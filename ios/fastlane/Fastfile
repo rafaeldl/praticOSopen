@@ -1,0 +1,48 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build + upload para TestFlight (sem match)"
+  lane :beta do
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
+    )
+
+    version = get_version_number(
+      xcodeproj: "Runner.xcodeproj",
+      target: "Runner",
+      configuration: "Release"
+    )
+    last = (latest_testflight_build_number(app_identifier: ENV['BUNDLE_ID'], version: version) || 0)
+    build_num = last + 1
+
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      xcargs: "CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} " \
+              "PROVISIONING_PROFILE_SPECIFIER='#{ENV['PROFILE_NAME']}' " \
+              "PROVISIONING_PROFILE=#{ENV['PROFILE_UUID']} " \
+              "CODE_SIGN_IDENTITY='Apple Distribution' " \
+              "CURRENT_PROJECT_VERSION=#{build_num}",
+      export_options: {
+        signingStyle: "manual",
+        provisioningProfiles: {
+          ENV['BUNDLE_ID'] => ENV['PROFILE_NAME']
+        }
+      }
+    )
+
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+  end
+
+  desc "Só envia o último .ipa"
+  lane :upload do
+    upload_to_testflight(skip_waiting_for_build_processing: true)
+  end
+end

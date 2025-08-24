@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+    match /companies/{id} {
+      allow create: if request.resource.data.owner['id'] == request.auth.uid;
+    	allow read, write: if resource.data.owner.id == request.auth.uid;
+    }
+
+    match /customers/{id} {
+      allow create: if request.resource.data.company['id'] == request.auth.uid;
+    	allow read, write: if resource.data.company.id == request.auth.uid;
+    }
+
+    match /devices/{id} {
+      allow create: if request.resource.data.company['id'] == request.auth.uid;
+    	allow read, write: if resource.data.company.id == request.auth.uid;
+    }
+
+    match /orders/{id} {
+      allow create: if request.resource.data.company['id'] == request.auth.uid;
+    	allow read, write: if resource.data.company.id == request.auth.uid;
+    }
+
+    match /products/{id} {
+      allow create: if request.resource.data.company['id'] == request.auth.uid;
+    	allow read, write: if resource.data.company.id == request.auth.uid;
+    }
+
+    match /services/{id} {
+      allow create: if request.resource.data.company['id'] == request.auth.uid;
+    	allow read, write: if resource.data.company.id == request.auth.uid;
+    }
+
+    match /users/{id} {
+      allow create: if request.resource.data.company['id'] == request.auth.uid;
+    	allow read, write: if id == request.auth.uid;
+    }
+  }
+}

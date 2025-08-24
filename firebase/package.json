@@ -1,0 +1,8 @@
+{
+  "name": "PraticOS",
+  "version": "1.0.0",
+  "scripts": {
+    "deploy": "firebase deploy --only hosting"
+  },
+  "private": true
+}
