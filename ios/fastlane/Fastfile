@@ -9,28 +9,38 @@ platform :ios do
       key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
     )
 
-    # Increment the build number (not the version number)
-    # Providing the xcodeproj is optional
+    # numeração do build (ex.: última + 1)
     increment_build_number(
       build_number: latest_testflight_build_number + 1
     )
 
-    # Build the app
+    # 🔧 força assinatura só no Runner (Release)
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      targets: ["Runner"],
+      build_configurations: ["Release"],
+      team_id: ENV['DEVELOPMENT_TEAM'],
+      code_sign_identity: "Apple Distribution",
+      profile_name: ENV['PROFILE_NAME'],   # nome do .mobileprovision (o "Name" extraído)
+      profile_uuid: ENV['PROFILE_UUID']    # opcional, ajuda a fixar
+    )
+
+    # 🏗️ archive + export (sem passar PROVISIONING_* em xcargs)
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
       configuration: "Release",
       export_method: "app-store",
+      skip_profile_detection: true,
       export_options: {
         signingStyle: "manual",
         provisioningProfiles: {
           ENV['BUNDLE_ID'] => ENV['PROFILE_NAME']
         }
       },
-      xcargs: "DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} " \
-              "PROVISIONING_PROFILE=#{ENV['PROFILE_UUID']} " \
-              "CODE_SIGN_STYLE=Manual " \
-              "CODE_SIGN_IDENTITY='Apple Distribution' "
+      # xcargs mínimos: time/team, sem perfis
+      xcargs: "DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} CODE_SIGN_STYLE=Manual"
     )
 
     upload_to_testflight(
