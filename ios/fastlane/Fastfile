@@ -30,8 +30,7 @@ platform :ios do
       xcargs: "DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} " \
               "PROVISIONING_PROFILE=#{ENV['PROFILE_UUID']} " \
               "CODE_SIGN_STYLE=Manual " \
-              "CODE_SIGN_IDENTITY='Apple Distribution' " \
-              "CURRENT_PROJECT_VERSION=#{build_num}"
+              "CODE_SIGN_IDENTITY='Apple Distribution' "
     )
 
     upload_to_testflight(
