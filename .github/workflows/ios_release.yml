@@ -40,6 +40,11 @@ jobs:
         with:
           xcode-version: '16.2'
 
+      # Accept Xcode license
+      - name: Accept Xcode license
+        run: sudo xcodebuild -license accept
+
+      # Download iOS Platform
       - name: Download iOS Platform
         run: xcodebuild -downloadPlatform iOS
 
