@@ -24,8 +24,6 @@ platform :ios do
       export_method: "app-store",
       skip_profile_detection: true,
       xcargs: "CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} " \
-              "PROVISIONING_PROFILE_SPECIFIER=" \
-              "PROVISIONING_PROFILE=" \
               "CODE_SIGN_IDENTITY='Apple Distribution' " \
               "CURRENT_PROJECT_VERSION=#{build_num}",
       export_options: {
