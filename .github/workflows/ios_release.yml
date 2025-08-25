@@ -108,6 +108,17 @@ jobs:
         working-directory: ios
         run: bundle exec pod install --repo-update
 
+      # 📄 Adiciona o GoogleService-Info.plist
+      - name: Add GoogleService-Info.plist
+        working-directory: ios
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo -n "${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64 }}" | base64 --decode > GoogleService-Info.plist
+          # valida sintaxe do plist (opcional, ajuda a detectar secret errado)
+          /usr/bin/plutil -lint GoogleService-Info.plist
+          echo "GoogleService-Info.plist criado em ios/"
+
       # 🚀 Build + upload via Fastlane
       - name: Fastlane beta
         working-directory: ios
