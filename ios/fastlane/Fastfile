@@ -16,7 +16,23 @@ platform :ios do
     )
 
     # Build the app
-    build_app(xcargs: "-allowProvisioningUpdates")
+    build_app(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        signingStyle: "manual",
+        provisioningProfiles: {
+          ENV['BUNDLE_ID'] => ENV['PROFILE_NAME']
+        }
+      },
+      xcargs: "DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} " \
+              "PROVISIONING_PROFILE=#{ENV['PROFILE_UUID']} " \
+              "CODE_SIGN_STYLE=Manual " \
+              "CODE_SIGN_IDENTITY='Apple Distribution' " \
+              "CURRENT_PROJECT_VERSION=#{build_num}"
+    )
 
     upload_to_testflight(
       skip_waiting_for_build_processing: true
