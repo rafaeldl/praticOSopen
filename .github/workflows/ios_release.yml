@@ -22,15 +22,6 @@ jobs:
           channel: stable
           cache: false
 
-      # 💾 Cache do Pub (Dart/Flutter packages)
-      - name: Cache Pub
-        uses: actions/cache@v4
-        with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pub-
-
       - name: Flutter deps
         run: flutter pub get
 
@@ -48,26 +39,7 @@ jobs:
       - name: Download iOS Platform
         run: xcodebuild -downloadPlatform iOS
 
-      # 💾 Cache dos Pods (pasta Pods)
-      - name: Cache CocoaPods (Pods dir)
-        uses: actions/cache@v4
-        with:
-          path: ios/Pods
-          key: ${{ runner.os }}-pods-xcode16.2-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-xcode16.2-
-            ${{ runner.os }}-pods-
-
-      # (Opcional) 💾 Cache do Specs local do CocoaPods
-      - name: Cache CocoaPods Specs
-        uses: actions/cache@v4
-        with:
-          path: ~/.cocoapods
-          key: ${{ runner.os }}-cocoaspecs
-          restore-keys: |
-            ${{ runner.os }}-cocoaspecs
-
-      # 💾 Ruby + Bundler com cache automático (usa ios/Gemfile)
+      # Ruby + Bundler
       - name: Ruby (bundler cache)
         uses: ruby/setup-ruby@v1
         env:
