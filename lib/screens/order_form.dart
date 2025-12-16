@@ -8,6 +8,7 @@ import 'package:praticos/screens/modal_menu.dart';
 import 'package:praticos/screens/modal_status.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/screens/widgets/order_photos_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
@@ -129,8 +130,12 @@ class _OrderFormState extends State<OrderForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                SizedBox(height: 20.0),
-                // buildMainPhoto(),
+                SizedBox(height: 10.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: OrderPhotosWidget(store: _store),
+                ),
+                SizedBox(height: 10.0),
                 Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(9.0),
@@ -486,44 +491,6 @@ class _OrderFormState extends State<OrderForm> {
       ),
     );
   }
-
-  // Widget buildMainPhoto() {
-  //   if (order == null) {
-  //     return GestureDetector(
-  //       onTap: () => print('Snapshot'),
-  //       child: Container(
-  //         height: 180,
-  //         decoration: BoxDecoration(
-  //             color: Colors.white,
-  //             borderRadius: BorderRadius.circular(4.0),
-  //             border: Border.all(color: Colors.grey[350]),
-  //             boxShadow: [
-  //               BoxShadow(
-  //                 color: Colors.grey[200],
-  //                 blurRadius: 2.0, // soften the shadow
-  //                 spreadRadius: 1.2, //extend the shadow
-  //                 offset: Offset(
-  //                   5.0, // Move to right 10  horizontally
-  //                   5.0, // Move to bottom 10 Vertically
-  //                 ),
-  //               )
-  //             ]),
-  //         child: Icon(
-  //           Icons.camera_alt,
-  //           color: Color(0xFF3498db),
-  //           size: 30.0,
-  //         ),
-  //       ),
-  //     );
-  //   } else {
-  //     return Image(
-  //       image: AssetImage('assets/images/car2.jpg'),
-  //       // image: AssetImage(_store.order.mainPhoto),
-  //       height: 180,
-  //       fit: BoxFit.cover,
-  //     );
-  //   }
-  // }
 
   Widget _buildCustomerName() {
     if (_store.customerName != null)

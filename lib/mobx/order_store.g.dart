@@ -236,6 +236,38 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$photosAtom =
+      Atom(name: '_OrderStore.photos', context: context);
+
+  @override
+  ObservableList<OrderPhoto> get photos {
+    _$photosAtom.reportRead();
+    return super.photos;
+  }
+
+  @override
+  set photos(ObservableList<OrderPhoto> value) {
+    _$photosAtom.reportWrite(value, super.photos, () {
+      super.photos = value;
+    });
+  }
+
+  late final _$isUploadingPhotoAtom =
+      Atom(name: '_OrderStore.isUploadingPhoto', context: context);
+
+  @override
+  bool get isUploadingPhoto {
+    _$isUploadingPhotoAtom.reportRead();
+    return super.isUploadingPhoto;
+  }
+
+  @override
+  set isUploadingPhoto(bool value) {
+    _$isUploadingPhotoAtom.reportWrite(value, super.isUploadingPhoto, () {
+      super.isUploadingPhoto = value;
+    });
+  }
+
   late final _$totalPaidAmountAtom =
       Atom(name: '_OrderStore.totalPaidAmount', context: context);
 
@@ -701,6 +733,43 @@ mixin _$OrderStore on _OrderStore, Store {
     }
   }
 
+  late final _$addPhotoFromGalleryAsyncAction =
+      AsyncAction('_OrderStore.addPhotoFromGallery', context: context);
+
+  @override
+  Future<bool> addPhotoFromGallery() {
+    return _$addPhotoFromGalleryAsyncAction
+        .run(() => super.addPhotoFromGallery());
+  }
+
+  late final _$addPhotoFromCameraAsyncAction =
+      AsyncAction('_OrderStore.addPhotoFromCamera', context: context);
+
+  @override
+  Future<bool> addPhotoFromCamera() {
+    return _$addPhotoFromCameraAsyncAction
+        .run(() => super.addPhotoFromCamera());
+  }
+
+  late final _$deletePhotoAsyncAction =
+      AsyncAction('_OrderStore.deletePhoto', context: context);
+
+  @override
+  Future<bool> deletePhoto(int index) {
+    return _$deletePhotoAsyncAction.run(() => super.deletePhoto(index));
+  }
+
+  @override
+  void setPhotoCover(int index) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+        name: '_OrderStore.setPhotoCover');
+    try {
+      return super.setPhotoCover(index);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
   @override
   dynamic setDiscount(double value) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
@@ -816,6 +885,8 @@ device: ${device},
 customerFilter: ${customerFilter},
 services: ${services},
 products: ${products},
+photos: ${photos},
+isUploadingPhoto: ${isUploadingPhoto},
 totalPaidAmount: ${totalPaidAmount},
 totalUnpaidAmount: ${totalUnpaidAmount},
 totalRevenue: ${totalRevenue},

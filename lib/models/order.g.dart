@@ -35,6 +35,9 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..products = (json['products'] as List<dynamic>?)
       ?.map((e) => OrderProduct.fromJson(e as Map<String, dynamic>))
       .toList()
+  ..photos = (json['photos'] as List<dynamic>?)
+      ?.map((e) => OrderPhoto.fromJson(e as Map<String, dynamic>))
+      .toList()
   ..total = (json['total'] as num?)?.toDouble()
   ..discount = (json['discount'] as num?)?.toDouble()
   ..dueDate =
@@ -43,7 +46,6 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..paid = json['paid'] as bool?
   ..payment = json['payment'] as String?
   ..status = json['status'] as String?
-  ..mainPhoto = json['mainPhoto'] as String?
   ..number = json['number'] as int?;
 
 Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
@@ -57,6 +59,7 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
       'device': instance.device?.toJson(),
       'services': instance.services?.map((e) => e.toJson()).toList(),
       'products': instance.products?.map((e) => e.toJson()).toList(),
+      'photos': instance.photos?.map((e) => e.toJson()).toList(),
       'total': instance.total,
       'discount': instance.discount,
       'dueDate': instance.dueDate?.toIso8601String(),
@@ -64,7 +67,6 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
       'paid': instance.paid,
       'payment': instance.payment,
       'status': instance.status,
-      'mainPhoto': instance.mainPhoto,
       'number': instance.number,
     };
 
