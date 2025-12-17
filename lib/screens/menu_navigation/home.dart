@@ -4,7 +4,6 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -16,17 +15,16 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int previousSelected = 0;
   int currentSelected = 0;
   final ScrollController _scrollController = ScrollController();
   late OrderStore orderStore;
 
   List filters = [
-    {'status': 'Todos', 'icon': Icons.apps_rounded},
+    {'status': 'Todos', 'icon': Icons.apps_rounded, 'field': null},
     {'status': 'Entrega', 'field': 'due_date', 'icon': Icons.schedule_rounded},
-    {'status': 'Aprovados', 'field': 'approved', 'icon': Icons.thumb_up_rounded},
-    {'status': 'Andamento', 'field': 'progress', 'icon': Icons.autorenew_rounded},
-    {'status': 'Orçamentos', 'field': 'quote', 'icon': Icons.request_quote_rounded},
+    {'status': 'Aprovados', 'field': 'approved', 'icon': Icons.thumb_up_alt_rounded},
+    {'status': 'Andamento', 'field': 'progress', 'icon': Icons.sync_rounded},
+    {'status': 'Orçamentos', 'field': 'quote', 'icon': Icons.description_rounded},
     {'status': 'Concluídos', 'field': 'done', 'icon': Icons.check_circle_rounded},
     {'status': 'Cancelados', 'field': 'canceled', 'icon': Icons.cancel_rounded},
     {'status': 'A receber', 'field': 'unpaid', 'icon': Icons.payments_outlined},
@@ -54,7 +52,6 @@ class _HomeState extends State<Home> {
   }
 
   void _loadOrders() {
-    print("Carregando ordens na tela Home...");
     orderStore.loadOrdersInfinite(filters[currentSelected]['field']);
   }
 
@@ -83,207 +80,160 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      appBar: _buildModernAppBar(),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Filtros compactos
-            _buildFilterSection(),
-            // Lista de OS
-            Expanded(
-              child: _buildOrdersList(),
+      body: NestedScrollView(
+        controller: _scrollController,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            // AppBar fixa
+            SliverAppBar(
+              floating: false,
+              pinned: true,
+              elevation: 0,
+              backgroundColor: AppTheme.surfaceColor,
+              title: Text(
+                'Ordens de Serviço',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.bar_chart_rounded, color: AppTheme.textSecondary),
+                  onPressed: () => Navigator.pushNamed(context, '/financial_dashboard_simple'),
+                ),
+                IconButton(
+                  icon: Container(
+                    padding: EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/order').then((_) => _loadOrders());
+                  },
+                ),
+                SizedBox(width: 8),
+              ],
             ),
+            // Filtros que somem ao rolar
+            SliverAppBar(
+              floating: true,
+              snap: true,
+              pinned: false,
+              elevation: 0,
+              backgroundColor: AppTheme.surfaceColor,
+              toolbarHeight: 44,
+              flexibleSpace: _buildFilterBar(),
+            ),
+          ];
+        },
+        body: _buildOrdersList(),
+      ),
+    );
+  }
+
+  Widget _buildFilterBar() {
+    return Container(
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        border: Border(bottom: BorderSide(color: AppTheme.borderLight, width: 1)),
+      ),
+      child: Observer(
+        builder: (_) {
+          return ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            scrollDirection: Axis.horizontal,
+            itemCount: filters.length + (orderStore.customerFilter != null ? 1 : 0),
+            itemBuilder: (context, index) {
+              // Primeiro item: filtro de cliente (se existir)
+              if (orderStore.customerFilter != null) {
+                if (index == 0) {
+                  return _buildCustomerFilterChip();
+                }
+                return _buildFilterChip(index - 1);
+              }
+              return _buildFilterChip(index);
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCustomerFilterChip() {
+    return GestureDetector(
+      onTap: () {
+        orderStore.setCustomerFilter(null);
+        _loadOrders();
+      },
+      child: Container(
+        margin: EdgeInsets.only(right: 6),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.person_rounded, size: 14, color: Colors.white),
+            SizedBox(width: 4),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text(
+                orderStore.customerFilter?.name ?? '',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            SizedBox(width: 4),
+            Icon(Icons.close_rounded, size: 14, color: Colors.white70),
           ],
         ),
       ),
     );
   }
 
-  PreferredSizeWidget _buildModernAppBar() {
-    return AppBar(
-      elevation: 0,
-      backgroundColor: AppTheme.surfaceColor,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Ordens de Serviço',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
-              letterSpacing: -0.5,
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        IconButton(
-          icon: Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.backgroundColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              Icons.bar_chart_rounded,
-              color: AppTheme.textSecondary,
-              size: 20,
-            ),
-          ),
-          onPressed: () {
-            Navigator.pushNamed(context, '/financial_dashboard_simple');
-          },
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: IconButton(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.add_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            onPressed: () {
-              Navigator.pushNamed(context, '/order').then((_) {
-                print("Retornou da tela de criação de OS, recarregando lista...");
-                _loadOrders();
-              });
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFilterSection() {
-    return Container(
-      color: AppTheme.surfaceColor,
-      child: Column(
-        children: [
-          // Filtros horizontais compactos
-          Container(
-            height: 48,
-            margin: EdgeInsets.only(bottom: 8),
-            child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              scrollDirection: Axis.horizontal,
-              itemCount: filters.length,
-              itemBuilder: (context, index) => _buildFilterChip(index),
-            ),
-          ),
-          // Indicador de filtro por cliente
-          Observer(
-            builder: (_) {
-              if (orderStore.customerFilter == null) {
-                return SizedBox.shrink();
-              }
-              return _buildCustomerFilterIndicator();
-            },
-          ),
-          // Divisor sutil
-          Container(
-            height: 1,
-            color: AppTheme.borderLight,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildFilterChip(int index) {
-    final isSelected = previousSelected == index;
+    final isSelected = currentSelected == index;
 
     return GestureDetector(
       onTap: () {
-        currentSelected = index;
-        setState(() {
-          previousSelected = index;
-        });
+        setState(() => currentSelected = index);
         orderStore.loadOrdersInfinite(filters[index]['field']);
       },
       child: Container(
-        margin: EdgeInsets.only(right: 8),
-        child: AnimatedContainer(
-          duration: Duration(milliseconds: 200),
-          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? AppTheme.primaryColor : AppTheme.backgroundColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor,
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                filters[index]['icon'],
-                size: 16,
-                color: isSelected ? Colors.white : AppTheme.textSecondary,
-              ),
-              SizedBox(width: 6),
-              Text(
-                filters[index]['status'],
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  color: isSelected ? Colors.white : AppTheme.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomerFilterIndicator() {
-    return GestureDetector(
-      onTap: () {
-        orderStore.setCustomerFilter(null);
-        orderStore.loadOrdersInfinite(filters[currentSelected]['field']);
-      },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 12, left: 16, right: 16),
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        margin: EdgeInsets.only(right: 6),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppTheme.infoLight,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
+          color: isSelected ? AppTheme.primaryColor : AppTheme.backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.person_rounded,
-              size: 16,
-              color: AppTheme.primaryColor,
+              filters[index]['icon'],
+              size: 14,
+              color: isSelected ? Colors.white : AppTheme.textSecondary,
             ),
-            SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                orderStore.customerFilter?.name ?? '',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: AppTheme.primaryColor,
-                ),
-                overflow: TextOverflow.ellipsis,
+            SizedBox(width: 4),
+            Text(
+              filters[index]['status'],
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? Colors.white : AppTheme.textSecondary,
               ),
-            ),
-            SizedBox(width: 8),
-            Icon(
-              Icons.close_rounded,
-              size: 18,
-              color: AppTheme.primaryColor,
             ),
           ],
         ),
@@ -296,22 +246,9 @@ class _HomeState extends State<Home> {
       builder: (_) {
         if (orderStore.isLoading && orderStore.orders.isEmpty) {
           return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Carregando...',
-                  style: TextStyle(
-                    color: AppTheme.textSecondary,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
             ),
           );
         }
@@ -321,24 +258,18 @@ class _HomeState extends State<Home> {
         }
 
         return ListView.builder(
-          controller: _scrollController,
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: EdgeInsets.fromLTRB(12, 8, 12, 20),
           itemCount: orderStore.orders.length + (orderStore.isLoading ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == orderStore.orders.length) {
               return Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(16),
                 child: Center(
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
-                  ),
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
               );
             }
-
-            Order? order = orderStore.orders[index];
-            return _buildCompactOrderItem(order ?? Order());
+            return _buildOrderItem(orderStore.orders[index] ?? Order());
           },
         );
       },
@@ -350,225 +281,157 @@ class _HomeState extends State<Home> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            padding: EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppTheme.borderLight,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.assignment_outlined,
-              size: 48,
-              color: AppTheme.textTertiary,
-            ),
-          ),
-          SizedBox(height: 20),
+          Icon(Icons.assignment_outlined, size: 56, color: AppTheme.textTertiary),
+          SizedBox(height: 16),
           Text(
             'Nenhuma OS encontrada',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-            ),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 4),
           Text(
-            'Toque em + para criar uma nova ordem',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppTheme.textSecondary,
-            ),
+            'Toque em + para criar',
+            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCompactOrderItem(Order order) {
-    // Formatação da data
-    String formattedCreatedDate = '';
-    if (order.createdAt != null) {
-      formattedCreatedDate = DateFormat('dd/MM/yy').format(order.createdAt!);
-    }
+  Widget _buildOrderItem(Order order) {
+    // Dados formatados
+    final createdDate = order.createdAt != null ? DateFormat('dd/MM').format(order.createdAt!) : '';
 
-    // Verificar se atrasada
+    // Verificar atraso
     bool isOverdue = false;
+    String dueDateText = '';
     if (order.dueDate != null) {
       final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
       final dueDate = DateTime(order.dueDate!.year, order.dueDate!.month, order.dueDate!.day);
-      if ((dueDate.compareTo(today) < 0) && order.status != 'done' && order.status != 'canceled') {
-        isOverdue = true;
-      }
+      isOverdue = dueDate.isBefore(today) && order.status != 'done' && order.status != 'canceled';
+      dueDateText = DateFormat('dd/MM').format(order.dueDate!);
     }
 
-    // Status
-    String orderStatus = Order.statusMap[order.status] ?? '';
-    Color statusColor = AppTheme.getStatusColor(order.status);
-    Color statusBgColor = AppTheme.getStatusBackgroundColor(order.status);
-
-    // Pagamento
-    String paymentText = order.payment == 'paid' ? 'Pago' : (order.payment == 'unpaid' ? 'A receber' : '');
-    Color paymentColor = AppTheme.getPaymentColor(order.payment);
+    // Status e pagamento
+    final statusText = Order.statusMap[order.status] ?? '';
+    final statusColor = AppTheme.getStatusColor(order.status);
+    final isPaid = order.payment == 'paid';
 
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/order',
-          arguments: {'order': order},
-        ).then((_) => _loadOrders());
+        Navigator.pushNamed(context, '/order', arguments: {'order': order}).then((_) => _loadOrders());
       },
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        margin: EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
           color: AppTheme.surfaceColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isOverdue ? AppTheme.errorColor.withOpacity(0.5) : AppTheme.borderColor,
+            color: isOverdue ? AppTheme.errorColor.withOpacity(0.4) : AppTheme.borderColor,
             width: isOverdue ? 1.5 : 1,
           ),
-          boxShadow: isOverdue
-              ? [
-                  BoxShadow(
-                    color: AppTheme.errorColor.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  ),
-                ]
-              : AppTheme.cardShadow,
         ),
-        child: Padding(
-          padding: EdgeInsets.all(12),
-          child: Row(
-            children: [
-              // Thumbnail compacto
-              _buildCompactThumbnail(order),
-              SizedBox(width: 12),
-              // Informações principais
-              Expanded(
+        child: Row(
+          children: [
+            // Foto - ocupa altura total
+            _buildThumbnail(order),
+            // Informações
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(10),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Linha 1: Cliente + Número da OS
+                    // Linha 1: Cliente + Número
                     Row(
                       children: [
                         Expanded(
                           child: Text(
                             order.customer?.name ?? 'Cliente',
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.textPrimary,
                             ),
                             overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppTheme.backgroundColor,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            order.number != null ? '#${order.number}' : 'NOVA',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.textSecondary,
-                            ),
+                        Text(
+                          '#${order.number ?? 'NOVA'}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textTertiary,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 4),
-                    // Linha 2: Veículo/Dispositivo
+                    SizedBox(height: 2),
+                    // Linha 2: Veículo
                     Text(
                       order.device != null
-                          ? '${order.device?.name ?? ''} ${order.device?.serial != null ? '• ${order.device?.serial}' : ''}'
+                          ? '${order.device?.name ?? ''} • ${order.device?.serial ?? ''}'
                           : 'Sem veículo',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppTheme.textSecondary,
-                      ),
+                      style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
                       overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
                     ),
-                    SizedBox(height: 8),
-                    // Linha 3: Status + Datas + Valor
+                    SizedBox(height: 6),
+                    // Linha 3: Status + Data + Valor
                     Row(
                       children: [
-                        // Parte esquerda flexível (status + data)
-                        Expanded(
-                          child: Row(
-                            children: [
-                              // Status badge
-                              if (orderStatus.isNotEmpty)
-                                Flexible(
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: statusBgColor,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      orderStatus,
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: statusColor,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ),
-                              if (orderStatus.isNotEmpty) SizedBox(width: 6),
-                              // Data de criação
-                              Icon(
-                                Icons.calendar_today_rounded,
-                                size: 11,
-                                color: AppTheme.textTertiary,
-                              ),
-                              SizedBox(width: 2),
-                              Text(
-                                formattedCreatedDate,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: AppTheme.textTertiary,
-                                ),
-                              ),
-                              // Indicador de atrasada
-                              if (isOverdue) ...[
-                                SizedBox(width: 6),
-                                Icon(
-                                  Icons.warning_rounded,
-                                  size: 11,
-                                  color: AppTheme.errorColor,
-                                ),
-                              ],
-                            ],
+                        // Status
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            statusText,
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: statusColor,
+                            ),
                           ),
                         ),
-                        SizedBox(width: 8),
-                        // Valor (fixo à direita)
+                        SizedBox(width: 6),
+                        // Data
+                        if (isOverdue)
+                          Row(
+                            children: [
+                              Icon(Icons.warning_amber_rounded, size: 12, color: AppTheme.errorColor),
+                              SizedBox(width: 2),
+                              Text(
+                                dueDateText,
+                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.errorColor),
+                              ),
+                            ],
+                          )
+                        else
+                          Text(
+                            createdDate,
+                            style: TextStyle(fontSize: 10, color: AppTheme.textTertiary),
+                          ),
+                        Spacer(),
+                        // Valor
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              _convertToCurrency(order.total),
+                              _formatCurrency(order.total),
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
                                 color: AppTheme.textPrimary,
                               ),
                             ),
-                            if (paymentText.isNotEmpty)
+                            if (order.payment != null)
                               Text(
-                                paymentText,
+                                isPaid ? 'Pago' : 'A receber',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w500,
-                                  color: paymentColor,
+                                  color: isPaid ? AppTheme.successColor : AppTheme.errorColor,
                                 ),
                               ),
                           ],
@@ -578,62 +441,53 @@ class _HomeState extends State<Home> {
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildCompactThumbnail(Order order) {
-    final coverPhotoUrl = order.coverPhotoUrl;
+  Widget _buildThumbnail(Order order) {
+    final url = order.coverPhotoUrl;
 
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(11),
+        bottomLeft: Radius.circular(11),
+      ),
+      child: Container(
+        width: 80,
+        height: 80,
         color: AppTheme.backgroundColor,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: coverPhotoUrl != null && coverPhotoUrl.isNotEmpty
-          ? Image.network(
-              coverPhotoUrl,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(AppTheme.textTertiary),
+        child: url != null && url.isNotEmpty
+            ? Image.network(
+                url,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) => _buildDefaultIcon(),
-            )
-          : _buildDefaultIcon(),
-    );
-  }
-
-  Widget _buildDefaultIcon() {
-    return Center(
-      child: Icon(
-        Icons.build_circle_outlined,
-        size: 28,
-        color: AppTheme.textTertiary,
+                  );
+                },
+                errorBuilder: (_, __, ___) => _defaultIcon(),
+              )
+            : _defaultIcon(),
       ),
     );
   }
 
-  String _convertToCurrency(double? total) {
-    NumberFormat numberFormat = NumberFormat.currency(
-      locale: 'pt-BR',
-      symbol: 'R\$',
+  Widget _defaultIcon() {
+    return Center(
+      child: Icon(Icons.build_circle_outlined, size: 32, color: AppTheme.textTertiary),
     );
-    return numberFormat.format(total ?? 0);
+  }
+
+  String _formatCurrency(double? value) {
+    return NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$').format(value ?? 0);
   }
 }
