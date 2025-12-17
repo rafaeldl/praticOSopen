@@ -170,6 +170,9 @@ GoogleService-Info.plist
 /ios/fastlane/metadata/review_information/
 /ios/ExportOptions.plist
 
+# Generated during CI
+next_build_number.txt
+
 # Flutter
 .flutter-plugins
 .flutter-plugins-dependencies

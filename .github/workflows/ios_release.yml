@@ -101,8 +101,8 @@ jobs:
           APP_STORE_CONNECT_API_KEY_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_PRIVATE_KEY }}
           BUNDLE_ID: ${{ env.BUNDLE_ID }}
         run: |
-          NEXT_BUILD=$(bundle exec fastlane run latest_testflight_build_number app_identifier:"$BUNDLE_ID" | grep -oE 'Result: [0-9]+' | grep -oE '[0-9]+')
-          NEXT_BUILD=$((NEXT_BUILD + 1))
+          bundle exec fastlane get_next_build_number
+          NEXT_BUILD=$(cat ../next_build_number.txt)
           echo "Next build number: $NEXT_BUILD"
           echo "BUILD_NUMBER=$NEXT_BUILD" >> $GITHUB_OUTPUT
 

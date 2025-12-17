@@ -28,6 +28,7 @@ Runner/GeneratedPluginRegistrant.*
 # Generated during CI
 ExportOptions.plist
 GoogleService-Info.plist
+next_build_number.txt
 
 # Exceptions to above rules.
 !default.mode1v3
