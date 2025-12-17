@@ -91,8 +91,59 @@ jobs:
           /usr/bin/plutil -lint GoogleService-Info.plist
           echo "GoogleService-Info.plist criado em ios/"
 
-      # 🚀 Build + upload via Fastlane
-      - name: Fastlane beta
+      # 🔢 Busca o último build number do TestFlight e incrementa
+      - name: Get next build number
+        id: build_number
+        working-directory: ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_PRIVATE_KEY }}
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
+        run: |
+          NEXT_BUILD=$(bundle exec fastlane run latest_testflight_build_number app_identifier:"$BUNDLE_ID" | grep -oE 'Result: [0-9]+' | grep -oE '[0-9]+')
+          NEXT_BUILD=$((NEXT_BUILD + 1))
+          echo "Next build number: $NEXT_BUILD"
+          echo "BUILD_NUMBER=$NEXT_BUILD" >> $GITHUB_OUTPUT
+
+      # 📄 Gera ExportOptions.plist para o Flutter build
+      - name: Generate ExportOptions.plist
+        env:
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
+        run: |
+          cat > ios/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>$DEVELOPMENT_TEAM</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>$BUNDLE_ID</key>
+                  <string>$PROFILE_NAME</string>
+              </dict>
+              <key>uploadSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          PLIST
+          echo "ExportOptions.plist created with TEAM=$DEVELOPMENT_TEAM"
+
+      # 🏗️ Flutter build com build number incrementado
+      - name: Flutter build IPA
+        run: |
+          flutter build ipa \
+            --release \
+            --build-number=${{ steps.build_number.outputs.BUILD_NUMBER }} \
+            --export-options-plist=ios/ExportOptions.plist
+
+      # 🚀 Upload para TestFlight via Fastlane
+      - name: Fastlane upload
         working-directory: ios
         env:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
@@ -104,7 +155,7 @@ jobs:
           PROFILE_NAME: ${{ env.PROFILE_NAME }}
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
-        run: bundle exec fastlane beta
+        run: bundle exec fastlane upload
 
       - name: Upload fastlane logs (on failure)
         if: failure()
