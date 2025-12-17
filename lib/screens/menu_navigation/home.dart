@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
@@ -86,8 +88,20 @@ class _HomeState extends State<Home> {
     FirebaseCrashlytics.instance.log("Abrindo home");
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text('Ordens de Serviço'),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
+        flexibleSpace: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            child: Container(
+              color: Colors.transparent,
+            ),
+          ),
+        ),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.dashboard),
@@ -109,16 +123,25 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: ListView(
-          controller: _scrollController,
-          padding: EdgeInsets.symmetric(vertical: 30.0),
-          children: <Widget>[
-            // Botões de filtro
-            Column(
-              children: <Widget>[
-                Container(
-                  height: 95.0,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFFF0F4F8), // Greyish Blue Light
+              Color(0xFFE1F5FE), // Light Blue
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: <Widget>[
+              // Botões de filtro
+              Padding(
+                padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                child: Container(
+                  height: 100.0,
                   child: ListView.builder(
                     padding: EdgeInsets.symmetric(horizontal: 10),
                     scrollDirection: Axis.horizontal,
@@ -128,161 +151,161 @@ class _HomeState extends State<Home> {
                     },
                   ),
                 ),
-              ],
-            ),
-            SizedBox(height: 25.0),
-            Observer(
-              builder: (_) {
-                // Sem filtro
-                if (orderStore.customerFilter == null) {
-                  return SizedBox(height: 0.0);
-                }
-                return GestureDetector(
-                  onTap: () {
-                    orderStore.setCustomerFilter(null);
-                    orderStore.loadOrdersInfinite(
-                      filters[currentSelected]['field'],
-                    );
-                  },
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            child: Text(
+              ),
+
+              Observer(
+                builder: (_) {
+                  // Sem filtro de cliente
+                  if (orderStore.customerFilter == null) {
+                    return SizedBox(height: 0.0);
+                  }
+                  return GestureDetector(
+                    onTap: () {
+                      orderStore.setCustomerFilter(null);
+                      orderStore.loadOrdersInfinite(
+                        filters[currentSelected]['field'],
+                      );
+                    },
+                    child: Container(
+                        margin: EdgeInsets.symmetric(vertical: 10),
+                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                        decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.red.withOpacity(0.5))
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
                               orderStore.customerFilter?.name! ?? '',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 20.0,
-                                color: Colors.black,
+                                fontSize: 16.0,
+                                color: Colors.black87,
                               ),
-                              maxLines: 2,
+                              maxLines: 1,
                             ),
-                          ),
-                          Icon(Icons.cancel, size: 18.0),
-                        ],
-                      ),
-                      SizedBox(height: 20.0),
-                    ],
-                  ),
-                );
-              },
-            ),
-            Observer(
-              builder: (_) {
-                if (orderStore.isLoading && orderStore.orders.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(30),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                }
-
-                if (orderStore.orders.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.all(30),
-                    child: Center(
-                      child: Container(
-                        child: Text(
-                          'Nenhuma ordem de serviço encontrada',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
-                          ),
-                          maxLines: 2,
+                            SizedBox(width: 10),
+                            Icon(Icons.cancel, size: 18.0, color: Colors.red),
+                          ],
                         ),
                       ),
-                    ),
                   );
-                }
+                },
+              ),
 
-                return Column(
-                  children: [
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: orderStore.orders.length,
+              Expanded(
+                child: Observer(
+                  builder: (_) {
+                    if (orderStore.isLoading && orderStore.orders.isEmpty) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    if (orderStore.orders.isEmpty) {
+                      return Center(
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                                Icon(Icons.assignment_outlined, size: 60, color: Colors.grey[400]),
+                                SizedBox(height: 10),
+                                Text(
+                                  'Nenhuma ordem de serviço encontrada',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16.0,
+                                    color: Colors.grey[600]
+                                  ),
+                                ),
+                            ]
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.symmetric(vertical: 10.0),
+                      itemCount: orderStore.orders.length + (orderStore.isLoading ? 1 : 0),
                       itemBuilder: (context, index) {
+                        if (index == orderStore.orders.length) {
+                             return Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Center(child: CircularProgressIndicator()),
+                              );
+                        }
                         Order? order = orderStore.orders[index];
                         return _buildOrderItem(order ?? Order(), orderStore);
                       },
-                    ),
-                    if (orderStore.isLoading)
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildIconFilter(BuildContext context, int index) {
-    return Container(
-      height: 90,
-      width: 80,
-      child: GestureDetector(
-        onTap: () {
-          currentSelected = index;
-          setState(() {
-            previousSelected = index;
-          });
-          orderStore.loadOrdersInfinite(filters[index]['field']);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5.0),
-          child: Column(
-            children: <Widget>[
-              Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: previousSelected == index
-                      ? Theme.of(context).colorScheme.secondary
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(30.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey[200]!,
-                      blurRadius: 6.0,
-                      spreadRadius: 2.0,
-                      offset: Offset(7.0, 7.0),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  filters[index]['icon'],
-                  color: previousSelected == index
-                      ? Colors.white
-                      : Theme.of(context).primaryColor,
-                ),
-              ),
-              SizedBox(height: 2),
-              Expanded(
-                child: Text(
-                  filters[index]['status'],
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                  style: TextStyle(
-                    letterSpacing: -1.0,
-                    fontSize: 12,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-              ),
-            ],
+    bool isSelected = previousSelected == index;
+    return GestureDetector(
+      onTap: () {
+        currentSelected = index;
+        setState(() {
+          previousSelected = index;
+        });
+        orderStore.loadOrdersInfinite(filters[index]['field']);
+      },
+      child: Container(
+        width: 80,
+        margin: EdgeInsets.symmetric(horizontal: 5),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.secondary
+              : Colors.white.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(25.0),
+          border: Border.all(
+              color: isSelected
+                  ? Colors.transparent
+                  : Colors.white.withOpacity(0.5),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10.0,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              filters[index]['icon'],
+              color: isSelected
+                  ? Colors.white
+                  : Theme.of(context).primaryColor,
+              size: 28,
+            ),
+            SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: Text(
+                filters[index]['status'],
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.white : Colors.black87,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -293,40 +316,6 @@ class _HomeState extends State<Home> {
     String formattedCreatedDate = '';
     if (order.createdAt != null) {
       formattedCreatedDate = DateFormat('dd/MM/yyyy').format(order.createdAt!);
-    }
-
-    // Verificar se a entrega está atrasada
-    bool isOverdue = false;
-    if (order.dueDate != null) {
-      // Comparar apenas as datas, ignorando a hora
-      final today = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-      );
-      final dueDate = DateTime(
-        order.dueDate!.year,
-        order.dueDate!.month,
-        order.dueDate!.day,
-      );
-
-      // Considera atrasado APENAS quando a data de entrega é ANTERIOR ao dia de hoje
-      if ((dueDate.compareTo(today) < 0) &&
-          order.status != 'done' &&
-          order.status != 'canceled') {
-        isOverdue = true;
-      }
-    }
-
-    // Status de pagamento
-    String payment = '';
-    Color paymentColor = Colors.green;
-    if (order.payment == 'paid') {
-      payment = 'Pago';
-      paymentColor = Colors.green;
-    } else if (order.payment == 'unpaid') {
-      payment = 'A receber';
-      paymentColor = Colors.red.shade400;
     }
 
     // Status da OS
@@ -356,259 +345,138 @@ class _HomeState extends State<Home> {
         });
       },
       child: Container(
-        margin: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
-        constraints: BoxConstraints(minHeight: 100.0),
-        width: double.infinity,
+        margin: EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+        height: 110,
         decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.75),
+          borderRadius: BorderRadius.circular(20.0),
           border: Border.all(
-            color: isOverdue ? Colors.red : Colors.grey[100]!,
-            width: isOverdue ? 2.0 : 1.0,
+              color: Colors.white.withOpacity(0.6),
+              width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: isOverdue
-                  ? Colors.red.withOpacity(0.2)
-                  : Colors.grey[200]!,
-              blurRadius: 6.0,
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 15.0,
               spreadRadius: 2.0,
-              offset: Offset(7.0, 7.0),
+              offset: Offset(0, 8),
             ),
           ],
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.0),
         ),
-        child: Row(
-          children: <Widget>[
-            // Imagem à esquerda - Foto de capa da OS
-            Container(
-              width: 100,
-              height: 160,
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20.0),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Row(
+              children: <Widget>[
+                // Imagem à esquerda - Foto de capa da OS
+                Container(
+                  width: 100,
+                  height: double.infinity,
+                  child: _buildOrderCoverPhoto(order),
                 ),
-                child: _buildOrderCoverPhoto(order),
-              ),
-            ),
 
-            // Informações da OS
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.fromLTRB(13, 12, 13, 12),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    // Linha superior: Cliente e Número
-                    Row(
+                // Informações da OS
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(12, 12, 16, 12),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        // Cliente e Veículo
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
+                        // Linha superior: Cliente e Status
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
                                 order.customer?.name ?? 'Cliente',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16.0,
+                                  fontSize: 15.0,
+                                  color: Colors.black87,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                order.device == null
-                                    ? 'Veículo - Placa'
-                                    : "${order.device?.name} - ${order.device?.serial}",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey[700],
-                                  fontSize: 13.0,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Número da OS
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            order.number != null ? "#${order.number}" : 'NOVA',
-                            style: TextStyle(
-                              color: Colors.grey[800],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 8),
-
-                    // Linha central: Datas
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Data de criação
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.calendar_today,
-                                  size: 14,
-                                  color: Colors.grey[600],
+                            Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                    color: statusColor.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(10)
                                 ),
-                                SizedBox(width: 4),
-                                Text(
-                                  "Criação",
-                                  style: TextStyle(
-                                    fontSize: 11.0,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey[600],
-                                  ),
+                                child: Text(
+                                    orderStatus.toUpperCase(),
+                                    style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        color: statusColor
+                                    ),
                                 ),
-                              ],
-                            ),
-                            SizedBox(height: 2),
-                            Padding(
-                              padding: EdgeInsets.only(left: 18),
-                              child: Text(
-                                formattedCreatedDate,
-                                style: TextStyle(
-                                  fontSize: 12.0,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey[800],
-                                ),
-                              ),
-                            ),
+                            )
                           ],
                         ),
 
-                        // Data de entrega - alinhada à direita
-                        if (order.dueDate != null)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.event,
-                                    size: 14,
-                                    color: isOverdue
-                                        ? Colors.red
-                                        : Colors.grey[600],
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    isOverdue ? "Atrasada" : "Entrega",
-                                    style: TextStyle(
-                                      fontSize: 11.0,
-                                      fontWeight: FontWeight.w500,
-                                      color: isOverdue
-                                          ? Colors.red
-                                          : Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 2),
-                              Padding(
-                                padding: EdgeInsets.only(right: 4),
-                                child: Text(
-                                  DateFormat(
-                                    'dd/MM/yyyy',
-                                  ).format(order.dueDate!),
-                                  style: TextStyle(
-                                    fontSize: 12.0,
-                                    fontWeight: isOverdue
-                                        ? FontWeight.bold
-                                        : FontWeight.w500,
-                                    color: isOverdue
-                                        ? Colors.red
-                                        : Colors.grey[800],
-                                  ),
+                        // Meio: Dispositivo e OS #
+                         Row(
+                          children: [
+                              Text(
+                                order.number != null ? "#${order.number}" : 'NOVA',
+                                style: TextStyle(
+                                  color: Colors.grey[800],
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 12.0,
                                 ),
                               ),
-                            ],
-                          )
-                        else
-                          SizedBox.shrink(),
-                      ],
-                    ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  order.device == null
+                                      ? 'Veículo / Dispositivo'
+                                      : "${order.device?.name}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.grey[600],
+                                    fontSize: 12.0,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                          ],
+                         ),
 
-                    SizedBox(height: 8),
-
-                    // Linha inferior: Status, Pagamento e Valor
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        // Status da OS
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: statusColor, width: 1),
-                          ),
-                          child: Text(
-                            orderStatus,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: statusColor,
-                              fontSize: 12.0,
-                            ),
-                          ),
-                        ),
-
-                        // Valor e status de pagamento
-                        Column(
+                        // Linha inferior: Data e Valor
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: <Widget>[
+                             Text(
+                                formattedCreatedDate,
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[500]
+                                ),
+                             ),
+
                             Text(
                               _convertToCurrency(order.total),
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16.0,
-                              ),
-                            ),
-                            Text(
-                              payment,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12.0,
-                                color: paymentColor,
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
                           ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -619,7 +487,7 @@ class _HomeState extends State<Home> {
       locale: 'pt-BR',
       symbol: 'R\$',
     );
-    return numberFormat.format(total);
+    return numberFormat.format(total ?? 0.0);
   }
 
   /// Constrói a foto de capa da ordem de serviço
@@ -634,7 +502,7 @@ class _HomeState extends State<Home> {
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Container(
-            color: Colors.grey[200],
+            color: Colors.grey[200].withOpacity(0.5),
             child: Center(
               child: CircularProgressIndicator(
                 strokeWidth: 2,
@@ -659,21 +527,14 @@ class _HomeState extends State<Home> {
   /// Constrói a imagem padrão quando não há foto
   Widget _buildDefaultOrderImage() {
     return Container(
-      color: Colors.grey[200],
-      child: Icon(
-        Icons.build_circle,
-        size: 50,
-        color: Colors.grey[400],
+      color: Colors.grey[200].withOpacity(0.5),
+      child: Center(
+        child: Icon(
+            Icons.build_circle_outlined,
+            size: 40,
+            color: Colors.grey[400],
+        ),
       ),
-    );
-  }
-
-  Color _getColorWithOpacity(Color color, double opacity) {
-    return color.withValues(
-      red: color.red.toDouble(),
-      green: color.green.toDouble(),
-      blue: color.blue.toDouble(),
-      alpha: (opacity * 255).toDouble(),
     );
   }
 }
