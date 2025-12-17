@@ -23,6 +23,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:praticos/global.dart';
+import 'package:praticos/theme/app_theme.dart';
 import 'screens/customers/customer_form_screen.dart';
 import 'screens/customers/customer_list_screen.dart';
 import 'screens/info_form_screen.dart';
@@ -74,13 +75,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'PraticOS',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: Color(0xFF3498db),
-        scaffoldBackgroundColor: Color(0xFFF7F7F7),
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          secondary: Color(0xFFf1c40f),
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       navigatorObservers: <NavigatorObserver>[observer],
       home: Observer(
         builder: (BuildContext context) {
