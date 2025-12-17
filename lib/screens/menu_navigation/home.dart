@@ -55,7 +55,25 @@ class _HomeState extends State<Home> {
   }
 
   void _loadOrders() {
-    orderStore.loadOrdersInfinite(filters[currentSelected]['field']);
+    // Salvar a posição atual do scroll
+    final currentOffset = _scrollController.hasClients ? _scrollController.offset : 0.0;
+
+    orderStore.loadOrdersInfinite(filters[currentSelected]['field']).then((_) {
+      // Após o carregamento, ajustar o scroll para uma posição válida
+      if (_scrollController.hasClients) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients) {
+            // Se a posição anterior ainda for válida, tentar restaurá-la
+            if (_scrollController.position.maxScrollExtent >= currentOffset && currentOffset > 0) {
+              _scrollController.jumpTo(currentOffset);
+            } else {
+              // Caso contrário, resetar para o topo
+              _scrollController.jumpTo(0);
+            }
+          }
+        });
+      }
+    });
   }
 
   @override
@@ -266,9 +284,18 @@ class _HomeState extends State<Home> {
           );
         }
 
+        // Verificar se o scroll está em uma posição válida
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (_scrollController.hasClients &&
+              _scrollController.offset > _scrollController.position.maxScrollExtent) {
+            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+          }
+        });
+
         return ListView.builder(
           controller: _scrollController,
           padding: EdgeInsets.zero,
+          physics: AlwaysScrollableScrollPhysics(),
           itemCount: orderStore.orders.length + (orderStore.isLoading ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == orderStore.orders.length) {
