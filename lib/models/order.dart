@@ -2,6 +2,7 @@ import 'package:praticos/models/base_audit_company.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
@@ -15,6 +16,7 @@ class Order extends BaseAuditCompany {
   DeviceAggr? device;
   List<OrderService>? services = [];
   List<OrderProduct>? products = [];
+  List<OrderPhoto>? photos = [];
   double? total;
   double? discount;
   DateTime? dueDate;
@@ -22,8 +24,10 @@ class Order extends BaseAuditCompany {
   bool? paid;
   String? payment; // unpaid, paid
   String? status;
-  String? mainPhoto;
   int? number;
+
+  /// Retorna a URL da primeira foto (capa da OS)
+  String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 
   static Map statusMap = {
     'quote': 'Orçamento',

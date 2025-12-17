@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:intl/intl.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/repositories/order_repository.dart';
 import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 
@@ -15,6 +19,7 @@ class OrderStore = _OrderStore with _$OrderStore;
 
 abstract class _OrderStore with Store {
   final OrderRepository repository = OrderRepository();
+  final PhotoService photoService = PhotoService();
 
   Order? order;
 
@@ -69,6 +74,12 @@ abstract class _OrderStore with Store {
 
   @observable
   ObservableList<OrderProduct>? products = ObservableList();
+
+  @observable
+  ObservableList<OrderPhoto> photos = ObservableList();
+
+  @observable
+  bool isUploadingPhoto = false;
 
   @observable
   double totalPaidAmount = 0.0;
@@ -155,7 +166,8 @@ abstract class _OrderStore with Store {
       total = order!.total;
       order!.discount = 0.0;
       discount = order!.discount;
-      order!.mainPhoto = 'assets/images/mainPhoto.png';
+      order!.photos = [];
+      photos = ObservableList<OrderPhoto>();
       order!.createdAt = DateTime.now();
       createdAt = order!.createdAt;
       order!.createdBy = Global.userAggr;
@@ -199,6 +211,7 @@ abstract class _OrderStore with Store {
     device = order.device;
     services = order.services?.asObservable() ?? ObservableList<OrderService>();
     products = order.products?.asObservable() ?? ObservableList<OrderProduct>();
+    photos = order.photos?.asObservable() ?? ObservableList<OrderPhoto>();
     dueDate = dateToString(order.dueDate);
     status = order.status;
     updateTotal();
@@ -354,6 +367,101 @@ abstract class _OrderStore with Store {
     order!.products!.removeAt(index);
     products = order?.products?.asObservable();
     updateTotal();
+    createItem();
+  }
+
+  /// Adiciona uma foto da galeria
+  @action
+  Future<bool> addPhotoFromGallery() async {
+    final File? file = await photoService.pickImageFromGallery();
+    if (file != null) {
+      return await _uploadPhoto(file);
+    }
+    return false;
+  }
+
+  /// Adiciona uma foto da câmera
+  @action
+  Future<bool> addPhotoFromCamera() async {
+    final File? file = await photoService.takePhoto();
+    if (file != null) {
+      return await _uploadPhoto(file);
+    }
+    return false;
+  }
+
+  /// Faz o upload de uma foto
+  Future<bool> _uploadPhoto(File file) async {
+    if (order == null) return false;
+
+    // Garante que a OS seja salva antes do upload
+    if (order!.id == null) {
+      await repository.createItem(order);
+    }
+
+    if (order!.id == null || order!.company?.id == null) return false;
+
+    isUploadingPhoto = true;
+
+    try {
+      final OrderPhoto? photo = await photoService.uploadPhoto(
+        file: file,
+        companyId: order!.company!.id!,
+        orderId: order!.id!,
+      );
+
+      isUploadingPhoto = false;
+
+      if (photo != null) {
+        if (order!.photos == null) {
+          order!.photos = [];
+        }
+        order!.photos!.add(photo);
+        photos.add(photo);
+        createItem();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      isUploadingPhoto = false;
+      print('Erro no upload da foto: $e');
+      return false;
+    }
+  }
+
+  /// Remove uma foto pelo índice
+  @action
+  Future<bool> deletePhoto(int index) async {
+    if (order == null || order!.photos == null || index >= order!.photos!.length) {
+      return false;
+    }
+
+    final OrderPhoto photo = order!.photos![index];
+
+    if (photo.storagePath != null) {
+      final bool deleted = await photoService.deletePhoto(photo.storagePath!);
+      if (!deleted) return false;
+    }
+
+    order!.photos!.removeAt(index);
+    photos.removeAt(index);
+    createItem();
+    return true;
+  }
+
+  /// Reordena as fotos (move uma foto para a posição de capa)
+  @action
+  void setPhotoCover(int index) {
+    if (order == null || order!.photos == null || index >= order!.photos!.length) {
+      return;
+    }
+
+    final OrderPhoto photo = order!.photos!.removeAt(index);
+    order!.photos!.insert(0, photo);
+
+    final OrderPhoto observablePhoto = photos.removeAt(index);
+    photos.insert(0, observablePhoto);
+
     createItem();
   }
 

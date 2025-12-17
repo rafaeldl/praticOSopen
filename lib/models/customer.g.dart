@@ -29,17 +29,17 @@ Customer _$CustomerFromJson(Map<String, dynamic> json) => Customer()
   ..address = json['address'] as String?;
 
 Map<String, dynamic> _$CustomerToJson(Customer instance) => <String, dynamic>{
-      'id': instance.id,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'createdBy': instance.createdBy?.toJson(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-      'updatedBy': instance.updatedBy?.toJson(),
-      'company': instance.company?.toJson(),
-      'name': instance.name,
-      'phone': instance.phone,
-      'email': instance.email,
-      'address': instance.address,
-    };
+  'id': instance.id,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'createdBy': instance.createdBy?.toJson(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'updatedBy': instance.updatedBy?.toJson(),
+  'company': instance.company?.toJson(),
+  'name': instance.name,
+  'phone': instance.phone,
+  'email': instance.email,
+  'address': instance.address,
+};
 
 CustomerAggr _$CustomerAggrFromJson(Map<String, dynamic> json) => CustomerAggr()
   ..id = json['id'] as String?

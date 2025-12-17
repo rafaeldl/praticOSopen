@@ -30,18 +30,18 @@ Device _$DeviceFromJson(Map<String, dynamic> json) => Device()
   ..description = json['description'] as String?;
 
 Map<String, dynamic> _$DeviceToJson(Device instance) => <String, dynamic>{
-      'id': instance.id,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'createdBy': instance.createdBy?.toJson(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-      'updatedBy': instance.updatedBy?.toJson(),
-      'company': instance.company?.toJson(),
-      'serial': instance.serial,
-      'name': instance.name,
-      'manufacturer': instance.manufacturer,
-      'category': instance.category,
-      'description': instance.description,
-    };
+  'id': instance.id,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'createdBy': instance.createdBy?.toJson(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'updatedBy': instance.updatedBy?.toJson(),
+  'company': instance.company?.toJson(),
+  'serial': instance.serial,
+  'name': instance.name,
+  'manufacturer': instance.manufacturer,
+  'category': instance.category,
+  'description': instance.description,
+};
 
 DeviceAggr _$DeviceAggrFromJson(Map<String, dynamic> json) => DeviceAggr()
   ..id = json['id'] as String?

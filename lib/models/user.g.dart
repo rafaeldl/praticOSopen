@@ -27,21 +27,21 @@ User _$UserFromJson(Map<String, dynamic> json) => User()
       .toList();
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
-      'id': instance.id,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'createdBy': instance.createdBy?.toJson(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-      'updatedBy': instance.updatedBy?.toJson(),
-      'name': instance.name,
-      'email': instance.email,
-      'companies': instance.companies?.map((e) => e.toJson()).toList(),
-    };
+  'id': instance.id,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'createdBy': instance.createdBy?.toJson(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'updatedBy': instance.updatedBy?.toJson(),
+  'name': instance.name,
+  'email': instance.email,
+  'companies': instance.companies?.map((e) => e.toJson()).toList(),
+};
 
 UserAggr _$UserAggrFromJson(Map<String, dynamic> json) => UserAggr()
   ..id = json['id'] as String?
   ..name = json['name'] as String?;
 
 Map<String, dynamic> _$UserAggrToJson(UserAggr instance) => <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-    };
+  'id': instance.id,
+  'name': instance.name,
+};

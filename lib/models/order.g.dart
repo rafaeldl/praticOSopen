@@ -35,38 +35,41 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..products = (json['products'] as List<dynamic>?)
       ?.map((e) => OrderProduct.fromJson(e as Map<String, dynamic>))
       .toList()
+  ..photos = (json['photos'] as List<dynamic>?)
+      ?.map((e) => OrderPhoto.fromJson(e as Map<String, dynamic>))
+      .toList()
   ..total = (json['total'] as num?)?.toDouble()
   ..discount = (json['discount'] as num?)?.toDouble()
-  ..dueDate =
-      json['dueDate'] == null ? null : DateTime.parse(json['dueDate'] as String)
+  ..dueDate = json['dueDate'] == null
+      ? null
+      : DateTime.parse(json['dueDate'] as String)
   ..done = json['done'] as bool?
   ..paid = json['paid'] as bool?
   ..payment = json['payment'] as String?
   ..status = json['status'] as String?
-  ..mainPhoto = json['mainPhoto'] as String?
-  ..number = json['number'] as int?;
+  ..number = (json['number'] as num?)?.toInt();
 
 Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
-      'id': instance.id,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'createdBy': instance.createdBy?.toJson(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-      'updatedBy': instance.updatedBy?.toJson(),
-      'company': instance.company?.toJson(),
-      'customer': instance.customer?.toJson(),
-      'device': instance.device?.toJson(),
-      'services': instance.services?.map((e) => e.toJson()).toList(),
-      'products': instance.products?.map((e) => e.toJson()).toList(),
-      'total': instance.total,
-      'discount': instance.discount,
-      'dueDate': instance.dueDate?.toIso8601String(),
-      'done': instance.done,
-      'paid': instance.paid,
-      'payment': instance.payment,
-      'status': instance.status,
-      'mainPhoto': instance.mainPhoto,
-      'number': instance.number,
-    };
+  'id': instance.id,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'createdBy': instance.createdBy?.toJson(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'updatedBy': instance.updatedBy?.toJson(),
+  'company': instance.company?.toJson(),
+  'customer': instance.customer?.toJson(),
+  'device': instance.device?.toJson(),
+  'services': instance.services?.map((e) => e.toJson()).toList(),
+  'products': instance.products?.map((e) => e.toJson()).toList(),
+  'photos': instance.photos?.map((e) => e.toJson()).toList(),
+  'total': instance.total,
+  'discount': instance.discount,
+  'dueDate': instance.dueDate?.toIso8601String(),
+  'done': instance.done,
+  'paid': instance.paid,
+  'payment': instance.payment,
+  'status': instance.status,
+  'number': instance.number,
+};
 
 OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()
   ..id = json['id'] as String?
@@ -78,10 +81,10 @@ OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()
       : DeviceAggr.fromJson(json['device'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$OrderAggrToJson(OrderAggr instance) => <String, dynamic>{
-      'id': instance.id,
-      'customer': instance.customer?.toJson(),
-      'device': instance.device?.toJson(),
-    };
+  'id': instance.id,
+  'customer': instance.customer?.toJson(),
+  'device': instance.device?.toJson(),
+};
 
 OrderProduct _$OrderProductFromJson(Map<String, dynamic> json) => OrderProduct()
   ..product = json['product'] == null
@@ -89,7 +92,7 @@ OrderProduct _$OrderProductFromJson(Map<String, dynamic> json) => OrderProduct()
       : ProductAggr.fromJson(json['product'] as Map<String, dynamic>)
   ..description = json['description'] as String?
   ..value = (json['value'] as num?)?.toDouble()
-  ..quantity = json['quantity'] as int?
+  ..quantity = (json['quantity'] as num?)?.toInt()
   ..total = (json['total'] as num?)?.toDouble();
 
 Map<String, dynamic> _$OrderProductToJson(OrderProduct instance) =>
