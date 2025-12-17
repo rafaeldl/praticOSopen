@@ -29,6 +29,7 @@ import 'screens/info_form_screen.dart';
 import 'screens/service_form_screen.dart';
 import 'screens/service_list_screen.dart';
 import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
+import 'package:praticos/screens/settings/edit_profile_screen.dart';
 
 AuthStore _authStore = AuthStore();
 
@@ -102,6 +103,7 @@ class MyApp extends StatelessWidget {
         '/order_product': (context) => OrderProductScreen(),
         '/payment_form_screen': (context) => PaymentFormScreen(),
         '/financial_dashboard_simple': (context) => FinancialDashboardSimple(),
+        '/edit_profile': (context) => EditProfileScreen(),
       },
     );
   }

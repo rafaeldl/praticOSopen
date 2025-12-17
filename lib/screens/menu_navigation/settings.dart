@@ -62,6 +62,10 @@ class _SettingsState extends State<Settings> {
                   ],
                 ),
               ),
+              _buildHeader('CONTA'),
+              _buildListTile('Editar Perfil', FontAwesomeIcons.userEdit, () {
+                Navigator.pushNamed(context, '/edit_profile');
+              }),
               _buildHeader('CADASTRO'),
               _buildListTile('Clientes', FontAwesomeIcons.userPen, () {
                 Navigator.pushNamed(context, '/customer_list');
