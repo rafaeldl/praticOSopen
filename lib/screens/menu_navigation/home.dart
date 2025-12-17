@@ -291,7 +291,15 @@ class _HomeState extends State<Home> {
       isOverdue = dueDate.isBefore(today) && order.status != 'done' && order.status != 'canceled';
     }
 
-    const double itemHeight = 70.0;
+    const double itemHeight = 76.0;
+
+    // Descrição do veículo
+    String vehicleDesc = '';
+    if (order.device != null) {
+      final name = order.device?.name ?? '';
+      final serial = order.device?.serial ?? '';
+      vehicleDesc = serial.isNotEmpty ? '$name • $serial' : name;
+    }
 
     return GestureDetector(
       onTap: () {
@@ -315,12 +323,12 @@ class _HomeState extends State<Home> {
             // Info
             Expanded(
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Nome + Número
+                    // Linha 1: Nome + Número
                     Row(
                       children: [
                         Expanded(
@@ -336,7 +344,14 @@ class _HomeState extends State<Home> {
                         ),
                       ],
                     ),
-                    // Status + Valor
+                    // Linha 2: Veículo
+                    Text(
+                      vehicleDesc.isNotEmpty ? vehicleDesc : 'Sem veículo',
+                      style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    // Linha 3: Status + Valor
                     Row(
                       children: [
                         Container(
@@ -355,22 +370,18 @@ class _HomeState extends State<Home> {
                           Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.errorColor),
                         ],
                         Spacer(),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              _formatCurrency(order.total),
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
-                            ),
-                            Text(
-                              isPaid ? 'Pago' : 'A receber',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w500,
-                                color: isPaid ? AppTheme.successColor : AppTheme.errorColor,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          _formatCurrency(order.total),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                        ),
+                        SizedBox(width: 6),
+                        Text(
+                          isPaid ? 'Pago' : 'A receber',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: isPaid ? AppTheme.successColor : AppTheme.errorColor,
+                          ),
                         ),
                       ],
                     ),
