@@ -291,8 +291,9 @@ class _HomeState extends State<Home> {
     final statusColor = AppTheme.getStatusColor(order.status);
     final isPaid = order.payment == 'paid';
 
-    // Não mostrar ícone de pagamento em orçamento e cancelado
-    final showPaymentIcon = order.status != 'quote' && order.status != 'canceled';
+    // Só mostrar ícone quando PAGO (não mostrar círculo vazio para "a receber")
+    // E não mostrar em orçamento e cancelado
+    final showPaidIcon = isPaid && order.status != 'quote' && order.status != 'canceled';
 
     // Verificar atraso
     bool isOverdue = false;
@@ -302,12 +303,15 @@ class _HomeState extends State<Home> {
       isOverdue = dueDate.isBefore(today) && order.status != 'done' && order.status != 'canceled';
     }
 
-    // Descrição do veículo
-    String vehicleDesc = '';
+    // Descrição do veículo com número da OS
+    String deviceLine = '#${order.number ?? '-'}';
     if (order.device != null) {
       final name = order.device?.name ?? '';
       final serial = order.device?.serial ?? '';
-      vehicleDesc = serial.isNotEmpty ? '$name • $serial' : name;
+      final vehicleDesc = serial.isNotEmpty ? '$name • $serial' : name;
+      if (vehicleDesc.isNotEmpty) {
+        deviceLine = '#${order.number ?? '-'} • $vehicleDesc';
+      }
     }
 
     return InkWell(
@@ -319,100 +323,97 @@ class _HomeState extends State<Home> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Thumbnail circular
+                  // Thumbnail
                   _buildThumbnail(order),
-                  SizedBox(width: 14),
+                  SizedBox(width: 12),
                   // Conteúdo principal
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Linha 1: Nome + Número
+                        // Linha 1: Nome + Status
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
                               child: Text(
                                 order.customer?.name ?? 'Cliente',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                   color: AppTheme.textPrimary,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Text(
-                              '#${order.number ?? '-'}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: AppTheme.textTertiary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 4),
-                        // Linha 2: Veículo
-                        Text(
-                          vehicleDesc.isNotEmpty ? vehicleDesc : 'Sem veículo',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppTheme.textSecondary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                        SizedBox(height: 8),
-                        // Linha 3: Status + Ícones + Valor
-                        Row(
-                          children: [
-                            // Status badge
+                            SizedBox(width: 8),
+                            // Status badge no canto superior direito
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: statusColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
                                 statusText,
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: statusColor,
                                 ),
                               ),
                             ),
-                            SizedBox(width: 8),
-                            // Ícones de status (atrasado + pagamento)
+                          ],
+                        ),
+                        SizedBox(height: 2),
+                        // Linha 2: #OS + Veículo + Ícones
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                deviceLine,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppTheme.textSecondary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                            // Ícones (atrasado + pago)
                             if (isOverdue)
                               Padding(
-                                padding: EdgeInsets.only(right: 6),
+                                padding: EdgeInsets.only(left: 6),
                                 child: Icon(
                                   Icons.schedule,
-                                  size: 18,
+                                  size: 16,
                                   color: AppTheme.errorColor,
                                 ),
                               ),
-                            if (showPaymentIcon)
-                              Icon(
-                                isPaid ? Icons.check_circle : Icons.circle_outlined,
-                                size: 18,
-                                color: isPaid ? AppTheme.successColor : AppTheme.textTertiary,
+                            if (showPaidIcon)
+                              Padding(
+                                padding: EdgeInsets.only(left: 6),
+                                child: Icon(
+                                  Icons.check_circle,
+                                  size: 16,
+                                  color: AppTheme.successColor,
+                                ),
                               ),
-                            Spacer(),
-                            // Valor
-                            Text(
-                              _formatCurrency(order.total),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.textPrimary,
-                              ),
-                            ),
                           ],
+                        ),
+                        SizedBox(height: 4),
+                        // Linha 3: Valor
+                        Text(
+                          _formatCurrency(order.total),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
                         ),
                       ],
                     ),
@@ -420,9 +421,9 @@ class _HomeState extends State<Home> {
                 ],
               ),
             ),
-            // Divisor - apenas se não for o último item
+            // Divisor
             Padding(
-              padding: EdgeInsets.only(left: 86),
+              padding: EdgeInsets.only(left: 80),
               child: Container(
                 height: 1,
                 color: AppTheme.borderLight,
@@ -436,10 +437,10 @@ class _HomeState extends State<Home> {
 
   Widget _buildThumbnail(Order order) {
     final url = order.coverPhotoUrl;
-    const double size = 56.0;
+    const double size = 52.0;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       child: Container(
         width: size,
         height: size,
@@ -452,7 +453,7 @@ class _HomeState extends State<Home> {
             : Center(
                 child: Icon(
                   Icons.build_circle_outlined,
-                  size: 28,
+                  size: 26,
                   color: AppTheme.textTertiary,
                 ),
               ),
