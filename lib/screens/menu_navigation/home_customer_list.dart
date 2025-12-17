@@ -153,10 +153,12 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     // Gerar iniciais para o avatar
     String initials = '';
     if (customer.name != null && customer.name!.isNotEmpty) {
-      final parts = customer.name!.split(' ');
-      initials = parts.length > 1
-          ? '${parts[0][0]}${parts[1][0]}'.toUpperCase()
-          : customer.name![0].toUpperCase();
+      final parts = customer.name!.trim().split(' ').where((p) => p.isNotEmpty).toList();
+      if (parts.length > 1 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
+        initials = '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+      } else if (parts.isNotEmpty && parts[0].isNotEmpty) {
+        initials = parts[0][0].toUpperCase();
+      }
     }
 
     return Dismissible(
