@@ -4,12 +4,60 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/global.dart';
 
 class PhotoService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final ImagePicker _picker = ImagePicker();
+
+  /// Converte qualquer imagem para JPEG válido
+  /// Isso resolve o problema de fotos HEIC/HEIF/PNG que podem causar cores esverdeadas
+  ///
+  /// [input] - Arquivo de imagem original (qualquer formato suportado)
+  /// [photoId] - ID único para nomear o arquivo temporário
+  /// [quality] - Qualidade da compressão (0-100, padrão 80)
+  ///
+  /// Retorna um File com o JPEG convertido
+  Future<File> _ensureJpeg(File input, String photoId, {int quality = 80}) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final outputPath = '${tempDir.path}/$photoId.jpg';
+
+      // Log do arquivo original para debug
+      final originalSize = await input.length();
+      final originalExtension = input.path.split('.').last.toLowerCase();
+      print('Convertendo imagem: $originalExtension -> JPEG');
+      print('Tamanho original: ${(originalSize / 1024).toStringAsFixed(1)} KB');
+
+      // Converte para JPEG usando flutter_image_compress
+      // Preserva EXIF (orientação) quando possível
+      final XFile? result = await FlutterImageCompress.compressAndGetFile(
+        input.absolute.path,
+        outputPath,
+        format: CompressFormat.jpeg,
+        quality: quality,
+        keepExif: true, // Preserva orientação da foto
+      );
+
+      if (result == null) {
+        throw Exception('Falha na conversão da imagem para JPEG');
+      }
+
+      final convertedFile = File(result.path);
+      final convertedSize = await convertedFile.length();
+
+      print('Conversão concluída: ${(convertedSize / 1024).toStringAsFixed(1)} KB');
+      print('Redução: ${((1 - convertedSize / originalSize) * 100).toStringAsFixed(1)}%');
+
+      return convertedFile;
+    } catch (e) {
+      print('Erro na conversão para JPEG: $e');
+      throw Exception('Não foi possível processar a imagem. Tente novamente ou escolha outra foto.');
+    }
+  }
 
   /// Abre a galeria para selecionar uma imagem
   Future<File?> pickImageFromGallery() async {
@@ -80,6 +128,12 @@ class PhotoService {
       final String storagePath =
           'tenants/$companyId/orders/$orderId/photos/$photoId.jpg';
 
+      // IMPORTANTE: Converte a imagem para JPEG antes do upload
+      // Isso garante que HEIC/HEIF/PNG sejam convertidos corretamente,
+      // evitando o problema de cores esverdeadas
+      print('Convertendo imagem para JPEG antes do upload...');
+      final File jpegFile = await _ensureJpeg(file, photoId);
+
       print('Iniciando upload para: $storagePath');
       final Reference ref = _storage.ref().child(storagePath);
 
@@ -88,7 +142,7 @@ class PhotoService {
       try {
         print('Tentativa 1: putFile com metadata');
         final UploadTask uploadTask = ref.putFile(
-          file,
+          jpegFile, // Usa o arquivo JPEG convertido
           SettableMetadata(contentType: 'image/jpeg'),
         );
 
@@ -115,7 +169,7 @@ class PhotoService {
           try {
             print('Tentativa 2: putFile com contentType (Fallback)');
             final UploadTask uploadTask = ref.putFile(
-              file,
+              jpegFile, // Usa o arquivo JPEG convertido
               SettableMetadata(contentType: 'image/jpeg'),
             );
 
@@ -125,11 +179,11 @@ class PhotoService {
             return _createOrderPhoto(photoId, storagePath, downloadUrl, now);
           } catch (retryError) {
             print('Erro na tentativa 2: $retryError');
-            
+
             // Estratégia 3: putData (converte arquivo para bytes)
             try {
               print('Tentativa 3: putData (bytes)');
-              final Uint8List fileBytes = await file.readAsBytes();
+              final Uint8List fileBytes = await jpegFile.readAsBytes(); // Usa o arquivo JPEG convertido
               final UploadTask uploadTask = ref.putData(
                 fileBytes,
                 SettableMetadata(contentType: 'image/jpeg'),
@@ -141,11 +195,11 @@ class PhotoService {
               return _createOrderPhoto(photoId, storagePath, downloadUrl, now);
             } catch (dataError) {
               print('Erro na tentativa 3: $dataError');
-              
+
               // Estratégia 4: putData sem metadata
               try {
                 print('Tentativa 4: putData sem metadata');
-                final Uint8List fileBytes = await file.readAsBytes();
+                final Uint8List fileBytes = await jpegFile.readAsBytes(); // Usa o arquivo JPEG convertido
                 final UploadTask uploadTask = ref.putData(fileBytes);
 
                 final TaskSnapshot snapshot = await uploadTask;

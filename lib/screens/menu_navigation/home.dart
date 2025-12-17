@@ -2,6 +2,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/theme/app_theme.dart';
+import 'package:praticos/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
@@ -408,14 +409,9 @@ class _HomeState extends State<Home> {
         height: height,
         color: AppTheme.backgroundColor,
         child: url != null && url.isNotEmpty
-            ? Image.network(
-                url,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return Center(child: CircularProgressIndicator(strokeWidth: 2));
-                },
-                errorBuilder: (_, __, ___) => _defaultIcon(),
+            ? CachedImage.thumbnail(
+                imageUrl: url,
+                size: height,
               )
             : _defaultIcon(),
       ),
