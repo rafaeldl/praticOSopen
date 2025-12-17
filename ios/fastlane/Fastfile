@@ -1,6 +1,23 @@
 default_platform(:ios)
 
 platform :ios do
+  desc "Retorna o próximo build number (último do TestFlight + 1)"
+  lane :get_next_build_number do
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
+    )
+
+    current = latest_testflight_build_number(app_identifier: ENV['BUNDLE_ID'])
+    next_build = current + 1
+    UI.message("Current build: #{current}, Next build: #{next_build}")
+
+    # Escreve o número em um arquivo para o CI ler
+    File.write("../next_build_number.txt", next_build.to_s)
+    next_build
+  end
+
   desc "Build + upload para TestFlight (sem match)"
   lane :beta do
     app_store_connect_api_key(
