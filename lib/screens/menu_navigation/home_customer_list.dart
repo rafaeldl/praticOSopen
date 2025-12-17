@@ -59,6 +59,13 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/customer_form');
+        },
+        backgroundColor: AppTheme.primaryColor,
+        child: Icon(Icons.add, color: Colors.white),
+      ),
     );
   }
 
@@ -140,7 +147,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     }
 
     return ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.only(top: 8, bottom: 88),
       itemCount: filteredList.length,
       itemBuilder: (context, index) {
         Customer customer = filteredList[index];
@@ -163,27 +170,84 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
 
     return Dismissible(
       key: Key(customer.id!),
-      direction: DismissDirection.endToStart,
+      direction: DismissDirection.horizontal,
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          // Swipe para esquerda = excluir (com confirmação)
+          return await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Confirmar exclusão'),
+              content: Text('Deseja remover o cliente "${customer.name}"?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text('Cancelar'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.errorColor,
+                  ),
+                  child: Text('Remover'),
+                ),
+              ],
+            ),
+          ) ?? false;
+        } else if (direction == DismissDirection.startToEnd) {
+          // Swipe para direita = editar (não remove o item)
+          Navigator.pushNamed(
+            context,
+            '/customer_form',
+            arguments: {'customer': customer},
+          );
+          return false;
+        }
+        return false;
+      },
       onDismissed: (direction) {
-        customerStore.deleteCustomer(customer);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Cliente ${customer.name} removido'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+        if (direction == DismissDirection.endToStart) {
+          customerStore.deleteCustomer(customer);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Cliente "${customer.name}" removido'),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-            action: SnackBarAction(
-              label: 'Desfazer',
-              textColor: AppTheme.accentColor,
-              onPressed: () {
-                // TODO: Implementar desfazer
-              },
-            ),
-          ),
-        );
+          );
+        }
       },
       background: Container(
+        // Swipe para direita = editar (azul)
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        alignment: Alignment.centerLeft,
+        padding: EdgeInsets.only(left: 24),
+        child: Row(
+          children: [
+            Icon(
+              Icons.edit_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Editar',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+      secondaryBackground: Container(
+        // Swipe para esquerda = excluir (vermelho)
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
           color: AppTheme.errorColor,
@@ -191,10 +255,23 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         ),
         alignment: Alignment.centerRight,
         padding: EdgeInsets.only(right: 24),
-        child: Icon(
-          Icons.delete_rounded,
-          color: Colors.white,
-          size: 24,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              'Excluir',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(width: 8),
+            Icon(
+              Icons.delete_rounded,
+              color: Colors.white,
+              size: 24,
+            ),
+          ],
         ),
       ),
       child: Container(
@@ -257,7 +334,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                           ),
                           SizedBox(width: 4),
                           Text(
-                            customer.phone ?? 'Sem telefone',
+                            _formatPhone(customer.phone),
                             style: TextStyle(
                               fontSize: 13,
                               color: AppTheme.textSecondary,
@@ -287,6 +364,17 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         ),
       ),
     );
+  }
+
+  String _formatPhone(String? phone) {
+    if (phone == null || phone.isEmpty) return 'Sem telefone';
+    final cleaned = phone.replaceAll(RegExp(r'\D'), '');
+    if (cleaned.length == 11) {
+      return '(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 7)}-${cleaned.substring(7)}';
+    } else if (cleaned.length == 10) {
+      return '(${cleaned.substring(0, 2)}) ${cleaned.substring(2, 6)}-${cleaned.substring(6)}';
+    }
+    return phone;
   }
 
   Widget _buildLoadingState() {
@@ -381,7 +469,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           ),
           SizedBox(height: 8),
           Text(
-            'Adicione clientes através do menu Ajustes',
+            'Toque no + para adicionar',
             style: TextStyle(
               fontSize: 14,
               color: AppTheme.textSecondary,
