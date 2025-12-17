@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_photo.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:io';
 
 class OrderPhotosWidget extends StatelessWidget {
   final OrderStore store;
@@ -422,6 +426,7 @@ class PhotoViewerScreen extends StatefulWidget {
 class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
   late PageController _pageController;
   late int _currentIndex;
+  bool _isSharing = false;
 
   @override
   void initState() {
@@ -436,6 +441,62 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
     super.dispose();
   }
 
+  Future<void> _sharePhoto() async {
+    if (_isSharing) return;
+
+    setState(() {
+      _isSharing = true;
+    });
+
+    try {
+      final photo = widget.photos[_currentIndex];
+      final url = photo.url;
+
+      if (url == null || url.isEmpty) {
+        throw Exception('URL da imagem inválida');
+      }
+
+      // Baixa a imagem
+      final response = await http.get(Uri.parse(url));
+      
+      if (response.statusCode != 200) {
+        throw Exception('Falha ao baixar imagem');
+      }
+
+      // Prepara o arquivo temporário
+      final tempDir = await getTemporaryDirectory();
+      final fileName = 'foto_os_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final file = await File('${tempDir.path}/$fileName').create();
+      await file.writeAsBytes(response.bodyBytes);
+
+      // Compartilha
+      // Define uma origem para o popover no iPad/iOS
+      final box = context.findRenderObject() as RenderBox?;
+      final size = MediaQuery.of(context).size;
+      
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'Foto da Ordem de Serviço',
+        sharePositionOrigin: box != null 
+            ? box.localToGlobal(Offset.zero) & box.size 
+            : Rect.fromLTWH(0, 0, size.width, size.height / 2),
+      );
+    } catch (e) {
+      print('Erro no compartilhamento: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao compartilhar: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSharing = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -448,6 +509,17 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
           style: TextStyle(color: Colors.white),
         ),
         actions: [
+          IconButton(
+            icon: _isSharing 
+                ? SizedBox(
+                    width: 20, 
+                    height: 20, 
+                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                  )
+                : Icon(Icons.share),
+            tooltip: 'Compartilhar',
+            onPressed: _sharePhoto,
+          ),
           if (_currentIndex > 0)
             IconButton(
               icon: Icon(Icons.star_border),
