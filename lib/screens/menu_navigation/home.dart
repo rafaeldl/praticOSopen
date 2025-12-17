@@ -1,6 +1,7 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -21,19 +22,15 @@ class _HomeState extends State<Home> {
   late OrderStore orderStore;
 
   List filters = [
-    {'status': 'Todos', 'icon': Icons.select_all},
-    {'status': 'Data entrega', 'field': 'due_date', 'icon': Icons.schedule},
-    {
-      'status': 'Aprovados',
-      'field': 'approved',
-      'icon': FontAwesomeIcons.thumbsUp,
-    },
-    {'status': 'Em andamento', 'field': 'progress', 'icon': Icons.sync},
-    {'status': 'Orçamentos', 'field': 'quote', 'icon': Icons.assignment},
-    {'status': 'Concluídos', 'field': 'done', 'icon': Icons.done},
-    {'status': 'Cancelados', 'field': 'canceled', 'icon': Icons.cancel},
-    {'status': 'A receber', 'field': 'unpaid', 'icon': Icons.money_off},
-    {'status': 'Pago', 'field': 'paid', 'icon': Icons.monetization_on},
+    {'status': 'Todos', 'icon': Icons.apps_rounded},
+    {'status': 'Entrega', 'field': 'due_date', 'icon': Icons.schedule_rounded},
+    {'status': 'Aprovados', 'field': 'approved', 'icon': Icons.thumb_up_rounded},
+    {'status': 'Andamento', 'field': 'progress', 'icon': Icons.autorenew_rounded},
+    {'status': 'Orçamentos', 'field': 'quote', 'icon': Icons.request_quote_rounded},
+    {'status': 'Concluídos', 'field': 'done', 'icon': Icons.check_circle_rounded},
+    {'status': 'Cancelados', 'field': 'canceled', 'icon': Icons.cancel_rounded},
+    {'status': 'A receber', 'field': 'unpaid', 'icon': Icons.payments_outlined},
+    {'status': 'Pago', 'field': 'paid', 'icon': Icons.paid_rounded},
   ];
 
   @override
@@ -56,7 +53,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-  // Método para carregar as ordens
   void _loadOrders() {
     print("Carregando ordens na tela Home...");
     orderStore.loadOrdersInfinite(filters[currentSelected]['field']);
@@ -86,140 +82,16 @@ class _HomeState extends State<Home> {
     FirebaseCrashlytics.instance.log("Abrindo home");
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Ordens de Serviço'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.dashboard),
-            onPressed: () {
-              Navigator.pushNamed(context, '/financial_dashboard_simple');
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '/order').then((_) {
-                // Recarregar a lista ao retornar da tela de criação de OS
-                print(
-                  "Retornou da tela de criação de OS, recarregando lista...",
-                );
-                _loadOrders();
-              });
-            },
-          ),
-        ],
-      ),
+      backgroundColor: AppTheme.backgroundColor,
+      appBar: _buildModernAppBar(),
       body: SafeArea(
-        child: ListView(
-          controller: _scrollController,
-          padding: EdgeInsets.symmetric(vertical: 30.0),
-          children: <Widget>[
-            // Botões de filtro
-            Column(
-              children: <Widget>[
-                Container(
-                  height: 95.0,
-                  child: ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    scrollDirection: Axis.horizontal,
-                    itemCount: filters.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return _buildIconFilter(context, index);
-                    },
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 25.0),
-            Observer(
-              builder: (_) {
-                // Sem filtro
-                if (orderStore.customerFilter == null) {
-                  return SizedBox(height: 0.0);
-                }
-                return GestureDetector(
-                  onTap: () {
-                    orderStore.setCustomerFilter(null);
-                    orderStore.loadOrdersInfinite(
-                      filters[currentSelected]['field'],
-                    );
-                  },
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                            child: Text(
-                              orderStore.customerFilter?.name! ?? '',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20.0,
-                                color: Colors.black,
-                              ),
-                              maxLines: 2,
-                            ),
-                          ),
-                          Icon(Icons.cancel, size: 18.0),
-                        ],
-                      ),
-                      SizedBox(height: 20.0),
-                    ],
-                  ),
-                );
-              },
-            ),
-            Observer(
-              builder: (_) {
-                if (orderStore.isLoading && orderStore.orders.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(30),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                }
-
-                if (orderStore.orders.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.all(30),
-                    child: Center(
-                      child: Container(
-                        child: Text(
-                          'Nenhuma ordem de serviço encontrada',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.0,
-                          ),
-                          maxLines: 2,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                return Column(
-                  children: [
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: orderStore.orders.length,
-                      itemBuilder: (context, index) {
-                        Order? order = orderStore.orders[index];
-                        return _buildOrderItem(order ?? Order(), orderStore);
-                      },
-                    ),
-                    if (orderStore.isLoading)
-                      Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                  ],
-                );
-              },
+        child: Column(
+          children: [
+            // Filtros compactos
+            _buildFilterSection(),
+            // Lista de OS
+            Expanded(
+              child: _buildOrdersList(),
             ),
           ],
         ),
@@ -227,58 +99,143 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildIconFilter(BuildContext context, int index) {
-    return Container(
-      height: 90,
-      width: 80,
-      child: GestureDetector(
-        onTap: () {
-          currentSelected = index;
-          setState(() {
-            previousSelected = index;
-          });
-          orderStore.loadOrdersInfinite(filters[index]['field']);
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5.0),
-          child: Column(
-            children: <Widget>[
-              Container(
-                height: 60,
-                width: 60,
-                decoration: BoxDecoration(
-                  color: previousSelected == index
-                      ? Theme.of(context).colorScheme.secondary
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(30.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey[200]!,
-                      blurRadius: 6.0,
-                      spreadRadius: 2.0,
-                      offset: Offset(7.0, 7.0),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  filters[index]['icon'],
-                  color: previousSelected == index
-                      ? Colors.white
-                      : Theme.of(context).primaryColor,
-                ),
+  PreferredSizeWidget _buildModernAppBar() {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: AppTheme.surfaceColor,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Ordens de Serviço',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.textPrimary,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        IconButton(
+          icon: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.backgroundColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              Icons.bar_chart_rounded,
+              color: AppTheme.textSecondary,
+              size: 20,
+            ),
+          ),
+          onPressed: () {
+            Navigator.pushNamed(context, '/financial_dashboard_simple');
+          },
+        ),
+        Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: IconButton(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor,
+                borderRadius: BorderRadius.circular(10),
               ),
-              SizedBox(height: 2),
-              Expanded(
-                child: Text(
-                  filters[index]['status'],
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                  style: TextStyle(
-                    letterSpacing: -1.0,
-                    fontSize: 12,
-                    color: Theme.of(context).primaryColor,
-                  ),
+              child: Icon(
+                Icons.add_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, '/order').then((_) {
+                print("Retornou da tela de criação de OS, recarregando lista...");
+                _loadOrders();
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilterSection() {
+    return Container(
+      color: AppTheme.surfaceColor,
+      child: Column(
+        children: [
+          // Filtros horizontais compactos
+          Container(
+            height: 48,
+            margin: EdgeInsets.only(bottom: 8),
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              scrollDirection: Axis.horizontal,
+              itemCount: filters.length,
+              itemBuilder: (context, index) => _buildFilterChip(index),
+            ),
+          ),
+          // Indicador de filtro por cliente
+          Observer(
+            builder: (_) {
+              if (orderStore.customerFilter == null) {
+                return SizedBox.shrink();
+              }
+              return _buildCustomerFilterIndicator();
+            },
+          ),
+          // Divisor sutil
+          Container(
+            height: 1,
+            color: AppTheme.borderLight,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(int index) {
+    final isSelected = previousSelected == index;
+
+    return GestureDetector(
+      onTap: () {
+        currentSelected = index;
+        setState(() {
+          previousSelected = index;
+        });
+        orderStore.loadOrdersInfinite(filters[index]['field']);
+      },
+      child: Container(
+        margin: EdgeInsets.only(right: 8),
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 200),
+          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? AppTheme.primaryColor : AppTheme.backgroundColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                filters[index]['icon'],
+                size: 16,
+                color: isSelected ? Colors.white : AppTheme.textSecondary,
+              ),
+              SizedBox(width: 6),
+              Text(
+                filters[index]['status'],
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected ? Colors.white : AppTheme.textSecondary,
                 ),
               ),
             ],
@@ -288,62 +245,170 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildOrderItem(Order order, OrderStore orderStore) {
-    // Formatação da data da OS (createdAt)
+  Widget _buildCustomerFilterIndicator() {
+    return GestureDetector(
+      onTap: () {
+        orderStore.setCustomerFilter(null);
+        orderStore.loadOrdersInfinite(filters[currentSelected]['field']);
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12, left: 16, right: 16),
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: AppTheme.infoLight,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: AppTheme.primaryColor.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_rounded,
+              size: 16,
+              color: AppTheme.primaryColor,
+            ),
+            SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                orderStore.customerFilter?.name ?? '',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  color: AppTheme.primaryColor,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            SizedBox(width: 8),
+            Icon(
+              Icons.close_rounded,
+              size: 18,
+              color: AppTheme.primaryColor,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrdersList() {
+    return Observer(
+      builder: (_) {
+        if (orderStore.isLoading && orderStore.orders.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Carregando...',
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        if (orderStore.orders.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        return ListView.builder(
+          controller: _scrollController,
+          padding: EdgeInsets.symmetric(vertical: 12),
+          itemCount: orderStore.orders.length + (orderStore.isLoading ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == orderStore.orders.length) {
+              return Padding(
+                padding: const EdgeInsets.all(20),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
+                  ),
+                ),
+              );
+            }
+
+            Order? order = orderStore.orders[index];
+            return _buildCompactOrderItem(order ?? Order());
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppTheme.borderLight,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.assignment_outlined,
+              size: 48,
+              color: AppTheme.textTertiary,
+            ),
+          ),
+          SizedBox(height: 20),
+          Text(
+            'Nenhuma OS encontrada',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Toque em + para criar uma nova ordem',
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactOrderItem(Order order) {
+    // Formatação da data
     String formattedCreatedDate = '';
     if (order.createdAt != null) {
-      formattedCreatedDate = DateFormat('dd/MM/yyyy').format(order.createdAt!);
+      formattedCreatedDate = DateFormat('dd/MM/yy').format(order.createdAt!);
     }
 
-    // Verificar se a entrega está atrasada
+    // Verificar se atrasada
     bool isOverdue = false;
     if (order.dueDate != null) {
-      // Comparar apenas as datas, ignorando a hora
-      final today = DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-      );
-      final dueDate = DateTime(
-        order.dueDate!.year,
-        order.dueDate!.month,
-        order.dueDate!.day,
-      );
-
-      // Considera atrasado APENAS quando a data de entrega é ANTERIOR ao dia de hoje
-      if ((dueDate.compareTo(today) < 0) &&
-          order.status != 'done' &&
-          order.status != 'canceled') {
+      final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      final dueDate = DateTime(order.dueDate!.year, order.dueDate!.month, order.dueDate!.day);
+      if ((dueDate.compareTo(today) < 0) && order.status != 'done' && order.status != 'canceled') {
         isOverdue = true;
       }
     }
 
-    // Status de pagamento
-    String payment = '';
-    Color paymentColor = Colors.green;
-    if (order.payment == 'paid') {
-      payment = 'Pago';
-      paymentColor = Colors.green;
-    } else if (order.payment == 'unpaid') {
-      payment = 'A receber';
-      paymentColor = Colors.red.shade400;
-    }
+    // Status
+    String orderStatus = Order.statusMap[order.status] ?? '';
+    Color statusColor = AppTheme.getStatusColor(order.status);
+    Color statusBgColor = AppTheme.getStatusBackgroundColor(order.status);
 
-    // Status da OS
-    String orderStatus = Order.statusMap[order.status] ?? 'Desconhecido';
-    Color statusColor = Theme.of(context).primaryColor;
-
-    // Cor baseada no status
-    if (order.status == 'approved')
-      statusColor = Colors.green;
-    else if (order.status == 'quote')
-      statusColor = Colors.orange;
-    else if (order.status == 'progress')
-      statusColor = Colors.blue;
-    else if (order.status == 'done')
-      statusColor = Colors.green.shade800;
-    else if (order.status == 'canceled')
-      statusColor = Colors.red;
+    // Pagamento
+    String paymentText = order.payment == 'paid' ? 'Pago' : (order.payment == 'unpaid' ? 'A receber' : '');
+    Color paymentColor = AppTheme.getPaymentColor(order.payment);
 
     return GestureDetector(
       onTap: () {
@@ -351,255 +416,160 @@ class _HomeState extends State<Home> {
           context,
           '/order',
           arguments: {'order': order},
-        ).then((_) {
-          _loadOrders();
-        });
+        ).then((_) => _loadOrders());
       },
       child: Container(
-        margin: EdgeInsets.fromLTRB(20.0, 8.0, 20.0, 8.0),
-        constraints: BoxConstraints(minHeight: 100.0),
-        width: double.infinity,
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
+          color: AppTheme.surfaceColor,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isOverdue ? Colors.red : Colors.grey[100]!,
-            width: isOverdue ? 2.0 : 1.0,
+            color: isOverdue ? AppTheme.errorColor.withOpacity(0.5) : AppTheme.borderColor,
+            width: isOverdue ? 1.5 : 1,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: isOverdue
-                  ? Colors.red.withOpacity(0.2)
-                  : Colors.grey[200]!,
-              blurRadius: 6.0,
-              spreadRadius: 2.0,
-              offset: Offset(7.0, 7.0),
-            ),
-          ],
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20.0),
+          boxShadow: isOverdue
+              ? [
+                  BoxShadow(
+                    color: AppTheme.errorColor.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: Offset(0, 2),
+                  ),
+                ]
+              : AppTheme.cardShadow,
         ),
-        child: Row(
-          children: <Widget>[
-            // Imagem à esquerda - Foto de capa da OS
-            Container(
-              width: 100,
-              height: 160,
-              child: ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20),
-                ),
-                child: _buildOrderCoverPhoto(order),
-              ),
-            ),
-
-            // Informações da OS
-            Expanded(
-              child: Container(
-                padding: EdgeInsets.fromLTRB(13, 12, 13, 12),
+        child: Padding(
+          padding: EdgeInsets.all(12),
+          child: Row(
+            children: [
+              // Thumbnail compacto
+              _buildCompactThumbnail(order),
+              SizedBox(width: 12),
+              // Informações principais
+              Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    // Linha superior: Cliente e Número
+                  children: [
+                    // Linha 1: Cliente + Número da OS
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        // Cliente e Veículo
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                order.customer?.name ?? 'Cliente',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.0,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                order.device == null
-                                    ? 'Veículo - Placa'
-                                    : "${order.device?.name} - ${order.device?.serial}",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey[700],
-                                  fontSize: 13.0,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        // Número da OS
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            order.number != null ? "#${order.number}" : 'NOVA',
-                            style: TextStyle(
-                              color: Colors.grey[800],
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 8),
-
-                    // Linha central: Datas
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Data de criação
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.calendar_today,
-                                  size: 14,
-                                  color: Colors.grey[600],
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  "Criação",
-                                  style: TextStyle(
-                                    fontSize: 11.0,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ],
+                        Expanded(
+                          child: Text(
+                            order.customer?.name ?? 'Cliente',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
                             ),
-                            SizedBox(height: 2),
-                            Padding(
-                              padding: EdgeInsets.only(left: 18),
-                              child: Text(
-                                formattedCreatedDate,
-                                style: TextStyle(
-                                  fontSize: 12.0,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.grey[800],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        // Data de entrega - alinhada à direita
-                        if (order.dueDate != null)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.event,
-                                    size: 14,
-                                    color: isOverdue
-                                        ? Colors.red
-                                        : Colors.grey[600],
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    isOverdue ? "Atrasada" : "Entrega",
-                                    style: TextStyle(
-                                      fontSize: 11.0,
-                                      fontWeight: FontWeight.w500,
-                                      color: isOverdue
-                                          ? Colors.red
-                                          : Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 2),
-                              Padding(
-                                padding: EdgeInsets.only(right: 4),
-                                child: Text(
-                                  DateFormat(
-                                    'dd/MM/yyyy',
-                                  ).format(order.dueDate!),
-                                  style: TextStyle(
-                                    fontSize: 12.0,
-                                    fontWeight: isOverdue
-                                        ? FontWeight.bold
-                                        : FontWeight.w500,
-                                    color: isOverdue
-                                        ? Colors.red
-                                        : Colors.grey[800],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          SizedBox.shrink(),
-                      ],
-                    ),
-
-                    SizedBox(height: 8),
-
-                    // Linha inferior: Status, Pagamento e Valor
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        // Status da OS
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 3,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: statusColor, width: 1),
+                            color: AppTheme.backgroundColor,
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            orderStatus,
+                            order.number != null ? '#${order.number}' : 'NOVA',
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: statusColor,
-                              fontSize: 12.0,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.textSecondary,
                             ),
                           ),
                         ),
-
-                        // Valor e status de pagamento
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    // Linha 2: Veículo/Dispositivo
+                    Text(
+                      order.device != null
+                          ? '${order.device?.name ?? ''} ${order.device?.serial != null ? '• ${order.device?.serial}' : ''}'
+                          : 'Sem veículo',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppTheme.textSecondary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                    SizedBox(height: 8),
+                    // Linha 3: Status + Datas + Valor
+                    Row(
+                      children: [
+                        // Status badge
+                        if (orderStatus.isNotEmpty)
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: statusBgColor,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              orderStatus,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: statusColor,
+                              ),
+                            ),
+                          ),
+                        SizedBox(width: 8),
+                        // Data de criação
+                        Icon(
+                          Icons.calendar_today_rounded,
+                          size: 12,
+                          color: AppTheme.textTertiary,
+                        ),
+                        SizedBox(width: 3),
+                        Text(
+                          formattedCreatedDate,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AppTheme.textTertiary,
+                          ),
+                        ),
+                        // Data de entrega se atrasada
+                        if (isOverdue) ...[
+                          SizedBox(width: 8),
+                          Icon(
+                            Icons.warning_rounded,
+                            size: 12,
+                            color: AppTheme.errorColor,
+                          ),
+                          SizedBox(width: 2),
+                          Text(
+                            'Atrasada',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.errorColor,
+                            ),
+                          ),
+                        ],
+                        Spacer(),
+                        // Valor
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
+                          children: [
                             Text(
                               _convertToCurrency(order.total),
                               style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.0,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.textPrimary,
                               ),
                             ),
-                            Text(
-                              payment,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12.0,
-                                color: paymentColor,
+                            if (paymentText.isNotEmpty)
+                              Text(
+                                paymentText,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: paymentColor,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ],
@@ -607,9 +577,53 @@ class _HomeState extends State<Home> {
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCompactThumbnail(Order order) {
+    final coverPhotoUrl = order.coverPhotoUrl;
+
+    return Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: coverPhotoUrl != null && coverPhotoUrl.isNotEmpty
+          ? Image.network(
+              coverPhotoUrl,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(AppTheme.textTertiary),
+                    ),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) => _buildDefaultIcon(),
+            )
+          : _buildDefaultIcon(),
+    );
+  }
+
+  Widget _buildDefaultIcon() {
+    return Center(
+      child: Icon(
+        Icons.build_circle_outlined,
+        size: 28,
+        color: AppTheme.textTertiary,
       ),
     );
   }
@@ -619,61 +633,6 @@ class _HomeState extends State<Home> {
       locale: 'pt-BR',
       symbol: 'R\$',
     );
-    return numberFormat.format(total);
-  }
-
-  /// Constrói a foto de capa da ordem de serviço
-  Widget _buildOrderCoverPhoto(Order order) {
-    final coverPhotoUrl = order.coverPhotoUrl;
-
-    if (coverPhotoUrl != null && coverPhotoUrl.isNotEmpty) {
-      return Image.network(
-        coverPhotoUrl,
-        alignment: Alignment.center,
-        fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            color: Colors.grey[200],
-            child: Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-              ),
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return _buildDefaultOrderImage();
-        },
-      );
-    }
-
-    // Se não houver fotos, mostra imagem padrão
-    return _buildDefaultOrderImage();
-  }
-
-  /// Constrói a imagem padrão quando não há foto
-  Widget _buildDefaultOrderImage() {
-    return Container(
-      color: Colors.grey[200],
-      child: Icon(
-        Icons.build_circle,
-        size: 50,
-        color: Colors.grey[400],
-      ),
-    );
-  }
-
-  Color _getColorWithOpacity(Color color, double opacity) {
-    return color.withValues(
-      red: color.red.toDouble(),
-      green: color.green.toDouble(),
-      blue: color.blue.toDouble(),
-      alpha: (opacity * 255).toDouble(),
-    );
+    return numberFormat.format(total ?? 0);
   }
 }
