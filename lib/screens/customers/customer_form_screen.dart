@@ -11,9 +11,10 @@ class CustomerFormScreen extends StatefulWidget {
 }
 
 class _CustomerFormScreenState extends State<CustomerFormScreen> {
-  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   Customer? _customer;
   final CustomerStore _customerStore = CustomerStore();
+  bool _isLoading = false;
 
   @override
   void didChangeDependencies() {
@@ -27,43 +28,74 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     }
   }
 
+  bool get _isEditing => _customer?.id != null;
+
+  Future<void> _saveCustomer() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      _formKey.currentState!.save();
+      await _customerStore.saveCustomer(_customer!);
+      setState(() => _isLoading = false);
+      Navigator.pop(context, _customer);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            _customer?.id == null ? "Novo Cliente" : "Editar Cliente",
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  await _customerStore.saveCustomer(_customer!);
-                  Navigator.pop(context, _customer);
-                }
-              },
-              child: Text("Salvar"),
-            ),
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Container(
-            margin: EdgeInsets.fromLTRB(20, 30, 20, 0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  _buildNameField(),
-                  SizedBox(height: 50.0),
-                  _buildPhoneField(),
-                  SizedBox(height: 50.0),
-                  _buildEmailField(),
-                  SizedBox(height: 50.0),
-                  _buildAddressField(),
-                ],
-              ),
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isEditing ? "Editar Cliente" : "Novo Cliente"),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header icon
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    child: Icon(
+                      Icons.person,
+                      size: 40,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Form fields
+                _buildNameField(),
+                const SizedBox(height: 16),
+                _buildPhoneField(),
+                const SizedBox(height: 16),
+                _buildEmailField(),
+                const SizedBox(height: 16),
+                _buildAddressField(),
+                const SizedBox(height: 32),
+                // Save button
+                FilledButton.icon(
+                  onPressed: _isLoading ? null : _saveCustomer,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check),
+                  label: Text(_isLoading ? 'Salvando...' : 'Salvar'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -71,15 +103,33 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     );
   }
 
+  InputDecoration _inputDecoration({
+    required String label,
+    required IconData icon,
+    String? hint,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: Icon(icon),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      filled: true,
+    );
+  }
+
   Widget _buildNameField() {
     return TextFormField(
       initialValue: _customer!.name,
-      decoration: const InputDecoration(
-        icon: Icon(Icons.edit),
-        labelText: 'Nome',
+      decoration: _inputDecoration(
+        label: 'Nome',
+        icon: Icons.person_outline,
+        hint: 'Nome do cliente',
       ),
+      textCapitalization: TextCapitalization.words,
       validator: (value) {
-        if (value!.isEmpty) {
+        if (value == null || value.isEmpty) {
           return 'Preencha o nome do cliente';
         }
         return null;
@@ -93,12 +143,12 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   Widget _buildPhoneField() {
     return TextFormField(
       initialValue: _customer!.phone,
-      keyboardType: TextInputType.number,
-      textCapitalization: TextCapitalization.characters,
+      keyboardType: TextInputType.phone,
       inputFormatters: [TextInputMask(mask: '(99) 99999-9999')],
-      decoration: const InputDecoration(
-        icon: Icon(Icons.phone_iphone),
-        labelText: 'Telefone',
+      decoration: _inputDecoration(
+        label: 'Telefone',
+        icon: Icons.phone_outlined,
+        hint: '(00) 00000-0000',
       ),
       onSaved: (String? value) {
         _customer!.phone = value!.replaceAll(RegExp(r'\D'), '');
@@ -109,9 +159,11 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   Widget _buildEmailField() {
     return TextFormField(
       initialValue: _customer!.email,
-      decoration: const InputDecoration(
-        icon: Icon(Icons.email),
-        labelText: 'Email',
+      keyboardType: TextInputType.emailAddress,
+      decoration: _inputDecoration(
+        label: 'Email',
+        icon: Icons.email_outlined,
+        hint: 'email@exemplo.com',
       ),
       onSaved: (String? value) {
         _customer!.email = value;
@@ -122,10 +174,12 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   Widget _buildAddressField() {
     return TextFormField(
       initialValue: _customer!.address,
-      decoration: const InputDecoration(
-        icon: Icon(Icons.location_on),
-        labelText: 'Endereço',
+      decoration: _inputDecoration(
+        label: 'Endereço',
+        icon: Icons.location_on_outlined,
+        hint: 'Endereço completo',
       ),
+      textCapitalization: TextCapitalization.sentences,
       onSaved: (String? value) {
         _customer!.address = value;
       },

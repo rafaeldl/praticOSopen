@@ -11,112 +11,201 @@ class ServiceListScreen extends StatefulWidget {
 
 class _ServiceListScreenState extends State<ServiceListScreen> {
   ServiceStore serviceStore = ServiceStore();
-
-  final PageController pageController = PageController();
   Map<String, dynamic>? args;
 
   @override
   Widget build(BuildContext context) {
     args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-    if (args != null && args!.containsKey('orderStore')) {
-      print('orderStore');
-    }
+    final isSelectionMode = args != null && args!.containsKey('orderStore');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Serviços'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.pushNamed(context, '/service_form');
-            },
-          ),
-        ],
+        title: const Text('Serviços'),
+        elevation: 0,
       ),
-      body: SafeArea(
-        child: Container(
-          child: Observer(
-            builder: (_) {
-              return _buildServiceList(serviceStore);
-            },
-          ),
-        ),
+      body: Observer(
+        builder: (_) => _buildBody(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/service_form');
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
 
-  Widget _buildServiceList(ServiceStore serviceStore) {
+  Widget _buildBody() {
     if (serviceStore.serviceList == null) {
-      return Center(
-        child: ElevatedButton(
-          onPressed: serviceStore.retrieveServices(),
-          child: Text('Error'),
-        ),
-      );
+      return _buildError();
     }
 
     if (serviceStore.serviceList!.hasError) {
-      return Center(
-        child: ElevatedButton(
-          onPressed: serviceStore.retrieveServices(),
-          child: Text('Error'),
-        ),
-      );
+      return _buildError();
     }
 
-    List<Service>? list = serviceStore.serviceList!.value;
-    if (list == null) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
+    List<Service>? serviceList = serviceStore.serviceList!.value;
+
+    if (serviceList == null) {
+      return const Center(child: CircularProgressIndicator());
     }
 
-    return Container(
-      padding: EdgeInsets.all(0.0),
-      margin: EdgeInsets.all(20.0),
-      child: ListView.separated(
-        itemCount: list.length,
-        itemBuilder: (context, index) {
-          Service service = list[index];
+    if (serviceList.isEmpty) {
+      return _buildEmptyState();
+    }
 
-          return Dismissible(
-            direction: DismissDirection.endToStart,
-            background: Container(
-                color: Colors.red,
-                child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 10.0),
-                      child: Icon(Icons.delete, size: 30),
-                    ))),
-            key: Key(service.id!),
-            onDismissed: (direction) {
-              serviceStore.deleteService(service);
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Serviço ${service.name} removido")));
-            },
-            child: ListTile(
-              title: Text(service.name == null ? '' : service.name!),
-              subtitle: Text(_convertToCurrency(service.value)),
-              trailing: Icon(Icons.keyboard_arrow_right),
-              onTap: () {
-                if (args != null && args!.containsKey('orderStore')) {
-                  Navigator.pushNamed(context, '/order_service', arguments: {
-                    'service': service,
-                    'orderStore': args!['orderStore']
-                  });
-                } else {
-                  Navigator.pushNamed(context, '/service_form',
-                      arguments: {'service': service});
-                }
-              },
+    return _buildServiceList(serviceList);
+  }
+
+  Widget _buildError() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Erro ao carregar serviços',
+            style: TextStyle(fontSize: 18),
+          ),
+          const SizedBox(height: 16),
+          FilledButton.tonal(
+            onPressed: () => serviceStore.retrieveServices(),
+            child: const Text('Tentar novamente'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.build_outlined,
+            size: 80,
+            color: Theme.of(context).colorScheme.outline,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Nenhum serviço cadastrado',
+            style: TextStyle(
+              fontSize: 18,
+              color: Theme.of(context).colorScheme.outline,
             ),
-          );
-        },
-        separatorBuilder: (context, index) {
-          return Divider();
-        },
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Toque no + para adicionar',
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceList(List<Service> list) {
+    final isSelectionMode = args != null && args!.containsKey('orderStore');
+
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: 8, bottom: 88),
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final service = list[index];
+        return _buildServiceCard(service, isSelectionMode);
+      },
+    );
+  }
+
+  Widget _buildServiceCard(Service service, bool isSelectionMode) {
+    return Dismissible(
+      key: Key(service.id!),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirmar exclusão'),
+            content: Text('Deseja remover o serviço "${service.name}"?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancelar'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Remover'),
+              ),
+            ],
+          ),
+        );
+      },
+      onDismissed: (direction) {
+        serviceStore.deleteService(service);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Serviço "${service.name}" removido'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: Theme.of(context).colorScheme.error,
+        child: Icon(
+          Icons.delete_outline,
+          color: Theme.of(context).colorScheme.onError,
+          size: 28,
+        ),
+      ),
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          leading: CircleAvatar(
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            child: Icon(
+              Icons.build_outlined,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+          title: Text(
+            service.name ?? '',
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+          subtitle: Text(
+            _convertToCurrency(service.value),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () {
+            if (isSelectionMode) {
+              Navigator.pushNamed(context, '/order_service', arguments: {
+                'service': service,
+                'orderStore': args!['orderStore']
+              });
+            } else {
+              Navigator.pushNamed(
+                context,
+                '/service_form',
+                arguments: {'service': service},
+              );
+            }
+          },
+        ),
       ),
     );
   }
@@ -124,7 +213,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   String _convertToCurrency(double? total) {
     if (total == null) return '';
     NumberFormat numberFormat =
-        NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$');
+        NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$ ');
     return numberFormat.format(total);
   }
 }

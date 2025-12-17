@@ -4,47 +4,98 @@ import 'package:currency_text_input_formatter/currency_text_input_formatter.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ProductFormScreen extends StatelessWidget {
-  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
-  Map<String, dynamic>? args;
+class ProductFormScreen extends StatefulWidget {
+  const ProductFormScreen({Key? key}) : super(key: key);
 
-  Product? _product = Product();
+  @override
+  State<ProductFormScreen> createState() => _ProductFormScreenState();
+}
+
+class _ProductFormScreenState extends State<ProductFormScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  Product? _product;
   final ProductStore _productStore = ProductStore();
+  bool _isLoading = false;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args.containsKey('product')) {
+        _product = args['product'];
+      } else {
+        _product = Product();
+      }
+      _initialized = true;
+    }
+  }
+
+  bool get _isEditing => _product?.id != null;
+
+  Future<void> _saveProduct() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      _formKey.currentState!.save();
+      await _productStore.saveProduct(_product!);
+      setState(() => _isLoading = false);
+      Navigator.pop(context, _product);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-    if (args != null && args!.containsKey('product')) {
-      _product = args!['product'];
-    }
+    final theme = Theme.of(context);
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("Novo Produto"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  _productStore.saveProduct(_product!);
-                  Navigator.pop(context);
-                }
-              },
-              child: Text("Salvar"),
-            ),
-          ],
-        ),
-        body: Container(
-          margin: EdgeInsets.fromLTRB(20, 30, 20, 0),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_isEditing ? "Editar Produto" : "Novo Produto"),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
           child: Form(
             key: _formKey,
             child: Column(
-              // mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header icon
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    child: Icon(
+                      Icons.inventory_2,
+                      size: 40,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Form fields
                 _buildNameField(),
-                SizedBox(height: 50.0),
+                const SizedBox(height: 16),
                 _buildValueField(),
+                const SizedBox(height: 32),
+                // Save button
+                FilledButton.icon(
+                  onPressed: _isLoading ? null : _saveProduct,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check),
+                  label: Text(_isLoading ? 'Salvando...' : 'Salvar'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
               ],
             ),
           ),
@@ -53,15 +104,35 @@ class ProductFormScreen extends StatelessWidget {
     );
   }
 
+  InputDecoration _inputDecoration({
+    required String label,
+    required IconData icon,
+    String? hint,
+    String? prefix,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixText: prefix,
+      prefixIcon: Icon(icon),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      filled: true,
+    );
+  }
+
   Widget _buildNameField() {
     return TextFormField(
       initialValue: _product!.name,
-      decoration: const InputDecoration(
-        icon: Icon(Icons.edit),
-        labelText: 'Nome',
+      decoration: _inputDecoration(
+        label: 'Nome',
+        icon: Icons.inventory_2_outlined,
+        hint: 'Nome do produto',
       ),
+      textCapitalization: TextCapitalization.sentences,
       validator: (value) {
-        if (value!.isEmpty) {
+        if (value == null || value.isEmpty) {
           return 'Preencha o nome do produto';
         }
         return null;
@@ -75,20 +146,21 @@ class ProductFormScreen extends StatelessWidget {
   Widget _buildValueField() {
     return TextFormField(
       initialValue: _convertToCurrency(_product!.value),
-      decoration: const InputDecoration(
-        icon: Icon(Icons.monetization_on),
-        labelText: 'Valor',
+      decoration: _inputDecoration(
+        label: 'Valor',
+        icon: Icons.attach_money,
+        hint: '0,00',
       ),
       inputFormatters: [
         CurrencyTextInputFormatter.currency(
           locale: 'pt_BR',
-          symbol: 'R\$',
+          symbol: 'R\$ ',
           decimalDigits: 2,
         ),
       ],
       keyboardType: TextInputType.number,
       validator: (value) {
-        if (value!.isEmpty) {
+        if (value == null || value.isEmpty) {
           return 'Preencha o valor do produto';
         }
         return null;
@@ -97,15 +169,15 @@ class ProductFormScreen extends StatelessWidget {
         value = value!
             .replaceAll(RegExp(r'R\$'), '')
             .replaceAll(RegExp(r'\.'), '')
-            .replaceAll(RegExp(r','), '.');
-
-        _product!.value = double.parse(value);
+            .replaceAll(RegExp(r','), '.')
+            .trim();
+        _product!.value = double.tryParse(value) ?? 0;
       },
     );
   }
 
   String _convertToCurrency(double? total) {
-    if (total == null) return '';
+    if (total == null || total == 0) return '';
     NumberFormat numberFormat = NumberFormat.currency(
       locale: 'pt-BR',
       symbol: '',
