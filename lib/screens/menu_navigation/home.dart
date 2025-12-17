@@ -18,6 +18,8 @@ class _HomeState extends State<Home> {
   int currentSelected = 0;
   final ScrollController _scrollController = ScrollController();
   late OrderStore orderStore;
+  bool _showFilters = true;
+  double _lastOffset = 0;
 
   List filters = [
     {'status': 'Todos', 'icon': Icons.apps_rounded, 'field': null},
@@ -62,8 +64,20 @@ class _HomeState extends State<Home> {
   }
 
   void _scrollListener() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 100) {
+    final offset = _scrollController.offset;
+
+    // Detectar direção do scroll
+    if (offset > _lastOffset && offset > 50) {
+      // Rolando para cima - esconder filtros
+      if (_showFilters) setState(() => _showFilters = false);
+    } else if (offset < _lastOffset) {
+      // Rolando para baixo - mostrar filtros
+      if (!_showFilters) setState(() => _showFilters = true);
+    }
+    _lastOffset = offset;
+
+    // Carregar mais itens
+    if (offset >= _scrollController.position.maxScrollExtent - 100) {
       _loadMoreOrders();
     }
   }
@@ -80,82 +94,72 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: NestedScrollView(
-        controller: _scrollController,
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            // AppBar fixa
-            SliverAppBar(
-              floating: false,
-              pinned: true,
-              elevation: 0,
-              backgroundColor: AppTheme.surfaceColor,
-              title: Text(
-                'Ordens de Serviço',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimary,
-                  letterSpacing: -0.5,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: AppTheme.surfaceColor,
+        title: Text(
+          'Ordens de Serviço',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: AppTheme.textPrimary,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.bar_chart_rounded, color: AppTheme.textSecondary),
+            onPressed: () => Navigator.pushNamed(context, '/financial_dashboard_simple'),
+          ),
+          Padding(
+            padding: EdgeInsets.only(right: 8),
+            child: IconButton(
+              icon: Container(
+                padding: EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor,
+                  borderRadius: BorderRadius.circular(8),
                 ),
+                child: Icon(Icons.add_rounded, color: Colors.white, size: 20),
               ),
-              actions: [
-                IconButton(
-                  icon: Icon(Icons.bar_chart_rounded, color: AppTheme.textSecondary),
-                  onPressed: () => Navigator.pushNamed(context, '/financial_dashboard_simple'),
-                ),
-                IconButton(
-                  icon: Container(
-                    padding: EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: AppTheme.primaryColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(Icons.add_rounded, color: Colors.white, size: 20),
-                  ),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/order').then((_) => _loadOrders());
-                  },
-                ),
-                SizedBox(width: 8),
-              ],
+              onPressed: () {
+                Navigator.pushNamed(context, '/order').then((_) => _loadOrders());
+              },
             ),
-            // Filtros que somem ao rolar
-            SliverAppBar(
-              floating: true,
-              snap: true,
-              pinned: false,
-              elevation: 0,
-              backgroundColor: AppTheme.surfaceColor,
-              toolbarHeight: 44,
-              flexibleSpace: _buildFilterBar(),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Filtros animados
+          AnimatedContainer(
+            duration: Duration(milliseconds: 200),
+            height: _showFilters ? 40 : 0,
+            child: AnimatedOpacity(
+              duration: Duration(milliseconds: 150),
+              opacity: _showFilters ? 1 : 0,
+              child: _buildFilterBar(),
             ),
-          ];
-        },
-        body: _buildOrdersList(),
+          ),
+          // Lista
+          Expanded(child: _buildOrdersList()),
+        ],
       ),
     );
   }
 
   Widget _buildFilterBar() {
     return Container(
-      height: 44,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        border: Border(bottom: BorderSide(color: AppTheme.borderLight, width: 1)),
-      ),
+      height: 40,
+      color: AppTheme.surfaceColor,
       child: Observer(
         builder: (_) {
           return ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             scrollDirection: Axis.horizontal,
             itemCount: filters.length + (orderStore.customerFilter != null ? 1 : 0),
             itemBuilder: (context, index) {
-              // Primeiro item: filtro de cliente (se existir)
               if (orderStore.customerFilter != null) {
-                if (index == 0) {
-                  return _buildCustomerFilterChip();
-                }
+                if (index == 0) return _buildCustomerChip();
                 return _buildFilterChip(index - 1);
               }
               return _buildFilterChip(index);
@@ -166,7 +170,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildCustomerFilterChip() {
+  Widget _buildCustomerChip() {
     return GestureDetector(
       onTap: () {
         orderStore.setCustomerFilter(null);
@@ -182,18 +186,18 @@ class _HomeState extends State<Home> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.person_rounded, size: 14, color: Colors.white),
+            Icon(Icons.person_rounded, size: 13, color: Colors.white),
             SizedBox(width: 4),
             ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 80),
+              constraints: BoxConstraints(maxWidth: 70),
               child: Text(
                 orderStore.customerFilter?.name ?? '',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(width: 4),
-            Icon(Icons.close_rounded, size: 14, color: Colors.white70),
+            SizedBox(width: 2),
+            Icon(Icons.close, size: 13, color: Colors.white70),
           ],
         ),
       ),
@@ -212,26 +216,20 @@ class _HomeState extends State<Home> {
         margin: EdgeInsets.only(right: 6),
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : AppTheme.backgroundColor,
+          color: isSelected ? AppTheme.primaryColor : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor,
-          ),
+          border: Border.all(color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              filters[index]['icon'],
-              size: 14,
-              color: isSelected ? Colors.white : AppTheme.textSecondary,
-            ),
+            Icon(filters[index]['icon'], size: 13, color: isSelected ? Colors.white : AppTheme.textSecondary),
             SizedBox(width: 4),
             Text(
               filters[index]['status'],
               style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
                 color: isSelected ? Colors.white : AppTheme.textSecondary,
               ),
             ),
@@ -245,29 +243,32 @@ class _HomeState extends State<Home> {
     return Observer(
       builder: (_) {
         if (orderStore.isLoading && orderStore.orders.isEmpty) {
+          return Center(child: CircularProgressIndicator(strokeWidth: 2));
+        }
+
+        if (orderStore.orders.isEmpty) {
           return Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.assignment_outlined, size: 48, color: AppTheme.textTertiary),
+                SizedBox(height: 12),
+                Text('Nenhuma OS encontrada', style: TextStyle(color: AppTheme.textSecondary)),
+              ],
             ),
           );
         }
 
-        if (orderStore.orders.isEmpty) {
-          return _buildEmptyState();
-        }
-
         return ListView.builder(
-          padding: EdgeInsets.fromLTRB(12, 8, 12, 20),
+          controller: _scrollController,
+          padding: EdgeInsets.fromLTRB(12, 4, 12, 20),
           itemCount: orderStore.orders.length + (orderStore.isLoading ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == orderStore.orders.length) {
-              return Padding(
+              return Center(child: Padding(
                 padding: EdgeInsets.all(16),
-                child: Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              );
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ));
             }
             return _buildOrderItem(orderStore.orders[index] ?? Order());
           },
@@ -276,173 +277,108 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.assignment_outlined, size: 56, color: AppTheme.textTertiary),
-          SizedBox(height: 16),
-          Text(
-            'Nenhuma OS encontrada',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
-          ),
-          SizedBox(height: 4),
-          Text(
-            'Toque em + para criar',
-            style: TextStyle(fontSize: 14, color: AppTheme.textSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildOrderItem(Order order) {
-    // Dados formatados
-    final createdDate = order.createdAt != null ? DateFormat('dd/MM').format(order.createdAt!) : '';
+    // Status e cores
+    final statusText = Order.statusMap[order.status] ?? '';
+    final statusColor = AppTheme.getStatusColor(order.status);
+    final isPaid = order.payment == 'paid';
 
     // Verificar atraso
     bool isOverdue = false;
-    String dueDateText = '';
     if (order.dueDate != null) {
       final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
       final dueDate = DateTime(order.dueDate!.year, order.dueDate!.month, order.dueDate!.day);
       isOverdue = dueDate.isBefore(today) && order.status != 'done' && order.status != 'canceled';
-      dueDateText = DateFormat('dd/MM').format(order.dueDate!);
     }
-
-    // Status e pagamento
-    final statusText = Order.statusMap[order.status] ?? '';
-    final statusColor = AppTheme.getStatusColor(order.status);
-    final isPaid = order.payment == 'paid';
 
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/order', arguments: {'order': order}).then((_) => _loadOrders());
       },
       child: Container(
-        margin: EdgeInsets.only(bottom: 8),
+        margin: EdgeInsets.only(bottom: 6),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceColor,
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isOverdue ? AppTheme.errorColor.withOpacity(0.4) : AppTheme.borderColor,
+            color: isOverdue ? AppTheme.errorColor.withOpacity(0.5) : AppTheme.borderColor,
             width: isOverdue ? 1.5 : 1,
           ),
         ),
-        child: Row(
-          children: [
-            // Foto - ocupa altura total
-            _buildThumbnail(order),
-            // Informações
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Linha 1: Cliente + Número
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            order.customer?.name ?? 'Cliente',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.textPrimary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Text(
-                          '#${order.number ?? 'NOVA'}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textTertiary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 2),
-                    // Linha 2: Veículo
-                    Text(
-                      order.device != null
-                          ? '${order.device?.name ?? ''} • ${order.device?.serial ?? ''}'
-                          : 'Sem veículo',
-                      style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 6),
-                    // Linha 3: Status + Data + Valor
-                    Row(
-                      children: [
-                        // Status
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            statusText,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: statusColor,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Foto - altura total
+              _buildThumbnail(order),
+              // Info
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Nome + Número
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              order.customer?.name ?? 'Cliente',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ),
-                        SizedBox(width: 6),
-                        // Data
-                        if (isOverdue)
-                          Row(
-                            children: [
-                              Icon(Icons.warning_amber_rounded, size: 12, color: AppTheme.errorColor),
-                              SizedBox(width: 2),
-                              Text(
-                                dueDateText,
-                                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.errorColor),
-                              ),
-                            ],
-                          )
-                        else
                           Text(
-                            createdDate,
-                            style: TextStyle(fontSize: 10, color: AppTheme.textTertiary),
+                            '#${order.number ?? '-'}',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textTertiary),
                           ),
-                        Spacer(),
-                        // Valor
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              _formatCurrency(order.total),
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.textPrimary,
-                              ),
+                        ],
+                      ),
+                      // Status + Valor
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: statusColor.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(4),
                             ),
-                            if (order.payment != null)
+                            child: Text(
+                              statusText,
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: statusColor),
+                            ),
+                          ),
+                          if (isOverdue) ...[
+                            SizedBox(width: 4),
+                            Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.errorColor),
+                          ],
+                          Spacer(),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                _formatCurrency(order.total),
+                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                              ),
                               Text(
                                 isPaid ? 'Pago' : 'A receber',
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 9,
                                   fontWeight: FontWeight.w500,
                                   color: isPaid ? AppTheme.successColor : AppTheme.errorColor,
                                 ),
                               ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -453,38 +389,31 @@ class _HomeState extends State<Home> {
 
     return ClipRRect(
       borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(11),
-        bottomLeft: Radius.circular(11),
+        topLeft: Radius.circular(9),
+        bottomLeft: Radius.circular(9),
       ),
-      child: Container(
-        width: 80,
-        height: 80,
-        color: AppTheme.backgroundColor,
-        child: url != null && url.isNotEmpty
-            ? Image.network(
-                url,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  );
-                },
-                errorBuilder: (_, __, ___) => _defaultIcon(),
-              )
-            : _defaultIcon(),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Container(
+          color: AppTheme.backgroundColor,
+          child: url != null && url.isNotEmpty
+              ? Image.network(
+                  url,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return Center(child: CircularProgressIndicator(strokeWidth: 2));
+                  },
+                  errorBuilder: (_, __, ___) => _defaultIcon(),
+                )
+              : _defaultIcon(),
+        ),
       ),
     );
   }
 
   Widget _defaultIcon() {
-    return Center(
-      child: Icon(Icons.build_circle_outlined, size: 32, color: AppTheme.textTertiary),
-    );
+    return Center(child: Icon(Icons.build_circle_outlined, size: 28, color: AppTheme.textTertiary));
   }
 
   String _formatCurrency(double? value) {
