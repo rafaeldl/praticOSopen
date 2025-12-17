@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_photo.dart';
+import 'package:praticos/widgets/cached_image.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
@@ -126,31 +127,10 @@ class OrderPhotosWidget extends StatelessWidget {
                 ),
               ],
             ),
-            child: ClipRRect(
+            child: CachedImage.cover(
+              imageUrl: coverPhoto.url!,
+              height: 200,
               borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                coverPhoto.url!,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[200],
-                    child: Center(
-                      child: Icon(Icons.broken_image, size: 48),
-                    ),
-                  );
-                },
-              ),
             ),
           ),
           Positioned(
@@ -203,27 +183,12 @@ class OrderPhotosWidget extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              ClipRRect(
+              CachedImage(
+                imageUrl: photo.url!,
+                fit: BoxFit.cover,
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  photo.url!,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: Colors.grey[200],
-                      child: Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[200],
-                      child: Icon(Icons.broken_image),
-                    );
-                  },
-                ),
+                memCacheWidth: 200, // Otimiza para thumbnails
+                memCacheHeight: 200,
               ),
               Positioned(
                 top: 4,
@@ -557,36 +522,8 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
             minScale: 0.5,
             maxScale: 3.0,
             child: Center(
-              child: Image.network(
-                photo.url!,
-                fit: BoxFit.contain,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.broken_image, size: 64, color: Colors.white54),
-                        SizedBox(height: 16),
-                        Text(
-                          'Erro ao carregar imagem',
-                          style: TextStyle(color: Colors.white54),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+              child: CachedImage.fullScreen(
+                imageUrl: photo.url!,
               ),
             ),
           );

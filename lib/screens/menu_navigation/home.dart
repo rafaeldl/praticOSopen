@@ -2,6 +2,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/theme/app_theme.dart';
+import 'package:praticos/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
@@ -68,10 +69,8 @@ class _HomeState extends State<Home> {
 
     // Detectar direção do scroll
     if (offset > _lastOffset && offset > 50) {
-      // Rolando para cima - esconder filtros
       if (_showFilters) setState(() => _showFilters = false);
     } else if (offset < _lastOffset) {
-      // Rolando para baixo - mostrar filtros
       if (!_showFilters) setState(() => _showFilters = true);
     }
     _lastOffset = offset;
@@ -93,33 +92,33 @@ class _HomeState extends State<Home> {
     FirebaseCrashlytics.instance.log("Abrindo home");
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: AppTheme.surfaceColor,
+        backgroundColor: Colors.white,
         title: Text(
           'Ordens de Serviço',
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 22,
             fontWeight: FontWeight.w700,
             color: AppTheme.textPrimary,
           ),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.bar_chart_rounded, color: AppTheme.textSecondary),
+            icon: Icon(Icons.bar_chart_rounded, color: AppTheme.textSecondary, size: 26),
             onPressed: () => Navigator.pushNamed(context, '/financial_dashboard_simple'),
           ),
           Padding(
-            padding: EdgeInsets.only(right: 8),
+            padding: EdgeInsets.only(right: 12),
             child: IconButton(
               icon: Container(
-                padding: EdgeInsets.all(6),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: AppTheme.primaryColor,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(Icons.add_rounded, color: Colors.white, size: 20),
+                child: Icon(Icons.add_rounded, color: Colors.white, size: 22),
               ),
               onPressed: () {
                 Navigator.pushNamed(context, '/order').then((_) => _loadOrders());
@@ -133,13 +132,15 @@ class _HomeState extends State<Home> {
           // Filtros animados
           AnimatedContainer(
             duration: Duration(milliseconds: 200),
-            height: _showFilters ? 40 : 0,
+            height: _showFilters ? 48 : 0,
             child: AnimatedOpacity(
               duration: Duration(milliseconds: 150),
               opacity: _showFilters ? 1 : 0,
               child: _buildFilterBar(),
             ),
           ),
+          // Divisor sutil
+          Container(height: 1, color: AppTheme.borderLight),
           // Lista
           Expanded(child: _buildOrdersList()),
         ],
@@ -149,12 +150,12 @@ class _HomeState extends State<Home> {
 
   Widget _buildFilterBar() {
     return Container(
-      height: 40,
-      color: AppTheme.surfaceColor,
+      height: 48,
+      color: Colors.white,
       child: Observer(
         builder: (_) {
           return ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             scrollDirection: Axis.horizontal,
             itemCount: filters.length + (orderStore.customerFilter != null ? 1 : 0),
             itemBuilder: (context, index) {
@@ -177,27 +178,27 @@ class _HomeState extends State<Home> {
         _loadOrders();
       },
       child: Container(
-        margin: EdgeInsets.only(right: 6),
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        margin: EdgeInsets.only(right: 8),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: AppTheme.primaryColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.person_rounded, size: 13, color: Colors.white),
-            SizedBox(width: 4),
+            Icon(Icons.person_rounded, size: 16, color: Colors.white),
+            SizedBox(width: 6),
             ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 70),
+              constraints: BoxConstraints(maxWidth: 80),
               child: Text(
                 orderStore.customerFilter?.name ?? '',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.white),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(width: 2),
-            Icon(Icons.close, size: 13, color: Colors.white70),
+            SizedBox(width: 4),
+            Icon(Icons.close, size: 16, color: Colors.white70),
           ],
         ),
       ),
@@ -213,22 +214,25 @@ class _HomeState extends State<Home> {
         orderStore.loadOrdersInfinite(filters[index]['field']);
       },
       child: Container(
-        margin: EdgeInsets.only(right: 6),
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        margin: EdgeInsets.only(right: 8),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor),
+          color: isSelected ? AppTheme.primaryColor : AppTheme.backgroundColor,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(filters[index]['icon'], size: 13, color: isSelected ? Colors.white : AppTheme.textSecondary),
-            SizedBox(width: 4),
+            Icon(
+              filters[index]['icon'],
+              size: 16,
+              color: isSelected ? Colors.white : AppTheme.textSecondary,
+            ),
+            SizedBox(width: 6),
             Text(
               filters[index]['status'],
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: isSelected ? Colors.white : AppTheme.textSecondary,
               ),
@@ -251,9 +255,12 @@ class _HomeState extends State<Home> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.assignment_outlined, size: 48, color: AppTheme.textTertiary),
-                SizedBox(height: 12),
-                Text('Nenhuma OS encontrada', style: TextStyle(color: AppTheme.textSecondary)),
+                Icon(Icons.assignment_outlined, size: 56, color: AppTheme.textTertiary),
+                SizedBox(height: 16),
+                Text(
+                  'Nenhuma OS encontrada',
+                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+                ),
               ],
             ),
           );
@@ -261,27 +268,34 @@ class _HomeState extends State<Home> {
 
         return ListView.builder(
           controller: _scrollController,
-          padding: EdgeInsets.fromLTRB(12, 4, 12, 20),
+          padding: EdgeInsets.zero,
           itemCount: orderStore.orders.length + (orderStore.isLoading ? 1 : 0),
           itemBuilder: (context, index) {
             if (index == orderStore.orders.length) {
-              return Center(child: Padding(
-                padding: EdgeInsets.all(16),
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ));
+              return Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              );
             }
-            return _buildOrderItem(orderStore.orders[index] ?? Order());
+            return _buildOrderItem(orderStore.orders[index] ?? Order(), index);
           },
         );
       },
     );
   }
 
-  Widget _buildOrderItem(Order order) {
-    // Status e cores
+  Widget _buildOrderItem(Order order, int index) {
     final statusText = Order.statusMap[order.status] ?? '';
     final statusColor = AppTheme.getStatusColor(order.status);
     final isPaid = order.payment == 'paid';
+
+    // Mostrar ícone de pagamento sempre que a OS foi paga, independente do status
+    final showPaymentIcon = isPaid;
+
+    // Mostrar ícone "a receber" quando status for concluído e financeiro em aberto
+    final showUnpaidIcon = order.status == 'done' && order.payment == 'unpaid';
 
     // Verificar atraso
     bool isOverdue = false;
@@ -291,102 +305,154 @@ class _HomeState extends State<Home> {
       isOverdue = dueDate.isBefore(today) && order.status != 'done' && order.status != 'canceled';
     }
 
-    const double itemHeight = 76.0;
-
-    // Descrição do veículo
-    String vehicleDesc = '';
+    // Descrição do veículo com número da OS
+    String deviceLine = '#${order.number ?? '-'}';
     if (order.device != null) {
       final name = order.device?.name ?? '';
       final serial = order.device?.serial ?? '';
-      vehicleDesc = serial.isNotEmpty ? '$name • $serial' : name;
+      final vehicleDesc = serial.isNotEmpty ? '$name • $serial' : name;
+      if (vehicleDesc.isNotEmpty) {
+        deviceLine = '#${order.number ?? '-'} • $vehicleDesc';
+      }
     }
 
-    return GestureDetector(
+    return InkWell(
       onTap: () {
         Navigator.pushNamed(context, '/order', arguments: {'order': order}).then((_) => _loadOrders());
       },
       child: Container(
-        height: itemHeight,
-        margin: EdgeInsets.only(bottom: 6),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isOverdue ? AppTheme.errorColor.withOpacity(0.5) : AppTheme.borderColor,
-            width: isOverdue ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
+        color: Colors.white,
+        child: Column(
           children: [
-            // Foto - altura total do item
-            _buildThumbnail(order, itemHeight),
-            // Info
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Linha 1: Nome + Número
-                    Row(
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Thumbnail
+                  _buildThumbnail(order),
+                  SizedBox(width: 12),
+                  // Conteúdo principal
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            order.customer?.name ?? 'Cliente',
-                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                        // Linha 1: Nome + Ícones (atraso e pagamento) + Status
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            // Nome do cliente com ícones ao lado
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      order.customer?.name ?? 'Cliente',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  // Ícones de atraso, pagamento e a receber ao lado do nome
+                                  if (isOverdue)
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 6),
+                                      child: Icon(
+                                        Icons.schedule,
+                                        size: 16,
+                                        color: AppTheme.errorColor,
+                                      ),
+                                    ),
+                                  if (showPaymentIcon)
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 6),
+                                      child: Icon(
+                                        Icons.check_circle,
+                                        size: 16,
+                                        color: AppTheme.successColor,
+                                      ),
+                                    ),
+                                  if (showUnpaidIcon)
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 6),
+                                      child: Icon(
+                                        Icons.payments_outlined,
+                                        size: 16,
+                                        color: AppTheme.warningColor,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(width: 8),
+                            // Status badge
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: order.status == 'approved' 
+                                    ? Colors.transparent 
+                                    : statusColor.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(4),
+                                border: order.status == 'approved'
+                                    ? Border.all(color: statusColor, width: 1)
+                                    : null,
+                              ),
+                              child: Text(
+                                statusText,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: statusColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          '#${order.number ?? '-'}',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textTertiary),
+                        SizedBox(height: 2),
+                        // Linha 2: #OS + Veículo + Valor total (canto inferior direito)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                deviceLine,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppTheme.textSecondary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                            // SizedBox(height: 20,),
+                            // Valor total no canto inferior direito
+                            Text(
+                              _formatCurrency(order.total),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal,
+                                color: AppTheme.textPrimary,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    // Linha 2: Veículo
-                    Text(
-                      vehicleDesc.isNotEmpty ? vehicleDesc : 'Sem veículo',
-                      style: TextStyle(fontSize: 11, color: AppTheme.textSecondary),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    ),
-                    // Linha 3: Status + Valor
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: statusColor.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            statusText,
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: statusColor),
-                          ),
-                        ),
-                        if (isOverdue) ...[
-                          SizedBox(width: 4),
-                          Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.errorColor),
-                        ],
-                        Spacer(),
-                        Text(
-                          _formatCurrency(order.total),
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          isPaid ? 'Pago' : 'A receber',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: isPaid ? AppTheme.successColor : AppTheme.errorColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+            ),
+            // Divisor
+            Padding(
+              padding: EdgeInsets.only(left: 80),
+              child: Container(
+                height: 1,
+                color: AppTheme.borderLight,
               ),
             ),
           ],
@@ -395,35 +461,30 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildThumbnail(Order order, double height) {
+  Widget _buildThumbnail(Order order) {
     final url = order.coverPhotoUrl;
+    const double size = 52.0;
 
     return ClipRRect(
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(9),
-        bottomLeft: Radius.circular(9),
-      ),
+      borderRadius: BorderRadius.circular(10),
       child: Container(
-        width: height,
-        height: height,
+        width: size,
+        height: size,
         color: AppTheme.backgroundColor,
         child: url != null && url.isNotEmpty
-            ? Image.network(
-                url,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, progress) {
-                  if (progress == null) return child;
-                  return Center(child: CircularProgressIndicator(strokeWidth: 2));
-                },
-                errorBuilder: (_, __, ___) => _defaultIcon(),
+            ? CachedImage.thumbnail(
+                imageUrl: url,
+                size: size,
               )
-            : _defaultIcon(),
+            : Center(
+                child: Icon(
+                  Icons.build_circle_outlined,
+                  size: 26,
+                  color: AppTheme.textTertiary,
+                ),
+              ),
       ),
     );
-  }
-
-  Widget _defaultIcon() {
-    return Center(child: Icon(Icons.build_circle_outlined, size: 28, color: AppTheme.textTertiary));
   }
 
   String _formatCurrency(double? value) {
