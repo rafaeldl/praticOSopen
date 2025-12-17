@@ -291,11 +291,14 @@ class _HomeState extends State<Home> {
       isOverdue = dueDate.isBefore(today) && order.status != 'done' && order.status != 'canceled';
     }
 
+    const double itemHeight = 70.0;
+
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/order', arguments: {'order': order}).then((_) => _loadOrders());
       },
       child: Container(
+        height: itemHeight,
         margin: EdgeInsets.only(bottom: 6),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -305,86 +308,83 @@ class _HomeState extends State<Home> {
             width: isOverdue ? 1.5 : 1,
           ),
         ),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Foto - altura total
-              _buildThumbnail(order),
-              // Info
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Nome + Número
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              order.customer?.name ?? 'Cliente',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
-                              overflow: TextOverflow.ellipsis,
-                            ),
+        child: Row(
+          children: [
+            // Foto - altura total do item
+            _buildThumbnail(order, itemHeight),
+            // Info
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Nome + Número
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            order.customer?.name ?? 'Cliente',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          Text(
-                            '#${order.number ?? '-'}',
-                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textTertiary),
+                        ),
+                        Text(
+                          '#${order.number ?? '-'}',
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textTertiary),
+                        ),
+                      ],
+                    ),
+                    // Status + Valor
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(4),
                           ),
+                          child: Text(
+                            statusText,
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: statusColor),
+                          ),
+                        ),
+                        if (isOverdue) ...[
+                          SizedBox(width: 4),
+                          Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.errorColor),
                         ],
-                      ),
-                      // Status + Valor
-                      Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: statusColor.withOpacity(0.15),
-                              borderRadius: BorderRadius.circular(4),
+                        Spacer(),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              _formatCurrency(order.total),
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                             ),
-                            child: Text(
-                              statusText,
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: statusColor),
+                            Text(
+                              isPaid ? 'Pago' : 'A receber',
+                              style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w500,
+                                color: isPaid ? AppTheme.successColor : AppTheme.errorColor,
+                              ),
                             ),
-                          ),
-                          if (isOverdue) ...[
-                            SizedBox(width: 4),
-                            Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.errorColor),
                           ],
-                          Spacer(),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                _formatCurrency(order.total),
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
-                              ),
-                              Text(
-                                isPaid ? 'Pago' : 'A receber',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w500,
-                                  color: isPaid ? AppTheme.successColor : AppTheme.errorColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildThumbnail(Order order) {
+  Widget _buildThumbnail(Order order, double height) {
     final url = order.coverPhotoUrl;
 
     return ClipRRect(
@@ -392,22 +392,21 @@ class _HomeState extends State<Home> {
         topLeft: Radius.circular(9),
         bottomLeft: Radius.circular(9),
       ),
-      child: AspectRatio(
-        aspectRatio: 1,
-        child: Container(
-          color: AppTheme.backgroundColor,
-          child: url != null && url.isNotEmpty
-              ? Image.network(
-                  url,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return Center(child: CircularProgressIndicator(strokeWidth: 2));
-                  },
-                  errorBuilder: (_, __, ___) => _defaultIcon(),
-                )
-              : _defaultIcon(),
-        ),
+      child: Container(
+        width: height,
+        height: height,
+        color: AppTheme.backgroundColor,
+        child: url != null && url.isNotEmpty
+            ? Image.network(
+                url,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return Center(child: CircularProgressIndicator(strokeWidth: 2));
+                },
+                errorBuilder: (_, __, ___) => _defaultIcon(),
+              )
+            : _defaultIcon(),
       ),
     );
   }
