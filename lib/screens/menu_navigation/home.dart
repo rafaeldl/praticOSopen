@@ -498,58 +498,59 @@ class _HomeState extends State<Home> {
                     // Linha 3: Status + Datas + Valor
                     Row(
                       children: [
-                        // Status badge
-                        if (orderStatus.isNotEmpty)
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: statusBgColor,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              orderStatus,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: statusColor,
+                        // Parte esquerda flexível (status + data)
+                        Expanded(
+                          child: Row(
+                            children: [
+                              // Status badge
+                              if (orderStatus.isNotEmpty)
+                                Flexible(
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: statusBgColor,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      orderStatus,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: statusColor,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                              if (orderStatus.isNotEmpty) SizedBox(width: 6),
+                              // Data de criação
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                size: 11,
+                                color: AppTheme.textTertiary,
                               ),
-                            ),
+                              SizedBox(width: 2),
+                              Text(
+                                formattedCreatedDate,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: AppTheme.textTertiary,
+                                ),
+                              ),
+                              // Indicador de atrasada
+                              if (isOverdue) ...[
+                                SizedBox(width: 6),
+                                Icon(
+                                  Icons.warning_rounded,
+                                  size: 11,
+                                  color: AppTheme.errorColor,
+                                ),
+                              ],
+                            ],
                           ),
+                        ),
                         SizedBox(width: 8),
-                        // Data de criação
-                        Icon(
-                          Icons.calendar_today_rounded,
-                          size: 12,
-                          color: AppTheme.textTertiary,
-                        ),
-                        SizedBox(width: 3),
-                        Text(
-                          formattedCreatedDate,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppTheme.textTertiary,
-                          ),
-                        ),
-                        // Data de entrega se atrasada
-                        if (isOverdue) ...[
-                          SizedBox(width: 8),
-                          Icon(
-                            Icons.warning_rounded,
-                            size: 12,
-                            color: AppTheme.errorColor,
-                          ),
-                          SizedBox(width: 2),
-                          Text(
-                            'Atrasada',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.errorColor,
-                            ),
-                          ),
-                        ],
-                        Spacer(),
-                        // Valor
+                        // Valor (fixo à direita)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
@@ -565,7 +566,7 @@ class _HomeState extends State<Home> {
                               Text(
                                 paymentText,
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w500,
                                   color: paymentColor,
                                 ),
