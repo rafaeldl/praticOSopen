@@ -291,9 +291,8 @@ class _HomeState extends State<Home> {
     final statusColor = AppTheme.getStatusColor(order.status);
     final isPaid = order.payment == 'paid';
 
-    // Só mostrar ícone quando PAGO (não mostrar círculo vazio para "a receber")
-    // E não mostrar em orçamento e cancelado
-    final showPaidIcon = isPaid && order.status != 'quote' && order.status != 'canceled';
+    // Mostrar ícones de pagamento apenas quando status for "done" (concluído)
+    final showPaymentIcon = order.status == 'done';
 
     // Verificar atraso
     bool isOverdue = false;
@@ -384,7 +383,7 @@ class _HomeState extends State<Home> {
                                 maxLines: 1,
                               ),
                             ),
-                            // Ícones (atrasado + pago)
+                            // Ícones (atrasado + pagamento)
                             if (isOverdue)
                               Padding(
                                 padding: EdgeInsets.only(left: 6),
@@ -394,13 +393,13 @@ class _HomeState extends State<Home> {
                                   color: AppTheme.errorColor,
                                 ),
                               ),
-                            if (showPaidIcon)
+                            if (showPaymentIcon)
                               Padding(
                                 padding: EdgeInsets.only(left: 6),
                                 child: Icon(
-                                  Icons.check_circle,
+                                  isPaid ? Icons.check_circle : Icons.circle_outlined,
                                   size: 16,
-                                  color: AppTheme.successColor,
+                                  color: isPaid ? AppTheme.successColor : AppTheme.textTertiary,
                                 ),
                               ),
                           ],
