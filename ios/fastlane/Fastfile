@@ -26,10 +26,15 @@ platform :ios do
       key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
     )
 
-    # numeração do build (ex.: última + 1)
-    increment_build_number(
-      build_number: latest_testflight_build_number + 1
-    )
+    # Busca o próximo build number
+    current_build = latest_testflight_build_number(app_identifier: ENV['BUNDLE_ID'])
+    next_build = current_build + 1
+    UI.message("Current build: #{current_build}, Next build: #{next_build}")
+
+    # 🏗️ Flutter build com build number correto (sem code sign)
+    Dir.chdir("..") do
+      sh("flutter", "build", "ios", "--release", "--no-codesign", "--build-number=#{next_build}")
+    end
 
     # 🔧 força assinatura só no Runner (Release)
     update_code_signing_settings(
@@ -43,7 +48,7 @@ platform :ios do
       profile_uuid: ENV['PROFILE_UUID']    # opcional, ajuda a fixar
     )
 
-    # 🏗️ archive + export (sem passar PROVISIONING_* em xcargs)
+    # 🏗️ archive + export
     build_app(
       workspace: "Runner.xcworkspace",
       scheme: "Runner",
@@ -56,7 +61,6 @@ platform :ios do
           ENV['BUNDLE_ID'] => ENV['PROFILE_NAME']
         }
       },
-      # xcargs mínimos: time/team, sem perfis
       xcargs: "DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} CODE_SIGN_STYLE=Manual"
     )
 
