@@ -44,12 +44,6 @@ class _SettingsState extends State<Settings> {
               'Cadastros',
               [
                 _MenuItemData(
-                  icon: Icons.people_rounded,
-                  title: 'Clientes',
-                  subtitle: 'Gerenciar clientes cadastrados',
-                  onTap: () => Navigator.pushNamed(context, '/customer_list'),
-                ),
-                _MenuItemData(
                   icon: Icons.directions_car_rounded,
                   title: 'Veículos',
                   subtitle: 'Gerenciar veículos cadastrados',
