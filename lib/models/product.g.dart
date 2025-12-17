@@ -27,15 +27,15 @@ Product _$ProductFromJson(Map<String, dynamic> json) => Product()
   ..value = (json['value'] as num?)?.toDouble();
 
 Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
-      'id': instance.id,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'createdBy': instance.createdBy?.toJson(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-      'updatedBy': instance.updatedBy?.toJson(),
-      'company': instance.company?.toJson(),
-      'name': instance.name,
-      'value': instance.value,
-    };
+  'id': instance.id,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'createdBy': instance.createdBy?.toJson(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'updatedBy': instance.updatedBy?.toJson(),
+  'company': instance.company?.toJson(),
+  'name': instance.name,
+  'value': instance.value,
+};
 
 ProductAggr _$ProductAggrFromJson(Map<String, dynamic> json) => ProductAggr()
   ..id = json['id'] as String?

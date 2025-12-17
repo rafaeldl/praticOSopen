@@ -12,27 +12,30 @@ mixin _$OrderStore on _OrderStore, Store {
   Computed<String?>? _$customerNameComputed;
 
   @override
-  String? get customerName =>
-      (_$customerNameComputed ??= Computed<String?>(() => super.customerName,
-              name: '_OrderStore.customerName'))
-          .value;
+  String? get customerName => (_$customerNameComputed ??= Computed<String?>(
+    () => super.customerName,
+    name: '_OrderStore.customerName',
+  )).value;
   Computed<String?>? _$deviceNameComputed;
 
   @override
-  String? get deviceName =>
-      (_$deviceNameComputed ??= Computed<String?>(() => super.deviceName,
-              name: '_OrderStore.deviceName'))
-          .value;
+  String? get deviceName => (_$deviceNameComputed ??= Computed<String?>(
+    () => super.deviceName,
+    name: '_OrderStore.deviceName',
+  )).value;
   Computed<String>? _$formattedCreatedDateComputed;
 
   @override
-  String get formattedCreatedDate => (_$formattedCreatedDateComputed ??=
-          Computed<String>(() => super.formattedCreatedDate,
-              name: '_OrderStore.formattedCreatedDate'))
-      .value;
+  String get formattedCreatedDate =>
+      (_$formattedCreatedDateComputed ??= Computed<String>(
+        () => super.formattedCreatedDate,
+        name: '_OrderStore.formattedCreatedDate',
+      )).value;
 
-  late final _$orderListAtom =
-      Atom(name: '_OrderStore.orderList', context: context);
+  late final _$orderListAtom = Atom(
+    name: '_OrderStore.orderList',
+    context: context,
+  );
 
   @override
   ObservableStream<List<Order?>>? get orderList {
@@ -47,8 +50,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$orderStreamAtom =
-      Atom(name: '_OrderStore.orderStream', context: context);
+  late final _$orderStreamAtom = Atom(
+    name: '_OrderStore.orderStream',
+    context: context,
+  );
 
   @override
   ObservableStream<Order?>? get orderStream {
@@ -63,8 +68,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$dueDateAtom =
-      Atom(name: '_OrderStore.dueDate', context: context);
+  late final _$dueDateAtom = Atom(
+    name: '_OrderStore.dueDate',
+    context: context,
+  );
 
   @override
   String? get dueDate {
@@ -94,8 +101,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$createdAtAtom =
-      Atom(name: '_OrderStore.createdAt', context: context);
+  late final _$createdAtAtom = Atom(
+    name: '_OrderStore.createdAt',
+    context: context,
+  );
 
   @override
   DateTime? get createdAt {
@@ -125,8 +134,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$discountAtom =
-      Atom(name: '_OrderStore.discount', context: context);
+  late final _$discountAtom = Atom(
+    name: '_OrderStore.discount',
+    context: context,
+  );
 
   @override
   double? get discount {
@@ -141,8 +152,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$paymentAtom =
-      Atom(name: '_OrderStore.payment', context: context);
+  late final _$paymentAtom = Atom(
+    name: '_OrderStore.payment',
+    context: context,
+  );
 
   @override
   String? get payment {
@@ -157,8 +170,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$customerAtom =
-      Atom(name: '_OrderStore.customer', context: context);
+  late final _$customerAtom = Atom(
+    name: '_OrderStore.customer',
+    context: context,
+  );
 
   @override
   CustomerAggr? get customer {
@@ -188,8 +203,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$customerFilterAtom =
-      Atom(name: '_OrderStore.customerFilter', context: context);
+  late final _$customerFilterAtom = Atom(
+    name: '_OrderStore.customerFilter',
+    context: context,
+  );
 
   @override
   Customer? get customerFilter {
@@ -204,8 +221,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$servicesAtom =
-      Atom(name: '_OrderStore.services', context: context);
+  late final _$servicesAtom = Atom(
+    name: '_OrderStore.services',
+    context: context,
+  );
 
   @override
   ObservableList<OrderService>? get services {
@@ -220,8 +239,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$productsAtom =
-      Atom(name: '_OrderStore.products', context: context);
+  late final _$productsAtom = Atom(
+    name: '_OrderStore.products',
+    context: context,
+  );
 
   @override
   ObservableList<OrderProduct>? get products {
@@ -236,8 +257,7 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$photosAtom =
-      Atom(name: '_OrderStore.photos', context: context);
+  late final _$photosAtom = Atom(name: '_OrderStore.photos', context: context);
 
   @override
   ObservableList<OrderPhoto> get photos {
@@ -252,8 +272,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$isUploadingPhotoAtom =
-      Atom(name: '_OrderStore.isUploadingPhoto', context: context);
+  late final _$isUploadingPhotoAtom = Atom(
+    name: '_OrderStore.isUploadingPhoto',
+    context: context,
+  );
 
   @override
   bool get isUploadingPhoto {
@@ -268,8 +290,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$totalPaidAmountAtom =
-      Atom(name: '_OrderStore.totalPaidAmount', context: context);
+  late final _$totalPaidAmountAtom = Atom(
+    name: '_OrderStore.totalPaidAmount',
+    context: context,
+  );
 
   @override
   double get totalPaidAmount {
@@ -284,8 +308,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$totalUnpaidAmountAtom =
-      Atom(name: '_OrderStore.totalUnpaidAmount', context: context);
+  late final _$totalUnpaidAmountAtom = Atom(
+    name: '_OrderStore.totalUnpaidAmount',
+    context: context,
+  );
 
   @override
   double get totalUnpaidAmount {
@@ -300,8 +326,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$totalRevenueAtom =
-      Atom(name: '_OrderStore.totalRevenue', context: context);
+  late final _$totalRevenueAtom = Atom(
+    name: '_OrderStore.totalRevenue',
+    context: context,
+  );
 
   @override
   double get totalRevenue {
@@ -316,8 +344,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$totalOrdersCountAtom =
-      Atom(name: '_OrderStore.totalOrdersCount', context: context);
+  late final _$totalOrdersCountAtom = Atom(
+    name: '_OrderStore.totalOrdersCount',
+    context: context,
+  );
 
   @override
   int get totalOrdersCount {
@@ -332,8 +362,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$paidOrdersCountAtom =
-      Atom(name: '_OrderStore.paidOrdersCount', context: context);
+  late final _$paidOrdersCountAtom = Atom(
+    name: '_OrderStore.paidOrdersCount',
+    context: context,
+  );
 
   @override
   int get paidOrdersCount {
@@ -348,8 +380,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$recentOrdersAtom =
-      Atom(name: '_OrderStore.recentOrders', context: context);
+  late final _$recentOrdersAtom = Atom(
+    name: '_OrderStore.recentOrders',
+    context: context,
+  );
 
   @override
   ObservableList<Order?> get recentOrders {
@@ -364,8 +398,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$selectedDashboardPeriodAtom =
-      Atom(name: '_OrderStore.selectedDashboardPeriod', context: context);
+  late final _$selectedDashboardPeriodAtom = Atom(
+    name: '_OrderStore.selectedDashboardPeriod',
+    context: context,
+  );
 
   @override
   String get selectedDashboardPeriod {
@@ -375,14 +411,19 @@ mixin _$OrderStore on _OrderStore, Store {
 
   @override
   set selectedDashboardPeriod(String value) {
-    _$selectedDashboardPeriodAtom
-        .reportWrite(value, super.selectedDashboardPeriod, () {
-      super.selectedDashboardPeriod = value;
-    });
+    _$selectedDashboardPeriodAtom.reportWrite(
+      value,
+      super.selectedDashboardPeriod,
+      () {
+        super.selectedDashboardPeriod = value;
+      },
+    );
   }
 
-  late final _$periodOffsetAtom =
-      Atom(name: '_OrderStore.periodOffset', context: context);
+  late final _$periodOffsetAtom = Atom(
+    name: '_OrderStore.periodOffset',
+    context: context,
+  );
 
   @override
   int get periodOffset {
@@ -397,8 +438,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$orderStatusCountsAtom =
-      Atom(name: '_OrderStore.orderStatusCounts', context: context);
+  late final _$orderStatusCountsAtom = Atom(
+    name: '_OrderStore.orderStatusCounts',
+    context: context,
+  );
 
   @override
   ObservableMap<String, int> get orderStatusCounts {
@@ -413,8 +456,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$paymentStatusCountsAtom =
-      Atom(name: '_OrderStore.paymentStatusCounts', context: context);
+  late final _$paymentStatusCountsAtom = Atom(
+    name: '_OrderStore.paymentStatusCounts',
+    context: context,
+  );
 
   @override
   ObservableMap<String, double> get paymentStatusCounts {
@@ -429,8 +474,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$paymentFilterAtom =
-      Atom(name: '_OrderStore.paymentFilter', context: context);
+  late final _$paymentFilterAtom = Atom(
+    name: '_OrderStore.paymentFilter',
+    context: context,
+  );
 
   @override
   String? get paymentFilter {
@@ -460,8 +507,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$isLoadingAtom =
-      Atom(name: '_OrderStore.isLoading', context: context);
+  late final _$isLoadingAtom = Atom(
+    name: '_OrderStore.isLoading',
+    context: context,
+  );
 
   @override
   bool get isLoading {
@@ -476,8 +525,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$hasMoreOrdersAtom =
-      Atom(name: '_OrderStore.hasMoreOrders', context: context);
+  late final _$hasMoreOrdersAtom = Atom(
+    name: '_OrderStore.hasMoreOrders',
+    context: context,
+  );
 
   @override
   bool get hasMoreOrders {
@@ -492,8 +543,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$customerOrderTotalsAtom =
-      Atom(name: '_OrderStore.customerOrderTotals', context: context);
+  late final _$customerOrderTotalsAtom = Atom(
+    name: '_OrderStore.customerOrderTotals',
+    context: context,
+  );
 
   @override
   ObservableMap<String, double> get customerOrderTotals {
@@ -508,8 +561,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$customerUnpaidTotalsAtom =
-      Atom(name: '_OrderStore.customerUnpaidTotals', context: context);
+  late final _$customerUnpaidTotalsAtom = Atom(
+    name: '_OrderStore.customerUnpaidTotals',
+    context: context,
+  );
 
   @override
   ObservableMap<String, double> get customerUnpaidTotals {
@@ -519,14 +574,19 @@ mixin _$OrderStore on _OrderStore, Store {
 
   @override
   set customerUnpaidTotals(ObservableMap<String, double> value) {
-    _$customerUnpaidTotalsAtom.reportWrite(value, super.customerUnpaidTotals,
-        () {
-      super.customerUnpaidTotals = value;
-    });
+    _$customerUnpaidTotalsAtom.reportWrite(
+      value,
+      super.customerUnpaidTotals,
+      () {
+        super.customerUnpaidTotals = value;
+      },
+    );
   }
 
-  late final _$customerRankingAtom =
-      Atom(name: '_OrderStore.customerRanking', context: context);
+  late final _$customerRankingAtom = Atom(
+    name: '_OrderStore.customerRanking',
+    context: context,
+  );
 
   @override
   ObservableList<Map<String, dynamic>> get customerRanking {
@@ -541,8 +601,10 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$selectedCustomerInRankingAtom =
-      Atom(name: '_OrderStore.selectedCustomerInRanking', context: context);
+  late final _$selectedCustomerInRankingAtom = Atom(
+    name: '_OrderStore.selectedCustomerInRanking',
+    context: context,
+  );
 
   @override
   Map<String, dynamic>? get selectedCustomerInRanking {
@@ -552,14 +614,19 @@ mixin _$OrderStore on _OrderStore, Store {
 
   @override
   set selectedCustomerInRanking(Map<String, dynamic>? value) {
-    _$selectedCustomerInRankingAtom
-        .reportWrite(value, super.selectedCustomerInRanking, () {
-      super.selectedCustomerInRanking = value;
-    });
+    _$selectedCustomerInRankingAtom.reportWrite(
+      value,
+      super.selectedCustomerInRanking,
+      () {
+        super.selectedCustomerInRanking = value;
+      },
+    );
   }
 
-  late final _$rankingSortTypeAtom =
-      Atom(name: '_OrderStore.rankingSortType', context: context);
+  late final _$rankingSortTypeAtom = Atom(
+    name: '_OrderStore.rankingSortType',
+    context: context,
+  );
 
   @override
   String get rankingSortType {
@@ -574,48 +641,96 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
-  late final _$loadOrdersAsyncAction =
-      AsyncAction('_OrderStore.loadOrders', context: context);
+  late final _$loadOrdersAsyncAction = AsyncAction(
+    '_OrderStore.loadOrders',
+    context: context,
+  );
 
   @override
   Future loadOrders(String? status) {
     return _$loadOrdersAsyncAction.run(() => super.loadOrders(status));
   }
 
-  late final _$loadOrdersForDashboardAsyncAction =
-      AsyncAction('_OrderStore.loadOrdersForDashboard', context: context);
+  late final _$addPhotoFromGalleryAsyncAction = AsyncAction(
+    '_OrderStore.addPhotoFromGallery',
+    context: context,
+  );
+
+  @override
+  Future<bool> addPhotoFromGallery() {
+    return _$addPhotoFromGalleryAsyncAction.run(
+      () => super.addPhotoFromGallery(),
+    );
+  }
+
+  late final _$addPhotoFromCameraAsyncAction = AsyncAction(
+    '_OrderStore.addPhotoFromCamera',
+    context: context,
+  );
+
+  @override
+  Future<bool> addPhotoFromCamera() {
+    return _$addPhotoFromCameraAsyncAction.run(
+      () => super.addPhotoFromCamera(),
+    );
+  }
+
+  late final _$deletePhotoAsyncAction = AsyncAction(
+    '_OrderStore.deletePhoto',
+    context: context,
+  );
+
+  @override
+  Future<bool> deletePhoto(int index) {
+    return _$deletePhotoAsyncAction.run(() => super.deletePhoto(index));
+  }
+
+  late final _$loadOrdersForDashboardAsyncAction = AsyncAction(
+    '_OrderStore.loadOrdersForDashboard',
+    context: context,
+  );
 
   @override
   Future<void> loadOrdersForDashboard() {
-    return _$loadOrdersForDashboardAsyncAction
-        .run(() => super.loadOrdersForDashboard());
+    return _$loadOrdersForDashboardAsyncAction.run(
+      () => super.loadOrdersForDashboard(),
+    );
   }
 
-  late final _$loadOrdersInfiniteAsyncAction =
-      AsyncAction('_OrderStore.loadOrdersInfinite', context: context);
+  late final _$loadOrdersInfiniteAsyncAction = AsyncAction(
+    '_OrderStore.loadOrdersInfinite',
+    context: context,
+  );
 
   @override
   Future<void> loadOrdersInfinite(String? status) {
-    return _$loadOrdersInfiniteAsyncAction
-        .run(() => super.loadOrdersInfinite(status));
+    return _$loadOrdersInfiniteAsyncAction.run(
+      () => super.loadOrdersInfinite(status),
+    );
   }
 
-  late final _$loadMoreOrdersInfiniteAsyncAction =
-      AsyncAction('_OrderStore.loadMoreOrdersInfinite', context: context);
+  late final _$loadMoreOrdersInfiniteAsyncAction = AsyncAction(
+    '_OrderStore.loadMoreOrdersInfinite',
+    context: context,
+  );
 
   @override
   Future<void> loadMoreOrdersInfinite(String? status) {
-    return _$loadMoreOrdersInfiniteAsyncAction
-        .run(() => super.loadMoreOrdersInfinite(status));
+    return _$loadMoreOrdersInfiniteAsyncAction.run(
+      () => super.loadMoreOrdersInfinite(status),
+    );
   }
 
-  late final _$_OrderStoreActionController =
-      ActionController(name: '_OrderStore', context: context);
+  late final _$_OrderStoreActionController = ActionController(
+    name: '_OrderStore',
+    context: context,
+  );
 
   @override
   dynamic loadOrder({String? id}) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.loadOrder');
+      name: '_OrderStore.loadOrder',
+    );
     try {
       return super.loadOrder(id: id);
     } finally {
@@ -625,8 +740,9 @@ mixin _$OrderStore on _OrderStore, Store {
 
   @override
   void setOrder(Order? order) {
-    final _$actionInfo =
-        _$_OrderStoreActionController.startAction(name: '_OrderStore.setOrder');
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setOrder',
+    );
     try {
       return super.setOrder(order);
     } finally {
@@ -637,7 +753,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic setCustomer(Customer? c) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setCustomer');
+      name: '_OrderStore.setCustomer',
+    );
     try {
       return super.setCustomer(c);
     } finally {
@@ -648,7 +765,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic setDevice(Device? d) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setDevice');
+      name: '_OrderStore.setDevice',
+    );
     try {
       return super.setDevice(d);
     } finally {
@@ -659,7 +777,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic setStatus(String? status) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setStatus');
+      name: '_OrderStore.setStatus',
+    );
     try {
       return super.setStatus(status);
     } finally {
@@ -670,7 +789,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic updateOrder() {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.updateOrder');
+      name: '_OrderStore.updateOrder',
+    );
     try {
       return super.updateOrder();
     } finally {
@@ -681,7 +801,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   Future<void> deleteOrder() {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.deleteOrder');
+      name: '_OrderStore.deleteOrder',
+    );
     try {
       return super.deleteOrder();
     } finally {
@@ -692,7 +813,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic addService(OrderService orderService) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.addService');
+      name: '_OrderStore.addService',
+    );
     try {
       return super.addService(orderService);
     } finally {
@@ -703,7 +825,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic addProduct(OrderProduct orderProduct) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.addProduct');
+      name: '_OrderStore.addProduct',
+    );
     try {
       return super.addProduct(orderProduct);
     } finally {
@@ -714,7 +837,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic deleteService(int index) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.deleteService');
+      name: '_OrderStore.deleteService',
+    );
     try {
       return super.deleteService(index);
     } finally {
@@ -725,7 +849,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic deleteProduct(int index) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.deleteProduct');
+      name: '_OrderStore.deleteProduct',
+    );
     try {
       return super.deleteProduct(index);
     } finally {
@@ -733,36 +858,11 @@ mixin _$OrderStore on _OrderStore, Store {
     }
   }
 
-  late final _$addPhotoFromGalleryAsyncAction =
-      AsyncAction('_OrderStore.addPhotoFromGallery', context: context);
-
-  @override
-  Future<bool> addPhotoFromGallery() {
-    return _$addPhotoFromGalleryAsyncAction
-        .run(() => super.addPhotoFromGallery());
-  }
-
-  late final _$addPhotoFromCameraAsyncAction =
-      AsyncAction('_OrderStore.addPhotoFromCamera', context: context);
-
-  @override
-  Future<bool> addPhotoFromCamera() {
-    return _$addPhotoFromCameraAsyncAction
-        .run(() => super.addPhotoFromCamera());
-  }
-
-  late final _$deletePhotoAsyncAction =
-      AsyncAction('_OrderStore.deletePhoto', context: context);
-
-  @override
-  Future<bool> deletePhoto(int index) {
-    return _$deletePhotoAsyncAction.run(() => super.deletePhoto(index));
-  }
-
   @override
   void setPhotoCover(int index) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setPhotoCover');
+      name: '_OrderStore.setPhotoCover',
+    );
     try {
       return super.setPhotoCover(index);
     } finally {
@@ -773,7 +873,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic setDiscount(double value) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setDiscount');
+      name: '_OrderStore.setDiscount',
+    );
     try {
       return super.setDiscount(value);
     } finally {
@@ -784,7 +885,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   dynamic setCustomerFilter(Customer? customerFilter) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setCustomerFilter');
+      name: '_OrderStore.setCustomerFilter',
+    );
     try {
       return super.setCustomerFilter(customerFilter);
     } finally {
@@ -795,7 +897,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   void setDashboardPeriod(String period) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setDashboardPeriod');
+      name: '_OrderStore.setDashboardPeriod',
+    );
     try {
       return super.setDashboardPeriod(period);
     } finally {
@@ -806,7 +909,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   void setCustomPeriod(String period, int offset) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setCustomPeriod');
+      name: '_OrderStore.setCustomPeriod',
+    );
     try {
       return super.setCustomPeriod(period, offset);
     } finally {
@@ -817,7 +921,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   void setPaymentFilter(String? filter) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setPaymentFilter');
+      name: '_OrderStore.setPaymentFilter',
+    );
     try {
       return super.setPaymentFilter(filter);
     } finally {
@@ -828,7 +933,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   void sortCustomerRanking() {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.sortCustomerRanking');
+      name: '_OrderStore.sortCustomerRanking',
+    );
     try {
       return super.sortCustomerRanking();
     } finally {
@@ -839,7 +945,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   void setRankingSortType(String sortType) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.setRankingSortType');
+      name: '_OrderStore.setRankingSortType',
+    );
     try {
       return super.setRankingSortType(sortType);
     } finally {
@@ -850,7 +957,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   void selectCustomerInRanking(Map<String, dynamic>? customerData) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.selectCustomerInRanking');
+      name: '_OrderStore.selectCustomerInRanking',
+    );
     try {
       return super.selectCustomerInRanking(customerData);
     } finally {
@@ -861,7 +969,8 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   void clearCustomerRankingSelection() {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
-        name: '_OrderStore.clearCustomerRankingSelection');
+      name: '_OrderStore.clearCustomerRankingSelection',
+    );
     try {
       return super.clearCustomerRankingSelection();
     } finally {

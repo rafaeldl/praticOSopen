@@ -9,8 +9,10 @@ part of 'bottom_navigation_bar_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$BottomNavigationBarStore on _BottomNavigationBarStore, Store {
-  late final _$_currentIndexAtom =
-      Atom(name: '_BottomNavigationBarStore._currentIndex', context: context);
+  late final _$_currentIndexAtom = Atom(
+    name: '_BottomNavigationBarStore._currentIndex',
+    context: context,
+  );
 
   @override
   int get _currentIndex {
@@ -25,8 +27,10 @@ mixin _$BottomNavigationBarStore on _BottomNavigationBarStore, Store {
     });
   }
 
-  late final _$_BottomNavigationBarStoreActionController =
-      ActionController(name: '_BottomNavigationBarStore', context: context);
+  late final _$_BottomNavigationBarStoreActionController = ActionController(
+    name: '_BottomNavigationBarStore',
+    context: context,
+  );
 
   @override
   dynamic setCurrentIndex(int index) {

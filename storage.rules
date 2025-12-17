@@ -1,7 +1,48 @@
+rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+
+    // Função auxiliar para verificar se o usuário está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Função para validar tipo e tamanho de imagem
+    function isValidImage() {
+      // Permite se não houver contentType OU se for uma imagem
+      return (request.resource.contentType == null ||
+              request.resource.contentType.matches('image/.*')) &&
+             request.resource.size < 10 * 1024 * 1024; // 10MB max
+    }
+
+    // NOTA: Validação completa de tenant requer Custom Claims ou subcoleção
+    // Por enquanto, a validação de tenant é feita client-side no PhotoService
+    // TODO: Implementar Custom Claims com companyId no Firebase Auth token
+
+    // Regras para fotos de ordens de serviço organizadas por tenant
+    match /tenants/{companyId}/orders/{orderId}/photos/{photoId} {
+      // Leitura: apenas usuários autenticados
+      // IMPORTANTE: Validação adicional de tenant feita no client (PhotoService)
+      allow read: if isAuthenticated();
+
+      // Upload: usuário autenticado + validação de imagem
+      allow create: if isAuthenticated() && isValidImage();
+
+      // Atualização: usuário autenticado + validação de imagem
+      allow update: if isAuthenticated() && isValidImage();
+
+      // Exclusão: apenas usuários autenticados
+      allow delete: if isAuthenticated();
+    }
+
+    // Lista de arquivos em uma pasta de fotos de ordem
+    match /tenants/{companyId}/orders/{orderId}/photos {
+      allow list: if isAuthenticated();
+    }
+
+    // Bloqueia acesso a qualquer outro caminho não especificado
     match /{allPaths=**} {
-      allow read, write: if request.auth!=null;
+      allow read, write: if false;
     }
   }
 }

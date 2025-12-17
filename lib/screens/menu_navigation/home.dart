@@ -1,6 +1,5 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:praticos/mobx/order_store.dart';
-import 'package:praticos/models/destination_model.dart';
 import 'package:praticos/models/order.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -380,7 +379,7 @@ class _HomeState extends State<Home> {
         ),
         child: Row(
           children: <Widget>[
-            // Imagem à esquerda
+            // Imagem à esquerda - Foto de capa da OS
             Container(
               width: 100,
               height: 160,
@@ -389,11 +388,7 @@ class _HomeState extends State<Home> {
                   topLeft: Radius.circular(20),
                   bottomLeft: Radius.circular(20),
                 ),
-                child: Image(
-                  alignment: Alignment.topRight,
-                  fit: BoxFit.cover,
-                  image: AssetImage(destinations[0].imageUrl!),
-                ),
+                child: _buildOrderCoverPhoto(order),
               ),
             ),
 
@@ -625,6 +620,52 @@ class _HomeState extends State<Home> {
       symbol: 'R\$',
     );
     return numberFormat.format(total);
+  }
+
+  /// Constrói a foto de capa da ordem de serviço
+  Widget _buildOrderCoverPhoto(Order order) {
+    final coverPhotoUrl = order.coverPhotoUrl;
+
+    if (coverPhotoUrl != null && coverPhotoUrl.isNotEmpty) {
+      return Image.network(
+        coverPhotoUrl,
+        alignment: Alignment.center,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            color: Colors.grey[200],
+            child: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return _buildDefaultOrderImage();
+        },
+      );
+    }
+
+    // Se não houver fotos, mostra imagem padrão
+    return _buildDefaultOrderImage();
+  }
+
+  /// Constrói a imagem padrão quando não há foto
+  Widget _buildDefaultOrderImage() {
+    return Container(
+      color: Colors.grey[200],
+      child: Icon(
+        Icons.build_circle,
+        size: 50,
+        color: Colors.grey[400],
+      ),
+    );
   }
 
   Color _getColorWithOpacity(Color color, double opacity) {

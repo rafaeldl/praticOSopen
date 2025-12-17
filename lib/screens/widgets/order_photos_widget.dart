@@ -252,9 +252,11 @@ class OrderPhotosWidget extends StatelessWidget {
           _confirmDeletePhoto(context, index);
         } else if (value == 'cover') {
           store.setPhotoCover(index);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Foto definida como capa')),
-          );
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Foto definida como capa')),
+            );
+          }
         }
       },
       itemBuilder: (context) => [
@@ -284,12 +286,15 @@ class OrderPhotosWidget extends StatelessWidget {
   }
 
   void _showAddPhotoOptions(BuildContext context) {
+    // Salva o contexto do Scaffold pai antes de abrir o modal
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) {
+      builder: (modalContext) {
         return SafeArea(
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
@@ -300,10 +305,10 @@ class OrderPhotosWidget extends StatelessWidget {
                   leading: Icon(Icons.camera_alt, color: Theme.of(context).primaryColor),
                   title: Text('Tirar foto'),
                   onTap: () async {
-                    Navigator.pop(context);
+                    Navigator.pop(modalContext);
                     final success = await store.addPhotoFromCamera();
-                    if (!success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                    if (!success && context.mounted) {
+                      scaffoldMessenger.showSnackBar(
                         SnackBar(content: Text('Erro ao adicionar foto')),
                       );
                     }
@@ -313,10 +318,10 @@ class OrderPhotosWidget extends StatelessWidget {
                   leading: Icon(Icons.photo_library, color: Theme.of(context).primaryColor),
                   title: Text('Escolher da galeria'),
                   onTap: () async {
-                    Navigator.pop(context);
+                    Navigator.pop(modalContext);
                     final success = await store.addPhotoFromGallery();
-                    if (!success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                    if (!success && context.mounted) {
+                      scaffoldMessenger.showSnackBar(
                         SnackBar(content: Text('Erro ao adicionar foto')),
                       );
                     }
@@ -326,7 +331,7 @@ class OrderPhotosWidget extends StatelessWidget {
                 ListTile(
                   leading: Icon(Icons.close, color: Colors.grey),
                   title: Text('Cancelar'),
-                  onTap: () => Navigator.pop(context),
+                  onTap: () => Navigator.pop(modalContext),
                 ),
               ],
             ),
@@ -337,29 +342,34 @@ class OrderPhotosWidget extends StatelessWidget {
   }
 
   void _confirmDeletePhoto(BuildContext context, int index) {
+    // Salva o contexto do Scaffold antes de abrir o dialog
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
           title: Text('Excluir foto?'),
           content: Text('Esta ação não pode ser desfeita.'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: Text('Cancelar'),
             ),
             TextButton(
               onPressed: () async {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 final success = await store.deletePhoto(index);
-                if (success) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Foto excluída')),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erro ao excluir foto')),
-                  );
+                if (context.mounted) {
+                  if (success) {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(content: Text('Foto excluída')),
+                    );
+                  } else {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(content: Text('Erro ao excluir foto')),
+                    );
+                  }
                 }
               },
               child: Text('Excluir', style: TextStyle(color: Colors.red)),
@@ -445,9 +455,13 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
               onPressed: () {
                 widget.onSetCover(_currentIndex);
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Foto definida como capa')),
-                );
+                // Usa o contexto do Scaffold pai se disponível
+                if (mounted) {
+                  final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+                  scaffoldMessenger?.showSnackBar(
+                    SnackBar(content: Text('Foto definida como capa')),
+                  );
+                }
               },
             ),
           IconButton(
@@ -525,24 +539,28 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
               onPressed: () async {
                 Navigator.pop(context);
                 final success = await widget.onDelete(_currentIndex);
-                if (success) {
-                  if (widget.photos.length <= 1) {
-                    Navigator.pop(context);
+                if (mounted) {
+                  if (success) {
+                    if (widget.photos.length <= 1) {
+                      Navigator.pop(context);
+                    } else {
+                      setState(() {
+                        if (_currentIndex >= widget.photos.length - 1) {
+                          _currentIndex = widget.photos.length - 2;
+                          _pageController.jumpToPage(_currentIndex);
+                        }
+                      });
+                    }
+                    final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+                    scaffoldMessenger?.showSnackBar(
+                      SnackBar(content: Text('Foto excluída')),
+                    );
                   } else {
-                    setState(() {
-                      if (_currentIndex >= widget.photos.length - 1) {
-                        _currentIndex = widget.photos.length - 2;
-                        _pageController.jumpToPage(_currentIndex);
-                      }
-                    });
+                    final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
+                    scaffoldMessenger?.showSnackBar(
+                      SnackBar(content: Text('Erro ao excluir foto')),
+                    );
                   }
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Foto excluída')),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Erro ao excluir foto')),
-                  );
                 }
               },
               child: Text('Excluir', style: TextStyle(color: Colors.red)),

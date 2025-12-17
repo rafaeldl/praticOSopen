@@ -29,15 +29,15 @@ UserRole _$UserRoleFromJson(Map<String, dynamic> json) => UserRole()
   ..role = $enumDecodeNullable(_$RolesTypeEnumMap, json['role']);
 
 Map<String, dynamic> _$UserRoleToJson(UserRole instance) => <String, dynamic>{
-      'id': instance.id,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'createdBy': instance.createdBy?.toJson(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
-      'updatedBy': instance.updatedBy?.toJson(),
-      'company': instance.company?.toJson(),
-      'user': instance.user?.toJson(),
-      'role': _$RolesTypeEnumMap[instance.role],
-    };
+  'id': instance.id,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'createdBy': instance.createdBy?.toJson(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
+  'updatedBy': instance.updatedBy?.toJson(),
+  'company': instance.company?.toJson(),
+  'user': instance.user?.toJson(),
+  'role': _$RolesTypeEnumMap[instance.role],
+};
 
 const _$RolesTypeEnumMap = {
   RolesType.admin: 'admin',

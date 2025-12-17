@@ -9,8 +9,10 @@ part of 'auth_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$AuthStore on _AuthStore, Store {
-  late final _$currentUserAtom =
-      Atom(name: '_AuthStore.currentUser', context: context);
+  late final _$currentUserAtom = Atom(
+    name: '_AuthStore.currentUser',
+    context: context,
+  );
 
   @override
   ObservableStream<User?>? get currentUser {
@@ -25,21 +27,26 @@ mixin _$AuthStore on _AuthStore, Store {
     });
   }
 
-  late final _$signOutGoogleAsyncAction =
-      AsyncAction('_AuthStore.signOutGoogle', context: context);
+  late final _$signOutGoogleAsyncAction = AsyncAction(
+    '_AuthStore.signOutGoogle',
+    context: context,
+  );
 
   @override
   Future signOutGoogle() {
     return _$signOutGoogleAsyncAction.run(() => super.signOutGoogle());
   }
 
-  late final _$_AuthStoreActionController =
-      ActionController(name: '_AuthStore', context: context);
+  late final _$_AuthStoreActionController = ActionController(
+    name: '_AuthStore',
+    context: context,
+  );
 
   @override
   dynamic signInWithGoogle() {
     final _$actionInfo = _$_AuthStoreActionController.startAction(
-        name: '_AuthStore.signInWithGoogle');
+      name: '_AuthStore.signInWithGoogle',
+    );
     try {
       return super.signInWithGoogle();
     } finally {

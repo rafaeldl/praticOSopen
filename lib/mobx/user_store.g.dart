@@ -24,8 +24,10 @@ mixin _$UserStore on _UserStore, Store {
     });
   }
 
-  late final _$findCurrentUserAsyncAction =
-      AsyncAction('_UserStore.findCurrentUser', context: context);
+  late final _$findCurrentUserAsyncAction = AsyncAction(
+    '_UserStore.findCurrentUser',
+    context: context,
+  );
 
   @override
   Future findCurrentUser() {

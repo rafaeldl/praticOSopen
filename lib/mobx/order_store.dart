@@ -403,24 +403,30 @@ abstract class _OrderStore with Store {
 
     isUploadingPhoto = true;
 
-    final OrderPhoto? photo = await photoService.uploadPhoto(
-      file: file,
-      companyId: order!.company!.id!,
-      orderId: order!.id!,
-    );
+    try {
+      final OrderPhoto? photo = await photoService.uploadPhoto(
+        file: file,
+        companyId: order!.company!.id!,
+        orderId: order!.id!,
+      );
 
-    isUploadingPhoto = false;
+      isUploadingPhoto = false;
 
-    if (photo != null) {
-      if (order!.photos == null) {
-        order!.photos = [];
+      if (photo != null) {
+        if (order!.photos == null) {
+          order!.photos = [];
+        }
+        order!.photos!.add(photo);
+        photos.add(photo);
+        createItem();
+        return true;
       }
-      order!.photos!.add(photo);
-      photos.add(photo);
-      createItem();
-      return true;
+      return false;
+    } catch (e) {
+      isUploadingPhoto = false;
+      print('Erro no upload da foto: $e');
+      return false;
     }
-    return false;
   }
 
   /// Remove uma foto pelo índice
