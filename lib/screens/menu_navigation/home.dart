@@ -291,8 +291,11 @@ class _HomeState extends State<Home> {
     final statusColor = AppTheme.getStatusColor(order.status);
     final isPaid = order.payment == 'paid';
 
-    // Mostrar ícones de pagamento apenas quando status for "done" (concluído)
-    final showPaymentIcon = order.status == 'done';
+    // Mostrar ícone de pagamento sempre que a OS foi paga, independente do status
+    final showPaymentIcon = isPaid;
+
+    // Mostrar ícone "a receber" quando status for concluído e financeiro em aberto
+    final showUnpaidIcon = order.status == 'done' && order.payment == 'unpaid';
 
     // Verificar atraso
     bool isOverdue = false;
@@ -334,28 +337,68 @@ class _HomeState extends State<Home> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Linha 1: Nome + Status
+                        // Linha 1: Nome + Ícones (atraso e pagamento) + Status
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            // Nome do cliente com ícones ao lado
                             Expanded(
-                              child: Text(
-                                order.customer?.name ?? 'Cliente',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.textPrimary,
-                                ),
-                                overflow: TextOverflow.ellipsis,
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      order.customer?.name ?? 'Cliente',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  // Ícones de atraso, pagamento e a receber ao lado do nome
+                                  if (isOverdue)
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 6),
+                                      child: Icon(
+                                        Icons.schedule,
+                                        size: 16,
+                                        color: AppTheme.errorColor,
+                                      ),
+                                    ),
+                                  if (showPaymentIcon)
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 6),
+                                      child: Icon(
+                                        Icons.check_circle,
+                                        size: 16,
+                                        color: AppTheme.successColor,
+                                      ),
+                                    ),
+                                  if (showUnpaidIcon)
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 6),
+                                      child: Icon(
+                                        Icons.payments_outlined,
+                                        size: 16,
+                                        color: AppTheme.warningColor,
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                             SizedBox(width: 8),
-                            // Status badge no canto superior direito
+                            // Status badge
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.12),
+                                color: order.status == 'approved' 
+                                    ? Colors.transparent 
+                                    : statusColor.withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(4),
+                                border: order.status == 'approved'
+                                    ? Border.all(color: statusColor, width: 1)
+                                    : null,
                               ),
                               child: Text(
                                 statusText,
@@ -369,8 +412,10 @@ class _HomeState extends State<Home> {
                           ],
                         ),
                         SizedBox(height: 2),
-                        // Linha 2: #OS + Veículo + Ícones
+                        // Linha 2: #OS + Veículo + Valor total (canto inferior direito)
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
                               child: Text(
@@ -383,36 +428,18 @@ class _HomeState extends State<Home> {
                                 maxLines: 1,
                               ),
                             ),
-                            // Ícones (atrasado + pagamento)
-                            if (isOverdue)
-                              Padding(
-                                padding: EdgeInsets.only(left: 6),
-                                child: Icon(
-                                  Icons.schedule,
-                                  size: 16,
-                                  color: AppTheme.errorColor,
-                                ),
+                            // SizedBox(height: 20,),
+                            // Valor total no canto inferior direito
+                            Text(
+                              _formatCurrency(order.total),
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.normal,
+                                color: AppTheme.textPrimary,
+                                letterSpacing: -0.5,
                               ),
-                            if (showPaymentIcon)
-                              Padding(
-                                padding: EdgeInsets.only(left: 6),
-                                child: Icon(
-                                  isPaid ? Icons.check_circle : Icons.circle_outlined,
-                                  size: 16,
-                                  color: isPaid ? AppTheme.successColor : AppTheme.textTertiary,
-                                ),
-                              ),
+                            ),
                           ],
-                        ),
-                        SizedBox(height: 4),
-                        // Linha 3: Valor
-                        Text(
-                          _formatCurrency(order.total),
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textPrimary,
-                          ),
                         ),
                       ],
                     ),
