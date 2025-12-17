@@ -15,9 +15,7 @@ class PhotoService {
   Future<File?> pickImageFromGallery() async {
     final XFile? image = await _picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 80,
-      maxWidth: 1920,
-      maxHeight: 1080,
+      imageQuality: 95, // Aumentado qualidade e removido resize para preservar cores
     );
     if (image != null) {
       return File(image.path);
@@ -29,9 +27,7 @@ class PhotoService {
   Future<File?> takePhoto() async {
     final XFile? image = await _picker.pickImage(
       source: ImageSource.camera,
-      imageQuality: 80,
-      maxWidth: 1920,
-      maxHeight: 1080,
+      imageQuality: 95, // Aumentado qualidade e removido resize para preservar cores
     );
     if (image != null) {
       return File(image.path);
@@ -77,10 +73,27 @@ class PhotoService {
       // Usa um UUID-like approach: milliseconds + random de 6 dígitos
       final int randomSuffix = (now.microsecondsSinceEpoch % 1000000);
       final String photoId = '${now.millisecondsSinceEpoch}-$randomSuffix';
-      final String storagePath =
-          'tenants/$companyId/orders/$orderId/photos/$photoId.jpg';
 
-      print('Iniciando upload para: $storagePath');
+      // Detecta a extensão e content type baseados no arquivo
+      String extension = 'jpg';
+      String contentType = 'image/jpeg';
+
+      final String pathLower = file.path.toLowerCase();
+      if (pathLower.endsWith('.png')) {
+        extension = 'png';
+        contentType = 'image/png';
+      } else if (pathLower.endsWith('.webp')) {
+        extension = 'webp';
+        contentType = 'image/webp';
+      } else if (pathLower.endsWith('.heic')) {
+        extension = 'heic';
+        contentType = 'image/heic';
+      }
+
+      final String storagePath =
+          'tenants/$companyId/orders/$orderId/photos/$photoId.$extension';
+
+      print('Iniciando upload para: $storagePath (ContentType: $contentType)');
       final Reference ref = _storage.ref().child(storagePath);
 
       // Tenta múltiplas estratégias de upload
@@ -89,7 +102,7 @@ class PhotoService {
         print('Tentativa 1: putFile com metadata');
         final UploadTask uploadTask = ref.putFile(
           file,
-          SettableMetadata(contentType: 'image/jpeg'),
+          SettableMetadata(contentType: contentType),
         );
 
         // Monitora o progresso
@@ -116,7 +129,7 @@ class PhotoService {
             print('Tentativa 2: putFile com contentType (Fallback)');
             final UploadTask uploadTask = ref.putFile(
               file,
-              SettableMetadata(contentType: 'image/jpeg'),
+              SettableMetadata(contentType: contentType),
             );
 
             final TaskSnapshot snapshot = await uploadTask;
@@ -132,7 +145,7 @@ class PhotoService {
               final Uint8List fileBytes = await file.readAsBytes();
               final UploadTask uploadTask = ref.putData(
                 fileBytes,
-                SettableMetadata(contentType: 'image/jpeg'),
+                SettableMetadata(contentType: contentType),
               );
 
               final TaskSnapshot snapshot = await uploadTask;
