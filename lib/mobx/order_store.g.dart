@@ -641,6 +641,42 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$customStartDateAtom = Atom(
+    name: '_OrderStore.customStartDate',
+    context: context,
+  );
+
+  @override
+  DateTime? get customStartDate {
+    _$customStartDateAtom.reportRead();
+    return super.customStartDate;
+  }
+
+  @override
+  set customStartDate(DateTime? value) {
+    _$customStartDateAtom.reportWrite(value, super.customStartDate, () {
+      super.customStartDate = value;
+    });
+  }
+
+  late final _$customEndDateAtom = Atom(
+    name: '_OrderStore.customEndDate',
+    context: context,
+  );
+
+  @override
+  DateTime? get customEndDate {
+    _$customEndDateAtom.reportRead();
+    return super.customEndDate;
+  }
+
+  @override
+  set customEndDate(DateTime? value) {
+    _$customEndDateAtom.reportWrite(value, super.customEndDate, () {
+      super.customEndDate = value;
+    });
+  }
+
   late final _$loadOrdersAsyncAction = AsyncAction(
     '_OrderStore.loadOrders',
     context: context,
@@ -683,6 +719,18 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   Future<bool> deletePhoto(int index) {
     return _$deletePhotoAsyncAction.run(() => super.deletePhoto(index));
+  }
+
+  late final _$loadOrdersForDashboardCustomRangeAsyncAction = AsyncAction(
+    '_OrderStore.loadOrdersForDashboardCustomRange',
+    context: context,
+  );
+
+  @override
+  Future<void> loadOrdersForDashboardCustomRange(DateTime start, DateTime end) {
+    return _$loadOrdersForDashboardCustomRangeAsyncAction.run(
+      () => super.loadOrdersForDashboardCustomRange(start, end),
+    );
   }
 
   late final _$loadOrdersForDashboardAsyncAction = AsyncAction(
@@ -919,6 +967,18 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void setCustomDateRange(DateTime start, DateTime end) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setCustomDateRange',
+    );
+    try {
+      return super.setCustomDateRange(start, end);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void setPaymentFilter(String? filter) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setPaymentFilter',
@@ -1015,6 +1075,8 @@ customerUnpaidTotals: ${customerUnpaidTotals},
 customerRanking: ${customerRanking},
 selectedCustomerInRanking: ${selectedCustomerInRanking},
 rankingSortType: ${rankingSortType},
+customStartDate: ${customStartDate},
+customEndDate: ${customEndDate},
 customerName: ${customerName},
 deviceName: ${deviceName},
 formattedCreatedDate: ${formattedCreatedDate}

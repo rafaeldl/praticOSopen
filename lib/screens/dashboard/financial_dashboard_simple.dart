@@ -615,15 +615,17 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? (orderStore.totalUnpaidAmount / orderStore.totalRevenue * 100)
         : 0.0;
 
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
         ),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -740,6 +742,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             ],
           ),
         ],
+      ),
       ),
     );
   }
@@ -866,14 +869,16 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       sectionTitle = 'Clientes - A Receber';
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
         ),
-      ),
       child: Column(
         children: [
           Padding(
@@ -969,6 +974,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             ),
         ],
       ),
+      ),
     );
   }
 
@@ -993,14 +999,16 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     final totalServicesQty = servicesRanking.fold<int>(
       0, (sum, item) => sum + (item['quantity'] as int));
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
         ),
-      ),
       child: Column(
         children: [
           Padding(
@@ -1092,6 +1100,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             ),
         ],
       ),
+      ),
     );
   }
 
@@ -1116,14 +1125,16 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     final totalProductsQty = productsRanking.fold<int>(
       0, (sum, item) => sum + (item['quantity'] as int));
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
         ),
-      ),
       child: Column(
         children: [
           Padding(
@@ -1214,6 +1225,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               onTap: () => setState(() => _isProductsExpanded = !_isProductsExpanded),
             ),
         ],
+      ),
       ),
     );
   }
@@ -1450,14 +1462,16 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? filteredOrders.length
         : (filteredOrders.length > 5 ? 5 : filteredOrders.length);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
         ),
-      ),
       child: Column(
         children: [
           Padding(
@@ -1616,6 +1630,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             ),
         ],
       ),
+      ),
     );
   }
 
@@ -1624,31 +1639,34 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     required IconData icon,
     required String message,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outline.withOpacity(0.1),
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outline.withOpacity(0.1),
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            icon,
-            size: 48,
-            color: theme.colorScheme.outline.withOpacity(0.5),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            message,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 48,
+              color: theme.colorScheme.outline.withOpacity(0.5),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 12),
+            Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
