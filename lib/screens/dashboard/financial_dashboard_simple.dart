@@ -19,11 +19,24 @@ class FinancialDashboardSimple extends StatefulWidget {
 
 class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   String selectedPeriod = 'mês';
-  final List<String> periodFilters = ['hoje', 'semana', 'mês', 'ano'];
+  final List<String> periodFilters = ['hoje', 'semana', 'mês', 'ano', 'custom'];
+  final Map<String, String> periodLabelsMap = {
+    'hoje': 'HOJE',
+    'semana': 'SEMANA',
+    'mês': 'MÊS',
+    'ano': 'ANO',
+    'custom': 'PERÍODO',
+  };
   DateTime _lastTouchTime = DateTime.now();
   int _periodOffset = 0;
   bool _isRankingExpanded = false;
+  bool _isServicesExpanded = false;
+  bool _isProductsExpanded = false;
   bool _isRecentOrdersExpanded = false;
+
+  // Custom period dates
+  DateTime? _customStartDate;
+  DateTime? _customEndDate;
 
   @override
   void initState() {
@@ -32,6 +45,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   }
 
   String get periodLabel {
+    if (selectedPeriod == 'custom' && _customStartDate != null && _customEndDate != null) {
+      final DateFormat dateFormat = DateFormat('dd/MM/yy', 'pt_BR');
+      return '${dateFormat.format(_customStartDate!)} - ${dateFormat.format(_customEndDate!)}';
+    }
+
     DateTime now = DateTime.now();
     DateTime periodDate = now;
 
@@ -125,6 +143,14 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                             _buildCustomerRanking(orderStore, theme)),
                     const SizedBox(height: 20),
                     Observer(
+                        builder: (_) =>
+                            _buildServicesRanking(orderStore, theme)),
+                    const SizedBox(height: 20),
+                    Observer(
+                        builder: (_) =>
+                            _buildProductsRanking(orderStore, theme)),
+                    const SizedBox(height: 20),
+                    Observer(
                         builder: (_) => _buildRecentOrders(orderStore, theme)),
                     const SizedBox(height: 24),
                   ],
@@ -152,103 +178,256 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       ),
       child: Column(
         children: [
-          // Period type selector
-          SegmentedButton<String>(
-            segments: periodFilters.map((period) {
-              return ButtonSegment<String>(
-                value: period,
-                label: Text(period.toUpperCase()),
-              );
-            }).toList(),
-            selected: {selectedPeriod},
-            onSelectionChanged: (Set<String> selection) {
-              setState(() {
-                selectedPeriod = selection.first;
-                _periodOffset = 0;
-              });
-              _updateDashboardPeriod();
-            },
-            style: ButtonStyle(
-              visualDensity: VisualDensity.compact,
+          // Period type selector - using custom chips without checkmark
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: periodFilters.map((period) {
+                final isSelected = selectedPeriod == period;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: FilterChip(
+                    label: Text(
+                      periodLabelsMap[period] ?? period.toUpperCase(),
+                      style: TextStyle(
+                        color: isSelected
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurfaceVariant,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                    ),
+                    selected: isSelected,
+                    showCheckmark: false,
+                    selectedColor: theme.colorScheme.primary,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    onSelected: (selected) {
+                      if (period == 'custom') {
+                        _showCustomPeriodPicker(theme);
+                      } else {
+                        setState(() {
+                          selectedPeriod = period;
+                          _periodOffset = 0;
+                          _customStartDate = null;
+                          _customEndDate = null;
+                        });
+                        _updateDashboardPeriod();
+                      }
+                    },
+                  ),
+                );
+              }).toList(),
             ),
           ),
           const SizedBox(height: 12),
           // Period navigation
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.chevron_left,
-                    color: theme.colorScheme.primary,
-                  ),
-                  onPressed: () {
-                    setState(() => _periodOffset--);
-                    _updateDashboardPeriod();
-                  },
-                  visualDensity: VisualDensity.compact,
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      if (_periodOffset != 0) {
-                        setState(() => _periodOffset = 0);
-                        final orderStore =
-                            Provider.of<OrderStore>(context, listen: false);
-                        orderStore.setPaymentFilter(null);
-                        orderStore.clearCustomerRankingSelection();
-                        _updateDashboardPeriod();
-                      }
-                    },
-                    child: Column(
-                      children: [
-                        Text(
-                          periodLabel,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        if (_periodOffset != 0)
-                          Text(
-                            'Toque para voltar ao atual',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontSize: 10,
-                            ),
-                          ),
-                      ],
+          if (selectedPeriod != 'custom')
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.chevron_left,
+                      color: theme.colorScheme.primary,
                     ),
+                    onPressed: () {
+                      setState(() => _periodOffset--);
+                      _updateDashboardPeriod();
+                    },
+                    visualDensity: VisualDensity.compact,
                   ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.chevron_right,
-                    color: _periodOffset < 0
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.outline.withOpacity(0.3),
-                  ),
-                  onPressed: _periodOffset < 0
-                      ? () {
-                          setState(() => _periodOffset++);
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        if (_periodOffset != 0) {
+                          setState(() => _periodOffset = 0);
+                          final orderStore =
+                              Provider.of<OrderStore>(context, listen: false);
+                          orderStore.setPaymentFilter(null);
+                          orderStore.clearCustomerRankingSelection();
                           _updateDashboardPeriod();
                         }
-                      : null,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ],
+                      },
+                      child: Column(
+                        children: [
+                          Text(
+                            periodLabel,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (_periodOffset != 0)
+                            Text(
+                              'Toque para voltar ao atual',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontSize: 10,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.chevron_right,
+                      color: _periodOffset < 0
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outline.withOpacity(0.3),
+                    ),
+                    onPressed: _periodOffset < 0
+                        ? () {
+                            setState(() => _periodOffset++);
+                            _updateDashboardPeriod();
+                          }
+                        : null,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
             ),
-          ),
+          if (selectedPeriod == 'custom')
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.date_range,
+                    size: 20,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    periodLabel,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      size: 20,
+                      color: theme.colorScheme.primary,
+                    ),
+                    onPressed: () => _showCustomPeriodPicker(theme),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
+  }
+
+  Future<void> _showCustomPeriodPicker(ThemeData theme) async {
+    final now = DateTime.now();
+    final initialStart = _customStartDate ?? now.subtract(const Duration(days: 30));
+    final initialEnd = _customEndDate ?? now;
+
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      initialDateRange: DateTimeRange(start: initialStart, end: initialEnd),
+      builder: (context, child) {
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme,
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedPeriod = 'custom';
+        _customStartDate = picked.start;
+        _customEndDate = picked.end;
+        _periodOffset = 0;
+      });
+      _updateDashboardPeriodCustom(picked.start, picked.end);
+    }
+  }
+
+  void _updateDashboardPeriodCustom(DateTime start, DateTime end) {
+    final orderStore = Provider.of<OrderStore>(context, listen: false);
+    orderStore.setCustomDateRange(start, end);
+  }
+
+  // Calculate services ranking from orders
+  List<Map<String, dynamic>> _calculateServicesRanking(OrderStore orderStore) {
+    final Map<String, Map<String, dynamic>> servicesMap = {};
+
+    for (final order in orderStore.recentOrders) {
+      if (order?.services != null) {
+        for (final service in order!.services!) {
+          final name = service.service?.name ?? service.description ?? 'Serviço sem nome';
+          final value = service.value ?? 0.0;
+
+          if (servicesMap.containsKey(name)) {
+            servicesMap[name]!['total'] = (servicesMap[name]!['total'] as double) + value;
+            servicesMap[name]!['quantity'] = (servicesMap[name]!['quantity'] as int) + 1;
+          } else {
+            servicesMap[name] = {
+              'name': name,
+              'total': value,
+              'quantity': 1,
+            };
+          }
+        }
+      }
+    }
+
+    final ranking = servicesMap.values.toList();
+    ranking.sort((a, b) => (b['total'] as double).compareTo(a['total'] as double));
+    return ranking;
+  }
+
+  // Calculate products ranking from orders
+  List<Map<String, dynamic>> _calculateProductsRanking(OrderStore orderStore) {
+    final Map<String, Map<String, dynamic>> productsMap = {};
+
+    for (final order in orderStore.recentOrders) {
+      if (order?.products != null) {
+        for (final product in order!.products!) {
+          final name = product.product?.name ?? product.description ?? 'Produto sem nome';
+          final total = product.total ?? (product.value ?? 0.0) * (product.quantity ?? 1);
+          final quantity = product.quantity ?? 1;
+
+          if (productsMap.containsKey(name)) {
+            productsMap[name]!['total'] = (productsMap[name]!['total'] as double) + total;
+            productsMap[name]!['quantity'] = (productsMap[name]!['quantity'] as int) + quantity;
+          } else {
+            productsMap[name] = {
+              'name': name,
+              'total': total,
+              'quantity': quantity,
+            };
+          }
+        }
+      }
+    }
+
+    final ranking = productsMap.values.toList();
+    ranking.sort((a, b) => (b['total'] as double).compareTo(a['total'] as double));
+    return ranking;
   }
 
   Widget _buildKpiCards(OrderStore orderStore, ThemeData theme) {
@@ -702,7 +881,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             child: Row(
               children: [
                 Icon(
-                  Icons.leaderboard_outlined,
+                  Icons.people_outline,
                   size: 20,
                   color: theme.colorScheme.primary,
                 ),
@@ -753,15 +932,25 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               final double unpaidAmount = customer['unpaidTotal'] ?? 0.0;
               final double paidAmount = totalAmount - unpaidAmount;
 
-              return _buildCustomerItem(
+              return _buildRankingItem(
                 theme: theme,
                 index: index,
                 name: customer['name'] ?? 'Cliente sem nome',
-                paidAmount: paidAmount,
-                unpaidAmount: unpaidAmount,
-                totalAmount: totalAmount,
+                value: orderStore.paymentFilter == 'paid'
+                    ? paidAmount
+                    : orderStore.paymentFilter == 'unpaid'
+                        ? unpaidAmount
+                        : totalAmount,
+                secondaryValue: orderStore.paymentFilter == null && unpaidAmount > 0
+                    ? unpaidAmount
+                    : null,
                 isSelected: isSelected,
-                paymentFilter: orderStore.paymentFilter,
+                color: orderStore.paymentFilter == 'paid'
+                    ? Colors.green.shade600
+                    : orderStore.paymentFilter == 'unpaid'
+                        ? Colors.orange.shade700
+                        : theme.colorScheme.primary,
+                secondaryColor: Colors.orange.shade700,
                 onTap: () {
                   if (isSelected) {
                     orderStore.clearCustomerRankingSelection();
@@ -773,55 +962,271 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             },
           ),
           if (filteredRanking.length > 5)
-            InkWell(
-              onTap: () {
-                setState(() => _isRankingExpanded = !_isRankingExpanded);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: theme.colorScheme.outline.withOpacity(0.1),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _isRankingExpanded ? 'Ver menos' : 'Ver todos',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      _isRankingExpanded
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      size: 18,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ],
-                ),
-              ),
+            _buildExpandButton(
+              theme: theme,
+              isExpanded: _isRankingExpanded,
+              onTap: () => setState(() => _isRankingExpanded = !_isRankingExpanded),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildCustomerItem({
+  Widget _buildServicesRanking(OrderStore orderStore, ThemeData theme) {
+    final servicesRanking = _calculateServicesRanking(orderStore);
+
+    if (servicesRanking.isEmpty) {
+      return _buildEmptyState(
+        theme: theme,
+        icon: Icons.build_outlined,
+        message: 'Sem dados de serviços neste período',
+      );
+    }
+
+    final itemCount = _isServicesExpanded
+        ? servicesRanking.length
+        : (servicesRanking.length > 5 ? 5 : servicesRanking.length);
+
+    // Calculate totals
+    final totalServicesValue = servicesRanking.fold<double>(
+      0, (sum, item) => sum + (item['total'] as double));
+    final totalServicesQty = servicesRanking.fold<int>(
+      0, (sum, item) => sum + (item['quantity'] as int));
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.1),
+        ),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.build_outlined,
+                      size: 20,
+                      color: Colors.blue.shade600,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Serviços',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${servicesRanking.length}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      'Total: ${_convertToCurrency(totalServicesValue)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.blue.shade700,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      'Qtd: $totalServicesQty',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: itemCount,
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              indent: 16,
+              endIndent: 16,
+              color: theme.colorScheme.outline.withOpacity(0.1),
+            ),
+            itemBuilder: (context, index) {
+              final service = servicesRanking[index];
+              return _buildRankingItemWithQty(
+                theme: theme,
+                index: index,
+                name: service['name'] as String,
+                value: service['total'] as double,
+                quantity: service['quantity'] as int,
+                color: Colors.blue.shade600,
+              );
+            },
+          ),
+          if (servicesRanking.length > 5)
+            _buildExpandButton(
+              theme: theme,
+              isExpanded: _isServicesExpanded,
+              onTap: () => setState(() => _isServicesExpanded = !_isServicesExpanded),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductsRanking(OrderStore orderStore, ThemeData theme) {
+    final productsRanking = _calculateProductsRanking(orderStore);
+
+    if (productsRanking.isEmpty) {
+      return _buildEmptyState(
+        theme: theme,
+        icon: Icons.inventory_2_outlined,
+        message: 'Sem dados de produtos neste período',
+      );
+    }
+
+    final itemCount = _isProductsExpanded
+        ? productsRanking.length
+        : (productsRanking.length > 5 ? 5 : productsRanking.length);
+
+    // Calculate totals
+    final totalProductsValue = productsRanking.fold<double>(
+      0, (sum, item) => sum + (item['total'] as double));
+    final totalProductsQty = productsRanking.fold<int>(
+      0, (sum, item) => sum + (item['quantity'] as int));
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.1),
+        ),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.inventory_2_outlined,
+                      size: 20,
+                      color: Colors.purple.shade600,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Produtos',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${productsRanking.length}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(
+                      'Total: ${_convertToCurrency(totalProductsValue)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.purple.shade700,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      'Qtd: $totalProductsQty',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: itemCount,
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              indent: 16,
+              endIndent: 16,
+              color: theme.colorScheme.outline.withOpacity(0.1),
+            ),
+            itemBuilder: (context, index) {
+              final product = productsRanking[index];
+              return _buildRankingItemWithQty(
+                theme: theme,
+                index: index,
+                name: product['name'] as String,
+                value: product['total'] as double,
+                quantity: product['quantity'] as int,
+                color: Colors.purple.shade600,
+              );
+            },
+          ),
+          if (productsRanking.length > 5)
+            _buildExpandButton(
+              theme: theme,
+              isExpanded: _isProductsExpanded,
+              onTap: () => setState(() => _isProductsExpanded = !_isProductsExpanded),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRankingItem({
     required ThemeData theme,
     required int index,
     required String name,
-    required double paidAmount,
-    required double unpaidAmount,
-    required double totalAmount,
+    required double value,
+    double? secondaryValue,
     required bool isSelected,
-    String? paymentFilter,
+    required Color color,
+    Color? secondaryColor,
     VoidCallback? onTap,
   }) {
     Color rankColor;
@@ -878,40 +1283,140 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (paymentFilter == 'paid')
+                Text(
+                  _convertToCurrency(value),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                if (secondaryValue != null)
                   Text(
-                    _convertToCurrency(paidAmount),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green.shade600,
-                    ),
-                  )
-                else if (paymentFilter == 'unpaid')
-                  Text(
-                    _convertToCurrency(unpaidAmount),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.orange.shade700,
-                    ),
-                  )
-                else ...[
-                  Text(
-                    _convertToCurrency(totalAmount),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.primary,
+                    _convertToCurrency(secondaryValue),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: secondaryColor ?? Colors.orange.shade700,
+                      fontSize: 11,
                     ),
                   ),
-                  if (unpaidAmount > 0)
-                    Text(
-                      _convertToCurrency(unpaidAmount),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.orange.shade700,
-                        fontSize: 11,
-                      ),
-                    ),
-                ],
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRankingItemWithQty({
+    required ThemeData theme,
+    required int index,
+    required String name,
+    required double value,
+    required int quantity,
+    required Color color,
+  }) {
+    Color rankColor;
+    if (index == 0) {
+      rankColor = Colors.amber.shade600;
+    } else if (index == 1) {
+      rankColor = Colors.blueGrey.shade400;
+    } else if (index == 2) {
+      rankColor = Colors.brown.shade400;
+    } else {
+      rankColor = theme.colorScheme.outline;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: rankColor.withOpacity(0.15),
+              shape: BoxShape.circle,
+              border: index < 3
+                  ? Border.all(color: rankColor, width: 2)
+                  : null,
+            ),
+            child: Center(
+              child: Text(
+                '${index + 1}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: rankColor,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              name,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                _convertToCurrency(value),
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+              Text(
+                'Qtd: $quantity',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpandButton({
+    required ThemeData theme,
+    required bool isExpanded,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: theme.colorScheme.outline.withOpacity(0.1),
+            ),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              isExpanded ? 'Ver menos' : 'Ver todos',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              isExpanded
+                  ? Icons.keyboard_arrow_up
+                  : Icons.keyboard_arrow_down,
+              size: 18,
+              color: theme.colorScheme.primary,
             ),
           ],
         ),
@@ -1104,40 +1609,10 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             },
           ),
           if (filteredOrders.length > 5)
-            InkWell(
-              onTap: () {
-                setState(() => _isRecentOrdersExpanded = !_isRecentOrdersExpanded);
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: BorderSide(
-                      color: theme.colorScheme.outline.withOpacity(0.1),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _isRecentOrdersExpanded ? 'Ver menos' : 'Ver todas',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      _isRecentOrdersExpanded
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
-                      size: 18,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ],
-                ),
-              ),
+            _buildExpandButton(
+              theme: theme,
+              isExpanded: _isRecentOrdersExpanded,
+              onTap: () => setState(() => _isRecentOrdersExpanded = !_isRecentOrdersExpanded),
             ),
         ],
       ),
@@ -1327,7 +1802,6 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     final accentColor = PdfColors.blue900;
     final successColor = PdfColors.green700;
     final warningColor = PdfColors.orange700;
-    final backgroundColor = PdfColors.grey100;
     final textColor = PdfColors.grey800;
 
     final baseFont = pw.Font.helvetica();
@@ -1343,6 +1817,10 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     final unpaidPercentage = totalValue > 0
         ? (orderStore.totalUnpaidAmount / totalValue * 100).toStringAsFixed(1)
         : "0";
+
+    // Calculate services and products rankings
+    final servicesRanking = _calculateServicesRanking(orderStore);
+    final productsRanking = _calculateProductsRanking(orderStore);
 
     pdf.addPage(
       pw.MultiPage(
@@ -1519,6 +1997,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               content.add(_buildPdfOrdersTable(clientOrders, boldFont, baseFont, textColor, accentColor, true));
             }
           } else {
+            // Financial Summary
             content.add(
               pw.Container(
                 margin: const pw.EdgeInsets.only(bottom: 24),
@@ -1582,35 +2061,9 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               ),
             );
 
+            // Customer Ranking
             if (orderStore.customerRanking.isNotEmpty) {
               var filteredRanking = List.from(orderStore.customerRanking);
-
-              if (orderStore.paymentFilter != null) {
-                filteredRanking = filteredRanking.where((customer) {
-                  final double total = customer['total'] ?? 0.0;
-                  final double unpaidTotal = customer['unpaidTotal'] ?? 0.0;
-                  final double paidTotal = total - unpaidTotal;
-
-                  if (orderStore.paymentFilter == 'paid') return paidTotal > 0;
-                  if (orderStore.paymentFilter == 'unpaid') return unpaidTotal > 0;
-                  return true;
-                }).toList();
-
-                filteredRanking.sort((a, b) {
-                  final double totalA = a['total'] ?? 0.0;
-                  final double unpaidTotalA = a['unpaidTotal'] ?? 0.0;
-                  final double paidTotalA = totalA - unpaidTotalA;
-
-                  final double totalB = b['total'] ?? 0.0;
-                  final double unpaidTotalB = b['unpaidTotal'] ?? 0.0;
-                  final double paidTotalB = totalB - unpaidTotalB;
-
-                  if (orderStore.paymentFilter == 'paid') {
-                    return paidTotalB.compareTo(paidTotalA);
-                  }
-                  return unpaidTotalB.compareTo(unpaidTotalA);
-                });
-              }
 
               content.add(
                 pw.Container(
@@ -1660,6 +2113,91 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               );
             }
 
+            // Services Ranking
+            if (servicesRanking.isNotEmpty) {
+              content.add(
+                pw.Container(
+                  margin: const pw.EdgeInsets.only(bottom: 24),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Ranking de Servicos',
+                        style: pw.TextStyle(font: boldFont, fontSize: 16, color: PdfColors.blue700),
+                      ),
+                      pw.SizedBox(height: 12),
+                      pw.Table.fromTextArray(
+                        border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+                        headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 10),
+                        headerDecoration: pw.BoxDecoration(color: PdfColors.blue700),
+                        cellStyle: pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
+                        cellPadding: const pw.EdgeInsets.all(8),
+                        cellAlignments: {
+                          0: pw.Alignment.center,
+                          1: pw.Alignment.centerLeft,
+                          2: pw.Alignment.center,
+                          3: pw.Alignment.centerRight,
+                        },
+                        headers: ['#', 'Servico', 'Qtd', 'Valor'],
+                        data: List.generate(
+                          servicesRanking.length,
+                          (index) => [
+                            '${index + 1}',
+                            _latinCharactersOnly(servicesRanking[index]['name'] as String),
+                            '${servicesRanking[index]['quantity']}',
+                            _convertToCurrency(servicesRanking[index]['total'] as double),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            // Products Ranking
+            if (productsRanking.isNotEmpty) {
+              content.add(
+                pw.Container(
+                  margin: const pw.EdgeInsets.only(bottom: 24),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        'Ranking de Produtos',
+                        style: pw.TextStyle(font: boldFont, fontSize: 16, color: PdfColors.purple700),
+                      ),
+                      pw.SizedBox(height: 12),
+                      pw.Table.fromTextArray(
+                        border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+                        headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 10),
+                        headerDecoration: pw.BoxDecoration(color: PdfColors.purple700),
+                        cellStyle: pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
+                        cellPadding: const pw.EdgeInsets.all(8),
+                        cellAlignments: {
+                          0: pw.Alignment.center,
+                          1: pw.Alignment.centerLeft,
+                          2: pw.Alignment.center,
+                          3: pw.Alignment.centerRight,
+                        },
+                        headers: ['#', 'Produto', 'Qtd', 'Valor'],
+                        data: List.generate(
+                          productsRanking.length,
+                          (index) => [
+                            '${index + 1}',
+                            _latinCharactersOnly(productsRanking[index]['name'] as String),
+                            '${productsRanking[index]['quantity']}',
+                            _convertToCurrency(productsRanking[index]['total'] as double),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            // Orders Table
             if (orderStore.recentOrders.isNotEmpty) {
               final filteredOrders = orderStore.paymentFilter == null
                   ? orderStore.recentOrders
