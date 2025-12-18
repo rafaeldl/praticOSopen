@@ -15,82 +15,33 @@ class OrderPhotosWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Fotos',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    return Observer(
+      builder: (_) {
+        // Show loading indicator while uploading
+        if (store.isUploadingPhoto) {
+          return Container(
+            height: 120,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 8),
+                  Text('Enviando foto...'),
+                ],
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.add_a_photo),
-              onPressed: () => _showAddPhotoOptions(context),
-            ),
-          ],
-        ),
-        SizedBox(height: 8),
-        Observer(
-          builder: (_) {
-            if (store.isUploadingPhoto) {
-              return Container(
-                height: 120,
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 8),
-                      Text('Enviando foto...'),
-                    ],
-                  ),
-                ),
-              );
-            }
+          );
+        }
 
-            if (store.photos.isEmpty) {
-              return GestureDetector(
-                onTap: () => _showAddPhotoOptions(context),
-                child: Container(
-                  height: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.add_photo_alternate,
-                          size: 48,
-                          color: Colors.grey[400],
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Adicionar fotos',
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }
+        // Don't show anything if no photos
+        if (store.photos.isEmpty) {
+          return SizedBox.shrink();
+        }
 
-            return _buildPhotosGrid(context);
-          },
-        ),
-      ],
+        // Show photos grid
+        return _buildPhotosGrid(context);
+      },
     );
   }
 
@@ -108,6 +59,7 @@ class OrderPhotosWidget extends StatelessWidget {
 
   Widget _buildCoverPhoto(BuildContext context) {
     final OrderPhoto coverPhoto = store.photos.first;
+    final theme = Theme.of(context);
 
     return GestureDetector(
       onTap: () => _showPhotoViewer(context, 0),
@@ -118,19 +70,14 @@ class OrderPhotosWidget extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey[300]!,
-                  blurRadius: 6.0,
-                  spreadRadius: 2.0,
-                  offset: Offset(3.0, 3.0),
-                ),
-              ],
             ),
-            child: CachedImage.cover(
-              imageUrl: coverPhoto.url!,
-              height: 200,
+            child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
+              child: CachedImage.cover(
+                imageUrl: coverPhoto.url!,
+                height: 200,
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
           Positioned(
@@ -139,16 +86,27 @@ class OrderPhotosWidget extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: theme.colorScheme.primary,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Text(
-                'Capa',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.photo_library,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    '${store.photos.length}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -254,66 +212,10 @@ class OrderPhotosWidget extends StatelessWidget {
     );
   }
 
-  void _showAddPhotoOptions(BuildContext context) {
-    // Salva o contexto do Scaffold pai antes de abrir o modal
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (modalContext) {
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListTile(
-                  leading: Icon(Icons.camera_alt, color: Theme.of(context).primaryColor),
-                  title: Text('Tirar foto'),
-                  onTap: () async {
-                    Navigator.pop(modalContext);
-                    final success = await store.addPhotoFromCamera();
-                    if (!success && context.mounted) {
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(content: Text('Erro ao adicionar foto')),
-                      );
-                    }
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.photo_library, color: Theme.of(context).primaryColor),
-                  title: Text('Escolher da galeria'),
-                  onTap: () async {
-                    Navigator.pop(modalContext);
-                    final success = await store.addPhotoFromGallery();
-                    if (!success && context.mounted) {
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(content: Text('Erro ao adicionar foto')),
-                      );
-                    }
-                  },
-                ),
-                SizedBox(height: 8),
-                ListTile(
-                  leading: Icon(Icons.close, color: Colors.grey),
-                  title: Text('Cancelar'),
-                  onTap: () => Navigator.pop(modalContext),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   void _confirmDeletePhoto(BuildContext context, int index) {
     // Salva o contexto do Scaffold antes de abrir o dialog
     final scaffoldMessenger = ScaffoldMessenger.of(context);
-    
+
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -423,7 +325,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
 
       // Baixa a imagem
       final response = await http.get(Uri.parse(url));
-      
+
       if (response.statusCode != 200) {
         throw Exception('Falha ao baixar imagem');
       }
@@ -438,12 +340,12 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
       // Define uma origem para o popover no iPad/iOS
       final box = context.findRenderObject() as RenderBox?;
       final size = MediaQuery.of(context).size;
-      
+
       await Share.shareXFiles(
         [XFile(file.path)],
         text: 'Foto da Ordem de Serviço',
-        sharePositionOrigin: box != null 
-            ? box.localToGlobal(Offset.zero) & box.size 
+        sharePositionOrigin: box != null
+            ? box.localToGlobal(Offset.zero) & box.size
             : Rect.fromLTWH(0, 0, size.width, size.height / 2),
       );
     } catch (e) {
@@ -475,10 +377,10 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
         ),
         actions: [
           IconButton(
-            icon: _isSharing 
+            icon: _isSharing
                 ? SizedBox(
-                    width: 20, 
-                    height: 20, 
+                    width: 20,
+                    height: 20,
                     child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
                   )
                 : Icon(Icons.share),
