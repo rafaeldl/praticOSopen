@@ -547,11 +547,153 @@ abstract class _OrderStore with Store {
     loadOrdersForDashboard();
   }
 
+  @observable
+  DateTime? customStartDate;
+
+  @observable
+  DateTime? customEndDate;
+
   @action
   void setCustomPeriod(String period, int offset) {
     selectedDashboardPeriod = period;
     periodOffset = offset;
+    customStartDate = null;
+    customEndDate = null;
     loadOrdersForDashboard();
+  }
+
+  @action
+  void setCustomDateRange(DateTime start, DateTime end) {
+    selectedDashboardPeriod = 'custom';
+    periodOffset = 0;
+    customStartDate = start;
+    customEndDate = end;
+    loadOrdersForDashboardCustomRange(start, end);
+  }
+
+  @action
+  Future<void> loadOrdersForDashboardCustomRange(DateTime start, DateTime end) async {
+    try {
+      final orders = await repository.getOrdersByDateRange(start, end);
+
+      // Filtrar ordens que não são orçamentos
+      var filteredOrders =
+          orders.where((order) => order?.status != 'quote').toList();
+
+      // Aplicar filtro por cliente selecionado no ranking
+      if (selectedCustomerInRanking != null) {
+        String customerId = selectedCustomerInRanking!['id'];
+        if (customerId == 'sem-cliente') {
+          filteredOrders = filteredOrders
+              .where((order) => order?.customer?.id == null)
+              .toList();
+        } else {
+          filteredOrders = filteredOrders
+              .where((order) => order?.customer?.id == customerId)
+              .toList();
+        }
+      }
+
+      // Calcular totais baseados nas ordens filtradas
+      totalOrdersCount = filteredOrders.length;
+      paidOrdersCount =
+          filteredOrders.where((order) => order?.payment == 'paid').length;
+
+      // Calcular o faturamento total (soma de todos os valores)
+      totalRevenue =
+          filteredOrders.fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
+
+      // Calcular valores pagos e a receber
+      totalPaidAmount = filteredOrders
+          .where((order) => order?.payment == 'paid')
+          .fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
+
+      totalUnpaidAmount = filteredOrders
+          .where((order) => order?.payment == 'unpaid')
+          .fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
+
+      // Atualizar paymentStatusCounts para o gráfico
+      paymentStatusCounts.clear();
+      paymentStatusCounts['paid'] = totalPaidAmount;
+      paymentStatusCounts['unpaid'] = totalUnpaidAmount;
+
+      // Calcular os totais por cliente
+      customerOrderTotals.clear();
+      customerUnpaidTotals.clear();
+
+      double semClienteTotal = 0.0;
+      double semClienteUnpaid = 0.0;
+
+      for (var order in filteredOrders) {
+        if (order?.total != null) {
+          if (order?.customer?.id != null) {
+            String customerId = order!.customer!.id!;
+            double currentTotal = customerOrderTotals[customerId] ?? 0.0;
+            customerOrderTotals[customerId] = currentTotal + order.total!;
+
+            if (order.payment == 'unpaid') {
+              double currentUnpaid = customerUnpaidTotals[customerId] ?? 0.0;
+              customerUnpaidTotals[customerId] = currentUnpaid + order.total!;
+            }
+          } else {
+            semClienteTotal += order!.total!;
+            if (order.payment == 'unpaid') {
+              semClienteUnpaid += order.total!;
+            }
+          }
+        }
+      }
+
+      // Gerar o ranking de clientes
+      customerRanking.clear();
+
+      if (semClienteTotal > 0) {
+        customerRanking.add({
+          'id': 'sem-cliente',
+          'name': 'Sem Cliente',
+          'total': semClienteTotal,
+          'unpaidTotal': semClienteUnpaid,
+        });
+      }
+
+      customerOrderTotals.forEach((customerId, total) {
+        if (total > 0) {
+          var customerName = filteredOrders
+                  .firstWhere((order) => order?.customer?.id == customerId,
+                      orElse: () => null)
+                  ?.customer
+                  ?.name ??
+              'Cliente sem nome';
+
+          customerRanking.add({
+            'id': customerId,
+            'name': customerName,
+            'total': total,
+            'unpaidTotal': customerUnpaidTotals[customerId] ?? 0.0,
+          });
+        }
+      });
+
+      sortCustomerRanking();
+
+      // Aplicar filtro de pagamento nas ordens recentes
+      if (paymentFilter != null) {
+        filteredOrders = filteredOrders
+            .where((order) => order?.payment == paymentFilter)
+            .toList();
+      }
+
+      // Ordenar ordens por data de atualização
+      filteredOrders.sort((a, b) {
+        if (a?.updatedAt == null || b?.updatedAt == null) return 0;
+        return b!.updatedAt!.compareTo(a!.updatedAt!);
+      });
+
+      recentOrders.clear();
+      recentOrders.addAll(filteredOrders);
+    } catch (e) {
+      print('Erro ao carregar dados para dashboard (custom range): $e');
+    }
   }
 
   @action

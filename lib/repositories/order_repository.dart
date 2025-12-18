@@ -125,4 +125,33 @@ class OrderRepository extends Repository<Order?> {
       return [];
     }
   }
+
+  Future<List<Order?>> getOrdersByDateRange(
+      DateTime startDate, DateTime endDate) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? companyId = prefs.getString('companyId');
+    if (companyId == null) companyId = '';
+
+    try {
+      // Adicionar filtros incluindo os de data
+      List<QueryArgs> filterList = [
+        QueryArgs('company.id', companyId),
+        QueryArgs('createdAt', startDate.toIso8601String(),
+            oper: 'isGreaterThanOrEqualTo'),
+        QueryArgs('createdAt', endDate.toIso8601String(), oper: 'isLessThan')
+      ];
+
+      // Configurar ordenação
+      List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
+
+      // Obter os dados
+      final stream = streamQueryList(orderBy: orderBy, args: filterList);
+      final snapshot = await stream.first;
+
+      return snapshot;
+    } catch (e) {
+      print('Erro ao buscar ordens por intervalo de datas: $e');
+      return [];
+    }
+  }
 }
