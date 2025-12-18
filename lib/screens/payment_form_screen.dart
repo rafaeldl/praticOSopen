@@ -3,11 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 
-class PaymentFormScreen extends StatelessWidget {
-  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
-  Map<String, dynamic>? args;
+class PaymentFormScreen extends StatefulWidget {
+  const PaymentFormScreen({Key? key}) : super(key: key);
 
-  NumberFormat numberFormat = NumberFormat.currency(
+  @override
+  State<PaymentFormScreen> createState() => _PaymentFormScreenState();
+}
+
+class _PaymentFormScreenState extends State<PaymentFormScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+  bool _initialized = false;
+
+  final NumberFormat numberFormat = NumberFormat.currency(
     locale: 'pt-BR',
     symbol: 'R\$',
   );
@@ -16,35 +24,121 @@ class PaymentFormScreen extends StatelessWidget {
   OrderStore? _store;
 
   @override
-  Widget build(BuildContext context) {
-    args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-    if (args != null && args!.containsKey('orderStore')) {
-      _store = args!['orderStore'];
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      if (args != null && args.containsKey('orderStore')) {
+        _store = args['orderStore'];
+      }
+      _initialized = true;
     }
+  }
 
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("Pagamento"),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  Navigator.pop(context, value);
-                }
-              },
-              child: Text("Salvar"),
-            ),
-          ],
-        ),
-        body: Container(
-          margin: EdgeInsets.fromLTRB(20, 30, 20, 0),
+  void _saveDiscount() {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _isLoading = true);
+      _formKey.currentState!.save();
+      Navigator.pop(context, value);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Desconto'),
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
           child: Form(
             key: _formKey,
             child: Column(
-              // mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[_buildValueField()],
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Header icon
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    child: Icon(
+                      Icons.local_offer,
+                      size: 40,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Info card
+                Card(
+                  elevation: 0,
+                  color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: theme.colorScheme.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Total da OS',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              Text(
+                                _convertToCurrency(_store?.total),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Discount field
+                _buildValueField(theme),
+                const SizedBox(height: 32),
+
+                // Save button
+                FilledButton.icon(
+                  onPressed: _isLoading ? null : _saveDiscount,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.check),
+                  label: Text(_isLoading ? 'Salvando...' : 'Aplicar Desconto'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -52,12 +146,29 @@ class PaymentFormScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildValueField() {
+  InputDecoration _inputDecoration({
+    required String label,
+    required IconData icon,
+    String? hint,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: Icon(icon),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      filled: true,
+    );
+  }
+
+  Widget _buildValueField(ThemeData theme) {
     return TextFormField(
-      initialValue: _convertToCurrency(_store!.discount),
-      decoration: const InputDecoration(
-        icon: Icon(Icons.local_offer),
-        labelText: 'Desconto R\$',
+      initialValue: _convertToCurrency(_store?.discount),
+      decoration: _inputDecoration(
+        label: 'Valor do desconto',
+        icon: Icons.local_offer_outlined,
+        hint: 'R\$ 0,00',
       ),
       inputFormatters: [
         CurrencyTextInputFormatter.currency(
@@ -67,36 +178,42 @@ class PaymentFormScreen extends StatelessWidget {
         ),
       ],
       keyboardType: TextInputType.number,
+      style: theme.textTheme.headlineSmall?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
       validator: (value) {
-        if (value!.isEmpty) {
+        if (value == null || value.isEmpty) {
           return 'Preencha o valor do desconto';
         }
 
-        value = value
+        final cleanValue = value
             .replaceAll(RegExp(r'R\$'), '')
             .replaceAll(RegExp(r'BRL'), '')
             .replaceAll(RegExp(r'\.'), '')
-            .replaceAll(RegExp(r','), '.');
-        double valueDouble = double.parse(value);
-        if (valueDouble > _store!.total!) {
-          return 'Valor do desconto não pode ser maior que o total.';
+            .replaceAll(RegExp(r','), '.')
+            .trim();
+
+        final valueDouble = double.tryParse(cleanValue) ?? 0;
+        if (_store?.total != null && valueDouble > _store!.total!) {
+          return 'Desconto não pode ser maior que o total';
         }
         return null;
       },
       onSaved: (String? value) {
-        value = value!
+        final cleanValue = value!
             .replaceAll(RegExp(r'R\$'), '')
             .replaceAll(RegExp(r'BRL'), '')
             .replaceAll(RegExp(r'\.'), '')
-            .replaceAll(RegExp(r','), '.');
+            .replaceAll(RegExp(r','), '.')
+            .trim();
 
-        this.value = double.parse(value);
+        this.value = double.tryParse(cleanValue) ?? 0;
       },
     );
   }
 
   String _convertToCurrency(double? total) {
-    if (total == null) return '';
+    if (total == null || total == 0) return '';
     return numberFormat.format(total);
   }
 }

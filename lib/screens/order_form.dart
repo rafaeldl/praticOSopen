@@ -82,17 +82,29 @@ class _OrderFormState extends State<OrderForm> {
           ),
           actions: [
             IconButton(
-              icon: const Icon(Icons.share_outlined),
-              tooltip: 'Compartilhar PDF',
-              onPressed: () => _onShare(context, _store.order),
+              icon: const Icon(Icons.add_a_photo_outlined),
+              tooltip: 'Adicionar foto',
+              onPressed: () => _showAddPhotoOptions(),
             ),
             PopupMenuButton<String>(
               onSelected: (value) async {
-                if (value == 'delete') {
+                if (value == 'share') {
+                  _onShare(context, _store.order);
+                } else if (value == 'delete') {
                   _showDeleteConfirmation();
                 }
               },
               itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'share',
+                  child: Row(
+                    children: [
+                      Icon(Icons.share_outlined),
+                      SizedBox(width: 8),
+                      Text('Compartilhar PDF'),
+                    ],
+                  ),
+                ),
                 const PopupMenuItem(
                   value: 'delete',
                   child: Row(
@@ -811,6 +823,62 @@ class _OrderFormState extends State<OrderForm> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showAddPhotoOptions() {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (modalContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.camera_alt, color: theme.colorScheme.primary),
+                  title: const Text('Tirar foto'),
+                  onTap: () async {
+                    Navigator.pop(modalContext);
+                    final success = await _store.addPhotoFromCamera();
+                    if (!success && mounted) {
+                      scaffoldMessenger.showSnackBar(
+                        const SnackBar(content: Text('Erro ao adicionar foto')),
+                      );
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.photo_library, color: theme.colorScheme.primary),
+                  title: const Text('Escolher da galeria'),
+                  onTap: () async {
+                    Navigator.pop(modalContext);
+                    final success = await _store.addPhotoFromGallery();
+                    if (!success && mounted) {
+                      scaffoldMessenger.showSnackBar(
+                        const SnackBar(content: Text('Erro ao adicionar foto')),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                ListTile(
+                  leading: const Icon(Icons.close, color: Colors.grey),
+                  title: const Text('Cancelar'),
+                  onTap: () => Navigator.pop(modalContext),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
