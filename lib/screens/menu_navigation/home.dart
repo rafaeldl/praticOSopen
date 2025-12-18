@@ -397,7 +397,7 @@ class _HomeState extends State<Home> {
                                     Padding(
                                       padding: EdgeInsets.only(left: 6),
                                       child: Icon(
-                                        Icons.check_circle,
+                                        Icons.paid_rounded,
                                         size: 16,
                                         color: AppTheme.successColor,
                                       ),
