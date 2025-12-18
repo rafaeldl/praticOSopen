@@ -28,15 +28,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   @override
   void initState() {
     super.initState();
-    // Inicializar dados de localização para formatação de datas em português
     initializeDateFormatting('pt_BR', null);
   }
 
   String get periodLabel {
-    // Obter a data atual
     DateTime now = DateTime.now();
-
-    // Aplicar o offset ao período selecionado
     DateTime periodDate = now;
 
     if (_periodOffset != 0) {
@@ -56,28 +52,26 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       }
     }
 
-    // Formatar a data de acordo com o tipo de período
     final DateFormat monthFormat = DateFormat('MMMM/yy', 'pt_BR');
     final DateFormat dayFormat = DateFormat('dd MMM', 'pt_BR');
     final DateFormat yearFormat = DateFormat('yyyy', 'pt_BR');
 
     switch (selectedPeriod) {
       case 'hoje':
-        return "Hoje ${_periodOffset != 0 ? '(' + dayFormat.format(periodDate) + ')' : ''}";
+        return _periodOffset != 0 ? dayFormat.format(periodDate) : 'Hoje';
       case 'semana':
-        // Para semana, mostramos a data inicial e final da semana
         DateTime startOfWeek =
             periodDate.subtract(Duration(days: periodDate.weekday));
         DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
-        String weekRange =
-            "${dayFormat.format(startOfWeek)} - ${dayFormat.format(endOfWeek)}";
-        return "Semana ${_periodOffset != 0 ? '(' + weekRange + ')' : 'atual'}";
+        return "${dayFormat.format(startOfWeek)} - ${dayFormat.format(endOfWeek)}";
       case 'mês':
-        String monthName = monthFormat.format(periodDate).toUpperCase();
-        return "Mês ${_periodOffset != 0 ? '(' + monthName + ')' : 'atual'}";
+        return _periodOffset != 0
+            ? monthFormat.format(periodDate)
+            : 'Mês atual';
       case 'ano':
-        String yearValue = yearFormat.format(periodDate);
-        return "Ano ${_periodOffset != 0 ? '(' + yearValue + ')' : 'atual'}";
+        return _periodOffset != 0
+            ? yearFormat.format(periodDate)
+            : 'Ano atual';
       default:
         return selectedPeriod;
     }
@@ -86,27 +80,23 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   @override
   Widget build(BuildContext context) {
     final orderStore = Provider.of<OrderStore>(context);
+    final theme = Theme.of(context);
 
-    // Carregar dados para o dashboard
     orderStore.loadOrdersForDashboard();
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: Text('Painel Financeiro'),
+        title: const Text('Painel Financeiro'),
+        centerTitle: false,
+        elevation: 0,
         actions: [
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Tooltip(
-              message: 'Gerar relatório',
-              child: IconButton(
-                icon: Icon(Icons.description),
-                onPressed: () {
-                  _generateReport(orderStore);
-                },
-              ),
-            ),
+          IconButton(
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            tooltip: 'Gerar Relatório PDF',
+            onPressed: () => _generateReport(orderStore),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
         ],
       ),
       body: RefreshIndicator(
@@ -114,18 +104,32 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
           await orderStore.loadOrdersForDashboard();
         },
         child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.all(16.0),
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildPeriodFilter(),
-              SizedBox(height: 16.0),
-              Observer(builder: (_) => _buildFinancialSummary(orderStore)),
-              SizedBox(height: 24.0),
-              Observer(builder: (_) => _buildCustomerRanking(orderStore)),
-              SizedBox(height: 24.0),
-              Observer(builder: (_) => _buildRecentOrders(orderStore)),
+              _buildPeriodSelector(theme),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Observer(builder: (_) => _buildKpiCards(orderStore, theme)),
+                    const SizedBox(height: 20),
+                    Observer(
+                        builder: (_) =>
+                            _buildRevenueBreakdown(orderStore, theme)),
+                    const SizedBox(height: 20),
+                    Observer(
+                        builder: (_) =>
+                            _buildCustomerRanking(orderStore, theme)),
+                    const SizedBox(height: 20),
+                    Observer(
+                        builder: (_) => _buildRecentOrders(orderStore, theme)),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -133,175 +137,111 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     );
   }
 
-  Widget _buildPeriodFilter() {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  Widget _buildPeriodSelector(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         children: [
-          // Header com título
+          // Period type selector
+          SegmentedButton<String>(
+            segments: periodFilters.map((period) {
+              return ButtonSegment<String>(
+                value: period,
+                label: Text(period.toUpperCase()),
+              );
+            }).toList(),
+            selected: {selectedPeriod},
+            onSelectionChanged: (Set<String> selection) {
+              setState(() {
+                selectedPeriod = selection.first;
+                _periodOffset = 0;
+              });
+              _updateDashboardPeriod();
+            },
+            style: ButtonStyle(
+              visualDensity: VisualDensity.compact,
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Period navigation
           Container(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.blue[50],
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
+              color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today,
-                      size: 20,
-                      color: Colors.blue[700],
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'PERÍODO',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ],
+                IconButton(
+                  icon: Icon(
+                    Icons.chevron_left,
+                    color: theme.colorScheme.primary,
+                  ),
+                  onPressed: () {
+                    setState(() => _periodOffset--);
+                    _updateDashboardPeriod();
+                  },
+                  visualDensity: VisualDensity.compact,
                 ),
-                MouseRegion(
-                  cursor: SystemMouseCursors.click,
+                Expanded(
                   child: GestureDetector(
                     onTap: () {
-                      setState(() {
-                        selectedPeriod = 'mês';
-                        _periodOffset = 0;
-                      });
-                      final orderStore =
-                          Provider.of<OrderStore>(context, listen: false);
-                      orderStore.setPaymentFilter(null);
-                      orderStore.clearCustomerRankingSelection();
-                      _updateDashboardPeriod();
+                      if (_periodOffset != 0) {
+                        setState(() => _periodOffset = 0);
+                        final orderStore =
+                            Provider.of<OrderStore>(context, listen: false);
+                        orderStore.setPaymentFilter(null);
+                        orderStore.clearCustomerRankingSelection();
+                        _updateDashboardPeriod();
+                      }
                     },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    child: Column(
                       children: [
-                        Icon(
-                          Icons.refresh,
-                          size: 16,
-                          color: Colors.blue[700],
-                        ),
-                        SizedBox(width: 4),
                         Text(
-                          'LIMPAR',
-                          style: TextStyle(
-                            color: Colors.blue[700],
-                            fontSize: 12,
+                          periodLabel,
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
                           ),
+                          textAlign: TextAlign.center,
                         ),
+                        if (_periodOffset != 0)
+                          Text(
+                            'Toque para voltar ao atual',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.primary,
+                              fontSize: 10,
+                            ),
+                          ),
                       ],
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-          // Conteúdo com navegação e filtros
-          Container(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                // Navegação entre períodos
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.arrow_back_ios,
-                        size: 18,
-                        color: Colors.blue[700],
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _periodOffset--;
-                        });
-                        _updateDashboardPeriod();
-                      },
-                    ),
-                    Text(
-                      periodLabel.toUpperCase(),
-                      style: TextStyle(
-                        color: Colors.blue[700],
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 18,
-                        color: _periodOffset < 0
-                            ? Colors.blue[700]
-                            : Colors.grey[400],
-                      ),
-                      onPressed: _periodOffset < 0
-                          ? () {
-                              setState(() {
-                                _periodOffset++;
-                              });
-                              _updateDashboardPeriod();
-                            }
-                          : null,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                // Chips de filtro
-                Container(
-                  height: 36,
-                  child: Center(
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      itemCount: periodFilters.length,
-                      itemBuilder: (context, index) {
-                        final period = periodFilters[index];
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4.0),
-                          child: ChoiceChip(
-                            label: Text(
-                              period.toUpperCase(),
-                              style: TextStyle(
-                                color: selectedPeriod == period
-                                    ? Colors.white
-                                    : Colors.blue[700],
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
-                              ),
-                            ),
-                            selected: selectedPeriod == period,
-                            selectedColor: Colors.blue[700],
-                            backgroundColor: Colors.blue[50],
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            labelPadding: EdgeInsets.symmetric(horizontal: 4),
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() {
-                                  selectedPeriod = period;
-                                  _periodOffset = 0;
-                                });
-                                _updateDashboardPeriod();
-                              }
-                            },
-                          ),
-                        );
-                      },
-                    ),
+                IconButton(
+                  icon: Icon(
+                    Icons.chevron_right,
+                    color: _periodOffset < 0
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outline.withOpacity(0.3),
                   ),
+                  onPressed: _periodOffset < 0
+                      ? () {
+                          setState(() => _periodOffset++);
+                          _updateDashboardPeriod();
+                        }
+                      : null,
+                  visualDensity: VisualDensity.compact,
                 ),
               ],
             ),
@@ -311,401 +251,313 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     );
   }
 
-  void _updateDashboardPeriod() {
-    final orderStore = Provider.of<OrderStore>(context, listen: false);
-    orderStore.setCustomPeriod(selectedPeriod, _periodOffset);
-  }
+  Widget _buildKpiCards(OrderStore orderStore, ThemeData theme) {
+    final totalOrders = orderStore.recentOrders.length;
+    final paidOrders =
+        orderStore.recentOrders.where((o) => o?.payment == 'paid').length;
+    final unpaidOrders = totalOrders - paidOrders;
+    final avgTicket = totalOrders > 0
+        ? orderStore.totalRevenue / totalOrders
+        : 0.0;
 
-  Widget _buildFinancialSummary(OrderStore orderStore) {
-    if (orderStore.totalRevenue == 0) {
-      return Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Center(
-            child: Text(
-              'Sem dados financeiros para exibir',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ),
-        ),
-      );
-    }
-
-    final Map<String, Color> paymentColors = {
-      'paid': Colors.green[400]!,
-      'unpaid': Colors.red[400]!,
-    };
-
-    final Map<String, String> paymentLabels = {
-      'paid': 'Recebido',
-      'unpaid': 'A Receber',
-    };
-
-    // Preparar dados para o gráfico
-    List<PieChartSectionData> sections = [];
-    Map<String, double> paymentValues = {
-      'paid': orderStore.totalPaidAmount,
-      'unpaid': orderStore.totalUnpaidAmount,
-    };
-
-    double totalValue = orderStore.totalRevenue;
-
-    paymentValues.forEach((payment, value) {
-      double percentage = totalValue > 0 ? value / totalValue * 100 : 0;
-      bool isSelected = orderStore.paymentFilter == payment;
-
-      sections.add(
-        PieChartSectionData(
-          color: paymentColors[payment] ?? Colors.grey,
-          value: value,
-          title: '${percentage.toStringAsFixed(0)}%',
-          radius: isSelected ? 70 : 65,
-          titleStyle: TextStyle(
-            fontSize: 12,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Resumo do Período',
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: theme.colorScheme.onSurface,
           ),
-          titlePositionPercentageOffset: 0.5,
         ),
-      );
-    });
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        children: [
-          // Header com Faturamento Total
-          Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.blue[50],
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildKpiCard(
+                theme: theme,
+                title: 'Faturamento',
+                value: _convertToCurrency(orderStore.totalRevenue),
+                icon: Icons.account_balance_wallet_outlined,
+                color: theme.colorScheme.primary,
+                subtitle: '$totalOrders ordens',
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.account_balance,
-                      size: 20,
-                      color: Colors.blue[700],
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'FATURAMENTO',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ],
-                ),
-                Text(
-                  _convertToCurrency(orderStore.totalRevenue),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[700],
-                  ),
-                ),
-              ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildKpiCard(
+                theme: theme,
+                title: 'Ticket Médio',
+                value: _convertToCurrency(avgTicket),
+                icon: Icons.receipt_long_outlined,
+                color: theme.colorScheme.tertiary,
+                subtitle: 'por ordem',
+              ),
             ),
-          ),
-          // Conteúdo com gráfico e valores
-          Container(
-            padding: EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Gráfico de Pizza
-                Expanded(
-                  flex: 4,
-                  child: Container(
-                    height: 120,
-                    child: PieChart(
-                      PieChartData(
-                        sectionsSpace: 0,
-                        centerSpaceRadius: 0,
-                        sections: sections
-                            .map(
-                              (section) => PieChartSectionData(
-                                color: section.color,
-                                value: section.value,
-                                title:
-                                    '${(section.value / totalValue * 100).toStringAsFixed(0)}%',
-                                radius: section.radius,
-                                titleStyle: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                titlePositionPercentageOffset: 0.5,
-                              ),
-                            )
-                            .toList(),
-                        pieTouchData: PieTouchData(
-                          touchCallback:
-                              (FlTouchEvent event, pieTouchResponse) {
-                            final now = DateTime.now();
-                            if (event.isInterestedForInteractions &&
-                                now.difference(_lastTouchTime).inMilliseconds >
-                                    500 &&
-                                pieTouchResponse != null &&
-                                pieTouchResponse.touchedSection != null) {
-                              _lastTouchTime = now;
-                              final touchedIndex = pieTouchResponse
-                                  .touchedSection!.touchedSectionIndex;
-                              if (touchedIndex >= 0 &&
-                                  touchedIndex < paymentValues.length) {
-                                final paymentStatus =
-                                    paymentValues.keys.elementAt(touchedIndex);
-                                if (orderStore.paymentFilter == paymentStatus) {
-                                  orderStore.setPaymentFilter(null);
-                                } else {
-                                  orderStore.setPaymentFilter(paymentStatus);
-                                }
-                              }
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 24),
-                // Valores detalhados
-                Expanded(
-                  flex: 6,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          if (orderStore.paymentFilter == 'paid') {
-                            orderStore.setPaymentFilter(null);
-                          } else {
-                            orderStore.setPaymentFilter('paid');
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: orderStore.paymentFilter == 'paid'
-                                ? Colors.green[50]
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.green[400]!,
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.check_circle,
-                                    size: 20,
-                                    color: Colors.green[400],
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Recebido',
-                                    style: TextStyle(
-                                      color: Colors.green[700],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                _convertToCurrency(orderStore.totalPaidAmount),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green[700],
-                                ),
-                                textAlign: TextAlign.end,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      GestureDetector(
-                        onTap: () {
-                          if (orderStore.paymentFilter == 'unpaid') {
-                            orderStore.setPaymentFilter(null);
-                          } else {
-                            orderStore.setPaymentFilter('unpaid');
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: orderStore.paymentFilter == 'unpaid'
-                                ? Colors.red[50]
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.red[400]!,
-                              width: 1,
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.pending,
-                                    size: 20,
-                                    color: Colors.red[400],
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'A Receber',
-                                    style: TextStyle(
-                                      color: Colors.red[700],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                _convertToCurrency(
-                                    orderStore.totalUnpaidAmount),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red[700],
-                                ),
-                                textAlign: TextAlign.end,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _buildKpiCard(
+                theme: theme,
+                title: 'Recebido',
+                value: _convertToCurrency(orderStore.totalPaidAmount),
+                icon: Icons.check_circle_outline,
+                color: Colors.green.shade600,
+                subtitle: '$paidOrders ordens',
+                onTap: () {
+                  if (orderStore.paymentFilter == 'paid') {
+                    orderStore.setPaymentFilter(null);
+                  } else {
+                    orderStore.setPaymentFilter('paid');
+                  }
+                },
+                isSelected: orderStore.paymentFilter == 'paid',
+              ),
             ),
-          ),
-        ],
-      ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildKpiCard(
+                theme: theme,
+                title: 'A Receber',
+                value: _convertToCurrency(orderStore.totalUnpaidAmount),
+                icon: Icons.schedule_outlined,
+                color: Colors.orange.shade700,
+                subtitle: '$unpaidOrders ordens',
+                onTap: () {
+                  if (orderStore.paymentFilter == 'unpaid') {
+                    orderStore.setPaymentFilter(null);
+                  } else {
+                    orderStore.setPaymentFilter('unpaid');
+                  }
+                },
+                isSelected: orderStore.paymentFilter == 'unpaid',
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  Widget _buildPaymentItem(
-      String label, String value, IconData icon, Color color, double percentage,
-      {bool isSelected = false}) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: isSelected ? color : Colors.transparent,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 14, color: color),
-              SizedBox(width: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[700],
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 2),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          Text(
-            '${percentage.toStringAsFixed(1)}%',
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey[600],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFinancialDetailItem(
-    String label,
-    String value,
-    IconData icon,
-    Color color, {
+  Widget _buildKpiCard({
+    required ThemeData theme,
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+    String? subtitle,
+    VoidCallback? onTap,
     bool isSelected = false,
   }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isSelected ? color : Colors.transparent,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ],
+    return Material(
+      color: isSelected
+          ? color.withOpacity(0.1)
+          : theme.colorScheme.surfaceContainerLow,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: isSelected
+                ? Border.all(color: color, width: 2)
+                : Border.all(
+                    color: theme.colorScheme.outline.withOpacity(0.1),
+                    width: 1,
+                  ),
           ),
-          SizedBox(height: 4),
-          Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, size: 20, color: color),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               Text(
                 value,
-                style: TextStyle(
-                  fontSize: 16,
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: color,
                 ),
               ),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRevenueBreakdown(OrderStore orderStore, ThemeData theme) {
+    if (orderStore.totalRevenue == 0) {
+      return _buildEmptyState(
+        theme: theme,
+        icon: Icons.analytics_outlined,
+        message: 'Sem dados de faturamento neste período',
+      );
+    }
+
+    final paidPercentage = orderStore.totalRevenue > 0
+        ? (orderStore.totalPaidAmount / orderStore.totalRevenue * 100)
+        : 0.0;
+    final unpaidPercentage = orderStore.totalRevenue > 0
+        ? (orderStore.totalUnpaidAmount / orderStore.totalRevenue * 100)
+        : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.pie_chart_outline,
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Composição do Faturamento',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              // Mini pie chart
+              SizedBox(
+                width: 80,
+                height: 80,
+                child: PieChart(
+                  PieChartData(
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 20,
+                    sections: [
+                      PieChartSectionData(
+                        color: Colors.green.shade500,
+                        value: orderStore.totalPaidAmount,
+                        title: '',
+                        radius: 18,
+                      ),
+                      PieChartSectionData(
+                        color: Colors.orange.shade500,
+                        value: orderStore.totalUnpaidAmount,
+                        title: '',
+                        radius: 18,
+                      ),
+                    ],
+                    pieTouchData: PieTouchData(
+                      touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                        final now = DateTime.now();
+                        if (event.isInterestedForInteractions &&
+                            now.difference(_lastTouchTime).inMilliseconds >
+                                500 &&
+                            pieTouchResponse != null &&
+                            pieTouchResponse.touchedSection != null) {
+                          _lastTouchTime = now;
+                          final touchedIndex = pieTouchResponse
+                              .touchedSection!.touchedSectionIndex;
+                          if (touchedIndex == 0) {
+                            if (orderStore.paymentFilter == 'paid') {
+                              orderStore.setPaymentFilter(null);
+                            } else {
+                              orderStore.setPaymentFilter('paid');
+                            }
+                          } else if (touchedIndex == 1) {
+                            if (orderStore.paymentFilter == 'unpaid') {
+                              orderStore.setPaymentFilter(null);
+                            } else {
+                              orderStore.setPaymentFilter('unpaid');
+                            }
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 24),
+              // Legend
+              Expanded(
+                child: Column(
+                  children: [
+                    _buildBreakdownItem(
+                      theme: theme,
+                      label: 'Recebido',
+                      value: _convertToCurrency(orderStore.totalPaidAmount),
+                      percentage: paidPercentage,
+                      color: Colors.green.shade500,
+                      isSelected: orderStore.paymentFilter == 'paid',
+                      onTap: () {
+                        if (orderStore.paymentFilter == 'paid') {
+                          orderStore.setPaymentFilter(null);
+                        } else {
+                          orderStore.setPaymentFilter('paid');
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _buildBreakdownItem(
+                      theme: theme,
+                      label: 'A Receber',
+                      value: _convertToCurrency(orderStore.totalUnpaidAmount),
+                      percentage: unpaidPercentage,
+                      color: Colors.orange.shade500,
+                      isSelected: orderStore.paymentFilter == 'unpaid',
+                      onTap: () {
+                        if (orderStore.paymentFilter == 'unpaid') {
+                          orderStore.setPaymentFilter(null);
+                        } else {
+                          orderStore.setPaymentFilter('unpaid');
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -713,27 +565,87 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     );
   }
 
-  Widget _buildCustomerRanking(OrderStore orderStore) {
-    if (orderStore.customerRanking.isEmpty) {
-      return Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Center(
-            child: Text(
-              'Sem dados de clientes para exibir',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ),
+  Widget _buildBreakdownItem({
+    required ThemeData theme,
+    required String label,
+    required String value,
+    required double percentage,
+    required Color color,
+    bool isSelected = false,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected ? Border.all(color: color, width: 1) : null,
         ),
+        child: Row(
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${percentage.toStringAsFixed(0)}%',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomerRanking(OrderStore orderStore, ThemeData theme) {
+    if (orderStore.customerRanking.isEmpty) {
+      return _buildEmptyState(
+        theme: theme,
+        icon: Icons.people_outline,
+        message: 'Sem dados de clientes neste período',
       );
     }
 
-    // Filtrar e ordenar o ranking de acordo com o filtro de pagamento
     var filteredRanking = List.from(orderStore.customerRanking);
 
-    // Aplicar filtro se necessário
     if (orderStore.paymentFilter != null) {
       filteredRanking = filteredRanking.where((customer) {
         final double total = customer['total'] ?? 0.0;
@@ -748,7 +660,6 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         return true;
       }).toList();
 
-      // Reordenar baseado no filtro
       filteredRanking.sort((a, b) {
         final double totalA = a['total'] ?? 0.0;
         final double unpaidTotalA = a['unpaidTotal'] ?? 0.0;
@@ -769,260 +680,253 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? filteredRanking.length
         : (filteredRanking.length > 5 ? 5 : filteredRanking.length);
 
-    String rankingTitle = 'CLIENTES';
+    String sectionTitle = 'Ranking de Clientes';
     if (orderStore.paymentFilter == 'paid') {
-      rankingTitle = 'CLIENTES - RECEBIDO';
+      sectionTitle = 'Clientes - Recebido';
     } else if (orderStore.paymentFilter == 'unpaid') {
-      rankingTitle = 'CLIENTES - A RECEBER';
+      sectionTitle = 'Clientes - A Receber';
     }
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.1),
+        ),
+      ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.blue[50],
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.people,
-                      size: 20,
-                      color: Colors.blue[700],
+                Icon(
+                  Icons.leaderboard_outlined,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  sectionTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${filteredRanking.length}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onPrimaryContainer,
                     ),
-                    SizedBox(width: 8),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: itemCount,
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              indent: 16,
+              endIndent: 16,
+              color: theme.colorScheme.outline.withOpacity(0.1),
+            ),
+            itemBuilder: (context, index) {
+              final customer = filteredRanking[index];
+              final isSelected =
+                  orderStore.selectedCustomerInRanking != null &&
+                      orderStore.selectedCustomerInRanking!['id'] ==
+                          customer['id'];
+
+              final double totalAmount = customer['total'] ?? 0.0;
+              final double unpaidAmount = customer['unpaidTotal'] ?? 0.0;
+              final double paidAmount = totalAmount - unpaidAmount;
+
+              return _buildCustomerItem(
+                theme: theme,
+                index: index,
+                name: customer['name'] ?? 'Cliente sem nome',
+                paidAmount: paidAmount,
+                unpaidAmount: unpaidAmount,
+                totalAmount: totalAmount,
+                isSelected: isSelected,
+                paymentFilter: orderStore.paymentFilter,
+                onTap: () {
+                  if (isSelected) {
+                    orderStore.clearCustomerRankingSelection();
+                  } else {
+                    orderStore.selectCustomerInRanking(customer);
+                  }
+                },
+              );
+            },
+          ),
+          if (filteredRanking.length > 5)
+            InkWell(
+              onTap: () {
+                setState(() => _isRankingExpanded = !_isRankingExpanded);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: theme.colorScheme.outline.withOpacity(0.1),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
                     Text(
-                      '$rankingTitle (${filteredRanking.length})',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.blue[700],
+                      _isRankingExpanded ? 'Ver menos' : 'Ver todos',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
                       ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      _isRankingExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      size: 18,
+                      color: theme.colorScheme.primary,
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  constraints: BoxConstraints(
-                    maxHeight: _isRankingExpanded ? double.infinity : 300,
-                  ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: itemCount,
-                    itemBuilder: (context, index) {
-                      final customer = filteredRanking[index];
-                      final isSelected =
-                          orderStore.selectedCustomerInRanking != null &&
-                              orderStore.selectedCustomerInRanking!['id'] ==
-                                  customer['id'];
-
-                      final double totalAmount = customer['total'] ?? 0.0;
-                      final double unpaidAmount =
-                          customer['unpaidTotal'] ?? 0.0;
-                      final double paidAmount = totalAmount - unpaidAmount;
-                      final bool hasUnpaidAmount = unpaidAmount > 0;
-
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.blue[100],
-                          child: Text(
-                            '${index + 1}',
-                            style: TextStyle(
-                              color: Colors.blue[800],
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        title: Text(
-                          customer['name'] ?? 'Cliente sem nome',
-                          style: TextStyle(
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                        ),
-                        subtitle: null,
-                        trailing: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (orderStore.paymentFilter == 'paid')
-                              Text(
-                                _convertToCurrency(paidAmount),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green[700],
-                                  fontSize: 14,
-                                ),
-                              )
-                            else if (orderStore.paymentFilter == 'unpaid')
-                              Text(
-                                _convertToCurrency(unpaidAmount),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red[700],
-                                  fontSize: 14,
-                                ),
-                              )
-                            else
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    _convertToCurrency(totalAmount),
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green[700],
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  if (hasUnpaidAmount)
-                                    Text(
-                                      _convertToCurrency(unpaidAmount),
-                                      style: TextStyle(
-                                        color: Colors.red[700],
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                          ],
-                        ),
-                        selected: isSelected,
-                        selectedTileColor: Colors.blue[50],
-                        onTap: () {
-                          if (isSelected) {
-                            orderStore.clearCustomerRankingSelection();
-                          } else {
-                            orderStore.selectCustomerInRanking(customer);
-                          }
-                        },
-                      );
-                    },
-                  ),
-                ),
-                if (!_isRankingExpanded && filteredRanking.length > 5)
-                  Padding(
-                    padding: EdgeInsets.zero,
-                    child: Center(
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isRankingExpanded = !_isRankingExpanded;
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 6, horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Ver todos',
-                                  style: TextStyle(
-                                    color: Colors.blue[700],
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(width: 2),
-                                Icon(
-                                  Icons.keyboard_arrow_down,
-                                  size: 14,
-                                  color: Colors.blue[700],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                if (_isRankingExpanded)
-                  Padding(
-                    padding: EdgeInsets.zero,
-                    child: Center(
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isRankingExpanded = !_isRankingExpanded;
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 6, horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Ver menos',
-                                  style: TextStyle(
-                                    color: Colors.blue[700],
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(width: 2),
-                                Icon(
-                                  Icons.keyboard_arrow_up,
-                                  size: 14,
-                                  color: Colors.blue[700],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildRecentOrders(OrderStore orderStore) {
-    String sectionTitle = orderStore.paymentFilter == 'paid'
-        ? 'PAGOS RECENTES'
-        : orderStore.paymentFilter == 'unpaid'
-            ? 'A RECEBER RECENTES'
-            : 'RECENTES';
+  Widget _buildCustomerItem({
+    required ThemeData theme,
+    required int index,
+    required String name,
+    required double paidAmount,
+    required double unpaidAmount,
+    required double totalAmount,
+    required bool isSelected,
+    String? paymentFilter,
+    VoidCallback? onTap,
+  }) {
+    Color rankColor;
+    if (index == 0) {
+      rankColor = Colors.amber.shade600;
+    } else if (index == 1) {
+      rankColor = Colors.blueGrey.shade400;
+    } else if (index == 2) {
+      rankColor = Colors.brown.shade400;
+    } else {
+      rankColor = theme.colorScheme.outline;
+    }
 
-    // Filtrar ordens de acordo com o filtro de pagamento
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        color: isSelected
+            ? theme.colorScheme.primaryContainer.withOpacity(0.3)
+            : null,
+        child: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: rankColor.withOpacity(0.15),
+                shape: BoxShape.circle,
+                border: index < 3
+                    ? Border.all(color: rankColor, width: 2)
+                    : null,
+              ),
+              child: Center(
+                child: Text(
+                  '${index + 1}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: rankColor,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                name,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (paymentFilter == 'paid')
+                  Text(
+                    _convertToCurrency(paidAmount),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade600,
+                    ),
+                  )
+                else if (paymentFilter == 'unpaid')
+                  Text(
+                    _convertToCurrency(unpaidAmount),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.orange.shade700,
+                    ),
+                  )
+                else ...[
+                  Text(
+                    _convertToCurrency(totalAmount),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  if (unpaidAmount > 0)
+                    Text(
+                      _convertToCurrency(unpaidAmount),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.orange.shade700,
+                        fontSize: 11,
+                      ),
+                    ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentOrders(OrderStore orderStore, ThemeData theme) {
+    String sectionTitle = 'Ordens de Serviço';
+    if (orderStore.paymentFilter == 'paid') {
+      sectionTitle = 'Ordens Pagas';
+    } else if (orderStore.paymentFilter == 'unpaid') {
+      sectionTitle = 'Ordens a Receber';
+    }
+
     final filteredOrders = orderStore.paymentFilter == null
         ? orderStore.recentOrders
         : orderStore.recentOrders
@@ -1030,224 +934,253 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             .toList();
 
     if (filteredOrders.isEmpty) {
-      return Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Center(
-            child: Text(
-              'Nenhuma ordem recente neste período',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ),
-        ),
+      return _buildEmptyState(
+        theme: theme,
+        icon: Icons.receipt_long_outlined,
+        message: 'Nenhuma ordem neste período',
       );
     }
 
     final itemCount = _isRecentOrdersExpanded
         ? filteredOrders.length
-        : (filteredOrders.length > 10 ? 10 : filteredOrders.length);
+        : (filteredOrders.length > 5 ? 5 : filteredOrders.length);
 
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.1),
+        ),
+      ),
       child: Column(
         children: [
-          Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.blue[50],
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.receipt_long,
-                      size: 20,
-                      color: Colors.blue[700],
+                Icon(
+                  Icons.receipt_long_outlined,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  sectionTitle,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${filteredOrders.length}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onPrimaryContainer,
                     ),
-                    SizedBox(width: 8),
-                    Text(
-                      '$sectionTitle (${filteredOrders.length})',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
           ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: itemCount,
-                  itemBuilder: (context, index) {
-                    final order = filteredOrders[index];
-                    final dateFormat = DateFormat('dd/MM/yyyy');
-                    final dateStr = order?.createdAt != null
-                        ? dateFormat.format(order!.createdAt!)
-                        : '';
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: itemCount,
+            separatorBuilder: (context, index) => Divider(
+              height: 1,
+              indent: 16,
+              endIndent: 16,
+              color: theme.colorScheme.outline.withOpacity(0.1),
+            ),
+            itemBuilder: (context, index) {
+              final order = filteredOrders[index];
+              final dateFormat = DateFormat('dd/MM/yy');
+              final dateStr = order?.createdAt != null
+                  ? dateFormat.format(order!.createdAt!)
+                  : '';
+              final isPaid = order?.payment == 'paid';
 
-                    final isPaid = order?.payment == 'paid';
-
-                    // Obter informações do veículo
-                    String vehicleInfo = _getVehicleInfo(order);
-
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: Row(
+              return InkWell(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/order',
+                    arguments: {'order': order},
+                  );
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: isPaid
+                              ? Colors.green.withOpacity(0.1)
+                              : Colors.orange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          isPaid
+                              ? Icons.check_circle_outline
+                              : Icons.schedule_outlined,
+                          color: isPaid
+                              ? Colors.green.shade600
+                              : Colors.orange.shade700,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              order?.customer?.name ?? 'Cliente',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'OS #${order?.number} • $dateStr',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(order?.customer?.name ?? 'Cliente'),
-                          SizedBox(width: 8),
+                          Text(
+                            _convertToCurrency(order?.total),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: isPaid
+                                  ? Colors.green.shade600
+                                  : Colors.orange.shade700,
+                            ),
+                          ),
                           Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
+                            margin: const EdgeInsets.only(top: 4),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color:
-                                  isPaid ? Colors.green[100] : Colors.red[100],
+                              color: isPaid
+                                  ? Colors.green.withOpacity(0.1)
+                                  : Colors.orange.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              isPaid ? 'Pago' : 'A receber',
-                              style: TextStyle(
+                              isPaid ? 'Pago' : 'Pendente',
+                              style: theme.textTheme.bodySmall?.copyWith(
                                 fontSize: 10,
+                                fontWeight: FontWeight.w600,
                                 color: isPaid
-                                    ? Colors.green[800]
-                                    : Colors.red[800],
-                                fontWeight: FontWeight.bold,
+                                    ? Colors.green.shade700
+                                    : Colors.orange.shade800,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      subtitle: Text('OS #${order?.number} - $dateStr'),
-                      trailing: Text(
-                        _convertToCurrency(order?.total),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: isPaid ? Colors.green[800] : Colors.red[800],
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/order',
-                          arguments: {'order': order},
-                        );
-                      },
-                    );
-                  },
+                    ],
+                  ),
                 ),
-                if (!_isRecentOrdersExpanded && filteredOrders.length > 10)
-                  Padding(
-                    padding: EdgeInsets.zero,
-                    child: Center(
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isRecentOrdersExpanded =
-                                  !_isRecentOrdersExpanded;
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 6, horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Ver todos',
-                                  style: TextStyle(
-                                    color: Colors.blue[700],
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(width: 2),
-                                Icon(
-                                  Icons.keyboard_arrow_down,
-                                  size: 14,
-                                  color: Colors.blue[700],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+              );
+            },
+          ),
+          if (filteredOrders.length > 5)
+            InkWell(
+              onTap: () {
+                setState(() => _isRecentOrdersExpanded = !_isRecentOrdersExpanded);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: theme.colorScheme.outline.withOpacity(0.1),
                     ),
                   ),
-                if (_isRecentOrdersExpanded)
-                  Padding(
-                    padding: EdgeInsets.zero,
-                    child: Center(
-                      child: MouseRegion(
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isRecentOrdersExpanded =
-                                  !_isRecentOrdersExpanded;
-                            });
-                          },
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 6, horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Ver menos',
-                                  style: TextStyle(
-                                    color: Colors.blue[700],
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                SizedBox(width: 2),
-                                Icon(
-                                  Icons.keyboard_arrow_up,
-                                  size: 14,
-                                  color: Colors.blue[700],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _isRecentOrdersExpanded ? 'Ver menos' : 'Ver todas',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.primary,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-              ],
+                    const SizedBox(width: 4),
+                    Icon(
+                      _isRecentOrdersExpanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      size: 18,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState({
+    required ThemeData theme,
+    required IconData icon,
+    required String message,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withOpacity(0.1),
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            size: 48,
+            color: theme.colorScheme.outline.withOpacity(0.5),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            message,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
+  }
+
+  void _updateDashboardPeriod() {
+    final orderStore = Provider.of<OrderStore>(context, listen: false);
+    orderStore.setCustomPeriod(selectedPeriod, _periodOffset);
   }
 
   String _convertToCurrency(double? total) {
@@ -1257,21 +1190,15 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     return numberFormat.format(total);
   }
 
-  // Método auxiliar para extrair informações do veículo de forma segura
   String _getVehicleInfo(dynamic order) {
     if (order == null || order.device == null) return 'Não informado';
 
     String vehicleInfo = 'Não informado';
     var device = order.device;
 
-    // Tenta obter modelo e placa
-    String? modelo;
-    String? placa;
-
     try {
-      // Tenta acessar diretamente
-      modelo = device?.name?.toString() ?? '';
-      placa = device?.serial?.toString() ?? '';
+      String? modelo = device?.name?.toString() ?? '';
+      String? placa = device?.serial?.toString() ?? '';
 
       if (modelo.isNotEmpty || placa.isNotEmpty) {
         if (modelo.isNotEmpty && placa.isNotEmpty) {
@@ -1284,11 +1211,10 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       }
     } catch (error) {
       try {
-        // Tenta acessar como Map
         if (device is Map) {
           var deviceMap = device as Map;
-          modelo = deviceMap['name']?.toString() ?? '';
-          placa = deviceMap['serial']?.toString() ?? '';
+          String? modelo = deviceMap['name']?.toString() ?? '';
+          String? placa = deviceMap['serial']?.toString() ?? '';
 
           if (modelo.isNotEmpty || placa.isNotEmpty) {
             if (modelo.isNotEmpty && placa.isNotEmpty) {
@@ -1301,7 +1227,6 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
           }
         }
       } catch (_) {
-        // Se tudo falhar, tenta toString
         vehicleInfo = device?.toString() ?? 'Não informado';
       }
     }
@@ -1310,20 +1235,27 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   }
 
   void _generateReport(OrderStore orderStore) {
+    final theme = Theme.of(context);
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
+        icon: Icon(
+          Icons.picture_as_pdf_outlined,
+          size: 48,
+          color: theme.colorScheme.primary,
+        ),
         title: const Text('Gerar Relatório'),
-        content:
-            const Text('Deseja gerar um relatório com os dados do painel?'),
+        content: const Text(
+          'Deseja gerar um relatório PDF com os dados financeiros do período selecionado?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('CANCELAR'),
+            child: const Text('Cancelar'),
           ),
-          TextButton(
+          FilledButton(
             onPressed: () => _proceedWithReportGeneration(orderStore),
-            child: const Text('GERAR'),
+            child: const Text('Gerar PDF'),
           ),
         ],
       ),
@@ -1331,60 +1263,53 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   }
 
   Future<void> _proceedWithReportGeneration(OrderStore orderStore) async {
-    // Fechar o diálogo de confirmação
     Navigator.of(context).pop();
-
-    // Referência ao contexto atual
     final currentContext = context;
 
-    // Mostrar diálogo de carregamento
     showDialog<void>(
       context: currentContext,
       barrierDismissible: false,
-      builder: (context) => const AlertDialog(
+      builder: (context) => AlertDialog(
         content: Row(
           children: [
-            CircularProgressIndicator(),
-            SizedBox(width: 20),
-            Text("Gerando relatório..."),
+            const CircularProgressIndicator(),
+            const SizedBox(width: 20),
+            const Text("Gerando relatório..."),
           ],
         ),
       ),
     );
 
     try {
-      // Gerar o PDF
       final pdf = await _buildPdf(orderStore);
 
-      // Fechar diálogo de carregamento
       if (currentContext.mounted) {
         Navigator.of(currentContext).pop();
       }
 
-      // Mostrar o PDF
       if (currentContext.mounted) {
         await Printing.layoutPdf(
           onLayout: (format) async => pdf,
-          name: 'Relatório Financeiro - ${periodLabel}',
+          name: 'Relatório Financeiro - $periodLabel',
         );
 
         ScaffoldMessenger.of(currentContext).showSnackBar(
-          const SnackBar(
-            content: Text('Relatório gerado com sucesso!'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Relatório gerado com sucesso!'),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
     } catch (e) {
-      // Fechar diálogo de carregamento em caso de erro
       if (currentContext.mounted) {
         Navigator.of(currentContext).pop();
 
-        // Mostrar mensagem de erro
         ScaffoldMessenger.of(currentContext).showSnackBar(
           SnackBar(
             content: Text('Erro ao gerar relatório: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -1398,24 +1323,20 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? orderStore.selectedCustomerInRanking!['name'] ?? 'Cliente'
         : '';
 
-    // Definir cores para um design mais moderno
-    final primaryColor = PdfColors.blueAccent;
-    final secondaryColor = PdfColors.blue800;
+    final primaryColor = PdfColors.blue700;
+    final accentColor = PdfColors.blue900;
+    final successColor = PdfColors.green700;
+    final warningColor = PdfColors.orange700;
     final backgroundColor = PdfColors.grey100;
-    final textColor = PdfColors.blueGrey800;
-    final highlightColor = PdfColors.amber700;
+    final textColor = PdfColors.grey800;
 
-    // Fontes básicas sem suporte a Unicode
-    final baseFont = pw.Font.courier();
-    final boldFont = pw.Font.courierBold();
-    final italicFont = pw.Font.courierOblique();
+    final baseFont = pw.Font.helvetica();
+    final boldFont = pw.Font.helveticaBold();
 
-    // Variáveis auxiliares para cálculos
     final totalValue = orderStore.totalRevenue;
-    final hasRecentOrders = orderStore.recentOrders.isNotEmpty;
-    final hasCustomerRanking = orderStore.customerRanking.isNotEmpty;
+    final totalOrders = orderStore.recentOrders.length;
+    final avgTicket = totalOrders > 0 ? totalValue / totalOrders : 0.0;
 
-    // Cálculo de porcentagens com segurança contra divisão por zero
     final paidPercentage = totalValue > 0
         ? (orderStore.totalPaidAmount / totalValue * 100).toStringAsFixed(1)
         : "0";
@@ -1426,43 +1347,54 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: pw.EdgeInsets.all(20),
+        margin: const pw.EdgeInsets.all(24),
         header: (context) {
           return pw.Container(
-            color: primaryColor,
-            padding: pw.EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const pw.EdgeInsets.only(bottom: 16),
+            decoration: const pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(color: PdfColors.grey300, width: 1),
+              ),
+            ),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      isClientSelected
-                          ? 'Relatório Financeiro - Cliente'
-                          : 'PraticOS - Relatório Financeiro',
+                      'Relatorio Financeiro',
                       style: pw.TextStyle(
-                        color: PdfColors.white,
-                        fontSize: 20,
-                        fontWeight: pw.FontWeight.bold,
+                        font: boldFont,
+                        fontSize: 24,
+                        color: accentColor,
                       ),
                     ),
+                    pw.SizedBox(height: 4),
                     pw.Text(
-                      _latinCharactersOnly(Global.companyAggr?.name ?? ''),
+                      _latinCharactersOnly(Global.companyAggr?.name ?? 'PraticOS'),
                       style: pw.TextStyle(
-                        color: PdfColors.white,
+                        font: baseFont,
                         fontSize: 12,
-                        fontStyle: pw.FontStyle.italic,
+                        color: PdfColors.grey600,
                       ),
                     ),
                   ],
                 ),
-                pw.Text(
-                  _latinCharactersOnly(periodLabel),
-                  style: pw.TextStyle(
-                    color: PdfColors.white,
-                    fontSize: 14,
-                    fontStyle: pw.FontStyle.italic,
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.blue50,
+                    borderRadius: pw.BorderRadius.circular(8),
+                  ),
+                  child: pw.Text(
+                    _latinCharactersOnly(periodLabel),
+                    style: pw.TextStyle(
+                      font: boldFont,
+                      fontSize: 14,
+                      color: primaryColor,
+                    ),
                   ),
                 ),
               ],
@@ -1471,10 +1403,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         },
         footer: (context) {
           return pw.Container(
-            margin: pw.EdgeInsets.only(top: 10),
-            padding: pw.EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            decoration: pw.BoxDecoration(
-              border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300)),
+            padding: const pw.EdgeInsets.only(top: 8),
+            decoration: const pw.BoxDecoration(
+              border: pw.Border(
+                top: pw.BorderSide(color: PdfColors.grey300, width: 1),
+              ),
             ),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -1482,16 +1415,17 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 pw.Text(
                   'Gerado em ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
                   style: pw.TextStyle(
-                    color: PdfColors.grey600,
+                    font: baseFont,
                     fontSize: 9,
-                    fontStyle: pw.FontStyle.italic,
+                    color: PdfColors.grey500,
                   ),
                 ),
                 pw.Text(
-                  'Página ${context.pageNumber} de ${context.pagesCount}',
+                  'Pagina ${context.pageNumber} de ${context.pagesCount}',
                   style: pw.TextStyle(
-                    color: PdfColors.grey600,
+                    font: baseFont,
                     fontSize: 9,
+                    color: PdfColors.grey500,
                   ),
                 ),
               ],
@@ -1502,250 +1436,76 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
           List<pw.Widget> content = [];
 
           if (isClientSelected) {
-            // RELATÓRIO ESPECÍFICO PARA CLIENTE SELECIONADO
             final selectedClientData = orderStore.selectedCustomerInRanking!;
             final double clientTotal = selectedClientData['total'] ?? 0.0;
-            final double clientUnpaidTotal =
-                selectedClientData['unpaidTotal'] ?? 0.0;
+            final double clientUnpaidTotal = selectedClientData['unpaidTotal'] ?? 0.0;
             final double clientPaidTotal = clientTotal - clientUnpaidTotal;
 
-            // Pedidos do cliente - filtra por cliente
             var clientOrders = orderStore.recentOrders
-                .where(
-                    (order) => order?.customer?.id == selectedClientData['id'])
+                .where((order) => order?.customer?.id == selectedClientData['id'])
                 .toList();
 
-            // Aplica filtro adicional de pagamento, se houver
             if (orderStore.paymentFilter != null) {
               clientOrders = clientOrders
                   .where((order) => order?.payment == orderStore.paymentFilter)
                   .toList();
             }
 
-            // Resumo do Cliente
             content.add(
               pw.Container(
-                margin: pw.EdgeInsets.only(bottom: 20),
-                padding: pw.EdgeInsets.all(15),
-                decoration: pw.BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: pw.BorderRadius.circular(8),
-                ),
+                margin: const pw.EdgeInsets.only(bottom: 24),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    // Título
                     pw.Container(
-                      padding: pw.EdgeInsets.only(bottom: 8),
-                      decoration: pw.BoxDecoration(
-                        border: pw.Border(
-                            bottom: pw.BorderSide(color: primaryColor)),
-                      ),
-                      child: pw.Text(
-                        'INFORMAÇÕES DO CLIENTE',
-                        style: pw.TextStyle(
-                          font: boldFont,
-                          color: secondaryColor,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-
-                    // Nome do cliente
-                    pw.Container(
-                      margin: pw.EdgeInsets.only(top: 10, bottom: 15),
-                      padding: pw.EdgeInsets.all(10),
+                      padding: const pw.EdgeInsets.all(16),
                       decoration: pw.BoxDecoration(
                         color: PdfColors.blue50,
-                        borderRadius: pw.BorderRadius.circular(5),
+                        borderRadius: pw.BorderRadius.circular(8),
                       ),
                       child: pw.Row(
                         children: [
                           pw.Text(
                             'Cliente: ',
-                            style: pw.TextStyle(
-                              font: boldFont,
-                              fontSize: 12,
-                              color: textColor,
-                            ),
+                            style: pw.TextStyle(font: baseFont, color: textColor),
                           ),
                           pw.Text(
                             _latinCharactersOnly(selectedClientName),
-                            style: pw.TextStyle(
-                              font: baseFont,
-                              fontSize: 12,
-                              color: textColor,
-                            ),
+                            style: pw.TextStyle(font: boldFont, color: accentColor, fontSize: 16),
                           ),
                         ],
                       ),
                     ),
-
-                    // Faturamento Total do Cliente
-                    pw.Container(
-                      margin: pw.EdgeInsets.symmetric(vertical: 5),
-                      padding: pw.EdgeInsets.all(12),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.white,
-                        borderRadius: pw.BorderRadius.circular(5),
-                        border: pw.Border.all(color: primaryColor),
-                      ),
-                      child: pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                        children: [
-                          pw.Text(
-                            'FATURAMENTO TOTAL',
-                            style: pw.TextStyle(
-                              font: boldFont,
-                              color: secondaryColor,
-                            ),
-                          ),
-                          pw.Text(
-                            _convertToCurrency(clientTotal),
-                            style: pw.TextStyle(
-                              font: boldFont,
-                              fontSize: 16,
-                              color: highlightColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    pw.SizedBox(height: 10),
-
-                    // Valores Pagos/A Receber
+                    pw.SizedBox(height: 16),
                     pw.Row(
                       children: [
-                        // Recebido
                         pw.Expanded(
-                          child: pw.Container(
-                            padding: pw.EdgeInsets.all(12),
-                            decoration: pw.BoxDecoration(
-                              color: PdfColors.white,
-                              borderRadius: pw.BorderRadius.circular(5),
-                              border: pw.Border.all(color: PdfColors.green),
-                            ),
-                            child: pw.Column(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
-                                pw.Row(
-                                  children: [
-                                    pw.Container(
-                                      width: 10,
-                                      height: 10,
-                                      decoration: pw.BoxDecoration(
-                                        color: PdfColors.green,
-                                        shape: pw.BoxShape.circle,
-                                      ),
-                                    ),
-                                    pw.SizedBox(width: 5),
-                                    pw.Text(
-                                      'Recebido',
-                                      style: pw.TextStyle(
-                                        font: boldFont,
-                                        color: PdfColors.green800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                pw.SizedBox(height: 8),
-                                pw.Text(
-                                  'Quantidade: ${clientOrders.where((order) => order?.payment == 'paid').length}',
-                                  style: pw.TextStyle(
-                                    font: baseFont,
-                                    fontSize: 10,
-                                    color: textColor,
-                                  ),
-                                ),
-                                pw.SizedBox(height: 5),
-                                pw.Text(
-                                  _convertToCurrency(clientPaidTotal),
-                                  style: pw.TextStyle(
-                                    font: boldFont,
-                                    fontSize: 14,
-                                    color: PdfColors.green800,
-                                  ),
-                                ),
-                                pw.SizedBox(height: 2),
-                                if (clientTotal > 0)
-                                  pw.Text(
-                                    '${(clientPaidTotal / clientTotal * 100).toStringAsFixed(1)}% do total',
-                                    style: pw.TextStyle(
-                                      font: italicFont,
-                                      fontSize: 9,
-                                      color: PdfColors.grey700,
-                                    ),
-                                  ),
-                              ],
-                            ),
+                          child: _buildPdfKpiBox(
+                            'Faturamento Total',
+                            _convertToCurrency(clientTotal),
+                            primaryColor,
+                            boldFont,
+                            baseFont,
                           ),
                         ),
-
-                        pw.SizedBox(width: 10),
-
-                        // A Receber
+                        pw.SizedBox(width: 12),
                         pw.Expanded(
-                          child: pw.Container(
-                            padding: pw.EdgeInsets.all(12),
-                            decoration: pw.BoxDecoration(
-                              color: PdfColors.white,
-                              borderRadius: pw.BorderRadius.circular(5),
-                              border: pw.Border.all(color: PdfColors.red),
-                            ),
-                            child: pw.Column(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
-                                pw.Row(
-                                  children: [
-                                    pw.Container(
-                                      width: 10,
-                                      height: 10,
-                                      decoration: pw.BoxDecoration(
-                                        color: PdfColors.red,
-                                        shape: pw.BoxShape.circle,
-                                      ),
-                                    ),
-                                    pw.SizedBox(width: 5),
-                                    pw.Text(
-                                      'A Receber',
-                                      style: pw.TextStyle(
-                                        font: boldFont,
-                                        color: PdfColors.red800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                pw.SizedBox(height: 8),
-                                pw.Text(
-                                  'Quantidade: ${clientOrders.where((order) => order?.payment == 'unpaid').length}',
-                                  style: pw.TextStyle(
-                                    font: baseFont,
-                                    fontSize: 10,
-                                    color: textColor,
-                                  ),
-                                ),
-                                pw.SizedBox(height: 5),
-                                pw.Text(
-                                  _convertToCurrency(clientUnpaidTotal),
-                                  style: pw.TextStyle(
-                                    font: boldFont,
-                                    fontSize: 14,
-                                    color: PdfColors.red800,
-                                  ),
-                                ),
-                                pw.SizedBox(height: 2),
-                                if (clientTotal > 0)
-                                  pw.Text(
-                                    '${(clientUnpaidTotal / clientTotal * 100).toStringAsFixed(1)}% do total',
-                                    style: pw.TextStyle(
-                                      font: italicFont,
-                                      fontSize: 9,
-                                      color: PdfColors.grey700,
-                                    ),
-                                  ),
-                              ],
-                            ),
+                          child: _buildPdfKpiBox(
+                            'Recebido',
+                            _convertToCurrency(clientPaidTotal),
+                            successColor,
+                            boldFont,
+                            baseFont,
+                          ),
+                        ),
+                        pw.SizedBox(width: 12),
+                        pw.Expanded(
+                          child: _buildPdfKpiBox(
+                            'A Receber',
+                            _convertToCurrency(clientUnpaidTotal),
+                            warningColor,
+                            boldFont,
+                            baseFont,
                           ),
                         ),
                       ],
@@ -1755,311 +1515,64 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               ),
             );
 
-            // Pedidos do Cliente
             if (clientOrders.isNotEmpty) {
-              final tableData = List<List<String>>.generate(
-                clientOrders.length,
-                (index) {
-                  final order = clientOrders[index];
-                  final dateStr = order?.createdAt != null
-                      ? DateFormat('dd/MM/yyyy').format(order!.createdAt!)
-                      : '';
-                  final isPaid = order?.payment == 'paid';
-
-                  // Obter informações do veículo
-                  String vehicleInfo = _getVehicleInfo(order);
-
-                  return [
-                    '#${order?.number ?? ""}',
-                    dateStr,
-                    vehicleInfo,
-                    _convertToCurrency(order?.total ?? 0.0),
-                    isPaid ? 'Pago' : 'A receber',
-                  ];
-                },
-              );
-
-              content.add(
-                pw.Container(
-                  margin: pw.EdgeInsets.only(bottom: 20),
-                  padding: pw.EdgeInsets.all(15),
-                  decoration: pw.BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: pw.BorderRadius.circular(8),
-                  ),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      // Título
-                      pw.Container(
-                        padding: pw.EdgeInsets.only(bottom: 8),
-                        decoration: pw.BoxDecoration(
-                          border: pw.Border(
-                              bottom: pw.BorderSide(color: primaryColor)),
-                        ),
-                        child: pw.Row(
-                          children: [
-                            pw.Text(
-                              'ORDENS DE SERVIÇO',
-                              style: pw.TextStyle(
-                                font: boldFont,
-                                color: secondaryColor,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      pw.SizedBox(height: 10),
-
-                      // Tabela de pedidos do cliente
-                      pw.Table.fromTextArray(
-                        border: pw.TableBorder.all(color: PdfColors.grey300),
-                        headerStyle: pw.TextStyle(
-                          font: boldFont,
-                          color: PdfColors.white,
-                          fontSize: 10,
-                        ),
-                        headerDecoration: pw.BoxDecoration(
-                          color: secondaryColor,
-                        ),
-                        cellStyle: pw.TextStyle(
-                          font: baseFont,
-                          color: textColor,
-                          fontSize: 9,
-                        ),
-                        cellPadding: pw.EdgeInsets.all(4),
-                        cellHeight: 20,
-                        columnWidths: {
-                          0: const pw.FlexColumnWidth(0.8),
-                          1: const pw.FlexColumnWidth(1.8),
-                          2: const pw.FlexColumnWidth(2),
-                          3: const pw.FlexColumnWidth(1.5),
-                          4: const pw.FlexColumnWidth(1.5),
-                        },
-                        cellAlignments: {
-                          0: pw.Alignment.center,
-                          1: pw.Alignment.center,
-                          2: pw.Alignment.centerLeft,
-                          3: pw.Alignment.centerRight,
-                          4: pw.Alignment.center,
-                        },
-                        headers: [
-                          'OS',
-                          'Data',
-                          'Veículo',
-                          'Valor',
-                          'Status',
-                        ],
-                        data: tableData,
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              content.add(_buildPdfOrdersTable(clientOrders, boldFont, baseFont, textColor, accentColor, true));
             }
           } else {
-            // RELATÓRIO GERAL (SEM CLIENTE SELECIONADO)
-
-            // Resumo Financeiro
             content.add(
               pw.Container(
-                margin: pw.EdgeInsets.only(bottom: 20),
-                padding: pw.EdgeInsets.all(15),
-                decoration: pw.BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: pw.BorderRadius.circular(8),
-                ),
+                margin: const pw.EdgeInsets.only(bottom: 24),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    // Título
-                    pw.Container(
-                      padding: pw.EdgeInsets.only(bottom: 8),
-                      decoration: pw.BoxDecoration(
-                        border: pw.Border(
-                            bottom: pw.BorderSide(color: primaryColor)),
-                      ),
-                      child: pw.Row(
-                        children: [
-                          pw.Text(
-                            'RESUMO FINANCEIRO',
-                            style: pw.TextStyle(
-                              font: boldFont,
-                              color: secondaryColor,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
+                    pw.Text(
+                      'Resumo Financeiro',
+                      style: pw.TextStyle(font: boldFont, fontSize: 16, color: accentColor),
                     ),
-                    pw.SizedBox(height: 10),
-
-                    // Faturamento Total
-                    pw.Container(
-                      margin: pw.EdgeInsets.symmetric(vertical: 5),
-                      padding: pw.EdgeInsets.all(12),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.white,
-                        borderRadius: pw.BorderRadius.circular(5),
-                        border: pw.Border.all(color: primaryColor),
-                      ),
-                      child: pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                        children: [
-                          pw.Text(
-                            'FATURAMENTO TOTAL',
-                            style: pw.TextStyle(
-                              font: boldFont,
-                              color: secondaryColor,
-                            ),
-                          ),
-                          pw.Text(
-                            _convertToCurrency(orderStore.totalRevenue),
-                            style: pw.TextStyle(
-                              font: boldFont,
-                              fontSize: 16,
-                              color: highlightColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    pw.SizedBox(height: 10),
-
-                    // Valores Pagos/A Receber
+                    pw.SizedBox(height: 16),
                     pw.Row(
                       children: [
-                        // Recebido
                         pw.Expanded(
-                          child: pw.Container(
-                            padding: pw.EdgeInsets.all(12),
-                            decoration: pw.BoxDecoration(
-                              color: PdfColors.white,
-                              borderRadius: pw.BorderRadius.circular(5),
-                              border: pw.Border.all(color: PdfColors.green),
-                            ),
-                            child: pw.Column(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
-                                pw.Row(
-                                  children: [
-                                    pw.Container(
-                                      width: 10,
-                                      height: 10,
-                                      decoration: pw.BoxDecoration(
-                                        color: PdfColors.green,
-                                        shape: pw.BoxShape.circle,
-                                      ),
-                                    ),
-                                    pw.SizedBox(width: 5),
-                                    pw.Text(
-                                      'Recebido',
-                                      style: pw.TextStyle(
-                                        font: boldFont,
-                                        color: PdfColors.green800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                pw.SizedBox(height: 8),
-                                pw.Text(
-                                  'Quantidade: ${orderStore.recentOrders.where((order) => order?.payment == 'paid').length}',
-                                  style: pw.TextStyle(
-                                    font: baseFont,
-                                    fontSize: 10,
-                                    color: textColor,
-                                  ),
-                                ),
-                                pw.SizedBox(height: 5),
-                                pw.Text(
-                                  _convertToCurrency(
-                                      orderStore.totalPaidAmount),
-                                  style: pw.TextStyle(
-                                    font: boldFont,
-                                    fontSize: 14,
-                                    color: PdfColors.green800,
-                                  ),
-                                ),
-                                pw.SizedBox(height: 2),
-                                pw.Text(
-                                  '$paidPercentage% do total',
-                                  style: pw.TextStyle(
-                                    font: italicFont,
-                                    fontSize: 9,
-                                    color: PdfColors.grey700,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          child: _buildPdfKpiBox(
+                            'Faturamento Total',
+                            _convertToCurrency(orderStore.totalRevenue),
+                            primaryColor,
+                            boldFont,
+                            baseFont,
                           ),
                         ),
-
-                        pw.SizedBox(width: 10),
-
-                        // A Receber
+                        pw.SizedBox(width: 12),
                         pw.Expanded(
-                          child: pw.Container(
-                            padding: pw.EdgeInsets.all(12),
-                            decoration: pw.BoxDecoration(
-                              color: PdfColors.white,
-                              borderRadius: pw.BorderRadius.circular(5),
-                              border: pw.Border.all(color: PdfColors.red),
-                            ),
-                            child: pw.Column(
-                              crossAxisAlignment: pw.CrossAxisAlignment.start,
-                              children: [
-                                pw.Row(
-                                  children: [
-                                    pw.Container(
-                                      width: 10,
-                                      height: 10,
-                                      decoration: pw.BoxDecoration(
-                                        color: PdfColors.red,
-                                        shape: pw.BoxShape.circle,
-                                      ),
-                                    ),
-                                    pw.SizedBox(width: 5),
-                                    pw.Text(
-                                      'A Receber',
-                                      style: pw.TextStyle(
-                                        font: boldFont,
-                                        color: PdfColors.red800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                pw.SizedBox(height: 8),
-                                pw.Text(
-                                  'Quantidade: ${orderStore.recentOrders.where((order) => order?.payment == 'unpaid').length}',
-                                  style: pw.TextStyle(
-                                    font: baseFont,
-                                    fontSize: 10,
-                                    color: textColor,
-                                  ),
-                                ),
-                                pw.SizedBox(height: 5),
-                                pw.Text(
-                                  _convertToCurrency(
-                                      orderStore.totalUnpaidAmount),
-                                  style: pw.TextStyle(
-                                    font: boldFont,
-                                    fontSize: 14,
-                                    color: PdfColors.red800,
-                                  ),
-                                ),
-                                pw.SizedBox(height: 2),
-                                pw.Text(
-                                  '$unpaidPercentage% do total',
-                                  style: pw.TextStyle(
-                                    font: italicFont,
-                                    fontSize: 9,
-                                    color: PdfColors.grey700,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          child: _buildPdfKpiBox(
+                            'Ticket Medio',
+                            _convertToCurrency(avgTicket),
+                            PdfColors.purple700,
+                            boldFont,
+                            baseFont,
+                          ),
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 12),
+                    pw.Row(
+                      children: [
+                        pw.Expanded(
+                          child: _buildPdfKpiBox(
+                            'Recebido ($paidPercentage%)',
+                            _convertToCurrency(orderStore.totalPaidAmount),
+                            successColor,
+                            boldFont,
+                            baseFont,
+                          ),
+                        ),
+                        pw.SizedBox(width: 12),
+                        pw.Expanded(
+                          child: _buildPdfKpiBox(
+                            'A Receber ($unpaidPercentage%)',
+                            _convertToCurrency(orderStore.totalUnpaidAmount),
+                            warningColor,
+                            boldFont,
+                            baseFont,
                           ),
                         ),
                       ],
@@ -2069,27 +1582,20 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               ),
             );
 
-            // Ranking de Clientes
-            if (hasCustomerRanking) {
-              // Filtrar e ordenar o ranking de acordo com o filtro de pagamento
+            if (orderStore.customerRanking.isNotEmpty) {
               var filteredRanking = List.from(orderStore.customerRanking);
 
-              // Aplicar filtro se necessário
               if (orderStore.paymentFilter != null) {
                 filteredRanking = filteredRanking.where((customer) {
                   final double total = customer['total'] ?? 0.0;
                   final double unpaidTotal = customer['unpaidTotal'] ?? 0.0;
                   final double paidTotal = total - unpaidTotal;
 
-                  if (orderStore.paymentFilter == 'paid') {
-                    return paidTotal > 0;
-                  } else if (orderStore.paymentFilter == 'unpaid') {
-                    return unpaidTotal > 0;
-                  }
+                  if (orderStore.paymentFilter == 'paid') return paidTotal > 0;
+                  if (orderStore.paymentFilter == 'unpaid') return unpaidTotal > 0;
                   return true;
                 }).toList();
 
-                // Reordenar baseado no filtro
                 filteredRanking.sort((a, b) {
                   final double totalA = a['total'] ?? 0.0;
                   final double unpaidTotalA = a['unpaidTotal'] ?? 0.0;
@@ -2108,59 +1614,21 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
 
               content.add(
                 pw.Container(
-                  margin: pw.EdgeInsets.only(bottom: 20),
-                  padding: pw.EdgeInsets.all(15),
-                  decoration: pw.BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: pw.BorderRadius.circular(8),
-                  ),
+                  margin: const pw.EdgeInsets.only(bottom: 24),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      // Título
-                      pw.Container(
-                        padding: pw.EdgeInsets.only(bottom: 8),
-                        decoration: pw.BoxDecoration(
-                          border: pw.Border(
-                              bottom: pw.BorderSide(color: primaryColor)),
-                        ),
-                        child: pw.Row(
-                          children: [
-                            pw.Text(
-                              orderStore.paymentFilter == 'paid'
-                                  ? 'RANKING DE CLIENTES - RECEBIDO'
-                                  : orderStore.paymentFilter == 'unpaid'
-                                      ? 'RANKING DE CLIENTES - A RECEBER'
-                                      : 'RANKING DE CLIENTES',
-                              style: pw.TextStyle(
-                                font: boldFont,
-                                color: secondaryColor,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
+                      pw.Text(
+                        'Ranking de Clientes',
+                        style: pw.TextStyle(font: boldFont, fontSize: 16, color: accentColor),
                       ),
-                      pw.SizedBox(height: 10),
-
-                      // Tabela de clientes
+                      pw.SizedBox(height: 12),
                       pw.Table.fromTextArray(
-                        border: pw.TableBorder.all(color: PdfColors.grey300),
-                        headerStyle: pw.TextStyle(
-                          font: boldFont,
-                          color: PdfColors.white,
-                          fontSize: 10,
-                        ),
-                        headerDecoration: pw.BoxDecoration(
-                          color: secondaryColor,
-                        ),
-                        cellStyle: pw.TextStyle(
-                          font: baseFont,
-                          color: textColor,
-                          fontSize: 9,
-                        ),
-                        cellPadding: pw.EdgeInsets.all(4),
-                        cellHeight: 20,
+                        border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+                        headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 10),
+                        headerDecoration: pw.BoxDecoration(color: accentColor),
+                        cellStyle: pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
+                        cellPadding: const pw.EdgeInsets.all(8),
                         cellAlignments: {
                           0: pw.Alignment.center,
                           1: pw.Alignment.centerLeft,
@@ -2168,27 +1636,17 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           3: pw.Alignment.centerRight,
                           4: pw.Alignment.centerRight,
                         },
-                        headers: [
-                          'Pos',
-                          'Cliente',
-                          'Valor Pago',
-                          'A Receber',
-                          'Total',
-                        ],
+                        headers: ['#', 'Cliente', 'Recebido', 'A Receber', 'Total'],
                         data: List.generate(
                           filteredRanking.length,
                           (index) {
-                            final double total =
-                                filteredRanking[index]['total'] ?? 0.0;
-                            final double unpaidTotal =
-                                filteredRanking[index]['unpaidTotal'] ?? 0.0;
+                            final double total = filteredRanking[index]['total'] ?? 0.0;
+                            final double unpaidTotal = filteredRanking[index]['unpaidTotal'] ?? 0.0;
                             final double paidTotal = total - unpaidTotal;
 
                             return [
                               '${index + 1}',
-                              _latinCharactersOnly(filteredRanking[index]
-                                      ['name'] ??
-                                  'Cliente sem nome'),
+                              _latinCharactersOnly(filteredRanking[index]['name'] ?? 'Cliente'),
                               _convertToCurrency(paidTotal),
                               _convertToCurrency(unpaidTotal),
                               _convertToCurrency(total),
@@ -2202,147 +1660,16 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               );
             }
 
-            // Pedidos Recentes
-            if (hasRecentOrders) {
-              // Filtrar ordens de acordo com o filtro de pagamento
+            if (orderStore.recentOrders.isNotEmpty) {
               final filteredOrders = orderStore.paymentFilter == null
                   ? orderStore.recentOrders
                   : orderStore.recentOrders
-                      .where(
-                          (order) => order?.payment == orderStore.paymentFilter)
+                      .where((order) => order?.payment == orderStore.paymentFilter)
                       .toList();
 
-              final tableData = List<List<String>>.generate(
-                filteredOrders.length,
-                (index) {
-                  final order = filteredOrders[index];
-                  final dateStr = order?.createdAt != null
-                      ? DateFormat('dd/MM/yyyy').format(order!.createdAt!)
-                      : '';
-                  final isPaid = order?.payment == 'paid';
-
-                  // Obter informações do veículo
-                  String vehicleInfo = _getVehicleInfo(order);
-
-                  return [
-                    '#${order?.number ?? ""}',
-                    _latinCharactersOnly(order?.customer?.name ?? 'Cliente'),
-                    vehicleInfo,
-                    dateStr,
-                    _convertToCurrency(order?.total ?? 0.0),
-                    isPaid ? 'Pago' : 'A receber',
-                  ];
-                },
-              );
-
-              content.add(
-                pw.Container(
-                  margin: pw.EdgeInsets.only(bottom: 20),
-                  padding: pw.EdgeInsets.all(15),
-                  decoration: pw.BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: pw.BorderRadius.circular(8),
-                  ),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      // Título
-                      pw.Container(
-                        padding: pw.EdgeInsets.only(bottom: 8),
-                        decoration: pw.BoxDecoration(
-                          border: pw.Border(
-                              bottom: pw.BorderSide(color: primaryColor)),
-                        ),
-                        child: pw.Row(
-                          children: [
-                            pw.Text(
-                              'ORDENS DE SERVIÇO',
-                              style: pw.TextStyle(
-                                font: boldFont,
-                                color: secondaryColor,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      pw.SizedBox(height: 10),
-
-                      // Tabela de pedidos
-                      pw.Table.fromTextArray(
-                        border: pw.TableBorder.all(color: PdfColors.grey300),
-                        headerStyle: pw.TextStyle(
-                          font: boldFont,
-                          color: PdfColors.white,
-                          fontSize: 10,
-                        ),
-                        headerDecoration: pw.BoxDecoration(
-                          color: secondaryColor,
-                        ),
-                        cellStyle: pw.TextStyle(
-                          font: baseFont,
-                          color: textColor,
-                          fontSize: 9,
-                        ),
-                        cellPadding: pw.EdgeInsets.all(4),
-                        cellHeight: 20,
-                        columnWidths: {
-                          0: const pw.FlexColumnWidth(0.8),
-                          1: const pw.FlexColumnWidth(2),
-                          2: const pw.FlexColumnWidth(2),
-                          3: const pw.FlexColumnWidth(1.8),
-                          4: const pw.FlexColumnWidth(1.5),
-                          5: const pw.FlexColumnWidth(1.5),
-                        },
-                        cellAlignments: {
-                          0: pw.Alignment.center,
-                          1: pw.Alignment.centerLeft,
-                          2: pw.Alignment.centerLeft,
-                          3: pw.Alignment.center,
-                          4: pw.Alignment.centerRight,
-                          5: pw.Alignment.center,
-                        },
-                        headers: [
-                          'OS',
-                          'Cliente',
-                          'Veículo',
-                          'Data',
-                          'Valor',
-                          'Status',
-                        ],
-                        data: tableData,
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              content.add(_buildPdfOrdersTable(filteredOrders, boldFont, baseFont, textColor, accentColor, false));
             }
           }
-
-          // Rodapé adicional
-          content.add(
-            pw.Container(
-              padding: pw.EdgeInsets.all(12),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.blue50,
-                borderRadius: pw.BorderRadius.circular(5),
-                border: pw.Border.all(color: PdfColors.blue100),
-              ),
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: [
-                  pw.Text(
-                    'PraticOS - Sistema de Gestão Automotiva',
-                    style: pw.TextStyle(
-                      font: italicFont,
-                      fontSize: 10,
-                      color: secondaryColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
 
           return content;
         },
@@ -2352,62 +1679,139 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     return pdf.save();
   }
 
-  // Função auxiliar para remover acentos e caracteres especiais
-  String _latinCharactersOnly(String text) {
-    if (text.isEmpty) {
-      return '';
-    }
+  pw.Widget _buildPdfKpiBox(
+    String title,
+    String value,
+    PdfColor color,
+    pw.Font boldFont,
+    pw.Font baseFont,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.white,
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: color, width: 1),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            title,
+            style: pw.TextStyle(font: baseFont, fontSize: 10, color: PdfColors.grey600),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Text(
+            value,
+            style: pw.TextStyle(font: boldFont, fontSize: 16, color: color),
+          ),
+        ],
+      ),
+    );
+  }
 
-    // Mapeamento simples para caracteres latinos comuns
+  pw.Widget _buildPdfOrdersTable(
+    List<dynamic> orders,
+    pw.Font boldFont,
+    pw.Font baseFont,
+    PdfColor textColor,
+    PdfColor accentColor,
+    bool isClientReport,
+  ) {
+    final tableData = List<List<String>>.generate(
+      orders.length,
+      (index) {
+        final order = orders[index];
+        final dateStr = order?.createdAt != null
+            ? DateFormat('dd/MM/yyyy').format(order!.createdAt!)
+            : '';
+        final isPaid = order?.payment == 'paid';
+        String vehicleInfo = _getVehicleInfo(order);
+
+        if (isClientReport) {
+          return [
+            '#${order?.number ?? ""}',
+            dateStr,
+            vehicleInfo,
+            _convertToCurrency(order?.total ?? 0.0),
+            isPaid ? 'Pago' : 'Pendente',
+          ];
+        } else {
+          return [
+            '#${order?.number ?? ""}',
+            _latinCharactersOnly(order?.customer?.name ?? 'Cliente'),
+            dateStr,
+            _convertToCurrency(order?.total ?? 0.0),
+            isPaid ? 'Pago' : 'Pendente',
+          ];
+        }
+      },
+    );
+
+    return pw.Container(
+      margin: const pw.EdgeInsets.only(bottom: 24),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            'Ordens de Servico',
+            style: pw.TextStyle(font: boldFont, fontSize: 16, color: accentColor),
+          ),
+          pw.SizedBox(height: 12),
+          pw.Table.fromTextArray(
+            border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
+            headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 10),
+            headerDecoration: pw.BoxDecoration(color: accentColor),
+            cellStyle: pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
+            cellPadding: const pw.EdgeInsets.all(8),
+            columnWidths: isClientReport
+                ? {
+                    0: const pw.FlexColumnWidth(1),
+                    1: const pw.FlexColumnWidth(1.5),
+                    2: const pw.FlexColumnWidth(2.5),
+                    3: const pw.FlexColumnWidth(1.5),
+                    4: const pw.FlexColumnWidth(1.2),
+                  }
+                : {
+                    0: const pw.FlexColumnWidth(1),
+                    1: const pw.FlexColumnWidth(2.5),
+                    2: const pw.FlexColumnWidth(1.5),
+                    3: const pw.FlexColumnWidth(1.5),
+                    4: const pw.FlexColumnWidth(1.2),
+                  },
+            cellAlignments: {
+              0: pw.Alignment.center,
+              1: pw.Alignment.centerLeft,
+              2: pw.Alignment.center,
+              3: pw.Alignment.centerRight,
+              4: pw.Alignment.center,
+            },
+            headers: isClientReport
+                ? ['OS', 'Data', 'Veiculo', 'Valor', 'Status']
+                : ['OS', 'Cliente', 'Data', 'Valor', 'Status'],
+            data: tableData,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _latinCharactersOnly(String text) {
+    if (text.isEmpty) return '';
+
     final Map<String, String> accentMap = {
-      'á': 'a',
-      'à': 'a',
-      'â': 'a',
-      'ã': 'a',
-      'ä': 'a',
-      'é': 'e',
-      'è': 'e',
-      'ê': 'e',
-      'ë': 'e',
-      'í': 'i',
-      'ì': 'i',
-      'î': 'i',
-      'ï': 'i',
-      'ó': 'o',
-      'ò': 'o',
-      'ô': 'o',
-      'õ': 'o',
-      'ö': 'o',
-      'ú': 'u',
-      'ù': 'u',
-      'û': 'u',
-      'ü': 'u',
-      'ç': 'c',
-      'ñ': 'n',
-      'Á': 'A',
-      'À': 'A',
-      'Â': 'A',
-      'Ã': 'A',
-      'Ä': 'A',
-      'É': 'E',
-      'È': 'E',
-      'Ê': 'E',
-      'Ë': 'E',
-      'Í': 'I',
-      'Ì': 'I',
-      'Î': 'I',
-      'Ï': 'I',
-      'Ó': 'O',
-      'Ò': 'O',
-      'Ô': 'O',
-      'Õ': 'O',
-      'Ö': 'O',
-      'Ú': 'U',
-      'Ù': 'U',
-      'Û': 'U',
-      'Ü': 'U',
-      'Ç': 'C',
-      'Ñ': 'N',
+      'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a',
+      'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
+      'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i',
+      'ó': 'o', 'ò': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+      'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u',
+      'ç': 'c', 'ñ': 'n',
+      'Á': 'A', 'À': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A',
+      'É': 'E', 'È': 'E', 'Ê': 'E', 'Ë': 'E',
+      'Í': 'I', 'Ì': 'I', 'Î': 'I', 'Ï': 'I',
+      'Ó': 'O', 'Ò': 'O', 'Ô': 'O', 'Õ': 'O', 'Ö': 'O',
+      'Ú': 'U', 'Ù': 'U', 'Û': 'U', 'Ü': 'U',
+      'Ç': 'C', 'Ñ': 'N',
     };
 
     try {
@@ -2415,13 +1819,9 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       accentMap.forEach((key, value) {
         result = result.replaceAll(key, value);
       });
-
-      // Remover outros caracteres não ASCII que possam causar problemas
       result = result.replaceAll(RegExp(r'[^\x00-\x7F]'), '');
-
       return result;
     } catch (e) {
-      // Em caso de erro, retornar uma string vazia ou safe
       return 'texto';
     }
   }
