@@ -63,7 +63,8 @@ class CachedImage extends StatelessWidget {
       height: size,
       borderRadius: borderRadius,
       memCacheWidth: (size * 2).toInt(), // 2x para telas retina
-      memCacheHeight: (size * 2).toInt(),
+      // Removido memCacheHeight para manter o aspect ratio e evitar distorção
+      // O BoxFit.cover cuidará do preenchimento visual
     );
   }
 
@@ -80,7 +81,7 @@ class CachedImage extends StatelessWidget {
       height: height,
       borderRadius: borderRadius,
       memCacheWidth: 800, // Limita para economizar memória
-      memCacheHeight: 600,
+      // Removido memCacheHeight para manter o aspect ratio
     );
   }
 
