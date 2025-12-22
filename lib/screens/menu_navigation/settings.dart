@@ -1,10 +1,9 @@
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
-import 'package:praticos/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:praticos/global.dart';
+import 'package:provider/provider.dart';
+import 'package:praticos/mobx/theme_store.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -17,30 +16,30 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     _userStore.findCurrentUser();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final themeStore = Provider.of<ThemeStore>(context);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: AppTheme.surfaceColor,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         title: Text(
           'Ajustes',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimary,
-            letterSpacing: -0.5,
-          ),
+          style: theme.appBarTheme.titleTextStyle,
         ),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             // Header do perfil
-            _buildProfileHeader(),
+            _buildProfileHeader(theme, colorScheme),
             SizedBox(height: 16),
             // Seções de menu
             _buildMenuSection(
+              theme,
+              colorScheme,
               'Cadastros',
               [
                 _MenuItemData(
@@ -65,6 +64,22 @@ class _SettingsState extends State<Settings> {
             ),
             SizedBox(height: 16),
             _buildMenuSection(
+              theme,
+              colorScheme,
+              'Interface',
+              [
+                _MenuItemData(
+                  icon: Icons.dark_mode_rounded,
+                  title: 'Modo Noturno',
+                  subtitle: _getThemeModeText(themeStore.themeMode),
+                  onTap: () => _showThemeSelectionDialog(context, themeStore),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            _buildMenuSection(
+              theme,
+              colorScheme,
               'Conta',
               [
                 _MenuItemData(
@@ -77,7 +92,7 @@ class _SettingsState extends State<Settings> {
               ],
             ),
             SizedBox(height: 24),
-            _buildVersionInfo(),
+            _buildVersionInfo(theme),
             SizedBox(height: 32),
           ],
         ),
@@ -85,9 +100,9 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(ThemeData theme, ColorScheme colorScheme) {
     return Container(
-      color: AppTheme.surfaceColor,
+      color: theme.cardColor,
       padding: EdgeInsets.all(24),
       child: Column(
         children: [
@@ -95,12 +110,12 @@ class _SettingsState extends State<Settings> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: AppTheme.primaryColor,
+                color: theme.primaryColor,
                 width: 3,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.primaryColor.withOpacity(0.2),
+                  color: theme.primaryColor.withOpacity(0.2),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -108,7 +123,7 @@ class _SettingsState extends State<Settings> {
             ),
             child: CircleAvatar(
               radius: 50,
-              backgroundColor: AppTheme.backgroundColor,
+              backgroundColor: theme.scaffoldBackgroundColor,
               backgroundImage: Global.currentUser?.photoURL != null
                   ? NetworkImage(Global.currentUser!.photoURL!)
                   : null,
@@ -116,7 +131,7 @@ class _SettingsState extends State<Settings> {
                   ? Icon(
                       Icons.person_rounded,
                       size: 50,
-                      color: AppTheme.textTertiary,
+                      color: theme.disabledColor,
                     )
                   : null,
             ),
@@ -124,18 +139,15 @@ class _SettingsState extends State<Settings> {
           SizedBox(height: 16),
           Text(
             Global.currentUser?.displayName ?? 'Usuário',
-            style: TextStyle(
-              fontSize: 20,
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
             ),
           ),
           SizedBox(height: 4),
           Text(
             Global.currentUser?.email ?? '',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppTheme.textSecondary,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
             ),
           ),
         ],
@@ -143,13 +155,13 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  Widget _buildMenuSection(String title, List<_MenuItemData> items) {
+  Widget _buildMenuSection(ThemeData theme, ColorScheme colorScheme, String title, List<_MenuItemData> items) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.borderColor),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +173,7 @@ class _SettingsState extends State<Settings> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textTertiary,
+                color: theme.disabledColor,
                 letterSpacing: 1,
               ),
             ),
@@ -171,12 +183,12 @@ class _SettingsState extends State<Settings> {
             final item = entry.value;
             return Column(
               children: [
-                _buildMenuItem(item),
+                _buildMenuItem(theme, colorScheme, item),
                 if (index < items.length - 1)
                   Divider(
                     height: 1,
                     indent: 56,
-                    color: AppTheme.borderLight,
+                    color: theme.dividerColor,
                   ),
               ],
             );
@@ -186,7 +198,7 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  Widget _buildMenuItem(_MenuItemData item) {
+  Widget _buildMenuItem(ThemeData theme, ColorScheme colorScheme, _MenuItemData item) {
     return InkWell(
       onTap: item.onTap,
       borderRadius: BorderRadius.circular(12),
@@ -199,16 +211,16 @@ class _SettingsState extends State<Settings> {
               height: 40,
               decoration: BoxDecoration(
                 color: item.isDestructive
-                    ? AppTheme.errorLight
-                    : AppTheme.primaryColor.withOpacity(0.1),
+                    ? colorScheme.errorContainer
+                    : theme.primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 item.icon,
                 size: 20,
                 color: item.isDestructive
-                    ? AppTheme.errorColor
-                    : AppTheme.primaryColor,
+                    ? colorScheme.error
+                    : theme.primaryColor,
               ),
             ),
             SizedBox(width: 12),
@@ -222,8 +234,8 @@ class _SettingsState extends State<Settings> {
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                       color: item.isDestructive
-                          ? AppTheme.errorColor
-                          : AppTheme.textPrimary,
+                          ? colorScheme.error
+                          : theme.textTheme.bodyLarge?.color,
                     ),
                   ),
                   if (item.subtitle != null) ...[
@@ -232,7 +244,7 @@ class _SettingsState extends State<Settings> {
                       item.subtitle!,
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppTheme.textTertiary,
+                        color: theme.textTheme.bodySmall?.color,
                       ),
                     ),
                   ],
@@ -241,7 +253,7 @@ class _SettingsState extends State<Settings> {
             ),
             Icon(
               Icons.chevron_right_rounded,
-              color: AppTheme.textTertiary,
+              color: theme.disabledColor,
               size: 20,
             ),
           ],
@@ -250,13 +262,13 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  Widget _buildVersionInfo() {
+  Widget _buildVersionInfo(ThemeData theme) {
     return Column(
       children: [
         Icon(
           Icons.apps_rounded,
           size: 32,
-          color: AppTheme.textTertiary,
+          color: theme.disabledColor,
         ),
         SizedBox(height: 8),
         Text(
@@ -264,7 +276,7 @@ class _SettingsState extends State<Settings> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: AppTheme.textSecondary,
+            color: theme.textTheme.bodyMedium?.color,
           ),
         ),
         SizedBox(height: 4),
@@ -272,10 +284,78 @@ class _SettingsState extends State<Settings> {
           'Versão ${Global.version}',
           style: TextStyle(
             fontSize: 13,
-            color: AppTheme.textTertiary,
+            color: theme.disabledColor,
           ),
         ),
       ],
+    );
+  }
+
+  String _getThemeModeText(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system:
+        return 'Automático (Sistema)';
+      case ThemeMode.light:
+        return 'Claro';
+      case ThemeMode.dark:
+        return 'Escuro';
+    }
+  }
+
+  void _showThemeSelectionDialog(BuildContext context, ThemeStore themeStore) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Escolher tema'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<ThemeMode>(
+                title: Text('Automático (Sistema)'),
+                value: ThemeMode.system,
+                groupValue: themeStore.themeMode,
+                onChanged: (ThemeMode? value) {
+                  if (value != null) {
+                    themeStore.setThemeMode(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: Text('Claro'),
+                value: ThemeMode.light,
+                groupValue: themeStore.themeMode,
+                onChanged: (ThemeMode? value) {
+                  if (value != null) {
+                    themeStore.setThemeMode(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: Text('Escuro'),
+                value: ThemeMode.dark,
+                groupValue: themeStore.themeMode,
+                onChanged: (ThemeMode? value) {
+                  if (value != null) {
+                    themeStore.setThemeMode(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -108,23 +108,20 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     FirebaseCrashlytics.instance.log("Abrindo home");
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         title: Text(
           'Ordens de Serviço',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimary,
-          ),
+          style: theme.appBarTheme.titleTextStyle,
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.bar_chart_rounded, color: AppTheme.textSecondary, size: 26),
+            icon: Icon(Icons.bar_chart_rounded, color: theme.iconTheme.color, size: 26),
             onPressed: () => Navigator.pushNamed(context, '/financial_dashboard_simple'),
           ),
           Padding(
@@ -133,7 +130,7 @@ class _HomeState extends State<Home> {
               icon: Container(
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor,
+                  color: theme.primaryColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(Icons.add_rounded, color: Colors.white, size: 22),
@@ -154,22 +151,22 @@ class _HomeState extends State<Home> {
             child: AnimatedOpacity(
               duration: Duration(milliseconds: 150),
               opacity: _showFilters ? 1 : 0,
-              child: _buildFilterBar(),
+              child: _buildFilterBar(theme),
             ),
           ),
           // Divisor sutil
-          Container(height: 1, color: AppTheme.borderLight),
+          Container(height: 1, color: theme.dividerColor),
           // Lista
-          Expanded(child: _buildOrdersList()),
+          Expanded(child: _buildOrdersList(theme)),
         ],
       ),
     );
   }
 
-  Widget _buildFilterBar() {
+  Widget _buildFilterBar(ThemeData theme) {
     return Container(
       height: 48,
-      color: Colors.white,
+      color: theme.cardColor,
       child: Observer(
         builder: (_) {
           return ListView.builder(
@@ -178,10 +175,10 @@ class _HomeState extends State<Home> {
             itemCount: filters.length + (orderStore.customerFilter != null ? 1 : 0),
             itemBuilder: (context, index) {
               if (orderStore.customerFilter != null) {
-                if (index == 0) return _buildCustomerChip();
-                return _buildFilterChip(index - 1);
+                if (index == 0) return _buildCustomerChip(theme);
+                return _buildFilterChip(index - 1, theme);
               }
-              return _buildFilterChip(index);
+              return _buildFilterChip(index, theme);
             },
           );
         },
@@ -189,7 +186,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildCustomerChip() {
+  Widget _buildCustomerChip(ThemeData theme) {
     return GestureDetector(
       onTap: () {
         orderStore.setCustomerFilter(null);
@@ -199,7 +196,7 @@ class _HomeState extends State<Home> {
         margin: EdgeInsets.only(right: 8),
         padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: AppTheme.primaryColor,
+          color: theme.primaryColor,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -223,7 +220,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildFilterChip(int index) {
+  Widget _buildFilterChip(int index, ThemeData theme) {
     final isSelected = currentSelected == index;
 
     return GestureDetector(
@@ -235,7 +232,7 @@ class _HomeState extends State<Home> {
         margin: EdgeInsets.only(right: 8),
         padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : AppTheme.backgroundColor,
+          color: isSelected ? theme.primaryColor : theme.scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -244,7 +241,7 @@ class _HomeState extends State<Home> {
             Icon(
               filters[index]['icon'],
               size: 16,
-              color: isSelected ? Colors.white : AppTheme.textSecondary,
+              color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
             ),
             SizedBox(width: 6),
             Text(
@@ -252,7 +249,7 @@ class _HomeState extends State<Home> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : AppTheme.textSecondary,
+                color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
               ),
             ),
           ],
@@ -261,7 +258,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildOrdersList() {
+  Widget _buildOrdersList(ThemeData theme) {
     return Observer(
       builder: (_) {
         if (orderStore.isLoading && orderStore.orders.isEmpty) {
@@ -273,11 +270,11 @@ class _HomeState extends State<Home> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.assignment_outlined, size: 56, color: AppTheme.textTertiary),
+                Icon(Icons.assignment_outlined, size: 56, color: theme.disabledColor),
                 SizedBox(height: 16),
                 Text(
                   'Nenhuma OS encontrada',
-                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
+                  style: TextStyle(fontSize: 16, color: theme.textTheme.bodyMedium?.color),
                 ),
               ],
             ),
@@ -306,14 +303,14 @@ class _HomeState extends State<Home> {
                 ),
               );
             }
-            return _buildOrderItem(orderStore.orders[index] ?? Order(), index);
+            return _buildOrderItem(orderStore.orders[index] ?? Order(), index, theme);
           },
         );
       },
     );
   }
 
-  Widget _buildOrderItem(Order order, int index) {
+  Widget _buildOrderItem(Order order, int index, ThemeData theme) {
     final statusText = Order.statusMap[order.status] ?? '';
     final statusColor = AppTheme.getStatusColor(order.status);
     final isPaid = order.payment == 'paid';
@@ -348,7 +345,7 @@ class _HomeState extends State<Home> {
         Navigator.pushNamed(context, '/order', arguments: {'order': order}).then((_) => _loadOrders());
       },
       child: Container(
-        color: Colors.white,
+        color: theme.cardColor,
         child: Column(
           children: [
             Padding(
@@ -357,7 +354,7 @@ class _HomeState extends State<Home> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Thumbnail
-                  _buildThumbnail(order),
+                  _buildThumbnail(order, theme),
                   SizedBox(width: 12),
                   // Conteúdo principal
                   Expanded(
@@ -378,7 +375,7 @@ class _HomeState extends State<Home> {
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w600,
-                                        color: AppTheme.textPrimary,
+                                        color: theme.textTheme.bodyLarge?.color,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -449,7 +446,7 @@ class _HomeState extends State<Home> {
                                 deviceLine,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: AppTheme.textSecondary,
+                                  color: theme.textTheme.bodyMedium?.color,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
@@ -462,7 +459,7 @@ class _HomeState extends State<Home> {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.normal,
-                                color: AppTheme.textPrimary,
+                                color: theme.textTheme.bodyLarge?.color,
                                 letterSpacing: -0.5,
                               ),
                             ),
@@ -479,7 +476,7 @@ class _HomeState extends State<Home> {
               padding: EdgeInsets.only(left: 80),
               child: Container(
                 height: 1,
-                color: AppTheme.borderLight,
+                color: theme.dividerColor,
               ),
             ),
           ],
@@ -488,7 +485,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildThumbnail(Order order) {
+  Widget _buildThumbnail(Order order, ThemeData theme) {
     final url = order.coverPhotoUrl;
     const double size = 52.0;
 
@@ -497,7 +494,7 @@ class _HomeState extends State<Home> {
       child: Container(
         width: size,
         height: size,
-        color: AppTheme.backgroundColor,
+        color: theme.scaffoldBackgroundColor,
         child: url != null && url.isNotEmpty
             ? CachedImage.thumbnail(
                 imageUrl: url,
@@ -507,7 +504,7 @@ class _HomeState extends State<Home> {
                 child: Icon(
                   Icons.build_circle_outlined,
                   size: 26,
-                  color: AppTheme.textTertiary,
+                  color: theme.disabledColor,
                 ),
               ),
       ),

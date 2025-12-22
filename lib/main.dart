@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/device_form_screen.dart';
@@ -48,6 +49,7 @@ Future<void> main() async {
         Provider<BottomNavigationBarStore>(
           create: (_) => BottomNavigationBarStore(),
         ),
+        Provider<ThemeStore>(create: (_) => ThemeStore()),
       ],
       child: MyApp(),
     ),
@@ -72,31 +74,39 @@ class MyApp extends StatelessWidget {
       // Global.orderStore = OrderStore();
     });
 
-    return MaterialApp(
-      title: 'PraticOS',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      navigatorObservers: <NavigatorObserver>[observer],
-      home: Observer(
-        builder: (BuildContext context) {
-          return _buildHome(_authStore);
-        },
-      ),
-      routes: {
-        '/service_list': (context) => ServiceListScreen(),
-        '/service_form': (context) => ServiceFormScreen(),
-        '/product_list': (context) => ProductListScreen(),
-        '/product_form': (context) => ProductFormScreen(),
-        '/customer_form': (context) => CustomerFormScreen(),
-        '/customer_list': (context) => CustomerListScreen(),
-        '/device_form': (context) => DeviceFormScreen(),
-        '/device_list': (context) => DeviceListScreen(),
-        '/info_form': (context) => InfoFormScreen(),
-        '/order': (context) => OrderForm(),
-        '/order_service': (context) => OrderServiceScreen(),
-        '/order_product': (context) => OrderProductScreen(),
-        '/payment_form_screen': (context) => PaymentFormScreen(),
-        '/financial_dashboard_simple': (context) => FinancialDashboardSimple(),
+    final themeStore = Provider.of<ThemeStore>(context);
+
+    return Observer(
+      builder: (_) {
+        return MaterialApp(
+          title: 'PraticOS',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeStore.themeMode,
+          navigatorObservers: <NavigatorObserver>[observer],
+          home: Observer(
+            builder: (BuildContext context) {
+              return _buildHome(_authStore);
+            },
+          ),
+          routes: {
+            '/service_list': (context) => ServiceListScreen(),
+            '/service_form': (context) => ServiceFormScreen(),
+            '/product_list': (context) => ProductListScreen(),
+            '/product_form': (context) => ProductFormScreen(),
+            '/customer_form': (context) => CustomerFormScreen(),
+            '/customer_list': (context) => CustomerListScreen(),
+            '/device_form': (context) => DeviceFormScreen(),
+            '/device_list': (context) => DeviceListScreen(),
+            '/info_form': (context) => InfoFormScreen(),
+            '/order': (context) => OrderForm(),
+            '/order_service': (context) => OrderServiceScreen(),
+            '/order_product': (context) => OrderProductScreen(),
+            '/payment_form_screen': (context) => PaymentFormScreen(),
+            '/financial_dashboard_simple': (context) => FinancialDashboardSimple(),
+          },
+        );
       },
     );
   }
