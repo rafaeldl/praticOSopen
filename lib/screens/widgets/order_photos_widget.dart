@@ -146,7 +146,7 @@ class OrderPhotosWidget extends StatelessWidget {
                 fit: BoxFit.cover,
                 borderRadius: BorderRadius.circular(8),
                 memCacheWidth: 200, // Otimiza para thumbnails
-                memCacheHeight: 200,
+                // Removido memCacheHeight para manter o aspect ratio
               ),
               Positioned(
                 top: 4,
