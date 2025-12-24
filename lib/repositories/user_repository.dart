@@ -16,4 +16,11 @@ class UserRepository extends Repository<User> {
     User? user = await super.getSingle(id);
     return user;
   }
+
+  Future<User?> findUserByEmail(String email) async {
+    List<User> users =
+        await super.getQueryList(args: [QueryArgs('email', email)]);
+    if (users.isEmpty) return null;
+    return users.first;
+  }
 }

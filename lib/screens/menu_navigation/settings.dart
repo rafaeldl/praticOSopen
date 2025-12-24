@@ -61,6 +61,12 @@ class _SettingsState extends State<Settings> {
                   subtitle: 'Gerenciar estoque de produtos',
                   onTap: () => Navigator.pushNamed(context, '/product_list'),
                 ),
+                _MenuItemData(
+                  icon: Icons.people_rounded,
+                  title: 'Colaboradores',
+                  subtitle: 'Gerenciar equipe da organização',
+                  onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
+                ),
               ],
             ),
             SizedBox(height: 16),
