@@ -6,6 +6,7 @@ part 'order_photo.g.dart';
 @JsonSerializable(explicitToJson: true)
 class OrderPhoto {
   String? id;
+  String? itemId;
   String? url;
   String? storagePath;
   DateTime? createdAt;

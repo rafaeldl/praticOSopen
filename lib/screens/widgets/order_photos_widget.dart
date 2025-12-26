@@ -10,8 +10,14 @@ import 'dart:io';
 
 class OrderPhotosWidget extends StatelessWidget {
   final OrderStore store;
+  final String? itemId;
 
-  const OrderPhotosWidget({Key? key, required this.store}) : super(key: key);
+  const OrderPhotosWidget({Key? key, required this.store, this.itemId}) : super(key: key);
+
+  List<OrderPhoto> get _filteredPhotos {
+    if (itemId == null) return store.photos;
+    return store.photos.where((p) => p.itemId == itemId).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,35 +40,38 @@ class OrderPhotosWidget extends StatelessWidget {
           );
         }
 
+        final photos = _filteredPhotos;
+
         // Don't show anything if no photos
-        if (store.photos.isEmpty) {
+        if (photos.isEmpty) {
           return SizedBox.shrink();
         }
 
         // Show photos grid
-        return _buildPhotosGrid(context);
+        return _buildPhotosGrid(context, photos);
       },
     );
   }
 
-  Widget _buildPhotosGrid(BuildContext context) {
+  Widget _buildPhotosGrid(BuildContext context, List<OrderPhoto> photos) {
     return Column(
       children: [
         // Foto de capa (primeira foto)
-        if (store.photos.isNotEmpty) _buildCoverPhoto(context),
+        if (photos.isNotEmpty) _buildCoverPhoto(context, photos),
         SizedBox(height: 8),
         // Grid das outras fotos
-        if (store.photos.length > 1) _buildThumbnailGrid(context),
+        if (photos.length > 1) _buildThumbnailGrid(context, photos),
       ],
     );
   }
 
-  Widget _buildCoverPhoto(BuildContext context) {
-    final OrderPhoto coverPhoto = store.photos.first;
+  Widget _buildCoverPhoto(BuildContext context, List<OrderPhoto> photos) {
+    final OrderPhoto coverPhoto = photos.first;
     final theme = Theme.of(context);
+    final globalIndex = store.photos.indexOf(coverPhoto);
 
     return GestureDetector(
-      onTap: () => _showPhotoViewer(context, 0),
+      onTap: () => _showPhotoViewer(context, globalIndex),
       child: Stack(
         children: [
           Container(
@@ -99,7 +108,7 @@ class OrderPhotosWidget extends StatelessWidget {
                   ),
                   SizedBox(width: 4),
                   Text(
-                    '${store.photos.length}',
+                    '${photos.length}',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -113,15 +122,15 @@ class OrderPhotosWidget extends StatelessWidget {
           Positioned(
             top: 8,
             right: 8,
-            child: _buildPhotoActionButton(context, 0),
+            child: _buildPhotoActionButton(context, globalIndex),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildThumbnailGrid(BuildContext context) {
-    final thumbnailPhotos = store.photos.skip(1).toList();
+  Widget _buildThumbnailGrid(BuildContext context, List<OrderPhoto> photos) {
+    final thumbnailPhotos = photos.skip(1).toList();
 
     return GridView.builder(
       shrinkWrap: true,
@@ -134,10 +143,10 @@ class OrderPhotosWidget extends StatelessWidget {
       itemCount: thumbnailPhotos.length,
       itemBuilder: (context, index) {
         final photo = thumbnailPhotos[index];
-        final actualIndex = index + 1; // +1 porque pulamos a primeira foto
+        final globalIndex = store.photos.indexOf(photo);
 
         return GestureDetector(
-          onTap: () => _showPhotoViewer(context, actualIndex),
+          onTap: () => _showPhotoViewer(context, globalIndex),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -151,7 +160,7 @@ class OrderPhotosWidget extends StatelessWidget {
               Positioned(
                 top: 4,
                 right: 4,
-                child: _buildPhotoActionButton(context, actualIndex, small: true),
+                child: _buildPhotoActionButton(context, globalIndex, small: true),
               ),
             ],
           ),

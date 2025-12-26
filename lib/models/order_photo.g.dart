@@ -8,6 +8,7 @@ part of 'order_photo.dart';
 
 OrderPhoto _$OrderPhotoFromJson(Map<String, dynamic> json) => OrderPhoto()
   ..id = json['id'] as String?
+  ..itemId = json['itemId'] as String?
   ..url = json['url'] as String?
   ..storagePath = json['storagePath'] as String?
   ..createdAt = json['createdAt'] == null
@@ -20,6 +21,7 @@ OrderPhoto _$OrderPhotoFromJson(Map<String, dynamic> json) => OrderPhoto()
 Map<String, dynamic> _$OrderPhotoToJson(OrderPhoto instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'itemId': instance.itemId,
       'url': instance.url,
       'storagePath': instance.storagePath,
       'createdAt': instance.createdAt?.toIso8601String(),

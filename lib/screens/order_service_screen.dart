@@ -1,9 +1,13 @@
+import 'dart:math';
+
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/service.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:praticos/screens/widgets/order_photos_widget.dart';
 
 class OrderServiceScreen extends StatefulWidget {
   const OrderServiceScreen({Key? key}) : super(key: key);
@@ -49,6 +53,11 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
           _orderService = _orderStore!.order!.services![orderServiceIndex!];
         }
       }
+
+      if (_orderService.id == null) {
+        _orderService.id = "${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(10000)}";
+      }
+
       _initialized = true;
     }
   }
@@ -76,6 +85,13 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
       appBar: AppBar(
         title: Text(_isEditing ? 'Editar Serviço' : 'Novo Serviço'),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_a_photo_outlined),
+            tooltip: 'Adicionar foto',
+            onPressed: () => _showAddPhotoOptions(),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -85,6 +101,14 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (_orderStore != null)
+                  Observer(
+                    builder: (_) => OrderPhotosWidget(
+                      store: _orderStore!,
+                      itemId: _orderService.id,
+                    ),
+                  ),
+                const SizedBox(height: 16),
                 // Header icon
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 24),
@@ -221,5 +245,61 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   String _convertToCurrency(double? total) {
     if (total == null) return '';
     return numberFormat.format(total);
+  }
+
+  void _showAddPhotoOptions() {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final theme = Theme.of(context);
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (modalContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: Icon(Icons.camera_alt, color: theme.colorScheme.primary),
+                  title: const Text('Tirar foto'),
+                  onTap: () async {
+                    Navigator.pop(modalContext);
+                    final success = await _orderStore!.addPhotoFromCamera(itemId: _orderService.id);
+                    if (!success && mounted) {
+                      scaffoldMessenger.showSnackBar(
+                        const SnackBar(content: Text('Erro ao adicionar foto')),
+                      );
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.photo_library, color: theme.colorScheme.primary),
+                  title: const Text('Escolher da galeria'),
+                  onTap: () async {
+                    Navigator.pop(modalContext);
+                    final success = await _orderStore!.addPhotoFromGallery(itemId: _orderService.id);
+                    if (!success && mounted) {
+                      scaffoldMessenger.showSnackBar(
+                        const SnackBar(content: Text('Erro ao adicionar foto')),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 8),
+                ListTile(
+                  leading: const Icon(Icons.close, color: Colors.grey),
+                  title: const Text('Cancelar'),
+                  onTap: () => Navigator.pop(modalContext),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
