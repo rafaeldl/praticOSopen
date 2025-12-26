@@ -188,7 +188,7 @@ class _SettingsState extends State<Settings> {
                   Divider(
                     height: 1,
                     indent: 56,
-                    color: theme.dividerColor,
+                    color: colorScheme.outlineVariant,
                   ),
               ],
             );

@@ -155,7 +155,7 @@ class _HomeState extends State<Home> {
             ),
           ),
           // Divisor sutil
-          Container(height: 1, color: theme.dividerColor),
+          Container(height: 1, color: theme.colorScheme.outlineVariant),
           // Lista
           Expanded(child: _buildOrdersList(theme)),
         ],
@@ -476,7 +476,7 @@ class _HomeState extends State<Home> {
               padding: EdgeInsets.only(left: 80),
               child: Container(
                 height: 1,
-                color: theme.dividerColor,
+                color: theme.colorScheme.outlineVariant,
               ),
             ),
           ],

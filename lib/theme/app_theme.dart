@@ -86,6 +86,7 @@ class AppTheme {
       brightness: Brightness.dark,
       primaryColor: primaryLight,
       scaffoldBackgroundColor: backgroundDark,
+      dividerColor: borderColorDark,
 
       // Color Scheme
       colorScheme: const ColorScheme.dark(
@@ -97,6 +98,8 @@ class AppTheme {
         onSurface: textPrimaryDark,
         error: errorColor,
         onError: Colors.white,
+        outline: borderColorDark,
+        outlineVariant: borderColorDark,
       ),
 
       // AppBar Theme
@@ -326,6 +329,7 @@ class AppTheme {
       brightness: Brightness.light,
       primaryColor: primaryColor,
       scaffoldBackgroundColor: backgroundColor,
+      dividerColor: borderColor,
 
       // Color Scheme
       colorScheme: const ColorScheme.light(
@@ -337,6 +341,8 @@ class AppTheme {
         onSurface: textPrimary,
         error: errorColor,
         onError: Colors.white,
+        outline: borderColor,
+        outlineVariant: borderLight,
       ),
 
       // AppBar Theme
