@@ -2,6 +2,7 @@ import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:praticos/global.dart';
@@ -41,22 +42,31 @@ class _SettingsState extends State<Settings> {
             _buildProfileHeader(),
             SizedBox(height: 16),
             // Seções de menu
-            if (_userStore.user?.value != null &&
-                _userStore.user!.value!.companies != null &&
-                _userStore.user!.value!.companies!.length > 1) ...[
-              _buildMenuSection(
-                'Organização',
-                [
-                  _MenuItemData(
-                    icon: Icons.business_rounded,
-                    title: 'Trocar Empresa',
-                    subtitle: 'Alternar entre organizações',
-                    onTap: () => _showCompanySelectionModal(context),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-            ],
+            Observer(
+              builder: (context) {
+                if (_userStore.user?.value != null &&
+                    _userStore.user!.value!.companies != null &&
+                    _userStore.user!.value!.companies!.length > 1) {
+                  return Column(
+                    children: [
+                      _buildMenuSection(
+                        'Organização',
+                        [
+                          _MenuItemData(
+                            icon: Icons.business_rounded,
+                            title: 'Trocar Empresa',
+                            subtitle: 'Alternar entre organizações',
+                            onTap: () => _showCompanySelectionModal(context),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                    ],
+                  );
+                }
+                return Container();
+              },
+            ),
             _buildMenuSection(
               'Cadastros',
               [
