@@ -117,7 +117,7 @@ class _SettingsState extends State<Settings> {
                   icon: Icons.logout_rounded,
                   title: 'Sair',
                   subtitle: 'Encerrar sessão',
-                  onTap: () async => AuthStore().signOutGoogle(),
+                  onTap: () => _showLogoutConfirmation(context),
                   isDestructive: true,
                 ),
               ],
@@ -184,6 +184,29 @@ class _SettingsState extends State<Settings> {
               color: AppTheme.textSecondary,
             ),
           ),
+          Observer(builder: (_) {
+            return _authStore.companyAggr?.name != null
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        _authStore.companyAggr!.name!,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
+                    ),
+                  )
+                : SizedBox();
+          }),
         ],
       ),
     );
@@ -227,6 +250,32 @@ class _SettingsState extends State<Settings> {
               ],
             );
           }).toList(),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Sair'),
+        content: Text('Tem certeza que deseja sair?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('CANCELAR'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _authStore.signOutGoogle();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.errorColor,
+            ),
+            child: Text('SAIR', style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
     );
