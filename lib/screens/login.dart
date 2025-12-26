@@ -1,5 +1,6 @@
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:flutter/material.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -22,6 +23,16 @@ class _LoginPageState extends State<LoginPage> {
               Image(image: AssetImage("assets/images/icon.png"), height: 200.0),
               SizedBox(height: 50),
               _signInButton(),
+              SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: SignInWithAppleButton(
+                  text: 'Entrar com Apple',
+                  onPressed: () {
+                    _auth.signInWithApple();
+                  },
+                ),
+              ),
             ],
           ),
         ),

@@ -21,6 +21,18 @@ mixin _$AuthStore on _AuthStore, Store {
   }
 
   @override
+  dynamic signInWithApple() {
+    final _$actionInfo = _$_AuthStoreActionController.startAction(
+      name: '_AuthStore.signInWithApple',
+    );
+    try {
+      return super.signInWithApple();
+    } finally {
+      _$_AuthStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   set currentUser(ObservableStream<User?>? value) {
     _$currentUserAtom.reportWrite(value, super.currentUser, () {
       super.currentUser = value;

@@ -101,6 +101,11 @@ abstract class _AuthStore with Store {
   }
 
   @action
+  signInWithApple() {
+    _auth.signInWithApple();
+  }
+
+  @action
   signOutGoogle() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     logout = true;
