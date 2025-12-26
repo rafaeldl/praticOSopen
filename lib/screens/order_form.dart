@@ -549,6 +549,7 @@ class _OrderFormState extends State<OrderForm> {
                   title: service.service?.name,
                   description: service.description,
                   value: service.value,
+                  photoUrl: service.photo,
                   onTap: () => _editService(index),
                   onDelete: () {
                     _store.deleteService(index);
@@ -623,6 +624,7 @@ class _OrderFormState extends State<OrderForm> {
                   description: product.description,
                   value: product.value,
                   quantity: product.quantity,
+                  photoUrl: product.photo,
                   onTap: () => _editProduct(index),
                   onDelete: () {
                     _store.deleteProduct(index);

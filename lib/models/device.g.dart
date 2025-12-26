@@ -27,7 +27,8 @@ Device _$DeviceFromJson(Map<String, dynamic> json) => Device()
   ..name = json['name'] as String?
   ..manufacturer = json['manufacturer'] as String?
   ..category = json['category'] as String?
-  ..description = json['description'] as String?;
+  ..description = json['description'] as String?
+  ..photo = json['photo'] as String?;
 
 Map<String, dynamic> _$DeviceToJson(Device instance) => <String, dynamic>{
   'id': instance.id,
@@ -41,16 +42,19 @@ Map<String, dynamic> _$DeviceToJson(Device instance) => <String, dynamic>{
   'manufacturer': instance.manufacturer,
   'category': instance.category,
   'description': instance.description,
+  'photo': instance.photo,
 };
 
 DeviceAggr _$DeviceAggrFromJson(Map<String, dynamic> json) => DeviceAggr()
   ..id = json['id'] as String?
   ..serial = json['serial'] as String?
-  ..name = json['name'] as String?;
+  ..name = json['name'] as String?
+  ..photo = json['photo'] as String?;
 
 Map<String, dynamic> _$DeviceAggrToJson(DeviceAggr instance) =>
     <String, dynamic>{
       'id': instance.id,
       'serial': instance.serial,
       'name': instance.name,
+      'photo': instance.photo,
     };

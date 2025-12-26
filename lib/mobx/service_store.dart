@@ -1,9 +1,13 @@
 import 'dart:async';
 
+import 'dart:io';
+
+import 'package:praticos/global.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/service_repository.dart';
+import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,9 +19,13 @@ class ServiceStore = _ServiceStore with _$ServiceStore;
 abstract class _ServiceStore with Store {
   final ServiceRepository repository = ServiceRepository();
   final UserStore userStore = UserStore();
+  final PhotoService photoService = PhotoService();
 
   @observable
   ObservableStream<List<Service>>? serviceList;
+
+  @observable
+  bool isUploading = false;
 
   String? companyId;
 
@@ -53,5 +61,28 @@ abstract class _ServiceStore with Store {
   @action
   deleteService(Service service) async {
     await repository.removeItem(service.id);
+  }
+
+  @action
+  Future<String?> uploadServicePhoto(File file, Service service) async {
+    if (service.id == null) {
+      await saveService(service);
+    }
+
+    if (Global.companyAggr?.id == null) return null;
+
+    isUploading = true;
+    try {
+      final String storagePath = 'tenants/${Global.companyAggr!.id}/services/${service.id}/photo.jpg';
+      final String? url = await photoService.uploadImage(file: file, storagePath: storagePath);
+
+      if (url != null) {
+        service.photo = url;
+        await repository.updateItem(service);
+      }
+      return url;
+    } finally {
+      isUploading = false;
+    }
   }
 }

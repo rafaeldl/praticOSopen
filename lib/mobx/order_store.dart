@@ -340,6 +340,10 @@ abstract class _OrderStore with Store {
 
   @action
   addService(OrderService orderService) {
+    // Copia a foto do serviço se existir
+    if (orderService.service?.photo != null) {
+      orderService.photo = orderService.service?.photo;
+    }
     order!.services!.add(orderService);
     services!.add(orderService);
     updateTotal();
@@ -348,6 +352,10 @@ abstract class _OrderStore with Store {
 
   @action
   addProduct(OrderProduct orderProduct) {
+    // Copia a foto do produto se existir
+    if (orderProduct.product?.photo != null) {
+      orderProduct.photo = orderProduct.product?.photo;
+    }
     order!.products!.add(orderProduct);
     products!.add(orderProduct);
     updateTotal();

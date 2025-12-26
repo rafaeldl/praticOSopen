@@ -1,9 +1,13 @@
 import 'dart:async';
 
+import 'dart:io';
+
+import 'package:praticos/global.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/product_repository.dart';
 import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,9 +19,13 @@ class ProductStore = _ProductStore with _$ProductStore;
 abstract class _ProductStore with Store {
   final ProductRepository repository = ProductRepository();
   final UserStore userStore = UserStore();
+  final PhotoService photoService = PhotoService();
 
   @observable
   ObservableStream<List<Product>>? productList;
+
+  @observable
+  bool isUploading = false;
 
   String? companyId;
 
@@ -53,5 +61,30 @@ abstract class _ProductStore with Store {
   @action
   deleteProduct(Product product) async {
     await repository.removeItem(product.id);
+  }
+
+  @action
+  Future<String?> uploadProductPhoto(File file, Product product) async {
+    if (product.id == null) {
+      // Salva o produto primeiro para ter um ID
+      await saveProduct(product);
+    }
+
+    if (Global.companyAggr?.id == null) return null;
+
+    isUploading = true;
+    try {
+      final String storagePath = 'tenants/${Global.companyAggr!.id}/products/${product.id}/photo.jpg';
+      final String? url = await photoService.uploadImage(file: file, storagePath: storagePath);
+
+      if (url != null) {
+        product.photo = url;
+        // Atualiza apenas o campo foto se o produto já existir, ou salva tudo
+        await repository.updateItem(product);
+      }
+      return url;
+    } finally {
+      isUploading = false;
+    }
   }
 }

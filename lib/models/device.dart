@@ -12,6 +12,7 @@ class Device extends BaseAuditCompany {
   String? manufacturer;
   String? category;
   String? description;
+  String? photo;
 
   Device();
   factory Device.fromJson(Map<String, dynamic> json) => _$DeviceFromJson(json);
@@ -23,6 +24,7 @@ class Device extends BaseAuditCompany {
 class DeviceAggr extends BaseAuditCompanyAggr {
   String? serial;
   String? name;
+  String? photo;
 
   DeviceAggr();
   factory DeviceAggr.fromJson(Map<String, dynamic> json) =>

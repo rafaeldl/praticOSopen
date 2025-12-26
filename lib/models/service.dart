@@ -9,6 +9,7 @@ part 'service.g.dart';
 class Service extends BaseAuditCompany {
   String? name;
   double? value;
+  String? photo;
 
   Service();
   factory Service.fromJson(Map<String, dynamic> json) =>
@@ -21,6 +22,7 @@ class Service extends BaseAuditCompany {
 class ServiceAggr extends BaseAuditCompanyAggr {
   String? name;
   double? value;
+  String? photo;
 
   ServiceAggr();
   factory ServiceAggr.fromJson(Map<String, dynamic> json) =>

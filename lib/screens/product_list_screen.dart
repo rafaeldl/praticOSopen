@@ -1,5 +1,6 @@
 import 'package:praticos/mobx/product_store.dart';
 import 'package:praticos/models/product.dart';
+import 'package:praticos/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
@@ -172,13 +173,22 @@ class _ProductListScreenState extends State<ProductListScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            child: Icon(
-              Icons.inventory_2_outlined,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-          ),
+          leading: product.photo != null
+              ? ClipOval(
+                  child: CachedImage(
+                    imageUrl: product.photo!,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.inventory_2_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
           title: Text(
             product.name ?? '',
             style: const TextStyle(fontWeight: FontWeight.w500),

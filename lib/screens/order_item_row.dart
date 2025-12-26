@@ -1,3 +1,4 @@
+import 'package:praticos/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -6,6 +7,7 @@ class OrderItemRow extends StatelessWidget {
   final String? description;
   final int? quantity;
   final double? value;
+  final String? photoUrl;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
 
@@ -15,6 +17,7 @@ class OrderItemRow extends StatelessWidget {
     this.description = '',
     this.quantity,
     this.value = 0.0,
+    this.photoUrl,
     this.onTap,
     this.onDelete,
   }) : super(key: key);
@@ -58,6 +61,17 @@ class OrderItemRow extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
+                if (photoUrl != null) ...[
+                  ClipOval(
+                    child: CachedImage(
+                      imageUrl: photoUrl!,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
                 // Item info
                 Expanded(
                   child: Column(

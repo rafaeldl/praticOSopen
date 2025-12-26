@@ -312,4 +312,48 @@ class PhotoService {
       return false;
     }
   }
+
+  /// Faz upload de uma imagem genérica para um caminho específico
+  /// Retorna a URL de download
+  Future<String?> uploadImage({
+    required File file,
+    required String storagePath,
+  }) async {
+    try {
+      final auth = FirebaseAuth.instance;
+      final user = auth.currentUser;
+
+      if (user == null) {
+        throw Exception('Usuário não autenticado.');
+      }
+
+      // Valida que o storagePath começa com o tenant correto
+      final expectedPrefix = 'tenants/${Global.companyAggr?.id}/';
+      if (!storagePath.startsWith(expectedPrefix)) {
+         print('SECURITY: Tentativa de upload para outro tenant');
+         throw Exception('Você não tem permissão para fazer upload para esta empresa.');
+      }
+
+      // Gera um ID único para a conversão
+      final String photoId = DateTime.now().millisecondsSinceEpoch.toString();
+
+      // Converte para JPEG
+      final File jpegFile = await _ensureJpeg(file, photoId);
+
+      final Reference ref = _storage.ref().child(storagePath);
+
+      final UploadTask uploadTask = ref.putFile(
+        jpegFile,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+
+      final TaskSnapshot snapshot = await uploadTask;
+      final String downloadUrl = await _getDownloadUrlWithRetry(snapshot.ref);
+
+      return downloadUrl;
+    } catch (e) {
+      print('Erro ao fazer upload da imagem: $e');
+      return null;
+    }
+  }
 }

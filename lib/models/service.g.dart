@@ -24,7 +24,8 @@ Service _$ServiceFromJson(Map<String, dynamic> json) => Service()
       ? null
       : CompanyAggr.fromJson(json['company'] as Map<String, dynamic>)
   ..name = json['name'] as String?
-  ..value = (json['value'] as num?)?.toDouble();
+  ..value = (json['value'] as num?)?.toDouble()
+  ..photo = json['photo'] as String?;
 
 Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
   'id': instance.id,
@@ -35,16 +36,19 @@ Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
   'company': instance.company?.toJson(),
   'name': instance.name,
   'value': instance.value,
+  'photo': instance.photo,
 };
 
 ServiceAggr _$ServiceAggrFromJson(Map<String, dynamic> json) => ServiceAggr()
   ..id = json['id'] as String?
   ..name = json['name'] as String?
-  ..value = (json['value'] as num?)?.toDouble();
+  ..value = (json['value'] as num?)?.toDouble()
+  ..photo = json['photo'] as String?;
 
 Map<String, dynamic> _$ServiceAggrToJson(ServiceAggr instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'value': instance.value,
+      'photo': instance.photo,
     };

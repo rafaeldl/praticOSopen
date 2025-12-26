@@ -1,6 +1,7 @@
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/service.dart';
+import 'package:praticos/widgets/cached_image.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -88,14 +89,8 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
                 // Header icon
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    child: Icon(
-                      Icons.build,
-                      size: 40,
-                      color: theme.colorScheme.primary,
-                    ),
+                  child: Center(
+                    child: _buildHeaderImage(theme),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -221,5 +216,35 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   String _convertToCurrency(double? total) {
     if (total == null) return '';
     return numberFormat.format(total);
+  }
+
+  Widget _buildHeaderImage(ThemeData theme) {
+    String? photoUrl;
+    if (orderServiceIndex != null) {
+      photoUrl = _orderService.photo;
+    } else {
+      photoUrl = _service?.photo;
+    }
+
+    if (photoUrl != null) {
+      return ClipOval(
+        child: CachedImage(
+          imageUrl: photoUrl,
+          width: 80,
+          height: 80,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    return CircleAvatar(
+      radius: 40,
+      backgroundColor: theme.colorScheme.primaryContainer,
+      child: Icon(
+        Icons.build,
+        size: 40,
+        color: theme.colorScheme.primary,
+      ),
+    );
   }
 }

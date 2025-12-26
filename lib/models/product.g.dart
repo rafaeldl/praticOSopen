@@ -24,7 +24,8 @@ Product _$ProductFromJson(Map<String, dynamic> json) => Product()
       ? null
       : CompanyAggr.fromJson(json['company'] as Map<String, dynamic>)
   ..name = json['name'] as String?
-  ..value = (json['value'] as num?)?.toDouble();
+  ..value = (json['value'] as num?)?.toDouble()
+  ..photo = json['photo'] as String?;
 
 Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
   'id': instance.id,
@@ -35,16 +36,19 @@ Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
   'company': instance.company?.toJson(),
   'name': instance.name,
   'value': instance.value,
+  'photo': instance.photo,
 };
 
 ProductAggr _$ProductAggrFromJson(Map<String, dynamic> json) => ProductAggr()
   ..id = json['id'] as String?
   ..name = json['name'] as String?
-  ..value = (json['value'] as num?)?.toDouble();
+  ..value = (json['value'] as num?)?.toDouble()
+  ..photo = json['photo'] as String?;
 
 Map<String, dynamic> _$ProductAggrToJson(ProductAggr instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
       'value': instance.value,
+      'photo': instance.photo,
     };
