@@ -75,7 +75,7 @@ class _SettingsState extends State<Settings> {
                 [
                   if (isAdmin)
                     _MenuItemData(
-                      icon: Icons.edit_business_rounded,
+                      icon: Icons.store_rounded,
                       title: 'Dados da Empresa',
                       subtitle: 'Editar informações da organização',
                       onTap: () => Navigator.pushNamed(context, '/company_form'),
