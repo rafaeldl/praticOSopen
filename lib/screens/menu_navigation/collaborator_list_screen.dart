@@ -13,12 +13,14 @@ class CollaboratorListScreen extends StatefulWidget {
 
 class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   final CompanyStore _companyStore = CompanyStore();
+  final UserStore _userStore = UserStore();
   Company? _company;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _userStore.findCurrentUser();
     _loadData();
   }
 
@@ -32,50 +34,56 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppTheme.surfaceColor,
-        elevation: 0,
-        title: Text(
-          'Colaboradores',
-          style: TextStyle(
-            color: AppTheme.textPrimary,
-            fontWeight: FontWeight.w700,
+    return Observer(builder: (_) {
+      final isAdmin = _isAdmin();
+      return Scaffold(
+        backgroundColor: AppTheme.backgroundColor,
+        appBar: AppBar(
+          backgroundColor: AppTheme.surfaceColor,
+          elevation: 0,
+          title: Text(
+            'Colaboradores',
+            style: TextStyle(
+              color: AppTheme.textPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_rounded, color: AppTheme.primaryColor),
+            onPressed: () => Navigator.pop(context),
           ),
         ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded, color: AppTheme.primaryColor),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.pushNamed(context, '/collaborator_form');
-          if (result == true) {
-            _loadData();
-          }
-        },
-        backgroundColor: AppTheme.primaryColor,
-        child: Icon(Icons.add_rounded, color: Colors.white),
-      ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _company == null
-              ? Center(child: Text('Empresa não encontrada'))
-              : ListView.separated(
-                  padding: EdgeInsets.all(16),
-                  itemCount: _company!.users?.length ?? 0,
-                  separatorBuilder: (context, index) => SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final userRole = _company!.users![index];
-                    return _buildUserCard(userRole);
-                  },
-                ),
-    );
+        floatingActionButton: isAdmin
+            ? FloatingActionButton(
+                onPressed: () async {
+                  final result =
+                      await Navigator.pushNamed(context, '/collaborator_form');
+                  if (result == true) {
+                    _loadData();
+                  }
+                },
+                backgroundColor: AppTheme.primaryColor,
+                child: Icon(Icons.add_rounded, color: Colors.white),
+              )
+            : null,
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : _company == null
+                ? Center(child: Text('Empresa não encontrada'))
+                : ListView.separated(
+                    padding: EdgeInsets.all(16),
+                    itemCount: _company!.users?.length ?? 0,
+                    separatorBuilder: (context, index) => SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final userRole = _company!.users![index];
+                      return _buildUserCard(userRole, isAdmin);
+                    },
+                  ),
+      );
+    });
   }
 
-  Widget _buildUserCard(UserRoleAggr userRole) {
+  Widget _buildUserCard(UserRoleAggr userRole, bool isAdmin) {
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor,
@@ -115,47 +123,66 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             color: AppTheme.textSecondary,
           ),
         ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'edit') {
-              _showEditRoleDialog(userRole);
-            } else if (value == 'remove') {
-              _showRemoveConfirmation(userRole);
-            }
-          },
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit_rounded, size: 20, color: AppTheme.textSecondary),
-                  SizedBox(width: 12),
-                  Text('Editar Permissão'),
+        trailing: isAdmin
+            ? PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'edit') {
+                    _showEditRoleDialog(userRole);
+                  } else if (value == 'remove') {
+                    _showRemoveConfirmation(userRole);
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_rounded,
+                            size: 20, color: AppTheme.textSecondary),
+                        SizedBox(width: 12),
+                        Text('Editar Permissão'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'remove',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_rounded,
+                            size: 20, color: AppTheme.errorColor),
+                        SizedBox(width: 12),
+                        Text('Remover',
+                            style: TextStyle(color: AppTheme.errorColor)),
+                      ],
+                    ),
+                  ),
                 ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'remove',
-              child: Row(
-                children: [
-                  Icon(Icons.delete_rounded, size: 20, color: AppTheme.errorColor),
-                  SizedBox(width: 12),
-                  Text('Remover', style: TextStyle(color: AppTheme.errorColor)),
-                ],
-              ),
-            ),
-          ],
-          child: Container(
-            padding: EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.backgroundColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(Icons.more_vert_rounded, color: AppTheme.textSecondary),
-          ),
-        ),
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.backgroundColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(Icons.more_vert_rounded,
+                      color: AppTheme.textSecondary),
+                ),
+              )
+            : null,
       ),
     );
+  }
+
+  bool _isAdmin() {
+    if (_userStore.user?.value == null || Global.companyAggr == null) return false;
+
+    final currentCompanyId = Global.companyAggr!.id;
+    final companyRole = _userStore.user!.value!.companies?.firstWhere(
+      (c) => c.company?.id == currentCompanyId,
+      orElse: () => CompanyRoleAggr(),
+    );
+
+    return companyRole?.role == RolesType.admin ||
+        companyRole?.role == RolesType.manager;
   }
 
   void _showEditRoleDialog(UserRoleAggr userRole) {

@@ -1,5 +1,6 @@
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
+import 'package:praticos/models/user_role.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -67,35 +68,47 @@ class _SettingsState extends State<Settings> {
                 return Container();
               },
             ),
-            _buildMenuSection(
-              'Cadastros',
-              [
-                _MenuItemData(
-                  icon: Icons.directions_car_rounded,
-                  title: 'Veículos',
-                  subtitle: 'Gerenciar veículos cadastrados',
-                  onTap: () => Navigator.pushNamed(context, '/device_list'),
-                ),
-                _MenuItemData(
-                  icon: Icons.build_rounded,
-                  title: 'Serviços',
-                  subtitle: 'Gerenciar serviços oferecidos',
-                  onTap: () => Navigator.pushNamed(context, '/service_list'),
-                ),
-                _MenuItemData(
-                  icon: Icons.inventory_2_rounded,
-                  title: 'Produtos',
-                  subtitle: 'Gerenciar estoque de produtos',
-                  onTap: () => Navigator.pushNamed(context, '/product_list'),
-                ),
-                _MenuItemData(
-                  icon: Icons.people_rounded,
-                  title: 'Colaboradores',
-                  subtitle: 'Gerenciar equipe da organização',
-                  onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
-                ),
-              ],
-            ),
+            Observer(builder: (context) {
+              final isAdmin = _isAdmin();
+              return _buildMenuSection(
+                'Organização',
+                [
+                  if (isAdmin)
+                    _MenuItemData(
+                      icon: Icons.edit_business_rounded,
+                      title: 'Dados da Empresa',
+                      subtitle: 'Editar informações da organização',
+                      onTap: () => Navigator.pushNamed(context, '/company_form'),
+                    ),
+                  if (isAdmin)
+                    _MenuItemData(
+                      icon: Icons.people_rounded,
+                      title: 'Colaboradores',
+                      subtitle: 'Gerenciar equipe da organização',
+                      onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
+                    ),
+                  // Items available to all roles (or check permissions if needed)
+                  _MenuItemData(
+                    icon: Icons.directions_car_rounded,
+                    title: 'Veículos',
+                    subtitle: 'Gerenciar veículos cadastrados',
+                    onTap: () => Navigator.pushNamed(context, '/device_list'),
+                  ),
+                  _MenuItemData(
+                    icon: Icons.build_rounded,
+                    title: 'Serviços',
+                    subtitle: 'Gerenciar serviços oferecidos',
+                    onTap: () => Navigator.pushNamed(context, '/service_list'),
+                  ),
+                  _MenuItemData(
+                    icon: Icons.inventory_2_rounded,
+                    title: 'Produtos',
+                    subtitle: 'Gerenciar estoque de produtos',
+                    onTap: () => Navigator.pushNamed(context, '/product_list'),
+                  ),
+                ],
+              );
+            }),
             SizedBox(height: 16),
             _buildMenuSection(
               'Conta',
@@ -354,6 +367,18 @@ class _SettingsState extends State<Settings> {
         ),
       ),
     );
+  }
+
+  bool _isAdmin() {
+    if (_userStore.user?.value == null || Global.companyAggr == null) return false;
+
+    final currentCompanyId = Global.companyAggr!.id;
+    final companyRole = _userStore.user!.value!.companies?.firstWhere(
+      (c) => c.company?.id == currentCompanyId,
+      orElse: () => CompanyRoleAggr(),
+    );
+
+    return companyRole?.role == RolesType.admin || companyRole?.role == RolesType.manager;
   }
 
   Widget _buildVersionInfo() {

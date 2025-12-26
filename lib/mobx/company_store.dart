@@ -121,4 +121,9 @@ abstract class _CompanyStore with Store {
     await repository.updateItem(company);
     await userRepository.updateItem(user);
   }
+
+  @action
+  Future<void> updateCompany(Company company) async {
+    await repository.updateItem(company);
+  }
 }
