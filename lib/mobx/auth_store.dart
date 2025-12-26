@@ -20,6 +20,7 @@ abstract class _AuthStore with Store {
   @observable
   ObservableStream<User?>? currentUser;
 
+  @observable
   CompanyAggr? companyAggr;
 
   Observable<bool> changed = Observable(false);
@@ -39,12 +40,21 @@ abstract class _AuthStore with Store {
       var dbUser = await userStore.repository.findUserById(user.uid);
       Company company;
 
-      if (dbUser != null &&
+      // Check if there is a last selected company saved
+      String? lastCompanyId = prefs.getString('companyId');
+
+      if (lastCompanyId != null &&
+          dbUser != null &&
+          dbUser.companies != null &&
+          dbUser.companies!.any((c) => c.company?.id == lastCompanyId)) {
+        // Load the saved company if the user still belongs to it
+        company = await companyStore.retrieveCompany(lastCompanyId);
+      } else if (dbUser != null &&
           dbUser.companies != null &&
           dbUser.companies!.isNotEmpty) {
         // Retrieve the first company associated with the user
-        company =
-            await companyStore.retrieveCompany(dbUser.companies!.first.company!.id);
+        company = await companyStore
+            .retrieveCompany(dbUser.companies!.first.company!.id);
       } else {
         // Fallback for legacy or owner-only logic
         company = await companyStore.getCompanyByOwnerId(user.uid);
@@ -68,6 +78,21 @@ abstract class _AuthStore with Store {
       companyAggr = company.toAggr();
       Global.companyAggr = companyAggr;
     });
+  }
+
+  @action
+  Future<void> switchCompany(String companyId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Company company = await companyStore.retrieveCompany(companyId);
+
+    if (company.id != null) {
+      prefs.setString('companyId', company.id!);
+    }
+    if (company.name != null) {
+      prefs.setString('companyName', company.name!);
+    }
+    companyAggr = company.toAggr();
+    Global.companyAggr = companyAggr;
   }
 
   @action

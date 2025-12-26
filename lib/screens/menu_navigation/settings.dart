@@ -13,6 +13,7 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   final UserStore _userStore = UserStore();
+  final AuthStore _authStore = AuthStore();
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +41,22 @@ class _SettingsState extends State<Settings> {
             _buildProfileHeader(),
             SizedBox(height: 16),
             // Seções de menu
+            if (_userStore.user?.value != null &&
+                _userStore.user!.value!.companies != null &&
+                _userStore.user!.value!.companies!.length > 1) ...[
+              _buildMenuSection(
+                'Organização',
+                [
+                  _MenuItemData(
+                    icon: Icons.business_rounded,
+                    title: 'Trocar Empresa',
+                    subtitle: 'Alternar entre organizações',
+                    onTap: () => _showCompanySelectionModal(context),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
+            ],
             _buildMenuSection(
               'Cadastros',
               [
@@ -188,6 +205,79 @@ class _SettingsState extends State<Settings> {
             );
           }).toList(),
         ],
+      ),
+    );
+  }
+
+  void _showCompanySelectionModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceColor,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Selecionar Empresa',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+            ),
+            Divider(height: 1),
+            if (_userStore.user?.value?.companies != null)
+              ..._userStore.user!.value!.companies!.map((companyRole) {
+                bool isSelected =
+                    companyRole.company?.id == Global.companyAggr?.id;
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: isSelected
+                        ? AppTheme.primaryColor
+                        : AppTheme.backgroundColor,
+                    child: Icon(
+                      Icons.business_rounded,
+                      color: isSelected ? Colors.white : AppTheme.textTertiary,
+                    ),
+                  ),
+                  title: Text(
+                    companyRole.company?.name ?? 'Empresa sem nome',
+                    style: TextStyle(
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? AppTheme.primaryColor
+                          : AppTheme.textPrimary,
+                    ),
+                  ),
+                  subtitle: Text(
+                    companyRole.role.toString().split('.').last.toUpperCase(),
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  trailing: isSelected
+                      ? Icon(Icons.check_circle_rounded,
+                          color: AppTheme.primaryColor)
+                      : null,
+                  onTap: () async {
+                    if (!isSelected && companyRole.company?.id != null) {
+                      Navigator.pop(context);
+                      await _authStore.switchCompany(companyRole.company!.id!);
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, '/', (route) => false);
+                    }
+                  },
+                );
+              }).toList(),
+            SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }

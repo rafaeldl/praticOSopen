@@ -76,4 +76,49 @@ abstract class _CompanyStore with Store {
     await repository.updateItem(company);
     await userRepository.updateItem(user);
   }
+
+  @action
+  Future<void> removeCollaborator(String userId) async {
+    if (Global.companyAggr == null) return;
+
+    Company? company = await repository.getSingle(Global.companyAggr!.id);
+    User? user = await userRepository.findUserById(userId);
+
+    if (company == null || user == null) return;
+
+    // Remove user from company
+    company.users?.removeWhere((u) => u.user?.id == userId);
+
+    // Remove company from user
+    user.companies?.removeWhere((c) => c.company?.id == company.id);
+
+    await repository.updateItem(company);
+    await userRepository.updateItem(user);
+  }
+
+  @action
+  Future<void> updateCollaboratorRole(String userId, RolesType newRole) async {
+    if (Global.companyAggr == null) return;
+
+    Company? company = await repository.getSingle(Global.companyAggr!.id);
+    User? user = await userRepository.findUserById(userId);
+
+    if (company == null || user == null) return;
+
+    // Update in company
+    var userRole = company.users?.firstWhere((u) => u.user?.id == userId);
+    if (userRole != null) {
+      userRole.role = newRole;
+    }
+
+    // Update in user
+    var companyRole =
+        user.companies?.firstWhere((c) => c.company?.id == company.id);
+    if (companyRole != null) {
+      companyRole.role = newRole;
+    }
+
+    await repository.updateItem(company);
+    await userRepository.updateItem(user);
+  }
 }

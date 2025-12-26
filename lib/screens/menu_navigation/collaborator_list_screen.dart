@@ -115,6 +115,140 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             color: AppTheme.textSecondary,
           ),
         ),
+        trailing: PopupMenuButton<String>(
+          onSelected: (value) {
+            if (value == 'edit') {
+              _showEditRoleDialog(userRole);
+            } else if (value == 'remove') {
+              _showRemoveConfirmation(userRole);
+            }
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'edit',
+              child: Row(
+                children: [
+                  Icon(Icons.edit_rounded, size: 20, color: AppTheme.textSecondary),
+                  SizedBox(width: 12),
+                  Text('Editar Permissão'),
+                ],
+              ),
+            ),
+            PopupMenuItem(
+              value: 'remove',
+              child: Row(
+                children: [
+                  Icon(Icons.delete_rounded, size: 20, color: AppTheme.errorColor),
+                  SizedBox(width: 12),
+                  Text('Remover', style: TextStyle(color: AppTheme.errorColor)),
+                ],
+              ),
+            ),
+          ],
+          child: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.backgroundColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(Icons.more_vert_rounded, color: AppTheme.textSecondary),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showEditRoleDialog(UserRoleAggr userRole) {
+    RolesType selectedRole = userRole.role ?? RolesType.user;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Editar Permissão'),
+        content: DropdownButtonFormField<RolesType>(
+          value: selectedRole,
+          decoration: InputDecoration(
+            labelText: 'Permissão',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          items: RolesType.values.map((role) {
+            return DropdownMenuItem(
+              value: role,
+              child: Text(role.toString().split('.').last.toUpperCase()),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) selectedRole = value;
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('CANCELAR'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              setState(() => _isLoading = true);
+              try {
+                await _companyStore.updateCollaboratorRole(
+                    userRole.user!.id!, selectedRole);
+                _loadData();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Permissão atualizada com sucesso!')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Erro ao atualizar: $e')),
+                );
+                setState(() => _isLoading = false);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+            ),
+            child: Text('SALVAR', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRemoveConfirmation(UserRoleAggr userRole) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Remover Colaborador'),
+        content: Text(
+            'Tem certeza que deseja remover ${userRole.user?.name} da organização?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('CANCELAR'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              setState(() => _isLoading = true);
+              try {
+                await _companyStore.removeCollaborator(userRole.user!.id!);
+                _loadData();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Colaborador removido com sucesso!')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Erro ao remover: $e')),
+                );
+                setState(() => _isLoading = false);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.errorColor,
+            ),
+            child: Text('REMOVER', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
