@@ -27,6 +27,34 @@ mixin _$AuthStore on _AuthStore, Store {
     });
   }
 
+  late final _$companyAggrAtom = Atom(
+    name: '_AuthStore.companyAggr',
+    context: context,
+  );
+
+  @override
+  CompanyAggr? get companyAggr {
+    _$companyAggrAtom.reportRead();
+    return super.companyAggr;
+  }
+
+  @override
+  set companyAggr(CompanyAggr? value) {
+    _$companyAggrAtom.reportWrite(value, super.companyAggr, () {
+      super.companyAggr = value;
+    });
+  }
+
+  late final _$switchCompanyAsyncAction = AsyncAction(
+    '_AuthStore.switchCompany',
+    context: context,
+  );
+
+  @override
+  Future<void> switchCompany(String companyId) {
+    return _$switchCompanyAsyncAction.run(() => super.switchCompany(companyId));
+  }
+
   late final _$signOutGoogleAsyncAction = AsyncAction(
     '_AuthStore.signOutGoogle',
     context: context,
@@ -57,7 +85,8 @@ mixin _$AuthStore on _AuthStore, Store {
   @override
   String toString() {
     return '''
-currentUser: ${currentUser}
+currentUser: ${currentUser},
+companyAggr: ${companyAggr}
     ''';
   }
 }
