@@ -36,16 +36,35 @@ abstract class _AuthStore with Store {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await userStore.createUserIfNotExist(user);
 
-      Company company = await companyStore.getCompanyByOwnerId(user.uid);
+      var dbUser = await userStore.repository.findUserById(user.uid);
+      Company company;
+
+      if (dbUser != null &&
+          dbUser.companies != null &&
+          dbUser.companies!.isNotEmpty) {
+        // Retrieve the first company associated with the user
+        company =
+            await companyStore.retrieveCompany(dbUser.companies!.first.company!.id);
+      } else {
+        // Fallback for legacy or owner-only logic
+        company = await companyStore.getCompanyByOwnerId(user.uid);
+      }
+
       Global.currentUser = user;
 
       prefs.setString('userId', user.uid);
       prefs.setString('userDisplayName', user.displayName!);
       prefs.setString('userEmail', user.email!);
-      prefs.setString('userPhoto', user.photoURL!);
+      if (user.photoURL != null) {
+        prefs.setString('userPhoto', user.photoURL!);
+      }
 
-      prefs.setString('companyId', company.id!);
-      prefs.setString('companyName', company.name!);
+      if (company.id != null) {
+        prefs.setString('companyId', company.id!);
+      }
+      if (company.name != null) {
+        prefs.setString('companyName', company.name!);
+      }
       companyAggr = company.toAggr();
       Global.companyAggr = companyAggr;
     });

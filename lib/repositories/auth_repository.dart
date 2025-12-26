@@ -28,7 +28,6 @@ class AuthRepository {
     // Checking if email and name is null
     assert(user.email != null);
     assert(user.displayName != null);
-    assert(user.photoURL != null);
     assert(!user.isAnonymous);
 
     final User firebaseUser = _auth.currentUser!;
