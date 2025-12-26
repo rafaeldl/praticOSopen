@@ -981,7 +981,8 @@ _onShare(BuildContext context, Order? order) async {
 Future<List<pw.MemoryImage>> _downloadPhotos(Order order) async {
   List<pw.MemoryImage> images = [];
 
-  final photosToDownload = order.photos!.take(6).toList();
+  // Baixa todas as fotos, ou um limite maior se necessário
+  final photosToDownload = order.photos ?? [];
 
   for (var photo in photosToDownload) {
     try {
@@ -1164,14 +1165,14 @@ List<pw.Widget> _printLayoutContent(Order order, Customer? customer, Company com
     if (order.services != null && order.services!.isNotEmpty) ...[
       _buildSectionTitle('SERVIÇOS REALIZADOS', primaryColor),
       pw.SizedBox(height: 8),
-      _printServices(order),
+      _printServices(order, photoImages),
       pw.SizedBox(height: 20),
     ],
 
     if (order.products != null && order.products!.isNotEmpty) ...[
       _buildSectionTitle('PEÇAS E PRODUTOS', primaryColor),
       pw.SizedBox(height: 8),
-      _printProduct(order),
+      _printProduct(order, photoImages),
       pw.SizedBox(height: 20),
     ],
 
@@ -1269,7 +1270,80 @@ pw.Widget _buildSummaryRow(String label, double value, {bool isBold = false, Pdf
   );
 }
 
-pw.Widget _printProduct(Order order) {
+pw.Widget _printProduct(Order order, [List<pw.MemoryImage>? photoImages]) {
+  List<pw.TableRow> rows = [];
+
+  // Header
+  rows.add(
+    pw.TableRow(
+      decoration: pw.BoxDecoration(color: PdfColor.fromHex('#F5F5F5')),
+      children: [
+        _modernTableHeader('QTD'),
+        _modernTableHeader('DESCRIÇÃO'),
+        _modernTableHeader('UNIT.', alignRight: true),
+        _modernTableHeader('TOTAL', alignRight: true),
+      ],
+    ),
+  );
+
+  for (var p in order.products!) {
+    rows.add(
+      pw.TableRow(
+        children: [
+          _modernTableCell(p.quantity.toString(), alignCenter: true),
+          _modernTableCell("${p.product?.name} ${p.description != null ? '- ${p.description}' : ''}"),
+          _modernTableCell(_convertToCurrency(p.value), alignRight: true),
+          _modernTableCell(_convertToCurrency(p.total), alignRight: true),
+        ],
+      ),
+    );
+
+    // Check for linked photos
+    if (order.photos != null && p.id != null && photoImages != null) {
+      final linkedPhotos = order.photos!.where((photo) => photo.itemId == p.id).toList();
+      if (linkedPhotos.isNotEmpty) {
+        // Collect MemoryImages for these photos
+        List<pw.MemoryImage> itemImages = [];
+        for (var photo in linkedPhotos) {
+          int index = order.photos!.indexOf(photo);
+          if (index >= 0 && index < photoImages.length) {
+            itemImages.add(photoImages[index]);
+          }
+        }
+
+        if (itemImages.isNotEmpty) {
+           rows.add(
+            pw.TableRow(
+              children: [
+                pw.SizedBox(),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(bottom: 8, left: 8, right: 8),
+                  child: pw.Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: itemImages.map((img) {
+                      return pw.Container(
+                        width: 50,
+                        height: 50,
+                        child: pw.ClipRRect(
+                          horizontalRadius: 4,
+                          verticalRadius: 4,
+                          child: pw.Image(img, fit: pw.BoxFit.cover),
+                        )
+                      );
+                    }).toList(),
+                  ),
+                ),
+                pw.SizedBox(),
+                pw.SizedBox(),
+              ],
+            ),
+          );
+        }
+      }
+    }
+  }
+
   return pw.Table(
     border: pw.TableBorder(
       bottom: const pw.BorderSide(color: PdfColors.grey300, width: 0.5),
@@ -1281,31 +1355,78 @@ pw.Widget _printProduct(Order order) {
       2: const pw.FixedColumnWidth(70),
       3: const pw.FixedColumnWidth(70),
     },
-    children: [
-      pw.TableRow(
-        decoration: pw.BoxDecoration(color: PdfColor.fromHex('#F5F5F5')),
-        children: [
-          _modernTableHeader('QTD'),
-          _modernTableHeader('DESCRIÇÃO'),
-          _modernTableHeader('UNIT.', alignRight: true),
-          _modernTableHeader('TOTAL', alignRight: true),
-        ],
-      ),
-      ...order.products!.map((p) {
-        return pw.TableRow(
-          children: [
-            _modernTableCell(p.quantity.toString(), alignCenter: true),
-            _modernTableCell("${p.product?.name} ${p.description != null ? '- ${p.description}' : ''}"),
-            _modernTableCell(_convertToCurrency(p.value), alignRight: true),
-            _modernTableCell(_convertToCurrency(p.total), alignRight: true),
-          ],
-        );
-      }).toList(),
-    ],
+    children: rows,
   );
 }
 
-pw.Widget _printServices(Order order) {
+pw.Widget _printServices(Order order, [List<pw.MemoryImage>? photoImages]) {
+  List<pw.TableRow> rows = [];
+
+  // Header
+  rows.add(
+    pw.TableRow(
+      decoration: pw.BoxDecoration(color: PdfColor.fromHex('#F5F5F5')),
+      children: [
+        _modernTableHeader('DESCRIÇÃO DO SERVIÇO'),
+        _modernTableHeader('VALOR', alignRight: true),
+      ],
+    ),
+  );
+
+  for (var s in order.services!) {
+    rows.add(
+      pw.TableRow(
+        children: [
+          _modernTableCell("${s.service?.name} ${s.description != null ? '- ${s.description}' : ''}"),
+          _modernTableCell(_convertToCurrency(s.value), alignRight: true),
+        ],
+      ),
+    );
+
+    // Check for linked photos
+    if (order.photos != null && s.id != null && photoImages != null) {
+      final linkedPhotos = order.photos!.where((photo) => photo.itemId == s.id).toList();
+      if (linkedPhotos.isNotEmpty) {
+        // Collect MemoryImages for these photos
+        List<pw.MemoryImage> itemImages = [];
+        for (var photo in linkedPhotos) {
+          int index = order.photos!.indexOf(photo);
+          if (index >= 0 && index < photoImages.length) {
+            itemImages.add(photoImages[index]);
+          }
+        }
+
+        if (itemImages.isNotEmpty) {
+           rows.add(
+            pw.TableRow(
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.only(bottom: 8, left: 8, right: 8),
+                  child: pw.Wrap(
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: itemImages.map((img) {
+                      return pw.Container(
+                        width: 50,
+                        height: 50,
+                        child: pw.ClipRRect(
+                          horizontalRadius: 4,
+                          verticalRadius: 4,
+                          child: pw.Image(img, fit: pw.BoxFit.cover),
+                        )
+                      );
+                    }).toList(),
+                  ),
+                ),
+                pw.SizedBox(),
+              ],
+            ),
+          );
+        }
+      }
+    }
+  }
+
   return pw.Table(
     border: pw.TableBorder(
       bottom: const pw.BorderSide(color: PdfColors.grey300, width: 0.5),
@@ -1315,23 +1436,7 @@ pw.Widget _printServices(Order order) {
       0: const pw.FlexColumnWidth(3),
       1: const pw.FixedColumnWidth(80),
     },
-    children: [
-      pw.TableRow(
-        decoration: pw.BoxDecoration(color: PdfColor.fromHex('#F5F5F5')),
-        children: [
-          _modernTableHeader('DESCRIÇÃO DO SERVIÇO'),
-          _modernTableHeader('VALOR', alignRight: true),
-        ],
-      ),
-      ...order.services!.map((s) {
-        return pw.TableRow(
-          children: [
-            _modernTableCell("${s.service?.name} ${s.description != null ? '- ${s.description}' : ''}"),
-            _modernTableCell(_convertToCurrency(s.value), alignRight: true),
-          ],
-        );
-      }).toList(),
-    ],
+    children: rows,
   );
 }
 

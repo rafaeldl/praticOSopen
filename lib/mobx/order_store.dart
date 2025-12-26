@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:intl/intl.dart';
 import 'package:praticos/models/customer.dart';
@@ -340,6 +341,9 @@ abstract class _OrderStore with Store {
 
   @action
   addService(OrderService orderService) {
+    if (orderService.id == null) {
+      orderService.id = "${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(10000)}";
+    }
     order!.services!.add(orderService);
     services!.add(orderService);
     updateTotal();
@@ -348,6 +352,9 @@ abstract class _OrderStore with Store {
 
   @action
   addProduct(OrderProduct orderProduct) {
+    if (orderProduct.id == null) {
+      orderProduct.id = "${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(10000)}";
+    }
     order!.products!.add(orderProduct);
     products!.add(orderProduct);
     updateTotal();
@@ -372,26 +379,26 @@ abstract class _OrderStore with Store {
 
   /// Adiciona uma foto da galeria
   @action
-  Future<bool> addPhotoFromGallery() async {
+  Future<bool> addPhotoFromGallery({String? itemId}) async {
     final File? file = await photoService.pickImageFromGallery();
     if (file != null) {
-      return await _uploadPhoto(file);
+      return await _uploadPhoto(file, itemId: itemId);
     }
     return false;
   }
 
   /// Adiciona uma foto da câmera
   @action
-  Future<bool> addPhotoFromCamera() async {
+  Future<bool> addPhotoFromCamera({String? itemId}) async {
     final File? file = await photoService.takePhoto();
     if (file != null) {
-      return await _uploadPhoto(file);
+      return await _uploadPhoto(file, itemId: itemId);
     }
     return false;
   }
 
   /// Faz o upload de uma foto
-  Future<bool> _uploadPhoto(File file) async {
+  Future<bool> _uploadPhoto(File file, {String? itemId}) async {
     if (order == null) return false;
 
     // Garante que a OS seja salva antes do upload
@@ -413,6 +420,10 @@ abstract class _OrderStore with Store {
       isUploadingPhoto = false;
 
       if (photo != null) {
+        if (itemId != null) {
+          photo.itemId = itemId;
+        }
+
         if (order!.photos == null) {
           order!.photos = [];
         }

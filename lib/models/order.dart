@@ -79,6 +79,7 @@ class OrderAggr extends BaseAuditCompanyAggr {
 
 @JsonSerializable(explicitToJson: true)
 class OrderProduct {
+  String? id;
   ProductAggr? product;
   String? description;
   double? value;
@@ -93,6 +94,7 @@ class OrderProduct {
 
 @JsonSerializable(explicitToJson: true)
 class OrderService {
+  String? id;
   ServiceAggr? service;
   String? description;
   double? value;

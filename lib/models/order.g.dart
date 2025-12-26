@@ -87,6 +87,7 @@ Map<String, dynamic> _$OrderAggrToJson(OrderAggr instance) => <String, dynamic>{
 };
 
 OrderProduct _$OrderProductFromJson(Map<String, dynamic> json) => OrderProduct()
+  ..id = json['id'] as String?
   ..product = json['product'] == null
       ? null
       : ProductAggr.fromJson(json['product'] as Map<String, dynamic>)
@@ -97,6 +98,7 @@ OrderProduct _$OrderProductFromJson(Map<String, dynamic> json) => OrderProduct()
 
 Map<String, dynamic> _$OrderProductToJson(OrderProduct instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'product': instance.product?.toJson(),
       'description': instance.description,
       'value': instance.value,
@@ -105,6 +107,7 @@ Map<String, dynamic> _$OrderProductToJson(OrderProduct instance) =>
     };
 
 OrderService _$OrderServiceFromJson(Map<String, dynamic> json) => OrderService()
+  ..id = json['id'] as String?
   ..service = json['service'] == null
       ? null
       : ServiceAggr.fromJson(json['service'] as Map<String, dynamic>)
@@ -113,6 +116,7 @@ OrderService _$OrderServiceFromJson(Map<String, dynamic> json) => OrderService()
 
 Map<String, dynamic> _$OrderServiceToJson(OrderService instance) =>
     <String, dynamic>{
+      'id': instance.id,
       'service': instance.service?.toJson(),
       'description': instance.description,
       'value': instance.value,
