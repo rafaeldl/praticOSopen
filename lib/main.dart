@@ -14,6 +14,9 @@ import 'package:praticos/screens/login.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
 import 'package:praticos/screens/order_form.dart';
 import 'package:praticos/screens/order_product_screen.dart';
+import 'package:praticos/screens/menu_navigation/collaborator_form_screen.dart';
+import 'package:praticos/screens/menu_navigation/collaborator_list_screen.dart';
+import 'package:praticos/screens/menu_navigation/company_form_screen.dart';
 import 'package:praticos/screens/order_service_screen.dart';
 import 'package:praticos/screens/payment_form_screen.dart';
 import 'package:praticos/screens/product_form_screen.dart';
@@ -105,6 +108,9 @@ class MyApp extends StatelessWidget {
             '/order_product': (context) => OrderProductScreen(),
             '/payment_form_screen': (context) => PaymentFormScreen(),
             '/financial_dashboard_simple': (context) => FinancialDashboardSimple(),
+            '/collaborator_list': (context) => CollaboratorListScreen(),
+            '/collaborator_form': (context) => CollaboratorFormScreen(),
+            '/company_form': (context) => CompanyFormScreen(),
           },
         );
       },

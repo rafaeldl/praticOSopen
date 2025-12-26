@@ -373,7 +373,7 @@ class _HomeState extends State<Home> {
                                     child: Text(
                                       order.customer?.name ?? 'Cliente',
                                       style: TextStyle(
-                                        fontSize: 15,
+                                        fontSize: 17,
                                         fontWeight: FontWeight.w600,
                                         color: theme.textTheme.bodyLarge?.color,
                                       ),
@@ -427,7 +427,7 @@ class _HomeState extends State<Home> {
                               child: Text(
                                 statusText,
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: statusColor,
                                 ),
@@ -457,7 +457,7 @@ class _HomeState extends State<Home> {
                             Text(
                               _formatCurrency(order.total),
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 16,
                                 fontWeight: FontWeight.normal,
                                 color: theme.textTheme.bodyLarge?.color,
                                 letterSpacing: -0.5,
