@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
-import 'package:praticos/theme/app_theme.dart';
 
 class CompanyFormScreen extends StatefulWidget {
   @override
@@ -95,27 +94,27 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.surfaceColor,
         elevation: 0,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         title: Text(
           'Dados da Empresa',
-          style: TextStyle(
-            color: AppTheme.textPrimary,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_rounded, color: AppTheme.primaryColor),
-          onPressed: () => Navigator.pop(context),
+          style: theme.appBarTheme.titleTextStyle,
         ),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: theme.primaryColor))
           : _company == null
-              ? Center(child: Text('Empresa não encontrada'))
+              ? Center(
+                  child: Text(
+                    'Empresa não encontrada',
+                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+                  ),
+                )
               : SingleChildScrollView(
                   padding: EdgeInsets.all(24),
                   child: Form(
@@ -128,37 +127,37 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.textPrimary,
+                            color: theme.textTheme.bodyLarge?.color,
                           ),
                         ),
                         SizedBox(height: 24),
                         TextFormField(
                           controller: _nameController,
-                          decoration: _buildInputDecoration('Nome da Empresa', Icons.business_rounded),
+                          decoration: _buildInputDecoration(theme, 'Nome da Empresa', Icons.business_rounded),
                           validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
                         ),
                         SizedBox(height: 16),
                         TextFormField(
                           controller: _emailController,
-                          decoration: _buildInputDecoration('Email de Contato', Icons.email_rounded),
+                          decoration: _buildInputDecoration(theme, 'Email de Contato', Icons.email_rounded),
                           keyboardType: TextInputType.emailAddress,
                         ),
                         SizedBox(height: 16),
                         TextFormField(
                           controller: _phoneController,
-                          decoration: _buildInputDecoration('Telefone', Icons.phone_rounded),
+                          decoration: _buildInputDecoration(theme, 'Telefone', Icons.phone_rounded),
                           keyboardType: TextInputType.phone,
                         ),
                         SizedBox(height: 16),
                         TextFormField(
                           controller: _addressController,
-                          decoration: _buildInputDecoration('Endereço', Icons.location_on_rounded),
+                          decoration: _buildInputDecoration(theme, 'Endereço', Icons.location_on_rounded),
                           maxLines: 2,
                         ),
                         SizedBox(height: 16),
                         TextFormField(
                           controller: _siteController,
-                          decoration: _buildInputDecoration('Site', Icons.language_rounded),
+                          decoration: _buildInputDecoration(theme, 'Site', Icons.language_rounded),
                           keyboardType: TextInputType.url,
                         ),
                         SizedBox(height: 32),
@@ -166,7 +165,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                           onPressed: _isLoading ? null : _submit,
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: AppTheme.primaryColor,
+                            backgroundColor: theme.primaryColor,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -188,13 +187,13 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     );
   }
 
-  InputDecoration _buildInputDecoration(String label, IconData icon) {
+  InputDecoration _buildInputDecoration(ThemeData theme, String label, IconData icon) {
     return InputDecoration(
       labelText: label,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      prefixIcon: Icon(icon, color: AppTheme.textSecondary),
+      prefixIcon: Icon(icon, color: theme.iconTheme.color),
     );
   }
 }

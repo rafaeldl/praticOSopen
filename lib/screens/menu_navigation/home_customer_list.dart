@@ -4,7 +4,6 @@ import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/customer.dart';
-import 'package:praticos/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 class HomeCustomerList extends StatefulWidget {
@@ -29,31 +28,27 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
   Widget build(BuildContext context) {
     orderStore = Provider.of<OrderStore>(context);
     navegationStore = Provider.of<BottomNavigationBarStore>(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: AppTheme.surfaceColor,
+        backgroundColor: theme.appBarTheme.backgroundColor,
         title: Text(
           'Clientes',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: AppTheme.textPrimary,
-            letterSpacing: -0.5,
-          ),
+          style: theme.appBarTheme.titleTextStyle,
         ),
       ),
       body: SafeArea(
         child: Column(
           children: [
             // Barra de busca
-            _buildSearchBar(),
+            _buildSearchBar(theme),
             // Lista de clientes
             Expanded(
               child: Observer(
-                builder: (_) => _buildCustomerList(customerStore),
+                builder: (_) => _buildCustomerList(customerStore, theme),
               ),
             ),
           ],
@@ -63,21 +58,21 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         onPressed: () {
           Navigator.pushNamed(context, '/customer_form');
         },
-        backgroundColor: AppTheme.primaryColor,
+        backgroundColor: theme.primaryColor,
         child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(ThemeData theme) {
     return Container(
-      color: AppTheme.surfaceColor,
+      color: theme.cardColor,
       padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Container(
         decoration: BoxDecoration(
-          color: AppTheme.backgroundColor,
+          color: theme.scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.borderColor),
+          border: Border.all(color: theme.dividerColor),
         ),
         child: TextField(
           controller: _searchController,
@@ -89,19 +84,19 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           decoration: InputDecoration(
             hintText: 'Buscar cliente...',
             hintStyle: TextStyle(
-              color: AppTheme.textTertiary,
+              color: theme.disabledColor,
               fontSize: 15,
             ),
             prefixIcon: Icon(
               Icons.search_rounded,
-              color: AppTheme.textTertiary,
+              color: theme.disabledColor,
               size: 22,
             ),
             suffixIcon: _searchQuery.isNotEmpty
                 ? IconButton(
                     icon: Icon(
                       Icons.close_rounded,
-                      color: AppTheme.textTertiary,
+                      color: theme.disabledColor,
                       size: 20,
                     ),
                     onPressed: () {
@@ -120,19 +115,19 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     );
   }
 
-  Widget _buildCustomerList(CustomerStore customerStore) {
+  Widget _buildCustomerList(CustomerStore customerStore, ThemeData theme) {
     if (customerStore.customerList == null) {
-      return _buildLoadingState();
+      return _buildLoadingState(theme);
     }
 
     if (customerStore.customerList!.hasError) {
-      return _buildErrorState(customerStore);
+      return _buildErrorState(customerStore, theme);
     }
 
     List<Customer>? customerList = customerStore.customerList!.data;
 
     if (customerList == null || customerList.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(theme);
     }
 
     // Filtrar lista baseado na busca
@@ -143,7 +138,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     }).toList();
 
     if (filteredList.isEmpty) {
-      return _buildNoResultsState();
+      return _buildNoResultsState(theme);
     }
 
     return ListView.builder(
@@ -151,12 +146,12 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       itemCount: filteredList.length,
       itemBuilder: (context, index) {
         Customer customer = filteredList[index];
-        return _buildCustomerItem(customer);
+        return _buildCustomerItem(customer, theme);
       },
     );
   }
 
-  Widget _buildCustomerItem(Customer customer) {
+  Widget _buildCustomerItem(Customer customer, ThemeData theme) {
     // Gerar iniciais para o avatar
     String initials = '';
     if (customer.name != null && customer.name!.isNotEmpty) {
@@ -187,7 +182,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                 FilledButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppTheme.errorColor,
+                    backgroundColor: theme.colorScheme.error,
                   ),
                   child: Text('Remover'),
                 ),
@@ -223,7 +218,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         // Swipe para direita = editar (azul)
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
-          color: AppTheme.primaryColor,
+          color: theme.primaryColor,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.centerLeft,
@@ -250,7 +245,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         // Swipe para esquerda = excluir (vermelho)
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
-          color: AppTheme.errorColor,
+          color: theme.colorScheme.error,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: Alignment.centerRight,
@@ -277,9 +272,9 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         decoration: BoxDecoration(
-          color: AppTheme.surfaceColor,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.borderColor),
+          border: Border.all(color: theme.dividerColor),
         ),
         child: InkWell(
           onTap: () {
@@ -296,7 +291,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
+                    color: theme.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
@@ -305,7 +300,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppTheme.primaryColor,
+                        color: theme.primaryColor,
                       ),
                     ),
                   ),
@@ -321,7 +316,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.textPrimary,
+                          color: theme.textTheme.bodyLarge?.color,
                         ),
                       ),
                       SizedBox(height: 4),
@@ -330,14 +325,14 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                           Icon(
                             Icons.phone_rounded,
                             size: 14,
-                            color: AppTheme.textTertiary,
+                            color: theme.disabledColor,
                           ),
                           SizedBox(width: 4),
                           Text(
                             _formatPhone(customer.phone),
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppTheme.textSecondary,
+                              color: theme.textTheme.bodyMedium?.color,
                             ),
                           ),
                         ],
@@ -349,13 +344,13 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                 Container(
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppTheme.backgroundColor,
+                    color: theme.scaffoldBackgroundColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     Icons.filter_list_rounded,
                     size: 18,
-                    color: AppTheme.textSecondary,
+                    color: theme.textTheme.bodyMedium?.color,
                   ),
                 ),
               ],
@@ -377,20 +372,20 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     return phone;
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(ThemeData theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
             strokeWidth: 3,
-            valueColor: AlwaysStoppedAnimation(AppTheme.primaryColor),
+            valueColor: AlwaysStoppedAnimation(theme.primaryColor),
           ),
           SizedBox(height: 16),
           Text(
             'Carregando clientes...',
             style: TextStyle(
-              color: AppTheme.textSecondary,
+              color: theme.textTheme.bodyMedium?.color,
               fontSize: 14,
             ),
           ),
@@ -399,7 +394,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     );
   }
 
-  Widget _buildErrorState(CustomerStore customerStore) {
+  Widget _buildErrorState(CustomerStore customerStore, ThemeData theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -407,13 +402,13 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           Container(
             padding: EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppTheme.errorLight,
+              color: theme.colorScheme.errorContainer,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.error_outline_rounded,
               size: 48,
-              color: AppTheme.errorColor,
+              color: theme.colorScheme.error,
             ),
           ),
           SizedBox(height: 20),
@@ -422,14 +417,14 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
+              color: theme.textTheme.bodyLarge?.color,
             ),
           ),
           SizedBox(height: 12),
           ElevatedButton(
             onPressed: () => customerStore.retrieveCustomers(),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
+              backgroundColor: theme.primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -441,7 +436,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -449,13 +444,13 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           Container(
             padding: EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppTheme.borderLight,
+              color: theme.dividerColor,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.people_outline_rounded,
               size: 48,
-              color: AppTheme.textTertiary,
+              color: theme.disabledColor,
             ),
           ),
           SizedBox(height: 20),
@@ -464,7 +459,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
+              color: theme.textTheme.bodyLarge?.color,
             ),
           ),
           SizedBox(height: 8),
@@ -472,7 +467,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
             'Toque no + para adicionar',
             style: TextStyle(
               fontSize: 14,
-              color: AppTheme.textSecondary,
+              color: theme.textTheme.bodyMedium?.color,
             ),
           ),
         ],
@@ -480,7 +475,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     );
   }
 
-  Widget _buildNoResultsState() {
+  Widget _buildNoResultsState(ThemeData theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -488,7 +483,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           Icon(
             Icons.search_off_rounded,
             size: 48,
-            color: AppTheme.textTertiary,
+            color: theme.disabledColor,
           ),
           SizedBox(height: 16),
           Text(
@@ -496,7 +491,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
+              color: theme.textTheme.bodyLarge?.color,
             ),
           ),
           SizedBox(height: 8),
@@ -504,7 +499,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
             'Tente uma busca diferente',
             style: TextStyle(
               fontSize: 14,
-              color: AppTheme.textSecondary,
+              color: theme.textTheme.bodyMedium?.color,
             ),
           ),
         ],
