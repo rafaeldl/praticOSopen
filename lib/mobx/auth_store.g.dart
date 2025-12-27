@@ -21,7 +21,7 @@ mixin _$AuthStore on _AuthStore, Store {
   }
 
   @override
-  dynamic signInWithApple() {
+  Future<dynamic> signInWithApple() {
     final _$actionInfo = _$_AuthStoreActionController.startAction(
       name: '_AuthStore.signInWithApple',
     );
