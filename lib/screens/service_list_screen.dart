@@ -173,7 +173,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: service.photo != null
+          leading: (service.photo != null && service.photo!.isNotEmpty)
               ? ClipOval(
                   child: CachedImage(
                     imageUrl: service.photo!,

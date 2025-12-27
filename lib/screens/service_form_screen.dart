@@ -111,7 +111,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                       onTap: _pickImage,
                       child: Stack(
                         children: [
-                          if (_service?.photo != null)
+                          if (_service?.photo != null && _service!.photo!.isNotEmpty)
                             ClipOval(
                               child: CachedImage(
                                 imageUrl: _service!.photo!,

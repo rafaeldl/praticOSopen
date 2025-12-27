@@ -111,7 +111,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                       onTap: _pickImage,
                       child: Stack(
                         children: [
-                          if (_product?.photo != null)
+                          if (_product?.photo != null && _product!.photo!.isNotEmpty)
                             ClipOval(
                               child: CachedImage(
                                 imageUrl: _product!.photo!,

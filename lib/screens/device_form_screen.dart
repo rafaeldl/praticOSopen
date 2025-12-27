@@ -110,7 +110,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                       onTap: _pickImage,
                       child: Stack(
                         children: [
-                          if (_device?.photo != null)
+                          if (_device?.photo != null && _device!.photo!.isNotEmpty)
                             ClipOval(
                               child: CachedImage(
                                 imageUrl: _device!.photo!,

@@ -226,7 +226,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
       photoUrl = _service?.photo;
     }
 
-    if (photoUrl != null) {
+    if (photoUrl != null && photoUrl.isNotEmpty) {
       return ClipOval(
         child: CachedImage(
           imageUrl: photoUrl,

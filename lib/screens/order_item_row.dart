@@ -63,7 +63,7 @@ class OrderItemRow extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                if (photoUrl != null) ...[
+                if (photoUrl != null && photoUrl!.isNotEmpty) ...[
                   ClipOval(
                     child: CachedImage(
                       imageUrl: photoUrl!,

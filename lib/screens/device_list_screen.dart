@@ -329,7 +329,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: device.photo != null
+          leading: (device.photo != null && device.photo!.isNotEmpty)
               ? ClipOval(
                   child: CachedImage(
                     imageUrl: device.photo!,

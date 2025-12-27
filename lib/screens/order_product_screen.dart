@@ -271,7 +271,7 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
       photoUrl = _product?.photo;
     }
 
-    if (photoUrl != null) {
+    if (photoUrl != null && photoUrl.isNotEmpty) {
       return ClipOval(
         child: CachedImage(
           imageUrl: photoUrl,
