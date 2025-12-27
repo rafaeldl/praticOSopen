@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:praticos/mobx/service_store.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -184,6 +182,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
