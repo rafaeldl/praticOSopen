@@ -98,4 +98,41 @@ platform :ios do
       skip_waiting_for_build_processing: true
     )
   end
+
+  desc "Gera screenshots usando Flutter Integration Test e envia para App Store"
+  lane :screenshots do
+    # 1. Gera screenshots
+    # Note: Isso usa o 'flutter drive' para rodar o teste de integração.
+    # Certifique-se de que um simulador está rodando.
+    # Os screenshots serão salvos no diretório raiz do projeto ou onde o script especificar.
+    # O driver 'test_driver/integration_test.dart' deve salvar os arquivos.
+
+    UI.message("Iniciando captura de screenshots via Flutter Integration Test...")
+
+    # Define o diretório de saída para os screenshots (opcional, ajustado no script dart)
+    # Por padrão, o driver salva no path relativo. Vamos garantir que temos a pasta.
+    # Fastlane deliver espera estrutura por locale, ex: screenshots/en-US
+    sh("mkdir -p fastlane/screenshots/pt-BR")
+
+    Dir.chdir("..") do
+      # Roda o teste. Note que isso roda no device/simulador conectado.
+      # Para rodar em múltiplos devices, você precisaria iterar e rodar o comando para cada id de device.
+      sh("flutter drive --driver=test_driver/integration_test.dart --target=integration_test/screenshot_test.dart")
+
+      # Move os screenshots gerados (assumindo que foram salvos na raiz ou ajusta conforme driver)
+      # O driver simples salva no diretório de execução.
+      # Movendo para a pasta pt-BR (ajuste conforme o locale do device ou desejado)
+      sh("mv *.png ios/fastlane/screenshots/pt-BR/ || true")
+    end
+
+    UI.message("Screenshots capturados em ios/fastlane/screenshots/pt-BR")
+
+    # 2. Upload para App Store
+    # deliver(
+    #   screenshots_path: "fastlane/screenshots",
+    #   skip_binary_upload: true,
+    #   skip_metadata: true, # Remove se quiser subir metadata também
+    #   force: true # Pula confirmação HTML
+    # )
+  end
 end

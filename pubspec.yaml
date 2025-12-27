@@ -72,6 +72,10 @@ dev_dependencies:
   test: ^1.25.15
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
 
   build_runner: ^2.4.8
   mobx_codegen: ^2.7.1
