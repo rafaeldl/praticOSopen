@@ -60,10 +60,10 @@ class AuthRepository {
       nonce: nonce,
       webAuthenticationOptions: WebAuthenticationOptions(
         // TODO: Update with your Service ID from Apple Developer Portal
-        clientId: 'com.example.app.service',
+        clientId: 'br.com.rafsoft.praticos.app',
         // TODO: Update with your Callback URL from Firebase Console
         redirectUri: Uri.parse(
-          'https://YOUR_PROJECT_ID.firebaseapp.com/__/auth/handler',
+          'https://praticos.firebaseapp.com/__/auth/handler',
         ),
       ),
     );
