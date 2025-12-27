@@ -329,22 +329,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: (device.photo != null && device.photo!.isNotEmpty)
-              ? ClipOval(
-                  child: CachedImage(
-                    imageUrl: device.photo!,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  child: Icon(
-                    Icons.directions_car_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
+          leading: _buildDeviceAvatar(device),
           title: Text(
             '${device.name ?? ''} ${device.serial ?? ''}',
             style: const TextStyle(fontWeight: FontWeight.w500),
@@ -363,6 +348,31 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             }
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildDeviceAvatar(Device device) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final fallback = CircleAvatar(
+      backgroundColor: colorScheme.primaryContainer,
+      child: Icon(
+        Icons.directions_car_outlined,
+        color: colorScheme.onPrimaryContainer,
+      ),
+    );
+
+    if (device.photo == null || device.photo!.isEmpty) {
+      return fallback;
+    }
+
+    return ClipOval(
+      child: CachedImage(
+        imageUrl: device.photo!,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        errorWidget: fallback,
       ),
     );
   }

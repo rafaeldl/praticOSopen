@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import '../models/device.dart';
+import '../widgets/cached_image.dart';
 import 'order_item_row.dart';
 
 import 'package:pdf/pdf.dart';
@@ -170,26 +171,26 @@ class _OrderFormState extends State<OrderForm> {
             // Cliente
             Observer(
               builder: (_) => _buildSelectionTile(
-                icon: Icons.person_outline,
                 label: 'Cliente',
                 value: _store.customerName,
                 placeholder: 'Selecionar cliente',
                 onTap: () => _selectCustomer(),
                 colorScheme: colorScheme,
                 theme: theme,
+                avatar: _buildCustomerAvatar(colorScheme),
               ),
             ),
             const Divider(height: 24),
             // Veículo
             Observer(
               builder: (_) => _buildSelectionTile(
-                icon: Icons.directions_car_outlined,
                 label: 'Veículo',
                 value: _store.deviceName,
                 placeholder: 'Selecionar veículo',
                 onTap: () => _selectDevice(),
                 colorScheme: colorScheme,
                 theme: theme,
+                avatar: _buildDeviceAvatar(colorScheme),
               ),
             ),
           ],
@@ -198,14 +199,71 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
+  Widget _buildCustomerAvatar(ColorScheme colorScheme) {
+    final initials = _store.customerInitials;
+    final hasCustomer = _store.customer != null;
+
+    return CircleAvatar(
+      radius: 21,
+      backgroundColor: hasCustomer
+          ? colorScheme.primaryContainer
+          : colorScheme.surfaceContainerHighest,
+      child: initials != null
+          ? Text(
+              initials,
+              style: TextStyle(
+                color: colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            )
+          : Icon(
+              Icons.person_outline,
+              color: colorScheme.onSurfaceVariant,
+              size: 22,
+            ),
+    );
+  }
+
+  Widget _buildDeviceAvatar(ColorScheme colorScheme) {
+    final photo = _store.devicePhoto;
+    final hasDevice = _store.device != null;
+
+    final fallback = CircleAvatar(
+      radius: 21,
+      backgroundColor: hasDevice
+          ? colorScheme.primaryContainer
+          : colorScheme.surfaceContainerHighest,
+      child: Icon(
+        Icons.directions_car_outlined,
+        color: hasDevice ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+        size: 22,
+      ),
+    );
+
+    if (photo == null || photo.isEmpty) {
+      return fallback;
+    }
+
+    return ClipOval(
+      child: CachedImage(
+        imageUrl: photo,
+        width: 42,
+        height: 42,
+        fit: BoxFit.cover,
+        errorWidget: fallback,
+      ),
+    );
+  }
+
   Widget _buildSelectionTile({
-    required IconData icon,
     required String label,
     required String? value,
     required String placeholder,
     required VoidCallback onTap,
     required ColorScheme colorScheme,
     required ThemeData theme,
+    Widget? avatar,
   }) {
     final hasValue = value != null && value.isNotEmpty;
 
@@ -216,7 +274,7 @@ class _OrderFormState extends State<OrderForm> {
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: [
-            Container(
+            avatar ?? Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 color: hasValue
@@ -225,7 +283,7 @@ class _OrderFormState extends State<OrderForm> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
-                icon,
+                Icons.image_outlined,
                 color: hasValue
                     ? colorScheme.primary
                     : colorScheme.onSurfaceVariant,

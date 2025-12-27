@@ -23,6 +23,21 @@ mixin _$OrderStore on _OrderStore, Store {
     () => super.deviceName,
     name: '_OrderStore.deviceName',
   )).value;
+  Computed<String?>? _$devicePhotoComputed;
+
+  @override
+  String? get devicePhoto => (_$devicePhotoComputed ??= Computed<String?>(
+    () => super.devicePhoto,
+    name: '_OrderStore.devicePhoto',
+  )).value;
+  Computed<String?>? _$customerInitialsComputed;
+
+  @override
+  String? get customerInitials =>
+      (_$customerInitialsComputed ??= Computed<String?>(
+        () => super.customerInitials,
+        name: '_OrderStore.customerInitials',
+      )).value;
   Computed<String>? _$formattedCreatedDateComputed;
 
   @override
@@ -1079,6 +1094,8 @@ customStartDate: ${customStartDate},
 customEndDate: ${customEndDate},
 customerName: ${customerName},
 deviceName: ${deviceName},
+devicePhoto: ${devicePhoto},
+customerInitials: ${customerInitials},
 formattedCreatedDate: ${formattedCreatedDate}
     ''';
   }

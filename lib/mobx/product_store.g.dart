@@ -73,7 +73,8 @@ mixin _$ProductStore on _ProductStore, Store {
   @override
   Future<String?> uploadProductPhoto(File file, Product product) {
     return _$uploadProductPhotoAsyncAction.run(
-        () => super.uploadProductPhoto(file, product));
+      () => super.uploadProductPhoto(file, product),
+    );
   }
 
   late final _$_ProductStoreActionController = ActionController(

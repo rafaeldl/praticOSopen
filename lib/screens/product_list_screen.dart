@@ -172,22 +172,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: (product.photo != null && product.photo!.isNotEmpty)
-              ? ClipOval(
-                  child: CachedImage(
-                    imageUrl: product.photo!,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  child: Icon(
-                    Icons.inventory_2_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
+          leading: _buildProductAvatar(product),
           title: Text(
             product.name ?? '',
             style: const TextStyle(fontWeight: FontWeight.w500),
@@ -215,6 +200,31 @@ class _ProductListScreenState extends State<ProductListScreen> {
             }
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildProductAvatar(Product product) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final fallback = CircleAvatar(
+      backgroundColor: colorScheme.primaryContainer,
+      child: Icon(
+        Icons.inventory_2_outlined,
+        color: colorScheme.onPrimaryContainer,
+      ),
+    );
+
+    if (product.photo == null || product.photo!.isEmpty) {
+      return fallback;
+    }
+
+    return ClipOval(
+      child: CachedImage(
+        imageUrl: product.photo!,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        errorWidget: fallback,
       ),
     );
   }

@@ -9,11 +9,6 @@ part of 'company_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$CompanyStore on _CompanyStore, Store {
-  late final _$_CompanyStoreActionController = ActionController(
-    name: '_CompanyStore',
-    context: context,
-  );
-
   late final _$addCollaboratorAsyncAction = AsyncAction(
     '_CompanyStore.addCollaborator',
     context: context,
@@ -21,8 +16,9 @@ mixin _$CompanyStore on _CompanyStore, Store {
 
   @override
   Future<void> addCollaborator(String email, RolesType role) {
-    return _$addCollaboratorAsyncAction
-        .run(() => super.addCollaborator(email, role));
+    return _$addCollaboratorAsyncAction.run(
+      () => super.addCollaborator(email, role),
+    );
   }
 
   late final _$removeCollaboratorAsyncAction = AsyncAction(
@@ -32,8 +28,9 @@ mixin _$CompanyStore on _CompanyStore, Store {
 
   @override
   Future<void> removeCollaborator(String userId) {
-    return _$removeCollaboratorAsyncAction
-        .run(() => super.removeCollaborator(userId));
+    return _$removeCollaboratorAsyncAction.run(
+      () => super.removeCollaborator(userId),
+    );
   }
 
   late final _$updateCollaboratorRoleAsyncAction = AsyncAction(
@@ -43,8 +40,9 @@ mixin _$CompanyStore on _CompanyStore, Store {
 
   @override
   Future<void> updateCollaboratorRole(String userId, RolesType newRole) {
-    return _$updateCollaboratorRoleAsyncAction
-        .run(() => super.updateCollaboratorRole(userId, newRole));
+    return _$updateCollaboratorRoleAsyncAction.run(
+      () => super.updateCollaboratorRole(userId, newRole),
+    );
   }
 
   late final _$updateCompanyAsyncAction = AsyncAction(
@@ -56,6 +54,11 @@ mixin _$CompanyStore on _CompanyStore, Store {
   Future<void> updateCompany(Company company) {
     return _$updateCompanyAsyncAction.run(() => super.updateCompany(company));
   }
+
+  late final _$_CompanyStoreActionController = ActionController(
+    name: '_CompanyStore',
+    context: context,
+  );
 
   @override
   dynamic retrieveCompany(String? id) {

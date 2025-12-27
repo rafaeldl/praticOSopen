@@ -69,6 +69,19 @@ abstract class _OrderStore with Store {
     return "${device?.name} - ${device?.serial}";
   }
 
+  @computed
+  String? get devicePhoto => device?.photo;
+
+  @computed
+  String? get customerInitials {
+    if (customer?.name == null || customer!.name!.isEmpty) return null;
+    final parts = customer!.name!.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+    }
+    return parts.first[0].toUpperCase();
+  }
+
   @observable
   ObservableList<OrderService>? services = ObservableList();
 
@@ -412,7 +425,7 @@ abstract class _OrderStore with Store {
     isUploadingPhoto = true;
 
     try {
-      final OrderPhoto? photo = await photoService.uploadPhoto(
+      final OrderPhoto? photo = await photoService.uploadOrderPhoto(
         file: file,
         companyId: order!.company!.id!,
         orderId: order!.id!,

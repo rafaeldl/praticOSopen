@@ -172,22 +172,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: (service.photo != null && service.photo!.isNotEmpty)
-              ? ClipOval(
-                  child: CachedImage(
-                    imageUrl: service.photo!,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  child: Icon(
-                    Icons.build_outlined,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
+          leading: _buildServiceAvatar(service),
           title: Text(
             service.name ?? '',
             style: const TextStyle(fontWeight: FontWeight.w500),
@@ -215,6 +200,31 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             }
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildServiceAvatar(Service service) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final fallback = CircleAvatar(
+      backgroundColor: colorScheme.primaryContainer,
+      child: Icon(
+        Icons.build_outlined,
+        color: colorScheme.onPrimaryContainer,
+      ),
+    );
+
+    if (service.photo == null || service.photo!.isEmpty) {
+      return fallback;
+    }
+
+    return ClipOval(
+      child: CachedImage(
+        imageUrl: service.photo!,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        errorWidget: fallback,
       ),
     );
   }

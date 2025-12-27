@@ -73,7 +73,8 @@ mixin _$DeviceStore on _DeviceStore, Store {
   @override
   Future<String?> uploadDevicePhoto(File file, Device device) {
     return _$uploadDevicePhotoAsyncAction.run(
-        () => super.uploadDevicePhoto(file, device));
+      () => super.uploadDevicePhoto(file, device),
+    );
   }
 
   late final _$_DeviceStoreActionController = ActionController(

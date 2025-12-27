@@ -73,7 +73,8 @@ mixin _$ServiceStore on _ServiceStore, Store {
   @override
   Future<String?> uploadServicePhoto(File file, Service service) {
     return _$uploadServicePhotoAsyncAction.run(
-        () => super.uploadServicePhoto(file, service));
+      () => super.uploadServicePhoto(file, service),
+    );
   }
 
   late final _$_ServiceStoreActionController = ActionController(

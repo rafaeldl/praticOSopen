@@ -63,28 +63,9 @@ class OrderItemRow extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                if (photoUrl != null && photoUrl!.isNotEmpty) ...[
-                  ClipOval(
-                    child: CachedImage(
-                      imageUrl: photoUrl!,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                ] else if (fallbackIcon != null) ...[
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    child: Icon(
-                      fallbackIcon,
-                      color: theme.colorScheme.primary,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                ],
+                // Sempre mostra avatar com imagem ou fallback icon
+                _buildAvatar(theme),
+                const SizedBox(width: 12),
                 // Item info
                 Expanded(
                   child: Column(
@@ -145,6 +126,36 @@ class OrderItemRow extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(ThemeData theme) {
+    final hasPhoto = photoUrl != null && photoUrl!.isNotEmpty;
+
+    // Fallback widget com ícone - usa onPrimaryContainer para garantir contraste
+    Widget fallbackWidget = CircleAvatar(
+      radius: 20,
+      backgroundColor: theme.colorScheme.primaryContainer,
+      child: Icon(
+        fallbackIcon ?? Icons.image_outlined,
+        color: theme.colorScheme.onPrimaryContainer,
+        size: 20,
+      ),
+    );
+
+    if (!hasPhoto) {
+      return fallbackWidget;
+    }
+
+    // Com foto: mostra CachedImage com fallback em caso de erro
+    return ClipOval(
+      child: CachedImage(
+        imageUrl: photoUrl!,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        errorWidget: fallbackWidget,
       ),
     );
   }
