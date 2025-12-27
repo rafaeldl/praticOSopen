@@ -51,10 +51,12 @@ abstract class _AuthStore with Store {
         company = await companyStore.retrieveCompany(lastCompanyId);
       } else if (dbUser != null &&
           dbUser.companies != null &&
-          dbUser.companies!.isNotEmpty) {
+          dbUser.companies!.isNotEmpty &&
+          dbUser.companies!.first.company != null &&
+          dbUser.companies!.first.company!.id != null) {
         // Retrieve the first company associated with the user
         company = await companyStore
-            .retrieveCompany(dbUser.companies!.first.company!.id);
+            .retrieveCompany(dbUser.companies!.first.company!.id!);
       } else {
         // Fallback for legacy or owner-only logic
         company = await companyStore.getCompanyByOwnerId(user.uid);
@@ -63,8 +65,8 @@ abstract class _AuthStore with Store {
       Global.currentUser = user;
 
       prefs.setString('userId', user.uid);
-      prefs.setString('userDisplayName', user.displayName!);
-      prefs.setString('userEmail', user.email!);
+      prefs.setString('userDisplayName', user.displayName ?? '');
+      prefs.setString('userEmail', user.email ?? '');
       if (user.photoURL != null) {
         prefs.setString('userPhoto', user.photoURL!);
       }
@@ -101,8 +103,8 @@ abstract class _AuthStore with Store {
   }
 
   @action
-  signInWithApple() {
-    _auth.signInWithApple();
+  Future<dynamic> signInWithApple() {
+    return _auth.signInWithApple();
   }
 
   @action

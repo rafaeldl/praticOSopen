@@ -28,8 +28,17 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: SignInWithAppleButton(
                   text: 'Entrar com Apple',
-                  onPressed: () {
-                    _auth.signInWithApple();
+                  onPressed: () async {
+                    try {
+                      await _auth.signInWithApple();
+                    } catch (e) {
+                      print(e);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Erro ao entrar com Apple: $e'),
+                        ),
+                      );
+                    }
                   },
                 ),
               ),
