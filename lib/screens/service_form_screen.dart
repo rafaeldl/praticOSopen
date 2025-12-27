@@ -185,7 +185,7 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   InputDecoration _inputDecoration({

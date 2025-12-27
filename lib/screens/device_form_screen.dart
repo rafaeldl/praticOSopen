@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:easy_mask/easy_mask.dart';
 import 'package:praticos/mobx/device_store.dart';
@@ -186,7 +185,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   InputDecoration _inputDecoration({
