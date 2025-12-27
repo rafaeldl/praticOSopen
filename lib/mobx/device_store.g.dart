@@ -27,6 +27,24 @@ mixin _$DeviceStore on _DeviceStore, Store {
     });
   }
 
+  late final _$isUploadingAtom = Atom(
+    name: '_DeviceStore.isUploading',
+    context: context,
+  );
+
+  @override
+  bool get isUploading {
+    _$isUploadingAtom.reportRead();
+    return super.isUploading;
+  }
+
+  @override
+  set isUploading(bool value) {
+    _$isUploadingAtom.reportWrite(value, super.isUploading, () {
+      super.isUploading = value;
+    });
+  }
+
   late final _$saveDeviceAsyncAction = AsyncAction(
     '_DeviceStore.saveDevice',
     context: context,
@@ -45,6 +63,18 @@ mixin _$DeviceStore on _DeviceStore, Store {
   @override
   Future deleteDevice(Device device) {
     return _$deleteDeviceAsyncAction.run(() => super.deleteDevice(device));
+  }
+
+  late final _$uploadDevicePhotoAsyncAction = AsyncAction(
+    '_DeviceStore.uploadDevicePhoto',
+    context: context,
+  );
+
+  @override
+  Future<String?> uploadDevicePhoto(File file, Device device) {
+    return _$uploadDevicePhotoAsyncAction.run(
+      () => super.uploadDevicePhoto(file, device),
+    );
   }
 
   late final _$_DeviceStoreActionController = ActionController(
@@ -67,7 +97,8 @@ mixin _$DeviceStore on _DeviceStore, Store {
   @override
   String toString() {
     return '''
-deviceList: ${deviceList}
+deviceList: ${deviceList},
+isUploading: ${isUploading}
     ''';
   }
 }

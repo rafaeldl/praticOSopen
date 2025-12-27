@@ -27,6 +27,24 @@ mixin _$ProductStore on _ProductStore, Store {
     });
   }
 
+  late final _$isUploadingAtom = Atom(
+    name: '_ProductStore.isUploading',
+    context: context,
+  );
+
+  @override
+  bool get isUploading {
+    _$isUploadingAtom.reportRead();
+    return super.isUploading;
+  }
+
+  @override
+  set isUploading(bool value) {
+    _$isUploadingAtom.reportWrite(value, super.isUploading, () {
+      super.isUploading = value;
+    });
+  }
+
   late final _$saveProductAsyncAction = AsyncAction(
     '_ProductStore.saveProduct',
     context: context,
@@ -45,6 +63,18 @@ mixin _$ProductStore on _ProductStore, Store {
   @override
   Future deleteProduct(Product product) {
     return _$deleteProductAsyncAction.run(() => super.deleteProduct(product));
+  }
+
+  late final _$uploadProductPhotoAsyncAction = AsyncAction(
+    '_ProductStore.uploadProductPhoto',
+    context: context,
+  );
+
+  @override
+  Future<String?> uploadProductPhoto(File file, Product product) {
+    return _$uploadProductPhotoAsyncAction.run(
+      () => super.uploadProductPhoto(file, product),
+    );
   }
 
   late final _$_ProductStoreActionController = ActionController(
@@ -67,7 +97,8 @@ mixin _$ProductStore on _ProductStore, Store {
   @override
   String toString() {
     return '''
-productList: ${productList}
+productList: ${productList},
+isUploading: ${isUploading}
     ''';
   }
 }

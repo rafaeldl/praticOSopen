@@ -9,6 +9,7 @@ part 'product.g.dart';
 class Product extends BaseAuditCompany {
   String? name;
   double? value;
+  String? photo;
 
   Product();
   factory Product.fromJson(Map<String, dynamic> json) =>
@@ -21,6 +22,7 @@ class Product extends BaseAuditCompany {
 class ProductAggr extends BaseAuditCompanyAggr {
   String? name;
   double? value;
+  String? photo;
 
   ProductAggr();
   factory ProductAggr.fromJson(Map<String, dynamic> json) =>

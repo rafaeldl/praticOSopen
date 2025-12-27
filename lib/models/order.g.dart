@@ -93,7 +93,8 @@ OrderProduct _$OrderProductFromJson(Map<String, dynamic> json) => OrderProduct()
   ..description = json['description'] as String?
   ..value = (json['value'] as num?)?.toDouble()
   ..quantity = (json['quantity'] as num?)?.toInt()
-  ..total = (json['total'] as num?)?.toDouble();
+  ..total = (json['total'] as num?)?.toDouble()
+  ..photo = json['photo'] as String?;
 
 Map<String, dynamic> _$OrderProductToJson(OrderProduct instance) =>
     <String, dynamic>{
@@ -102,6 +103,7 @@ Map<String, dynamic> _$OrderProductToJson(OrderProduct instance) =>
       'value': instance.value,
       'quantity': instance.quantity,
       'total': instance.total,
+      'photo': instance.photo,
     };
 
 OrderService _$OrderServiceFromJson(Map<String, dynamic> json) => OrderService()
@@ -109,11 +111,13 @@ OrderService _$OrderServiceFromJson(Map<String, dynamic> json) => OrderService()
       ? null
       : ServiceAggr.fromJson(json['service'] as Map<String, dynamic>)
   ..description = json['description'] as String?
-  ..value = (json['value'] as num?)?.toDouble();
+  ..value = (json['value'] as num?)?.toDouble()
+  ..photo = json['photo'] as String?;
 
 Map<String, dynamic> _$OrderServiceToJson(OrderService instance) =>
     <String, dynamic>{
       'service': instance.service?.toJson(),
       'description': instance.description,
       'value': instance.value,
+      'photo': instance.photo,
     };

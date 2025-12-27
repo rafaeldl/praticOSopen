@@ -69,6 +69,19 @@ abstract class _OrderStore with Store {
     return "${device?.name} - ${device?.serial}";
   }
 
+  @computed
+  String? get devicePhoto => device?.photo;
+
+  @computed
+  String? get customerInitials {
+    if (customer?.name == null || customer!.name!.isEmpty) return null;
+    final parts = customer!.name!.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+    }
+    return parts.first[0].toUpperCase();
+  }
+
   @observable
   ObservableList<OrderService>? services = ObservableList();
 
@@ -340,6 +353,10 @@ abstract class _OrderStore with Store {
 
   @action
   addService(OrderService orderService) {
+    // Copia a foto do serviço se existir
+    if (orderService.service?.photo != null) {
+      orderService.photo = orderService.service?.photo;
+    }
     order!.services!.add(orderService);
     services!.add(orderService);
     updateTotal();
@@ -348,6 +365,10 @@ abstract class _OrderStore with Store {
 
   @action
   addProduct(OrderProduct orderProduct) {
+    // Copia a foto do produto se existir
+    if (orderProduct.product?.photo != null) {
+      orderProduct.photo = orderProduct.product?.photo;
+    }
     order!.products!.add(orderProduct);
     products!.add(orderProduct);
     updateTotal();
@@ -404,7 +425,7 @@ abstract class _OrderStore with Store {
     isUploadingPhoto = true;
 
     try {
-      final OrderPhoto? photo = await photoService.uploadPhoto(
+      final OrderPhoto? photo = await photoService.uploadOrderPhoto(
         file: file,
         companyId: order!.company!.id!,
         orderId: order!.id!,

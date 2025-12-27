@@ -42,6 +42,7 @@ dependencies:
 
   # Image Picker
   image_picker: ^1.1.2
+  file_picker: ^8.0.0
 
   # Image processing and caching
   flutter_image_compress: ^2.3.0

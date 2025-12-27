@@ -21,23 +21,38 @@ service firebase.storage {
 
     // Regras para fotos de ordens de serviço organizadas por tenant
     match /tenants/{companyId}/orders/{orderId}/photos/{photoId} {
-      // Leitura: apenas usuários autenticados
-      // IMPORTANTE: Validação adicional de tenant feita no client (PhotoService)
       allow read: if isAuthenticated();
-
-      // Upload: usuário autenticado + validação de imagem
       allow create: if isAuthenticated() && isValidImage();
-
-      // Atualização: usuário autenticado + validação de imagem
       allow update: if isAuthenticated() && isValidImage();
-
-      // Exclusão: apenas usuários autenticados
       allow delete: if isAuthenticated();
     }
 
-    // Lista de arquivos em uma pasta de fotos de ordem
     match /tenants/{companyId}/orders/{orderId}/photos {
       allow list: if isAuthenticated();
+    }
+
+    // Regras para fotos de produtos
+    match /tenants/{companyId}/products/{productId}/{photoId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidImage();
+      allow update: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+
+    // Regras para fotos de serviços
+    match /tenants/{companyId}/services/{serviceId}/{photoId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidImage();
+      allow update: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+
+    // Regras para fotos de veículos/dispositivos
+    match /tenants/{companyId}/devices/{deviceId}/{photoId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidImage();
+      allow update: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
     }
 
     // Bloqueia acesso a qualquer outro caminho não especificado

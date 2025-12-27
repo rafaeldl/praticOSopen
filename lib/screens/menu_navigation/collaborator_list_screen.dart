@@ -6,7 +6,6 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/theme/app_theme.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
   @override

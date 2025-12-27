@@ -1,3 +1,4 @@
+import 'package:praticos/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -6,6 +7,8 @@ class OrderItemRow extends StatelessWidget {
   final String? description;
   final int? quantity;
   final double? value;
+  final String? photoUrl;
+  final IconData? fallbackIcon;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
 
@@ -15,6 +18,8 @@ class OrderItemRow extends StatelessWidget {
     this.description = '',
     this.quantity,
     this.value = 0.0,
+    this.photoUrl,
+    this.fallbackIcon,
     this.onTap,
     this.onDelete,
   }) : super(key: key);
@@ -58,6 +63,9 @@ class OrderItemRow extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
+                // Sempre mostra avatar com imagem ou fallback icon
+                _buildAvatar(theme),
+                const SizedBox(width: 12),
                 // Item info
                 Expanded(
                   child: Column(
@@ -118,6 +126,36 @@ class OrderItemRow extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(ThemeData theme) {
+    final hasPhoto = photoUrl != null && photoUrl!.isNotEmpty;
+
+    // Fallback widget com ícone - usa onPrimaryContainer para garantir contraste
+    Widget fallbackWidget = CircleAvatar(
+      radius: 20,
+      backgroundColor: theme.colorScheme.primaryContainer,
+      child: Icon(
+        fallbackIcon ?? Icons.image_outlined,
+        color: theme.colorScheme.onPrimaryContainer,
+        size: 20,
+      ),
+    );
+
+    if (!hasPhoto) {
+      return fallbackWidget;
+    }
+
+    // Com foto: mostra CachedImage com fallback em caso de erro
+    return ClipOval(
+      child: CachedImage(
+        imageUrl: photoUrl!,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+        errorWidget: fallbackWidget,
       ),
     );
   }

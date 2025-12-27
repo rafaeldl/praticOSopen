@@ -44,7 +44,9 @@
 		<string>_dartobservatory._tcp</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Explanation on why the camera access is needed.</string>
+	<string>O PraticOS precisa acessar a câmera para tirar fotos de veículos, produtos e ordens de serviço.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>O PraticOS precisa acessar suas fotos para anexar imagens a veículos, produtos e ordens de serviço.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

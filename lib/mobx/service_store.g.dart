@@ -27,6 +27,24 @@ mixin _$ServiceStore on _ServiceStore, Store {
     });
   }
 
+  late final _$isUploadingAtom = Atom(
+    name: '_ServiceStore.isUploading',
+    context: context,
+  );
+
+  @override
+  bool get isUploading {
+    _$isUploadingAtom.reportRead();
+    return super.isUploading;
+  }
+
+  @override
+  set isUploading(bool value) {
+    _$isUploadingAtom.reportWrite(value, super.isUploading, () {
+      super.isUploading = value;
+    });
+  }
+
   late final _$saveServiceAsyncAction = AsyncAction(
     '_ServiceStore.saveService',
     context: context,
@@ -45,6 +63,18 @@ mixin _$ServiceStore on _ServiceStore, Store {
   @override
   Future deleteService(Service service) {
     return _$deleteServiceAsyncAction.run(() => super.deleteService(service));
+  }
+
+  late final _$uploadServicePhotoAsyncAction = AsyncAction(
+    '_ServiceStore.uploadServicePhoto',
+    context: context,
+  );
+
+  @override
+  Future<String?> uploadServicePhoto(File file, Service service) {
+    return _$uploadServicePhotoAsyncAction.run(
+      () => super.uploadServicePhoto(file, service),
+    );
   }
 
   late final _$_ServiceStoreActionController = ActionController(
@@ -67,7 +97,8 @@ mixin _$ServiceStore on _ServiceStore, Store {
   @override
   String toString() {
     return '''
-serviceList: ${serviceList}
+serviceList: ${serviceList},
+isUploading: ${isUploading}
     ''';
   }
 }

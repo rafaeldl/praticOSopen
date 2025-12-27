@@ -84,6 +84,7 @@ class OrderProduct {
   double? value;
   int? quantity;
   double? total;
+  String? photo;
 
   OrderProduct();
   factory OrderProduct.fromJson(Map<String, dynamic> json) =>
@@ -96,6 +97,7 @@ class OrderService {
   ServiceAggr? service;
   String? description;
   double? value;
+  String? photo;
 
   OrderService();
   factory OrderService.fromJson(Map<String, dynamic> json) =>

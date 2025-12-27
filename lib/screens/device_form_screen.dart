@@ -1,7 +1,9 @@
 import 'package:easy_mask/easy_mask.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
 class DeviceFormScreen extends StatefulWidget {
   const DeviceFormScreen({Key? key}) : super(key: key);
@@ -44,6 +46,44 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Galeria'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final file = await _deviceStore.photoService.pickImageFromGallery();
+                  if (file != null) {
+                    await _deviceStore.uploadDevicePhoto(file, _device!);
+                    setState(() {});
+                  }
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Câmera'),
+                onTap: () async {
+                  Navigator.pop(context);
+                  final file = await _deviceStore.photoService.takePhoto();
+                  if (file != null) {
+                    await _deviceStore.uploadDevicePhoto(file, _device!);
+                    setState(() {});
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -53,30 +93,72 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         title: Text(_isEditing ? "Editar Veículo" : "Novo Veículo"),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header icon
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    child: Icon(
-                      Icons.directions_car,
-                      size: 40,
-                      color: theme.colorScheme.primary,
+      body: Observer(
+        builder: (_) => SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header icon / Photo
+                  Center(
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Stack(
+                        children: [
+                          if (_device?.photo != null && _device!.photo!.isNotEmpty)
+                            ClipOval(
+                              child: CachedImage(
+                                imageUrl: _device!.photo!,
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          else
+                            CircleAvatar(
+                              radius: 60,
+                              backgroundColor: theme.colorScheme.primaryContainer,
+                              child: Icon(
+                                Icons.directions_car,
+                                size: 60,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          if (_deviceStore.isUploading)
+                            Positioned.fill(
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.black45,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: CircleAvatar(
+                              radius: 18,
+                              backgroundColor: theme.colorScheme.primary,
+                              child: const Icon(
+                                Icons.camera_alt,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                // Form fields
-                _buildManufacturerField(),
+                  const SizedBox(height: 24),
+                  // Form fields
+                  _buildManufacturerField(),
                 const SizedBox(height: 16),
                 _buildNameField(),
                 const SizedBox(height: 16),
@@ -101,6 +183,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
             ),
           ),
         ),
+      ),
       ),
     );
   }
