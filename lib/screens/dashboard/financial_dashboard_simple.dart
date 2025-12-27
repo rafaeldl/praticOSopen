@@ -1705,7 +1705,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     } catch (error) {
       try {
         if (device is Map) {
-          var deviceMap = device;
+          var deviceMap = device as Map;
           String? modelo = deviceMap['name']?.toString() ?? '';
           String? placa = deviceMap['serial']?.toString() ?? '';
 

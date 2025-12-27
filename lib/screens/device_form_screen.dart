@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:easy_mask/easy_mask.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
@@ -183,7 +185,6 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
             ),
           ),
         ),
-      ),
       ),
     );
   }

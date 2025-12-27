@@ -245,7 +245,7 @@ class _OrderFormState extends State<OrderForm> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    hasValue ? value : placeholder,
+                    hasValue ? value! : placeholder,
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: hasValue
                           ? colorScheme.onSurface
@@ -550,6 +550,7 @@ class _OrderFormState extends State<OrderForm> {
                   description: service.description,
                   value: service.value,
                   photoUrl: service.photo,
+                  fallbackIcon: Icons.build_outlined,
                   onTap: () => _editService(index),
                   onDelete: () {
                     _store.deleteService(index);
@@ -625,6 +626,7 @@ class _OrderFormState extends State<OrderForm> {
                   value: product.value,
                   quantity: product.quantity,
                   photoUrl: product.photo,
+                  fallbackIcon: Icons.inventory_2_outlined,
                   onTap: () => _editProduct(index),
                   onDelete: () {
                     _store.deleteProduct(index);

@@ -8,6 +8,7 @@ class OrderItemRow extends StatelessWidget {
   final int? quantity;
   final double? value;
   final String? photoUrl;
+  final IconData? fallbackIcon;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
 
@@ -18,6 +19,7 @@ class OrderItemRow extends StatelessWidget {
     this.quantity,
     this.value = 0.0,
     this.photoUrl,
+    this.fallbackIcon,
     this.onTap,
     this.onDelete,
   }) : super(key: key);
@@ -68,6 +70,17 @@ class OrderItemRow extends StatelessWidget {
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ] else if (fallbackIcon != null) ...[
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: theme.colorScheme.primaryContainer,
+                    child: Icon(
+                      fallbackIcon,
+                      color: theme.colorScheme.primary,
+                      size: 20,
                     ),
                   ),
                   const SizedBox(width: 12),

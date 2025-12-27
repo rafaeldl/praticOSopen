@@ -17,6 +17,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
   @override
   Widget build(BuildContext context) {
     args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    final isSelectionMode = args != null && args!.containsKey('orderStore');
 
     return Scaffold(
       appBar: AppBar(
