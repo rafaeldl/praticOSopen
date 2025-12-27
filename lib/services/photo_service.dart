@@ -64,8 +64,9 @@ class PhotoService {
     final XFile? image = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 80,
-      maxWidth: 1920,
-      maxHeight: 1080,
+      maxWidth: 2048,
+      maxHeight: 2048,
+      requestFullMetadata: false, // Helps with HEIC on iOS
     );
     if (image != null) {
       return File(image.path);
@@ -78,8 +79,9 @@ class PhotoService {
     final XFile? image = await _picker.pickImage(
       source: ImageSource.camera,
       imageQuality: 80,
-      maxWidth: 1920,
-      maxHeight: 1080,
+      maxWidth: 2048,
+      maxHeight: 2048,
+      requestFullMetadata: false, // Helps with HEIC on iOS
     );
     if (image != null) {
       return File(image.path);
