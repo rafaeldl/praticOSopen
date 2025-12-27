@@ -185,7 +185,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           ),
         ),
       ),
-    ));
+    );
   }
 
   InputDecoration _inputDecoration({

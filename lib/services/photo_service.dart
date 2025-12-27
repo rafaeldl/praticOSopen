@@ -342,6 +342,8 @@ class PhotoService {
 
       final Reference ref = _storage.ref().child(storagePath);
 
+      print('Uploading to path: $storagePath'); // DEBUG: Print exact path
+
       final UploadTask uploadTask = ref.putFile(
         jpegFile,
         SettableMetadata(contentType: 'image/jpeg'),
