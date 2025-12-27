@@ -2,7 +2,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/menu_navigation/settings.dart';
-import 'package:praticos/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,13 +20,14 @@ class _NavigationControllerState extends State<NavigationController> {
   @override
   Widget build(BuildContext context) {
     final navegationStore = Provider.of<BottomNavigationBarStore>(context);
+    final theme = Theme.of(context);
 
     return Observer(builder: (_) {
       return Scaffold(
         body: _pageOptions[navegationStore.currentIndex],
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: AppTheme.surfaceColor,
+            color: theme.cardColor,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.05),
@@ -43,6 +43,7 @@ class _NavigationControllerState extends State<NavigationController> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildNavItem(
+                    theme: theme,
                     index: 0,
                     icon: Icons.home_rounded,
                     iconOutlined: Icons.home_outlined,
@@ -51,6 +52,7 @@ class _NavigationControllerState extends State<NavigationController> {
                     onTap: () => navegationStore.setCurrentIndex(0),
                   ),
                   _buildNavItem(
+                    theme: theme,
                     index: 1,
                     icon: Icons.people_rounded,
                     iconOutlined: Icons.people_outline_rounded,
@@ -59,6 +61,7 @@ class _NavigationControllerState extends State<NavigationController> {
                     onTap: () => navegationStore.setCurrentIndex(1),
                   ),
                   _buildNavItem(
+                    theme: theme,
                     index: 2,
                     icon: Icons.menu_rounded,
                     iconOutlined: Icons.menu_rounded,
@@ -76,6 +79,7 @@ class _NavigationControllerState extends State<NavigationController> {
   }
 
   Widget _buildNavItem({
+    required ThemeData theme,
     required int index,
     required IconData icon,
     required IconData iconOutlined,
@@ -95,7 +99,7 @@ class _NavigationControllerState extends State<NavigationController> {
           vertical: 10,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor.withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? theme.primaryColor.withOpacity(0.1) : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -104,7 +108,7 @@ class _NavigationControllerState extends State<NavigationController> {
             Icon(
               isSelected ? icon : iconOutlined,
               size: 24,
-              color: isSelected ? AppTheme.primaryColor : AppTheme.textTertiary,
+              color: isSelected ? theme.primaryColor : theme.disabledColor,
             ),
             if (isSelected) ...[
               SizedBox(width: 8),
@@ -113,7 +117,7 @@ class _NavigationControllerState extends State<NavigationController> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.primaryColor,
+                  color: theme.primaryColor,
                 ),
               ),
             ],

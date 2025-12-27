@@ -21,7 +21,9 @@ abstract class _UserStore with Store {
 
   @action
   findCurrentUser() async {
-    user = repository.streamSingle(Global.currentUser!.uid).asObservable();
+    if (Global.currentUser != null) {
+      user = repository.streamSingle(Global.currentUser!.uid).asObservable();
+    }
   }
 
   Future<User?> getSingleUserById() async {
