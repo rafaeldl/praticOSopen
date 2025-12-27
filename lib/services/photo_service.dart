@@ -63,9 +63,6 @@ class PhotoService {
   Future<File?> pickImageFromGallery() async {
     final XFile? image = await _picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality: 80,
-      maxWidth: 2048,
-      maxHeight: 2048,
       requestFullMetadata: false, // Helps with HEIC on iOS
     );
     if (image != null) {
@@ -78,9 +75,6 @@ class PhotoService {
   Future<File?> takePhoto() async {
     final XFile? image = await _picker.pickImage(
       source: ImageSource.camera,
-      imageQuality: 80,
-      maxWidth: 2048,
-      maxHeight: 2048,
       requestFullMetadata: false, // Helps with HEIC on iOS
     );
     if (image != null) {
