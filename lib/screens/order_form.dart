@@ -245,7 +245,7 @@ class _OrderFormState extends State<OrderForm> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    hasValue ? value! : placeholder,
+                    hasValue ? value : placeholder,
                     style: theme.textTheme.titleSmall?.copyWith(
                       color: hasValue
                           ? colorScheme.onSurface

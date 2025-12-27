@@ -4,7 +4,6 @@ import 'package:praticos/models/user_role.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:praticos/global.dart';
 
