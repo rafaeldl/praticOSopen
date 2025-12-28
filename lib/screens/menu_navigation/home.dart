@@ -116,7 +116,7 @@ class _HomeState extends State<Home> {
                      child: Center(child: CupertinoActivityIndicator()),
                    );
                  }
-                 return const SizedBox(height: 40); // Bottom padding
+                 return const SizedBox(height: 100); // Bottom padding to clear TabBar
                }),
             ),
           ],
@@ -150,7 +150,7 @@ class _HomeState extends State<Home> {
             child: const Icon(CupertinoIcons.add),
             onPressed: () {
               HapticFeedback.lightImpact();
-              Navigator.pushNamed(context, '/order').then((_) => _loadOrders());
+              Navigator.of(context, rootNavigator: true).pushNamed('/order').then((_) => _loadOrders());
             },
           ),
         ],
@@ -353,13 +353,11 @@ class _HomeState extends State<Home> {
       color: CupertinoColors.systemBackground,
       child: Material(
         type: MaterialType.transparency,
-        child: InkWell(
-          onTap: () {
-             Navigator.pushNamed(context, '/order', arguments: {'order': order})
-                 .then((_) => _loadOrders());
-          },
-          child: Column(
-            children: [
+                            child: InkWell(
+                            onTap: () {
+                               Navigator.of(context, rootNavigator: true).pushNamed('/order', arguments: {'order': order})
+                                   .then((_) => _loadOrders());
+                            },                  child: Column(            children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Compact padding
                 child: Row(

@@ -411,6 +411,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 | `lib/models/base_audit_company.dart` | Base para entidades multi-tenant |
 | `lib/mobx/order_store.dart` | Store principal, mais complexo (~700 linhas) |
 | `lib/screens/order_form.dart` | Tela de OS (~990 linhas) |
+| `UX_GUIDELINES.md` | Diretrizes de Design (Apple HIG) |
 | `pubspec.yaml` | Dependências do projeto |
 | `firestore.indexes.json` | Índices compostos do Firestore |
 
@@ -532,7 +533,9 @@ secondaryColor: Color(0xFFf1c40f)  // Amarelo
 
 1. **Sempre verificar multi-tenancy:** Toda nova feature que lida com dados deve filtrar por `company.id`
 
-2. **Usar padrão Aggregate:** Ao referenciar outras entidades, use a classe `*Aggr`
+2. **Seguir o Apple HIG:** Toda nova tela ou alteração de UI deve seguir estritamente o `UX_GUIDELINES.md` e os padrões de design da Apple (Cupertino).
+
+3. **Usar padrão Aggregate:** Ao referenciar outras entidades, use a classe `*Aggr`
 
 3. **Rodar build_runner:** Após modificar models ou stores, sempre rodar:
    ```bash
