@@ -29,14 +29,15 @@ class _SettingsState extends State<Settings> {
         type: MaterialType.transparency,
         child: CustomScrollView(
           slivers: [
-            const CupertinoSliverNavigationBar(
-              largeTitle: Text('Ajustes'),
-            ),
-          SliverList(
-            delegate: SliverChildListDelegate([
-              // Profile Section
-              CupertinoListSection.insetGrouped(
-                children: [
+                      const CupertinoSliverNavigationBar(
+                        largeTitle: Text('Ajustes'),
+                      ),
+                      SliverSafeArea(
+                        top: false,
+                        sliver: SliverList(
+                          delegate: SliverChildListDelegate([
+                            // Profile Section
+                            CupertinoListSection.insetGrouped(                children: [
                   CupertinoListTile(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     leadingSize: 60,
@@ -204,15 +205,25 @@ class _SettingsState extends State<Settings> {
                 ),
               ),
               
-              const SizedBox(height: 40),
-            ]),
+                
+              
+                const SizedBox(height: 40),
+              
+              ]),
+              
+            ),
+              
           ),
+              
         ],
+              
       ),
+              
       ),
+              
     );
+              
   }
-
   Widget _buildSettingsTile({
     required IconData icon,
     required Color color,

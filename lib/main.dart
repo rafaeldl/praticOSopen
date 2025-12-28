@@ -24,7 +24,7 @@ AuthStore _authStore = AuthStore();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PackageInfo info = await PackageInfo.fromPlatform();
-  Global.version = info.version;
+  Global.version = "${info.version} (${info.buildNumber})";
   await Firebase.initializeApp();
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   FirebaseCrashlytics.instance.log("iniciando a aplicação");
