@@ -4,6 +4,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -22,16 +23,16 @@ class _HomeState extends State<Home> {
   bool _showFilters = true;
   double _lastOffset = 0;
 
-  List filters = [
+  static const List<Map<String, dynamic>> filters = [
     {'status': 'Todos', 'icon': Icons.apps_rounded, 'field': null},
-    {'status': 'Entrega', 'field': 'due_date', 'icon': Icons.schedule_rounded},
-    {'status': 'Aprovados', 'field': 'approved', 'icon': Icons.thumb_up_alt_rounded},
-    {'status': 'Andamento', 'field': 'progress', 'icon': Icons.sync_rounded},
-    {'status': 'Orçamentos', 'field': 'quote', 'icon': Icons.description_rounded},
-    {'status': 'Concluídos', 'field': 'done', 'icon': Icons.check_circle_rounded},
-    {'status': 'Cancelados', 'field': 'canceled', 'icon': Icons.cancel_rounded},
-    {'status': 'A receber', 'field': 'unpaid', 'icon': Icons.payments_outlined},
-    {'status': 'Pago', 'field': 'paid', 'icon': Icons.paid_rounded},
+    {'status': 'Entrega', 'field': 'due_date', 'icon': Icons.schedule_outlined},
+    {'status': 'Aprovados', 'field': 'approved', 'icon': Icons.thumb_up_outlined},
+    {'status': 'Andamento', 'field': 'progress', 'icon': Icons.autorenew_rounded},
+    {'status': 'Orçamentos', 'field': 'quote', 'icon': Icons.request_quote_outlined},
+    {'status': 'Concluídos', 'field': 'done', 'icon': Icons.check_circle_outline},
+    {'status': 'Cancelados', 'field': 'canceled', 'icon': Icons.cancel_outlined},
+    {'status': 'A receber', 'field': 'unpaid', 'icon': Icons.account_balance_wallet_outlined},
+    {'status': 'Pago', 'field': 'paid', 'icon': Icons.payments_outlined},
   ];
 
   @override
@@ -109,33 +110,43 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     FirebaseCrashlytics.instance.log("Abrindo home");
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: isDark ? AppTheme.backgroundDark : AppTheme.backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: theme.appBarTheme.backgroundColor,
+        scrolledUnderElevation: 0.5,
+        backgroundColor: isDark ? AppTheme.surfaceDark : AppTheme.surfaceColor,
+        surfaceTintColor: Colors.transparent,
         title: Text(
           'Ordens de Serviço',
-          style: theme.appBarTheme.titleTextStyle,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+            color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary,
+          ),
         ),
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.bar_chart_rounded, color: theme.iconTheme.color, size: 26),
+            icon: Icon(
+              Icons.bar_chart_rounded,
+              color: theme.primaryColor,
+              size: 24,
+            ),
             onPressed: () => Navigator.pushNamed(context, '/financial_dashboard_simple'),
           ),
           Padding(
-            padding: EdgeInsets.only(right: 12),
+            padding: const EdgeInsets.only(right: 8),
             child: IconButton(
-              icon: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.primaryColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(Icons.add_rounded, color: Colors.white, size: 22),
+              icon: Icon(
+                Icons.add_circle_outline,
+                color: theme.primaryColor,
+                size: 26,
               ),
               onPressed: () {
+                HapticFeedback.lightImpact();
                 Navigator.pushNamed(context, '/order').then((_) => _loadOrders());
               },
             ),
@@ -144,41 +155,48 @@ class _HomeState extends State<Home> {
       ),
       body: Column(
         children: [
-          // Filtros animados
+          // Filtros com animação suave
           AnimatedContainer(
-            duration: Duration(milliseconds: 200),
-            height: _showFilters ? 48 : 0,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+            height: _showFilters ? 52 : 0,
             child: AnimatedOpacity(
-              duration: Duration(milliseconds: 150),
+              duration: const Duration(milliseconds: 200),
               opacity: _showFilters ? 1 : 0,
-              child: _buildFilterBar(theme),
+              child: _buildFilterBar(theme, isDark),
             ),
           ),
-          // Divisor sutil
-          Container(height: 1, color: theme.colorScheme.outlineVariant),
           // Lista
-          Expanded(child: _buildOrdersList(theme)),
+          Expanded(child: _buildOrdersList(theme, isDark)),
         ],
       ),
     );
   }
 
-  Widget _buildFilterBar(ThemeData theme) {
+  Widget _buildFilterBar(ThemeData theme, bool isDark) {
     return Container(
-      height: 48,
-      color: theme.cardColor,
+      height: 52,
+      decoration: BoxDecoration(
+        color: isDark ? AppTheme.surfaceDark : AppTheme.surfaceColor,
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? AppTheme.borderColorDark : AppTheme.borderColor,
+            width: 0.5,
+          ),
+        ),
+      ),
       child: Observer(
         builder: (_) {
           return ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             scrollDirection: Axis.horizontal,
             itemCount: filters.length + (orderStore.customerFilter != null ? 1 : 0),
             itemBuilder: (context, index) {
               if (orderStore.customerFilter != null) {
-                if (index == 0) return _buildCustomerChip(theme);
-                return _buildFilterChip(index - 1, theme);
+                if (index == 0) return _buildCustomerChip(theme, isDark);
+                return _buildFilterChip(index - 1, theme, isDark);
               }
-              return _buildFilterChip(index, theme);
+              return _buildFilterChip(index, theme, isDark);
             },
           );
         },
@@ -186,70 +204,88 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildCustomerChip(ThemeData theme) {
+  Widget _buildCustomerChip(ThemeData theme, bool isDark) {
     return GestureDetector(
       onTap: () {
+        HapticFeedback.lightImpact();
         orderStore.setCustomerFilter(null);
         _loadOrders();
       },
       child: Container(
-        margin: EdgeInsets.only(right: 8),
-        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: theme.primaryColor,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.person_rounded, size: 16, color: Colors.white),
-            SizedBox(width: 6),
+            const Icon(Icons.person_outline, size: 16, color: Colors.white),
+            const SizedBox(width: 6),
             ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 80),
+              constraints: const BoxConstraints(maxWidth: 80),
               child: Text(
                 orderStore.customerFilter?.name ?? '',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(width: 4),
-            Icon(Icons.close, size: 16, color: Colors.white70),
+            const SizedBox(width: 4),
+            Icon(Icons.close, size: 14, color: Colors.white.withValues(alpha: 0.8)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterChip(int index, ThemeData theme) {
+  Widget _buildFilterChip(int index, ThemeData theme, bool isDark) {
     final isSelected = currentSelected == index;
+    final backgroundColor = isSelected
+        ? theme.primaryColor
+        : (isDark ? AppTheme.backgroundDark : AppTheme.backgroundColor);
+    final textColor = isSelected
+        ? Colors.white
+        : (isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondary);
 
     return GestureDetector(
       onTap: () {
+        HapticFeedback.selectionClick();
         setState(() => currentSelected = index);
         orderStore.loadOrdersInfinite(filters[index]['field']);
       },
       child: Container(
-        margin: EdgeInsets.only(right: 8),
-        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? theme.primaryColor : theme.scaffoldBackgroundColor,
-          borderRadius: BorderRadius.circular(20),
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected
+              ? null
+              : Border.all(
+                  color: isDark ? AppTheme.borderColorDark : AppTheme.borderColor,
+                  width: 0.5,
+                ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              filters[index]['icon'],
+              filters[index]['icon'] as IconData,
               size: 16,
-              color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
+              color: textColor,
             ),
-            SizedBox(width: 6),
+            const SizedBox(width: 6),
             Text(
-              filters[index]['status'],
+              filters[index]['status'] as String,
               style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: textColor,
               ),
             ),
           ],
@@ -258,11 +294,16 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildOrdersList(ThemeData theme) {
+  Widget _buildOrdersList(ThemeData theme, bool isDark) {
     return Observer(
       builder: (_) {
         if (orderStore.isLoading && orderStore.orders.isEmpty) {
-          return Center(child: CircularProgressIndicator(strokeWidth: 2));
+          return Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: theme.primaryColor,
+            ),
+          );
         }
 
         if (orderStore.orders.isEmpty) {
@@ -270,11 +311,43 @@ class _HomeState extends State<Home> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.assignment_outlined, size: 56, color: theme.disabledColor),
-                SizedBox(height: 16),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppTheme.surfaceDark
+                        : AppTheme.backgroundColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Icon(
+                    Icons.assignment_outlined,
+                    size: 40,
+                    color: isDark
+                        ? AppTheme.textTertiaryDark
+                        : AppTheme.textTertiary,
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text(
                   'Nenhuma OS encontrada',
-                  style: TextStyle(fontSize: 16, color: theme.textTheme.bodyMedium?.color),
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? AppTheme.textPrimaryDark
+                        : AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Toque em + para criar uma nova',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: isDark
+                        ? AppTheme.textSecondaryDark
+                        : AppTheme.textSecondary,
+                  ),
                 ),
               ],
             ),
@@ -289,36 +362,52 @@ class _HomeState extends State<Home> {
           }
         });
 
-        return ListView.builder(
-          controller: _scrollController,
-          padding: EdgeInsets.zero,
-          physics: AlwaysScrollableScrollPhysics(),
-          itemCount: orderStore.orders.length + (orderStore.isLoading ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == orderStore.orders.length) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              );
-            }
-            return _buildOrderItem(orderStore.orders[index] ?? Order(), index, theme);
+        return RefreshIndicator(
+          onRefresh: () async {
+            HapticFeedback.mediumImpact();
+            await orderStore.loadOrdersInfinite(filters[currentSelected]['field']);
           },
+          color: theme.primaryColor,
+          backgroundColor: isDark ? AppTheme.surfaceDark : AppTheme.surfaceColor,
+          child: ListView.builder(
+            controller: _scrollController,
+            padding: EdgeInsets.zero,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: orderStore.orders.length + (orderStore.isLoading ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == orderStore.orders.length) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.primaryColor,
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return _buildOrderItem(
+                orderStore.orders[index] ?? Order(),
+                index,
+                theme,
+                isDark,
+              );
+            },
+          ),
         );
       },
     );
   }
 
-  Widget _buildOrderItem(Order order, int index, ThemeData theme) {
+  Widget _buildOrderItem(Order order, int index, ThemeData theme, bool isDark) {
     final statusText = Order.statusMap[order.status] ?? '';
     final statusColor = AppTheme.getStatusColor(order.status);
     final isPaid = order.payment == 'paid';
-
-    // Mostrar ícone de pagamento sempre que a OS foi paga, independente do status
     final showPaymentIcon = isPaid;
-
-    // Mostrar ícone "a receber" quando status for concluído e financeiro em aberto
     final showUnpaidIcon = order.status == 'done' && order.payment == 'unpaid';
 
     // Verificar atraso
@@ -329,43 +418,43 @@ class _HomeState extends State<Home> {
       isOverdue = dueDate.isBefore(today) && order.status != 'done' && order.status != 'canceled';
     }
 
-    // Descrição do veículo com número da OS
-    String deviceLine = '#${order.number ?? '-'}';
+    // Linha secundária com #OS e dispositivo
+    String secondaryLine = '#${order.number ?? '-'}';
     if (order.device != null) {
       final name = order.device?.name ?? '';
       final serial = order.device?.serial ?? '';
       final vehicleDesc = serial.isNotEmpty ? '$name • $serial' : name;
       if (vehicleDesc.isNotEmpty) {
-        deviceLine = '#${order.number ?? '-'} • $vehicleDesc';
+        secondaryLine = '$vehicleDesc';
       }
     }
 
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/order', arguments: {'order': order}).then((_) => _loadOrders());
-      },
-      child: Container(
-        color: theme.cardColor,
+    return Material(
+      color: isDark ? AppTheme.surfaceDark : AppTheme.surfaceColor,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          Navigator.pushNamed(context, '/order', arguments: {'order': order})
+              .then((_) => _loadOrders());
+        },
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Thumbnail
-                  _buildThumbnail(order, theme),
-                  SizedBox(width: 12),
+                  _buildThumbnail(order, isDark),
+                  const SizedBox(width: 12),
                   // Conteúdo principal
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Linha 1: Nome + Ícones (atraso e pagamento) + Status
+                        // Linha 1: Nome do cliente + indicadores
                         Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Nome do cliente com ícones ao lado
                             Expanded(
                               child: Row(
                                 children: [
@@ -375,92 +464,73 @@ class _HomeState extends State<Home> {
                                       style: TextStyle(
                                         fontSize: 17,
                                         fontWeight: FontWeight.w600,
-                                        color: theme.textTheme.bodyLarge?.color,
+                                        color: isDark
+                                            ? AppTheme.textPrimaryDark
+                                            : AppTheme.textPrimary,
+                                        letterSpacing: -0.3,
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
-                                  // Ícones de atraso, pagamento e a receber ao lado do nome
-                                  if (isOverdue)
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 6),
-                                      child: Icon(
-                                        Icons.schedule,
-                                        size: 16,
-                                        color: AppTheme.errorColor,
-                                      ),
+                                  // Indicadores inline
+                                  if (isOverdue) ...[
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      Icons.schedule,
+                                      size: 14,
+                                      color: AppTheme.errorColor,
                                     ),
-                                  if (showPaymentIcon)
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 6),
-                                      child: Icon(
-                                        Icons.paid_rounded,
-                                        size: 16,
-                                        color: AppTheme.successColor,
-                                      ),
+                                  ],
+                                  if (showPaymentIcon) ...[
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      Icons.check_circle,
+                                      size: 14,
+                                      color: AppTheme.successColor,
                                     ),
-                                  if (showUnpaidIcon)
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 6),
-                                      child: Icon(
-                                        Icons.payments_outlined,
-                                        size: 16,
-                                        color: AppTheme.warningColor,
-                                      ),
+                                  ],
+                                  if (showUnpaidIcon) ...[
+                                    const SizedBox(width: 6),
+                                    Icon(
+                                      Icons.account_balance_wallet_outlined,
+                                      size: 14,
+                                      color: AppTheme.warningColor,
                                     ),
+                                  ],
                                 ],
                               ),
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             // Status badge
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: order.status == 'approved' 
-                                    ? Colors.transparent 
-                                    : statusColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(4),
-                                border: order.status == 'approved'
-                                    ? Border.all(color: statusColor, width: 1)
-                                    : null,
-                              ),
-                              child: Text(
-                                statusText,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: statusColor,
-                                ),
-                              ),
-                            ),
+                            _buildStatusBadge(statusText, statusColor, order.status, isDark),
                           ],
                         ),
-                        SizedBox(height: 2),
-                        // Linha 2: #OS + Veículo + Valor total (canto inferior direito)
+                        const SizedBox(height: 4),
+                        // Linha 2: Info secundária + Valor
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
                               child: Text(
-                                deviceLine,
+                                secondaryLine,
                                 style: TextStyle(
-                                  fontSize: 13,
-                                  color: theme.textTheme.bodyMedium?.color,
+                                  fontSize: 15,
+                                  color: isDark
+                                      ? AppTheme.textSecondaryDark
+                                      : AppTheme.textSecondary,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
                             ),
-                            // SizedBox(height: 20,),
-                            // Valor total no canto inferior direito
+                            const SizedBox(width: 8),
                             Text(
                               _formatCurrency(order.total),
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal,
-                                color: theme.textTheme.bodyLarge?.color,
-                                letterSpacing: -0.5,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color: isDark
+                                    ? AppTheme.textPrimaryDark
+                                    : AppTheme.textPrimary,
                               ),
                             ),
                           ],
@@ -468,15 +538,24 @@ class _HomeState extends State<Home> {
                       ],
                     ),
                   ),
+                  const SizedBox(width: 4),
+                  // Chevron
+                  Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: isDark
+                        ? AppTheme.textTertiaryDark
+                        : AppTheme.textTertiary,
+                  ),
                 ],
               ),
             ),
-            // Divisor
+            // Divisor estilo iOS (indentado)
             Padding(
-              padding: EdgeInsets.only(left: 80),
+              padding: const EdgeInsets.only(left: 76),
               child: Container(
-                height: 1,
-                color: theme.colorScheme.outlineVariant,
+                height: 0.5,
+                color: isDark ? AppTheme.borderColorDark : AppTheme.borderColor,
               ),
             ),
           ],
@@ -485,16 +564,42 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildThumbnail(Order order, ThemeData theme) {
+  Widget _buildStatusBadge(String text, Color color, String? status, bool isDark) {
+    final isApproved = status == 'approved';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isApproved
+            ? Colors.transparent
+            : color.withValues(alpha: isDark ? 0.2 : 0.12),
+        borderRadius: BorderRadius.circular(6),
+        border: isApproved
+            ? Border.all(color: color, width: 1)
+            : null,
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: color,
+          letterSpacing: 0.1,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnail(Order order, bool isDark) {
     final url = order.coverPhotoUrl;
-    const double size = 52.0;
+    const double size = 48.0;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Container(
         width: size,
         height: size,
-        color: theme.scaffoldBackgroundColor,
+        color: isDark ? AppTheme.backgroundDark : AppTheme.backgroundColor,
         child: url != null && url.isNotEmpty
             ? CachedImage.thumbnail(
                 imageUrl: url,
@@ -502,9 +607,11 @@ class _HomeState extends State<Home> {
               )
             : Center(
                 child: Icon(
-                  Icons.build_circle_outlined,
-                  size: 26,
-                  color: theme.disabledColor,
+                  Icons.build_outlined,
+                  size: 22,
+                  color: isDark
+                      ? AppTheme.textTertiaryDark
+                      : AppTheme.textTertiary,
                 ),
               ),
       ),
