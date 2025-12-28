@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show ThemeMode; 
+import 'package:flutter/material.dart' show ThemeMode, Material, MaterialType; 
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/global.dart';
@@ -25,11 +25,13 @@ class _SettingsState extends State<Settings> {
 
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: CustomScrollView(
-        slivers: [
-          const CupertinoSliverNavigationBar(
-            largeTitle: Text('Ajustes'),
-          ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          slivers: [
+            const CupertinoSliverNavigationBar(
+              largeTitle: Text('Ajustes'),
+            ),
           SliverList(
             delegate: SliverChildListDelegate([
               // Profile Section
@@ -206,6 +208,7 @@ class _SettingsState extends State<Settings> {
             ]),
           ),
         ],
+      ),
       ),
     );
   }
