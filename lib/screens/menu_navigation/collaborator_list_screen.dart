@@ -101,6 +101,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             style: const TextStyle(
               color: CupertinoColors.activeBlue,
               fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
         ),

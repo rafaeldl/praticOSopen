@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/user_role.dart';
 
@@ -82,50 +83,54 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
               : const Text("Adicionar", style: TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
-      child: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              const SizedBox(height: 20),
-              
-              CupertinoListSection.insetGrouped(
-                header: const Text('INFORMAÇÕES DO USUÁRIO'),
-                footer: const Text('O usuário receberá um convite por email.'),
-                children: [
-                  CupertinoTextFormFieldRow(
-                    controller: _emailController,
-                    prefix: const Text('Email', style: TextStyle(fontSize: 16)),
-                    placeholder: 'email@exemplo.com',
-                    keyboardType: TextInputType.emailAddress,
-                    textAlign: TextAlign.right,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Obrigatório';
-                      }
-                      if (!value.contains('@')) {
-                        return 'Email inválido';
-                      }
-                      return null;
-                    },
-                  ),
-                  CupertinoListTile(
-                    title: const Text('Permissão'),
-                    trailing: Row(
-                      children: [
-                        Text(
-                          _getRoleLabel(_selectedRole),
-                          style: const TextStyle(color: CupertinoColors.secondaryLabel),
-                        ),
-                        const SizedBox(width: 6),
-                        const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
-                      ],
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                const SizedBox(height: 20),
+                
+                CupertinoListSection.insetGrouped(
+                  header: const Text('INFORMAÇÕES DO USUÁRIO'),
+                  footer: const Text('O usuário receberá um convite por email.'),
+                  children: [
+                    CupertinoTextFormFieldRow(
+                      controller: _emailController,
+                      prefix: const Text('Email', style: TextStyle(fontSize: 16)),
+                      placeholder: 'email@exemplo.com',
+                      keyboardType: TextInputType.emailAddress,
+                      textAlign: TextAlign.right,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        if (!value.contains('@')) {
+                          return 'Email inválido';
+                        }
+                        return null;
+                      },
                     ),
-                    onTap: _showRolePicker,
-                  ),
-                ],
-              ),
-            ],
+                    CupertinoListTile(
+                      title: const Text('Permissão'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _getRoleLabel(_selectedRole),
+                            style: const TextStyle(color: CupertinoColors.secondaryLabel),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                        ],
+                      ),
+                      onTap: _showRolePicker,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
