@@ -1737,8 +1737,17 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     const textColor = PdfColors.grey800;
     const lightGrey = PdfColors.grey200;
 
-    final baseFont = pw.Font.helvetica();
-    final boldFont = pw.Font.helveticaBold();
+    // Use fonts with Unicode support for Portuguese characters
+    pw.Font baseFont;
+    pw.Font boldFont;
+    try {
+      baseFont = await PdfGoogleFonts.nunitoSansRegular();
+      boldFont = await PdfGoogleFonts.nunitoSansBold();
+    } catch (e) {
+      // Fallback to Helvetica if Google Fonts fail to load
+      baseFont = pw.Font.helvetica();
+      boldFont = pw.Font.helveticaBold();
+    }
 
     final totalValue = orderStore.totalRevenue;
     final totalOrders = orderStore.recentOrders.length;

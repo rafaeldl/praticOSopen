@@ -833,10 +833,13 @@ class _OrderFormState extends State<OrderForm> {
   _onShare(BuildContext context, Order? order) async {
     if (order == null) return;
 
+    // Store navigator reference before async operations
+    final navigator = Navigator.of(context, rootNavigator: true);
+
     showCupertinoDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return CupertinoAlertDialog(
           content: Column(
             children: const [
@@ -853,6 +856,19 @@ class _OrderFormState extends State<OrderForm> {
       CompanyStore companyStore = CompanyStore();
       Company company = await companyStore.retrieveCompany(order.company!.id);
 
+      // Download company logo
+      pw.MemoryImage? logoImage;
+      if (company.logo != null && company.logo!.isNotEmpty) {
+        try {
+          final response = await http.get(Uri.parse(company.logo!));
+          if (response.statusCode == 200) {
+            logoImage = pw.MemoryImage(response.bodyBytes);
+          }
+        } catch (e) {
+          // Logo optional, continue without it
+        }
+      }
+
       Customer? customer;
       if (order.customer != null) {
         CustomerStore customerStore = CustomerStore();
@@ -864,12 +880,20 @@ class _OrderFormState extends State<OrderForm> {
         photoImages = await _downloadPhotos(order);
       }
 
+      // Load fonts with Unicode support for Portuguese characters
+      pw.Font baseFont;
+      pw.Font boldFont;
+      try {
+        baseFont = await PdfGoogleFonts.nunitoSansRegular();
+        boldFont = await PdfGoogleFonts.nunitoSansBold();
+      } catch (e) {
+        // Fallback to Helvetica if Google Fonts fail to load
+        baseFont = pw.Font.helvetica();
+        boldFont = pw.Font.helveticaBold();
+      }
+
       final doc = pw.Document();
-      // ... PDF building logic stays the same ...
-      // I am simplifying the PDF code part here to save tokens and focus on UI, 
-      // assuming I can reuse the previous helpers. 
-      // But I must include them to make the file compilable.
-      
+
       final PdfColor primaryColor = PdfColor.fromHex('#2196F3');
       final PdfColor darkGray = PdfColor.fromHex('#757575');
 
@@ -878,29 +902,43 @@ class _OrderFormState extends State<OrderForm> {
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(40),
           header: (pw.Context context) {
-            return _buildHeader(company, order, primaryColor, darkGray);
+            return _buildHeader(company, order, primaryColor, darkGray, baseFont, boldFont, logoImage);
           },
           footer: (pw.Context context) {
-            return _buildFooter(context, darkGray);
+            return _buildFooter(context, darkGray, baseFont);
           },
           build: (pw.Context context) {
-            return _printLayoutContent(order, customer, company, photoImages);
+            return _printLayoutContent(order, customer, company, photoImages, baseFont, boldFont);
           },
         ),
       );
 
-      Navigator.of(context, rootNavigator: true).pop();
+      if (mounted) {
+        navigator.pop();
+      }
 
       await Printing.sharePdf(
         bytes: await doc.save(),
         filename: "OS-${order.number == null ? 'NOVA' : order.number}.pdf",
       );
     } catch (e) {
-      Navigator.of(context, rootNavigator: true).pop();
+      if (mounted) {
+        navigator.pop();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao gerar PDF: $e')),
-      );
+        showCupertinoDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: const Text('Erro'),
+            content: Text('Erro ao gerar PDF: $e'),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('OK'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
@@ -924,70 +962,169 @@ class _OrderFormState extends State<OrderForm> {
   }
   
   // Re-implementing PDF helpers to ensure self-contained file (except models)
-  pw.Widget _buildHeader(Company company, Order order, PdfColor primaryColor, PdfColor darkGray) {
+  pw.Widget _buildHeader(Company company, Order order, PdfColor primaryColor, PdfColor darkGray, pw.Font baseFont, pw.Font boldFont, [pw.MemoryImage? logoImage]) {
+    final statusColor = _getStatusColor(order.status);
+    final statusText = Order.statusMap[order.status] ?? 'Pendente';
+
     return pw.Column(
       children: [
         pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  company.name!.toUpperCase(),
-                  style: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 20.0,
-                    color: primaryColor,
+            // Logo + Company Info
+            pw.Expanded(
+              flex: 3,
+              child: pw.Row(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  if (logoImage != null) ...[
+                    pw.Container(
+                      width: 50,
+                      height: 50,
+                      child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+                    ),
+                    pw.SizedBox(width: 12),
+                  ],
+                  pw.Expanded(
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          company.name ?? '',
+                          style: pw.TextStyle(
+                            font: boldFont,
+                            fontSize: 16.0,
+                            color: PdfColors.grey800,
+                          ),
+                        ),
+                        pw.SizedBox(height: 4),
+                        if (company.phone != null && company.phone!.isNotEmpty)
+                          pw.Text(
+                            company.phone!,
+                            style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
+                          ),
+                        if (company.email != null && company.email!.isNotEmpty)
+                          pw.Text(
+                            company.email!,
+                            style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
+                          ),
+                        if (company.address != null && company.address!.isNotEmpty)
+                          pw.Text(
+                            company.address!,
+                            style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
+                            maxLines: 2,
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                pw.SizedBox(height: 4),
-                if (company.phone != null)
-                  pw.Text(
-                    company.phone!,
-                    style: pw.TextStyle(fontSize: 10.0, color: darkGray),
-                  ),
-              ],
+                ],
+              ),
             ),
+
+            // OS Number and Info
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Text(
-                  'ORDEM DE SERVIÇO',
-                  style: pw.TextStyle(
-                    fontSize: 10.0,
-                    letterSpacing: 1.5,
-                    fontWeight: pw.FontWeight.bold,
-                    color: darkGray,
+                // OS Badge
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: pw.BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: pw.BorderRadius.circular(4),
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
+                    children: [
+                      pw.Text(
+                        'ORDEM DE SERVICO',
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 8.0,
+                          color: PdfColors.white,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      pw.SizedBox(height: 2),
+                      pw.Text(
+                        '#${order.number?.toString() ?? "NOVA"}',
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 18.0,
+                          color: PdfColors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                pw.SizedBox(height: 4),
+                pw.SizedBox(height: 8),
+                // Date
                 pw.Text(
-                  '#${order.number?.toString() ?? "NOVA"}',
-                  style: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 24.0,
-                    color: PdfColors.black,
-                  ),
+                  'Data: ${DateFormat('dd/MM/yyyy').format(order.createdAt!)}',
+                  style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
                 ),
-                pw.SizedBox(height: 4),
-                pw.Text(
-                  DateFormat('dd/MM/yyyy').format(order.createdAt!),
-                  style: pw.TextStyle(fontSize: 10.0, color: darkGray),
+                if (order.dueDate != null) ...[
+                  pw.SizedBox(height: 2),
+                  pw.Text(
+                    'Previsao: ${DateFormat('dd/MM/yyyy').format(order.dueDate!)}',
+                    style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
+                  ),
+                ],
+                pw.SizedBox(height: 6),
+                // Status Badge
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: pw.BoxDecoration(
+                    color: statusColor.shade(0.9),
+                    borderRadius: pw.BorderRadius.circular(3),
+                    border: pw.Border.all(color: statusColor, width: 0.5),
+                  ),
+                  child: pw.Text(
+                    statusText.toUpperCase(),
+                    style: pw.TextStyle(
+                      font: boldFont,
+                      fontSize: 8.0,
+                      color: statusColor,
+                    ),
+                  ),
                 ),
               ],
             ),
           ],
         ),
-        pw.SizedBox(height: 20),
-        pw.Divider(color: PdfColors.grey300, thickness: 1),
-        pw.SizedBox(height: 20),
+        pw.SizedBox(height: 16),
+        pw.Container(
+          height: 2,
+          decoration: pw.BoxDecoration(
+            gradient: pw.LinearGradient(
+              colors: [primaryColor, PdfColors.grey300],
+              begin: pw.Alignment.centerLeft,
+              end: pw.Alignment.centerRight,
+            ),
+          ),
+        ),
+        pw.SizedBox(height: 16),
       ],
     );
   }
 
-  pw.Widget _buildFooter(pw.Context context, PdfColor darkGray) {
+  PdfColor _getStatusColor(String? status) {
+    switch (status) {
+      case 'approved':
+        return PdfColors.blue700;
+      case 'done':
+        return PdfColors.green700;
+      case 'canceled':
+        return PdfColors.red700;
+      case 'quote':
+        return PdfColors.orange700;
+      case 'progress':
+        return PdfColors.purple700;
+      default:
+        return PdfColors.grey600;
+    }
+  }
+
+  pw.Widget _buildFooter(pw.Context context, PdfColor darkGray, pw.Font baseFont) {
     return pw.Container(
       margin: const pw.EdgeInsets.only(top: 20),
       padding: const pw.EdgeInsets.only(top: 10),
@@ -999,22 +1136,22 @@ class _OrderFormState extends State<OrderForm> {
         children: [
           pw.Text(
             'Documento gerado eletronicamente pelo PraticOS - praticos.web.app',
-            style: pw.TextStyle(fontSize: 8, color: darkGray),
+            style: pw.TextStyle(font: baseFont, fontSize: 8, color: darkGray),
           ),
           pw.Text(
-            'Página ${context.pageNumber} de ${context.pagesCount}',
-            style: pw.TextStyle(fontSize: 8, color: darkGray),
+            'Pagina ${context.pageNumber} de ${context.pagesCount}',
+            style: pw.TextStyle(font: baseFont, fontSize: 8, color: darkGray),
           ),
         ],
       ),
     );
   }
 
-  List<pw.Widget> _printLayoutContent(Order order, Customer? customer, Company company, [List<pw.MemoryImage>? photoImages]) {
-    DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+  List<pw.Widget> _printLayoutContent(Order order, Customer? customer, Company company, List<pw.MemoryImage>? photoImages, pw.Font baseFont, pw.Font boldFont) {
     final PdfColor primaryColor = PdfColor.fromHex('#1565C0');
-    final PdfColor darkGray = PdfColor.fromHex('#424242');
-    final PdfColor lightGray = PdfColor.fromHex('#EEEEEE');
+    final PdfColor darkGray = PdfColor.fromHex('#616161');
+    final PdfColor lightGray = PdfColor.fromHex('#F8F9FA');
+    final PdfColor borderColor = PdfColor.fromHex('#E0E0E0');
 
     double totalServices = order.services?.fold(0.0, (sum, s) => sum! + (s.value ?? 0)) ?? 0.0;
     double totalProducts = order.products?.fold(0.0, (sum, p) => sum! + (p.total ?? 0)) ?? 0.0;
@@ -1022,103 +1159,153 @@ class _OrderFormState extends State<OrderForm> {
     double discount = order.discount ?? 0.0;
     double total = order.total ?? 0.0;
 
+    final isPaid = order.payment == 'paid';
+
     return [
+      // Client & Vehicle Cards
       pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
+          // Client Card
           pw.Expanded(
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                _buildSectionTitle('CLIENTE', primaryColor),
-                pw.SizedBox(height: 8),
-                pw.Text(
-                  customer?.name ?? 'Cliente não informado',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
-                ),
-                if (customer?.phone != null) ...[
-                  pw.SizedBox(height: 2),
-                  pw.Text(customer!.phone!, style: pw.TextStyle(fontSize: 10, color: darkGray)),
+            child: pw.Container(
+              padding: const pw.EdgeInsets.all(12),
+              decoration: pw.BoxDecoration(
+                color: lightGray,
+                borderRadius: pw.BorderRadius.circular(6),
+                border: pw.Border.all(color: borderColor, width: 0.5),
+              ),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'CLIENTE',
+                    style: pw.TextStyle(font: boldFont, fontSize: 8, color: primaryColor, letterSpacing: 0.5),
+                  ),
+                  pw.SizedBox(height: 6),
+                  pw.Text(
+                    customer?.name ?? 'Nao informado',
+                    style: pw.TextStyle(font: boldFont, fontSize: 12, color: PdfColors.grey800),
+                  ),
+                  if (customer?.phone != null && customer!.phone!.isNotEmpty) ...[
+                    pw.SizedBox(height: 4),
+                    pw.Text(customer.phone!, style: pw.TextStyle(font: baseFont, fontSize: 9, color: darkGray)),
+                  ],
+                  if (customer?.email != null && customer!.email!.isNotEmpty) ...[
+                    pw.SizedBox(height: 2),
+                    pw.Text(customer.email!, style: pw.TextStyle(font: baseFont, fontSize: 9, color: darkGray)),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
-          pw.SizedBox(width: 20),
+          pw.SizedBox(width: 12),
+          // Vehicle Card
           pw.Expanded(
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                _buildSectionTitle('VEÍCULO', primaryColor),
-                pw.SizedBox(height: 8),
-                pw.Text(
-                  order.device?.name ?? 'Veículo não informado',
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11),
-                ),
-                if (order.device?.serial != null) ...[
-                  pw.SizedBox(height: 2),
-                  pw.Text(order.device!.serial!, style: pw.TextStyle(fontSize: 10, color: darkGray)),
+            child: pw.Container(
+              padding: const pw.EdgeInsets.all(12),
+              decoration: pw.BoxDecoration(
+                color: lightGray,
+                borderRadius: pw.BorderRadius.circular(6),
+                border: pw.Border.all(color: borderColor, width: 0.5),
+              ),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'VEICULO',
+                    style: pw.TextStyle(font: boldFont, fontSize: 8, color: primaryColor, letterSpacing: 0.5),
+                  ),
+                  pw.SizedBox(height: 6),
+                  pw.Text(
+                    order.device?.name ?? 'Nao informado',
+                    style: pw.TextStyle(font: boldFont, fontSize: 12, color: PdfColors.grey800),
+                  ),
+                  if (order.device?.serial != null && order.device!.serial!.isNotEmpty) ...[
+                    pw.SizedBox(height: 4),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: pw.BoxDecoration(
+                        color: PdfColors.grey300,
+                        borderRadius: pw.BorderRadius.circular(3),
+                      ),
+                      child: pw.Text(
+                        order.device!.serial!,
+                        style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey800),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ],
       ),
 
-      pw.SizedBox(height: 15),
+      pw.SizedBox(height: 20),
 
-      pw.Container(
-        padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        decoration: pw.BoxDecoration(
-          color: lightGray,
-          borderRadius: pw.BorderRadius.circular(4),
-        ),
-        child: pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            _buildDetailItem('STATUS', Order.statusMap[order.status] ?? 'Pendente'),
-            _buildDetailItem('PREVISÃO', order.dueDate != null ? dateFormat.format(order.dueDate!) : '-'),
-            _buildDetailItem('SITUAÇÃO PAGTO.', order.payment == 'paid' ? 'PAGO' : 'A RECEBER'),
-          ],
-        ),
-      ),
-
-      pw.SizedBox(height: 25),
-
+      // Services Section
       if (order.services != null && order.services!.isNotEmpty) ...[
-        _buildSectionTitle('SERVIÇOS REALIZADOS', primaryColor),
+        _buildSectionHeader('SERVICOS', '${order.services!.length} itens', primaryColor, baseFont, boldFont),
         pw.SizedBox(height: 8),
-        _printServices(order),
-        pw.SizedBox(height: 20),
+        _printServices(order, baseFont, boldFont),
+        pw.SizedBox(height: 16),
       ],
 
+      // Products Section
       if (order.products != null && order.products!.isNotEmpty) ...[
-        _buildSectionTitle('PEÇAS E PRODUTOS', primaryColor),
+        _buildSectionHeader('PECAS E PRODUTOS', '${order.products!.length} itens', primaryColor, baseFont, boldFont),
         pw.SizedBox(height: 8),
-        _printProduct(order),
-        pw.SizedBox(height: 20),
+        _printProduct(order, baseFont, boldFont),
+        pw.SizedBox(height: 16),
       ],
 
+      // Summary Section
       pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.end,
         children: [
           pw.Container(
-            width: 200,
+            width: 220,
+            decoration: pw.BoxDecoration(
+              borderRadius: pw.BorderRadius.circular(6),
+              border: pw.Border.all(color: borderColor, width: 0.5),
+            ),
             child: pw.Column(
               children: [
-                if (totalServices > 0) _buildSummaryRow('Total Serviços', totalServices),
-                if (totalProducts > 0) _buildSummaryRow('Total Produtos', totalProducts),
-                pw.Divider(color: PdfColors.grey300),
-                _buildSummaryRow('Subtotal', subtotal, isBold: true),
-                if (discount > 0) _buildSummaryRow('Desconto', -discount, color: PdfColors.red700),
-                pw.SizedBox(height: 8),
+                // Summary rows
                 pw.Container(
-                  color: primaryColor,
-                  padding: const pw.EdgeInsets.all(8),
+                  padding: const pw.EdgeInsets.all(10),
+                  child: pw.Column(
+                    children: [
+                      if (totalServices > 0) _buildSummaryRow('Servicos', totalServices, baseFont, boldFont),
+                      if (totalProducts > 0) _buildSummaryRow('Produtos', totalProducts, baseFont, boldFont),
+                      pw.Divider(color: borderColor, height: 16),
+                      _buildSummaryRow('Subtotal', subtotal, baseFont, boldFont),
+                      if (discount > 0) _buildSummaryRow('Desconto', -discount, baseFont, boldFont, color: PdfColors.red600),
+                    ],
+                  ),
+                ),
+                // Total
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                  decoration: pw.BoxDecoration(
+                    color: isPaid ? PdfColors.green700 : primaryColor,
+                    borderRadius: const pw.BorderRadius.only(
+                      bottomLeft: pw.Radius.circular(5),
+                      bottomRight: pw.Radius.circular(5),
+                    ),
+                  ),
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
-                      pw.Text('TOTAL A PAGAR', style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 10)),
-                      pw.Text(_convertToCurrency(total), style: pw.TextStyle(color: PdfColors.white, fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                      pw.Text(
+                        isPaid ? 'TOTAL PAGO' : 'TOTAL A PAGAR',
+                        style: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 9),
+                      ),
+                      pw.Text(
+                        _convertToCurrency(total),
+                        style: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 14),
+                      ),
                     ],
                   ),
                 ),
@@ -1128,69 +1315,75 @@ class _OrderFormState extends State<OrderForm> {
         ],
       ),
 
-      pw.SizedBox(height: 40),
+      pw.SizedBox(height: 30),
 
+      // Signature Section
       pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.start,
         children: [
           pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Container(width: 250, child: pw.Divider(color: PdfColors.black, thickness: 0.5)),
+              pw.Container(width: 250, child: pw.Divider(color: PdfColors.grey600, thickness: 0.5)),
               pw.SizedBox(height: 4),
-              pw.Text(customer?.name ?? 'Cliente', style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
-              pw.Text('Assinatura do Cliente', style: pw.TextStyle(fontSize: 8, color: darkGray)),
+              pw.Text(customer?.name ?? 'Cliente', style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey800)),
+              pw.Text('Assinatura do Cliente', style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.grey500)),
             ],
           ),
         ],
       ),
-      
+
+      // Photos Section
       if (order.photos != null && order.photos!.isNotEmpty) ...[
-        pw.Divider(color: PdfColors.grey300),
-        pw.SizedBox(height: 10),
-        _buildSectionTitle('REGISTRO FOTOGRÁFICO', primaryColor),
+        pw.SizedBox(height: 20),
+        pw.Divider(color: borderColor),
+        pw.SizedBox(height: 12),
+        _buildSectionHeader('REGISTRO FOTOGRAFICO', '${order.photos!.length} fotos', primaryColor, baseFont, boldFont),
         pw.SizedBox(height: 10),
         _printPhotos(order, photoImages),
       ],
     ];
   }
 
-  pw.Widget _buildSectionTitle(String title, PdfColor color) {
-    return pw.Text(
-      title,
-      style: pw.TextStyle(
-        color: color,
-        fontSize: 10,
-        fontWeight: pw.FontWeight.bold,
-        letterSpacing: 0.5,
-      ),
-    );
-  }
-
-  pw.Widget _buildDetailItem(String label, String value) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
+  pw.Widget _buildSectionHeader(String title, String subtitle, PdfColor color, pw.Font baseFont, pw.Font boldFont) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        pw.Text(label, style: pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
-        pw.Text(value, style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+        pw.Text(
+          title,
+          style: pw.TextStyle(
+            font: boldFont,
+            color: color,
+            fontSize: 10,
+            letterSpacing: 0.5,
+          ),
+        ),
+        pw.Text(
+          subtitle,
+          style: pw.TextStyle(
+            font: baseFont,
+            color: PdfColors.grey500,
+            fontSize: 8,
+          ),
+        ),
       ],
     );
   }
 
-  pw.Widget _buildSummaryRow(String label, double value, {bool isBold = false, PdfColor? color}) {
+  pw.Widget _buildSummaryRow(String label, double value, pw.Font baseFont, pw.Font boldFont, {bool isBold = false, PdfColor? color}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 2),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(label, style: pw.TextStyle(fontSize: 10, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal)),
-          pw.Text(_convertToCurrency(value), style: pw.TextStyle(fontSize: 10, fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal, color: color)),
+          pw.Text(label, style: pw.TextStyle(font: isBold ? boldFont : baseFont, fontSize: 10)),
+          pw.Text(_convertToCurrency(value), style: pw.TextStyle(font: isBold ? boldFont : baseFont, fontSize: 10, color: color)),
         ],
       ),
     );
   }
   
-  pw.Widget _printProduct(Order order) {
+  pw.Widget _printProduct(Order order, pw.Font baseFont, pw.Font boldFont) {
   return pw.Table(
     border: pw.TableBorder(
       bottom: const pw.BorderSide(color: PdfColors.grey300, width: 0.5),
@@ -1206,19 +1399,19 @@ class _OrderFormState extends State<OrderForm> {
       pw.TableRow(
         decoration: pw.BoxDecoration(color: PdfColor.fromHex('#F5F5F5')),
         children: [
-          _modernTableHeader('QTD'),
-          _modernTableHeader('DESCRIÇÃO'),
-          _modernTableHeader('UNIT.', alignRight: true),
-          _modernTableHeader('TOTAL', alignRight: true),
+          _modernTableHeader('QTD', boldFont),
+          _modernTableHeader('DESCRICAO', boldFont),
+          _modernTableHeader('UNIT.', boldFont, alignRight: true),
+          _modernTableHeader('TOTAL', boldFont, alignRight: true),
         ],
       ),
       ...order.products!.map((p) {
         return pw.TableRow(
           children: [
-            _modernTableCell(p.quantity.toString(), alignCenter: true),
-            _modernTableCell("${p.product?.name} ${p.description != null ? '- ${p.description}' : ''}"),
-            _modernTableCell(_convertToCurrency(p.value), alignRight: true),
-            _modernTableCell(_convertToCurrency(p.total), alignRight: true),
+            _modernTableCell(p.quantity.toString(), baseFont, alignCenter: true),
+            _modernTableCell("${p.product?.name} ${p.description != null ? '- ${p.description}' : ''}", baseFont),
+            _modernTableCell(_convertToCurrency(p.value), baseFont, alignRight: true),
+            _modernTableCell(_convertToCurrency(p.total), baseFont, alignRight: true),
           ],
         );
       }).toList(),
@@ -1226,7 +1419,7 @@ class _OrderFormState extends State<OrderForm> {
   );
 }
 
-pw.Widget _printServices(Order order) {
+pw.Widget _printServices(Order order, pw.Font baseFont, pw.Font boldFont) {
   return pw.Table(
     border: pw.TableBorder(
       bottom: const pw.BorderSide(color: PdfColors.grey300, width: 0.5),
@@ -1240,15 +1433,15 @@ pw.Widget _printServices(Order order) {
       pw.TableRow(
         decoration: pw.BoxDecoration(color: PdfColor.fromHex('#F5F5F5')),
         children: [
-          _modernTableHeader('DESCRIÇÃO DO SERVIÇO'),
-          _modernTableHeader('VALOR', alignRight: true),
+          _modernTableHeader('DESCRICAO DO SERVICO', boldFont),
+          _modernTableHeader('VALOR', boldFont, alignRight: true),
         ],
       ),
       ...order.services!.map((s) {
         return pw.TableRow(
           children: [
-            _modernTableCell("${s.service?.name} ${s.description != null ? '- ${s.description}' : ''}"),
-            _modernTableCell(_convertToCurrency(s.value), alignRight: true),
+            _modernTableCell("${s.service?.name} ${s.description != null ? '- ${s.description}' : ''}", baseFont),
+            _modernTableCell(_convertToCurrency(s.value), baseFont, alignRight: true),
           ],
         );
       }).toList(),
@@ -1256,14 +1449,14 @@ pw.Widget _printServices(Order order) {
   );
 }
 
-pw.Widget _modernTableHeader(String text, {bool alignRight = false}) {
+pw.Widget _modernTableHeader(String text, pw.Font boldFont, {bool alignRight = false}) {
   return pw.Padding(
     padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 8),
     child: pw.Text(
       text,
       textAlign: alignRight ? pw.TextAlign.right : pw.TextAlign.left,
       style: pw.TextStyle(
-        fontWeight: pw.FontWeight.bold,
+        font: boldFont,
         fontSize: 8.0,
         color: PdfColor.fromHex('#616161'),
       ),
@@ -1271,13 +1464,13 @@ pw.Widget _modernTableHeader(String text, {bool alignRight = false}) {
   );
 }
 
-pw.Widget _modernTableCell(String text, {bool alignRight = false, bool alignCenter = false}) {
+pw.Widget _modernTableCell(String text, pw.Font baseFont, {bool alignRight = false, bool alignCenter = false}) {
   return pw.Padding(
     padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 8),
     child: pw.Text(
       text,
       textAlign: alignRight ? pw.TextAlign.right : (alignCenter ? pw.TextAlign.center : pw.TextAlign.left),
-      style: const pw.TextStyle(fontSize: 9.0, color: PdfColors.black),
+      style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: PdfColors.black),
     ),
   );
 }
