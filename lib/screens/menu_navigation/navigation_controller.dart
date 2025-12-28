@@ -1,6 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Theme, Colors; // Keep for fallback/Store
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart'; // Import for reaction
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';

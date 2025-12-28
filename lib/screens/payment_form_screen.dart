@@ -87,7 +87,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
                 // Info card
                 Card(
                   elevation: 0,
-                  color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

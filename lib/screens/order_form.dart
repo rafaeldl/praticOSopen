@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Theme, ScaffoldMessenger, SnackBar, PopupMenuButton, PopupMenuItem, Material, MaterialType, Icons, CircleAvatar, Divider; 
+import 'package:flutter/material.dart' show Colors, ScaffoldMessenger, SnackBar, Material, MaterialType, Divider; 
 // Keeping Material for some specific helpers or if absolutely needed, but main UI is Cupertino.
 // Actually, strict HIG means avoiding Material widgets where possible.
 // I will try to rely purely on Cupertino for the visual tree.
@@ -15,10 +15,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
-import 'package:praticos/screens/modal_menu.dart';
-import 'package:praticos/screens/modal_status.dart';
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
-import 'package:praticos/widgets/cached_image.dart';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;

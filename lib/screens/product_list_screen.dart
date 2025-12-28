@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Theme, Material, MaterialType, Icons, CircleAvatar, Divider, DebugShowCheckedModeBanner, InkWell; 
+import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/mobx/product_store.dart';

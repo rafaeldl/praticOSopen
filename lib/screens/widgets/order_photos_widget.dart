@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Theme, ScaffoldMessenger, SnackBar, Material, Colors, Icons; 
+import 'package:flutter/material.dart' show ScaffoldMessenger, SnackBar; 
 // Keeping Material for ScaffoldMessenger/SnackBar reliance or specific Icons if needed, 
 // but preferring Cupertino.
 
@@ -88,7 +88,7 @@ class OrderPhotosWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: CupertinoColors.systemGrey.withOpacity(0.2),
+                  color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -109,7 +109,7 @@ class OrderPhotosWidget extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: CupertinoColors.black.withOpacity(0.6),
+                color: CupertinoColors.black.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -194,7 +194,7 @@ class OrderPhotosWidget extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(small ? 4 : 6),
         decoration: BoxDecoration(
-          color: CupertinoColors.black.withOpacity(0.5),
+          color: CupertinoColors.black.withValues(alpha: 0.5),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -389,7 +389,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.black,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.black.withOpacity(0.8),
+        backgroundColor: CupertinoColors.black.withValues(alpha: 0.8),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           child: const Icon(CupertinoIcons.back, color: CupertinoColors.white),
