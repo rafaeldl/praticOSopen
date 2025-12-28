@@ -15,13 +15,13 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
-### ios setup
+### ios get_next_build_number
 
 ```sh
-[bundle exec] fastlane ios setup
+[bundle exec] fastlane ios get_next_build_number
 ```
 
-Setup app store connect api key
+Retorna o próximo build number (último do TestFlight + 1)
 
 ### ios beta
 
@@ -29,7 +29,15 @@ Setup app store connect api key
 [bundle exec] fastlane ios beta
 ```
 
-Build and deploy testflight
+Build + upload para TestFlight (sem match)
+
+### ios upload_last
+
+```sh
+[bundle exec] fastlane ios upload_last
+```
+
+Só envia o último .ipa do diretório padrão do Fastlane
 
 ### ios upload
 
@@ -37,15 +45,15 @@ Build and deploy testflight
 [bundle exec] fastlane ios upload
 ```
 
-Upload to testflight
+Upload do IPA gerado pelo Flutter build
 
-### ios toCrashlytics
+### ios screenshots
 
 ```sh
-[bundle exec] fastlane ios toCrashlytics
+[bundle exec] fastlane ios screenshots
 ```
 
-Upload symbols to Crashlytics
+Gera screenshots automaticamente
 
 ----
 

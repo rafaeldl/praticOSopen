@@ -98,4 +98,9 @@ platform :ios do
       skip_waiting_for_build_processing: true
     )
   end
+
+  desc "Gera screenshots automaticamente"
+  lane :screenshots do
+    snapshot
+  end
 end
