@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell, DismissDirection;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
@@ -16,12 +17,20 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   final UserStore _userStore = UserStore();
   Company? _company;
   bool _isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _userStore.findCurrentUser();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -38,32 +47,52 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
       final isAdmin = _isAdmin();
       return CupertinoPageScaffold(
         backgroundColor: CupertinoColors.systemGroupedBackground,
-        child: CustomScrollView(
-          slivers: [
-            CupertinoSliverNavigationBar(
-              largeTitle: const Text('Colaboradores'),
-              trailing: isAdmin
-                  ? CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: const Icon(CupertinoIcons.add),
-                      onPressed: () async {
-                        final result = await Navigator.pushNamed(
-                            context, '/collaborator_form');
-                        if (result == true) {
-                          _loadData();
-                        }
-                      },
-                    )
-                  : null,
-            ),
-            SliverFillRemaining(
-              child: _isLoading
-                  ? const Center(child: CupertinoActivityIndicator())
-                  : _company == null
-                      ? const Center(child: Text('Empresa não encontrada'))
-                      : _buildList(isAdmin),
-            ),
-          ],
+        child: Material(
+          type: MaterialType.transparency,
+          child: CustomScrollView(
+            slivers: [
+              CupertinoSliverNavigationBar(
+                largeTitle: const Text('Colaboradores'),
+                trailing: isAdmin
+                    ? CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        child: const Icon(CupertinoIcons.add),
+                        onPressed: () async {
+                          final result = await Navigator.pushNamed(
+                              context, '/collaborator_form');
+                          if (result == true) {
+                            _loadData();
+                          }
+                        },
+                      )
+                    : null,
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: CupertinoSearchTextField(
+                    controller: _searchController,
+                    placeholder: 'Buscar colaborador',
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value.toLowerCase());
+                    },
+                  ),
+                ),
+              ),
+              if (_isLoading)
+                const SliverFillRemaining(
+                  child: Center(child: CupertinoActivityIndicator()),
+                )
+              else if (_company == null)
+                const SliverFillRemaining(
+                  child: Center(child: Text('Empresa não encontrada')),
+                )
+              else
+                _buildList(isAdmin),
+                
+              const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            ],
+          ),
         ),
       );
     });
@@ -71,56 +100,130 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
 
   Widget _buildList(bool isAdmin) {
     if (_company!.users == null || _company!.users!.isEmpty) {
-      return const Center(child: Text('Nenhum colaborador encontrado'));
+      return const SliverFillRemaining(
+        child: Center(child: Text('Nenhum colaborador encontrado')),
+      );
     }
 
-    return Column(
-      children: [
-        CupertinoListSection.insetGrouped(
-          children: _company!.users!.map((userRole) {
-            return _buildUserRow(userRole, isAdmin);
-          }).toList(),
-        ),
-      ],
+    final filteredList = _searchQuery.isEmpty
+        ? _company!.users!
+        : _company!.users!.where((userRole) {
+            final name = userRole.user?.name?.toLowerCase() ?? '';
+            return name.contains(_searchQuery);
+          }).toList();
+
+    if (filteredList.isEmpty) {
+      return const SliverFillRemaining(
+        child: Center(child: Text('Nenhum resultado encontrado')),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final userRole = filteredList[index];
+          return _buildUserRow(userRole, isAdmin, index == filteredList.length - 1);
+        },
+        childCount: filteredList.length,
+      ),
     );
   }
 
-  Widget _buildUserRow(UserRoleAggr userRole, bool isAdmin) {
-    return CupertinoListTile(
-      leadingSize: 40,
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: const BoxDecoration(
-          color: CupertinoColors.systemGrey5,
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: Text(
-            userRole.user?.name?.substring(0, 1).toUpperCase() ?? 'U',
-            style: const TextStyle(
-              color: CupertinoColors.activeBlue,
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
+  Widget _buildUserRow(UserRoleAggr userRole, bool isAdmin, bool isLast) {
+    Widget content = Container(
+      color: CupertinoColors.systemBackground,
+      child: InkWell(
+        onTap: isAdmin ? () => _showActionSheet(userRole) : null,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      color: CupertinoColors.systemGrey5,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      userRole.user?.name?.substring(0, 1).toUpperCase() ?? 'U',
+                      style: const TextStyle(
+                        color: CupertinoColors.activeBlue,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          userRole.user?.name ?? 'Usuário sem nome',
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: CupertinoColors.label,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          _getRoleLabel(userRole.role),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: CupertinoColors.secondaryLabel,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isAdmin)
+                    const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                ],
+              ),
             ),
-          ),
+            if (!isLast)
+              const Divider(
+                height: 1,
+                indent: 72,
+                color: CupertinoColors.systemGrey5,
+              ),
+          ],
         ),
       ),
-      title: Text(
-        userRole.user?.name ?? 'Usuário sem nome',
-        style: const TextStyle(fontWeight: FontWeight.w500),
+    );
+
+    if (!isAdmin) return content;
+
+    return Dismissible(
+      key: Key(userRole.user!.id!),
+      direction: DismissDirection.horizontal,
+      background: Container(
+        color: CupertinoColors.systemBlue,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20),
+        child: const Icon(CupertinoIcons.pencil, color: Colors.white),
       ),
-      subtitle: Text(
-        _getRoleLabel(userRole.role),
-        style: const TextStyle(color: CupertinoColors.secondaryLabel),
+      secondaryBackground: Container(
+        color: CupertinoColors.systemRed,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(CupertinoIcons.trash, color: Colors.white),
       ),
-      trailing: isAdmin
-          ? CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () => _showActionSheet(userRole),
-              child: const Icon(CupertinoIcons.ellipsis_circle),
-            )
-          : null,
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          _showEditRoleDialog(userRole);
+          return false;
+        } else {
+          _showRemoveConfirmation(userRole);
+          return false; // Wait for dialog confirmation which handles deletion logic
+        }
+      },
+      child: content,
     );
   }
 
