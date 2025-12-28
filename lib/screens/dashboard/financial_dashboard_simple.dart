@@ -4,11 +4,14 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/mobx/company_store.dart';
+import 'package:praticos/models/company.dart';
 import 'package:praticos/global.dart';
 import 'package:provider/provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 
 class FinancialDashboardSimple extends StatefulWidget {
@@ -1701,18 +1704,45 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? orderStore.selectedCustomerInRanking!['name'] ?? 'Cliente'
         : '';
 
-    // Paleta de cores profissional e minimalista
-    const primaryColor = PdfColors.grey800;
-    const accentColor = PdfColors.grey700;
-    const successColor = PdfColors.green800;
-    const warningColor = PdfColors.orange800;
-    const textColor = PdfColors.grey700;
+    // Fetch full company data for logo and contact info
+    Company? company;
+    pw.MemoryImage? logoImage;
+
+    try {
+      if (Global.companyAggr?.id != null) {
+        final companyStore = CompanyStore();
+        company = await companyStore.retrieveCompany(Global.companyAggr!.id);
+
+        // Download logo if available
+        if (company?.logo != null && company!.logo!.isNotEmpty) {
+          try {
+            final response = await http.get(Uri.parse(company.logo!));
+            if (response.statusCode == 200) {
+              logoImage = pw.MemoryImage(response.bodyBytes);
+            }
+          } catch (_) {
+            // Ignore logo loading errors
+          }
+        }
+      }
+    } catch (_) {
+      // Ignore company loading errors
+    }
+
+    // Paleta de cores profissional
+    const primaryColor = PdfColors.blueGrey800;
+    const accentColor = PdfColors.blueGrey700;
+    const successColor = PdfColors.green700;
+    const warningColor = PdfColors.orange700;
+    const textColor = PdfColors.grey800;
+    const lightGrey = PdfColors.grey200;
 
     final baseFont = pw.Font.helvetica();
     final boldFont = pw.Font.helveticaBold();
 
     final totalValue = orderStore.totalRevenue;
     final totalOrders = orderStore.recentOrders.length;
+    final totalCustomers = orderStore.customerRanking.length;
     final avgTicket = totalOrders > 0 ? totalValue / totalOrders : 0.0;
 
     final paidPercentage = totalValue > 0
@@ -1725,47 +1755,121 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     final servicesRanking = _calculateServicesRanking(orderStore);
     final productsRanking = _calculateProductsRanking(orderStore);
 
+    // Build company contact info string
+    List<String> contactParts = [];
+    if (company?.phone != null && company!.phone!.isNotEmpty) {
+      contactParts.add(_latinCharactersOnly(company.phone!));
+    }
+    if (company?.email != null && company!.email!.isNotEmpty) {
+      contactParts.add(_latinCharactersOnly(company.email!));
+    }
+    final contactInfo = contactParts.join(' | ');
+
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(24),
+        margin: const pw.EdgeInsets.all(32),
         header: (context) {
           return pw.Container(
-            padding: const pw.EdgeInsets.only(bottom: 20),
+            padding: const pw.EdgeInsets.only(bottom: 16),
+            decoration: const pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(color: lightGrey, width: 1),
+              ),
+            ),
             child: pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
+                // Logo
+                if (logoImage != null)
+                  pw.Container(
+                    width: 50,
+                    height: 50,
+                    margin: const pw.EdgeInsets.only(right: 16),
+                    child: pw.ClipRRect(
+                      horizontalRadius: 6,
+                      verticalRadius: 6,
+                      child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+                    ),
+                  ),
+                // Company info
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        _latinCharactersOnly(
+                            company?.name ?? Global.companyAggr?.name ?? 'Empresa'),
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 16,
+                          color: primaryColor,
+                        ),
+                      ),
+                      if (contactInfo.isNotEmpty) ...[
+                        pw.SizedBox(height: 2),
+                        pw.Text(
+                          contactInfo,
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 9,
+                            color: PdfColors.grey600,
+                          ),
+                        ),
+                      ],
+                      if (company?.address != null && company!.address!.isNotEmpty) ...[
+                        pw.SizedBox(height: 1),
+                        pw.Text(
+                          _latinCharactersOnly(company.address!),
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 9,
+                            color: PdfColors.grey600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                // Report info
                 pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
                   children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: pw.BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: pw.BorderRadius.circular(4),
+                      ),
+                      child: pw.Text(
+                        'RELATORIO FINANCEIRO',
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 8,
+                          color: PdfColors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    pw.SizedBox(height: 6),
                     pw.Text(
-                      _latinCharactersOnly(
-                          Global.companyAggr?.name ?? 'PraticOS'),
+                      _latinCharactersOnly(periodLabel),
                       style: pw.TextStyle(
                         font: boldFont,
-                        fontSize: 18,
-                        color: primaryColor,
+                        fontSize: 11,
+                        color: accentColor,
                       ),
                     ),
                     pw.SizedBox(height: 2),
                     pw.Text(
-                      'Relatorio Financeiro',
+                      'Gerado em ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
                       style: pw.TextStyle(
                         font: baseFont,
-                        fontSize: 11,
+                        fontSize: 8,
                         color: PdfColors.grey500,
                       ),
                     ),
                   ],
-                ),
-                pw.Text(
-                  _latinCharactersOnly(periodLabel),
-                  style: pw.TextStyle(
-                    font: baseFont,
-                    fontSize: 11,
-                    color: PdfColors.grey600,
-                  ),
                 ),
               ],
             ),
@@ -1773,12 +1877,17 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         },
         footer: (context) {
           return pw.Container(
-            padding: const pw.EdgeInsets.only(top: 16),
+            padding: const pw.EdgeInsets.only(top: 12),
+            decoration: const pw.BoxDecoration(
+              border: pw.Border(
+                top: pw.BorderSide(color: lightGrey, width: 1),
+              ),
+            ),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text(
-                  '${DateFormat('dd/MM/yyyy').format(DateTime.now())}',
+                  'PraticOS - Sistema de Gestao de Ordens de Servico',
                   style: pw.TextStyle(
                     font: baseFont,
                     fontSize: 8,
@@ -1786,7 +1895,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   ),
                 ),
                 pw.Text(
-                  '${context.pageNumber}/${context.pagesCount}',
+                  'Pagina ${context.pageNumber} de ${context.pagesCount}',
                   style: pw.TextStyle(
                     font: baseFont,
                     fontSize: 8,
@@ -1892,22 +2001,66 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   clientOrders, boldFont, baseFont, textColor, accentColor, true));
             }
           } else {
+            // Summary header with stats
             content.add(
               pw.Container(
                 margin: const pw.EdgeInsets.only(bottom: 24),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
-                      'Resumo Financeiro',
-                      style: pw.TextStyle(
-                          font: boldFont, fontSize: 16, color: accentColor),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
+                      children: [
+                        pw.Text(
+                          'Resumo Financeiro',
+                          style: pw.TextStyle(
+                              font: boldFont, fontSize: 16, color: accentColor),
+                        ),
+                        pw.Row(
+                          children: [
+                            pw.Container(
+                              padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: pw.BoxDecoration(
+                                color: PdfColors.grey100,
+                                borderRadius: pw.BorderRadius.circular(4),
+                              ),
+                              child: pw.Text(
+                                '$totalOrders ordens',
+                                style: pw.TextStyle(
+                                  font: boldFont,
+                                  fontSize: 9,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                            pw.SizedBox(width: 8),
+                            pw.Container(
+                              padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: pw.BoxDecoration(
+                                color: PdfColors.grey100,
+                                borderRadius: pw.BorderRadius.circular(4),
+                              ),
+                              child: pw.Text(
+                                '$totalCustomers clientes',
+                                style: pw.TextStyle(
+                                  font: boldFont,
+                                  fontSize: 9,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     pw.SizedBox(height: 16),
+                    // First row: Main KPIs
                     pw.Row(
                       children: [
                         pw.Expanded(
-                          child: _buildPdfKpiBox(
+                          flex: 2,
+                          child: _buildPdfKpiBoxLarge(
                             'Faturamento Total',
                             _convertToCurrency(orderStore.totalRevenue),
                             primaryColor,
@@ -1920,7 +2073,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           child: _buildPdfKpiBox(
                             'Ticket Medio',
                             _convertToCurrency(avgTicket),
-                            PdfColors.purple700,
+                            PdfColors.blueGrey600,
                             boldFont,
                             baseFont,
                           ),
@@ -1928,6 +2081,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       ],
                     ),
                     pw.SizedBox(height: 12),
+                    // Second row: Payment status
                     pw.Row(
                       children: [
                         pw.Expanded(
@@ -1959,29 +2113,53 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             if (orderStore.customerRanking.isNotEmpty) {
               var filteredRanking = List.from(orderStore.customerRanking);
 
+              // Calculate totals for customers
+              double totalCustomerPaid = 0;
+              double totalCustomerUnpaid = 0;
+              double totalCustomerAmount = 0;
+              for (var customer in filteredRanking) {
+                final double t = customer['total'] ?? 0.0;
+                final double u = customer['unpaidTotal'] ?? 0.0;
+                totalCustomerAmount += t;
+                totalCustomerUnpaid += u;
+                totalCustomerPaid += (t - u);
+              }
+
               content.add(
                 pw.Container(
                   margin: const pw.EdgeInsets.only(bottom: 24),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
-                        'Ranking de Clientes',
-                        style: pw.TextStyle(
-                            font: boldFont, fontSize: 16, color: accentColor),
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'Ranking de Clientes',
+                            style: pw.TextStyle(
+                                font: boldFont, fontSize: 14, color: accentColor),
+                          ),
+                          pw.Text(
+                            '${filteredRanking.length} clientes',
+                            style: pw.TextStyle(
+                                font: baseFont, fontSize: 9, color: PdfColors.grey500),
+                          ),
+                        ],
                       ),
                       pw.SizedBox(height: 12),
                       pw.TableHelper.fromTextArray(
                         border: const pw.TableBorder(
                           horizontalInside: pw.BorderSide(
                               color: PdfColors.grey200, width: 0.5),
+                          bottom: pw.BorderSide(
+                              color: PdfColors.grey300, width: 1),
                         ),
                         headerStyle: pw.TextStyle(
                             font: boldFont,
-                            color: PdfColors.grey700,
+                            color: PdfColors.white,
                             fontSize: 9),
                         headerDecoration:
-                            const pw.BoxDecoration(color: PdfColors.grey100),
+                            const pw.BoxDecoration(color: PdfColors.blueGrey700),
                         cellStyle: pw.TextStyle(
                             font: baseFont, color: textColor, fontSize: 9),
                         cellPadding: const pw.EdgeInsets.symmetric(
@@ -2014,6 +2192,52 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           },
                         ),
                       ),
+                      // Totals row
+                      pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                        decoration: const pw.BoxDecoration(
+                          color: PdfColors.grey100,
+                          border: pw.Border(
+                            bottom: pw.BorderSide(color: PdfColors.grey300, width: 1),
+                          ),
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.SizedBox(width: 20),
+                            pw.Expanded(
+                              flex: 3,
+                              child: pw.Text(
+                                'TOTAL',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: textColor),
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalCustomerPaid),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: successColor),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalCustomerUnpaid),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: warningColor),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalCustomerAmount),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: primaryColor),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -2021,31 +2245,51 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             }
 
             if (servicesRanking.isNotEmpty) {
+              // Calculate totals for services
+              int totalServicesQty = 0;
+              double totalServicesAmount = 0;
+              for (var service in servicesRanking) {
+                totalServicesQty += service['quantity'] as int;
+                totalServicesAmount += service['total'] as double;
+              }
+
               content.add(
                 pw.Container(
                   margin: const pw.EdgeInsets.only(bottom: 24),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
-                        'Ranking de Servicos',
-                        style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 14,
-                            color: accentColor),
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'Ranking de Servicos',
+                            style: pw.TextStyle(
+                                font: boldFont,
+                                fontSize: 14,
+                                color: accentColor),
+                          ),
+                          pw.Text(
+                            '${servicesRanking.length} servicos',
+                            style: pw.TextStyle(
+                                font: baseFont, fontSize: 9, color: PdfColors.grey500),
+                          ),
+                        ],
                       ),
                       pw.SizedBox(height: 12),
                       pw.TableHelper.fromTextArray(
                         border: const pw.TableBorder(
                           horizontalInside: pw.BorderSide(
                               color: PdfColors.grey200, width: 0.5),
+                          bottom: pw.BorderSide(
+                              color: PdfColors.grey300, width: 1),
                         ),
                         headerStyle: pw.TextStyle(
                             font: boldFont,
-                            color: PdfColors.grey700,
+                            color: PdfColors.white,
                             fontSize: 9),
                         headerDecoration:
-                            const pw.BoxDecoration(color: PdfColors.grey100),
+                            const pw.BoxDecoration(color: PdfColors.blue700),
                         cellStyle: pw.TextStyle(
                             font: baseFont, color: textColor, fontSize: 9),
                         cellPadding: const pw.EdgeInsets.symmetric(
@@ -2069,6 +2313,44 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           ],
                         ),
                       ),
+                      // Totals row
+                      pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                        decoration: const pw.BoxDecoration(
+                          color: PdfColors.blue50,
+                          border: pw.Border(
+                            bottom: pw.BorderSide(color: PdfColors.blue200, width: 1),
+                          ),
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.SizedBox(width: 20),
+                            pw.Expanded(
+                              flex: 4,
+                              child: pw.Text(
+                                'TOTAL',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.blue800),
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 1,
+                              child: pw.Text(
+                                '$totalServicesQty',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.blue800),
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalServicesAmount),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.blue800),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -2076,31 +2358,51 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             }
 
             if (productsRanking.isNotEmpty) {
+              // Calculate totals for products
+              int totalProductsQty = 0;
+              double totalProductsAmount = 0;
+              for (var product in productsRanking) {
+                totalProductsQty += product['quantity'] as int;
+                totalProductsAmount += product['total'] as double;
+              }
+
               content.add(
                 pw.Container(
                   margin: const pw.EdgeInsets.only(bottom: 24),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
-                        'Ranking de Produtos',
-                        style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 14,
-                            color: accentColor),
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'Ranking de Produtos',
+                            style: pw.TextStyle(
+                                font: boldFont,
+                                fontSize: 14,
+                                color: accentColor),
+                          ),
+                          pw.Text(
+                            '${productsRanking.length} produtos',
+                            style: pw.TextStyle(
+                                font: baseFont, fontSize: 9, color: PdfColors.grey500),
+                          ),
+                        ],
                       ),
                       pw.SizedBox(height: 12),
                       pw.TableHelper.fromTextArray(
                         border: const pw.TableBorder(
                           horizontalInside: pw.BorderSide(
                               color: PdfColors.grey200, width: 0.5),
+                          bottom: pw.BorderSide(
+                              color: PdfColors.grey300, width: 1),
                         ),
                         headerStyle: pw.TextStyle(
                             font: boldFont,
-                            color: PdfColors.grey700,
+                            color: PdfColors.white,
                             fontSize: 9),
                         headerDecoration:
-                            const pw.BoxDecoration(color: PdfColors.grey100),
+                            const pw.BoxDecoration(color: PdfColors.purple700),
                         cellStyle: pw.TextStyle(
                             font: baseFont, color: textColor, fontSize: 9),
                         cellPadding: const pw.EdgeInsets.symmetric(
@@ -2121,6 +2423,44 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                             '${productsRanking[index]['quantity']}',
                             _convertToCurrency(
                                 productsRanking[index]['total'] as double),
+                          ],
+                        ),
+                      ),
+                      // Totals row
+                      pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                        decoration: const pw.BoxDecoration(
+                          color: PdfColors.purple50,
+                          border: pw.Border(
+                            bottom: pw.BorderSide(color: PdfColors.purple200, width: 1),
+                          ),
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.SizedBox(width: 20),
+                            pw.Expanded(
+                              flex: 4,
+                              child: pw.Text(
+                                'TOTAL',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.purple800),
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 1,
+                              child: pw.Text(
+                                '$totalProductsQty',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.purple800),
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalProductsAmount),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.purple800),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -2162,7 +2502,8 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: pw.BoxDecoration(
         color: PdfColors.grey50,
-        borderRadius: pw.BorderRadius.circular(4),
+        borderRadius: pw.BorderRadius.circular(6),
+        border: pw.Border.all(color: PdfColors.grey200, width: 0.5),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -2189,7 +2530,46 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
           pw.Text(
             value,
             style: pw.TextStyle(
-                font: boldFont, fontSize: 18, color: PdfColors.grey800),
+                font: boldFont, fontSize: 16, color: PdfColors.grey800),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildPdfKpiBoxLarge(
+    String title,
+    String value,
+    PdfColor color,
+    pw.Font boldFont,
+    pw.Font baseFont,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      decoration: pw.BoxDecoration(
+        color: color,
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            title.toUpperCase(),
+            style: pw.TextStyle(
+              font: boldFont,
+              fontSize: 9,
+              color: PdfColors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              font: boldFont,
+              fontSize: 24,
+              color: PdfColors.white,
+            ),
           ),
         ],
       ),
@@ -2204,6 +2584,19 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     PdfColor accentColor,
     bool isClientReport,
   ) {
+    // Calculate totals
+    double totalAmount = 0;
+    int paidCount = 0;
+    int pendingCount = 0;
+    for (var order in orders) {
+      totalAmount += (order?.total ?? 0.0) as double;
+      if (order?.payment == 'paid') {
+        paidCount++;
+      } else {
+        pendingCount++;
+      }
+    }
+
     final tableData = List<List<String>>.generate(
       orders.length,
       (index) {
@@ -2239,21 +2632,54 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(
-            'Ordens de Servico',
-            style:
-                pw.TextStyle(font: boldFont, fontSize: 14, color: accentColor),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                'Ordens de Servico',
+                style:
+                    pw.TextStyle(font: boldFont, fontSize: 14, color: accentColor),
+              ),
+              pw.Row(
+                children: [
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.green100,
+                      borderRadius: pw.BorderRadius.circular(3),
+                    ),
+                    child: pw.Text(
+                      '$paidCount pagos',
+                      style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.green800),
+                    ),
+                  ),
+                  pw.SizedBox(width: 6),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.orange100,
+                      borderRadius: pw.BorderRadius.circular(3),
+                    ),
+                    child: pw.Text(
+                      '$pendingCount pendentes',
+                      style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.orange800),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           pw.SizedBox(height: 12),
           pw.TableHelper.fromTextArray(
             border: const pw.TableBorder(
               horizontalInside:
                   pw.BorderSide(color: PdfColors.grey200, width: 0.5),
+              bottom: pw.BorderSide(color: PdfColors.grey300, width: 1),
             ),
             headerStyle: pw.TextStyle(
-                font: boldFont, color: PdfColors.grey700, fontSize: 9),
+                font: boldFont, color: PdfColors.white, fontSize: 9),
             headerDecoration:
-                const pw.BoxDecoration(color: PdfColors.grey100),
+                const pw.BoxDecoration(color: PdfColors.blueGrey600),
             cellStyle:
                 pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
             cellPadding:
@@ -2284,6 +2710,36 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 ? ['OS', 'Data', 'Veiculo', 'Valor', 'Status']
                 : ['OS', 'Cliente', 'Data', 'Valor', 'Status'],
             data: tableData,
+          ),
+          // Totals row
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            decoration: const pw.BoxDecoration(
+              color: PdfColors.grey100,
+              border: pw.Border(
+                bottom: pw.BorderSide(color: PdfColors.grey300, width: 1),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 5,
+                  child: pw.Text(
+                    'TOTAL (${orders.length} ordens)',
+                    style: pw.TextStyle(font: boldFont, fontSize: 9, color: textColor),
+                  ),
+                ),
+                pw.Expanded(
+                  flex: 2,
+                  child: pw.Text(
+                    _convertToCurrency(totalAmount),
+                    style: pw.TextStyle(font: boldFont, fontSize: 9, color: accentColor),
+                    textAlign: pw.TextAlign.right,
+                  ),
+                ),
+                pw.SizedBox(width: 50),
+              ],
+            ),
           ),
         ],
       ),
