@@ -2,6 +2,8 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/widgets/grouped_row.dart';
+import 'package:praticos/widgets/grouped_section.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -72,144 +74,136 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    // iOS grouped background color approximation
+    final backgroundColor = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(_isEditing ? 'Editar Serviço' : 'Novo Serviço'),
         elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header icon
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: _buildHeaderImage(theme),
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Service name (read-only)
-                _buildServiceNameField(theme),
-                const SizedBox(height: 16),
-
-                // Description field
-                _buildDescriptionField(theme),
-                const SizedBox(height: 16),
-
-                // Value field
-                _buildValueField(theme),
-                const SizedBox(height: 32),
-
-                // Save button
-                FilledButton.icon(
-                  onPressed: _isLoading ? null : _saveService,
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check),
-                  label: Text(_isLoading ? 'Salvando...' : 'Salvar'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ],
+        backgroundColor: backgroundColor,
+        actions: [
+          TextButton(
+            onPressed: _isLoading ? null : _saveService,
+            child: Text(
+              _isLoading ? 'Salvando...' : 'Salvar',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
             ),
           ),
+        ],
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          children: [
+            // Header icon
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: _buildHeaderImage(theme),
+              ),
+            ),
+
+            GroupedSection(
+              children: [
+                _buildServiceNameRow(theme),
+                _buildValueRow(theme),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            GroupedSection(
+              header: const Text('OBSERVAÇÕES'),
+              children: [
+                _buildDescriptionRow(theme),
+              ],
+            ),
+
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );
   }
 
-  InputDecoration _inputDecoration({
-    required String label,
-    required IconData icon,
-    String? hint,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      filled: true,
-    );
-  }
-
-  Widget _buildServiceNameField(ThemeData theme) {
+  Widget _buildServiceNameRow(ThemeData theme) {
     final serviceName = orderServiceIndex == null
         ? _service?.name
         : _orderService.service?.name;
 
-    return TextFormField(
-      enabled: false,
-      initialValue: serviceName,
-      decoration: _inputDecoration(
-        label: 'Serviço',
-        icon: Icons.build_outlined,
-      ),
-      style: TextStyle(
-        color: theme.colorScheme.onSurface,
-        fontWeight: FontWeight.w600,
+    return GroupedRow(
+      label: 'Serviço',
+      child: Text(
+        serviceName ?? '',
+        style: TextStyle(
+          color: theme.colorScheme.onSurface,
+          fontWeight: FontWeight.w500,
+          fontSize: 17,
+        ),
+        textAlign: TextAlign.right,
       ),
     );
   }
 
-  Widget _buildDescriptionField(ThemeData theme) {
-    return TextFormField(
-      initialValue: orderServiceIndex != null ? _orderService.description : null,
-      decoration: _inputDecoration(
-        label: 'Descrição',
-        icon: Icons.description_outlined,
-        hint: 'Detalhes adicionais do serviço',
-      ),
-      textCapitalization: TextCapitalization.sentences,
-      maxLines: 3,
-      onSaved: (String? value) {
-        _orderService.description = value;
-      },
-    );
-  }
-
-  Widget _buildValueField(ThemeData theme) {
+  Widget _buildValueRow(ThemeData theme) {
     final initialValue = orderServiceIndex == null
         ? _convertToCurrency(_service?.value)
         : _convertToCurrency(_orderService.value);
 
-    return TextFormField(
-      initialValue: initialValue,
-      decoration: _inputDecoration(
-        label: 'Valor',
-        icon: Icons.attach_money,
-        hint: 'R\$ 0,00',
-      ),
-      inputFormatters: [
-        CurrencyTextInputFormatter.currency(
-          locale: 'pt_BR',
-          symbol: 'R\$',
-          decimalDigits: 2,
+    return GroupedRow(
+      label: 'Valor',
+      child: TextFormField(
+        initialValue: initialValue,
+        textAlign: TextAlign.right,
+        decoration: const InputDecoration.collapsed(
+          hintText: 'R\$ 0,00',
         ),
-      ],
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Preencha o valor do serviço';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        _orderService.value = numberFormat.parse(value!) as double?;
-      },
+        inputFormatters: [
+          CurrencyTextInputFormatter.currency(
+            locale: 'pt_BR',
+            symbol: 'R\$',
+            decimalDigits: 2,
+          ),
+        ],
+        keyboardType: TextInputType.number,
+        style: TextStyle(
+          color: theme.colorScheme.primary,
+          fontSize: 17,
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Obrigatório';
+          }
+          return null;
+        },
+        onSaved: (String? value) {
+          _orderService.value = numberFormat.parse(value!) as double?;
+        },
+      ),
+    );
+  }
+
+  Widget _buildDescriptionRow(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      constraints: const BoxConstraints(minHeight: 100),
+      child: TextFormField(
+        initialValue: orderServiceIndex != null ? _orderService.description : null,
+        decoration: const InputDecoration.collapsed(
+          hintText: 'Adicione detalhes sobre este serviço...',
+        ),
+        style: const TextStyle(fontSize: 17),
+        textCapitalization: TextCapitalization.sentences,
+        maxLines: 5,
+        minLines: 3,
+        onSaved: (String? value) {
+          _orderService.description = value;
+        },
+      ),
     );
   }
 
@@ -230,19 +224,19 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
       return ClipOval(
         child: CachedImage(
           imageUrl: photoUrl,
-          width: 80,
-          height: 80,
+          width: 100,
+          height: 100,
           fit: BoxFit.cover,
         ),
       );
     }
 
     return CircleAvatar(
-      radius: 40,
-      backgroundColor: theme.colorScheme.primaryContainer,
+      radius: 50,
+      backgroundColor: theme.colorScheme.surface,
       child: Icon(
         Icons.build,
-        size: 40,
+        size: 50,
         color: theme.colorScheme.primary,
       ),
     );

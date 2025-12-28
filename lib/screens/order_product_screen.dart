@@ -2,6 +2,8 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/widgets/grouped_row.dart';
+import 'package:praticos/widgets/grouped_section.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -74,187 +76,179 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    // iOS grouped background color approximation
+    final backgroundColor = isDark ? const Color(0xFF000000) : const Color(0xFFF2F2F7);
 
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(_isEditing ? 'Editar Produto' : 'Novo Produto'),
         elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header icon
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: _buildHeaderImage(theme),
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Product name (read-only)
-                _buildProductNameField(theme),
-                const SizedBox(height: 16),
-
-                // Quantity and Value row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: _buildQuantityField(theme),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 2,
-                      child: _buildValueField(theme),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Description field
-                _buildDescriptionField(theme),
-                const SizedBox(height: 32),
-
-                // Save button
-                FilledButton.icon(
-                  onPressed: _isLoading ? null : _saveProduct,
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check),
-                  label: Text(_isLoading ? 'Salvando...' : 'Salvar'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ],
+        backgroundColor: backgroundColor,
+        actions: [
+          TextButton(
+            onPressed: _isLoading ? null : _saveProduct,
+            child: Text(
+              _isLoading ? 'Salvando...' : 'Salvar',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
             ),
           ),
+        ],
+      ),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          children: [
+            // Header icon
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: _buildHeaderImage(theme),
+              ),
+            ),
+
+            GroupedSection(
+              children: [
+                _buildProductNameRow(theme),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            GroupedSection(
+              children: [
+                _buildQuantityRow(theme),
+                _buildValueRow(theme),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            GroupedSection(
+              header: const Text('OBSERVAÇÕES'),
+              children: [
+                _buildDescriptionRow(theme),
+              ],
+            ),
+
+            const SizedBox(height: 40),
+          ],
         ),
       ),
     );
   }
 
-  InputDecoration _inputDecoration({
-    required String label,
-    required IconData icon,
-    String? hint,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      filled: true,
-    );
-  }
-
-  Widget _buildProductNameField(ThemeData theme) {
+  Widget _buildProductNameRow(ThemeData theme) {
     final productName = orderProductIndex == null
         ? _product?.name
         : _orderProduct.product?.name;
 
-    return TextFormField(
-      enabled: false,
-      initialValue: productName,
-      decoration: _inputDecoration(
-        label: 'Produto',
-        icon: Icons.inventory_2_outlined,
-      ),
-      style: TextStyle(
-        color: theme.colorScheme.onSurface,
-        fontWeight: FontWeight.w600,
+    return GroupedRow(
+      label: 'Produto',
+      child: Text(
+        productName ?? '',
+        style: TextStyle(
+          color: theme.colorScheme.onSurface,
+          fontWeight: FontWeight.w500,
+          fontSize: 17,
+        ),
+        textAlign: TextAlign.right,
       ),
     );
   }
 
-  Widget _buildQuantityField(ThemeData theme) {
+  Widget _buildQuantityRow(ThemeData theme) {
     final initialValue = orderProductIndex != null
         ? _orderProduct.quantity.toString()
         : '1';
 
-    return TextFormField(
-      initialValue: initialValue,
-      decoration: _inputDecoration(
-        label: 'Qtd',
-        icon: Icons.numbers,
-        hint: '1',
+    return GroupedRow(
+      label: 'Quantidade',
+      child: TextFormField(
+        initialValue: initialValue,
+        textAlign: TextAlign.right,
+        decoration: const InputDecoration.collapsed(
+          hintText: '1',
+        ),
+        keyboardType: TextInputType.number,
+        style: TextStyle(
+          color: theme.colorScheme.primary,
+          fontSize: 17,
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Obrigatório';
+          }
+          final qty = int.tryParse(value);
+          if (qty == null || qty <= 0) {
+            return 'Inválido';
+          }
+          return null;
+        },
+        onSaved: (String? value) {
+          _orderProduct.quantity = int.parse(value!);
+        },
       ),
-      keyboardType: TextInputType.number,
-      textAlign: TextAlign.center,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Obrigatório';
-        }
-        final qty = int.tryParse(value);
-        if (qty == null || qty <= 0) {
-          return 'Qtd inválida';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        _orderProduct.quantity = int.parse(value!);
-      },
     );
   }
 
-  Widget _buildValueField(ThemeData theme) {
+  Widget _buildValueRow(ThemeData theme) {
     final initialValue = orderProductIndex == null
         ? _convertToCurrency(_product?.value)
         : _convertToCurrency(_orderProduct.value);
 
-    return TextFormField(
-      initialValue: initialValue,
-      decoration: _inputDecoration(
-        label: 'Valor unitário',
-        icon: Icons.attach_money,
-        hint: 'R\$ 0,00',
-      ),
-      inputFormatters: [
-        CurrencyTextInputFormatter.currency(
-          locale: 'pt_BR',
-          symbol: 'R\$',
-          decimalDigits: 2,
+    return GroupedRow(
+      label: 'Valor Unitário',
+      child: TextFormField(
+        initialValue: initialValue,
+        textAlign: TextAlign.right,
+        decoration: const InputDecoration.collapsed(
+          hintText: 'R\$ 0,00',
         ),
-      ],
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Preencha o valor';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        _orderProduct.value = numberFormat.parse(value!) as double?;
-      },
+        inputFormatters: [
+          CurrencyTextInputFormatter.currency(
+            locale: 'pt_BR',
+            symbol: 'R\$',
+            decimalDigits: 2,
+          ),
+        ],
+        keyboardType: TextInputType.number,
+        style: TextStyle(
+          color: theme.colorScheme.primary,
+          fontSize: 17,
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Obrigatório';
+          }
+          return null;
+        },
+        onSaved: (String? value) {
+          _orderProduct.value = numberFormat.parse(value!) as double?;
+        },
+      ),
     );
   }
 
-  Widget _buildDescriptionField(ThemeData theme) {
-    return TextFormField(
-      initialValue: orderProductIndex != null ? _orderProduct.description : null,
-      decoration: _inputDecoration(
-        label: 'Descrição',
-        icon: Icons.description_outlined,
-        hint: 'Observações sobre o produto',
+  Widget _buildDescriptionRow(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      constraints: const BoxConstraints(minHeight: 100),
+      child: TextFormField(
+        initialValue: orderProductIndex != null ? _orderProduct.description : null,
+        decoration: const InputDecoration.collapsed(
+          hintText: 'Adicione detalhes sobre este item...',
+        ),
+        style: const TextStyle(fontSize: 17),
+        textCapitalization: TextCapitalization.sentences,
+        maxLines: 5,
+        minLines: 3,
+        onSaved: (String? value) {
+          _orderProduct.description = value;
+        },
       ),
-      textCapitalization: TextCapitalization.sentences,
-      maxLines: 3,
-      onSaved: (String? value) {
-        _orderProduct.description = value;
-      },
     );
   }
 
@@ -275,19 +269,19 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
       return ClipOval(
         child: CachedImage(
           imageUrl: photoUrl,
-          width: 80,
-          height: 80,
+          width: 100,
+          height: 100,
           fit: BoxFit.cover,
         ),
       );
     }
 
     return CircleAvatar(
-      radius: 40,
-      backgroundColor: theme.colorScheme.primaryContainer,
+      radius: 50,
+      backgroundColor: theme.colorScheme.surface,
       child: Icon(
         Icons.inventory_2,
-        size: 40,
+        size: 50,
         color: theme.colorScheme.primary,
       ),
     );
