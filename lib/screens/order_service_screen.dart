@@ -1,10 +1,11 @@
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Theme, Icons, Icon, InputDecoration, Colors;
+import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/widgets/cached_image.dart';
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class OrderServiceScreen extends StatefulWidget {
   const OrderServiceScreen({Key? key}) : super(key: key);
@@ -22,12 +23,31 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   bool _isLoading = false;
   bool _initialized = false;
 
+  late final CurrencyTextInputFormatter _currencyFormatter;
+  final TextEditingController _valueController = TextEditingController();
+
   final NumberFormat numberFormat = NumberFormat.currency(
     locale: 'pt-BR',
     symbol: 'R\$',
   );
 
   bool get _isEditing => orderServiceIndex != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _currencyFormatter = CurrencyTextInputFormatter.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+      decimalDigits: 2,
+    );
+  }
+
+  @override
+  void dispose() {
+    _valueController.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -50,6 +70,13 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
           _orderService = _orderStore!.order!.services![orderServiceIndex!];
         }
       }
+
+      // Initialize value controller
+      final initialValue = orderServiceIndex == null
+        ? _service?.value
+        : _orderService.value;
+      _valueController.text = _convertToCurrency(initialValue);
+
       _initialized = true;
     }
   }
@@ -71,145 +98,98 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Editar Serviço' : 'Novo Serviço'),
-        elevation: 0,
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(_isEditing ? 'Editar Serviço' : 'Novo Serviço'),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _isLoading ? null : _saveService,
+          child: _isLoading
+              ? const CupertinoActivityIndicator()
+              : const Text("Salvar", style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header icon
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: _buildHeaderImage(theme),
+      child: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
+
+              // Header icon
+              Center(
+                child: _buildHeaderImage(),
+              ),
+
+              const SizedBox(height: 20),
+
+              CupertinoListSection.insetGrouped(
+                children: [
+                  // Service Name (Read-only)
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Serviço", style: TextStyle(fontSize: 16)),
+                    initialValue: orderServiceIndex == null
+                        ? _service?.name
+                        : _orderService.service?.name,
+                    readOnly: true,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: CupertinoColors.systemGrey.resolveFrom(context),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
 
-                // Service name (read-only)
-                _buildServiceNameField(theme),
-                const SizedBox(height: 16),
-
-                // Description field
-                _buildDescriptionField(theme),
-                const SizedBox(height: 16),
-
-                // Value field
-                _buildValueField(theme),
-                const SizedBox(height: 32),
-
-                // Save button
-                FilledButton.icon(
-                  onPressed: _isLoading ? null : _saveService,
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check),
-                  label: Text(_isLoading ? 'Salvando...' : 'Salvar'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  // Value
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Valor", style: TextStyle(fontSize: 16)),
+                    controller: _valueController,
+                    placeholder: "R\$ 0,00",
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.right,
+                    inputFormatters: [_currencyFormatter],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Obrigatório';
+                      }
+                      return null;
+                    },
+                    onSaved: (String? value) {
+                      if (value != null) {
+                         // Parse currency back to double
+                         final cleanValue = value
+                            .replaceAll(RegExp(r'R\$'), '')
+                            .replaceAll(RegExp(r'\.'), '')
+                            .replaceAll(RegExp(r','), '.')
+                            .trim();
+                        _orderService.value = double.tryParse(cleanValue) ?? 0.0;
+                      }
+                    },
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+
+              CupertinoListSection.insetGrouped(
+                header: const Text('OBSERVAÇÕES'),
+                children: [
+                   CupertinoTextFormFieldRow(
+                    initialValue: orderServiceIndex != null ? _orderService.description : null,
+                    placeholder: "Adicione detalhes sobre este serviço...",
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLines: 4,
+                    minLines: 2,
+                    textAlign: TextAlign.start,
+                    onSaved: (String? value) {
+                      _orderService.description = value;
+                    },
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 40),
+            ],
           ),
         ),
       ),
-    );
-  }
-
-  InputDecoration _inputDecoration({
-    required String label,
-    required IconData icon,
-    String? hint,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      filled: true,
-    );
-  }
-
-  Widget _buildServiceNameField(ThemeData theme) {
-    final serviceName = orderServiceIndex == null
-        ? _service?.name
-        : _orderService.service?.name;
-
-    return TextFormField(
-      enabled: false,
-      initialValue: serviceName,
-      decoration: _inputDecoration(
-        label: 'Serviço',
-        icon: Icons.build_outlined,
-      ),
-      style: TextStyle(
-        color: theme.colorScheme.onSurface,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-
-  Widget _buildDescriptionField(ThemeData theme) {
-    return TextFormField(
-      initialValue: orderServiceIndex != null ? _orderService.description : null,
-      decoration: _inputDecoration(
-        label: 'Descrição',
-        icon: Icons.description_outlined,
-        hint: 'Detalhes adicionais do serviço',
-      ),
-      textCapitalization: TextCapitalization.sentences,
-      maxLines: 3,
-      onSaved: (String? value) {
-        _orderService.description = value;
-      },
-    );
-  }
-
-  Widget _buildValueField(ThemeData theme) {
-    final initialValue = orderServiceIndex == null
-        ? _convertToCurrency(_service?.value)
-        : _convertToCurrency(_orderService.value);
-
-    return TextFormField(
-      initialValue: initialValue,
-      decoration: _inputDecoration(
-        label: 'Valor',
-        icon: Icons.attach_money,
-        hint: 'R\$ 0,00',
-      ),
-      inputFormatters: [
-        CurrencyTextInputFormatter.currency(
-          locale: 'pt_BR',
-          symbol: 'R\$',
-          decimalDigits: 2,
-        ),
-      ],
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Preencha o valor do serviço';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        _orderService.value = numberFormat.parse(value!) as double?;
-      },
     );
   }
 
@@ -218,7 +198,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
     return numberFormat.format(total);
   }
 
-  Widget _buildHeaderImage(ThemeData theme) {
+  Widget _buildHeaderImage() {
     String? photoUrl;
     if (orderServiceIndex != null) {
       photoUrl = _orderService.photo;
@@ -230,21 +210,29 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
       return ClipOval(
         child: CachedImage(
           imageUrl: photoUrl,
-          width: 80,
-          height: 80,
+          width: 100,
+          height: 100,
           fit: BoxFit.cover,
         ),
       );
     }
 
-    return CircleAvatar(
-      radius: 40,
-      backgroundColor: theme.colorScheme.primaryContainer,
-      child: Icon(
-        Icons.build,
-        size: 40,
-        color: theme.colorScheme.primary,
-      ),
+    return Builder(
+      builder: (context) {
+        return Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: CupertinoColors.systemGrey5.resolveFrom(context),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            CupertinoIcons.wrench,
+            size: 50,
+            color: CupertinoColors.systemGrey.resolveFrom(context),
+          ),
+        );
+      }
     );
   }
 }

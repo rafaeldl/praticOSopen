@@ -1,10 +1,11 @@
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Theme, Icons, Icon, InputDecoration, Colors;
+import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/widgets/cached_image.dart';
-import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class OrderProductScreen extends StatefulWidget {
   const OrderProductScreen({Key? key}) : super(key: key);
@@ -22,12 +23,31 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
   bool _isLoading = false;
   bool _initialized = false;
 
+  late final CurrencyTextInputFormatter _currencyFormatter;
+  final TextEditingController _valueController = TextEditingController();
+
   final NumberFormat numberFormat = NumberFormat.currency(
     locale: 'pt-BR',
     symbol: 'R\$',
   );
 
   bool get _isEditing => orderProductIndex != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _currencyFormatter = CurrencyTextInputFormatter.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+      decimalDigits: 2,
+    );
+  }
+
+  @override
+  void dispose() {
+    _valueController.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -50,6 +70,13 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
           _orderProduct = _orderStore!.order!.products![orderProductIndex!];
         }
       }
+
+      // Initialize value controller
+      final initialValue = orderProductIndex == null
+        ? _product?.value
+        : _orderProduct.value;
+      _valueController.text = _convertToCurrency(initialValue);
+
       _initialized = true;
     }
   }
@@ -73,188 +100,122 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Editar Produto' : 'Novo Produto'),
-        elevation: 0,
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(_isEditing ? 'Editar Produto' : 'Novo Produto'),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _isLoading ? null : _saveProduct,
+          child: _isLoading
+              ? const CupertinoActivityIndicator()
+              : const Text("Salvar", style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header icon
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: Center(
-                    child: _buildHeaderImage(theme),
-                  ),
-                ),
-                const SizedBox(height: 8),
+      child: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
 
-                // Product name (read-only)
-                _buildProductNameField(theme),
-                const SizedBox(height: 16),
+              // Header icon
+              Center(
+                child: _buildHeaderImage(),
+              ),
 
-                // Quantity and Value row
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: _buildQuantityField(theme),
+              const SizedBox(height: 20),
+
+              CupertinoListSection.insetGrouped(
+                children: [
+                  // Product Name (Read-only)
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Produto", style: TextStyle(fontSize: 16)),
+                    initialValue: orderProductIndex == null
+                        ? _product?.name
+                        : _orderProduct.product?.name,
+                    readOnly: true,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: CupertinoColors.systemGrey.resolveFrom(context),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 2,
-                      child: _buildValueField(theme),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Description field
-                _buildDescriptionField(theme),
-                const SizedBox(height: 32),
-
-                // Save button
-                FilledButton.icon(
-                  onPressed: _isLoading ? null : _saveProduct,
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check),
-                  label: Text(_isLoading ? 'Salvando...' : 'Salvar'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
-                ),
-              ],
-            ),
+
+                  // Quantity
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Quantidade", style: TextStyle(fontSize: 16)),
+                    initialValue: orderProductIndex != null
+                        ? _orderProduct.quantity.toString()
+                        : '1',
+                    placeholder: "1",
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.right,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Obrigatório';
+                      }
+                      final qty = int.tryParse(value);
+                      if (qty == null || qty <= 0) {
+                        return 'Inválido';
+                      }
+                      return null;
+                    },
+                    onSaved: (String? value) {
+                      _orderProduct.quantity = int.parse(value!);
+                    },
+                  ),
+
+                  // Value
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Valor Unitário", style: TextStyle(fontSize: 16)),
+                    controller: _valueController,
+                    placeholder: "R\$ 0,00",
+                    keyboardType: TextInputType.number,
+                    textAlign: TextAlign.right,
+                    inputFormatters: [_currencyFormatter],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Obrigatório';
+                      }
+                      return null;
+                    },
+                    onSaved: (String? value) {
+                      if (value != null) {
+                         // Parse currency back to double
+                         final cleanValue = value
+                            .replaceAll(RegExp(r'R\$'), '')
+                            .replaceAll(RegExp(r'\.'), '')
+                            .replaceAll(RegExp(r','), '.')
+                            .trim();
+                        _orderProduct.value = double.tryParse(cleanValue) ?? 0.0;
+                      }
+                    },
+                  ),
+                ],
+              ),
+
+              CupertinoListSection.insetGrouped(
+                header: const Text('OBSERVAÇÕES'),
+                children: [
+                   CupertinoTextFormFieldRow(
+                    initialValue: orderProductIndex != null ? _orderProduct.description : null,
+                    placeholder: "Adicione detalhes sobre este item...",
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLines: 4,
+                    minLines: 2,
+                    textAlign: TextAlign.start,
+                    onSaved: (String? value) {
+                      _orderProduct.description = value;
+                    },
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 40),
+            ],
           ),
         ),
       ),
-    );
-  }
-
-  InputDecoration _inputDecoration({
-    required String label,
-    required IconData icon,
-    String? hint,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      filled: true,
-    );
-  }
-
-  Widget _buildProductNameField(ThemeData theme) {
-    final productName = orderProductIndex == null
-        ? _product?.name
-        : _orderProduct.product?.name;
-
-    return TextFormField(
-      enabled: false,
-      initialValue: productName,
-      decoration: _inputDecoration(
-        label: 'Produto',
-        icon: Icons.inventory_2_outlined,
-      ),
-      style: TextStyle(
-        color: theme.colorScheme.onSurface,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-
-  Widget _buildQuantityField(ThemeData theme) {
-    final initialValue = orderProductIndex != null
-        ? _orderProduct.quantity.toString()
-        : '1';
-
-    return TextFormField(
-      initialValue: initialValue,
-      decoration: _inputDecoration(
-        label: 'Qtd',
-        icon: Icons.numbers,
-        hint: '1',
-      ),
-      keyboardType: TextInputType.number,
-      textAlign: TextAlign.center,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Obrigatório';
-        }
-        final qty = int.tryParse(value);
-        if (qty == null || qty <= 0) {
-          return 'Qtd inválida';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        _orderProduct.quantity = int.parse(value!);
-      },
-    );
-  }
-
-  Widget _buildValueField(ThemeData theme) {
-    final initialValue = orderProductIndex == null
-        ? _convertToCurrency(_product?.value)
-        : _convertToCurrency(_orderProduct.value);
-
-    return TextFormField(
-      initialValue: initialValue,
-      decoration: _inputDecoration(
-        label: 'Valor unitário',
-        icon: Icons.attach_money,
-        hint: 'R\$ 0,00',
-      ),
-      inputFormatters: [
-        CurrencyTextInputFormatter.currency(
-          locale: 'pt_BR',
-          symbol: 'R\$',
-          decimalDigits: 2,
-        ),
-      ],
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Preencha o valor';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        _orderProduct.value = numberFormat.parse(value!) as double?;
-      },
-    );
-  }
-
-  Widget _buildDescriptionField(ThemeData theme) {
-    return TextFormField(
-      initialValue: orderProductIndex != null ? _orderProduct.description : null,
-      decoration: _inputDecoration(
-        label: 'Descrição',
-        icon: Icons.description_outlined,
-        hint: 'Observações sobre o produto',
-      ),
-      textCapitalization: TextCapitalization.sentences,
-      maxLines: 3,
-      onSaved: (String? value) {
-        _orderProduct.description = value;
-      },
     );
   }
 
@@ -263,7 +224,7 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
     return numberFormat.format(total);
   }
 
-  Widget _buildHeaderImage(ThemeData theme) {
+  Widget _buildHeaderImage() {
     String? photoUrl;
     if (orderProductIndex != null) {
       photoUrl = _orderProduct.photo;
@@ -275,21 +236,30 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
       return ClipOval(
         child: CachedImage(
           imageUrl: photoUrl,
-          width: 80,
-          height: 80,
+          width: 100,
+          height: 100,
           fit: BoxFit.cover,
         ),
       );
     }
 
-    return CircleAvatar(
-      radius: 40,
-      backgroundColor: theme.colorScheme.primaryContainer,
-      child: Icon(
-        Icons.inventory_2,
-        size: 40,
-        color: theme.colorScheme.primary,
-      ),
+    // Using generic Icon inside Container for consistent look with ProductFormScreen
+    return Builder(
+      builder: (context) {
+        return Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: CupertinoColors.systemGrey5.resolveFrom(context),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.inventory_2, // Material icon is fine, or use CupertinoIcons.cube_box
+            size: 50,
+            color: CupertinoColors.systemGrey.resolveFrom(context),
+          ),
+        );
+      }
     );
   }
 }
