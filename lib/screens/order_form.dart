@@ -443,24 +443,60 @@ class _OrderFormState extends State<OrderForm> {
   }
   
   Widget _buildServiceRow(BuildContext context, dynamic service, int index, bool isLast) {
-    return _buildItemRow(
+    return _buildDismissibleItem(
       context: context,
-      title: service.service?.name ?? "Serviço",
-      subtitle: service.description,
-      trailing: _convertToCurrency(service.value),
-      onTap: () => _editService(index),
-      isLast: isLast,
+      index: index,
+      onDelete: () => _confirmDeleteService(index),
+      child: _buildItemRow(
+        context: context,
+        title: service.service?.name ?? "Serviço",
+        subtitle: service.description,
+        trailing: _convertToCurrency(service.value),
+        onTap: () => _editService(index),
+        isLast: isLast,
+      ),
     );
   }
 
   Widget _buildProductRow(BuildContext context, dynamic product, int index, bool isLast) {
-    return _buildItemRow(
+    return _buildDismissibleItem(
       context: context,
-      title: product.product?.name ?? "Produto",
-      subtitle: "${product.quantity}x • ${product.description ?? ''}",
-      trailing: _convertToCurrency(product.total),
-      onTap: () => _editProduct(index),
-      isLast: isLast,
+      index: index,
+      onDelete: () => _confirmDeleteProduct(index),
+      child: _buildItemRow(
+        context: context,
+        title: product.product?.name ?? "Produto",
+        subtitle: "${product.quantity}x • ${product.description ?? ''}",
+        trailing: _convertToCurrency(product.total),
+        onTap: () => _editProduct(index),
+        isLast: isLast,
+      ),
+    );
+  }
+
+  Widget _buildDismissibleItem({
+    required BuildContext context,
+    required int index,
+    required VoidCallback onDelete,
+    required Widget child,
+  }) {
+    return Dismissible(
+      key: ValueKey('item_$index'),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) async {
+        onDelete();
+        return false; // Don't auto-dismiss, let the confirmation handle it
+      },
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: CupertinoColors.systemRed,
+        child: const Icon(
+          CupertinoIcons.trash,
+          color: CupertinoColors.white,
+        ),
+      ),
+      child: child,
     );
   }
 
@@ -735,6 +771,56 @@ class _OrderFormState extends State<OrderForm> {
         'orderStore': _store,
         'orderProductIndex': index,
       },
+    );
+  }
+
+  void _confirmDeleteService(int index) {
+    final service = _store.services?[index];
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Remover Serviço'),
+        content: Text('Deseja remover "${service?.service?.name ?? 'este serviço'}" da OS?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: const Text('Remover'),
+            onPressed: () {
+              Navigator.pop(context);
+              _store.deleteService(index);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteProduct(int index) {
+    final product = _store.products?[index];
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Remover Produto'),
+        content: Text('Deseja remover "${product?.product?.name ?? 'este produto'}" da OS?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: const Text('Remover'),
+            onPressed: () {
+              Navigator.pop(context);
+              _store.deleteProduct(index);
+            },
+          ),
+        ],
+      ),
     );
   }
 
