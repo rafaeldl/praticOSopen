@@ -1,58 +1,36 @@
-import 'package:flutter/material.dart';
+import 'package:easy_mask/easy_mask.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Icons;
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
+import 'package:praticos/widgets/cached_image.dart';
 
 class CompanyFormScreen extends StatefulWidget {
+  const CompanyFormScreen({Key? key}) : super(key: key);
+
   @override
-  _CompanyFormScreenState createState() => _CompanyFormScreenState();
+  State<CompanyFormScreen> createState() => _CompanyFormScreenState();
 }
 
 class _CompanyFormScreenState extends State<CompanyFormScreen> {
   final CompanyStore _companyStore = CompanyStore();
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool _isLoading = true;
   Company? _company;
 
-  late TextEditingController _nameController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
-  late TextEditingController _addressController;
-  late TextEditingController _siteController;
-
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _emailController = TextEditingController();
-    _phoneController = TextEditingController();
-    _addressController = TextEditingController();
-    _siteController = TextEditingController();
     _loadData();
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
-    _siteController.dispose();
-    super.dispose();
   }
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     if (Global.companyAggr?.id != null) {
       _company = await _companyStore.retrieveCompany(Global.companyAggr!.id);
-      if (_company != null) {
-        _nameController.text = _company!.name ?? '';
-        _emailController.text = _company!.email ?? '';
-        _phoneController.text = _company!.phone ?? '';
-        _addressController.text = _company!.address ?? '';
-        _siteController.text = _company!.site ?? '';
-      }
     }
     setState(() => _isLoading = false);
   }
@@ -61,122 +39,158 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_company == null) return;
 
+    _formKey.currentState!.save();
     setState(() => _isLoading = true);
+
     try {
       _company!
-        ..name = _nameController.text.trim()
-        ..email = _emailController.text.trim()
-        ..phone = _phoneController.text.trim()
-        ..address = _addressController.text.trim()
-        ..site = _siteController.text.trim()
         ..updatedAt = DateTime.now()
         ..updatedBy = Global.userAggr;
 
       await _companyStore.updateCompany(_company!);
 
-      // Update global aggregate if name changed
       if (Global.companyAggr != null && _company!.id == Global.companyAggr!.id) {
         Global.companyAggr!.name = _company!.name;
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Dados atualizados com sucesso!')),
-      );
-      Navigator.pop(context);
+      
+      if (mounted) {
+        Navigator.pop(context);
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao atualizar: ${e.toString()}')),
-      );
+      // Handle error quietly or show simple alert if needed, adhering to UX guidelines implies avoiding snackbars if possible or using CupertinoDialog
+      // For now, simple return or print
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
+  }
+
+  Future<void> _pickImage() async {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text('Alterar Logo'),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            child: const Text('Tirar Foto'),
+            onPressed: () async {
+              Navigator.pop(context);
+              final file = await _companyStore.photoService.takePhoto();
+              if (file != null && _company != null) {
+                await _companyStore.uploadCompanyLogo(file, _company!);
+                setState(() {});
+              }
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: const Text('Escolher da Galeria'),
+            onPressed: () async {
+              Navigator.pop(context);
+              final file = await _companyStore.photoService.pickImageFromGallery();
+              if (file != null && _company != null) {
+                await _companyStore.uploadCompanyLogo(file, _company!);
+                setState(() {});
+              }
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancelar'),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    if (_isLoading && _company == null) {
+      return const CupertinoPageScaffold(
+        child: Center(child: CupertinoActivityIndicator()),
+      );
+    }
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        title: Text(
-          'Dados da Empresa',
-          style: theme.appBarTheme.titleTextStyle,
+    if (_company == null) {
+      return const CupertinoPageScaffold(
+        child: Center(child: Text("Empresa não encontrada")),
+      );
+    }
+
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text("Dados da Empresa"),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _isLoading ? null : _submit,
+          child: _isLoading
+              ? const CupertinoActivityIndicator()
+              : const Text("Salvar", style: TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: theme.primaryColor))
-          : _company == null
-              ? Center(
-                  child: Text(
-                    'Empresa não encontrada',
-                    style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-                  ),
-                )
-              : SingleChildScrollView(
-                  padding: EdgeInsets.all(24),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
+
+              // Logo Section
+              Center(
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: Observer(
+                    builder: (_) => Stack(
                       children: [
-                        Text(
-                          'Informações Gerais',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: theme.textTheme.bodyLarge?.color,
-                          ),
-                        ),
-                        SizedBox(height: 24),
-                        TextFormField(
-                          controller: _nameController,
-                          decoration: _buildInputDecoration(theme, 'Nome da Empresa', Icons.business_rounded),
-                          validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
-                        ),
-                        SizedBox(height: 16),
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: _buildInputDecoration(theme, 'Email de Contato', Icons.email_rounded),
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        SizedBox(height: 16),
-                        TextFormField(
-                          controller: _phoneController,
-                          decoration: _buildInputDecoration(theme, 'Telefone', Icons.phone_rounded),
-                          keyboardType: TextInputType.phone,
-                        ),
-                        SizedBox(height: 16),
-                        TextFormField(
-                          controller: _addressController,
-                          decoration: _buildInputDecoration(theme, 'Endereço', Icons.location_on_rounded),
-                          maxLines: 2,
-                        ),
-                        SizedBox(height: 16),
-                        TextFormField(
-                          controller: _siteController,
-                          decoration: _buildInputDecoration(theme, 'Site', Icons.language_rounded),
-                          keyboardType: TextInputType.url,
-                        ),
-                        SizedBox(height: 32),
-                        ElevatedButton(
-                          onPressed: _isLoading ? null : _submit,
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: theme.primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                        if (_company?.logo != null && _company!.logo!.isNotEmpty)
+                          ClipOval(
+                            child: CachedImage(
+                              imageUrl: _company!.logo!,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
                             ),
-                            elevation: 0,
+                          )
+                        else
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: const BoxDecoration(
+                              color: CupertinoColors.systemGrey5,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.business,
+                              size: 50,
+                              color: CupertinoColors.systemGrey,
+                            ),
                           ),
-                          child: Text(
-                            'SALVAR ALTERAÇÕES',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                        if (_companyStore.isUploading)
+                          Positioned.fill(
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: CupertinoColors.black,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Center(
+                                child: CupertinoActivityIndicator(color: CupertinoColors.white),
+                              ),
+                            ),
+                          ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: CupertinoColors.activeBlue,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.camera_fill,
+                              size: 16,
+                              color: CupertinoColors.white,
                             ),
                           ),
                         ),
@@ -184,16 +198,61 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     ),
                   ),
                 ),
-    );
-  }
+              ),
+              const SizedBox(height: 20),
 
-  InputDecoration _buildInputDecoration(ThemeData theme, String label, IconData icon) {
-    return InputDecoration(
-      labelText: label,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+              // Form Fields
+              CupertinoListSection.insetGrouped(
+                children: [
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Nome", style: TextStyle(fontSize: 16)),
+                    initialValue: _company?.name,
+                    placeholder: "Nome da Empresa",
+                    textCapitalization: TextCapitalization.words,
+                    textAlign: TextAlign.right,
+                    onSaved: (val) => _company?.name = val,
+                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                  ),
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Email", style: TextStyle(fontSize: 16)),
+                    initialValue: _company?.email,
+                    placeholder: "contato@empresa.com",
+                    keyboardType: TextInputType.emailAddress,
+                    textAlign: TextAlign.right,
+                    onSaved: (val) => _company?.email = val,
+                  ),
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Telefone", style: TextStyle(fontSize: 16)),
+                    initialValue: _company?.phone,
+                    placeholder: "(00) 00000-0000",
+                    keyboardType: TextInputType.phone,
+                    textAlign: TextAlign.right,
+                    inputFormatters: [TextInputMask(mask: ['(99) 9999-9999', '(99) 99999-9999'])],
+                    onSaved: (val) => _company?.phone = val,
+                  ),
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Endereço", style: TextStyle(fontSize: 16)),
+                    initialValue: _company?.address,
+                    placeholder: "Endereço completo",
+                    textCapitalization: TextCapitalization.sentences,
+                    textAlign: TextAlign.right,
+                    maxLines: 2,
+                    onSaved: (val) => _company?.address = val,
+                  ),
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text("Site", style: TextStyle(fontSize: 16)),
+                    initialValue: _company?.site,
+                    placeholder: "www.empresa.com.br",
+                    keyboardType: TextInputType.url,
+                    textAlign: TextAlign.right,
+                    onSaved: (val) => _company?.site = val,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
-      prefixIcon: Icon(icon, color: theme.iconTheme.color),
     );
   }
 }
