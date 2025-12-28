@@ -92,6 +92,24 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
               children: [
                 const SizedBox(height: 20),
                 
+                // Header Icon
+                Center(
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: const BoxDecoration(
+                      color: CupertinoColors.systemGrey5,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      CupertinoIcons.person_add_solid,
+                      size: 50,
+                      color: CupertinoColors.systemGrey,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
                 CupertinoListSection.insetGrouped(
                   header: const Text('INFORMAÇÕES DO USUÁRIO'),
                   footer: const Text('O usuário receberá um convite por email.'),
