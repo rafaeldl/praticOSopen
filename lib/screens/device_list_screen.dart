@@ -217,7 +217,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         store.deleteDevice(device);
       },
       child: Container(
-        color: CupertinoColors.systemBackground,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
         child: InkWell(
           onTap: () {
             if (isSelectionMode) {
@@ -272,7 +272,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 Divider(
                   height: 1,
                   indent: 76, // Avatar (48) + Padding (16+12)
-                  color: CupertinoColors.systemGrey5,
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
                 ),
             ],
           ),
@@ -298,7 +298,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: CupertinoColors.systemGrey5,
+        color: CupertinoColors.systemGrey5.resolveFrom(context),
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,

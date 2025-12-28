@@ -212,7 +212,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         customerStore.deleteCustomer(customer);
       },
       child: Container(
-        color: CupertinoColors.systemBackground,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
@@ -241,7 +241,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: CupertinoColors.systemGrey5,
+                          color: CupertinoColors.systemGrey5.resolveFrom(context),
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -288,7 +288,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                   Divider(
                     height: 1,
                     indent: 72, // Avatar (44) + Padding (16+12)
-                    color: CupertinoColors.systemGrey5,
+                    color: CupertinoColors.systemGrey5.resolveFrom(context),
                   ),
               ],
             ),

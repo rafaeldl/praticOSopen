@@ -131,7 +131,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
 
   Widget _buildUserRow(UserRoleAggr userRole, bool isAdmin, bool isLast) {
     Widget content = Container(
-      color: CupertinoColors.systemBackground,
+      color: CupertinoColors.systemBackground.resolveFrom(context),
       child: InkWell(
         onTap: isAdmin ? () => _showActionSheet(userRole) : null,
         child: Column(
@@ -143,8 +143,8 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                   Container(
                     width: 44,
                     height: 44,
-                    decoration: const BoxDecoration(
-                      color: CupertinoColors.systemGrey5,
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemGrey5.resolveFrom(context),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -186,13 +186,12 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                 ],
               ),
             ),
-            if (!isLast)
-              const Divider(
-                height: 1,
-                indent: 72,
-                color: CupertinoColors.systemGrey5,
-              ),
-          ],
+                          if (!isLast)
+                            Divider(
+                              height: 1,
+                              indent: 72,
+                              color: CupertinoColors.systemGrey5.resolveFrom(context),
+                            ),          ],
         ),
       ),
     );

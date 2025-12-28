@@ -220,7 +220,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         customerStore.deleteCustomer(customer);
       },
       child: Container(
-        color: CupertinoColors.systemBackground,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
         child: InkWell(
           onTap: () {
             if (isSelectionMode) {
@@ -244,7 +244,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: CupertinoColors.systemGrey5,
+                        color: CupertinoColors.systemGrey5.resolveFrom(context),
                         shape: BoxShape.circle,
                       ),
                       alignment: Alignment.center,
@@ -291,7 +291,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                 Divider(
                   height: 1,
                   indent: 72, // Avatar (44) + Padding (16+12)
-                  color: CupertinoColors.systemGrey5,
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
                 ),
             ],
           ),
