@@ -1,9 +1,10 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell;
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 import 'package:praticos/mobx/product_store.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/widgets/cached_image.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
 
 class ProductListScreen extends StatefulWidget {
   @override
@@ -13,178 +14,202 @@ class ProductListScreen extends StatefulWidget {
 class _ProductListScreenState extends State<ProductListScreen> {
   ProductStore productStore = ProductStore();
   Map<String, dynamic>? args;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    productStore.retrieveProducts();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    final isSelectionMode = args != null && args!.containsKey('orderStore');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Produtos'),
-        elevation: 0,
-      ),
-      body: Observer(
-        builder: (_) => _buildBody(),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/product_form');
-        },
-        child: const Icon(Icons.add),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          slivers: [
+            CupertinoSliverNavigationBar(
+              largeTitle: const Text('Produtos'),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: const Icon(CupertinoIcons.add),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/product_form').then((_) => productStore.retrieveProducts());
+                },
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: CupertinoSearchTextField(
+                  controller: _searchController,
+                  placeholder: 'Buscar produto',
+                  onChanged: (value) {
+                    setState(() => _searchQuery = value.toLowerCase());
+                  },
+                ),
+              ),
+            ),
+            
+            // List (as Sliver)
+            Observer(
+              builder: (_) => _buildBody(isSelectionMode),
+            ),
+            
+            // Bottom padding
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(bool isSelectionMode) {
     if (productStore.productList == null) {
-      return _buildError();
+      return const SliverFillRemaining(
+        child: Center(child: CupertinoActivityIndicator()),
+      );
     }
 
     if (productStore.productList!.hasError) {
-      return _buildError();
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
+              const SizedBox(height: 16),
+              const Text('Erro ao carregar produtos'),
+              const SizedBox(height: 16),
+              CupertinoButton(
+                child: const Text('Tentar novamente'),
+                onPressed: () => productStore.retrieveProducts(),
+              )
+            ],
+          ),
+        ),
+      );
     }
 
     List<Product>? productList = productStore.productList!.value;
 
     if (productList == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const SliverFillRemaining(
+        child: Center(child: CupertinoActivityIndicator()),
+      );
     }
 
     if (productList.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return _buildProductList(productList);
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Erro ao carregar produtos',
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.tonal(
-            onPressed: () => productStore.retrieveProducts(),
-            child: const Text('Tentar novamente'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.inventory_2_outlined,
-            size: 80,
-            color: Theme.of(context).colorScheme.outline,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhum produto cadastrado',
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Toque no + para adicionar',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProductList(List<Product> list) {
-    final isSelectionMode = args != null && args!.containsKey('orderStore');
-
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 8, bottom: 88),
-      itemCount: list.length,
-      itemBuilder: (context, index) {
-        final product = list[index];
-        return _buildProductCard(product, isSelectionMode);
-      },
-    );
-  }
-
-  Widget _buildProductCard(Product product, bool isSelectionMode) {
-    return Dismissible(
-      key: Key(product.id!),
-      direction: DismissDirection.endToStart,
-      confirmDismiss: (direction) async {
-        return await showDialog<bool>(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Confirmar exclusão'),
-            content: Text('Deseja remover o produto "${product.name}"?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancelar'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Remover'),
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(CupertinoIcons.cube_box, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
+              const SizedBox(height: 16),
+              Text(
+                'Nenhum produto cadastrado',
+                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
               ),
             ],
           ),
-        );
-      },
-      onDismissed: (direction) {
-        productStore.deleteProduct(product);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Produto "${product.name}" removido'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
+        ),
+      );
+    }
+
+    // Filter list based on search query
+    final filteredList = _searchQuery.isEmpty
+        ? productList
+        : productList.where((product) {
+            final name = product.name?.toLowerCase() ?? '';
+            return name.contains(_searchQuery);
+          }).toList();
+
+    if (filteredList.isEmpty) {
+      return const SliverFillRemaining(
+        child: Center(
+          child: Text('Nenhum resultado encontrado'),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          if (index >= filteredList.length) return null;
+          final product = filteredList[index];
+          return _buildProductItem(product, isSelectionMode, index == filteredList.length - 1);
+        },
+        childCount: filteredList.length,
+      ),
+    );
+  }
+
+  Widget _buildProductItem(Product product, bool isSelectionMode, bool isLast) {
+    return Dismissible(
+      key: Key(product.id!),
+      direction: DismissDirection.horizontal,
       background: Container(
+        color: CupertinoColors.systemBlue,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20),
+        child: const Icon(CupertinoIcons.pencil, color: Colors.white),
+      ),
+      secondaryBackground: Container(
+        color: CupertinoColors.systemRed,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
-        color: Theme.of(context).colorScheme.error,
-        child: Icon(
-          Icons.delete_outline,
-          color: Theme.of(context).colorScheme.onError,
-          size: 28,
-        ),
+        child: const Icon(CupertinoIcons.trash, color: Colors.white),
       ),
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: _buildProductAvatar(product),
-          title: Text(
-            product.name ?? '',
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          subtitle: Text(
-            _convertToCurrency(product.value),
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.w500,
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          // Swipe Right -> Edit
+          Navigator.pushNamed(
+            context,
+            '/product_form',
+            arguments: {'product': product},
+          ).then((_) => productStore.retrieveProducts());
+          return false;
+        } else {
+          // Swipe Left -> Delete
+          return await showCupertinoDialog<bool>(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('Confirmar exclusão'),
+              content: Text('Deseja remover o produto "${product.name}"?'),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text('Cancelar'),
+                  onPressed: () => Navigator.pop(context, false),
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  child: const Text('Remover'),
+                  onPressed: () => Navigator.pop(context, true),
+                ),
+              ],
             ),
-          ),
-          trailing: const Icon(Icons.chevron_right),
+          ) ?? false;
+        }
+      },
+      onDismissed: (_) {
+        productStore.deleteProduct(product);
+      },
+      child: Container(
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: InkWell(
           onTap: () {
             if (isSelectionMode) {
               Navigator.pushNamed(context, '/order_product', arguments: {
@@ -196,43 +221,88 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 context,
                 '/product_form',
                 arguments: {'product': product},
-              );
+              ).then((_) => productStore.retrieveProducts());
             }
           },
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  children: [
+                    // Avatar
+                    _buildProductAvatar(product),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.name ?? '',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.label.resolveFrom(context),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _convertToCurrency(product.value),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: CupertinoColors.activeBlue.resolveFrom(context),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
+                  ],
+                ),
+              ),
+              if (!isLast)
+                Divider(
+                  height: 1,
+                  indent: 76, // Avatar (48) + Padding (16+12)
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildProductAvatar(Product product) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final fallback = CircleAvatar(
-      backgroundColor: colorScheme.primaryContainer,
-      child: Icon(
-        Icons.inventory_2_outlined,
-        color: colorScheme.onPrimaryContainer,
-      ),
-    );
-
-    if (product.photo == null || product.photo!.isEmpty) {
-      return fallback;
+    if (product.photo != null && product.photo!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: CachedImage(
+          imageUrl: product.photo!,
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+        ),
+      );
     }
 
-    return ClipOval(
-      child: CachedImage(
-        imageUrl: product.photo!,
-        width: 40,
-        height: 40,
-        fit: BoxFit.cover,
-        errorWidget: fallback,
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGrey5.resolveFrom(context),
+        borderRadius: BorderRadius.circular(8),
       ),
+      alignment: Alignment.center,
+      child: Icon(CupertinoIcons.cube_box, color: CupertinoColors.systemGrey.resolveFrom(context)),
     );
   }
 
   String _convertToCurrency(double? total) {
     if (total == null) return '';
     NumberFormat numberFormat =
-        NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$ ');
+        NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$');
     return numberFormat.format(total);
   }
 }

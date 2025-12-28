@@ -1,7 +1,8 @@
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/theme/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -9,96 +10,258 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  AuthStore _auth = AuthStore();
+  final AuthStore _auth = AuthStore();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Color(0xff3b97d3),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Image(image: AssetImage("assets/images/icon.png"), height: 200.0),
-              SizedBox(height: 60),
-              _buildSocialButton(
-                onPressed: () {
-                  _auth.signInWithGoogle();
-                },
-                text: 'Entrar com Google',
-                color: Colors.white,
-                textColor: Colors.black87,
-                icon: Image(
-                  image: AssetImage("assets/images/google_logo.png"),
-                  height: 24.0,
-                ),
-              ),
-              SizedBox(height: 16),
-              _buildSocialButton(
-                onPressed: () async {
-                  try {
-                    await _auth.signInWithApple();
-                  } catch (e) {
-                    print(e);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Erro ao entrar com Apple: $e'),
-                      ),
-                    );
-                  }
-                },
-                text: 'Entrar com Apple',
-                color: Colors.black,
-                textColor: Colors.white,
-                icon: Icon(FontAwesomeIcons.apple, color: Colors.white, size: 24),
-              ),
-            ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: isDark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: isDark
+            ? AppTheme.backgroundDark
+            : AppTheme.backgroundColor,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                // Espaço flexível superior
+                const Spacer(flex: 2),
+
+                // Logo e título
+                _buildHeader(isDark),
+
+                const Spacer(flex: 3),
+
+                // Botões de login
+                _buildLoginButtons(isDark),
+
+                const SizedBox(height: 32),
+
+                // Termos e privacidade
+                _buildTermsText(isDark),
+
+                SizedBox(height: bottomPadding + 24),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSocialButton({
-    required VoidCallback onPressed,
-    required String text,
-    required Color color,
-    required Color textColor,
-    required Widget icon,
-  }) {
-    return SizedBox(
-      width: 280,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: textColor,
-          elevation: 3,
-          shadowColor: Colors.black.withOpacity(0.3),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+  Widget _buildHeader(bool isDark) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Logo do app
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryColor.withValues(alpha: 0.2),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-          padding: EdgeInsets.zero,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: Image.asset(
+              'assets/images/icon.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Título
+        Text(
+          'Bem-vindo ao PraticOS',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary,
+            letterSpacing: -0.5,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Subtítulo
+        Text(
+          'Gerencie suas ordens de serviço\nde forma simples e eficiente',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w400,
+            color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondary,
+            height: 1.4,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginButtons(bool isDark) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Sign in with Apple (primário seguindo HIG)
+        _buildAppleSignInButton(isDark),
+
+        const SizedBox(height: 12),
+
+        // Sign in with Google
+        _buildGoogleSignInButton(isDark),
+      ],
+    );
+  }
+
+  Widget _buildAppleSignInButton(bool isDark) {
+    // Seguindo Apple HIG: altura mínima 44pt, corner radius configurável
+    return SizedBox(
+      width: double.infinity,
+      height: 50, // 44pt mínimo + padding
+      child: ElevatedButton(
+        onPressed: _isLoading ? null : _handleAppleSignIn,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isDark ? Colors.white : Colors.black,
+          foregroundColor: isDark ? Colors.black : Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            icon,
-            SizedBox(width: 12),
+            Icon(
+              FontAwesomeIcons.apple,
+              size: 20,
+              color: isDark ? Colors.black : Colors.white,
+            ),
+            const SizedBox(width: 12),
             Text(
-              text,
+              'Continuar com Apple',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: textColor,
+                color: isDark ? Colors.black : Colors.white,
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildGoogleSignInButton(bool isDark) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: OutlinedButton(
+        onPressed: _isLoading ? null : _handleGoogleSignIn,
+        style: OutlinedButton.styleFrom(
+          backgroundColor: isDark ? AppTheme.surfaceDark : Colors.white,
+          side: BorderSide(
+            color: isDark ? AppTheme.borderColorDark : AppTheme.borderColor,
+            width: 1,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/google_logo.png',
+              height: 20,
+              width: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Continuar com Google',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTermsText(bool isDark) {
+    return Text(
+      'Ao continuar, você concorda com nossos\nTermos de Uso e Política de Privacidade',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontSize: 13,
+        color: isDark ? AppTheme.textTertiaryDark : AppTheme.textTertiary,
+        height: 1.4,
+      ),
+    );
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    setState(() => _isLoading = true);
+    try {
+      await _auth.signInWithApple();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao entrar com Apple: $e'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isLoading = true);
+    try {
+      await _auth.signInWithGoogle();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao entrar com Google: $e'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 }

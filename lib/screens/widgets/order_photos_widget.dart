@@ -1,4 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show ScaffoldMessenger, SnackBar; 
+// Keeping Material for ScaffoldMessenger/SnackBar reliance or specific Icons if needed, 
+// but preferring Cupertino.
+
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_photo.dart';
@@ -21,22 +25,27 @@ class OrderPhotosWidget extends StatelessWidget {
         if (store.isUploadingPhoto) {
           return Container(
             height: 120,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 8),
-                  Text('Enviando foto...'),
-                ],
-              ),
+            alignment: Alignment.center,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                CupertinoActivityIndicator(),
+                SizedBox(height: 8),
+                Text(
+                  'Enviando foto...',
+                  style: TextStyle(
+                    color: CupertinoColors.secondaryLabel,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
           );
         }
 
         // Don't show anything if no photos
         if (store.photos.isEmpty) {
-          return SizedBox.shrink();
+          return const SizedBox.shrink();
         }
 
         // Show photos grid
@@ -49,18 +58,25 @@ class OrderPhotosWidget extends StatelessWidget {
     return Column(
       children: [
         // Foto de capa (primeira foto)
-        if (store.photos.isNotEmpty) _buildCoverPhoto(context),
-        SizedBox(height: 8),
+        if (store.photos.isNotEmpty) 
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: _buildCoverPhoto(context),
+          ),
+        const SizedBox(height: 8),
         // Grid das outras fotos
-        if (store.photos.length > 1) _buildThumbnailGrid(context),
+        if (store.photos.length > 1) 
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: _buildThumbnailGrid(context),
+          ),
       ],
     );
   }
 
   Widget _buildCoverPhoto(BuildContext context) {
     final OrderPhoto coverPhoto = store.photos.first;
-    final theme = Theme.of(context);
-
+    
     return GestureDetector(
       onTap: () => _showPhotoViewer(context, 0),
       child: Stack(
@@ -70,6 +86,13 @@ class OrderPhotosWidget extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -84,24 +107,24 @@ class OrderPhotosWidget extends StatelessWidget {
             top: 8,
             left: 8,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary,
+                color: CupertinoColors.black.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.photo_library,
-                    color: Colors.white,
+                  const Icon(
+                    CupertinoIcons.photo_on_rectangle,
+                    color: CupertinoColors.white,
                     size: 14,
                   ),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Text(
                     '${store.photos.length}',
-                    style: TextStyle(
-                      color: Colors.white,
+                    style: const TextStyle(
+                      color: CupertinoColors.white,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -111,8 +134,8 @@ class OrderPhotosWidget extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: 8,
-            right: 8,
+            top: 4,
+            right: 4,
             child: _buildPhotoActionButton(context, 0),
           ),
         ],
@@ -125,8 +148,9 @@ class OrderPhotosWidget extends StatelessWidget {
 
     return GridView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 8,
         mainAxisSpacing: 8,
@@ -141,12 +165,14 @@ class OrderPhotosWidget extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              CachedImage(
-                imageUrl: photo.url!,
-                fit: BoxFit.cover,
+              ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                memCacheWidth: 200, // Otimiza para thumbnails
-                // Removido memCacheHeight para manter o aspect ratio
+                child: CachedImage(
+                  imageUrl: photo.url!,
+                  fit: BoxFit.cover,
+                  borderRadius: BorderRadius.circular(8),
+                  memCacheWidth: 200, // Otimiza para thumbnails
+                ),
               ),
               Positioned(
                 top: 4,
@@ -161,89 +187,85 @@ class OrderPhotosWidget extends StatelessWidget {
   }
 
   Widget _buildPhotoActionButton(BuildContext context, int index, {bool small = false}) {
-    return PopupMenuButton<String>(
-      icon: Container(
-        padding: EdgeInsets.all(small ? 2 : 4),
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      minSize: 0,
+      onPressed: () => _showActionSheet(context, index),
+      child: Container(
+        padding: EdgeInsets.all(small ? 4 : 6),
         decoration: BoxDecoration(
-          color: Colors.black54,
+          color: CupertinoColors.black.withValues(alpha: 0.5),
           shape: BoxShape.circle,
         ),
         child: Icon(
-          Icons.more_vert,
-          color: Colors.white,
+          CupertinoIcons.ellipsis,
+          color: CupertinoColors.white,
           size: small ? 16 : 20,
         ),
       ),
-      onSelected: (value) async {
-        if (value == 'delete') {
-          _confirmDeletePhoto(context, index);
-        } else if (value == 'cover') {
-          store.setPhotoCover(index);
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Foto definida como capa')),
-            );
-          }
-        }
-      },
-      itemBuilder: (context) => [
-        if (index > 0)
-          PopupMenuItem(
-            value: 'cover',
-            child: Row(
-              children: [
-                Icon(Icons.star, size: 20),
-                SizedBox(width: 8),
-                Text('Definir como capa'),
-              ],
+    );
+  }
+
+  void _showActionSheet(BuildContext context, int index) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        actions: [
+          if (index > 0)
+            CupertinoActionSheetAction(
+              child: const Text('Definir como Capa'),
+              onPressed: () {
+                Navigator.pop(context);
+                store.setPhotoCover(index);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Foto definida como capa')),
+                );
+              },
             ),
-          ),
-        PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: [
-              Icon(Icons.delete, size: 20, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Excluir', style: TextStyle(color: Colors.red)),
-            ],
-          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          child: const Text('Excluir Foto'),
+          onPressed: () {
+            Navigator.pop(context);
+            _confirmDeletePhoto(context, index);
+          },
         ),
-      ],
+      ),
     );
   }
 
   void _confirmDeletePhoto(BuildContext context, int index) {
-    // Salva o contexto do Scaffold antes de abrir o dialog
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-
-    showDialog(
+    showCupertinoDialog(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: Text('Excluir foto?'),
-          content: Text('Esta ação não pode ser desfeita.'),
+        return CupertinoAlertDialog(
+          title: const Text('Excluir foto?'),
+          content: const Text('Esta ação não pode ser desfeita.'),
           actions: [
-            TextButton(
+            CupertinoDialogAction(
+              child: const Text('Cancelar'),
               onPressed: () => Navigator.pop(dialogContext),
-              child: Text('Cancelar'),
             ),
-            TextButton(
+            CupertinoDialogAction(
+              isDestructiveAction: true,
               onPressed: () async {
                 Navigator.pop(dialogContext);
                 final success = await store.deletePhoto(index);
                 if (context.mounted) {
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
                   if (success) {
                     scaffoldMessenger.showSnackBar(
-                      SnackBar(content: Text('Foto excluída')),
+                      const SnackBar(content: Text('Foto excluída')),
                     );
                   } else {
                     scaffoldMessenger.showSnackBar(
-                      SnackBar(content: Text('Erro ao excluir foto')),
+                      const SnackBar(content: Text('Erro ao excluir foto')),
                     );
                   }
                 }
               },
-              child: Text('Excluir', style: TextStyle(color: Colors.red)),
+              child: const Text('Excluir'),
             ),
           ],
         );
@@ -252,9 +274,8 @@ class OrderPhotosWidget extends StatelessWidget {
   }
 
   void _showPhotoViewer(BuildContext context, int initialIndex) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
+    Navigator.of(context).push(
+      CupertinoPageRoute(
         builder: (context) => PhotoViewerScreen(
           photos: store.photos.toList(),
           initialIndex: initialIndex,
@@ -271,7 +292,7 @@ class OrderPhotosWidget extends StatelessWidget {
   }
 }
 
-/// Tela de visualização de fotos em tela cheia
+/// Tela de visualização de fotos em tela cheia (Cupertino style)
 class PhotoViewerScreen extends StatefulWidget {
   final List<OrderPhoto> photos;
   final int initialIndex;
@@ -337,7 +358,6 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
       await file.writeAsBytes(response.bodyBytes);
 
       // Compartilha
-      // Define uma origem para o popover no iPad/iOS
       final box = context.findRenderObject() as RenderBox?;
       final size = MediaQuery.of(context).size;
 
@@ -366,94 +386,88 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        iconTheme: IconThemeData(color: Colors.white),
-        title: Text(
-          'Foto ${_currentIndex + 1} de ${widget.photos.length}',
-          style: TextStyle(color: Colors.white),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.black,
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.black.withValues(alpha: 0.8),
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.back, color: CupertinoColors.white),
+          onPressed: () => Navigator.pop(context),
         ),
-        actions: [
-          IconButton(
-            icon: _isSharing
-                ? SizedBox(
+        middle: Text(
+          '${_currentIndex + 1} de ${widget.photos.length}',
+          style: const TextStyle(color: CupertinoColors.white),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+             CupertinoButton(
+              padding: EdgeInsets.zero,
+               child: _isSharing
+                ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                    child: CupertinoActivityIndicator(color: CupertinoColors.white)
                   )
-                : Icon(Icons.share),
-            tooltip: 'Compartilhar',
-            onPressed: _sharePhoto,
-          ),
-          if (_currentIndex > 0)
-            IconButton(
-              icon: Icon(Icons.star_border),
-              tooltip: 'Definir como capa',
-              onPressed: () {
-                widget.onSetCover(_currentIndex);
-                Navigator.pop(context);
-                // Usa o contexto do Scaffold pai se disponível
-                if (mounted) {
-                  final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
-                  scaffoldMessenger?.showSnackBar(
-                    SnackBar(content: Text('Foto definida como capa')),
-                  );
-                }
-              },
+                : const Icon(CupertinoIcons.share, color: CupertinoColors.white),
+              onPressed: _sharePhoto,
             ),
-          IconButton(
-            icon: Icon(Icons.delete),
-            tooltip: 'Excluir',
-            onPressed: () => _confirmDelete(),
-          ),
-        ],
+             CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(CupertinoIcons.trash, color: CupertinoColors.white),
+              onPressed: () => _confirmDelete(),
+            ),
+          ],
+        ),
       ),
-      body: PageView.builder(
-        controller: _pageController,
-        itemCount: widget.photos.length,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        itemBuilder: (context, index) {
-          final photo = widget.photos[index];
-          return InteractiveViewer(
-            minScale: 0.5,
-            maxScale: 3.0,
-            child: Center(
-              child: CachedImage.fullScreen(
-                imageUrl: photo.url!,
+      child: SafeArea(
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: widget.photos.length,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            final photo = widget.photos[index];
+            return InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 3.0,
+              child: Center(
+                child: CachedImage.fullScreen(
+                  imageUrl: photo.url!,
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
 
   void _confirmDelete() {
-    showDialog(
+    showCupertinoDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Excluir foto?'),
-          content: Text('Esta ação não pode ser desfeita.'),
+        return CupertinoAlertDialog(
+          title: const Text('Excluir foto?'),
+          content: const Text('Esta ação não pode ser desfeita.'),
           actions: [
-            TextButton(
+            CupertinoDialogAction(
+              child: const Text('Cancelar'),
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancelar'),
             ),
-            TextButton(
+            CupertinoDialogAction(
+              isDestructiveAction: true,
               onPressed: () async {
-                Navigator.pop(context);
+                Navigator.pop(context); // Close dialog
                 final success = await widget.onDelete(_currentIndex);
                 if (mounted) {
                   if (success) {
                     if (widget.photos.length <= 1) {
-                      Navigator.pop(context);
+                      Navigator.pop(context); // Close viewer if no photos left
                     } else {
                       setState(() {
                         if (_currentIndex >= widget.photos.length - 1) {
@@ -462,19 +476,11 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
                         }
                       });
                     }
-                    final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
-                    scaffoldMessenger?.showSnackBar(
-                      SnackBar(content: Text('Foto excluída')),
-                    );
-                  } else {
-                    final scaffoldMessenger = ScaffoldMessenger.maybeOf(context);
-                    scaffoldMessenger?.showSnackBar(
-                      SnackBar(content: Text('Erro ao excluir foto')),
-                    );
-                  }
+                    // Optional: Provide feedback?
+                  } 
                 }
               },
-              child: Text('Excluir', style: TextStyle(color: Colors.red)),
+              child: const Text('Excluir'),
             ),
           ],
         );

@@ -1,11 +1,14 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:praticos/mobx/order_store.dart';
-import 'package:praticos/models/order.dart';
-import 'package:praticos/theme/app_theme.dart';
-import 'package:praticos/widgets/cached_image.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType, Divider, InkWell;
+// Keeping Material for specific color references if needed, but UI tree will be Cupertino.
+
+import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
+import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/order.dart';
+import 'package:praticos/widgets/cached_image.dart';
 import 'package:provider/provider.dart';
 
 import '../../global.dart';
@@ -19,19 +22,17 @@ class _HomeState extends State<Home> {
   int currentSelected = 0;
   final ScrollController _scrollController = ScrollController();
   late OrderStore orderStore;
-  bool _showFilters = true;
-  double _lastOffset = 0;
 
-  List filters = [
-    {'status': 'Todos', 'icon': Icons.apps_rounded, 'field': null},
-    {'status': 'Entrega', 'field': 'due_date', 'icon': Icons.schedule_rounded},
-    {'status': 'Aprovados', 'field': 'approved', 'icon': Icons.thumb_up_alt_rounded},
-    {'status': 'Andamento', 'field': 'progress', 'icon': Icons.sync_rounded},
-    {'status': 'Orçamentos', 'field': 'quote', 'icon': Icons.description_rounded},
-    {'status': 'Concluídos', 'field': 'done', 'icon': Icons.check_circle_rounded},
-    {'status': 'Cancelados', 'field': 'canceled', 'icon': Icons.cancel_rounded},
-    {'status': 'A receber', 'field': 'unpaid', 'icon': Icons.payments_outlined},
-    {'status': 'Pago', 'field': 'paid', 'icon': Icons.paid_rounded},
+  static const List<Map<String, dynamic>> filters = [
+    {'status': 'Todos', 'icon': CupertinoIcons.square_grid_2x2, 'field': null},
+    {'status': 'Entrega', 'field': 'due_date', 'icon': CupertinoIcons.clock},
+    {'status': 'Aprovados', 'field': 'approved', 'icon': CupertinoIcons.hand_thumbsup},
+    {'status': 'Andamento', 'field': 'progress', 'icon': CupertinoIcons.arrow_2_circlepath},
+    {'status': 'Orçamentos', 'field': 'quote', 'icon': CupertinoIcons.doc_text},
+    {'status': 'Concluídos', 'field': 'done', 'icon': CupertinoIcons.check_mark_circled},
+    {'status': 'Cancelados', 'field': 'canceled', 'icon': CupertinoIcons.xmark_circle},
+    {'status': 'A receber', 'field': 'unpaid', 'icon': CupertinoIcons.money_dollar},
+    {'status': 'Pago', 'field': 'paid', 'icon': CupertinoIcons.money_dollar_circle},
   ];
 
   @override
@@ -55,19 +56,14 @@ class _HomeState extends State<Home> {
   }
 
   void _loadOrders() {
-    // Salvar a posição atual do scroll
     final currentOffset = _scrollController.hasClients ? _scrollController.offset : 0.0;
-
     orderStore.loadOrdersInfinite(filters[currentSelected]['field']).then((_) {
-      // Após o carregamento, ajustar o scroll para uma posição válida
       if (_scrollController.hasClients) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
-            // Se a posição anterior ainda for válida, tentar restaurá-la
             if (_scrollController.position.maxScrollExtent >= currentOffset && currentOffset > 0) {
               _scrollController.jumpTo(currentOffset);
             } else {
-              // Caso contrário, resetar para o topo
               _scrollController.jumpTo(0);
             }
           }
@@ -84,16 +80,7 @@ class _HomeState extends State<Home> {
 
   void _scrollListener() {
     final offset = _scrollController.offset;
-
-    // Detectar direção do scroll
-    if (offset > _lastOffset && offset > 50) {
-      if (_showFilters) setState(() => _showFilters = false);
-    } else if (offset < _lastOffset) {
-      if (!_showFilters) setState(() => _showFilters = true);
-    }
-    _lastOffset = offset;
-
-    // Carregar mais itens
+    // Simple logic to just load more
     if (offset >= _scrollController.position.maxScrollExtent - 100) {
       _loadMoreOrders();
     }
@@ -107,394 +94,368 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    FirebaseCrashlytics.instance.log("Abrindo home");
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        title: Text(
-          'Ordens de Serviço',
-          style: theme.appBarTheme.titleTextStyle,
+    FirebaseCrashlytics.instance.log("Abrindo home (Cupertino)");
+    // Ensuring default text style is available
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            _buildNavigationBar(context),
+            _buildActiveFilterHeader(),
+            _buildOrdersList(),
+            SliverToBoxAdapter(
+               child: Observer(builder: (_) {
+                 if (orderStore.isLoading && orderStore.orders.isNotEmpty) {
+                   return const Padding(
+                     padding: EdgeInsets.all(16.0),
+                     child: Center(child: CupertinoActivityIndicator()),
+                   );
+                 }
+                 return const SizedBox(height: 100); // Bottom padding to clear TabBar
+               }),
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.bar_chart_rounded, color: theme.iconTheme.color, size: 26),
+      ),
+    );
+  }
+
+  Widget _buildNavigationBar(BuildContext context) {
+    return CupertinoSliverNavigationBar(
+      largeTitle: const Text('Ordens de Serviço'),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            child: Icon(
+              currentSelected == 0 
+                  ? CupertinoIcons.line_horizontal_3_decrease_circle 
+                  : CupertinoIcons.line_horizontal_3_decrease_circle_fill,
+            ),
+            onPressed: () => _showFilterOptions(context),
+          ),
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            child: const Icon(CupertinoIcons.chart_bar_alt_fill),
             onPressed: () => Navigator.pushNamed(context, '/financial_dashboard_simple'),
           ),
-          Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: IconButton(
-              icon: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.primaryColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(Icons.add_rounded, color: Colors.white, size: 22),
-              ),
-              onPressed: () {
-                Navigator.pushNamed(context, '/order').then((_) => _loadOrders());
-              },
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Filtros animados
-          AnimatedContainer(
-            duration: Duration(milliseconds: 200),
-            height: _showFilters ? 48 : 0,
-            child: AnimatedOpacity(
-              duration: Duration(milliseconds: 150),
-              opacity: _showFilters ? 1 : 0,
-              child: _buildFilterBar(theme),
-            ),
-          ),
-          // Divisor sutil
-          Container(height: 1, color: theme.colorScheme.outlineVariant),
-          // Lista
-          Expanded(child: _buildOrdersList(theme)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterBar(ThemeData theme) {
-    return Container(
-      height: 48,
-      color: theme.cardColor,
-      child: Observer(
-        builder: (_) {
-          return ListView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            scrollDirection: Axis.horizontal,
-            itemCount: filters.length + (orderStore.customerFilter != null ? 1 : 0),
-            itemBuilder: (context, index) {
-              if (orderStore.customerFilter != null) {
-                if (index == 0) return _buildCustomerChip(theme);
-                return _buildFilterChip(index - 1, theme);
-              }
-              return _buildFilterChip(index, theme);
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            child: const Icon(CupertinoIcons.add),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.of(context, rootNavigator: true).pushNamed('/order').then((_) => _loadOrders());
             },
-          );
-        },
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCustomerChip(ThemeData theme) {
-    return GestureDetector(
-      onTap: () {
-        orderStore.setCustomerFilter(null);
-        _loadOrders();
-      },
-      child: Container(
-        margin: EdgeInsets.only(right: 8),
-        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: theme.primaryColor,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.person_rounded, size: 16, color: Colors.white),
-            SizedBox(width: 6),
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 80),
-              child: Text(
-                orderStore.customerFilter?.name ?? '',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.white),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            SizedBox(width: 4),
-            Icon(Icons.close, size: 16, color: Colors.white70),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(int index, ThemeData theme) {
-    final isSelected = currentSelected == index;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() => currentSelected = index);
-        orderStore.loadOrdersInfinite(filters[index]['field']);
-      },
-      child: Container(
-        margin: EdgeInsets.only(right: 8),
-        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? theme.primaryColor : theme.scaffoldBackgroundColor,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              filters[index]['icon'],
-              size: 16,
-              color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
-            ),
-            SizedBox(width: 6),
-            Text(
-              filters[index]['status'],
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : theme.textTheme.bodyMedium?.color,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOrdersList(ThemeData theme) {
-    return Observer(
-      builder: (_) {
-        if (orderStore.isLoading && orderStore.orders.isEmpty) {
-          return Center(child: CircularProgressIndicator(strokeWidth: 2));
-        }
-
-        if (orderStore.orders.isEmpty) {
-          return Center(
-            child: Column(
+  void _showFilterOptions(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: const Text('Filtrar por Status'),
+        actions: filters.asMap().entries.map((entry) {
+          final index = entry.key;
+          final filter = entry.value;
+          final isSelected = currentSelected == index;
+          
+          return CupertinoActionSheetAction(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.assignment_outlined, size: 56, color: theme.disabledColor),
-                SizedBox(height: 16),
+                if (isSelected) ...[
+                  const Icon(CupertinoIcons.checkmark, size: 16),
+                  const SizedBox(width: 8),
+                ],
                 Text(
-                  'Nenhuma OS encontrada',
-                  style: TextStyle(fontSize: 16, color: theme.textTheme.bodyMedium?.color),
+                  filter['status'] as String,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
                 ),
               ],
             ),
+            onPressed: () {
+              Navigator.pop(context);
+              if (currentSelected != index) {
+                HapticFeedback.selectionClick();
+                setState(() => currentSelected = index);
+                orderStore.loadOrdersInfinite(filters[index]['field']);
+              }
+            },
           );
-        }
-
-        // Verificar se o scroll está em uma posição válida
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollController.hasClients &&
-              _scrollController.offset > _scrollController.position.maxScrollExtent) {
-            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
-          }
-        });
-
-        return ListView.builder(
-          controller: _scrollController,
-          padding: EdgeInsets.zero,
-          physics: AlwaysScrollableScrollPhysics(),
-          itemCount: orderStore.orders.length + (orderStore.isLoading ? 1 : 0),
-          itemBuilder: (context, index) {
-            if (index == orderStore.orders.length) {
-              return Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20),
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              );
-            }
-            return _buildOrderItem(orderStore.orders[index] ?? Order(), index, theme);
-          },
-        );
-      },
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancelar'),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
     );
   }
 
-  Widget _buildOrderItem(Order order, int index, ThemeData theme) {
-    final statusText = Order.statusMap[order.status] ?? '';
-    final statusColor = AppTheme.getStatusColor(order.status);
-    final isPaid = order.payment == 'paid';
-
-    // Mostrar ícone de pagamento sempre que a OS foi paga, independente do status
-    final showPaymentIcon = isPaid;
-
-    // Mostrar ícone "a receber" quando status for concluído e financeiro em aberto
-    final showUnpaidIcon = order.status == 'done' && order.payment == 'unpaid';
-
-    // Verificar atraso
-    bool isOverdue = false;
-    if (order.dueDate != null) {
-      final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-      final dueDate = DateTime(order.dueDate!.year, order.dueDate!.month, order.dueDate!.day);
-      isOverdue = dueDate.isBefore(today) && order.status != 'done' && order.status != 'canceled';
-    }
-
-    // Descrição do veículo com número da OS
-    String deviceLine = '#${order.number ?? '-'}';
-    if (order.device != null) {
-      final name = order.device?.name ?? '';
-      final serial = order.device?.serial ?? '';
-      final vehicleDesc = serial.isNotEmpty ? '$name • $serial' : name;
-      if (vehicleDesc.isNotEmpty) {
-        deviceLine = '#${order.number ?? '-'} • $vehicleDesc';
-      }
-    }
-
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, '/order', arguments: {'order': order}).then((_) => _loadOrders());
-      },
-      child: Container(
-        color: theme.cardColor,
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+  Widget _buildActiveFilterHeader() {
+    return Observer(
+      builder: (_) {
+        if (orderStore.customerFilter == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
+        
+        return SliverToBoxAdapter(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            color: CupertinoColors.systemGroupedBackground,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: CupertinoColors.activeBlue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Thumbnail
-                  _buildThumbnail(order, theme),
-                  SizedBox(width: 12),
-                  // Conteúdo principal
+                  Icon(CupertinoIcons.person_fill, size: 14, color: CupertinoColors.activeBlue.resolveFrom(context)),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Linha 1: Nome + Ícones (atraso e pagamento) + Status
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            // Nome do cliente com ícones ao lado
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      order.customer?.name ?? 'Cliente',
-                                      style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w600,
-                                        color: theme.textTheme.bodyLarge?.color,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  // Ícones de atraso, pagamento e a receber ao lado do nome
-                                  if (isOverdue)
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 6),
-                                      child: Icon(
-                                        Icons.schedule,
-                                        size: 16,
-                                        color: AppTheme.errorColor,
-                                      ),
-                                    ),
-                                  if (showPaymentIcon)
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 6),
-                                      child: Icon(
-                                        Icons.paid_rounded,
-                                        size: 16,
-                                        color: AppTheme.successColor,
-                                      ),
-                                    ),
-                                  if (showUnpaidIcon)
-                                    Padding(
-                                      padding: EdgeInsets.only(left: 6),
-                                      child: Icon(
-                                        Icons.payments_outlined,
-                                        size: 16,
-                                        color: AppTheme.warningColor,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            // Status badge
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: order.status == 'approved' 
-                                    ? Colors.transparent 
-                                    : statusColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(4),
-                                border: order.status == 'approved'
-                                    ? Border.all(color: statusColor, width: 1)
-                                    : null,
-                              ),
-                              child: Text(
-                                statusText,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: statusColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 2),
-                        // Linha 2: #OS + Veículo + Valor total (canto inferior direito)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                deviceLine,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: theme.textTheme.bodyMedium?.color,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                            // SizedBox(height: 20,),
-                            // Valor total no canto inferior direito
-                            Text(
-                              _formatCurrency(order.total),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal,
-                                color: theme.textTheme.bodyLarge?.color,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                    child: Text(
+                      'Cliente: ${orderStore.customerFilter!.name}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: CupertinoColors.activeBlue.resolveFrom(context),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    minSize: 0,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      orderStore.setCustomerFilter(null);
+                      _loadOrders();
+                    },
+                    child: const Text(
+                      'Limpar',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
               ),
             ),
-            // Divisor
-            Padding(
-              padding: EdgeInsets.only(left: 80),
-              child: Container(
-                height: 1,
-                color: theme.colorScheme.outlineVariant,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildOrdersList() {
+    return Observer(
+      builder: (_) {
+        if (orderStore.isLoading && orderStore.orders.isEmpty) {
+          return const SliverFillRemaining(
+            child: Center(
+              child: CupertinoActivityIndicator(),
+            ),
+          );
+        }
+
+        if (orderStore.orders.isEmpty) {
+          return SliverFillRemaining(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    CupertinoIcons.doc_text_search,
+                    size: 48,
+                    color: CupertinoColors.systemGrey.resolveFrom(context),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Nenhuma OS encontrada',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: CupertinoColors.label.resolveFrom(context),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Toque em + para criar uma nova',
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          );
+        }
+
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              if (index >= orderStore.orders.length) return null;
+              final order = orderStore.orders[index];
+              if (order == null) return null;
+              return _buildOrderItem(order, index, index == orderStore.orders.length - 1);
+            },
+            childCount: orderStore.orders.length,
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildOrderItem(Order order, int index, bool isLast) {
+    final statusColor = _getCupertinoStatusColor(order.status);
+    
+    // Date Formatting (Mail style: "Yesterday", "Friday", or "dd/MM/yy")
+    if (order.createdAt != null) {
+      final now = DateTime.now();
+      final diff = now.difference(order.createdAt!);
+      if (diff.inDays == 0) {
+      } else if (diff.inDays == 1) {
+      } else if (diff.inDays < 7) {
+// Day name
+      } else {
+      }
+    }
+
+    String subtitle = '#${order.number ?? '-'}';
+    if (order.device != null) {
+      final name = order.device?.name ?? '';
+      final serial = order.device?.serial ?? '';
+      
+      if (name.isNotEmpty) {
+        subtitle += ' • $name';
+      }
+      // Assuming serial serves as the license plate/identifier
+      if (serial.isNotEmpty) {
+        subtitle += ' • $serial';
+      }
+    }
+
+    return Container(
+      color: CupertinoColors.systemBackground.resolveFrom(context),
+      child: Material(
+        type: MaterialType.transparency,
+                            child: InkWell(
+                            onTap: () {
+                               Navigator.of(context, rootNavigator: true).pushNamed('/order', arguments: {'order': order})
+                                   .then((_) => _loadOrders());
+                            },                  child: Column(            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Compact padding
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Thumbnail (Left side again)
+                    _buildThumbnail(order),
+                    const SizedBox(width: 12),
+                    
+                    // Main Content
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Line 1: Customer (Left) --- Value & Dot (Right)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  order.customer?.name ?? 'Cliente',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                    color: CupertinoColors.label.resolveFrom(context),
+                                    letterSpacing: -0.4,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _formatCurrency(order.total),
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Status Dot (Now on the right)
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: statusColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                CupertinoIcons.chevron_right,
+                                size: 12,
+                                color: CupertinoColors.tertiaryLabel.resolveFrom(context)
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          
+                          // Line 2: #OS • Vehicle • Plate
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!isLast)
+                Divider(
+                  height: 1,
+                  indent: 76, // Adjusted indent for thumbnail (52 size + padding)
+                  color: CupertinoColors.separator, 
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildThumbnail(Order order, ThemeData theme) {
+  Widget _buildThumbnail(Order order) {
     final url = order.coverPhotoUrl;
-    const double size = 52.0;
+    const double size = 52.0; // Slightly larger for iOS feel
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12), // Smoother corners
       child: Container(
         width: size,
         height: size,
-        color: theme.scaffoldBackgroundColor,
+        color: CupertinoColors.systemGroupedBackground,
         child: url != null && url.isNotEmpty
             ? CachedImage.thumbnail(
                 imageUrl: url,
@@ -502,13 +463,31 @@ class _HomeState extends State<Home> {
               )
             : Center(
                 child: Icon(
-                  Icons.build_circle_outlined,
-                  size: 26,
-                  color: theme.disabledColor,
+                  CupertinoIcons.wrench,
+                  size: 24,
+                  color: CupertinoColors.systemGrey.resolveFrom(context),
                 ),
               ),
       ),
     );
+  }
+
+
+  Color _getCupertinoStatusColor(String? status) {
+    switch (status) {
+      case 'approved':
+        return CupertinoColors.systemBlue;
+      case 'done':
+        return CupertinoColors.systemGreen;
+      case 'canceled':
+        return CupertinoColors.systemRed;
+      case 'quote':
+        return CupertinoColors.systemOrange;
+      case 'progress':
+        return CupertinoColors.systemPurple;
+      default:
+        return CupertinoColors.systemGrey;
+    }
   }
 
   String _formatCurrency(double? value) {

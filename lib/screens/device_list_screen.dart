@@ -1,8 +1,9 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell; 
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/widgets/cached_image.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 
 class DeviceListScreen extends StatefulWidget {
   @override
@@ -32,77 +33,103 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     final isSelectionMode = args != null && args!.containsKey('order');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Veículos'),
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          // Search bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: SearchBar(
-              controller: _searchController,
-              hintText: 'Buscar veículo...',
-              leading: const Padding(
-                padding: EdgeInsets.only(left: 8),
-                child: Icon(Icons.search),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          slivers: [
+            CupertinoSliverNavigationBar(
+              largeTitle: const Text('Veículos'),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: const Icon(CupertinoIcons.add),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/device_form').then((device) {
+                    if (isSelectionMode && device != null) {
+                      Navigator.pop(context, device);
+                    }
+                  });
+                },
               ),
-              trailing: _searchQuery.isNotEmpty
-                  ? [
-                      IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchQuery = '');
-                        },
-                      ),
-                    ]
-                  : null,
-              onChanged: (value) {
-                setState(() => _searchQuery = value.toLowerCase());
-              },
             ),
-          ),
-          // List
-          Expanded(
-            child: Observer(
-              builder: (_) => _buildBody(),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: CupertinoSearchTextField(
+                  controller: _searchController,
+                  placeholder: 'Buscar veículo',
+                  onChanged: (value) {
+                    setState(() => _searchQuery = value.toLowerCase());
+                  },
+                ),
+              ),
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/device_form').then((device) {
-            if (isSelectionMode && device != null) {
-              Navigator.pop(context, device);
-            }
-          });
-        },
-        child: const Icon(Icons.add),
+            
+            // List (as Sliver)
+            Observer(
+              builder: (_) => _buildBody(isSelectionMode),
+            ),
+            
+            // Bottom padding
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(bool isSelectionMode) {
     if (store.deviceList == null) {
-      return _buildError();
+      return const SliverFillRemaining(
+        child: Center(child: CupertinoActivityIndicator()),
+      );
     }
 
     if (store.deviceList!.hasError) {
-      return _buildError();
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
+              const SizedBox(height: 16),
+              const Text('Erro ao carregar veículos'),
+              const SizedBox(height: 16),
+              CupertinoButton(
+                child: const Text('Tentar novamente'),
+                onPressed: () => store.retrieveDevices(),
+              )
+            ],
+          ),
+        ),
+      );
     }
 
     List<Device>? deviceList = store.deviceList!.data;
 
     if (deviceList == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const SliverFillRemaining(
+        child: Center(child: CupertinoActivityIndicator()),
+      );
     }
 
     if (deviceList.isEmpty) {
-      return _buildEmptyState();
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(CupertinoIcons.car_detailed, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
+              const SizedBox(height: 16),
+              Text(
+                'Nenhum veículo cadastrado',
+                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     // Filter list based on search query
@@ -118,224 +145,80 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           }).toList();
 
     if (filteredList.isEmpty) {
-      return _buildNoResultsState();
+      return const SliverFillRemaining(
+        child: Center(
+          child: Text('Nenhum resultado encontrado'),
+        ),
+      );
     }
 
-    return _buildDeviceList(filteredList);
-  }
-
-  Widget _buildError() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Theme.of(context).colorScheme.error,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            'Erro ao carregar veículos',
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 16),
-          FilledButton.tonal(
-            onPressed: () => store.retrieveDevices(),
-            child: const Text('Tentar novamente'),
-          ),
-        ],
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          if (index >= filteredList.length) return null;
+          final device = filteredList[index];
+          return _buildDeviceItem(device, isSelectionMode, index == filteredList.length - 1);
+        },
+        childCount: filteredList.length,
       ),
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.directions_car_outlined,
-            size: 80,
-            color: Theme.of(context).colorScheme.outline,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhum veículo cadastrado',
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Toque no + para adicionar',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoResultsState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: 64,
-            color: Theme.of(context).colorScheme.outline,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Nenhum veículo encontrado',
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Tente buscar por outro termo',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDeviceList(List<Device> list) {
-    final isSelectionMode = args != null && args!.containsKey('order');
-
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 8, bottom: 88),
-      itemCount: list.length,
-      itemBuilder: (context, index) {
-        final device = list[index];
-        return _buildDeviceCard(device, isSelectionMode);
-      },
-    );
-  }
-
-  Widget _buildDeviceCard(Device device, bool isSelectionMode) {
-    final colorScheme = Theme.of(context).colorScheme;
-
+  Widget _buildDeviceItem(Device device, bool isSelectionMode, bool isLast) {
     return Dismissible(
       key: Key(device.id!),
       direction: DismissDirection.horizontal,
+      background: Container(
+        color: CupertinoColors.systemBlue,
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20),
+        child: const Icon(CupertinoIcons.pencil, color: Colors.white),
+      ),
+      secondaryBackground: Container(
+        color: CupertinoColors.systemRed,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(CupertinoIcons.trash, color: Colors.white),
+      ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
-          // Swipe right - Edit
+          // Swipe Right -> Edit
           Navigator.pushNamed(
             context,
             '/device_form',
             arguments: {'device': device},
-          );
+          ).then((_) {
+             // Handle update if needed
+          });
           return false;
         } else {
-          // Swipe left - Delete
-          return await showDialog<bool>(
+          // Swipe Left -> Delete
+          return await showCupertinoDialog<bool>(
             context: context,
-            builder: (context) => AlertDialog(
+            builder: (context) => CupertinoAlertDialog(
               title: const Text('Confirmar exclusão'),
               content: Text('Deseja remover o veículo "${device.name}"?'),
               actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
+                CupertinoDialogAction(
                   child: const Text('Cancelar'),
+                  onPressed: () => Navigator.pop(context, false),
                 ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: colorScheme.error,
-                  ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
                   child: const Text('Remover'),
+                  onPressed: () => Navigator.pop(context, true),
                 ),
               ],
             ),
-          );
+          ) ?? false;
         }
       },
-      onDismissed: (direction) {
-        if (direction == DismissDirection.endToStart) {
-          store.deleteDevice(device);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Veículo "${device.name}" removido'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+      onDismissed: (_) {
+        store.deleteDevice(device);
       },
-      background: Container(
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 20),
-        decoration: BoxDecoration(
-          color: colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.edit_outlined,
-              color: colorScheme.primary,
-              size: 28,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Editar',
-              style: TextStyle(
-                color: colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
-      secondaryBackground: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: colorScheme.errorContainer,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Text(
-              'Excluir',
-              style: TextStyle(
-                color: colorScheme.onErrorContainer,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Icon(
-              Icons.delete_outline,
-              color: colorScheme.onErrorContainer,
-              size: 28,
-            ),
-          ],
-        ),
-      ),
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: _buildDeviceAvatar(device),
-          title: Text(
-            '${device.name ?? ''} ${device.serial ?? ''}',
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          subtitle: Text(device.manufacturer ?? ''),
-          trailing: const Icon(Icons.chevron_right),
+      child: Container(
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: InkWell(
           onTap: () {
             if (isSelectionMode) {
               Navigator.pop(context, device);
@@ -347,33 +230,79 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
               );
             }
           },
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Row(
+                  children: [
+                    // Avatar
+                    _buildDeviceAvatar(device),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${device.name ?? ''} ${device.serial ?? ''}',
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.label.resolveFrom(context),
+                            ),
+                          ),
+                          if (device.manufacturer != null && device.manufacturer!.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              device.manufacturer!,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
+                  ],
+                ),
+              ),
+              if (!isLast)
+                Divider(
+                  height: 1,
+                  indent: 76, // Avatar (48) + Padding (16+12)
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildDeviceAvatar(Device device) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final fallback = CircleAvatar(
-      backgroundColor: colorScheme.primaryContainer,
-      child: Icon(
-        Icons.directions_car_outlined,
-        color: colorScheme.onPrimaryContainer,
-      ),
-    );
-
-    if (device.photo == null || device.photo!.isEmpty) {
-      return fallback;
+    if (device.photo != null && device.photo!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: CachedImage(
+          imageUrl: device.photo!,
+          width: 48,
+          height: 48,
+          fit: BoxFit.cover,
+        ),
+      );
     }
 
-    return ClipOval(
-      child: CachedImage(
-        imageUrl: device.photo!,
-        width: 40,
-        height: 40,
-        fit: BoxFit.cover,
-        errorWidget: fallback,
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGrey5.resolveFrom(context),
+        borderRadius: BorderRadius.circular(8),
       ),
+      alignment: Alignment.center,
+      child: Icon(CupertinoIcons.car_detailed, color: CupertinoColors.systemGrey.resolveFrom(context)),
     );
   }
 }

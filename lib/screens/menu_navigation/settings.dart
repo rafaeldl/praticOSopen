@@ -1,12 +1,13 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show ThemeMode, Material, MaterialType; 
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:provider/provider.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
-import 'package:praticos/models/user_role.dart';
-import 'package:praticos/theme/app_theme.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:praticos/global.dart';
-import 'package:provider/provider.dart';
 import 'package:praticos/mobx/theme_store.dart';
+import 'package:praticos/models/user_role.dart';
+import 'package:praticos/widgets/cached_image.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -20,276 +21,293 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     _userStore.findCurrentUser();
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final themeStore = Provider.of<ThemeStore>(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        title: Text(
-          'Ajustes',
-          style: theme.appBarTheme.titleTextStyle,
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header do perfil
-            _buildProfileHeader(theme, colorScheme),
-            SizedBox(height: 16),
-            // Seções de menu
-            Observer(
-              builder: (context) {
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          slivers: [
+                      const CupertinoSliverNavigationBar(
+                        largeTitle: Text('Ajustes'),
+                      ),
+                      SliverSafeArea(
+                        top: false,
+                        sliver: SliverList(
+                          delegate: SliverChildListDelegate([
+                            // Profile Section
+                            CupertinoListSection.insetGrouped(                children: [
+                  CupertinoListTile(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    leadingSize: 60,
+                    leading: ClipOval(
+                      child: Global.currentUser?.photoURL != null
+                          ? CachedImage(
+                              imageUrl: Global.currentUser!.photoURL!,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(
+                              width: 60,
+                              height: 60,
+                              color: CupertinoColors.systemGrey5,
+                              child: const Icon(CupertinoIcons.person_solid, color: CupertinoColors.systemGrey),
+                            ),
+                    ),
+                    title: Text(
+                      Global.currentUser?.displayName ?? 'Usuário',
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(Global.currentUser?.email ?? ''),
+                        if (_authStore.companyAggr?.name != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              _authStore.companyAggr!.name!,
+                              style: const TextStyle(
+                                color: CupertinoColors.activeBlue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              // Company Switcher (if applicable)
+              Observer(builder: (_) {
                 if (_userStore.user?.value != null &&
                     _userStore.user!.value!.companies != null &&
                     _userStore.user!.value!.companies!.length > 1) {
-                  return Column(
+                  return CupertinoListSection.insetGrouped(
+                    header: const Text('ORGANIZAÇÃO'),
                     children: [
-                      _buildMenuSection(
-                        theme,
-                        colorScheme,
-                        'Organização',
-                        [
-                          _MenuItemData(
-                            icon: Icons.business_rounded,
-                            title: 'Trocar Empresa',
-                            subtitle: 'Alternar entre organizações',
-                            onTap: () => _showCompanySelectionModal(context),
+                      CupertinoListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemPurple,
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                        ],
+                          child: const Icon(CupertinoIcons.building_2_fill, color: CupertinoColors.white, size: 20),
+                        ),
+                        title: const Text('Trocar Empresa'),
+                        subtitle: const Text('Alternar entre organizações'),
+                        trailing: const CupertinoListTileChevron(),
+                        onTap: () => _showCompanySelectionModal(context),
                       ),
-                      SizedBox(height: 16),
                     ],
                   );
                 }
-                return Container();
-              },
-            ),
-            Observer(builder: (context) {
-              final isAdmin = _isAdmin();
-              return _buildMenuSection(
-                theme,
-                colorScheme,
-                'Organização',
-                [
-                  if (isAdmin)
-                    _MenuItemData(
-                      icon: Icons.store_rounded,
-                      title: 'Dados da Empresa',
-                      subtitle: 'Editar informações da organização',
-                      onTap: () => Navigator.pushNamed(context, '/company_form'),
+                return const SizedBox.shrink();
+              }),
+
+              // Admin/Management Section
+              Observer(builder: (context) {
+                final isAdmin = _isAdmin();
+                return CupertinoListSection.insetGrouped(
+                  header: const Text('GERENCIAMENTO'),
+                  children: [
+                    if (isAdmin) ...[
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.briefcase_fill,
+                        color: CupertinoColors.systemOrange,
+                        title: 'Dados da Empresa',
+                        onTap: () => Navigator.pushNamed(context, '/company_form'),
+                      ),
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.person_3_fill,
+                        color: CupertinoColors.systemBlue,
+                        title: 'Colaboradores',
+                        onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
+                      ),
+                    ],
+                    _buildSettingsTile(
+                      icon: CupertinoIcons.car_detailed,
+                      color: CupertinoColors.systemGreen,
+                      title: 'Veículos',
+                      onTap: () => Navigator.pushNamed(context, '/device_list'),
                     ),
-                  if (isAdmin)
-                    _MenuItemData(
-                      icon: Icons.people_rounded,
-                      title: 'Colaboradores',
-                      subtitle: 'Gerenciar equipe da organização',
-                      onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
+                    _buildSettingsTile(
+                      icon: CupertinoIcons.wrench_fill,
+                      color: CupertinoColors.systemIndigo,
+                      title: 'Serviços',
+                      onTap: () => Navigator.pushNamed(context, '/service_list'),
                     ),
-                  // Items available to all roles (or check permissions if needed)
-                  _MenuItemData(
-                    icon: Icons.directions_car_rounded,
-                    title: 'Veículos',
-                    subtitle: 'Gerenciar veículos cadastrados',
-                    onTap: () => Navigator.pushNamed(context, '/device_list'),
-                  ),
-                  _MenuItemData(
-                    icon: Icons.build_rounded,
-                    title: 'Serviços',
-                    subtitle: 'Gerenciar serviços oferecidos',
-                    onTap: () => Navigator.pushNamed(context, '/service_list'),
-                  ),
-                  _MenuItemData(
-                    icon: Icons.inventory_2_rounded,
-                    title: 'Produtos',
-                    subtitle: 'Gerenciar estoque de produtos',
-                    onTap: () => Navigator.pushNamed(context, '/product_list'),
+                    _buildSettingsTile(
+                      icon: CupertinoIcons.cube_box_fill,
+                      color: CupertinoColors.systemPink,
+                      title: 'Produtos',
+                      onTap: () => Navigator.pushNamed(context, '/product_list'),
+                    ),
+                  ],
+                );
+              }),
+
+              // Interface Section
+              CupertinoListSection.insetGrouped(
+                header: const Text('INTERFACE'),
+                children: [
+                  CupertinoListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemGrey,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(CupertinoIcons.moon_fill, color: CupertinoColors.white, size: 20),
+                    ),
+                    title: const Text('Modo Noturno'),
+                    additionalInfo: Text(_getThemeModeText(themeStore.themeMode)),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () => _showThemeSelectionDialog(context, themeStore),
                   ),
                 ],
-              );
-            }),
-            SizedBox(height: 16),
-            _buildMenuSection(
-              theme,
-              colorScheme,
-              'Interface',
-              [
-                _MenuItemData(
-                  icon: Icons.dark_mode_rounded,
-                  title: 'Modo Noturno',
-                  subtitle: _getThemeModeText(themeStore.themeMode),
-                  onTap: () => _showThemeSelectionDialog(context, themeStore),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            _buildMenuSection(
-              theme,
-              colorScheme,
-              'Conta',
-              [
-                _MenuItemData(
-                  icon: Icons.logout_rounded,
-                  title: 'Sair',
-                  subtitle: 'Encerrar sessão',
-                  onTap: () => _showLogoutConfirmation(context),
-                  isDestructive: true,
-                ),
-              ],
-            ),
-            SizedBox(height: 24),
-            _buildVersionInfo(theme),
-            SizedBox(height: 32),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileHeader(ThemeData theme, ColorScheme colorScheme) {
-    return Container(
-      color: theme.cardColor,
-      padding: EdgeInsets.all(24),
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: theme.primaryColor,
-                width: 3,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.primaryColor.withOpacity(0.2),
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: CircleAvatar(
-              radius: 50,
-              backgroundColor: theme.scaffoldBackgroundColor,
-              backgroundImage: Global.currentUser?.photoURL != null
-                  ? NetworkImage(Global.currentUser!.photoURL!)
-                  : null,
-              child: Global.currentUser?.photoURL == null
-                  ? Icon(
-                      Icons.person_rounded,
-                      size: 50,
-                      color: theme.disabledColor,
-                    )
-                  : null,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            Global.currentUser?.displayName ?? 'Usuário',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            Global.currentUser?.email ?? '',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-            ),
-          ),
-          Observer(builder: (_) {
-            return _authStore.companyAggr?.name != null
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+
+              // Account Section
+              CupertinoListSection.insetGrouped(
+                header: const Text('CONTA'),
+                children: [
+                  CupertinoListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: AppTheme.primaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        color: CupertinoColors.systemRed,
+                        borderRadius: BorderRadius.circular(6),
                       ),
-                      child: Text(
-                        _authStore.companyAggr!.name!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
+                      child: const Icon(CupertinoIcons.arrow_right_square_fill, color: CupertinoColors.white, size: 20),
                     ),
-                  )
-                : SizedBox();
-          }),
+                    title: const Text('Sair', style: TextStyle(color: CupertinoColors.systemRed)),
+                    onTap: () => _showLogoutConfirmation(context),
+                  ),
+                ],
+              ),
+
+              // Version
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Text(
+                    'PraticOS ${Global.version}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.secondaryLabel,
+                    ),
+                  ),
+                ),
+              ),
+              
+                
+              
+                const SizedBox(height: 40),
+              
+              ]),
+              
+            ),
+              
+          ),
+              
         ],
+              
       ),
+              
+      ),
+              
+    );
+              
+  }
+  Widget _buildSettingsTile({
+    required IconData icon,
+    required Color color,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return CupertinoListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Icon(icon, color: CupertinoColors.white, size: 20),
+      ),
+      title: Text(title),
+      trailing: const CupertinoListTileChevron(),
+      onTap: onTap,
     );
   }
+  
+  bool _isAdmin() {
+    if (_userStore.user?.value == null || Global.companyAggr == null) return false;
+    final currentCompanyId = Global.companyAggr!.id;
+    final companyRole = _userStore.user!.value!.companies?.firstWhere(
+      (c) => c.company?.id == currentCompanyId,
+      orElse: () => CompanyRoleAggr(),
+    );
+    return companyRole?.role == RolesType.admin || companyRole?.role == RolesType.manager;
+  }
 
-  Widget _buildMenuSection(ThemeData theme, ColorScheme colorScheme, String title, List<_MenuItemData> items) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(
-              title.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: theme.disabledColor,
-                letterSpacing: 1,
-              ),
-            ),
+  String _getThemeModeText(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.system: return 'Automático';
+      case ThemeMode.light: return 'Claro';
+      case ThemeMode.dark: return 'Escuro';
+    }
+  }
+
+  void _showThemeSelectionDialog(BuildContext context, ThemeStore themeStore) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text('Escolher tema'),
+        actions: [
+          CupertinoActionSheetAction(
+            child: const Text('Automático (Sistema)'),
+            onPressed: () { themeStore.setThemeMode(ThemeMode.system); Navigator.pop(context); },
           ),
-          ...items.asMap().entries.map((entry) {
-            final index = entry.key;
-            final item = entry.value;
-            return Column(
-              children: [
-                _buildMenuItem(theme, colorScheme, item),
-                if (index < items.length - 1)
-                  Divider(
-                    height: 1,
-                    indent: 56,
-                    color: colorScheme.outlineVariant,
-                  ),
-              ],
-            );
-          }).toList(),
+          CupertinoActionSheetAction(
+            child: const Text('Claro'),
+            onPressed: () { themeStore.setThemeMode(ThemeMode.light); Navigator.pop(context); },
+          ),
+          CupertinoActionSheetAction(
+            child: const Text('Escuro'),
+            onPressed: () { themeStore.setThemeMode(ThemeMode.dark); Navigator.pop(context); },
+          ),
         ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancelar'),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
     );
   }
 
   void _showLogoutConfirmation(BuildContext context) {
-    showDialog(
+    showCupertinoDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Sair'),
-        content: Text('Tem certeza que deseja sair?'),
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Sair'),
+        content: const Text('Tem certeza que deseja sair?'),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
+            child: const Text('Cancelar'),
             onPressed: () => Navigator.pop(context),
-            child: Text('CANCELAR'),
           ),
-          ElevatedButton(
+          CupertinoDialogAction(
+            isDestructiveAction: true,
             onPressed: () async {
               Navigator.pop(context);
               await _authStore.signOutGoogle();
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.errorColor,
-            ),
-            child: Text('SAIR', style: TextStyle(color: Colors.white)),
+            child: const Text('Sair'),
           ),
         ],
       ),
@@ -297,265 +315,27 @@ class _SettingsState extends State<Settings> {
   }
 
   void _showCompanySelectionModal(BuildContext context) {
-    final theme = Theme.of(context);
-    showModalBottomSheet(
+    showCupertinoModalPopup(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(
-                'Selecionar Empresa',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: theme.textTheme.bodyLarge?.color,
-                ),
-              ),
-            ),
-            Divider(height: 1),
-            if (_userStore.user?.value?.companies != null)
-              ..._userStore.user!.value!.companies!.map((companyRole) {
-                bool isSelected =
-                    companyRole.company?.id == Global.companyAggr?.id;
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: isSelected
-                        ? theme.primaryColor
-                        : theme.scaffoldBackgroundColor,
-                    child: Icon(
-                      Icons.business_rounded,
-                      color: isSelected ? Colors.white : theme.disabledColor,
-                    ),
-                  ),
-                  title: Text(
-                    companyRole.company?.name ?? 'Empresa sem nome',
-                    style: TextStyle(
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected
-                          ? theme.primaryColor
-                          : theme.textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  subtitle: Text(
-                    companyRole.role.toString().split('.').last.toUpperCase(),
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  trailing: isSelected
-                      ? Icon(Icons.check_circle_rounded,
-                          color: theme.primaryColor)
-                      : null,
-                  onTap: () async {
-                    if (!isSelected && companyRole.company?.id != null) {
-                      Navigator.pop(context);
-                      await _authStore.switchCompany(companyRole.company!.id!);
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, '/', (route) => false);
-                    }
-                  },
-                );
-              }).toList(),
-            SizedBox(height: 24),
-          ],
+      builder: (context) => CupertinoActionSheet(
+        title: const Text('Selecionar Empresa'),
+        actions: _userStore.user?.value?.companies?.map((companyRole) {
+          return CupertinoActionSheetAction(
+            child: Text(companyRole.company?.name ?? 'Empresa sem nome'),
+            onPressed: () async {
+              if (companyRole.company?.id != null) {
+                Navigator.pop(context);
+                await _authStore.switchCompany(companyRole.company!.id!);
+                Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+              }
+            },
+          );
+        }).toList() ?? [],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancelar'),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
     );
   }
-
-  bool _isAdmin() {
-    if (_userStore.user?.value == null || Global.companyAggr == null) return false;
-
-    final currentCompanyId = Global.companyAggr!.id;
-    final companyRole = _userStore.user!.value!.companies?.firstWhere(
-      (c) => c.company?.id == currentCompanyId,
-      orElse: () => CompanyRoleAggr(),
-    );
-
-    return companyRole?.role == RolesType.admin || companyRole?.role == RolesType.manager;
-  }
-
-  Widget _buildMenuItem(ThemeData theme, ColorScheme colorScheme, _MenuItemData item) {
-    return InkWell(
-      onTap: item.onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: item.isDestructive
-                    ? colorScheme.errorContainer
-                    : theme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                item.icon,
-                size: 20,
-                color: item.isDestructive
-                    ? colorScheme.error
-                    : theme.primaryColor,
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: item.isDestructive
-                          ? colorScheme.error
-                          : theme.textTheme.bodyLarge?.color,
-                    ),
-                  ),
-                  if (item.subtitle != null) ...[
-                    SizedBox(height: 2),
-                    Text(
-                      item.subtitle!,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: theme.textTheme.bodySmall?.color,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: theme.disabledColor,
-              size: 20,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVersionInfo(ThemeData theme) {
-    return Column(
-      children: [
-        Icon(
-          Icons.apps_rounded,
-          size: 32,
-          color: theme.disabledColor,
-        ),
-        SizedBox(height: 8),
-        Text(
-          'PraticOS',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: theme.textTheme.bodyMedium?.color,
-          ),
-        ),
-        SizedBox(height: 4),
-        Text(
-          'Versão ${Global.version}',
-          style: TextStyle(
-            fontSize: 13,
-            color: theme.disabledColor,
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _getThemeModeText(ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.system:
-        return 'Automático (Sistema)';
-      case ThemeMode.light:
-        return 'Claro';
-      case ThemeMode.dark:
-        return 'Escuro';
-    }
-  }
-
-  void _showThemeSelectionDialog(BuildContext context, ThemeStore themeStore) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Escolher tema'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RadioListTile<ThemeMode>(
-                title: Text('Automático (Sistema)'),
-                value: ThemeMode.system,
-                groupValue: themeStore.themeMode,
-                onChanged: (ThemeMode? value) {
-                  if (value != null) {
-                    themeStore.setThemeMode(value);
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-              RadioListTile<ThemeMode>(
-                title: Text('Claro'),
-                value: ThemeMode.light,
-                groupValue: themeStore.themeMode,
-                onChanged: (ThemeMode? value) {
-                  if (value != null) {
-                    themeStore.setThemeMode(value);
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-              RadioListTile<ThemeMode>(
-                title: Text('Escuro'),
-                value: ThemeMode.dark,
-                groupValue: themeStore.themeMode,
-                onChanged: (ThemeMode? value) {
-                  if (value != null) {
-                    themeStore.setThemeMode(value);
-                    Navigator.of(context).pop();
-                  }
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _MenuItemData {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-  final bool isDestructive;
-
-  _MenuItemData({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    required this.onTap,
-    this.isDestructive = false,
-  });
 }

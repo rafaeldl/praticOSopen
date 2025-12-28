@@ -1,9 +1,9 @@
 import 'package:easy_mask/easy_mask.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/widgets/cached_image.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 
 class DeviceFormScreen extends StatefulWidget {
   const DeviceFormScreen({Key? key}) : super(key: key);
@@ -42,229 +42,199 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
       _formKey.currentState!.save();
       await _deviceStore.saveDevice(_device!);
       setState(() => _isLoading = false);
-      Navigator.pop(context, _device);
+      if (mounted) {
+        Navigator.pop(context, _device);
+      }
     }
   }
 
   Future<void> _pickImage() async {
-    showModalBottomSheet(
+    showCupertinoModalPopup(
       context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galeria'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final file = await _deviceStore.photoService.pickImageFromGallery();
-                  if (file != null) {
-                    await _deviceStore.uploadDevicePhoto(file, _device!);
-                    setState(() {});
-                  }
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Câmera'),
-                onTap: () async {
-                  Navigator.pop(context);
-                  final file = await _deviceStore.photoService.takePhoto();
-                  if (file != null) {
-                    await _deviceStore.uploadDevicePhoto(file, _device!);
-                    setState(() {});
-                  }
-                },
-              ),
-            ],
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: const Text('Alterar Foto'),
+        actions: <CupertinoActionSheetAction>[
+          CupertinoActionSheetAction(
+            child: const Text('Tirar Foto'),
+            onPressed: () async {
+              Navigator.pop(context);
+              final file = await _deviceStore.photoService.takePhoto();
+              if (file != null) {
+                await _deviceStore.uploadDevicePhoto(file, _device!);
+                setState(() {});
+              }
+            },
           ),
-        );
-      },
+          CupertinoActionSheetAction(
+            child: const Text('Escolher da Galeria'),
+            onPressed: () async {
+              Navigator.pop(context);
+              final file = await _deviceStore.photoService.pickImageFromGallery();
+              if (file != null) {
+                await _deviceStore.uploadDevicePhoto(file, _device!);
+                setState(() {});
+              }
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Cancelar'),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? "Editar Veículo" : "Novo Veículo"),
-        elevation: 0,
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(_isEditing ? "Editar Veículo" : "Novo Veículo"),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _isLoading ? null : _saveDevice,
+          child: _isLoading
+              ? const CupertinoActivityIndicator()
+              : const Text("Salvar", style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
       ),
-      body: Observer(
-        builder: (_) => SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Header icon / Photo
-                  Center(
-                    child: GestureDetector(
-                      onTap: _pickImage,
-                      child: Stack(
-                        children: [
-                          if (_device?.photo != null && _device!.photo!.isNotEmpty)
-                            ClipOval(
-                              child: CachedImage(
-                                imageUrl: _device!.photo!,
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          else
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundColor: theme.colorScheme.primaryContainer,
-                              child: Icon(
-                                Icons.directions_car,
-                                size: 60,
-                                color: theme.colorScheme.primary,
-                              ),
+      child: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
+              
+              // Photo Section
+              Center(
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: Stack(
+                    children: [
+                      if (_device?.photo != null && _device!.photo!.isNotEmpty)
+                        ClipOval(
+                          child: CachedImage(
+                            imageUrl: _device!.photo!,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      else
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemGrey5.resolveFrom(context),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            CupertinoIcons.car_detailed,
+                            size: 50,
+                            color: CupertinoColors.systemGrey.resolveFrom(context),
+                          ),
+                        ),
+                      if (_deviceStore.isUploading)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: CupertinoColors.black,
+                              shape: BoxShape.circle,
                             ),
-                          if (_deviceStore.isUploading)
-                            Positioned.fill(
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.black45,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                            ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: CircleAvatar(
-                              radius: 18,
-                              backgroundColor: theme.colorScheme.primary,
-                              child: const Icon(
-                                Icons.camera_alt,
-                                size: 18,
-                                color: Colors.white,
-                              ),
+                            child: const Center(
+                              child: CupertinoActivityIndicator(color: CupertinoColors.white),
                             ),
                           ),
-                        ],
+                        ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: CupertinoColors.activeBlue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            CupertinoIcons.camera_fill,
+                            size: 16,
+                            color: CupertinoColors.white,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Form fields
-                  _buildManufacturerField(),
-                const SizedBox(height: 16),
-                _buildNameField(),
-                const SizedBox(height: 16),
-                _buildSerialField(),
-                const SizedBox(height: 32),
-                // Save button
-                FilledButton.icon(
-                  onPressed: _isLoading ? null : _saveDevice,
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check),
-                  label: Text(_isLoading ? 'Salvando...' : 'Salvar'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 20),
+
+              // Form Fields
+              CupertinoListSection.insetGrouped(
+                children: [
+                  _buildCupertinoFormField(
+                    label: "Fabricante",
+                    initialValue: _device?.manufacturer,
+                    placeholder: "Ex: Fiat, VW",
+                    textCapitalization: TextCapitalization.words,
+                    onSaved: (val) => _device?.manufacturer = val,
+                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                  ),
+                  _buildCupertinoFormField(
+                    label: "Modelo",
+                    initialValue: _device?.name,
+                    placeholder: "Ex: Uno, Gol",
+                    textCapitalization: TextCapitalization.words,
+                    onSaved: (val) => _device?.name = val,
+                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                  ),
+                  _buildCupertinoFormField(
+                    label: "Placa",
+                    initialValue: _device?.serial,
+                    placeholder: "ABC1D23",
+                    textCapitalization: TextCapitalization.characters,
+                    inputFormatters: [TextInputMask(mask: 'AAA9N99')],
+                    onSaved: (val) => _device?.serial = val?.toUpperCase(),
+                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
-      ),
     );
   }
 
-  InputDecoration _inputDecoration({
+  Widget _buildCupertinoFormField({
     required String label,
-    required IconData icon,
-    String? hint,
+    String? initialValue,
+    String? placeholder,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    List<TextInputFormatter>? inputFormatters,
+    required FormFieldSetter<String> onSaved,
+    required FormFieldValidator<String> validator,
   }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+    return CupertinoListTile(
+      title: SizedBox(
+        width: 80,
+        child: Text(label, style: const TextStyle(fontSize: 16)),
       ),
-      filled: true,
-    );
-  }
-
-  Widget _buildManufacturerField() {
-    return TextFormField(
-      initialValue: _device!.manufacturer,
-      decoration: _inputDecoration(
-        label: 'Fabricante',
-        icon: Icons.business_outlined,
-        hint: 'Ex: Fiat, Volkswagen, Honda',
+      additionalInfo: SizedBox(
+        width: 200, // Constrain width or use Expanded logic if possible within ListTile
+        child: CupertinoTextFormFieldRow(
+          initialValue: initialValue,
+          placeholder: placeholder,
+          textCapitalization: textCapitalization,
+          inputFormatters: inputFormatters,
+          padding: EdgeInsets.zero,
+          textAlign: TextAlign.right,
+          decoration: null, // Remove border
+          style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
+          validator: validator,
+          onSaved: onSaved,
+        ),
       ),
-      textCapitalization: TextCapitalization.words,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Preencha o fabricante';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        _device!.manufacturer = value;
-      },
-    );
-  }
-
-  Widget _buildNameField() {
-    return TextFormField(
-      initialValue: _device!.name,
-      decoration: _inputDecoration(
-        label: 'Modelo',
-        icon: Icons.directions_car_outlined,
-        hint: 'Ex: Uno, Gol, CG 160',
-      ),
-      textCapitalization: TextCapitalization.words,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Preencha o modelo';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        _device!.name = value;
-      },
-    );
-  }
-
-  Widget _buildSerialField() {
-    return TextFormField(
-      initialValue: _device!.serial,
-      textCapitalization: TextCapitalization.characters,
-      inputFormatters: [TextInputMask(mask: 'AAA9N99')],
-      decoration: _inputDecoration(
-        label: 'Placa',
-        icon: Icons.pin_outlined,
-        hint: 'ABC1D23',
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Preencha a placa';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        _device!.serial = value!.toUpperCase();
-      },
     );
   }
 }

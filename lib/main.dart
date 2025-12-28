@@ -8,19 +8,9 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
-import 'package:praticos/screens/device_form_screen.dart';
-import 'package:praticos/screens/device_list_screen.dart';
 import 'package:praticos/screens/login.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
-import 'package:praticos/screens/order_form.dart';
-import 'package:praticos/screens/order_product_screen.dart';
-import 'package:praticos/screens/menu_navigation/collaborator_form_screen.dart';
-import 'package:praticos/screens/menu_navigation/collaborator_list_screen.dart';
-import 'package:praticos/screens/menu_navigation/company_form_screen.dart';
-import 'package:praticos/screens/order_service_screen.dart';
-import 'package:praticos/screens/payment_form_screen.dart';
-import 'package:praticos/screens/product_form_screen.dart';
-import 'package:praticos/screens/product_list_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -28,19 +18,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:praticos/global.dart';
 import 'package:praticos/theme/app_theme.dart';
-import 'screens/customers/customer_form_screen.dart';
-import 'screens/customers/customer_list_screen.dart';
-import 'screens/info_form_screen.dart';
-import 'screens/service_form_screen.dart';
-import 'screens/service_list_screen.dart';
-import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
+import 'package:praticos/routes.dart';
 
 AuthStore _authStore = AuthStore();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PackageInfo info = await PackageInfo.fromPlatform();
-  Global.version = info.version;
+  Global.version = "${info.version} (${info.buildNumber})";
   await Firebase.initializeApp();
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   FirebaseCrashlytics.instance.log("iniciando a aplicação");
@@ -88,30 +73,23 @@ class MyApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           themeMode: themeStore.themeMode,
           navigatorObservers: <NavigatorObserver>[observer],
+          builder: (context, child) {
+            // Wrap with CupertinoTheme to support dynamic Cupertino colors
+            final brightness = Theme.of(context).brightness;
+            return CupertinoTheme(
+              data: CupertinoThemeData(
+                brightness: brightness,
+                primaryColor: CupertinoColors.activeBlue,
+              ),
+              child: child!,
+            );
+          },
           home: Observer(
             builder: (BuildContext context) {
               return _buildHome(_authStore);
             },
           ),
-          routes: {
-            '/service_list': (context) => ServiceListScreen(),
-            '/service_form': (context) => ServiceFormScreen(),
-            '/product_list': (context) => ProductListScreen(),
-            '/product_form': (context) => ProductFormScreen(),
-            '/customer_form': (context) => CustomerFormScreen(),
-            '/customer_list': (context) => CustomerListScreen(),
-            '/device_form': (context) => DeviceFormScreen(),
-            '/device_list': (context) => DeviceListScreen(),
-            '/info_form': (context) => InfoFormScreen(),
-            '/order': (context) => OrderForm(),
-            '/order_service': (context) => OrderServiceScreen(),
-            '/order_product': (context) => OrderProductScreen(),
-            '/payment_form_screen': (context) => PaymentFormScreen(),
-            '/financial_dashboard_simple': (context) => FinancialDashboardSimple(),
-            '/collaborator_list': (context) => CollaboratorListScreen(),
-            '/collaborator_form': (context) => CollaboratorFormScreen(),
-            '/company_form': (context) => CompanyFormScreen(),
-          },
+          routes: appRoutes,
         );
       },
     );
