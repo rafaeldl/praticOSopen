@@ -208,7 +208,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         productStore.deleteProduct(product);
       },
       child: Container(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
+        color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
         child: InkWell(
           onTap: () {
             if (isSelectionMode) {

@@ -208,7 +208,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         serviceStore.deleteService(service);
       },
       child: Container(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
+        color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
         child: InkWell(
           onTap: () {
             if (isSelectionMode) {

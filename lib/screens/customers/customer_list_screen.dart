@@ -220,7 +220,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         customerStore.deleteCustomer(customer);
       },
       child: Container(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
+        color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
         child: InkWell(
           onTap: () {
             if (isSelectionMode) {

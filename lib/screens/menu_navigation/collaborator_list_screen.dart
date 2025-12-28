@@ -131,7 +131,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
 
   Widget _buildUserRow(UserRoleAggr userRole, bool isAdmin, bool isLast) {
     Widget content = Container(
-      color: CupertinoColors.systemBackground.resolveFrom(context),
+      color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
       child: InkWell(
         onTap: isAdmin ? () => _showActionSheet(userRole) : null,
         child: Column(

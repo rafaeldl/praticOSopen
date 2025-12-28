@@ -212,7 +212,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         customerStore.deleteCustomer(customer);
       },
       child: Container(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
+        color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
