@@ -1,16 +1,16 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Theme, Material, MaterialType, Icons, CircleAvatar, Divider, DebugShowCheckedModeBanner, InkWell; 
+import 'package:flutter/material.dart' show Material, MaterialType, Divider, InkWell;
 // Keeping Material for specific color references if needed, but UI tree will be Cupertino.
 
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
-import 'package:praticos/theme/app_theme.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:provider/provider.dart';
+
 import '../../global.dart';
 
 class Home extends StatefulWidget {
@@ -22,8 +22,6 @@ class _HomeState extends State<Home> {
   int currentSelected = 0;
   final ScrollController _scrollController = ScrollController();
   late OrderStore orderStore;
-  bool _showFilters = true;
-  double _lastOffset = 0;
 
   static const List<Map<String, dynamic>> filters = [
     {'status': 'Todos', 'icon': CupertinoIcons.square_grid_2x2, 'field': null},
@@ -316,22 +314,17 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildOrderItem(Order order, int index, bool isLast) {
-    final statusText = Order.statusMap[order.status] ?? '';
     final statusColor = _getCupertinoStatusColor(order.status);
     
     // Date Formatting (Mail style: "Yesterday", "Friday", or "dd/MM/yy")
-    String dateString = '';
     if (order.createdAt != null) {
       final now = DateTime.now();
       final diff = now.difference(order.createdAt!);
       if (diff.inDays == 0) {
-        dateString = DateFormat('HH:mm').format(order.createdAt!);
       } else if (diff.inDays == 1) {
-        dateString = 'Ontem';
       } else if (diff.inDays < 7) {
-        dateString = DateFormat('EEEE', 'pt_BR').format(order.createdAt!); // Day name
+// Day name
       } else {
-        dateString = DateFormat('dd/MM/yy').format(order.createdAt!);
       }
     }
 
@@ -479,23 +472,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildStatusBadge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text.toUpperCase(),
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
-      ),
-    );
-  }
 
   Color _getCupertinoStatusColor(String? status) {
     switch (status) {
