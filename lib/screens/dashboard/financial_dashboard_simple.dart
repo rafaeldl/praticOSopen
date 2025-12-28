@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
@@ -102,232 +103,193 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
 
     orderStore.loadOrdersForDashboard();
 
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        title: const Text('Painel Financeiro'),
-        centerTitle: false,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            tooltip: 'Gerar Relatório PDF',
-            onPressed: () => _generateReport(orderStore),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          CupertinoSliverNavigationBar(
+            largeTitle: const Text('Painel Financeiro'),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(CupertinoIcons.doc_text),
+              onPressed: () => _generateReport(orderStore),
+            ),
           ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await orderStore.loadOrdersForDashboard();
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildPeriodSelector(theme),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Observer(builder: (_) => _buildKpiCards(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) =>
-                            _buildRevenueBreakdown(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) =>
-                            _buildCustomerRanking(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) =>
-                            _buildServicesRanking(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) =>
-                            _buildProductsRanking(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) => _buildRecentOrders(orderStore, theme)),
-                    const SizedBox(height: 24),
-                  ],
+          SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPeriodSelector(theme),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Observer(builder: (_) => _buildKpiCards(orderStore, theme)),
+                      const SizedBox(height: 20),
+                      Observer(
+                          builder: (_) =>
+                              _buildRevenueBreakdown(orderStore, theme)),
+                      const SizedBox(height: 20),
+                      Observer(
+                          builder: (_) =>
+                              _buildCustomerRanking(orderStore, theme)),
+                      const SizedBox(height: 20),
+                      Observer(
+                          builder: (_) =>
+                              _buildServicesRanking(orderStore, theme)),
+                      const SizedBox(height: 20),
+                      Observer(
+                          builder: (_) =>
+                              _buildProductsRanking(orderStore, theme)),
+                      const SizedBox(height: 20),
+                      Observer(
+                          builder: (_) => _buildRecentOrders(orderStore, theme)),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   Widget _buildPeriodSelector(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      color: CupertinoColors.systemBackground.resolveFrom(context),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
         children: [
-          // Period type selector - using custom chips without checkmark
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: periodFilters.map((period) {
-                final isSelected = selectedPeriod == period;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(
+          // Period type selector
+          SizedBox(
+            width: double.infinity,
+            child: CupertinoSlidingSegmentedControl<String>(
+              groupValue: selectedPeriod,
+              children: {
+                for (var period in periodFilters)
+                  period: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
                       periodLabelsMap[period] ?? period.toUpperCase(),
-                      style: TextStyle(
-                        color: isSelected
-                            ? theme.colorScheme.onPrimary
-                            : theme.colorScheme.onSurfaceVariant,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(fontSize: 13),
                     ),
-                    selected: isSelected,
-                    showCheckmark: false,
-                    selectedColor: theme.colorScheme.primary,
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    onSelected: (selected) {
-                      if (period == 'custom') {
-                        _showCustomPeriodPicker(theme);
-                      } else {
-                        setState(() {
-                          selectedPeriod = period;
-                          _periodOffset = 0;
-                          _customStartDate = null;
-                          _customEndDate = null;
-                        });
+                  ),
+              },
+              onValueChanged: (value) {
+                if (value == null) return;
+                if (value == 'custom') {
+                  _showCustomPeriodPicker(theme);
+                } else {
+                  setState(() {
+                    selectedPeriod = value;
+                    _periodOffset = 0;
+                    _customStartDate = null;
+                    _customEndDate = null;
+                  });
+                  _updateDashboardPeriod();
+                }
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Period navigation
+          if (selectedPeriod != 'custom')
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: const Icon(CupertinoIcons.chevron_left),
+                  onPressed: () {
+                    setState(() => _periodOffset--);
+                    _updateDashboardPeriod();
+                  },
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      if (_periodOffset != 0) {
+                        setState(() => _periodOffset = 0);
+                        final orderStore =
+                            Provider.of<OrderStore>(context, listen: false);
+                        orderStore.setPaymentFilter(null);
+                        orderStore.clearCustomerRankingSelection();
                         _updateDashboardPeriod();
                       }
                     },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Period navigation
-          if (selectedPeriod != 'custom')
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_left,
-                      color: theme.colorScheme.primary,
+                    child: Column(
+                      children: [
+                        Text(
+                          periodLabel,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: CupertinoColors.label.resolveFrom(context),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (_periodOffset != 0)
+                          Text(
+                            'Toque para voltar ao atual',
+                            style: TextStyle(
+                              color: CupertinoColors.activeBlue.resolveFrom(context),
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
                     ),
-                    onPressed: () {
-                      setState(() => _periodOffset--);
-                      _updateDashboardPeriod();
-                    },
-                    visualDensity: VisualDensity.compact,
                   ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        if (_periodOffset != 0) {
-                          setState(() => _periodOffset = 0);
-                          final orderStore =
-                              Provider.of<OrderStore>(context, listen: false);
-                          orderStore.setPaymentFilter(null);
-                          orderStore.clearCustomerRankingSelection();
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _periodOffset < 0
+                      ? () {
+                          setState(() => _periodOffset++);
                           _updateDashboardPeriod();
                         }
-                      },
-                      child: Column(
-                        children: [
-                          Text(
-                            periodLabel,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          if (_periodOffset != 0)
-                            Text(
-                              'Toque para voltar ao atual',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontSize: 10,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
+                      : null,
+                  child: Icon(
+                    CupertinoIcons.chevron_right,
+                    color: _periodOffset < 0
+                        ? CupertinoColors.activeBlue.resolveFrom(context)
+                        : CupertinoColors.systemGrey.resolveFrom(context),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_right,
-                      color: _periodOffset < 0
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline.withOpacity(0.3),
-                    ),
-                    onPressed: _periodOffset < 0
-                        ? () {
-                            setState(() => _periodOffset++);
-                            _updateDashboardPeriod();
-                          }
-                        : null,
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           if (selectedPeriod == 'custom')
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.date_range,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    periodLabel,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit_outlined,
+            GestureDetector(
+              onTap: () => _showCustomPeriodPicker(theme),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.secondarySystemGroupedBackground
+                      .resolveFrom(context),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      CupertinoIcons.calendar,
                       size: 20,
-                      color: theme.colorScheme.primary,
+                      color: CupertinoColors.activeBlue.resolveFrom(context),
                     ),
-                    onPressed: () => _showCustomPeriodPicker(theme),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Text(
+                      periodLabel,
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: CupertinoColors.label.resolveFrom(context),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],
