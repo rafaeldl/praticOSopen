@@ -14,6 +14,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _initialized = false;
+  final TextEditingController _valueController = TextEditingController();
 
   final NumberFormat numberFormat = NumberFormat.currency(
     locale: 'pt-BR',
@@ -24,6 +25,12 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
   OrderStore? _store;
 
   @override
+  void dispose() {
+    _valueController.dispose();
+    super.dispose();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
@@ -32,6 +39,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
       if (args != null && args.containsKey('orderStore')) {
         _store = args['orderStore'];
       }
+      _valueController.text = _convertToCurrency(_store?.discount);
       _initialized = true;
     }
   }
@@ -164,7 +172,7 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
 
   Widget _buildValueField(ThemeData theme) {
     return TextFormField(
-      initialValue: _convertToCurrency(_store?.discount),
+      controller: _valueController,
       decoration: _inputDecoration(
         label: 'Valor do desconto',
         icon: Icons.local_offer_outlined,

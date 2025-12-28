@@ -60,18 +60,47 @@ Screens used to select an entity (e.g., Selecting a Customer for an Order) shoul
 
 ## 5. Forms & Input
 
-### Layout
-*   **Grouping:** Use `CupertinoListSection.insetGrouped` or visually similar styling for forms.
-    *   Rounded corners (radius ~10-12).
-    *   Background: `CupertinoColors.secondarySystemGroupedBackground` (White in light mode).
-    *   Canvas Background: `CupertinoColors.systemGroupedBackground` (Light Gray).
-*   **Labels:** Labels should be on the left, values on the right (or placeholders).
+### Layout & Structure
+*   **Grouping:** Use `CupertinoListSection.insetGrouped` for the main form container.
+    *   This provides the standard iOS grouped table view look with rounded corners.
+    *   **Background:** The page scaffold should use `CupertinoColors.systemGroupedBackground`.
+*   **Structure:**
+    1.  **Header/Photo:** If the entity has an image (Product, Service, etc.), place the photo picker at the very top, centered, outside the grouped section.
+    2.  **Fields:** Group related fields inside `CupertinoListSection.insetGrouped`.
+*   **Navigation Bar:**
+    *   **Middle:** "Novo [Entidade]" or "Editar [Entidade]".
+    *   **Trailing:** "Salvar" button (Text only, bold). Show a `CupertinoActivityIndicator` in place of the text while saving.
+
+### Photo Input (Entity Avatar)
+*   **Placement:** Top center of the scroll view.
+*   **Widget:** Circular avatar (ClipOval) approx 100x100 size.
+*   **Placeholder:** If no image exists, use a `Container` with a specific background color (`systemGrey5`) and a central icon (`CupertinoIcons`) representing the entity type.
+*   **Edit Action:**
+    *   Overlay a small camera icon (`CupertinoIcons.camera_fill`) in a blue circle (`activeBlue`) at the bottom-right of the avatar.
+    *   **Interaction:** Tapping the avatar opens a `CupertinoActionSheet` with options: "Tirar Foto", "Escolher da Galeria", "Cancelar".
+*   **Loading State:** Overlay a black transparent background with `CupertinoActivityIndicator` (white) when uploading.
+
+### Input Fields (`CupertinoTextFormFieldRow`)
+*   **Widget:** Use `CupertinoTextFormFieldRow` inside the list section.
+*   **Label:** Use the `prefix` parameter for the field label (Text style fontSize: 16).
+*   **Alignment:**
+    *   **Text:** `textAlign: TextAlign.right` for the input value.
+    *   **Placeholder:** standard placeholder on the right.
+*   **Capitalization:** Use `TextCapitalization.sentences` for names and descriptions.
+*   **Validation:** Return "Obrigatório" string for empty required fields.
+
+### Currency Formatting
+*   **Formatter:** Use `CurrencyTextInputFormatter`.
+    *   **Configuration:** `locale: 'pt_BR'`, `symbol: 'R$'` (Note: **No space** after the symbol).
+    *   **Controller:** Always use a `TextEditingController`. Initialize its text in `didChangeDependencies` using a helper method that matches the formatter's symbol.
+    *   **Symbol Handling:** Ensure the symbol (`R$`) is consistent between the initial text generation and the formatter configuration to avoid input masking conflicts.
+*   **Keyboard:** `TextInputType.number`.
 
 ### Inputs
 *   **Search:** Use `CupertinoSearchTextField`.
 *   **Text Fields:** Use `CupertinoTextField` with `BoxDecoration` removed (borderless) inside list items, or standard rounded style for search.
 
-## 5. Typography & Colors
+## 6. Typography & Colors
 
 ### Fonts
 *   Use the system font stack (San Francisco).
@@ -85,7 +114,7 @@ Screens used to select an entity (e.g., Selecting a Customer for an Order) shoul
 *   **System Colors:** Always use `CupertinoColors` constants (e.g., `systemBlue`, `systemRed`, `label`, `secondaryLabel`, `systemGroupedBackground`).
 *   **Dark Mode:** Rely on system colors which adapt automatically to dark mode.
 
-## 6. Implementation Example (Order List Item)
+## 7. Implementation Example (Order List Item)
 
 ```dart
 // Example of a compliant list item
