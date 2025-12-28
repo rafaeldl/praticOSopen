@@ -33,7 +33,7 @@ import 'screens/customers/customer_list_screen.dart';
 import 'screens/info_form_screen.dart';
 import 'screens/service_form_screen.dart';
 import 'screens/service_list_screen.dart';
-import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
+import 'package:praticos/routes.dart';
 
 AuthStore _authStore = AuthStore();
 
@@ -93,25 +93,7 @@ class MyApp extends StatelessWidget {
               return _buildHome(_authStore);
             },
           ),
-          routes: {
-            '/service_list': (context) => ServiceListScreen(),
-            '/service_form': (context) => ServiceFormScreen(),
-            '/product_list': (context) => ProductListScreen(),
-            '/product_form': (context) => ProductFormScreen(),
-            '/customer_form': (context) => CustomerFormScreen(),
-            '/customer_list': (context) => CustomerListScreen(),
-            '/device_form': (context) => DeviceFormScreen(),
-            '/device_list': (context) => DeviceListScreen(),
-            '/info_form': (context) => InfoFormScreen(),
-            '/order': (context) => OrderForm(),
-            '/order_service': (context) => OrderServiceScreen(),
-            '/order_product': (context) => OrderProductScreen(),
-            '/payment_form_screen': (context) => PaymentFormScreen(),
-            '/financial_dashboard_simple': (context) => FinancialDashboardSimple(),
-            '/collaborator_list': (context) => CollaboratorListScreen(),
-            '/collaborator_form': (context) => CollaboratorFormScreen(),
-            '/company_form': (context) => CompanyFormScreen(),
-          },
+          routes: appRoutes,
         );
       },
     );
