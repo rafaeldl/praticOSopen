@@ -1,38 +1,42 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Colors, Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/mobx/company_store.dart';
+import 'package:praticos/models/company.dart';
 import 'package:praticos/global.dart';
 import 'package:provider/provider.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 
 class FinancialDashboardSimple extends StatefulWidget {
+  const FinancialDashboardSimple({super.key});
+
   @override
-  _FinancialDashboardSimpleState createState() =>
+  State<FinancialDashboardSimple> createState() =>
       _FinancialDashboardSimpleState();
 }
 
 class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   String selectedPeriod = 'mês';
-  final List<String> periodFilters = ['hoje', 'semana', 'mês', 'ano', 'custom'];
   final Map<String, String> periodLabelsMap = {
-    'hoje': 'HOJE',
-    'semana': 'SEMANA',
-    'mês': 'MÊS',
-    'ano': 'ANO',
-    'custom': 'PERÍODO',
+    'hoje': 'Hoje',
+    'semana': 'Semana',
+    'mês': 'Mês',
+    'ano': 'Ano',
+    'custom': 'Período',
   };
-  DateTime _lastTouchTime = DateTime.now();
   int _periodOffset = 0;
   bool _isRankingExpanded = false;
   bool _isServicesExpanded = false;
   bool _isProductsExpanded = false;
   bool _isRecentOrdersExpanded = false;
+  bool _initialLoadDone = false;
 
   // Custom period dates
   DateTime? _customStartDate;
@@ -44,8 +48,20 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     initializeDateFormatting('pt_BR', null);
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialLoadDone) {
+      _initialLoadDone = true;
+      final orderStore = Provider.of<OrderStore>(context, listen: false);
+      orderStore.setCustomPeriod(selectedPeriod, _periodOffset);
+    }
+  }
+
   String get periodLabel {
-    if (selectedPeriod == 'custom' && _customStartDate != null && _customEndDate != null) {
+    if (selectedPeriod == 'custom' &&
+        _customStartDate != null &&
+        _customEndDate != null) {
       final DateFormat dateFormat = DateFormat('dd/MM/yy', 'pt_BR');
       return '${dateFormat.format(_customStartDate!)} - ${dateFormat.format(_customEndDate!)}';
     }
@@ -80,16 +96,12 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       case 'semana':
         DateTime startOfWeek =
             periodDate.subtract(Duration(days: periodDate.weekday));
-        DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
+        DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
         return "${dayFormat.format(startOfWeek)} - ${dayFormat.format(endOfWeek)}";
       case 'mês':
-        return _periodOffset != 0
-            ? monthFormat.format(periodDate)
-            : 'Mês atual';
+        return _periodOffset != 0 ? monthFormat.format(periodDate) : 'Mês atual';
       case 'ano':
-        return _periodOffset != 0
-            ? yearFormat.format(periodDate)
-            : 'Ano atual';
+        return _periodOffset != 0 ? yearFormat.format(periodDate) : 'Ano atual';
       default:
         return selectedPeriod;
     }
@@ -98,500 +110,696 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   @override
   Widget build(BuildContext context) {
     final orderStore = Provider.of<OrderStore>(context);
-    final theme = Theme.of(context);
 
-    orderStore.loadOrdersForDashboard();
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            CupertinoSliverNavigationBar(
+              largeTitle: const Text('Painel Financeiro'),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Icon(
+                  CupertinoIcons.square_arrow_up,
+                  color: CupertinoColors.activeBlue.resolveFrom(context),
+                ),
+                onPressed: () => _shareReport(orderStore),
+              ),
+            ),
+            CupertinoSliverRefreshControl(
+              onRefresh: () => orderStore.loadOrdersForDashboard(),
+            ),
+            _buildPeriodSelector(),
+            Observer(builder: (_) => _buildKpiCards(orderStore)),
+            Observer(builder: (_) => _buildRevenueBreakdown(orderStore)),
+            Observer(builder: (_) => _buildCustomerRanking(orderStore)),
+            Observer(builder: (_) => _buildServicesRanking(orderStore)),
+            Observer(builder: (_) => _buildProductsRanking(orderStore)),
+            Observer(builder: (_) => _buildRecentOrders(orderStore)),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+          ],
+        ),
+      ),
+    );
+  }
 
-    return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      appBar: AppBar(
-        title: const Text('Painel Financeiro'),
-        centerTitle: false,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            tooltip: 'Gerar Relatório PDF',
-            onPressed: () => _generateReport(orderStore),
+  // ============================================================
+  // PERIOD SELECTOR
+  // ============================================================
+
+  Widget _buildPeriodSelector() {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Column(
+          children: [
+            // Segmented Control for Period Type
+            SizedBox(
+              width: double.infinity,
+              child: CupertinoSlidingSegmentedControl<String>(
+                groupValue: selectedPeriod,
+                children: {
+                  'hoje': Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text('Hoje', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                  ),
+                  'semana': Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text('Semana', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                  ),
+                  'mês': Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text('Mês', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                  ),
+                  'ano': Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text('Ano', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                  ),
+                  'custom': Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Text('Período', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                  ),
+                },
+                onValueChanged: (value) {
+                  if (value == 'custom') {
+                    _showCustomPeriodPicker();
+                  } else {
+                    setState(() {
+                      selectedPeriod = value!;
+                      _periodOffset = 0;
+                      _customStartDate = null;
+                      _customEndDate = null;
+                    });
+                    _updateDashboardPeriod();
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Period Navigation Row
+            _buildPeriodNavigationRow(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPeriodNavigationRow() {
+    if (selectedPeriod == 'custom') {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: CupertinoColors.tertiarySystemGroupedBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.calendar,
+              size: 20,
+              color: CupertinoColors.activeBlue.resolveFrom(context),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              periodLabel,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.none,
+                color: CupertinoColors.label.resolveFrom(context),
+              ),
+            ),
+            const SizedBox(width: 8),
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size.square(28),
+              child: Icon(
+                CupertinoIcons.pencil,
+                size: 18,
+                color: CupertinoColors.activeBlue.resolveFrom(context),
+              ),
+              onPressed: () => _showCustomPeriodPicker(),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: CupertinoColors.tertiarySystemGroupedBackground.resolveFrom(context),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            minimumSize: const Size.square(32),
+            child: Icon(
+              CupertinoIcons.chevron_left,
+              color: CupertinoColors.activeBlue.resolveFrom(context),
+            ),
+            onPressed: () {
+              setState(() => _periodOffset--);
+              _updateDashboardPeriod();
+            },
           ),
-          const SizedBox(width: 8),
+          Expanded(
+            child: GestureDetector(
+              onTap: _periodOffset != 0
+                  ? () {
+                      setState(() => _periodOffset = 0);
+                      final orderStore =
+                          Provider.of<OrderStore>(context, listen: false);
+                      orderStore.setPaymentFilter(null);
+                      orderStore.clearCustomerRankingSelection();
+                      _updateDashboardPeriod();
+                    }
+                  : null,
+              child: Column(
+                children: [
+                  Text(
+                    periodLabel,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.none,
+                      color: CupertinoColors.label.resolveFrom(context),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (_periodOffset != 0)
+                    Text(
+                      'Toque para voltar ao atual',
+                      style: TextStyle(
+                        fontSize: 12,
+                        decoration: TextDecoration.none,
+                        color: CupertinoColors.activeBlue.resolveFrom(context),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            minimumSize: const Size.square(32),
+            onPressed: _periodOffset < 0
+                ? () {
+                    setState(() => _periodOffset++);
+                    _updateDashboardPeriod();
+                  }
+                : null,
+            child: Icon(
+              CupertinoIcons.chevron_right,
+              color: _periodOffset < 0
+                  ? CupertinoColors.activeBlue.resolveFrom(context)
+                  : CupertinoColors.tertiaryLabel.resolveFrom(context),
+            ),
+          ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await orderStore.loadOrdersForDashboard();
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildPeriodSelector(theme),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Observer(builder: (_) => _buildKpiCards(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) =>
-                            _buildRevenueBreakdown(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) =>
-                            _buildCustomerRanking(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) =>
-                            _buildServicesRanking(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) =>
-                            _buildProductsRanking(orderStore, theme)),
-                    const SizedBox(height: 20),
-                    Observer(
-                        builder: (_) => _buildRecentOrders(orderStore, theme)),
-                    const SizedBox(height: 24),
-                  ],
+    );
+  }
+
+  Future<void> _showCustomPeriodPicker() async {
+    DateTime tempStartDate =
+        _customStartDate ?? DateTime.now().subtract(const Duration(days: 30));
+    DateTime tempEndDate = _customEndDate ?? DateTime.now();
+    bool isSelectingStart = true;
+
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          height: 380,
+          padding: const EdgeInsets.only(top: 6.0),
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                // Header
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CupertinoButton(
+                        child: const Text('Cancelar'),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      Text(
+                        'Selecionar Período',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.none,
+                          color: CupertinoColors.label.resolveFrom(context),
+                        ),
+                      ),
+                      CupertinoButton(
+                        child: const Text('OK'),
+                        onPressed: () {
+                          setState(() {
+                            selectedPeriod = 'custom';
+                            _customStartDate = tempStartDate;
+                            _customEndDate = tempEndDate;
+                            _periodOffset = 0;
+                          });
+                          _updateDashboardPeriodCustom(
+                              tempStartDate, tempEndDate);
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                // Start/End Toggle
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: CupertinoSlidingSegmentedControl<bool>(
+                    groupValue: isSelectingStart,
+                    children: {
+                      true: Text(
+                        'Início: ${DateFormat('dd/MM/yy').format(tempStartDate)}',
+                        style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context)),
+                      ),
+                      false: Text(
+                        'Fim: ${DateFormat('dd/MM/yy').format(tempEndDate)}',
+                        style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context)),
+                      ),
+                    },
+                    onValueChanged: (value) {
+                      setModalState(() => isSelectingStart = value!);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Date Picker
+                Expanded(
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.date,
+                    initialDateTime:
+                        isSelectingStart ? tempStartDate : tempEndDate,
+                    maximumDate: DateTime.now(),
+                    minimumDate: DateTime(2020),
+                    onDateTimeChanged: (date) {
+                      setModalState(() {
+                        if (isSelectingStart) {
+                          tempStartDate = date;
+                          if (date.isAfter(tempEndDate)) {
+                            tempEndDate = date;
+                          }
+                        } else {
+                          tempEndDate = date;
+                          if (date.isBefore(tempStartDate)) {
+                            tempStartDate = date;
+                          }
+                        }
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildPeriodSelector(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        boxShadow: [
-          BoxShadow(
-            color: theme.shadowColor.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Period type selector - using custom chips without checkmark
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: periodFilters.map((period) {
-                final isSelected = selectedPeriod == period;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: FilterChip(
-                    label: Text(
-                      periodLabelsMap[period] ?? period.toUpperCase(),
-                      style: TextStyle(
-                        color: isSelected
-                            ? theme.colorScheme.onPrimary
-                            : theme.colorScheme.onSurfaceVariant,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                        fontSize: 12,
-                      ),
-                    ),
-                    selected: isSelected,
-                    showCheckmark: false,
-                    selectedColor: theme.colorScheme.primary,
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    onSelected: (selected) {
-                      if (period == 'custom') {
-                        _showCustomPeriodPicker(theme);
-                      } else {
-                        setState(() {
-                          selectedPeriod = period;
-                          _periodOffset = 0;
-                          _customStartDate = null;
-                          _customEndDate = null;
-                        });
-                        _updateDashboardPeriod();
-                      }
-                    },
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          // Period navigation
-          if (selectedPeriod != 'custom')
+  // ============================================================
+  // HERO SECTION (Health App Style)
+  // ============================================================
+
+  Widget _buildKpiCards(OrderStore orderStore) {
+    final totalOrders = orderStore.recentOrders.length;
+    final paidOrders =
+        orderStore.recentOrders.where((o) => o?.payment == 'paid').length;
+    final unpaidOrders = totalOrders - paidOrders;
+    final avgTicket =
+        totalOrders > 0 ? orderStore.totalRevenue / totalOrders : 0.0;
+
+    final labelColor = CupertinoColors.label.resolveFrom(context);
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+    final tertiaryColor = CupertinoColors.tertiaryLabel.resolveFrom(context);
+    final greenColor = CupertinoColors.systemGreen.resolveFrom(context);
+    final orangeColor = CupertinoColors.systemOrange.resolveFrom(context);
+
+    final paidPercent = orderStore.totalRevenue > 0
+        ? orderStore.totalPaidAmount / orderStore.totalRevenue
+        : 0.0;
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Hero: Large Revenue Number
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
+                color: CupertinoColors.secondarySystemGroupedBackground
+                    .resolveFrom(context),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_left,
-                      color: theme.colorScheme.primary,
+                  Text(
+                    'FATURAMENTO',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                      color: secondaryColor,
                     ),
-                    onPressed: () {
-                      setState(() => _periodOffset--);
-                      _updateDashboardPeriod();
-                    },
-                    visualDensity: VisualDensity.compact,
                   ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        if (_periodOffset != 0) {
-                          setState(() => _periodOffset = 0);
-                          final orderStore =
-                              Provider.of<OrderStore>(context, listen: false);
-                          orderStore.setPaymentFilter(null);
-                          orderStore.clearCustomerRankingSelection();
-                          _updateDashboardPeriod();
-                        }
-                      },
-                      child: Column(
+                  const SizedBox(height: 8),
+                  Text(
+                    _convertToCurrency(orderStore.totalRevenue),
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.bold,
+                      color: labelColor,
+                      letterSpacing: -1,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '$totalOrders ordens • Média ${_convertToCurrency(avgTicket)}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: secondaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Horizontal Stacked Bar (Health app style)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: SizedBox(
+                      height: 8,
+                      child: Row(
                         children: [
-                          Text(
-                            periodLabel,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            textAlign: TextAlign.center,
+                          Expanded(
+                            flex: (paidPercent * 100).round().clamp(1, 100),
+                            child: Container(color: greenColor),
                           ),
-                          if (_periodOffset != 0)
-                            Text(
-                              'Toque para voltar ao atual',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontSize: 10,
-                              ),
+                          if (paidPercent < 1)
+                            Expanded(
+                              flex: ((1 - paidPercent) * 100).round().clamp(1, 100),
+                              child: Container(color: orangeColor),
                             ),
                         ],
                       ),
                     ),
                   ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.chevron_right,
-                      color: _periodOffset < 0
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline.withOpacity(0.3),
-                    ),
-                    onPressed: _periodOffset < 0
-                        ? () {
-                            setState(() => _periodOffset++);
-                            _updateDashboardPeriod();
-                          }
-                        : null,
-                    visualDensity: VisualDensity.compact,
+                  const SizedBox(height: 16),
+
+                  // Legend Row
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildHealthLegendItem(
+                          label: 'Recebido',
+                          value: _convertToCurrency(orderStore.totalPaidAmount),
+                          count: paidOrders,
+                          color: greenColor,
+                          isSelected: orderStore.paymentFilter == 'paid',
+                          onTap: () => _togglePaymentFilter(orderStore, 'paid'),
+                        ),
+                      ),
+                      Container(
+                        width: 1,
+                        height: 40,
+                        color: tertiaryColor,
+                      ),
+                      Expanded(
+                        child: _buildHealthLegendItem(
+                          label: 'A Receber',
+                          value: _convertToCurrency(orderStore.totalUnpaidAmount),
+                          count: unpaidOrders,
+                          color: orangeColor,
+                          isSelected: orderStore.paymentFilter == 'unpaid',
+                          onTap: () => _togglePaymentFilter(orderStore, 'unpaid'),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          if (selectedPeriod == 'custom')
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.date_range,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    periodLabel,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit_outlined,
-                      size: 20,
-                      color: theme.colorScheme.primary,
-                    ),
-                    onPressed: () => _showCustomPeriodPicker(theme),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                ],
-              ),
-            ),
-        ],
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
 
-  Future<void> _showCustomPeriodPicker(ThemeData theme) async {
-    final now = DateTime.now();
-    final initialStart = _customStartDate ?? now.subtract(const Duration(days: 30));
-    final initialEnd = _customEndDate ?? now;
-
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: now,
-      initialDateRange: DateTimeRange(start: initialStart, end: initialEnd),
-      builder: (context, child) {
-        return Theme(
-          data: theme.copyWith(
-            colorScheme: theme.colorScheme,
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      setState(() {
-        selectedPeriod = 'custom';
-        _customStartDate = picked.start;
-        _customEndDate = picked.end;
-        _periodOffset = 0;
-      });
-      _updateDashboardPeriodCustom(picked.start, picked.end);
-    }
-  }
-
-  void _updateDashboardPeriodCustom(DateTime start, DateTime end) {
-    final orderStore = Provider.of<OrderStore>(context, listen: false);
-    orderStore.setCustomDateRange(start, end);
-  }
-
-  // Calculate services ranking from orders
-  List<Map<String, dynamic>> _calculateServicesRanking(OrderStore orderStore) {
-    final Map<String, Map<String, dynamic>> servicesMap = {};
-
-    for (final order in orderStore.recentOrders) {
-      if (order?.services != null) {
-        for (final service in order!.services!) {
-          final name = service.service?.name ?? service.description ?? 'Serviço sem nome';
-          final value = service.value ?? 0.0;
-
-          if (servicesMap.containsKey(name)) {
-            servicesMap[name]!['total'] = (servicesMap[name]!['total'] as double) + value;
-            servicesMap[name]!['quantity'] = (servicesMap[name]!['quantity'] as int) + 1;
-          } else {
-            servicesMap[name] = {
-              'name': name,
-              'total': value,
-              'quantity': 1,
-            };
-          }
-        }
-      }
-    }
-
-    final ranking = servicesMap.values.toList();
-    ranking.sort((a, b) => (b['total'] as double).compareTo(a['total'] as double));
-    return ranking;
-  }
-
-  // Calculate products ranking from orders
-  List<Map<String, dynamic>> _calculateProductsRanking(OrderStore orderStore) {
-    final Map<String, Map<String, dynamic>> productsMap = {};
-
-    for (final order in orderStore.recentOrders) {
-      if (order?.products != null) {
-        for (final product in order!.products!) {
-          final name = product.product?.name ?? product.description ?? 'Produto sem nome';
-          final total = product.total ?? (product.value ?? 0.0) * (product.quantity ?? 1);
-          final quantity = product.quantity ?? 1;
-
-          if (productsMap.containsKey(name)) {
-            productsMap[name]!['total'] = (productsMap[name]!['total'] as double) + total;
-            productsMap[name]!['quantity'] = (productsMap[name]!['quantity'] as int) + quantity;
-          } else {
-            productsMap[name] = {
-              'name': name,
-              'total': total,
-              'quantity': quantity,
-            };
-          }
-        }
-      }
-    }
-
-    final ranking = productsMap.values.toList();
-    ranking.sort((a, b) => (b['total'] as double).compareTo(a['total'] as double));
-    return ranking;
-  }
-
-  Widget _buildKpiCards(OrderStore orderStore, ThemeData theme) {
-    final totalOrders = orderStore.recentOrders.length;
-    final paidOrders =
-        orderStore.recentOrders.where((o) => o?.payment == 'paid').length;
-    final unpaidOrders = totalOrders - paidOrders;
-    final avgTicket = totalOrders > 0
-        ? orderStore.totalRevenue / totalOrders
-        : 0.0;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Resumo do Período',
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.onSurface,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildKpiCard(
-                theme: theme,
-                title: 'Faturamento',
-                value: _convertToCurrency(orderStore.totalRevenue),
-                icon: Icons.account_balance_wallet_outlined,
-                color: theme.colorScheme.primary,
-                subtitle: '$totalOrders ordens',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildKpiCard(
-                theme: theme,
-                title: 'Ticket Médio',
-                value: _convertToCurrency(avgTicket),
-                icon: Icons.receipt_long_outlined,
-                color: theme.colorScheme.tertiary,
-                subtitle: 'por ordem',
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildKpiCard(
-                theme: theme,
-                title: 'Recebido',
-                value: _convertToCurrency(orderStore.totalPaidAmount),
-                icon: Icons.check_circle_outline,
-                color: Colors.green.shade600,
-                subtitle: '$paidOrders ordens',
-                onTap: () {
-                  if (orderStore.paymentFilter == 'paid') {
-                    orderStore.setPaymentFilter(null);
-                  } else {
-                    orderStore.setPaymentFilter('paid');
-                  }
-                },
-                isSelected: orderStore.paymentFilter == 'paid',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildKpiCard(
-                theme: theme,
-                title: 'A Receber',
-                value: _convertToCurrency(orderStore.totalUnpaidAmount),
-                icon: Icons.schedule_outlined,
-                color: Colors.orange.shade700,
-                subtitle: '$unpaidOrders ordens',
-                onTap: () {
-                  if (orderStore.paymentFilter == 'unpaid') {
-                    orderStore.setPaymentFilter(null);
-                  } else {
-                    orderStore.setPaymentFilter('unpaid');
-                  }
-                },
-                isSelected: orderStore.paymentFilter == 'unpaid',
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildKpiCard({
-    required ThemeData theme,
-    required String title,
+  Widget _buildHealthLegendItem({
+    required String label,
     required String value,
-    required IconData icon,
+    required int count,
     required Color color,
-    String? subtitle,
-    VoidCallback? onTap,
-    bool isSelected = false,
+    required bool isSelected,
+    required VoidCallback onTap,
   }) {
-    return Material(
-      color: isSelected
-          ? color.withOpacity(0.1)
-          : theme.colorScheme.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: isSelected
-                ? Border.all(color: color, width: 2)
-                : Border.all(
-                    color: theme.colorScheme.outline.withOpacity(0.1),
-                    width: 1,
+    final labelColor = CupertinoColors.label.resolveFrom(context);
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? color.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
                   ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: secondaryColor,
+                  ),
+                ),
+                if (isSelected) ...[
+                  const SizedBox(width: 4),
+                  Icon(
+                    CupertinoIcons.checkmark,
+                    size: 10,
+                    color: color,
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: labelColor,
+              ),
+            ),
+            Text(
+              '$count ordens',
+              style: TextStyle(
+                fontSize: 11,
+                color: secondaryColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _togglePaymentFilter(OrderStore orderStore, String filter) {
+    if (orderStore.paymentFilter == filter) {
+      orderStore.setPaymentFilter(null);
+    } else {
+      orderStore.setPaymentFilter(filter);
+    }
+  }
+
+  // ============================================================
+  // REVENUE COMPOSITION (Services vs Products - Health App Style)
+  // ============================================================
+
+  Widget _buildRevenueBreakdown(OrderStore orderStore) {
+    final servicesRanking = _calculateServicesRanking(orderStore);
+    final productsRanking = _calculateProductsRanking(orderStore);
+
+    final totalServices = servicesRanking.fold<double>(
+        0, (sum, item) => sum + (item['total'] as double));
+    final totalProducts = productsRanking.fold<double>(
+        0, (sum, item) => sum + (item['total'] as double));
+    final totalComposition = totalServices + totalProducts;
+
+    if (totalComposition == 0) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    final labelColor = CupertinoColors.label.resolveFrom(context);
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+    final blueColor = CupertinoColors.systemBlue.resolveFrom(context);
+    final purpleColor = CupertinoColors.systemPurple.resolveFrom(context);
+
+    final servicesPercent = totalComposition > 0 ? totalServices / totalComposition : 0.0;
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: CupertinoColors.secondarySystemGroupedBackground
+                .resolveFrom(context),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'COMPOSIÇÃO',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                  color: secondaryColor,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Horizontal stacked bar
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: SizedBox(
+                  height: 8,
+                  child: Row(
+                    children: [
+                      if (totalServices > 0)
+                        Expanded(
+                          flex: (servicesPercent * 100).round().clamp(1, 100),
+                          child: Container(color: blueColor),
+                        ),
+                      if (totalProducts > 0)
+                        Expanded(
+                          flex: ((1 - servicesPercent) * 100).round().clamp(1, 100),
+                          child: Container(color: purpleColor),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Two columns
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, size: 20, color: color),
-                  ),
-                  const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      title,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: blueColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Serviços',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: secondaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _convertToCurrency(totalServices),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: labelColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(
+                                color: purpleColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Produtos',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: secondaryColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _convertToCurrency(totalProducts),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: labelColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-              if (subtitle != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -599,234 +807,118 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     );
   }
 
-  Widget _buildRevenueBreakdown(OrderStore orderStore, ThemeData theme) {
-    if (orderStore.totalRevenue == 0) {
-      return _buildEmptyState(
-        theme: theme,
-        icon: Icons.analytics_outlined,
-        message: 'Sem dados de faturamento neste período',
-      );
-    }
+  // ============================================================
+  // CUSTOMER RANKING
+  // ============================================================
 
-    final paidPercentage = orderStore.totalRevenue > 0
-        ? (orderStore.totalPaidAmount / orderStore.totalRevenue * 100)
-        : 0.0;
-    final unpaidPercentage = orderStore.totalRevenue > 0
-        ? (orderStore.totalUnpaidAmount / orderStore.totalRevenue * 100)
-        : 0.0;
-
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.1),
-          ),
-        ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.pie_chart_outline,
-                size: 20,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Composição do Faturamento',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              // Mini pie chart
-              SizedBox(
-                width: 80,
-                height: 80,
-                child: PieChart(
-                  PieChartData(
-                    sectionsSpace: 2,
-                    centerSpaceRadius: 20,
-                    sections: [
-                      PieChartSectionData(
-                        color: Colors.green.shade500,
-                        value: orderStore.totalPaidAmount,
-                        title: '',
-                        radius: 18,
-                      ),
-                      PieChartSectionData(
-                        color: Colors.orange.shade500,
-                        value: orderStore.totalUnpaidAmount,
-                        title: '',
-                        radius: 18,
-                      ),
-                    ],
-                    pieTouchData: PieTouchData(
-                      touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                        final now = DateTime.now();
-                        if (event.isInterestedForInteractions &&
-                            now.difference(_lastTouchTime).inMilliseconds >
-                                500 &&
-                            pieTouchResponse != null &&
-                            pieTouchResponse.touchedSection != null) {
-                          _lastTouchTime = now;
-                          final touchedIndex = pieTouchResponse
-                              .touchedSection!.touchedSectionIndex;
-                          if (touchedIndex == 0) {
-                            if (orderStore.paymentFilter == 'paid') {
-                              orderStore.setPaymentFilter(null);
-                            } else {
-                              orderStore.setPaymentFilter('paid');
-                            }
-                          } else if (touchedIndex == 1) {
-                            if (orderStore.paymentFilter == 'unpaid') {
-                              orderStore.setPaymentFilter(null);
-                            } else {
-                              orderStore.setPaymentFilter('unpaid');
-                            }
-                          }
-                        }
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 24),
-              // Legend
-              Expanded(
-                child: Column(
-                  children: [
-                    _buildBreakdownItem(
-                      theme: theme,
-                      label: 'Recebido',
-                      value: _convertToCurrency(orderStore.totalPaidAmount),
-                      percentage: paidPercentage,
-                      color: Colors.green.shade500,
-                      isSelected: orderStore.paymentFilter == 'paid',
-                      onTap: () {
-                        if (orderStore.paymentFilter == 'paid') {
-                          orderStore.setPaymentFilter(null);
-                        } else {
-                          orderStore.setPaymentFilter('paid');
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _buildBreakdownItem(
-                      theme: theme,
-                      label: 'A Receber',
-                      value: _convertToCurrency(orderStore.totalUnpaidAmount),
-                      percentage: unpaidPercentage,
-                      color: Colors.orange.shade500,
-                      isSelected: orderStore.paymentFilter == 'unpaid',
-                      onTap: () {
-                        if (orderStore.paymentFilter == 'unpaid') {
-                          orderStore.setPaymentFilter(null);
-                        } else {
-                          orderStore.setPaymentFilter('unpaid');
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      ),
-    );
-  }
-
-  Widget _buildBreakdownItem({
-    required ThemeData theme,
-    required String label,
-    required String value,
-    required double percentage,
-    required Color color,
-    bool isSelected = false,
-    VoidCallback? onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-          border: isSelected ? Border.all(color: color, width: 1) : null,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    value,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '${percentage.toStringAsFixed(0)}%',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCustomerRanking(OrderStore orderStore, ThemeData theme) {
+  Widget _buildCustomerRanking(OrderStore orderStore) {
     if (orderStore.customerRanking.isEmpty) {
       return _buildEmptyState(
-        theme: theme,
-        icon: Icons.people_outline,
+        icon: CupertinoIcons.person_2,
         message: 'Sem dados de clientes neste período',
       );
     }
 
-    var filteredRanking = List.from(orderStore.customerRanking);
+    var filteredRanking = _filterRankingByPayment(orderStore);
+    final itemCount = _isRankingExpanded
+        ? filteredRanking.length
+        : (filteredRanking.length > 5 ? 5 : filteredRanking.length);
+
+    String sectionTitle = orderStore.paymentFilter == 'paid'
+        ? 'CLIENTES - RECEBIDO'
+        : orderStore.paymentFilter == 'unpaid'
+            ? 'CLIENTES - A RECEBER'
+            : 'CLIENTES';
+
+    // Calculate total for header
+    final totalValue = filteredRanking.fold<double>(0, (sum, customer) {
+      final double totalAmount = customer['total'] ?? 0.0;
+      final double unpaidAmount = customer['unpaidTotal'] ?? 0.0;
+      final double paidAmount = totalAmount - unpaidAmount;
+
+      return sum + (orderStore.paymentFilter == 'paid'
+          ? paidAmount
+          : orderStore.paymentFilter == 'unpaid'
+              ? unpaidAmount
+              : totalAmount);
+    });
+
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+    final cardColor = CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context);
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      sectionTitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
+                        color: secondaryColor,
+                      ),
+                    ),
+                    Text(
+                      _convertToCurrency(totalValue),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: secondaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              for (int i = 0; i < itemCount; i++)
+                _buildRankingListTile(
+                  rank: i + 1,
+                  customer: filteredRanking[i],
+                  orderStore: orderStore,
+                ),
+              if (filteredRanking.length > 5)
+                CupertinoButton(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  onPressed: () => setState(() => _isRankingExpanded = !_isRankingExpanded),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _isRankingExpanded ? 'Ver menos' : 'Ver todos (${filteredRanking.length})',
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        _isRankingExpanded
+                            ? CupertinoIcons.chevron_up
+                            : CupertinoIcons.chevron_down,
+                        size: 14,
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 4),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> _filterRankingByPayment(OrderStore orderStore) {
+    var filteredRanking = List<Map<String, dynamic>>.from(orderStore.customerRanking);
 
     if (orderStore.paymentFilter != null) {
       filteredRanking = filteredRanking.where((customer) {
@@ -858,133 +950,129 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       });
     }
 
-    final itemCount = _isRankingExpanded
-        ? filteredRanking.length
-        : (filteredRanking.length > 5 ? 5 : filteredRanking.length);
+    return filteredRanking;
+  }
 
-    String sectionTitle = 'Ranking de Clientes';
-    if (orderStore.paymentFilter == 'paid') {
-      sectionTitle = 'Clientes - Recebido';
-    } else if (orderStore.paymentFilter == 'unpaid') {
-      sectionTitle = 'Clientes - A Receber';
-    }
+  Widget _buildRankingListTile({
+    required int rank,
+    required Map<String, dynamic> customer,
+    required OrderStore orderStore,
+  }) {
+    final isSelected =
+        orderStore.selectedCustomerInRanking?['id'] == customer['id'];
 
-    return SizedBox(
-      width: double.infinity,
+    final labelColor = CupertinoColors.label.resolveFrom(context);
+    final selectedBgColor = CupertinoColors.systemGrey5.resolveFrom(context);
+
+    final double totalAmount = customer['total'] ?? 0.0;
+    final double unpaidAmount = customer['unpaidTotal'] ?? 0.0;
+    final double paidAmount = totalAmount - unpaidAmount;
+
+    final displayValue = orderStore.paymentFilter == 'paid'
+        ? paidAmount
+        : orderStore.paymentFilter == 'unpaid'
+            ? unpaidAmount
+            : totalAmount;
+
+    return GestureDetector(
+      onTap: () {
+        if (isSelected) {
+          orderStore.clearCustomerRankingSelection();
+        } else {
+          orderStore.selectCustomerInRanking(customer);
+        }
+      },
       child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.1),
-          ),
-        ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.people_outline,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  sectionTitle,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${filteredRanking.length}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onPrimaryContainer,
+        color: isSelected ? selectedBgColor : Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    customer['name'] ?? 'Cliente sem nome',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: labelColor,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                  if (unpaidAmount > 0 && orderStore.paymentFilter == null)
+                    Text(
+                      'A receber: ${_convertToCurrency(unpaidAmount)}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: CupertinoColors.systemOrange,
+                      ),
+                    ),
+                ],
+              ),
             ),
-          ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: itemCount,
-            separatorBuilder: (context, index) => Divider(
-              height: 1,
-              indent: 16,
-              endIndent: 16,
-              color: theme.colorScheme.outline.withOpacity(0.1),
+            const SizedBox(width: 8),
+            Text(
+              _convertToCurrency(displayValue),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: labelColor,
+              ),
             ),
-            itemBuilder: (context, index) {
-              final customer = filteredRanking[index];
-              final isSelected =
-                  orderStore.selectedCustomerInRanking != null &&
-                      orderStore.selectedCustomerInRanking!['id'] ==
-                          customer['id'];
-
-              final double totalAmount = customer['total'] ?? 0.0;
-              final double unpaidAmount = customer['unpaidTotal'] ?? 0.0;
-              final double paidAmount = totalAmount - unpaidAmount;
-
-              return _buildRankingItem(
-                theme: theme,
-                index: index,
-                name: customer['name'] ?? 'Cliente sem nome',
-                value: orderStore.paymentFilter == 'paid'
-                    ? paidAmount
-                    : orderStore.paymentFilter == 'unpaid'
-                        ? unpaidAmount
-                        : totalAmount,
-                secondaryValue: orderStore.paymentFilter == null && unpaidAmount > 0
-                    ? unpaidAmount
-                    : null,
-                isSelected: isSelected,
-                color: orderStore.paymentFilter == 'paid'
-                    ? Colors.green.shade600
-                    : orderStore.paymentFilter == 'unpaid'
-                        ? Colors.orange.shade700
-                        : theme.colorScheme.primary,
-                secondaryColor: Colors.orange.shade700,
-                onTap: () {
-                  if (isSelected) {
-                    orderStore.clearCustomerRankingSelection();
-                  } else {
-                    orderStore.selectCustomerInRanking(customer);
-                  }
-                },
-              );
-            },
-          ),
-          if (filteredRanking.length > 5)
-            _buildExpandButton(
-              theme: theme,
-              isExpanded: _isRankingExpanded,
-              onTap: () => setState(() => _isRankingExpanded = !_isRankingExpanded),
+            const SizedBox(width: 8),
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 14,
+              color: CupertinoColors.tertiaryLabel.resolveFrom(context),
             ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildServicesRanking(OrderStore orderStore, ThemeData theme) {
+  // ============================================================
+  // SERVICES RANKING
+  // ============================================================
+
+  List<Map<String, dynamic>> _calculateServicesRanking(OrderStore orderStore) {
+    final Map<String, Map<String, dynamic>> servicesMap = {};
+
+    for (final order in orderStore.recentOrders) {
+      if (order?.services != null) {
+        for (final service in order!.services!) {
+          final name =
+              service.service?.name ?? service.description ?? 'Serviço sem nome';
+          final value = service.value ?? 0.0;
+
+          if (servicesMap.containsKey(name)) {
+            servicesMap[name]!['total'] =
+                (servicesMap[name]!['total'] as double) + value;
+            servicesMap[name]!['quantity'] =
+                (servicesMap[name]!['quantity'] as int) + 1;
+          } else {
+            servicesMap[name] = {
+              'name': name,
+              'total': value,
+              'quantity': 1,
+            };
+          }
+        }
+      }
+    }
+
+    final ranking = servicesMap.values.toList();
+    ranking.sort((a, b) => (b['total'] as double).compareTo(a['total'] as double));
+    return ranking;
+  }
+
+  Widget _buildServicesRanking(OrderStore orderStore) {
     final servicesRanking = _calculateServicesRanking(orderStore);
 
     if (servicesRanking.isEmpty) {
       return _buildEmptyState(
-        theme: theme,
-        icon: Icons.build_outlined,
+        icon: CupertinoIcons.wrench,
         message: 'Sem dados de serviços neste período',
       );
     }
@@ -993,124 +1081,126 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? servicesRanking.length
         : (servicesRanking.length > 5 ? 5 : servicesRanking.length);
 
-    // Calculate totals
     final totalServicesValue = servicesRanking.fold<double>(
-      0, (sum, item) => sum + (item['total'] as double));
-    final totalServicesQty = servicesRanking.fold<int>(
-      0, (sum, item) => sum + (item['quantity'] as int));
+        0, (sum, item) => sum + (item['total'] as double));
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+    final cardColor = CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context);
 
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.1),
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'SERVIÇOS',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
+                        color: secondaryColor,
+                      ),
+                    ),
+                    Text(
+                      _convertToCurrency(totalServicesValue),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: secondaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              for (int i = 0; i < itemCount; i++)
+                _buildRankingItemWithQty(
+                  rank: i + 1,
+                  name: servicesRanking[i]['name'] as String,
+                  value: servicesRanking[i]['total'] as double,
+                  quantity: servicesRanking[i]['quantity'] as int,
+                ),
+              if (servicesRanking.length > 5)
+                CupertinoButton(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  onPressed: () => setState(() => _isServicesExpanded = !_isServicesExpanded),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _isServicesExpanded ? 'Ver menos' : 'Ver todos (${servicesRanking.length})',
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        _isServicesExpanded
+                            ? CupertinoIcons.chevron_up
+                            : CupertinoIcons.chevron_down,
+                        size: 14,
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 4),
+            ],
           ),
         ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.build_outlined,
-                      size: 20,
-                      color: Colors.blue.shade600,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Serviços',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${servicesRanking.length}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      'Total: ${_convertToCurrency(totalServicesValue)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.blue.shade700,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      'Qtd: $totalServicesQty',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: itemCount,
-            separatorBuilder: (context, index) => Divider(
-              height: 1,
-              indent: 16,
-              endIndent: 16,
-              color: theme.colorScheme.outline.withOpacity(0.1),
-            ),
-            itemBuilder: (context, index) {
-              final service = servicesRanking[index];
-              return _buildRankingItemWithQty(
-                theme: theme,
-                index: index,
-                name: service['name'] as String,
-                value: service['total'] as double,
-                quantity: service['quantity'] as int,
-                color: Colors.blue.shade600,
-              );
-            },
-          ),
-          if (servicesRanking.length > 5)
-            _buildExpandButton(
-              theme: theme,
-              isExpanded: _isServicesExpanded,
-              onTap: () => setState(() => _isServicesExpanded = !_isServicesExpanded),
-            ),
-        ],
-      ),
       ),
     );
   }
 
-  Widget _buildProductsRanking(OrderStore orderStore, ThemeData theme) {
+  // ============================================================
+  // PRODUCTS RANKING
+  // ============================================================
+
+  List<Map<String, dynamic>> _calculateProductsRanking(OrderStore orderStore) {
+    final Map<String, Map<String, dynamic>> productsMap = {};
+
+    for (final order in orderStore.recentOrders) {
+      if (order?.products != null) {
+        for (final product in order!.products!) {
+          final name =
+              product.product?.name ?? product.description ?? 'Produto sem nome';
+          final total =
+              product.total ?? (product.value ?? 0.0) * (product.quantity ?? 1);
+          final quantity = product.quantity ?? 1;
+
+          if (productsMap.containsKey(name)) {
+            productsMap[name]!['total'] =
+                (productsMap[name]!['total'] as double) + total;
+            productsMap[name]!['quantity'] =
+                (productsMap[name]!['quantity'] as int) + quantity;
+          } else {
+            productsMap[name] = {
+              'name': name,
+              'total': total,
+              'quantity': quantity,
+            };
+          }
+        }
+      }
+    }
+
+    final ranking = productsMap.values.toList();
+    ranking.sort((a, b) => (b['total'] as double).compareTo(a['total'] as double));
+    return ranking;
+  }
+
+  Widget _buildProductsRanking(OrderStore orderStore) {
     final productsRanking = _calculateProductsRanking(orderStore);
 
     if (productsRanking.isEmpty) {
       return _buildEmptyState(
-        theme: theme,
-        icon: Icons.inventory_2_outlined,
+        icon: CupertinoIcons.cube_box,
         message: 'Sem dados de produtos neste período',
       );
     }
@@ -1119,330 +1209,143 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? productsRanking.length
         : (productsRanking.length > 5 ? 5 : productsRanking.length);
 
-    // Calculate totals
     final totalProductsValue = productsRanking.fold<double>(
-      0, (sum, item) => sum + (item['total'] as double));
-    final totalProductsQty = productsRanking.fold<int>(
-      0, (sum, item) => sum + (item['quantity'] as int));
+        0, (sum, item) => sum + (item['total'] as double));
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+    final cardColor = CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context);
 
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.1),
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(10),
           ),
-        ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.inventory_2_outlined,
-                      size: 20,
-                      color: Colors.purple.shade600,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Produtos',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.purple.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${productsRanking.length}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple.shade700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Total: ${_convertToCurrency(totalProductsValue)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.purple.shade700,
+                      'PRODUTOS',
+                      style: TextStyle(
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
+                        color: secondaryColor,
                       ),
                     ),
-                    const SizedBox(width: 16),
                     Text(
-                      'Qtd: $totalProductsQty',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                      _convertToCurrency(totalProductsValue),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: secondaryColor,
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+              for (int i = 0; i < itemCount; i++)
+                _buildRankingItemWithQty(
+                  rank: i + 1,
+                  name: productsRanking[i]['name'] as String,
+                  value: productsRanking[i]['total'] as double,
+                  quantity: productsRanking[i]['quantity'] as int,
+                ),
+              if (productsRanking.length > 5)
+                CupertinoButton(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  onPressed: () => setState(() => _isProductsExpanded = !_isProductsExpanded),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _isProductsExpanded ? 'Ver menos' : 'Ver todos (${productsRanking.length})',
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        _isProductsExpanded
+                            ? CupertinoIcons.chevron_up
+                            : CupertinoIcons.chevron_down,
+                        size: 14,
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 4),
+            ],
           ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: itemCount,
-            separatorBuilder: (context, index) => Divider(
-              height: 1,
-              indent: 16,
-              endIndent: 16,
-              color: theme.colorScheme.outline.withOpacity(0.1),
-            ),
-            itemBuilder: (context, index) {
-              final product = productsRanking[index];
-              return _buildRankingItemWithQty(
-                theme: theme,
-                index: index,
-                name: product['name'] as String,
-                value: product['total'] as double,
-                quantity: product['quantity'] as int,
-                color: Colors.purple.shade600,
-              );
-            },
-          ),
-          if (productsRanking.length > 5)
-            _buildExpandButton(
-              theme: theme,
-              isExpanded: _isProductsExpanded,
-              onTap: () => setState(() => _isProductsExpanded = !_isProductsExpanded),
-            ),
-        ],
-      ),
-      ),
-    );
-  }
-
-  Widget _buildRankingItem({
-    required ThemeData theme,
-    required int index,
-    required String name,
-    required double value,
-    double? secondaryValue,
-    required bool isSelected,
-    required Color color,
-    Color? secondaryColor,
-    VoidCallback? onTap,
-  }) {
-    Color rankColor;
-    if (index == 0) {
-      rankColor = Colors.amber.shade600;
-    } else if (index == 1) {
-      rankColor = Colors.blueGrey.shade400;
-    } else if (index == 2) {
-      rankColor = Colors.brown.shade400;
-    } else {
-      rankColor = theme.colorScheme.outline;
-    }
-
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        color: isSelected
-            ? theme.colorScheme.primaryContainer.withOpacity(0.3)
-            : null,
-        child: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: rankColor.withOpacity(0.15),
-                shape: BoxShape.circle,
-                border: index < 3
-                    ? Border.all(color: rankColor, width: 2)
-                    : null,
-              ),
-              child: Center(
-                child: Text(
-                  '${index + 1}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: rankColor,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                name,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  _convertToCurrency(value),
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-                if (secondaryValue != null)
-                  Text(
-                    _convertToCurrency(secondaryValue),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: secondaryColor ?? Colors.orange.shade700,
-                      fontSize: 11,
-                    ),
-                  ),
-              ],
-            ),
-          ],
         ),
       ),
     );
   }
 
   Widget _buildRankingItemWithQty({
-    required ThemeData theme,
-    required int index,
+    required int rank,
     required String name,
     required double value,
     required int quantity,
-    required Color color,
   }) {
-    Color rankColor;
-    if (index == 0) {
-      rankColor = Colors.amber.shade600;
-    } else if (index == 1) {
-      rankColor = Colors.blueGrey.shade400;
-    } else if (index == 2) {
-      rankColor = Colors.brown.shade400;
-    } else {
-      rankColor = theme.colorScheme.outline;
-    }
+    final labelColor = CupertinoColors.label.resolveFrom(context);
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
 
-    return Container(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: rankColor.withOpacity(0.15),
-              shape: BoxShape.circle,
-              border: index < 3
-                  ? Border.all(color: rankColor, width: 2)
-                  : null,
-            ),
-            child: Center(
-              child: Text(
-                '${index + 1}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: rankColor,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              name,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: labelColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  '$quantity ${quantity == 1 ? 'item' : 'itens'}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: secondaryColor,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                _convertToCurrency(value),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-              Text(
-                'Qtd: $quantity',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontSize: 11,
-                ),
-              ),
-            ],
+          Text(
+            _convertToCurrency(value),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: labelColor,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildExpandButton({
-    required ThemeData theme,
-    required bool isExpanded,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: theme.colorScheme.outline.withOpacity(0.1),
-            ),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              isExpanded ? 'Ver menos' : 'Ver todos',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              isExpanded
-                  ? Icons.keyboard_arrow_up
-                  : Icons.keyboard_arrow_down,
-              size: 18,
-              color: theme.colorScheme.primary,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // ============================================================
+  // RECENT ORDERS
+  // ============================================================
 
-  Widget _buildRecentOrders(OrderStore orderStore, ThemeData theme) {
-    String sectionTitle = 'Ordens de Serviço';
-    if (orderStore.paymentFilter == 'paid') {
-      sectionTitle = 'Ordens Pagas';
-    } else if (orderStore.paymentFilter == 'unpaid') {
-      sectionTitle = 'Ordens a Receber';
-    }
+  Widget _buildRecentOrders(OrderStore orderStore) {
+    String sectionTitle = orderStore.paymentFilter == 'paid'
+        ? 'ORDENS PAGAS'
+        : orderStore.paymentFilter == 'unpaid'
+            ? 'ORDENS A RECEBER'
+            : 'ORDENS RECENTES';
 
     final filteredOrders = orderStore.paymentFilter == null
         ? orderStore.recentOrders
@@ -1452,8 +1355,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
 
     if (filteredOrders.isEmpty) {
       return _buildEmptyState(
-        theme: theme,
-        icon: Icons.receipt_long_outlined,
+        icon: CupertinoIcons.doc_text,
         message: 'Nenhuma ordem neste período',
       );
     }
@@ -1462,208 +1364,161 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? filteredOrders.length
         : (filteredOrders.length > 5 ? 5 : filteredOrders.length);
 
-    return SizedBox(
-      width: double.infinity,
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.1),
-          ),
-        ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.receipt_long_outlined,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  sectionTitle,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${filteredOrders.length}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: itemCount,
-            separatorBuilder: (context, index) => Divider(
-              height: 1,
-              indent: 16,
-              endIndent: 16,
-              color: theme.colorScheme.outline.withOpacity(0.1),
-            ),
-            itemBuilder: (context, index) {
-              final order = filteredOrders[index];
-              final dateFormat = DateFormat('dd/MM/yy');
-              final dateStr = order?.createdAt != null
-                  ? dateFormat.format(order!.createdAt!)
-                  : '';
-              final isPaid = order?.payment == 'paid';
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+    final cardColor = CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context);
 
-              return InkWell(
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/order',
-                    arguments: {'order': order},
-                  );
-                },
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cardColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      sectionTitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.1,
+                        color: secondaryColor,
+                      ),
+                    ),
+                    Text(
+                      '${filteredOrders.length} ordens',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: secondaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              for (int i = 0; i < itemCount; i++)
+                _buildOrderListTile(filteredOrders[i]),
+              if (filteredOrders.length > 5)
+                CupertinoButton(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  onPressed: () => setState(() => _isRecentOrdersExpanded = !_isRecentOrdersExpanded),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: isPaid
-                              ? Colors.green.withOpacity(0.1)
-                              : Colors.orange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(
-                          isPaid
-                              ? Icons.check_circle_outline
-                              : Icons.schedule_outlined,
-                          color: isPaid
-                              ? Colors.green.shade600
-                              : Colors.orange.shade700,
-                          size: 20,
-                        ),
+                      Text(
+                        _isRecentOrdersExpanded ? 'Ver menos' : 'Ver todos (${filteredOrders.length})',
+                        style: const TextStyle(fontSize: 15),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              order?.customer?.name ?? 'Cliente',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'OS #${order?.number} • $dateStr',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            _convertToCurrency(order?.total),
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: isPaid
-                                  ? Colors.green.shade600
-                                  : Colors.orange.shade700,
-                            ),
-                          ),
-                          Container(
-                            margin: const EdgeInsets.only(top: 4),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: isPaid
-                                  ? Colors.green.withOpacity(0.1)
-                                  : Colors.orange.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              isPaid ? 'Pago' : 'Pendente',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: isPaid
-                                    ? Colors.green.shade700
-                                    : Colors.orange.shade800,
-                              ),
-                            ),
-                          ),
-                        ],
+                      const SizedBox(width: 4),
+                      Icon(
+                        _isRecentOrdersExpanded
+                            ? CupertinoIcons.chevron_up
+                            : CupertinoIcons.chevron_down,
+                        size: 14,
                       ),
                     ],
                   ),
                 ),
-              );
-            },
+              const SizedBox(height: 4),
+            ],
           ),
-          if (filteredOrders.length > 5)
-            _buildExpandButton(
-              theme: theme,
-              isExpanded: _isRecentOrdersExpanded,
-              onTap: () => setState(() => _isRecentOrdersExpanded = !_isRecentOrdersExpanded),
-            ),
-        ],
-      ),
+        ),
       ),
     );
   }
 
-  Widget _buildEmptyState({
-    required ThemeData theme,
-    required IconData icon,
-    required String message,
-  }) {
-    return SizedBox(
-      width: double.infinity,
+  Widget _buildOrderListTile(dynamic order) {
+    final dateFormat = DateFormat('dd/MM/yy');
+    final dateStr =
+        order?.createdAt != null ? dateFormat.format(order!.createdAt!) : '';
+    final isPaid = order?.payment == 'paid';
+
+    final labelColor = CupertinoColors.label.resolveFrom(context);
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(
+        context,
+        '/order',
+        arguments: {'order': order},
+      ),
       child: Container(
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: theme.colorScheme.outline.withOpacity(0.1),
-          ),
-        ),
-        child: Column(
+        color: Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
           children: [
-            Icon(
-              icon,
-              size: 48,
-              color: theme.colorScheme.outline.withOpacity(0.5),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    order?.customer?.name ?? 'Cliente',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: labelColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'OS #${order?.number} • $dateStr',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: secondaryColor,
+                    ),
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
+            ),
+            const SizedBox(width: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  _convertToCurrency(order?.total),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: labelColor,
+                  ),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isPaid
+                            ? CupertinoColors.systemGreen
+                            : CupertinoColors.systemOrange,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      isPaid ? 'Pago' : 'Pendente',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: secondaryColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 14,
+              color: CupertinoColors.tertiaryLabel.resolveFrom(context),
             ),
           ],
         ),
@@ -1671,16 +1526,131 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     );
   }
 
+  // ============================================================
+  // EMPTY STATE
+  // ============================================================
+
+  Widget _buildEmptyState({
+    required IconData icon,
+    required String message,
+  }) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: CupertinoColors.secondarySystemGroupedBackground
+                .resolveFrom(context),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: 48,
+                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // UTILITIES
+  // ============================================================
+
   void _updateDashboardPeriod() {
     final orderStore = Provider.of<OrderStore>(context, listen: false);
     orderStore.setCustomPeriod(selectedPeriod, _periodOffset);
   }
 
+  void _updateDashboardPeriodCustom(DateTime start, DateTime end) {
+    final orderStore = Provider.of<OrderStore>(context, listen: false);
+    orderStore.setCustomDateRange(start, end);
+  }
+
   String _convertToCurrency(double? total) {
-    if (total == null) total = 0.0;
+    total ??= 0.0;
     NumberFormat numberFormat =
         NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$');
     return numberFormat.format(total);
+  }
+
+  // ============================================================
+  // PDF REPORT GENERATION
+  // ============================================================
+
+  void _shareReport(OrderStore orderStore) {
+    _proceedWithShare(orderStore);
+  }
+
+  Future<void> _proceedWithShare(OrderStore orderStore) async {
+    final currentContext = context;
+
+    showCupertinoDialog(
+      context: currentContext,
+      barrierDismissible: false,
+      builder: (context) => CupertinoAlertDialog(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CupertinoActivityIndicator(),
+            const SizedBox(width: 16),
+            Text(
+              'Preparando relatório...',
+              style: TextStyle(
+                color: CupertinoColors.label.resolveFrom(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      final pdf = await _buildPdf(orderStore);
+
+      if (currentContext.mounted) {
+        Navigator.of(currentContext).pop();
+      }
+
+      if (currentContext.mounted) {
+        await Printing.sharePdf(
+          bytes: pdf,
+          filename: 'Relatorio_Financeiro_${periodLabel.replaceAll('/', '-').replaceAll(' ', '_')}.pdf',
+        );
+      }
+    } catch (e) {
+      if (currentContext.mounted) {
+        Navigator.of(currentContext).pop();
+
+        showCupertinoDialog(
+          context: currentContext,
+          builder: (context) => CupertinoAlertDialog(
+            title: const Text('Erro'),
+            content: Text('Erro ao gerar relatório: ${e.toString()}'),
+            actions: [
+              CupertinoDialogAction(
+                child: const Text('OK'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   String _getVehicleInfo(dynamic order) {
@@ -1727,88 +1697,6 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     return _latinCharactersOnly(vehicleInfo);
   }
 
-  void _generateReport(OrderStore orderStore) {
-    final theme = Theme.of(context);
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        icon: Icon(
-          Icons.picture_as_pdf_outlined,
-          size: 48,
-          color: theme.colorScheme.primary,
-        ),
-        title: const Text('Gerar Relatório'),
-        content: const Text(
-          'Deseja gerar um relatório PDF com os dados financeiros do período selecionado?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => _proceedWithReportGeneration(orderStore),
-            child: const Text('Gerar PDF'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _proceedWithReportGeneration(OrderStore orderStore) async {
-    Navigator.of(context).pop();
-    final currentContext = context;
-
-    showDialog<void>(
-      context: currentContext,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        content: Row(
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(width: 20),
-            const Text("Gerando relatório..."),
-          ],
-        ),
-      ),
-    );
-
-    try {
-      final pdf = await _buildPdf(orderStore);
-
-      if (currentContext.mounted) {
-        Navigator.of(currentContext).pop();
-      }
-
-      if (currentContext.mounted) {
-        await Printing.layoutPdf(
-          onLayout: (format) async => pdf,
-          name: 'Relatório Financeiro - $periodLabel',
-        );
-
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          SnackBar(
-            content: const Text('Relatório gerado com sucesso!'),
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (currentContext.mounted) {
-        Navigator.of(currentContext).pop();
-
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao gerar relatório: ${e.toString()}'),
-            backgroundColor: Colors.red.shade600,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
-
   Future<Uint8List> _buildPdf(OrderStore orderStore) async {
     final pdf = pw.Document();
     final bool isClientSelected = orderStore.selectedCustomerInRanking != null;
@@ -1816,17 +1704,45 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? orderStore.selectedCustomerInRanking!['name'] ?? 'Cliente'
         : '';
 
-    final primaryColor = PdfColors.blue700;
-    final accentColor = PdfColors.blue900;
-    final successColor = PdfColors.green700;
-    final warningColor = PdfColors.orange700;
-    final textColor = PdfColors.grey800;
+    // Fetch full company data for logo and contact info
+    Company? company;
+    pw.MemoryImage? logoImage;
+
+    try {
+      if (Global.companyAggr?.id != null) {
+        final companyStore = CompanyStore();
+        company = await companyStore.retrieveCompany(Global.companyAggr!.id);
+
+        // Download logo if available
+        if (company?.logo != null && company!.logo!.isNotEmpty) {
+          try {
+            final response = await http.get(Uri.parse(company.logo!));
+            if (response.statusCode == 200) {
+              logoImage = pw.MemoryImage(response.bodyBytes);
+            }
+          } catch (_) {
+            // Ignore logo loading errors
+          }
+        }
+      }
+    } catch (_) {
+      // Ignore company loading errors
+    }
+
+    // Paleta de cores profissional
+    const primaryColor = PdfColors.blueGrey800;
+    const accentColor = PdfColors.blueGrey700;
+    const successColor = PdfColors.green700;
+    const warningColor = PdfColors.orange700;
+    const textColor = PdfColors.grey800;
+    const lightGrey = PdfColors.grey200;
 
     final baseFont = pw.Font.helvetica();
     final boldFont = pw.Font.helveticaBold();
 
     final totalValue = orderStore.totalRevenue;
     final totalOrders = orderStore.recentOrders.length;
+    final totalCustomers = orderStore.customerRanking.length;
     final avgTicket = totalOrders > 0 ? totalValue / totalOrders : 0.0;
 
     final paidPercentage = totalValue > 0
@@ -1836,62 +1752,124 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         ? (orderStore.totalUnpaidAmount / totalValue * 100).toStringAsFixed(1)
         : "0";
 
-    // Calculate services and products rankings
     final servicesRanking = _calculateServicesRanking(orderStore);
     final productsRanking = _calculateProductsRanking(orderStore);
+
+    // Build company contact info string
+    List<String> contactParts = [];
+    if (company?.phone != null && company!.phone!.isNotEmpty) {
+      contactParts.add(_latinCharactersOnly(company.phone!));
+    }
+    if (company?.email != null && company!.email!.isNotEmpty) {
+      contactParts.add(_latinCharactersOnly(company.email!));
+    }
+    final contactInfo = contactParts.join(' | ');
 
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(24),
+        margin: const pw.EdgeInsets.all(32),
         header: (context) {
           return pw.Container(
             padding: const pw.EdgeInsets.only(bottom: 16),
             decoration: const pw.BoxDecoration(
               border: pw.Border(
-                bottom: pw.BorderSide(color: PdfColors.grey300, width: 1),
+                bottom: pw.BorderSide(color: lightGrey, width: 1),
               ),
             ),
             child: pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
+                // Logo
+                if (logoImage != null)
+                  pw.Container(
+                    width: 50,
+                    height: 50,
+                    margin: const pw.EdgeInsets.only(right: 16),
+                    child: pw.ClipRRect(
+                      horizontalRadius: 6,
+                      verticalRadius: 6,
+                      child: pw.Image(logoImage, fit: pw.BoxFit.contain),
+                    ),
+                  ),
+                // Company info
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        _latinCharactersOnly(
+                            company?.name ?? Global.companyAggr?.name ?? 'Empresa'),
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 16,
+                          color: primaryColor,
+                        ),
+                      ),
+                      if (contactInfo.isNotEmpty) ...[
+                        pw.SizedBox(height: 2),
+                        pw.Text(
+                          contactInfo,
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 9,
+                            color: PdfColors.grey600,
+                          ),
+                        ),
+                      ],
+                      if (company?.address != null && company!.address!.isNotEmpty) ...[
+                        pw.SizedBox(height: 1),
+                        pw.Text(
+                          _latinCharactersOnly(company.address!),
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 9,
+                            color: PdfColors.grey600,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                // Report info
                 pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  crossAxisAlignment: pw.CrossAxisAlignment.end,
                   children: [
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: pw.BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: pw.BorderRadius.circular(4),
+                      ),
+                      child: pw.Text(
+                        'RELATORIO FINANCEIRO',
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 8,
+                          color: PdfColors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                    pw.SizedBox(height: 6),
                     pw.Text(
-                      'Relatorio Financeiro',
+                      _latinCharactersOnly(periodLabel),
                       style: pw.TextStyle(
                         font: boldFont,
-                        fontSize: 24,
+                        fontSize: 11,
                         color: accentColor,
                       ),
                     ),
-                    pw.SizedBox(height: 4),
+                    pw.SizedBox(height: 2),
                     pw.Text(
-                      _latinCharactersOnly(Global.companyAggr?.name ?? 'PraticOS'),
+                      'Gerado em ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
                       style: pw.TextStyle(
                         font: baseFont,
-                        fontSize: 12,
-                        color: PdfColors.grey600,
+                        fontSize: 8,
+                        color: PdfColors.grey500,
                       ),
                     ),
                   ],
-                ),
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: pw.BoxDecoration(
-                    color: PdfColors.blue50,
-                    borderRadius: pw.BorderRadius.circular(8),
-                  ),
-                  child: pw.Text(
-                    _latinCharactersOnly(periodLabel),
-                    style: pw.TextStyle(
-                      font: boldFont,
-                      fontSize: 14,
-                      color: primaryColor,
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -1899,29 +1877,29 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         },
         footer: (context) {
           return pw.Container(
-            padding: const pw.EdgeInsets.only(top: 8),
+            padding: const pw.EdgeInsets.only(top: 12),
             decoration: const pw.BoxDecoration(
               border: pw.Border(
-                top: pw.BorderSide(color: PdfColors.grey300, width: 1),
+                top: pw.BorderSide(color: lightGrey, width: 1),
               ),
             ),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text(
-                  'Gerado em ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                  'PraticOS - Sistema de Gestao de Ordens de Servico',
                   style: pw.TextStyle(
                     font: baseFont,
-                    fontSize: 9,
-                    color: PdfColors.grey500,
+                    fontSize: 8,
+                    color: PdfColors.grey400,
                   ),
                 ),
                 pw.Text(
                   'Pagina ${context.pageNumber} de ${context.pagesCount}',
                   style: pw.TextStyle(
                     font: baseFont,
-                    fontSize: 9,
-                    color: PdfColors.grey500,
+                    fontSize: 8,
+                    color: PdfColors.grey400,
                   ),
                 ),
               ],
@@ -1934,16 +1912,19 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
           if (isClientSelected) {
             final selectedClientData = orderStore.selectedCustomerInRanking!;
             final double clientTotal = selectedClientData['total'] ?? 0.0;
-            final double clientUnpaidTotal = selectedClientData['unpaidTotal'] ?? 0.0;
+            final double clientUnpaidTotal =
+                selectedClientData['unpaidTotal'] ?? 0.0;
             final double clientPaidTotal = clientTotal - clientUnpaidTotal;
 
             var clientOrders = orderStore.recentOrders
-                .where((order) => order?.customer?.id == selectedClientData['id'])
+                .where((order) =>
+                    order?.customer?.id == selectedClientData['id'])
                 .toList();
 
             if (orderStore.paymentFilter != null) {
               clientOrders = clientOrders
-                  .where((order) => order?.payment == orderStore.paymentFilter)
+                  .where(
+                      (order) => order?.payment == orderStore.paymentFilter)
                   .toList();
             }
 
@@ -1963,11 +1944,15 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         children: [
                           pw.Text(
                             'Cliente: ',
-                            style: pw.TextStyle(font: baseFont, color: textColor),
+                            style:
+                                pw.TextStyle(font: baseFont, color: textColor),
                           ),
                           pw.Text(
                             _latinCharactersOnly(selectedClientName),
-                            style: pw.TextStyle(font: boldFont, color: accentColor, fontSize: 16),
+                            style: pw.TextStyle(
+                                font: boldFont,
+                                color: accentColor,
+                                fontSize: 16),
                           ),
                         ],
                       ),
@@ -2012,25 +1997,70 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             );
 
             if (clientOrders.isNotEmpty) {
-              content.add(_buildPdfOrdersTable(clientOrders, boldFont, baseFont, textColor, accentColor, true));
+              content.add(_buildPdfOrdersTable(
+                  clientOrders, boldFont, baseFont, textColor, accentColor, true));
             }
           } else {
-            // Financial Summary
+            // Summary header with stats
             content.add(
               pw.Container(
                 margin: const pw.EdgeInsets.only(bottom: 24),
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
-                      'Resumo Financeiro',
-                      style: pw.TextStyle(font: boldFont, fontSize: 16, color: accentColor),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
+                      children: [
+                        pw.Text(
+                          'Resumo Financeiro',
+                          style: pw.TextStyle(
+                              font: boldFont, fontSize: 16, color: accentColor),
+                        ),
+                        pw.Row(
+                          children: [
+                            pw.Container(
+                              padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: pw.BoxDecoration(
+                                color: PdfColors.grey100,
+                                borderRadius: pw.BorderRadius.circular(4),
+                              ),
+                              child: pw.Text(
+                                '$totalOrders ordens',
+                                style: pw.TextStyle(
+                                  font: boldFont,
+                                  fontSize: 9,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                            pw.SizedBox(width: 8),
+                            pw.Container(
+                              padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: pw.BoxDecoration(
+                                color: PdfColors.grey100,
+                                borderRadius: pw.BorderRadius.circular(4),
+                              ),
+                              child: pw.Text(
+                                '$totalCustomers clientes',
+                                style: pw.TextStyle(
+                                  font: boldFont,
+                                  fontSize: 9,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     pw.SizedBox(height: 16),
+                    // First row: Main KPIs
                     pw.Row(
                       children: [
                         pw.Expanded(
-                          child: _buildPdfKpiBox(
+                          flex: 2,
+                          child: _buildPdfKpiBoxLarge(
                             'Faturamento Total',
                             _convertToCurrency(orderStore.totalRevenue),
                             primaryColor,
@@ -2043,7 +2073,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           child: _buildPdfKpiBox(
                             'Ticket Medio',
                             _convertToCurrency(avgTicket),
-                            PdfColors.purple700,
+                            PdfColors.blueGrey600,
                             boldFont,
                             baseFont,
                           ),
@@ -2051,6 +2081,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       ],
                     ),
                     pw.SizedBox(height: 12),
+                    // Second row: Payment status
                     pw.Row(
                       children: [
                         pw.Expanded(
@@ -2079,9 +2110,20 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               ),
             );
 
-            // Customer Ranking
             if (orderStore.customerRanking.isNotEmpty) {
               var filteredRanking = List.from(orderStore.customerRanking);
+
+              // Calculate totals for customers
+              double totalCustomerPaid = 0;
+              double totalCustomerUnpaid = 0;
+              double totalCustomerAmount = 0;
+              for (var customer in filteredRanking) {
+                final double t = customer['total'] ?? 0.0;
+                final double u = customer['unpaidTotal'] ?? 0.0;
+                totalCustomerAmount += t;
+                totalCustomerUnpaid += u;
+                totalCustomerPaid += (t - u);
+              }
 
               content.add(
                 pw.Container(
@@ -2089,17 +2131,39 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
-                        'Ranking de Clientes',
-                        style: pw.TextStyle(font: boldFont, fontSize: 16, color: accentColor),
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'Ranking de Clientes',
+                            style: pw.TextStyle(
+                                font: boldFont, fontSize: 14, color: accentColor),
+                          ),
+                          pw.Text(
+                            '${filteredRanking.length} clientes',
+                            style: pw.TextStyle(
+                                font: baseFont, fontSize: 9, color: PdfColors.grey500),
+                          ),
+                        ],
                       ),
                       pw.SizedBox(height: 12),
-                      pw.Table.fromTextArray(
-                        border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-                        headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 10),
-                        headerDecoration: pw.BoxDecoration(color: accentColor),
-                        cellStyle: pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
-                        cellPadding: const pw.EdgeInsets.all(8),
+                      pw.TableHelper.fromTextArray(
+                        border: const pw.TableBorder(
+                          horizontalInside: pw.BorderSide(
+                              color: PdfColors.grey200, width: 0.5),
+                          bottom: pw.BorderSide(
+                              color: PdfColors.grey300, width: 1),
+                        ),
+                        headerStyle: pw.TextStyle(
+                            font: boldFont,
+                            color: PdfColors.white,
+                            fontSize: 9),
+                        headerDecoration:
+                            const pw.BoxDecoration(color: PdfColors.blueGrey700),
+                        cellStyle: pw.TextStyle(
+                            font: baseFont, color: textColor, fontSize: 9),
+                        cellPadding: const pw.EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 10),
                         cellAlignments: {
                           0: pw.Alignment.center,
                           1: pw.Alignment.centerLeft,
@@ -2111,18 +2175,67 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         data: List.generate(
                           filteredRanking.length,
                           (index) {
-                            final double total = filteredRanking[index]['total'] ?? 0.0;
-                            final double unpaidTotal = filteredRanking[index]['unpaidTotal'] ?? 0.0;
+                            final double total =
+                                filteredRanking[index]['total'] ?? 0.0;
+                            final double unpaidTotal =
+                                filteredRanking[index]['unpaidTotal'] ?? 0.0;
                             final double paidTotal = total - unpaidTotal;
 
                             return [
                               '${index + 1}',
-                              _latinCharactersOnly(filteredRanking[index]['name'] ?? 'Cliente'),
+                              _latinCharactersOnly(
+                                  filteredRanking[index]['name'] ?? 'Cliente'),
                               _convertToCurrency(paidTotal),
                               _convertToCurrency(unpaidTotal),
                               _convertToCurrency(total),
                             ];
                           },
+                        ),
+                      ),
+                      // Totals row
+                      pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                        decoration: const pw.BoxDecoration(
+                          color: PdfColors.grey100,
+                          border: pw.Border(
+                            bottom: pw.BorderSide(color: PdfColors.grey300, width: 1),
+                          ),
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.SizedBox(width: 20),
+                            pw.Expanded(
+                              flex: 3,
+                              child: pw.Text(
+                                'TOTAL',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: textColor),
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalCustomerPaid),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: successColor),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalCustomerUnpaid),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: warningColor),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalCustomerAmount),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: primaryColor),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -2131,25 +2244,56 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               );
             }
 
-            // Services Ranking
             if (servicesRanking.isNotEmpty) {
+              // Calculate totals for services
+              int totalServicesQty = 0;
+              double totalServicesAmount = 0;
+              for (var service in servicesRanking) {
+                totalServicesQty += service['quantity'] as int;
+                totalServicesAmount += service['total'] as double;
+              }
+
               content.add(
                 pw.Container(
                   margin: const pw.EdgeInsets.only(bottom: 24),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
-                        'Ranking de Servicos',
-                        style: pw.TextStyle(font: boldFont, fontSize: 16, color: PdfColors.blue700),
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'Ranking de Servicos',
+                            style: pw.TextStyle(
+                                font: boldFont,
+                                fontSize: 14,
+                                color: accentColor),
+                          ),
+                          pw.Text(
+                            '${servicesRanking.length} servicos',
+                            style: pw.TextStyle(
+                                font: baseFont, fontSize: 9, color: PdfColors.grey500),
+                          ),
+                        ],
                       ),
                       pw.SizedBox(height: 12),
-                      pw.Table.fromTextArray(
-                        border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-                        headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 10),
-                        headerDecoration: pw.BoxDecoration(color: PdfColors.blue700),
-                        cellStyle: pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
-                        cellPadding: const pw.EdgeInsets.all(8),
+                      pw.TableHelper.fromTextArray(
+                        border: const pw.TableBorder(
+                          horizontalInside: pw.BorderSide(
+                              color: PdfColors.grey200, width: 0.5),
+                          bottom: pw.BorderSide(
+                              color: PdfColors.grey300, width: 1),
+                        ),
+                        headerStyle: pw.TextStyle(
+                            font: boldFont,
+                            color: PdfColors.white,
+                            fontSize: 9),
+                        headerDecoration:
+                            const pw.BoxDecoration(color: PdfColors.blue700),
+                        cellStyle: pw.TextStyle(
+                            font: baseFont, color: textColor, fontSize: 9),
+                        cellPadding: const pw.EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 10),
                         cellAlignments: {
                           0: pw.Alignment.center,
                           1: pw.Alignment.centerLeft,
@@ -2161,9 +2305,49 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           servicesRanking.length,
                           (index) => [
                             '${index + 1}',
-                            _latinCharactersOnly(servicesRanking[index]['name'] as String),
+                            _latinCharactersOnly(
+                                servicesRanking[index]['name'] as String),
                             '${servicesRanking[index]['quantity']}',
-                            _convertToCurrency(servicesRanking[index]['total'] as double),
+                            _convertToCurrency(
+                                servicesRanking[index]['total'] as double),
+                          ],
+                        ),
+                      ),
+                      // Totals row
+                      pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                        decoration: const pw.BoxDecoration(
+                          color: PdfColors.blue50,
+                          border: pw.Border(
+                            bottom: pw.BorderSide(color: PdfColors.blue200, width: 1),
+                          ),
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.SizedBox(width: 20),
+                            pw.Expanded(
+                              flex: 4,
+                              child: pw.Text(
+                                'TOTAL',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.blue800),
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 1,
+                              child: pw.Text(
+                                '$totalServicesQty',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.blue800),
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalServicesAmount),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.blue800),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -2173,25 +2357,56 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               );
             }
 
-            // Products Ranking
             if (productsRanking.isNotEmpty) {
+              // Calculate totals for products
+              int totalProductsQty = 0;
+              double totalProductsAmount = 0;
+              for (var product in productsRanking) {
+                totalProductsQty += product['quantity'] as int;
+                totalProductsAmount += product['total'] as double;
+              }
+
               content.add(
                 pw.Container(
                   margin: const pw.EdgeInsets.only(bottom: 24),
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
-                        'Ranking de Produtos',
-                        style: pw.TextStyle(font: boldFont, fontSize: 16, color: PdfColors.purple700),
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Text(
+                            'Ranking de Produtos',
+                            style: pw.TextStyle(
+                                font: boldFont,
+                                fontSize: 14,
+                                color: accentColor),
+                          ),
+                          pw.Text(
+                            '${productsRanking.length} produtos',
+                            style: pw.TextStyle(
+                                font: baseFont, fontSize: 9, color: PdfColors.grey500),
+                          ),
+                        ],
                       ),
                       pw.SizedBox(height: 12),
-                      pw.Table.fromTextArray(
-                        border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-                        headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 10),
-                        headerDecoration: pw.BoxDecoration(color: PdfColors.purple700),
-                        cellStyle: pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
-                        cellPadding: const pw.EdgeInsets.all(8),
+                      pw.TableHelper.fromTextArray(
+                        border: const pw.TableBorder(
+                          horizontalInside: pw.BorderSide(
+                              color: PdfColors.grey200, width: 0.5),
+                          bottom: pw.BorderSide(
+                              color: PdfColors.grey300, width: 1),
+                        ),
+                        headerStyle: pw.TextStyle(
+                            font: boldFont,
+                            color: PdfColors.white,
+                            fontSize: 9),
+                        headerDecoration:
+                            const pw.BoxDecoration(color: PdfColors.purple700),
+                        cellStyle: pw.TextStyle(
+                            font: baseFont, color: textColor, fontSize: 9),
+                        cellPadding: const pw.EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 10),
                         cellAlignments: {
                           0: pw.Alignment.center,
                           1: pw.Alignment.centerLeft,
@@ -2203,9 +2418,49 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           productsRanking.length,
                           (index) => [
                             '${index + 1}',
-                            _latinCharactersOnly(productsRanking[index]['name'] as String),
+                            _latinCharactersOnly(
+                                productsRanking[index]['name'] as String),
                             '${productsRanking[index]['quantity']}',
-                            _convertToCurrency(productsRanking[index]['total'] as double),
+                            _convertToCurrency(
+                                productsRanking[index]['total'] as double),
+                          ],
+                        ),
+                      ),
+                      // Totals row
+                      pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                        decoration: const pw.BoxDecoration(
+                          color: PdfColors.purple50,
+                          border: pw.Border(
+                            bottom: pw.BorderSide(color: PdfColors.purple200, width: 1),
+                          ),
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.SizedBox(width: 20),
+                            pw.Expanded(
+                              flex: 4,
+                              child: pw.Text(
+                                'TOTAL',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.purple800),
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 1,
+                              child: pw.Text(
+                                '$totalProductsQty',
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.purple800),
+                                textAlign: pw.TextAlign.center,
+                              ),
+                            ),
+                            pw.Expanded(
+                              flex: 2,
+                              child: pw.Text(
+                                _convertToCurrency(totalProductsAmount),
+                                style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.purple800),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -2215,15 +2470,16 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               );
             }
 
-            // Orders Table
             if (orderStore.recentOrders.isNotEmpty) {
               final filteredOrders = orderStore.paymentFilter == null
                   ? orderStore.recentOrders
                   : orderStore.recentOrders
-                      .where((order) => order?.payment == orderStore.paymentFilter)
+                      .where(
+                          (order) => order?.payment == orderStore.paymentFilter)
                       .toList();
 
-              content.add(_buildPdfOrdersTable(filteredOrders, boldFont, baseFont, textColor, accentColor, false));
+              content.add(_buildPdfOrdersTable(
+                  filteredOrders, boldFont, baseFont, textColor, accentColor, false));
             }
           }
 
@@ -2243,23 +2499,77 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     pw.Font baseFont,
   ) {
     return pw.Container(
-      padding: const pw.EdgeInsets.all(16),
+      padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: pw.BoxDecoration(
-        color: PdfColors.white,
+        color: PdfColors.grey50,
+        borderRadius: pw.BorderRadius.circular(6),
+        border: pw.Border.all(color: PdfColors.grey200, width: 0.5),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Row(
+            children: [
+              pw.Container(
+                width: 3,
+                height: 12,
+                decoration: pw.BoxDecoration(
+                  color: color,
+                  borderRadius: pw.BorderRadius.circular(2),
+                ),
+              ),
+              pw.SizedBox(width: 8),
+              pw.Text(
+                title,
+                style: pw.TextStyle(
+                    font: baseFont, fontSize: 9, color: PdfColors.grey600),
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 6),
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+                font: boldFont, fontSize: 16, color: PdfColors.grey800),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildPdfKpiBoxLarge(
+    String title,
+    String value,
+    PdfColor color,
+    pw.Font boldFont,
+    pw.Font baseFont,
+  ) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      decoration: pw.BoxDecoration(
+        color: color,
         borderRadius: pw.BorderRadius.circular(8),
-        border: pw.Border.all(color: color, width: 1),
       ),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            title,
-            style: pw.TextStyle(font: baseFont, fontSize: 10, color: PdfColors.grey600),
+            title.toUpperCase(),
+            style: pw.TextStyle(
+              font: boldFont,
+              fontSize: 9,
+              color: PdfColors.white,
+              letterSpacing: 0.5,
+            ),
           ),
-          pw.SizedBox(height: 4),
+          pw.SizedBox(height: 8),
           pw.Text(
             value,
-            style: pw.TextStyle(font: boldFont, fontSize: 16, color: color),
+            style: pw.TextStyle(
+              font: boldFont,
+              fontSize: 24,
+              color: PdfColors.white,
+            ),
           ),
         ],
       ),
@@ -2274,6 +2584,19 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     PdfColor accentColor,
     bool isClientReport,
   ) {
+    // Calculate totals
+    double totalAmount = 0;
+    int paidCount = 0;
+    int pendingCount = 0;
+    for (var order in orders) {
+      totalAmount += (order?.total ?? 0.0) as double;
+      if (order?.payment == 'paid') {
+        paidCount++;
+      } else {
+        pendingCount++;
+      }
+    }
+
     final tableData = List<List<String>>.generate(
       orders.length,
       (index) {
@@ -2309,17 +2632,58 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Text(
-            'Ordens de Servico',
-            style: pw.TextStyle(font: boldFont, fontSize: 16, color: accentColor),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(
+                'Ordens de Servico',
+                style:
+                    pw.TextStyle(font: boldFont, fontSize: 14, color: accentColor),
+              ),
+              pw.Row(
+                children: [
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.green100,
+                      borderRadius: pw.BorderRadius.circular(3),
+                    ),
+                    child: pw.Text(
+                      '$paidCount pagos',
+                      style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.green800),
+                    ),
+                  ),
+                  pw.SizedBox(width: 6),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.orange100,
+                      borderRadius: pw.BorderRadius.circular(3),
+                    ),
+                    child: pw.Text(
+                      '$pendingCount pendentes',
+                      style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.orange800),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           pw.SizedBox(height: 12),
-          pw.Table.fromTextArray(
-            border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-            headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 10),
-            headerDecoration: pw.BoxDecoration(color: accentColor),
-            cellStyle: pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
-            cellPadding: const pw.EdgeInsets.all(8),
+          pw.TableHelper.fromTextArray(
+            border: const pw.TableBorder(
+              horizontalInside:
+                  pw.BorderSide(color: PdfColors.grey200, width: 0.5),
+              bottom: pw.BorderSide(color: PdfColors.grey300, width: 1),
+            ),
+            headerStyle: pw.TextStyle(
+                font: boldFont, color: PdfColors.white, fontSize: 9),
+            headerDecoration:
+                const pw.BoxDecoration(color: PdfColors.blueGrey600),
+            cellStyle:
+                pw.TextStyle(font: baseFont, color: textColor, fontSize: 9),
+            cellPadding:
+                const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
             columnWidths: isClientReport
                 ? {
                     0: const pw.FlexColumnWidth(1),
@@ -2346,6 +2710,36 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 ? ['OS', 'Data', 'Veiculo', 'Valor', 'Status']
                 : ['OS', 'Cliente', 'Data', 'Valor', 'Status'],
             data: tableData,
+          ),
+          // Totals row
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            decoration: const pw.BoxDecoration(
+              color: PdfColors.grey100,
+              border: pw.Border(
+                bottom: pw.BorderSide(color: PdfColors.grey300, width: 1),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 5,
+                  child: pw.Text(
+                    'TOTAL (${orders.length} ordens)',
+                    style: pw.TextStyle(font: boldFont, fontSize: 9, color: textColor),
+                  ),
+                ),
+                pw.Expanded(
+                  flex: 2,
+                  child: pw.Text(
+                    _convertToCurrency(totalAmount),
+                    style: pw.TextStyle(font: boldFont, fontSize: 9, color: accentColor),
+                    textAlign: pw.TextAlign.right,
+                  ),
+                ),
+                pw.SizedBox(width: 50),
+              ],
+            ),
           ),
         ],
       ),
