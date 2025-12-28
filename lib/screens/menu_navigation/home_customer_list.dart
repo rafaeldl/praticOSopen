@@ -105,16 +105,16 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         List<Customer>? customerList = customerStore.customerList!.data;
 
         if (customerList == null || customerList.isEmpty) {
-          return const SliverFillRemaining(
+          return SliverFillRemaining(
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(CupertinoIcons.person_2, size: 64, color: CupertinoColors.systemGrey),
-                  SizedBox(height: 16),
+                  Icon(CupertinoIcons.person_2, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
+                  const SizedBox(height: 16),
                   Text(
                     'Nenhum cliente cadastrado',
-                    style: TextStyle(color: CupertinoColors.secondaryLabel),
+                    style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
                   ),
                 ],
               ),
@@ -212,7 +212,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         customerStore.deleteCustomer(customer);
       },
       child: Container(
-        color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
@@ -247,10 +247,10 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                         alignment: Alignment.center,
                         child: Text(
                           initials,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: CupertinoColors.systemGrey,
+                            color: CupertinoColors.systemGrey.resolveFrom(context),
                           ),
                         ),
                       ),
@@ -261,26 +261,26 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                           children: [
                             Text(
                               customer.name ?? 'Cliente',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,
-                                color: CupertinoColors.label,
+                                color: CupertinoColors.label.resolveFrom(context),
                               ),
                             ),
                             if (customer.phone != null && customer.phone!.isNotEmpty) ...[
                               const SizedBox(height: 2),
                               Text(
                                 _formatPhone(customer.phone),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: CupertinoColors.secondaryLabel,
+                                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
                                 ),
                               ),
                             ],
                           ],
                         ),
                       ),
-                      const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                      Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
                     ],
                   ),
                 ),

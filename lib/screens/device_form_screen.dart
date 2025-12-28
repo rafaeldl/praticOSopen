@@ -125,14 +125,14 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                         Container(
                           width: 100,
                           height: 100,
-                          decoration: const BoxDecoration(
-                            color: CupertinoColors.systemGrey5,
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemGrey5.resolveFrom(context),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             CupertinoIcons.car_detailed,
                             size: 50,
-                            color: CupertinoColors.systemGrey,
+                            color: CupertinoColors.systemGrey.resolveFrom(context),
                           ),
                         ),
                       if (_deviceStore.isUploading)
@@ -230,7 +230,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
           padding: EdgeInsets.zero,
           textAlign: TextAlign.right,
           decoration: null, // Remove border
-          style: const TextStyle(color: CupertinoColors.label),
+          style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
           validator: validator,
           onSaved: onSaved,
         ),

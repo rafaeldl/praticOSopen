@@ -217,15 +217,15 @@ class _HomeState extends State<Home> {
               ),
               child: Row(
                 children: [
-                  const Icon(CupertinoIcons.person_fill, size: 14, color: CupertinoColors.activeBlue),
+                  Icon(CupertinoIcons.person_fill, size: 14, color: CupertinoColors.activeBlue.resolveFrom(context)),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Cliente: ${orderStore.customerFilter!.name}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: CupertinoColors.activeBlue,
+                        color: CupertinoColors.activeBlue.resolveFrom(context),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -265,7 +265,7 @@ class _HomeState extends State<Home> {
         }
 
         if (orderStore.orders.isEmpty) {
-          return const SliverFillRemaining(
+          return SliverFillRemaining(
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -273,23 +273,23 @@ class _HomeState extends State<Home> {
                   Icon(
                     CupertinoIcons.doc_text_search,
                     size: 48,
-                    color: CupertinoColors.systemGrey,
+                    color: CupertinoColors.systemGrey.resolveFrom(context),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     'Nenhuma OS encontrada',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
-                      color: CupertinoColors.label,
+                      color: CupertinoColors.label.resolveFrom(context),
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
                     'Toque em + para criar uma nova',
                     style: TextStyle(
                       fontSize: 15,
-                      color: CupertinoColors.secondaryLabel,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
                     ),
                   ),
                 ],
@@ -343,7 +343,7 @@ class _HomeState extends State<Home> {
     }
 
     return Container(
-      color: CupertinoColors.systemBackground,
+      color: CupertinoColors.systemBackground.resolveFrom(context),
       child: Material(
         type: MaterialType.transparency,
                             child: InkWell(
@@ -373,10 +373,10 @@ class _HomeState extends State<Home> {
                               Expanded(
                                 child: Text(
                                   order.customer?.name ?? 'Cliente',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
-                                    color: CupertinoColors.label,
+                                    color: CupertinoColors.label.resolveFrom(context),
                                     letterSpacing: -0.4,
                                   ),
                                   maxLines: 1,
@@ -389,9 +389,9 @@ class _HomeState extends State<Home> {
                                 children: [
                                   Text(
                                     _formatCurrency(order.total),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 15,
-                                      color: CupertinoColors.secondaryLabel,
+                                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
                                       fontWeight: FontWeight.w400,
                                     ),
                                   ),
@@ -408,10 +408,10 @@ class _HomeState extends State<Home> {
                                 ],
                               ),
                               const SizedBox(width: 4),
-                              const Icon(
-                                CupertinoIcons.chevron_right, 
-                                size: 12, 
-                                color: CupertinoColors.tertiaryLabel
+                              Icon(
+                                CupertinoIcons.chevron_right,
+                                size: 12,
+                                color: CupertinoColors.tertiaryLabel.resolveFrom(context)
                               ),
                             ],
                           ),
@@ -420,9 +420,9 @@ class _HomeState extends State<Home> {
                           // Line 2: #OS • Vehicle • Plate
                           Text(
                             subtitle,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: CupertinoColors.secondaryLabel,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -461,11 +461,11 @@ class _HomeState extends State<Home> {
                 imageUrl: url,
                 size: size,
               )
-            : const Center(
+            : Center(
                 child: Icon(
                   CupertinoIcons.wrench,
                   size: 24,
-                  color: CupertinoColors.systemGrey,
+                  color: CupertinoColors.systemGrey.resolveFrom(context),
                 ),
               ),
       ),

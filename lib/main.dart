@@ -10,6 +10,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/login.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -72,6 +73,17 @@ class MyApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           themeMode: themeStore.themeMode,
           navigatorObservers: <NavigatorObserver>[observer],
+          builder: (context, child) {
+            // Wrap with CupertinoTheme to support dynamic Cupertino colors
+            final brightness = Theme.of(context).brightness;
+            return CupertinoTheme(
+              data: CupertinoThemeData(
+                brightness: brightness,
+                primaryColor: CupertinoColors.activeBlue,
+              ),
+              child: child!,
+            );
+          },
           home: Observer(
             builder: (BuildContext context) {
               return _buildHome(_authStore);

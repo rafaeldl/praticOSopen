@@ -145,14 +145,14 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                         Container(
                           width: 100,
                           height: 100,
-                          decoration: const BoxDecoration(
-                            color: CupertinoColors.systemGrey5,
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemGrey5.resolveFrom(context),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             CupertinoIcons.wrench,
                             size: 50,
-                            color: CupertinoColors.systemGrey,
+                            color: CupertinoColors.systemGrey.resolveFrom(context),
                           ),
                         ),
                       if (_serviceStore.isUploading)

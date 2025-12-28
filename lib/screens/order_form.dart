@@ -319,7 +319,7 @@ class _OrderFormState extends State<OrderForm> {
               onTap: () {},
               showChevron: false,
               isBold: true,
-              valueColor: CupertinoColors.black,
+              valueColor: CupertinoColors.label.resolveFrom(context),
             ),
              _buildListTile(
               context: context,
@@ -342,31 +342,33 @@ class _OrderFormState extends State<OrderForm> {
     required String header,
     required List<Widget> children,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(32, 24, 16, 8),
-          child: Text(
-            header,
-            style: const TextStyle(
-              fontSize: 13,
-              color: CupertinoColors.secondaryLabel,
-              fontWeight: FontWeight.w500,
+    return Builder(
+      builder: (context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(32, 24, 16, 8),
+            child: Text(
+              header,
+              style: TextStyle(
+                fontSize: 13,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: CupertinoColors.secondarySystemGroupedBackground,
-            borderRadius: BorderRadius.circular(10),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              children: children,
+            ),
           ),
-          child: Column(
-            children: children,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -403,7 +405,7 @@ class _OrderFormState extends State<OrderForm> {
                       title,
                       style: TextStyle(
                         fontSize: 17,
-                        color: textColor ?? CupertinoColors.label,
+                        color: textColor ?? CupertinoColors.label.resolveFrom(context),
                         fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
@@ -412,27 +414,27 @@ class _OrderFormState extends State<OrderForm> {
                     hasValue ? value : placeholder,
                     style: TextStyle(
                       fontSize: 17,
-                      color: hasValue 
-                          ? (valueColor ?? CupertinoColors.secondaryLabel)
-                          : CupertinoColors.placeholderText,
+                      color: hasValue
+                          ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
+                          : CupertinoColors.placeholderText.resolveFrom(context),
                     ),
                   ),
                   if (showChevron) ...[
                     const SizedBox(width: 6),
-                    const Icon(
+                    Icon(
                       CupertinoIcons.chevron_right,
                       size: 16,
-                      color: CupertinoColors.systemGrey3,
+                      color: CupertinoColors.systemGrey3.resolveFrom(context),
                     ),
                   ],
                 ],
               ),
             ),
             if (!isLast)
-              const Divider(
+              Divider(
                 height: 1,
                 indent: 50, // Matches standard iOS indent
-                color: CupertinoColors.systemGrey5,
+                color: CupertinoColors.systemGrey5.resolveFrom(context),
               ),
           ],
         ),
@@ -486,9 +488,9 @@ class _OrderFormState extends State<OrderForm> {
                       children: [
                         Text(
                           title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 17,
-                            color: CupertinoColors.label,
+                            color: CupertinoColors.label.resolveFrom(context),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -498,9 +500,9 @@ class _OrderFormState extends State<OrderForm> {
                             padding: const EdgeInsets.only(top: 2.0),
                             child: Text(
                               subtitle,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
-                                color: CupertinoColors.secondaryLabel,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -512,26 +514,26 @@ class _OrderFormState extends State<OrderForm> {
                   const SizedBox(width: 8),
                   Text(
                     trailing,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
-                      color: CupertinoColors.label,
+                      color: CupertinoColors.label.resolveFrom(context),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Icon(
+                  Icon(
                     CupertinoIcons.chevron_right,
                     size: 16,
-                    color: CupertinoColors.systemGrey3,
+                    color: CupertinoColors.systemGrey3.resolveFrom(context),
                   ),
                 ],
               ),
             ),
             if (!isLast)
-              const Divider(
+              Divider(
                 height: 1,
                 indent: 16,
-                color: CupertinoColors.systemGrey5,
+                color: CupertinoColors.systemGrey5.resolveFrom(context),
               ),
           ],
         ),

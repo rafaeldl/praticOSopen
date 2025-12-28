@@ -117,11 +117,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(CupertinoIcons.cube_box, size: 64, color: CupertinoColors.systemGrey),
+              Icon(CupertinoIcons.cube_box, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
               const SizedBox(height: 16),
               Text(
                 'Nenhum produto cadastrado',
-                style: TextStyle(color: CupertinoColors.secondaryLabel),
+                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
               ),
             ],
           ),
@@ -208,7 +208,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         productStore.deleteProduct(product);
       },
       child: Container(
-        color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
         child: InkWell(
           onTap: () {
             if (isSelectionMode) {
@@ -239,25 +239,25 @@ class _ProductListScreenState extends State<ProductListScreen> {
                         children: [
                           Text(
                             product.name ?? '',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
-                              color: CupertinoColors.label,
+                              color: CupertinoColors.label.resolveFrom(context),
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             _convertToCurrency(product.value),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: CupertinoColors.activeBlue,
+                              color: CupertinoColors.activeBlue.resolveFrom(context),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
                   ],
                 ),
               ),
@@ -295,7 +295,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,
-      child: const Icon(CupertinoIcons.cube_box, color: CupertinoColors.systemGrey),
+      child: Icon(CupertinoIcons.cube_box, color: CupertinoColors.systemGrey.resolveFrom(context)),
     );
   }
 

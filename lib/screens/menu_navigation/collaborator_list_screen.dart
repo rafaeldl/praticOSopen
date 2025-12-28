@@ -131,7 +131,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
 
   Widget _buildUserRow(UserRoleAggr userRole, bool isAdmin, bool isLast) {
     Widget content = Container(
-      color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+      color: CupertinoColors.systemBackground.resolveFrom(context),
       child: InkWell(
         onTap: isAdmin ? () => _showActionSheet(userRole) : null,
         child: Column(
@@ -150,8 +150,8 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                     alignment: Alignment.center,
                     child: Text(
                       userRole.user?.name?.substring(0, 1).toUpperCase() ?? 'U',
-                      style: const TextStyle(
-                        color: CupertinoColors.activeBlue,
+                      style: TextStyle(
+                        color: CupertinoColors.activeBlue.resolveFrom(context),
                         fontWeight: FontWeight.w600,
                         fontSize: 18,
                       ),
@@ -164,25 +164,25 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                       children: [
                         Text(
                           userRole.user?.name ?? 'Usuário sem nome',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
-                            color: CupertinoColors.label,
+                            color: CupertinoColors.label.resolveFrom(context),
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           _getRoleLabel(userRole.role),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
-                            color: CupertinoColors.secondaryLabel,
+                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
                           ),
                         ),
                       ],
                     ),
                   ),
                   if (isAdmin)
-                    const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
                 ],
               ),
             ),

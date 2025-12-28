@@ -117,11 +117,11 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(CupertinoIcons.wrench, size: 64, color: CupertinoColors.systemGrey),
+              Icon(CupertinoIcons.wrench, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
               const SizedBox(height: 16),
               Text(
                 'Nenhum serviço cadastrado',
-                style: TextStyle(color: CupertinoColors.secondaryLabel),
+                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
               ),
             ],
           ),
@@ -208,7 +208,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         serviceStore.deleteService(service);
       },
       child: Container(
-        color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
         child: InkWell(
           onTap: () {
             if (isSelectionMode) {
@@ -239,25 +239,25 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                         children: [
                           Text(
                             service.name ?? '',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
-                              color: CupertinoColors.label,
+                              color: CupertinoColors.label.resolveFrom(context),
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             _convertToCurrency(service.value),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
-                              color: CupertinoColors.activeBlue,
+                              color: CupertinoColors.activeBlue.resolveFrom(context),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
                   ],
                 ),
               ),
@@ -295,7 +295,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,
-      child: const Icon(CupertinoIcons.wrench, color: CupertinoColors.systemGrey),
+      child: Icon(CupertinoIcons.wrench, color: CupertinoColors.systemGrey.resolveFrom(context)),
     );
   }
 

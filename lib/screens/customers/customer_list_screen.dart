@@ -115,11 +115,11 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(CupertinoIcons.person_2, size: 64, color: CupertinoColors.systemGrey),
+              Icon(CupertinoIcons.person_2, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
               const SizedBox(height: 16),
               Text(
                 'Nenhum cliente cadastrado',
-                style: TextStyle(color: CupertinoColors.secondaryLabel),
+                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
               ),
             ],
           ),
@@ -220,7 +220,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         customerStore.deleteCustomer(customer);
       },
       child: Container(
-        color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
         child: InkWell(
           onTap: () {
             if (isSelectionMode) {
@@ -250,10 +250,10 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                       alignment: Alignment.center,
                       child: Text(
                         initials,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: CupertinoColors.systemGrey,
+                          color: CupertinoColors.systemGrey.resolveFrom(context),
                         ),
                       ),
                     ),
@@ -264,26 +264,26 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                         children: [
                           Text(
                             customer.name ?? 'Cliente',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
-                              color: CupertinoColors.label,
+                              color: CupertinoColors.label.resolveFrom(context),
                             ),
                           ),
                           if (customer.phone != null && customer.phone!.isNotEmpty) ...[
                             const SizedBox(height: 2),
                             Text(
                               _formatPhone(customer.phone),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                color: CupertinoColors.secondaryLabel,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
                               ),
                             ),
                           ],
                         ],
                       ),
                     ),
-                    const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
                   ],
                 ),
               ),

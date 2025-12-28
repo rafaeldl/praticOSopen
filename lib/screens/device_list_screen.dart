@@ -120,11 +120,11 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(CupertinoIcons.car_detailed, size: 64, color: CupertinoColors.systemGrey),
+              Icon(CupertinoIcons.car_detailed, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
               const SizedBox(height: 16),
               Text(
                 'Nenhum veículo cadastrado',
-                style: TextStyle(color: CupertinoColors.secondaryLabel),
+                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
               ),
             ],
           ),
@@ -217,7 +217,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         store.deleteDevice(device);
       },
       child: Container(
-        color: CupertinoColors.secondarySystemGroupedBackground.resolveFrom(context),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
         child: InkWell(
           onTap: () {
             if (isSelectionMode) {
@@ -245,26 +245,26 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                         children: [
                           Text(
                             '${device.name ?? ''} ${device.serial ?? ''}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
-                              color: CupertinoColors.label,
+                              color: CupertinoColors.label.resolveFrom(context),
                             ),
                           ),
                           if (device.manufacturer != null && device.manufacturer!.isNotEmpty) ...[
                             const SizedBox(height: 2),
                             Text(
                               device.manufacturer!,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                color: CupertinoColors.secondaryLabel,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
                               ),
                             ),
                           ],
                         ],
                       ),
                     ),
-                    const Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3),
+                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
                   ],
                 ),
               ),
@@ -302,7 +302,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,
-      child: const Icon(CupertinoIcons.car_detailed, color: CupertinoColors.systemGrey),
+      child: Icon(CupertinoIcons.car_detailed, color: CupertinoColors.systemGrey.resolveFrom(context)),
     );
   }
 }

@@ -114,7 +114,131 @@ Screens used to select an entity (e.g., Selecting a Customer for an Order) shoul
 *   **System Colors:** Always use `CupertinoColors` constants (e.g., `systemBlue`, `systemRed`, `label`, `secondaryLabel`, `systemGroupedBackground`).
 *   **Dark Mode:** Rely on system colors which adapt automatically to dark mode.
 
-## 7. Implementation Example (Order List Item)
+## 7. Dark Mode & Dynamic Colors
+
+### CupertinoTheme Configuration
+When using `MaterialApp` with Cupertino widgets, wrap the app content with `CupertinoTheme` to ensure dynamic colors resolve correctly:
+
+```dart
+MaterialApp(
+  // ... other properties
+  builder: (context, child) {
+    final brightness = Theme.of(context).brightness;
+    return CupertinoTheme(
+      data: CupertinoThemeData(
+        brightness: brightness,
+        primaryColor: CupertinoColors.activeBlue,
+      ),
+      child: child!,
+    );
+  },
+)
+```
+
+### Dynamic Color Resolution
+**Critical:** Most `CupertinoColors` are dynamic and require `.resolveFrom(context)` to adapt to light/dark mode.
+
+#### Colors That Require `.resolveFrom(context)`
+| Color | Light Mode | Dark Mode | Usage |
+|-------|------------|-----------|-------|
+| `CupertinoColors.label` | Black | White | Primary text |
+| `CupertinoColors.secondaryLabel` | Gray | Light Gray | Secondary text, subtitles |
+| `CupertinoColors.systemBackground` | White | Black | List backgrounds, cards |
+| `CupertinoColors.systemGroupedBackground` | Light Gray | Black | Scaffold background |
+| `CupertinoColors.secondarySystemGroupedBackground` | White | Dark Gray | Grouped section backgrounds |
+| `CupertinoColors.systemGrey` | Gray | Gray | Icons, placeholders |
+| `CupertinoColors.systemGrey5` | Very Light Gray | Very Dark Gray | Avatar placeholders |
+| `CupertinoColors.separator` | Light Gray | Dark Gray | Dividers |
+
+#### Colors That Do NOT Require Resolution (Static)
+*   `CupertinoColors.white`
+*   `CupertinoColors.black`
+*   `CupertinoColors.activeBlue`
+*   `CupertinoColors.systemRed`
+*   `CupertinoColors.systemGreen`
+
+### Implementation Pattern
+
+```dart
+// ✅ CORRECT - Dynamic color with resolution
+Text(
+  'Title',
+  style: TextStyle(
+    color: CupertinoColors.label.resolveFrom(context),
+  ),
+)
+
+// ❌ WRONG - Dynamic color without resolution (won't adapt to dark mode)
+Text(
+  'Title',
+  style: TextStyle(
+    color: CupertinoColors.label, // Always resolves to light mode value
+  ),
+)
+```
+
+### Avoiding `const` with Dynamic Colors
+Dynamic colors cannot be used inside `const` widgets because `.resolveFrom(context)` is a method call.
+
+```dart
+// ❌ WRONG - Will cause compilation error
+const Icon(
+  CupertinoIcons.person,
+  color: CupertinoColors.systemGrey.resolveFrom(context), // ERROR!
+)
+
+// ✅ CORRECT - Remove const when using dynamic colors
+Icon(
+  CupertinoIcons.person,
+  color: CupertinoColors.systemGrey.resolveFrom(context),
+)
+
+// ✅ ALSO CORRECT - Use Builder to get context
+Builder(
+  builder: (context) => Icon(
+    CupertinoIcons.person,
+    color: CupertinoColors.systemGrey.resolveFrom(context),
+  ),
+)
+```
+
+### Background Color Choices
+
+| Context | Color to Use | Result |
+|---------|--------------|--------|
+| Page scaffold | `systemGroupedBackground` | Gray (light) / Black (dark) |
+| List container | `systemBackground` | White (light) / Black (dark) |
+| Grouped sections | `secondarySystemGroupedBackground` | White (light) / Dark Gray (dark) |
+| Cards on gray background | `systemBackground` | White (light) / Black (dark) |
+
+### Form Field Styling for Dark Mode
+When using `CupertinoTextFormFieldRow` or custom form fields:
+
+```dart
+CupertinoTextFormFieldRow(
+  // ... other properties
+  style: TextStyle(
+    color: CupertinoColors.label.resolveFrom(context),
+  ),
+)
+```
+
+### Avatar/Placeholder Icons
+
+```dart
+Container(
+  decoration: BoxDecoration(
+    color: CupertinoColors.systemGrey5.resolveFrom(context),
+    shape: BoxShape.circle,
+  ),
+  child: Icon(
+    CupertinoIcons.person,
+    color: CupertinoColors.systemGrey.resolveFrom(context),
+  ),
+)
+```
+
+## 8. Implementation Example (Order List Item)
 
 ```dart
 // Example of a compliant list item

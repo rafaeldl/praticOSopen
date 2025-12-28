@@ -145,14 +145,14 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                         Container(
                           width: 100,
                           height: 100,
-                          decoration: const BoxDecoration(
-                            color: CupertinoColors.systemGrey5,
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemGrey5.resolveFrom(context),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             CupertinoIcons.cube_box,
                             size: 50,
-                            color: CupertinoColors.systemGrey,
+                            color: CupertinoColors.systemGrey.resolveFrom(context),
                           ),
                         ),
                       if (_productStore.isUploading)
