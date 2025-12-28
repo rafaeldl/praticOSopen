@@ -141,7 +141,8 @@ class _HomeState extends State<Home> {
           CupertinoButton(
             padding: EdgeInsets.zero,
             child: const Icon(CupertinoIcons.chart_bar_alt_fill),
-            onPressed: () => Navigator.pushNamed(context, '/financial_dashboard_simple'),
+            onPressed: () => Navigator.of(context, rootNavigator: true)
+                .pushNamed('/financial_dashboard_simple'),
           ),
           CupertinoButton(
             padding: EdgeInsets.zero,
