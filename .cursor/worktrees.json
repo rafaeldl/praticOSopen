@@ -1,0 +1,11 @@
+{
+  "setup-worktree-unix": "setup-worktree.sh",
+  "setup-worktree-windows": [
+    "fvm flutter pub get",
+    "fvm flutter pub run build_runner build --delete-conflicting-outputs"
+  ],
+  "setup-worktree": [
+    "fvm flutter pub get",
+    "fvm flutter pub run build_runner build --delete-conflicting-outputs"
+  ]
+}
