@@ -13,7 +13,7 @@ app_review_information(
 submit_for_review false
 
 # Skip screenshots upload (we manage them separately)
-skip_screenshots true
+skip_screenshots false
 
 # Skip metadata upload if you want to manage it manually
 # skip_metadata true
