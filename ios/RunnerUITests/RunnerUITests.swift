@@ -249,22 +249,41 @@ class RunnerUITests: XCTestCase {
 
         // Dismiss keyboard and tap Entrar
         print("🔘 Tapping Entrar...")
-        app.tap()
-        sleep(1)
+
+        // Debug buttons available
+        print("🔍 Buttons after password: \(app.buttons.allElementsBoundByIndex.prefix(6).map { $0.label })")
+
+        // Try to dismiss keyboard first
+        if app.keyboards.count > 0 {
+            app.tap()
+            sleep(1)
+        }
 
         let entrarButton = app.buttons["Entrar"]
-        if entrarButton.waitForExistence(timeout: 3) {
+        if entrarButton.waitForExistence(timeout: 3) && entrarButton.isHittable {
             entrarButton.tap()
             print("✅ Tapped Entrar button")
-        } else {
+        } else if app.staticTexts["Entrar"].exists {
             app.staticTexts["Entrar"].tap()
             print("✅ Tapped Entrar text")
+        } else {
+            print("⚠️ Entrar not found, trying to submit via keyboard")
+            // Try pressing Return on keyboard
+            if app.keyboards.buttons["Return"].exists {
+                app.keyboards.buttons["Return"].tap()
+            } else if app.keyboards.buttons["Go"].exists {
+                app.keyboards.buttons["Go"].tap()
+            }
         }
 
         // Wait for home screen (check for home elements)
         print("⏳ Waiting for home screen...")
         sleep(5)
-        let success = app.buttons["Filtrar"].waitForExistence(timeout: 25) ||
+
+        // Debug what's on screen
+        debugScreen()
+
+        let success = app.buttons["Filtrar"].exists ||
                       app.buttons["Nova OS"].exists ||
                       app.staticTexts["Clientes"].exists
         print(success ? "✅ Home screen loaded" : "❌ Home screen timeout")
@@ -280,76 +299,75 @@ class RunnerUITests: XCTestCase {
         print("📸 [1/6] Home")
         snapshot("01_Home")
 
-        // 2. Order Detail - tap first list item (staticText with order info)
+        // 2. Order Detail - tap first order in list
         print("📸 [2/6] Order Detail")
-        let orderItems = app.staticTexts.allElementsBoundByIndex.filter {
-            $0.label.contains("#") || $0.label.contains("R$")
-        }
-        if let firstOrder = orderItems.first, firstOrder.isHittable {
-            firstOrder.tap()
-            sleep(2)
-            snapshot("02_OrderDetail")
-            goBack()
-            sleep(1)
-        } else {
-            print("⚠️ No order items found")
-        }
+        sleep(2)
+
+        let listY = app.frame.height * 0.35
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0))
+            .withOffset(CGVector(dx: 0, dy: listY)).tap()
+        sleep(3)
+        snapshot("02_OrderDetail")
+
+        // Go back to home
+        goToHome()
 
         // 3. Dashboard
         print("📸 [3/6] Dashboard")
-        if app.buttons["Painel Financeiro"].exists {
+        if app.buttons["Painel Financeiro"].waitForExistence(timeout: 3) {
             app.buttons["Painel Financeiro"].tap()
-            sleep(2)
+            sleep(3)
             snapshot("03_Dashboard")
-            goBack()
-            sleep(1)
+            goToHome()
         } else {
             print("⚠️ Dashboard button not found")
         }
 
         // 4. Customers tab
         print("📸 [4/6] Customers")
-        if app.staticTexts["Clientes"].exists {
-            app.staticTexts["Clientes"].tap()
-            sleep(2)
-            snapshot("04_Customers")
-        }
+        app.staticTexts["Clientes"].tap()
+        sleep(3)
+        snapshot("04_Customers")
 
-        // 5. Customer Detail
+        // 5. Customer Detail - tap first customer
         print("📸 [5/6] Customer Detail")
-        let customerItems = app.staticTexts.allElementsBoundByIndex.filter {
-            !$0.label.isEmpty && !["Clientes", "Mais", "Início"].contains($0.label)
-        }
-        if customerItems.count > 1, customerItems[1].isHittable {
-            customerItems[1].tap()
-            sleep(2)
-            snapshot("05_CustomerDetail")
-            goBack()
-            sleep(1)
-        } else {
-            print("⚠️ No customer items found")
-        }
+        let customerY = app.frame.height * 0.35
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0))
+            .withOffset(CGVector(dx: 0, dy: customerY)).tap()
+        sleep(3)
+        snapshot("05_CustomerDetail")
+
+        // Go back to customers
+        goBack()
+        sleep(2)
 
         // 6. Settings tab
         print("📸 [6/6] Settings")
-        if app.staticTexts["Mais"].exists {
-            app.staticTexts["Mais"].tap()
-            sleep(2)
-            snapshot("06_Settings")
-        }
+        app.staticTexts["Mais"].tap()
+        sleep(3)
+        snapshot("06_Settings")
 
         print("🏁 Done!")
     }
 
     private func goBack() {
-        // Try back button or swipe
-        let backButton = app.buttons.allElementsBoundByIndex.first {
-            $0.label.contains("Back") || $0.label.contains("Voltar") || $0.label == ""
-        }
-        if let btn = backButton, btn.isHittable {
-            btn.tap()
+        if app.buttons["Back"].exists {
+            app.buttons["Back"].tap()
         } else {
             app.swipeRight()
+        }
+        sleep(1)
+    }
+
+    private func goToHome() {
+        // Try Back button first
+        goBack()
+        sleep(1)
+
+        // Then tap Início tab to ensure we're on home
+        if app.staticTexts["Início"].exists {
+            app.staticTexts["Início"].tap()
+            sleep(2)
         }
     }
 }
