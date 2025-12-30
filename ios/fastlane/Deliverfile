@@ -1,3 +1,19 @@
 # The Deliverfile allows you to store various App Store Connect metadata
 # For more information, check out the docs
 # https://docs.fastlane.tools/actions/deliver/
+
+# App Review Information
+app_review_information(
+  demo_user: "demo@praticos.com.br",
+  demo_password: "Demo@2024!",
+  notes: "Para fazer login com a conta demo:\n\n1. Na tela de login, toque no link 'Entrar com email' abaixo dos botões de login social\n2. Digite o email e senha fornecidos\n3. Toque no botão 'Entrar'\n\nA conta demo possui dados de exemplo incluindo clientes e ordens de serviço."
+)
+
+# Automatically submit for review after upload
+submit_for_review false
+
+# Skip screenshots upload (we manage them separately)
+skip_screenshots true
+
+# Skip metadata upload if you want to manage it manually
+# skip_metadata true
