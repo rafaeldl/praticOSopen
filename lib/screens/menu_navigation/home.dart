@@ -125,32 +125,50 @@ class _HomeState extends State<Home> {
 
   Widget _buildNavigationBar(BuildContext context) {
     return CupertinoSliverNavigationBar(
-      largeTitle: const Text('Ordens de Serviço'),
+      largeTitle: Semantics(
+        identifier: 'home_title',
+        child: const Text('Ordens de Serviço'),
+      ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: Icon(
-              currentSelected == 0 
-                  ? CupertinoIcons.line_horizontal_3_decrease_circle 
-                  : CupertinoIcons.line_horizontal_3_decrease_circle_fill,
+          Semantics(
+            identifier: 'filter_button',
+            button: true,
+            label: 'Filtrar',
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Icon(
+                currentSelected == 0
+                    ? CupertinoIcons.line_horizontal_3_decrease_circle
+                    : CupertinoIcons.line_horizontal_3_decrease_circle_fill,
+              ),
+              onPressed: () => _showFilterOptions(context),
             ),
-            onPressed: () => _showFilterOptions(context),
           ),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: const Icon(CupertinoIcons.chart_bar_alt_fill),
-            onPressed: () => Navigator.of(context, rootNavigator: true)
-                .pushNamed('/financial_dashboard_simple'),
+          Semantics(
+            identifier: 'dashboard_button',
+            button: true,
+            label: 'Painel Financeiro',
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(CupertinoIcons.chart_bar_alt_fill),
+              onPressed: () => Navigator.of(context, rootNavigator: true)
+                  .pushNamed('/financial_dashboard_simple'),
+            ),
           ),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: const Icon(CupertinoIcons.add),
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Navigator.of(context, rootNavigator: true).pushNamed('/order').then((_) => _loadOrders());
-            },
+          Semantics(
+            identifier: 'add_order_button',
+            button: true,
+            label: 'Nova OS',
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(CupertinoIcons.add),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                Navigator.of(context, rootNavigator: true).pushNamed('/order').then((_) => _loadOrders());
+              },
+            ),
           ),
         ],
       ),
@@ -213,7 +231,7 @@ class _HomeState extends State<Home> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: CupertinoColors.activeBlue.withOpacity(0.1),
+                color: CupertinoColors.activeBlue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -234,7 +252,6 @@ class _HomeState extends State<Home> {
                   ),
                   CupertinoButton(
                     padding: EdgeInsets.zero,
-                    minSize: 0,
                     onPressed: () {
                       HapticFeedback.lightImpact();
                       orderStore.setCustomerFilter(null);
@@ -243,7 +260,7 @@ class _HomeState extends State<Home> {
                     child: const Text(
                       'Limpar',
                       style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
+                    ), minimumSize: Size(0, 0),
                   ),
                 ],
               ),

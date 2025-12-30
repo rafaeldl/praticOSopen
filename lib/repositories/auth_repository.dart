@@ -58,9 +58,7 @@ class AuthRepository {
       ],
       nonce: nonce,
       webAuthenticationOptions: WebAuthenticationOptions(
-        // TODO: Update with your Service ID from Apple Developer Portal
         clientId: 'br.com.rafsoft.praticos.app',
-        // TODO: Update with your Callback URL from Firebase Console
         redirectUri: Uri.parse(
           'https://praticos.firebaseapp.com/__/auth/handler',
         ),
@@ -95,12 +93,31 @@ class AuthRepository {
     return firebaseUser;
   }
 
+  Future<User> signInWithEmailPassword(String email, String password) async {
+    final UserCredential authResult = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    final User user = authResult.user!;
+
+    final User firebaseUser = _auth.currentUser!;
+    currentUser = firebaseUser;
+
+    print('signInWithEmailPassword succeeded: $user');
+
+    return firebaseUser;
+  }
+
   void signOutGoogle() async {
     await _googleSignIn.signOut();
     await _auth.signOut();
     currentUser = null;
 
     print("User Sign Out");
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
   }
 
   String _generateNonce([int length = 32]) {

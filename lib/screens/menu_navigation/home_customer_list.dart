@@ -103,50 +103,53 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         }
 
         List<Customer>? customerList = customerStore.customerList!.data;
-
-        if (customerList == null || customerList.isEmpty) {
-          return SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(CupertinoIcons.person_2, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Nenhum cliente cadastrado',
-                    style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        // Filter list
-        List<Customer> filteredList = customerList.where((customer) {
-          if (_searchQuery.isEmpty) return true;
-          return (customer.name?.toLowerCase().contains(_searchQuery) ?? false) ||
-              (customer.phone?.toLowerCase().contains(_searchQuery) ?? false);
-        }).toList();
-
-        if (filteredList.isEmpty) {
-          return const SliverFillRemaining(
-            child: Center(
-              child: Text('Nenhum resultado encontrado'),
-            ),
-          );
-        }
-
-        return SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              if (index >= filteredList.length) return null;
-              return _buildCustomerItem(filteredList[index], index == filteredList.length - 1);
-            },
-            childCount: filteredList.length,
-          ),
-        );
+        return _buildCustomerListContent(customerList);
       },
+    );
+  }
+
+  Widget _buildCustomerListContent(List<Customer>? customerList) {
+    if (customerList == null || customerList.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(CupertinoIcons.person_2, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
+              const SizedBox(height: 16),
+              Text(
+                'Nenhum cliente cadastrado',
+                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Filter list
+    List<Customer> filteredList = customerList.where((customer) {
+      if (_searchQuery.isEmpty) return true;
+      return (customer.name?.toLowerCase().contains(_searchQuery) ?? false) ||
+          (customer.phone?.toLowerCase().contains(_searchQuery) ?? false);
+    }).toList();
+
+    if (filteredList.isEmpty) {
+      return const SliverFillRemaining(
+        child: Center(
+          child: Text('Nenhum resultado encontrado'),
+        ),
+      );
+    }
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          if (index >= filteredList.length) return null;
+          return _buildCustomerItem(filteredList[index], index == filteredList.length - 1);
+        },
+        childCount: filteredList.length,
+      ),
     );
   }
 

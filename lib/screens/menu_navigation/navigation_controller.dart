@@ -57,19 +57,28 @@ class _NavigationControllerState extends State<NavigationController> {
         onTap: (index) {
           navigationStore.setCurrentIndex(index);
         },
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.house),
-            activeIcon: Icon(CupertinoIcons.house_fill),
+            icon: Semantics(
+              identifier: 'tab_home',
+              child: const Icon(CupertinoIcons.house),
+            ),
+            activeIcon: const Icon(CupertinoIcons.house_fill),
             label: 'Início',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.person_2),
-            activeIcon: Icon(CupertinoIcons.person_2_fill),
+            icon: Semantics(
+              identifier: 'tab_customers',
+              child: const Icon(CupertinoIcons.person_2),
+            ),
+            activeIcon: const Icon(CupertinoIcons.person_2_fill),
             label: 'Clientes',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.ellipsis),
+            icon: Semantics(
+              identifier: 'tab_settings',
+              child: const Icon(CupertinoIcons.ellipsis),
+            ),
             label: 'Mais',
           ),
         ],

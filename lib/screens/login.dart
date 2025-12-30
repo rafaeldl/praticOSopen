@@ -1,8 +1,12 @@
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/screens/email_login_screen.dart';
 import 'package:praticos/theme/app_theme.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,6 +16,11 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final AuthStore _auth = AuthStore();
   bool _isLoading = false;
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +133,34 @@ class _LoginPageState extends State<LoginPage> {
 
         // Sign in with Google
         _buildGoogleSignInButton(isDark),
+
+        const SizedBox(height: 24),
+
+        // Link para login com email (para revisão da Apple)
+        Semantics(
+          identifier: 'email_login_link',
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => _navigateToEmailLogin(context),
+            child: Text(
+              'Entrar com email',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondary,
+              ),
+            ),
+          ),
+        ),
       ],
+    );
+  }
+
+  void _navigateToEmailLogin(BuildContext context) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) => const EmailLoginScreen(),
+      ),
     );
   }
 
@@ -208,15 +244,39 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildTermsText(bool isDark) {
-    return Text(
-      'Ao continuar, você concorda com nossos\nTermos de Uso e Política de Privacidade',
+    final textColor = isDark ? AppTheme.textTertiaryDark : AppTheme.textTertiary;
+    final linkColor = isDark ? AppTheme.primaryLight : AppTheme.primaryColor;
+
+    return RichText(
       textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 13,
-        color: isDark ? AppTheme.textTertiaryDark : AppTheme.textTertiary,
-        height: 1.4,
+      text: TextSpan(
+        style: TextStyle(
+          fontSize: 13,
+          color: textColor,
+          height: 1.4,
+        ),
+        children: [
+          const TextSpan(text: 'Ao continuar, você concorda com nossa\n'),
+          TextSpan(
+            text: 'Política de Privacidade',
+            style: TextStyle(
+              color: linkColor,
+              decoration: TextDecoration.underline,
+              decorationColor: linkColor,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () => _openPrivacyPolicy(),
+          ),
+        ],
       ),
     );
+  }
+
+  Future<void> _openPrivacyPolicy() async {
+    final uri = Uri.parse('https://praticos.web.app/privacy.html');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   Future<void> _handleAppleSignIn() async {

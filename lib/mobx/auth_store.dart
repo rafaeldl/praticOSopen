@@ -108,6 +108,11 @@ abstract class _AuthStore with Store {
   }
 
   @action
+  Future<dynamic> signInWithEmailPassword(String email, String password) {
+    return _auth.signInWithEmailPassword(email, password);
+  }
+
+  @action
   signOutGoogle() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     logout = true;
@@ -120,5 +125,10 @@ abstract class _AuthStore with Store {
     Global.currentUser = null;
     Global.companyAggr = null;
     _auth.signOutGoogle();
+  }
+
+  @action
+  Future<void> sendPasswordResetEmail(String email) {
+    return _auth.sendPasswordResetEmail(email);
   }
 }
