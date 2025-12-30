@@ -4,235 +4,352 @@ import XCTest
 class RunnerUITests: XCTestCase {
     var app: XCUIApplication!
 
-    // Demo account credentials
     private let demoEmail = "demo@praticos.com.br"
     private let demoPassword = "Demo@2024!"
 
     override func setUp() {
         super.setUp()
-        continueAfterFailure = true  // Continue even if assertions fail
+        continueAfterFailure = true
         app = XCUIApplication()
         setupSnapshot(app)
         app.launch()
     }
 
-    // MARK: - Main Test
-
     func testTakeScreenshots() {
         print("🚀 Starting screenshot capture...")
         sleep(5)
 
-        // Check if logged in by looking for tab bar
-        let isLoggedIn = app.staticTexts["Ordens de Serviço"].waitForExistence(timeout: 5)
+        // Debug: what's on screen?
+        debugScreen()
+
+        // Check if already logged in by looking for home screen elements
+        let isLoggedIn = checkIfLoggedIn()
+        print("📍 Logged in check: \(isLoggedIn)")
 
         if isLoggedIn {
-            print("📱 App is logged in - forcing logout")
-            forceLogout()
+            print("📱 Already logged in - logging out first...")
+            logout()
             sleep(3)
         }
 
-        // Take login screenshot
+        print("📱 On login screen")
         snapshot("00_Login")
-        print("📸 Login screenshot taken")
 
         // Perform login
-        if doLogin() {
-            print("✅ Login successful!")
-            sleep(5)  // Wait for seed
-            captureAllScreens()
+        if login() {
+            print("✅ Login successful")
+            sleep(3)
+            captureScreens()
         } else {
             print("❌ Login failed")
+            snapshot("99_LoginFailed")
+        }
+    }
+
+    // MARK: - Debug
+
+    private func debugScreen() {
+        print("🔍 DEBUG - Buttons(\(app.buttons.count)): \(app.buttons.allElementsBoundByIndex.prefix(6).map { $0.label })")
+        print("🔍 DEBUG - Texts(\(app.staticTexts.count)): \(app.staticTexts.allElementsBoundByIndex.prefix(5).map { $0.label })")
+        print("🔍 DEBUG - TabBars: \(app.tabBars.count), Cells: \(app.cells.count)")
+    }
+
+    // MARK: - Check Login State
+
+    private func checkIfLoggedIn() -> Bool {
+        // Check for home screen elements (Flutter doesn't expose tabBars/cells natively)
+        let homeElements = [
+            app.buttons["Filtrar"],
+            app.buttons["Nova OS"],
+            app.buttons["Painel Financeiro"],
+            app.staticTexts["Clientes"],
+            app.staticTexts["Mais"]
+        ]
+
+        for element in homeElements {
+            if element.exists {
+                print("📍 Found home element: '\(element.label)'")
+                return true
+            }
+        }
+
+        return false
+    }
+
+    // MARK: - Logout
+
+    private func logout() {
+        print("🚪 Logging out...")
+
+        // Tap "Mais" tab (Settings)
+        let maisTab = app.staticTexts["Mais"]
+        if maisTab.exists {
+            maisTab.tap()
+            sleep(2)
+            print("📍 Tapped 'Mais' tab")
+        }
+
+        // Debug what's on settings screen
+        print("🔍 Settings texts: \(app.staticTexts.allElementsBoundByIndex.prefix(10).map { $0.label })")
+        print("🔍 Settings buttons: \(app.buttons.allElementsBoundByIndex.prefix(10).map { $0.label })")
+
+        // Scroll down to find "Sair" (it's usually at the bottom)
+        app.swipeUp()
+        sleep(1)
+        print("🔍 After scroll texts: \(app.staticTexts.allElementsBoundByIndex.prefix(10).map { $0.label })")
+
+        // Find and tap "Sair" - look for text containing "Sair"
+        var foundSair = false
+        for text in app.staticTexts.allElementsBoundByIndex {
+            if text.label.contains("Sair") {
+                text.tap()
+                print("📍 Tapped 'Sair' text")
+                foundSair = true
+                break
+            }
+        }
+
+        if !foundSair {
+            for btn in app.buttons.allElementsBoundByIndex {
+                if btn.label.contains("Sair") {
+                    btn.tap()
+                    print("📍 Tapped 'Sair' button")
+                    foundSair = true
+                    break
+                }
+            }
+        }
+
+        if !foundSair {
+            print("❌ Could not find 'Sair'")
+            return
+        }
+
+        sleep(1)
+
+        // Confirm logout if there's an alert/action sheet
+        sleep(1)
+        print("🔍 Looking for confirmation...")
+        print("🔍 Alerts: \(app.alerts.count), Sheets: \(app.sheets.count)")
+
+        // Try alert first
+        if app.alerts.buttons["Sair"].exists {
+            app.alerts.buttons["Sair"].tap()
+            print("📍 Confirmed in alert")
+        }
+        // Try action sheet
+        else if app.sheets.buttons["Sair"].exists {
+            app.sheets.buttons["Sair"].tap()
+            print("📍 Confirmed in sheet")
+        }
+        // Try any button with Sair
+        else {
+            for btn in app.buttons.allElementsBoundByIndex {
+                if btn.label == "Sair" && btn.isHittable {
+                    btn.tap()
+                    print("📍 Tapped confirmation button")
+                    break
+                }
+            }
+        }
+
+        sleep(3)
+
+        // Verify we're logged out
+        if app.buttons["Entrar com email"].exists || app.staticTexts["Entrar com email"].exists ||
+           app.staticTexts["Bem-vindo ao PraticOS"].exists {
+            print("✅ Logged out successfully")
+        } else {
+            print("⚠️ Logout may not have completed")
+            debugScreen()
+        }
+    }
+
+    // MARK: - Login
+
+    private func login() -> Bool {
+        print("🔑 Starting login...")
+
+        // Tap "Entrar com email" - it's a CupertinoButton
+        // Try button first, then staticText
+        var emailLoginElement: XCUIElement?
+
+        let emailButton = app.buttons["Entrar com email"]
+        let emailText = app.staticTexts["Entrar com email"]
+
+        if emailButton.waitForExistence(timeout: 3) {
+            emailLoginElement = emailButton
+            print("📍 Found as button")
+        } else if emailText.waitForExistence(timeout: 3) {
+            emailLoginElement = emailText
+            print("📍 Found as staticText")
+        }
+
+        guard let element = emailLoginElement else {
+            print("❌ 'Entrar com email' not found (tried button and staticText)")
+            // Debug: list all buttons
+            print("📋 Available buttons:")
+            for btn in app.buttons.allElementsBoundByIndex.prefix(10) {
+                print("   - '\(btn.label)'")
+            }
+            return false
+        }
+
+        element.tap()
+        print("✅ Tapped 'Entrar com email'")
+        sleep(2)
+
+        // Get all text fields (Flutter exposes both email and password as textFields)
+        let fields = app.textFields.allElementsBoundByIndex
+        let secureFields = app.secureTextFields.allElementsBoundByIndex
+        print("📝 Found \(fields.count) textFields, \(secureFields.count) secureTextFields")
+
+        guard fields.count >= 1 else {
+            print("❌ No text fields found")
+            return false
+        }
+
+        // Enter email
+        print("📧 Entering email...")
+        let emailField = fields[0]
+        emailField.tap()
+        sleep(1)
+        emailField.typeText(demoEmail)
+        print("✅ Email entered")
+
+        // Move to password using keyboard "Next" or tap the field
+        print("🔒 Entering password...")
+        sleep(1)
+
+        // Try tapping Next on keyboard first
+        let nextKey = app.keyboards.buttons["Next"]
+        if nextKey.exists {
+            nextKey.tap()
+            print("📍 Tapped Next key")
+            sleep(1)
+        } else {
+            // Tap password field directly
+            if fields.count >= 2 {
+                fields[1].tap()
+                print("📍 Tapped password field")
+                sleep(1)
+            } else if secureFields.count >= 1 {
+                secureFields[0].tap()
+                print("📍 Tapped secure field")
+                sleep(1)
+            } else {
+                print("❌ No password field found")
+                return false
+            }
+        }
+
+        // Type password
+        app.typeText(demoPassword)
+        print("✅ Password entered")
+
+        // Dismiss keyboard and tap Entrar
+        print("🔘 Tapping Entrar...")
+        app.tap()
+        sleep(1)
+
+        let entrarButton = app.buttons["Entrar"]
+        if entrarButton.waitForExistence(timeout: 3) {
+            entrarButton.tap()
+            print("✅ Tapped Entrar button")
+        } else {
+            app.staticTexts["Entrar"].tap()
+            print("✅ Tapped Entrar text")
+        }
+
+        // Wait for home screen (check for home elements)
+        print("⏳ Waiting for home screen...")
+        sleep(5)
+        let success = app.buttons["Filtrar"].waitForExistence(timeout: 25) ||
+                      app.buttons["Nova OS"].exists ||
+                      app.staticTexts["Clientes"].exists
+        print(success ? "✅ Home screen loaded" : "❌ Home screen timeout")
+        return success
+    }
+
+    // MARK: - Capture Screens
+
+    private func captureScreens() {
+        print("📸 Capturing screens...")
+
+        // 1. Home
+        print("📸 [1/6] Home")
+        snapshot("01_Home")
+
+        // 2. Order Detail - tap first list item (staticText with order info)
+        print("📸 [2/6] Order Detail")
+        let orderItems = app.staticTexts.allElementsBoundByIndex.filter {
+            $0.label.contains("#") || $0.label.contains("R$")
+        }
+        if let firstOrder = orderItems.first, firstOrder.isHittable {
+            firstOrder.tap()
+            sleep(2)
+            snapshot("02_OrderDetail")
+            goBack()
+            sleep(1)
+        } else {
+            print("⚠️ No order items found")
+        }
+
+        // 3. Dashboard
+        print("📸 [3/6] Dashboard")
+        if app.buttons["Painel Financeiro"].exists {
+            app.buttons["Painel Financeiro"].tap()
+            sleep(2)
+            snapshot("03_Dashboard")
+            goBack()
+            sleep(1)
+        } else {
+            print("⚠️ Dashboard button not found")
+        }
+
+        // 4. Customers tab
+        print("📸 [4/6] Customers")
+        if app.staticTexts["Clientes"].exists {
+            app.staticTexts["Clientes"].tap()
+            sleep(2)
+            snapshot("04_Customers")
+        }
+
+        // 5. Customer Detail
+        print("📸 [5/6] Customer Detail")
+        let customerItems = app.staticTexts.allElementsBoundByIndex.filter {
+            !$0.label.isEmpty && !["Clientes", "Mais", "Início"].contains($0.label)
+        }
+        if customerItems.count > 1, customerItems[1].isHittable {
+            customerItems[1].tap()
+            sleep(2)
+            snapshot("05_CustomerDetail")
+            goBack()
+            sleep(1)
+        } else {
+            print("⚠️ No customer items found")
+        }
+
+        // 6. Settings tab
+        print("📸 [6/6] Settings")
+        if app.staticTexts["Mais"].exists {
+            app.staticTexts["Mais"].tap()
+            sleep(2)
+            snapshot("06_Settings")
         }
 
         print("🏁 Done!")
     }
 
-    // MARK: - Logout
-
-    private func forceLogout() {
-        print("🔓 Forcing logout...")
-
-        // Tap "Mais" tab using coordinates (right side of tab bar)
-        tapAtBottomTab(position: .right)
-        sleep(2)
-
-        // Swipe up to find Sair
-        app.swipeUp()
-        app.swipeUp()
-        sleep(1)
-
-        // Find and tap Sair
-        let sairText = app.staticTexts["Sair"]
-        if sairText.waitForExistence(timeout: 3) {
-            sairText.tap()
-            sleep(1)
-
-            // Confirm in dialog - look for destructive button
-            let confirmButtons = app.buttons.allElementsBoundByIndex
-            for button in confirmButtons {
-                if button.label == "Sair" {
-                    button.tap()
-                    print("✅ Logout confirmed")
-                    sleep(3)
-                    return
-                }
-            }
+    private func goBack() {
+        // Try back button or swipe
+        let backButton = app.buttons.allElementsBoundByIndex.first {
+            $0.label.contains("Back") || $0.label.contains("Voltar") || $0.label == ""
         }
-        print("⚠️ Could not complete logout")
-    }
-
-    // MARK: - Login
-
-    private func doLogin() -> Bool {
-        print("🔑 Performing login...")
-        sleep(2)
-
-        // Find and tap "Entrar com email"
-        let emailLink = app.staticTexts["Entrar com email"]
-        guard emailLink.waitForExistence(timeout: 5) else {
-            print("❌ 'Entrar com email' not found")
-            return false
+        if let btn = backButton, btn.isHittable {
+            btn.tap()
+        } else {
+            app.swipeRight()
         }
-        emailLink.tap()
-        sleep(1)
-
-        // Enter email
-        let emailField = app.textFields.firstMatch
-        guard emailField.waitForExistence(timeout: 3) else {
-            print("❌ Email field not found")
-            return false
-        }
-        emailField.tap()
-        emailField.typeText(demoEmail)
-
-        // Enter password
-        let passwordField = app.secureTextFields.firstMatch
-        guard passwordField.waitForExistence(timeout: 3) else {
-            print("❌ Password field not found")
-            return false
-        }
-        passwordField.tap()
-        passwordField.typeText(demoPassword)
-
-        // Tap Entrar button
-        let entrarButton = app.buttons["Entrar"]
-        guard entrarButton.waitForExistence(timeout: 3) else {
-            print("❌ Entrar button not found")
-            return false
-        }
-        entrarButton.tap()
-
-        // Wait for home screen
-        let success = app.staticTexts["Ordens de Serviço"].waitForExistence(timeout: 20)
-        print(success ? "✅ Home screen loaded" : "❌ Home screen not found")
-        return success
-    }
-
-    // MARK: - Capture Screenshots
-
-    private func captureAllScreens() {
-        // 1. Home
-        sleep(3)
-        snapshot("01_Home_OrderList")
-        print("📸 Home captured")
-
-        // 2. Dashboard - tap the chart icon in nav bar (second button from right)
-        tapDashboardButton()
-        sleep(3)
-        snapshot("02_Dashboard_Financial")
-        print("📸 Dashboard captured")
-
-        // 3. Go back and navigate to Clientes
-        tapBackButton()
-        sleep(2)
-
-        tapAtBottomTab(position: .center)  // Clientes is center tab
-        sleep(3)
-        snapshot("03_Customers_List")
-        print("📸 Customers captured")
-
-        // 4. Navigate to Mais (Settings)
-        tapAtBottomTab(position: .right)  // Mais is right tab
-        sleep(3)
-        snapshot("04_Settings")
-        print("📸 Settings captured")
-    }
-
-    // MARK: - Navigation Helpers
-
-    private func tapDashboardButton() {
-        print("📊 Tapping dashboard button...")
-
-        // The dashboard button is in the navigation bar, second from right
-        // Try to find it by looking at all buttons
-        let allButtons = app.buttons.allElementsBoundByIndex
-        for button in allButtons {
-            let label = button.label.lowercased()
-            // Look for chart-related button
-            if label.contains("chart") || label.contains("painel") || label.contains("bar") {
-                button.tap()
-                print("✅ Found dashboard button: \(button.label)")
-                return
-            }
-        }
-
-        // Fallback: tap by coordinate (nav bar area, right side)
-        // Based on screenshot: nav bar buttons are at top right
-        let screenWidth = app.frame.width
-        let navBarY: CGFloat = 110  // Approximate Y position of nav bar buttons
-        let dashboardX = screenWidth - 120  // Second button from right
-
-        let coord = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-            .withOffset(CGVector(dx: dashboardX, dy: navBarY))
-        coord.tap()
-        print("✅ Tapped dashboard at coordinates")
-    }
-
-    private func tapBackButton() {
-        print("🔙 Tapping back button...")
-
-        // Try navigation bar back button first
-        let navBackButton = app.navigationBars.buttons.element(boundBy: 0)
-        if navBackButton.exists && navBackButton.isHittable {
-            navBackButton.tap()
-            print("✅ Tapped nav back button")
-            return
-        }
-
-        // Fallback: tap at top-left corner where back button should be
-        let coord = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-            .withOffset(CGVector(dx: 30, dy: 110))
-        coord.tap()
-        print("✅ Tapped back at coordinates")
-    }
-
-    enum TabPosition {
-        case left    // Início
-        case center  // Clientes
-        case right   // Mais
-    }
-
-    private func tapAtBottomTab(position: TabPosition) {
-        let screenWidth = app.frame.width
-        let screenHeight = app.frame.height
-
-        // Tab bar is at the bottom, approximately 50pt from bottom + safe area
-        let tabY = screenHeight - 40
-
-        let tabX: CGFloat
-        switch position {
-        case .left:
-            tabX = screenWidth * 0.17  // ~1/6 from left
-        case .center:
-            tabX = screenWidth * 0.5   // Center
-        case .right:
-            tabX = screenWidth * 0.83  // ~5/6 from left
-        }
-
-        print("📍 Tapping tab at (\(tabX), \(tabY))")
-
-        let coord = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
-            .withOffset(CGVector(dx: tabX, dy: tabY))
-        coord.tap()
     }
 }
