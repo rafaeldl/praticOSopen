@@ -1,1 +1,1 @@
-ordem de serviço, pedido de venda, PDV, OS
+ordem de serviço,OS,gestão,clientes,oficina,assistência técnica,orçamento,serviços,PDV,controle

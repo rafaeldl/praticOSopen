@@ -21,18 +21,6 @@ mixin _$AuthStore on _AuthStore, Store {
   }
 
   @override
-  Future<dynamic> signInWithApple() {
-    final _$actionInfo = _$_AuthStoreActionController.startAction(
-      name: '_AuthStore.signInWithApple',
-    );
-    try {
-      return super.signInWithApple();
-    } finally {
-      _$_AuthStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   set currentUser(ObservableStream<User?>? value) {
     _$currentUserAtom.reportWrite(value, super.currentUser, () {
       super.currentUser = value;
@@ -89,6 +77,42 @@ mixin _$AuthStore on _AuthStore, Store {
     );
     try {
       return super.signInWithGoogle();
+    } finally {
+      _$_AuthStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> signInWithApple() {
+    final _$actionInfo = _$_AuthStoreActionController.startAction(
+      name: '_AuthStore.signInWithApple',
+    );
+    try {
+      return super.signInWithApple();
+    } finally {
+      _$_AuthStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<dynamic> signInWithEmailPassword(String email, String password) {
+    final _$actionInfo = _$_AuthStoreActionController.startAction(
+      name: '_AuthStore.signInWithEmailPassword',
+    );
+    try {
+      return super.signInWithEmailPassword(email, password);
+    } finally {
+      _$_AuthStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  Future<void> sendPasswordResetEmail(String email) {
+    final _$actionInfo = _$_AuthStoreActionController.startAction(
+      name: '_AuthStore.sendPasswordResetEmail',
+    );
+    try {
+      return super.sendPasswordResetEmail(email);
     } finally {
       _$_AuthStoreActionController.endAction(_$actionInfo);
     }

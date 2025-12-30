@@ -1,1 +1,1 @@
-PraticOS - Ordens de serviço
+Gestão de Ordens de Serviço

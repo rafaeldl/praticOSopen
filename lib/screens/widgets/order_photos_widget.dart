@@ -189,7 +189,6 @@ class OrderPhotosWidget extends StatelessWidget {
   Widget _buildPhotoActionButton(BuildContext context, int index, {bool small = false}) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      minSize: 0,
       onPressed: () => _showActionSheet(context, index),
       child: Container(
         padding: EdgeInsets.all(small ? 4 : 6),
@@ -202,7 +201,7 @@ class OrderPhotosWidget extends StatelessWidget {
           color: CupertinoColors.white,
           size: small ? 16 : 20,
         ),
-      ),
+      ), minimumSize: Size(0, 0),
     );
   }
 

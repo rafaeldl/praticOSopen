@@ -49,6 +49,9 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
 
+  # URL Launcher
+  url_launcher: ^6.2.5
+
   # Utilitários
   intl: ^0.20.2
   font_awesome_flutter: ^10.7.0

@@ -9,6 +9,24 @@ part of 'company_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic, no_leading_underscores_for_local_identifiers
 
 mixin _$CompanyStore on _CompanyStore, Store {
+  late final _$isUploadingAtom = Atom(
+    name: '_CompanyStore.isUploading',
+    context: context,
+  );
+
+  @override
+  bool get isUploading {
+    _$isUploadingAtom.reportRead();
+    return super.isUploading;
+  }
+
+  @override
+  set isUploading(bool value) {
+    _$isUploadingAtom.reportWrite(value, super.isUploading, () {
+      super.isUploading = value;
+    });
+  }
+
   late final _$addCollaboratorAsyncAction = AsyncAction(
     '_CompanyStore.addCollaborator',
     context: context,
@@ -55,6 +73,18 @@ mixin _$CompanyStore on _CompanyStore, Store {
     return _$updateCompanyAsyncAction.run(() => super.updateCompany(company));
   }
 
+  late final _$uploadCompanyLogoAsyncAction = AsyncAction(
+    '_CompanyStore.uploadCompanyLogo',
+    context: context,
+  );
+
+  @override
+  Future<String?> uploadCompanyLogo(File file, Company company) {
+    return _$uploadCompanyLogoAsyncAction.run(
+      () => super.uploadCompanyLogo(file, company),
+    );
+  }
+
   late final _$_CompanyStoreActionController = ActionController(
     name: '_CompanyStore',
     context: context,
@@ -75,7 +105,7 @@ mixin _$CompanyStore on _CompanyStore, Store {
   @override
   String toString() {
     return '''
-
+isUploading: ${isUploading}
     ''';
   }
 }
