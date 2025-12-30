@@ -1,1 +1,7 @@
-Versão inicial de produção
+Novidades nesta versão:
+
+• Tela de login redesenhada seguindo as diretrizes Apple HIG
+• Melhorias na interface e experiência do usuário
+• Correções de bugs e otimizações de desempenho
+
+Obrigado por usar o PraticOS!
