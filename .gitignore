@@ -179,3 +179,4 @@ next_build_number.txt
 .dart_tool/
 build/
 
+android/fastlane/play_store_credentials.json

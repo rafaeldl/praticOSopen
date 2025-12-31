@@ -2,7 +2,7 @@ name: Release Android
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, feature/android-deployment ]
     tags:
       - 'v*'
   workflow_dispatch:
@@ -58,9 +58,9 @@ jobs:
         run: |
           echo "${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
 
-      # 🚀 Build + Upload to Internal Track (on master branch)
+      # 🚀 Build + Upload to Internal Track (on master or feature branch)
       - name: Fastlane Internal (Google Play)
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/feature/android-deployment'
         working-directory: android
         env:
           FASTLANE_SKIP_UPDATE_CHECK: "true"
