@@ -32,7 +32,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "br.com.rafsoft.praticos"
-    compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -55,7 +55,7 @@ android {
     defaultConfig {
         applicationId "br.com.rafsoft.praticos"
         minSdkVersion 24
-        targetSdkVersion 33
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -89,7 +89,7 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
