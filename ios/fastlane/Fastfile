@@ -150,7 +150,8 @@ platform :ios do
       force: true, # Pula confirmação de HTML preview
       skip_screenshots: false,
       skip_metadata: false,
-      submit_for_review: false # Apenas upload, revisão manual
+      submit_for_review: false, # Apenas upload, revisão manual
+      run_precheck_before_submit: false # Evita erro de API Key com IAP
     )
   end
 
