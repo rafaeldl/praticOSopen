@@ -43,6 +43,9 @@ jobs:
 
       # 🔐 Restore Secrets
       
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
       # 1. Keystore
       - name: Decode Keystore
         run: |
