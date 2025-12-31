@@ -33,15 +33,15 @@ jobs:
         run: flutter pub get
 
       # Setup Ruby + Bundler
-      - name: Ruby (bundler cache)
+      - name: Ruby (no cache temporarily)
         uses: ruby/setup-ruby@v1
         env:
           BUNDLE_GEMFILE: android/Gemfile
         with:
           ruby-version: '3.2'
-          bundler-cache: true
+          bundler-cache: false
 
-      - name: Update Bundler
+      - name: Install modern Bundler
         run: gem install bundler:2.4.22
 
       # 🔐 Restore Secrets
