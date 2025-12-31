@@ -1,18 +1,3 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
-
 default_platform(:android)
 
 platform :android do
@@ -21,18 +6,41 @@ platform :android do
     gradle(task: "test")
   end
 
-  desc "Submit a new Beta Build to Crashlytics Beta"
-  lane :beta do
-    gradle(task: "clean assembleRelease")
-    crashlytics
-  
-    # sh "your_script.sh"
-    # You can also use other beta testing services here
+  desc "Build the Android App Bundle (AAB)"
+  lane :build do |options|
+    gradle_properties = {}
+    gradle_properties["flutter-version-code"] = options[:version_code] if options[:version_code]
+    gradle_properties["flutter-version-name"] = options[:version_name] if options[:version_name]
+
+    gradle(
+      task: "clean bundleRelease",
+      properties: gradle_properties
+    )
   end
 
-  desc "Deploy a new version to the Google Play"
-  lane :internal do
-    upload_to_play_store(track: 'internal', aab: '../build/app/outputs/bundle/release/app-release.aab')
+  desc "Deploy a new version to the Google Play Internal Track"
+  lane :internal do |options|
+    build(options)
     
+    upload_to_play_store(
+      track: 'internal',
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      skip_upload_apk: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Promote Internal to Production"
+  lane :promote_to_production do
+    upload_to_play_store(
+      track: 'internal',
+      track_promote_to: 'production',
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false
+    )
   end
 end
