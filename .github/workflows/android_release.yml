@@ -70,11 +70,11 @@ jobs:
           CI: "true"
         run: bundle exec fastlane internal
 
-      # 🚀 Promote to Production (on Tags v*)
-      - name: Fastlane Promote to Production
+      # 🚀 Build + Upload to Production with Metadata (on Tags v*)
+      - name: Fastlane Release (Production)
         if: startsWith(github.ref, 'refs/tags/v')
         working-directory: android
         env:
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
-        run: bundle exec fastlane promote_to_production
+        run: bundle exec fastlane deploy_with_metadata track:production

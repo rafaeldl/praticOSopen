@@ -58,6 +58,43 @@ platform :android do
     )
   end
 
+  desc "Deploy to Internal Track with Metadata and Screenshots"
+  lane :deploy_with_metadata do |options|
+    # Default track is internal, but can be overridden (e.g., 'production')
+    track = options[:track] || 'internal'
+
+    # 1. Carregar credenciais (garante que json_key_data esteja disponível se precisar)
+    
+    # 2. Buscar versão atual na loja
+    begin
+      current_codes = google_play_track_version_codes(track: 'internal')
+      max_code = current_codes.max || 0
+      prod_codes = google_play_track_version_codes(track: 'production')
+      max_prod = prod_codes.max || 0
+      
+      current_version_code = [max_code, max_prod].max
+    rescue => ex
+      UI.error("Erro ao buscar versão na loja: #{ex}")
+      current_version_code = 0
+    end
+
+    new_version_code = current_version_code + 1
+    UI.message("Version Code atual na loja: #{current_version_code}. Novo Version Code: #{new_version_code}")
+
+    # 3. Buildar com o novo código
+    build_flutter(version_code: new_version_code)
+    
+    # 4. Upload completo
+    upload_to_play_store(
+      track: track,
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      skip_upload_apk: true,
+      skip_upload_images: false,      # Ativa upload de imagens
+      skip_upload_screenshots: false, # Ativa upload de screenshots
+      skip_upload_metadata: false     # Ativa upload de metadados
+    )
+  end
+
   desc "Promote Internal to Production"
   lane :promote_to_production do
     upload_to_play_store(
