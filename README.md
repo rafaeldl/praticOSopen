@@ -1,69 +1,107 @@
-# PraticOS
+# PraticOS 🚀
 
-Sistema operacional prático para gestão.
+Sistema operacional prático e intuitivo para gestão de ordens de serviço e clientes. Desenvolvido com **Flutter** e **Firebase**, focado em produtividade e automação.
+
+![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=Firebase&logoColor=white)
+![Fastlane](https://img.shields.io/badge/fastlane-00F200?style=for-the-badge&logo=fastlane&logoColor=white)
+
+---
 
 ## 📋 Índice
-- [Documentação](#documentação)
-- [Desenvolvimento](#desenvolvimento)
-- [Firebase](#firebase)
-- [Solução de Problemas](#solução-de-problemas)
+- [Funcionalidades](#-funcionalidades)
+- [Documentação](#-documentação)
+- [Desenvolvimento](#-desenvolvimento)
+- [Automação e Deploy](#-automação-e-deploy)
+- [Firebase](#-firebase)
+- [Solução de Problemas](#-solução-de-problemas)
+
+---
+
+## ✨ Funcionalidades
+- 📝 Gestão completa de Ordens de Serviço.
+- 👥 Cadastro e acompanhamento de Clientes.
+- 📊 Dashboard com indicadores de performance.
+- 🌗 Suporte a Modo Claro e Escuro (Material & Cupertino).
+- 🏢 Suporte a Multi-Tenancy (Várias organizações).
+- 🔐 Autenticação via Google, Apple e Email/Senha.
+
+---
 
 ## 📚 Documentação
 
-A documentação completa do projeto foi movida para a pasta [`docs/`](docs/).
+Toda a documentação técnica e de processos está centralizada para facilitar a manutenção.
 
-- **[Guia Completo de Deploy (Android & iOS)](docs/DEPLOYMENT.md)** - Instruções detalhadas sobre build, release, Fastlane e GitHub Actions.
-- [Configuração de Conta Demo](docs/DEMO_ACCOUNT_SETUP.md)
-- [Segredos do GitHub (Android)](docs/ANDROID_GITHUB_SECRETS.md)
-- [Guia de Configuração Android](docs/ANDROID_SETUP_GUIDE.md)
-- [Configuração Apple Sign In](docs/APPLE_SIGN_IN_SETUP.md)
-- [Multi-Tenancy](docs/MULTI_TENANCY.md)
-- [Diretrizes de UX](docs/UX_GUIDELINES.md)
-- [Agentes IA](AGENTS.md)
+- **[🚀 Guia de Deploy (Android & iOS)](docs/DEPLOYMENT.md)** - **Leia primeiro** para entender o fluxo de publicação.
+- [🤖 Agentes IA](AGENTS.md) - Contexto para desenvolvimento assistido.
+- [🔐 Configuração de Secrets](docs/ANDROID_GITHUB_SECRETS.md) - Guia para CI/CD no GitHub.
+- [⚙️ Setup Android](docs/ANDROID_SETUP_GUIDE.md) - Configuração do ambiente de desenvolvimento.
+- [🍏 Apple Sign In](docs/APPLE_SIGN_IN_SETUP.md) - Configuração do provedor de autenticação.
+- [📐 Diretrizes de UX](docs/UX_GUIDELINES.md) - Padrões visuais e de interação.
+- [👥 Conta Demo](docs/DEMO_ACCOUNT_SETUP.md) - Dados de acesso para teste/review.
+
+---
 
 ## 🚀 Desenvolvimento
 
-### Geração de Código MobX
-Para gerar os arquivos necessários do MobX, execute um dos comandos:
+### Pré-requisitos
+- Flutter SDK (versão especificada no `.fvmrc`)
+- FVM (Flutter Version Manager) - Recomendado
+
+### Geração de Código (MobX)
+Este projeto utiliza MobX para gerência de estado. Sempre que houver alterações nas stores, execute:
 
 ```bash
-# Gerar uma vez
-flutter packages pub run build_runner build
+# Gerar arquivos uma única vez
+fvm flutter packages pub run build_runner build --delete-conflicting-outputs
 
-# Observar alterações e gerar automaticamente
-flutter packages pub run build_runner watch
+# Observar alterações em tempo real
+fvm flutter packages pub run build_runner watch
 ```
+
+---
+
+## 📦 Automação e Deploy
+
+O projeto utiliza **Fastlane** para automatizar tarefas repetitivas.
+
+- **Screenshots:** Captura automática de telas para todas as resoluções de lojas (Phone e Tablets).
+- **CI/CD:** GitHub Actions configurado para deploy automático em trilhas internas (push) e produção (tags).
+
+Para rodar localmente (exemplo Android):
+```bash
+cd android
+bundle exec fastlane screenshots_all
+bundle exec fastlane internal
+```
+
+---
 
 ## 🔥 Firebase
 
-### Configuração de Índices do Firestore
+### Índices e Regras
+Para manter o banco de dados otimizado, utilize o Firebase CLI:
 
 ```bash
-# Login no Firebase
-firebase login
-
-# Configurar projeto
-gcloud config set project <project_name>
-
-# Exportar índices
+# Exportar índices atuais
 firebase firestore:indexes > firestore.indexes.json
 
-# Fazer deploy dos índices
-firebase deploy --only firestore:indexes
+# Deploy de regras e índices
+firebase deploy --only firestore,storage
 ```
+
+---
 
 ## ⚠️ Solução de Problemas
 
-### Erro: Flutter.framework Permission Denied
-Se encontrar erro de permissão no Flutter.framework:
+### Erro de Permissão no Framework (iOS)
+Se encontrar erro de permissão no `Flutter.framework`:
 ```
 Flutter.framework: Permission denied
 ```
-Solução disponível em: [Flutter Issue #39507](https://github.com/flutter/flutter/issues/39507#issuecomment-555715584)
+Execute: `chmod -R +x .` na raiz ou siga as instruções no [Issue #39507](https://github.com/flutter/flutter/issues/39507).
 
-### Erro: rsync no Build
-Se encontrar erro de rsync durante o build:
-```
-rsync error: some files could not be transferred (code 23) Command PhaseScriptExecution failed with a nonzero exit code
-```
-Solução disponível em: [Stack Overflow](https://stackoverflow.com/questions/63533819/rsync-error-some-files-could-not-be-transferred-code-23-command-phasescriptex)
+### Erro de rsync no Build Xcode
+Se o build falhar com erro de rsync (code 23):
+Certifique-se de que não há processos de build travados e limpe os arquivos temporários:
+`rm -rf ~/Library/Developer/Xcode/DerivedData`
