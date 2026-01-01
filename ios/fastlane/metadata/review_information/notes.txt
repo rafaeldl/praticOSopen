@@ -1,0 +1,12 @@
+Para fazer login com a conta demo:
+
+1. Na tela de login, toque no link "Entrar com email" abaixo dos botões de login social
+2. Digite o email e senha fornecidos nos campos correspondentes
+3. Toque no botão "Entrar"
+
+A conta demo possui dados de exemplo incluindo:
+- 5 clientes cadastrados
+- 5 ordens de serviço com diferentes status (orçamento, aprovado, em andamento, concluído)
+- Dados financeiros para visualização no painel
+
+Todas as funcionalidades do app podem ser testadas com esta conta.
