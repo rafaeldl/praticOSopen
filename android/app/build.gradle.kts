@@ -53,8 +53,22 @@ flutter {
     source = "../.."
 }
 
+configurations.all {
+    resolutionStrategy {
+        force("androidx.test:runner:1.4.0")
+        force("androidx.test:rules:1.4.0")
+        force("androidx.test.espresso:espresso-core:3.4.0")
+    }
+}
+
 dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-analytics")
+
+    // Testing dependencies
+    androidTestImplementation("androidx.test:runner:1.4.0")
+    androidTestImplementation("androidx.test:rules:1.4.0")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+    androidTestImplementation("tools.fastlane:screengrab:2.1.1")
 }

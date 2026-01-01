@@ -47,13 +47,29 @@ Só envia o último .ipa do diretório padrão do Fastlane
 
 Upload do IPA gerado pelo Flutter build
 
+### ios release_store
+
+```sh
+[bundle exec] fastlane ios release_store
+```
+
+Build + Upload para App Store (com metadados e screenshots)
+
 ### ios screenshots
 
 ```sh
 [bundle exec] fastlane ios screenshots
 ```
 
-Gera screenshots automaticamente
+Gera screenshots automaticamente usando Flutter integration tests
+
+### ios screenshots_all
+
+```sh
+[bundle exec] fastlane ios screenshots_all
+```
+
+Gera screenshots para iPhone 16e e iPhone 17
 
 ----
 

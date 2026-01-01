@@ -23,13 +23,13 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 Runs all the tests
 
-### android build
+### android build_flutter
 
 ```sh
-[bundle exec] fastlane android build
+[bundle exec] fastlane android build_flutter
 ```
 
-Build the Android App Bundle (AAB)
+Build the Android App Bundle (AAB) using Flutter
 
 ### android internal
 
@@ -46,6 +46,22 @@ Deploy a new version to the Google Play Internal Track
 ```
 
 Promote Internal to Production
+
+### android screenshots
+
+```sh
+[bundle exec] fastlane android screenshots
+```
+
+Capture screenshots automatically using Flutter integration tests
+
+### android screenshots_all
+
+```sh
+[bundle exec] fastlane android screenshots_all
+```
+
+Capture screenshots for Phone, 7-inch Tablet, and 10-inch Tablet
 
 ----
 

@@ -5,12 +5,17 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000147">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000275">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: snapshot" time="439.444339">
+      <testcase classname="fastlane.lanes" name="1: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart -d iPhone\ 16e" time="92.432633">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="2: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart -d iPhone\ 17" time="103.145649">
         
       </testcase>
     
