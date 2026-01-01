@@ -155,8 +155,45 @@ platform :ios do
     )
   end
 
-  desc "Gera screenshots automaticamente"
-  lane :screenshots do
-    snapshot
+  desc "Gera screenshots automaticamente usando Flutter integration tests"
+  lane :screenshots do |options|
+    device = options[:device] || "iPhone 16e"
+    device_id = options[:device_id] # UDID do simulador (opcional)
+    force_logout = options[:force_logout]
+
+    UI.message("📸 Capturing screenshots on device: #{device}")
+
+    # Limpa screenshots anteriores
+    screenshots_dir = "fastlane/screenshots/pt-BR"
+    FileUtils.rm_rf(Dir.glob("#{screenshots_dir}/#{device}*.png"))
+    FileUtils.mkdir_p(screenshots_dir)
+
+    # Determina o device ID
+    target_device = device_id || device
+
+    # Executa o teste de integração Flutter
+    Dir.chdir("..") do
+      ENV['FLUTTER_TEST_PLATFORM'] = 'ios'
+      ENV['DEVICE_NAME'] = device
+      
+      command_args = [
+        "fvm", "flutter", "drive",
+        "--driver=test_driver/integration_test.dart",
+        "--target=integration_test/screenshot_test.dart",
+        "-d", target_device
+      ]
+      
+      # Adiciona o parâmetro force_logout se fornecido
+      if force_logout
+        command_args << "--dart-define=FORCE_LOGOUT=#{force_logout}"
+      end
+      
+      sh(*command_args)
+    end
+
+    # Lista screenshots capturadas
+    screenshots = Dir.glob("#{screenshots_dir}/#{device}*.png")
+    UI.success("✅ Captured #{screenshots.length} screenshots:")
+    screenshots.each { |s| UI.message("   - #{s}") }
   end
 end
