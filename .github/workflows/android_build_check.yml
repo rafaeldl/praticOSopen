@@ -1,0 +1,49 @@
+name: Android Build Check
+
+on:
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.0'
+          channel: stable
+          cache: true
+
+      - name: Flutter deps
+        run: flutter pub get
+
+      # Setup Ruby + Bundler (caso necessário para algum script, mantendo padrão)
+      - name: Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      # 3. Google Services JSON (Required for build)
+      - name: Decode Google Services JSON
+        run: |
+          echo "${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
+
+      # Build Debug APK (Cheaper than Release build)
+      - name: Build Android Debug APK
+        run: |
+          flutter build apk --debug
+          echo "✅ Build Android concluído com sucesso"
