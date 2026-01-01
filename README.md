@@ -89,19 +89,3 @@ firebase firestore:indexes > firestore.indexes.json
 # Deploy de regras e índices
 firebase deploy --only firestore,storage
 ```
-
----
-
-## ⚠️ Solução de Problemas
-
-### Erro de Permissão no Framework (iOS)
-Se encontrar erro de permissão no `Flutter.framework`:
-```
-Flutter.framework: Permission denied
-```
-Execute: `chmod -R +x .` na raiz ou siga as instruções no [Issue #39507](https://github.com/flutter/flutter/issues/39507).
-
-### Erro de rsync no Build Xcode
-Se o build falhar com erro de rsync (code 23):
-Certifique-se de que não há processos de build travados e limpe os arquivos temporários:
-`rm -rf ~/Library/Developer/Xcode/DerivedData`
