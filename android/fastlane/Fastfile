@@ -6,22 +6,49 @@ platform :android do
     gradle(task: "test")
   end
 
-  desc "Build the Android App Bundle (AAB)"
-  lane :build do |options|
-    gradle_properties = {}
-    gradle_properties["flutter-version-code"] = options[:version_code] if options[:version_code]
-    gradle_properties["flutter-version-name"] = options[:version_name] if options[:version_name]
+  desc "Build the Android App Bundle (AAB) using Flutter"
+  lane :build_flutter do |options|
+    version_code = options[:version_code]
+    version_name = options[:version_name]
+    
+    # Constrói o comando flutter build
+    build_args = ["build", "appbundle", "--release"]
+    build_args << "--build-number=#{version_code}" if version_code
+    build_args << "--build-name=#{version_name}" if version_name
 
-    gradle(
-      task: "clean bundleRelease",
-      properties: gradle_properties
-    )
+    # Executa o build do Flutter na raiz do projeto (../)
+    Dir.chdir("..") do
+      sh("flutter", *build_args)
+    end
   end
 
   desc "Deploy a new version to the Google Play Internal Track"
   lane :internal do |options|
-    build(options)
+    # 1. Carregar credenciais (garante que json_key_data esteja disponível se precisar)
+    # A action google_play_track_version_codes usa a chave definida no Appfile ou json_key env var
+
+    # 2. Buscar versão atual na loja
+    # Se der erro (primeira vez), assume 0
+    begin
+      current_codes = google_play_track_version_codes(track: 'internal')
+      max_code = current_codes.max || 0
+      # Tenta também produção para garantir que não vamos repetir um código antigo
+      prod_codes = google_play_track_version_codes(track: 'production')
+      max_prod = prod_codes.max || 0
+      
+      current_version_code = [max_code, max_prod].max
+    rescue => ex
+      UI.error("Erro ao buscar versão na loja (pode ser o primeiro upload): #{ex}")
+      current_version_code = 0
+    end
+
+    new_version_code = current_version_code + 1
+    UI.message("Version Code atual na loja: #{current_version_code}. Novo Version Code: #{new_version_code}")
+
+    # 3. Buildar com o novo código
+    build_flutter(version_code: new_version_code)
     
+    # 4. Upload
     upload_to_play_store(
       track: 'internal',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
