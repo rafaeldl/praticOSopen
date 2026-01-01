@@ -45,20 +45,14 @@ platform :android do
     # 3. Buildar com o novo código
     build_flutter(version_code: new_version_code)
     
-    # Define o caminho padrão ou usa a variável de ambiente se disponível
-    json_key_path = 'fastlane/play_store_credentials.json'
-    json_key_data = ENV['ANDROID_PLAY_STORE_CREDENTIALS']
-
-    # 4. Upload com Metadados ativado para teste na branch
+    # 4. Upload
     upload_to_play_store(
       track: 'internal',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
-      json_key_data: json_key_data, 
-      json_key: json_key_data ? nil : json_key_path,
       skip_upload_apk: true,
-      skip_upload_images: false,      # Ativado para teste
-      skip_upload_screenshots: false, # Ativado para teste
-      skip_upload_metadata: false     # Ativado para teste
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_metadata: true
     )
   end
 
