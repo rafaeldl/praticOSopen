@@ -24,21 +24,18 @@ platform :android do
 
   desc "Deploy a new version to the Google Play Internal Track"
   lane :internal do |options|
-    # 1. Carregar credenciais (garante que json_key_data esteja disponível se precisar)
-    # A action google_play_track_version_codes usa a chave definida no Appfile ou json_key env var
-
+    # 1. Carregar credenciais
+    
     # 2. Buscar versão atual na loja
-    # Se der erro (primeira vez), assume 0
     begin
       current_codes = google_play_track_version_codes(track: 'internal')
       max_code = current_codes.max || 0
-      # Tenta também produção para garantir que não vamos repetir um código antigo
       prod_codes = google_play_track_version_codes(track: 'production')
       max_prod = prod_codes.max || 0
       
       current_version_code = [max_code, max_prod].max
     rescue => ex
-      UI.error("Erro ao buscar versão na loja (pode ser o primeiro upload): #{ex}")
+      UI.error("Erro ao buscar versão na loja: #{ex}")
       current_version_code = 0
     end
 
@@ -48,13 +45,20 @@ platform :android do
     # 3. Buildar com o novo código
     build_flutter(version_code: new_version_code)
     
-    # 4. Upload
+    # Define o caminho padrão ou usa a variável de ambiente se disponível
+    json_key_path = 'fastlane/play_store_credentials.json'
+    json_key_data = ENV['ANDROID_PLAY_STORE_CREDENTIALS']
+
+    # 4. Upload com Metadados ativado para teste na branch
     upload_to_play_store(
       track: 'internal',
       aab: '../build/app/outputs/bundle/release/app-release.aab',
+      json_key_data: json_key_data, 
+      json_key: json_key_data ? nil : json_key_path,
       skip_upload_apk: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true
+      skip_upload_images: false,      # Ativado para teste
+      skip_upload_screenshots: false, # Ativado para teste
+      skip_upload_metadata: false     # Ativado para teste
     )
   end
 
