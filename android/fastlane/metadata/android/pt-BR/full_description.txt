@@ -1,1 +1,28 @@
-Gerencie suas ordens de serviços de forma simples e rápida.
+Simplifique a gestão do seu negócio com o PraticOS, o app completo para gerenciar ordens de serviço, clientes e finanças em um só lugar.
+
+GESTÃO DE ORDENS DE SERVIÇO
+• Crie e acompanhe ordens de serviço com facilidade
+• Controle o status: orçamento, aprovado, em andamento, concluído
+• Adicione serviços, produtos e observações
+• Visualize o histórico completo de cada ordem
+
+CADASTRO DE CLIENTES
+• Mantenha sua base de clientes organizada
+• Acesse rapidamente informações de contato
+• Visualize o histórico de serviços por cliente
+• Busca rápida e intuitiva
+
+PAINEL FINANCEIRO
+• Acompanhe seus resultados em tempo real
+• Visualize receitas e métricas importantes
+• Tenha controle total sobre seu faturamento
+
+INTERFACE MODERNA
+• Design limpo e intuitivo
+• Modo escuro disponível
+• Navegação simples e rápida
+• Funciona offline
+
+Ideal para prestadores de serviço, oficinas, assistências técnicas, profissionais autônomos e pequenas empresas que buscam organização e praticidade no dia a dia.
+
+Baixe agora e transforme a gestão do seu negócio!

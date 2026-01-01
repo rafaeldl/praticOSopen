@@ -1,0 +1,80 @@
+name: Release Android
+
+on:
+  push:
+    branches: [ master, feature/android-deployment ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Java
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.0'
+          channel: stable
+          cache: true
+
+      - name: Flutter deps
+        run: flutter pub get
+
+      # Setup Ruby + Bundler
+      - name: Ruby (bundler cache)
+        uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GEMFILE: android/Gemfile
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      # 🔐 Restore Secrets
+      
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      # 1. Keystore
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/rafsoft.keystore
+
+      # 2. Google Play Credentials
+      - name: Decode Play Store Credentials
+        run: |
+          echo "${{ secrets.ANDROID_PLAY_STORE_CREDENTIALS_BASE64 }}" | base64 --decode > android/fastlane/play_store_credentials.json
+
+      # 3. Google Services JSON
+      - name: Decode Google Services JSON
+        run: |
+          echo "${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
+
+      # 🚀 Build + Upload to Internal Track (on master)
+      - name: Fastlane Internal (Google Play)
+        if: github.ref == 'refs/heads/master'
+        working-directory: android
+        env:
+          FASTLANE_SKIP_UPDATE_CHECK: "true"
+          CI: "true"
+        run: bundle exec fastlane internal
+
+      # 🚀 Build + Upload to Production with Metadata (on Tags v*)
+      - name: Fastlane Release (Production)
+        if: startsWith(github.ref, 'refs/tags/v')
+        working-directory: android
+        env:
+          FASTLANE_SKIP_UPDATE_CHECK: "true"
+          CI: "true"
+        run: bundle exec fastlane deploy_with_metadata track:production

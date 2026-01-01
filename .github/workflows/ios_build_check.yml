@@ -1,10 +1,6 @@
 name: iOS Build Check
 
 on:
-  push:
-    branches-ignore:
-      - master
-      - main
   pull_request:
     branches: [ master, main ]
 
@@ -20,6 +16,16 @@ jobs:
         with:
           flutter-version: '3.32.0'
           channel: stable
+          cache: true
+
+      - name: Cache Pub deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
 
       - name: Flutter deps
         run: flutter pub get
@@ -39,12 +45,11 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
+          bundler-cache: true
 
       - name: Install bundler
         working-directory: ios
-        run: |
-          gem install bundler
-          bundle install
+        run: gem install bundler
 
       - name: Add GoogleService-Info.plist
         working-directory: ios
@@ -53,11 +58,22 @@ jobs:
           /usr/bin/plutil -lint GoogleService-Info.plist
           echo "✅ GoogleService-Info.plist criado"
 
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
       - name: Pod install
         working-directory: ios
         run: |
-          rm -rf Pods Podfile.lock
-          bundle exec pod install --repo-update
+          if [ ! -d "Pods" ]; then
+            bundle exec pod install --repo-update
+          else
+            bundle exec pod install
+          fi
 
       - name: Build iOS app
         run: |

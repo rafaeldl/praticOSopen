@@ -1,18 +1,3 @@
-# This file contains the fastlane.tools configuration
-# You can find the documentation at https://docs.fastlane.tools
-#
-# For a list of all available actions, check out
-#
-#     https://docs.fastlane.tools/actions
-#
-# For a list of all available plugins, check out
-#
-#     https://docs.fastlane.tools/plugins/available-plugins
-#
-
-# Uncomment the line if you want fastlane to automatically update itself
-# update_fastlane
-
 default_platform(:android)
 
 platform :android do
@@ -21,18 +6,221 @@ platform :android do
     gradle(task: "test")
   end
 
-  desc "Submit a new Beta Build to Crashlytics Beta"
-  lane :beta do
-    gradle(task: "clean assembleRelease")
-    crashlytics
-  
-    # sh "your_script.sh"
-    # You can also use other beta testing services here
+  desc "Build the Android App Bundle (AAB) using Flutter"
+  lane :build_flutter do |options|
+    version_code = options[:version_code]
+    version_name = options[:version_name]
+    
+    # Constrói o comando flutter build
+    build_args = ["build", "appbundle", "--release"]
+    build_args << "--build-number=#{version_code}" if version_code
+    build_args << "--build-name=#{version_name}" if version_name
+
+    # Executa o build do Flutter na raiz do projeto (../)
+    Dir.chdir("..") do
+      sh("flutter", *build_args)
+    end
   end
 
-  desc "Deploy a new version to the Google Play"
-  lane :internal do
-    upload_to_play_store(track: 'internal', aab: '../build/app/outputs/bundle/release/app-release.aab')
+  desc "Deploy a new version to the Google Play Internal Track"
+  lane :internal do |options|
+    # 1. Carregar credenciais
     
+    # 2. Buscar versão atual na loja
+    begin
+      current_codes = google_play_track_version_codes(track: 'internal')
+      max_code = current_codes.max || 0
+      prod_codes = google_play_track_version_codes(track: 'production')
+      max_prod = prod_codes.max || 0
+      
+      current_version_code = [max_code, max_prod].max
+    rescue => ex
+      UI.error("Erro ao buscar versão na loja: #{ex}")
+      current_version_code = 0
+    end
+
+    new_version_code = current_version_code + 1
+    UI.message("Version Code atual na loja: #{current_version_code}. Novo Version Code: #{new_version_code}")
+
+    # 3. Buildar com o novo código
+    build_flutter(version_code: new_version_code)
+    
+    # 4. Upload
+    upload_to_play_store(
+      track: 'internal',
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+      skip_upload_apk: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_metadata: true
+    )
+  end
+
+  desc "Deploy to Internal Track with Metadata and Screenshots"
+  lane :deploy_with_metadata do |options|
+    # Default track is internal, but can be overridden (e.g., 'production')
+    track = options[:track] || 'internal'
+
+    # 1. Carregar credenciais (garante que json_key_data esteja disponível se precisar)
+    
+    # 2. Buscar versão atual na loja
+    begin
+      current_codes = google_play_track_version_codes(track: 'internal')
+      max_code = current_codes.max || 0
+      prod_codes = google_play_track_version_codes(track: 'production')
+      max_prod = prod_codes.max || 0
+      
+      current_version_code = [max_code, max_prod].max
+    rescue => ex
+      UI.error("Erro ao buscar versão na loja: #{ex}")
+      current_version_code = 0
+    end
+
+    new_version_code = current_version_code + 1
+    UI.message("Version Code atual na loja: #{current_version_code}. Novo Version Code: #{new_version_code}")
+
+    
+
+    # 3. Buildar com o novo código
+
+    build_flutter(version_code: new_version_code)
+
+    
+
+    # Define o caminho padrão ou usa a variável de ambiente se disponível
+
+    json_key_path = 'fastlane/play_store_credentials.json'
+
+    json_key_data = ENV['ANDROID_PLAY_STORE_CREDENTIALS']
+
+    
+
+    # 4. Upload completo
+
+    upload_to_play_store(
+
+      track: track,
+
+      aab: '../build/app/outputs/bundle/release/app-release.aab',
+
+      # Usa o conteúdo da variável de ambiente se existir, senão usa o arquivo
+
+      json_key_data: json_key_data, 
+
+      json_key: json_key_data ? nil : json_key_path,
+
+      skip_upload_apk: true,
+
+      skip_upload_images: false,      # Ativa upload de imagens
+
+      skip_upload_screenshots: false, # Ativa upload de screenshots
+
+      skip_upload_metadata: false     # Ativa upload de metadados
+
+    )
+
+  end
+  desc "Promote Internal to Production"
+  lane :promote_to_production do
+    upload_to_play_store(
+      track: 'internal',
+      track_promote_to: 'production',
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: false,
+      skip_upload_images: false,
+      skip_upload_screenshots: false
+    )
+  end
+
+  desc "Capture screenshots automatically using Flutter integration tests"
+  lane :screenshots do |options|
+    device = options[:device] || "emulator-5554"
+    force_logout = options[:force_logout]
+    
+    capture_screenshots_for_device(
+      device: device,
+      folder_name: "phoneScreenshots",
+      force_logout: force_logout
+    )
+  end
+
+  desc "Capture screenshots for Phone, 7-inch Tablet, and 10-inch Tablet"
+  lane :screenshots_all do |options|
+    # Default emulator names (usually 5554=Phone, 5556=7", 5558=10" if launched in that order)
+    phone_device = options[:phone_device] || "emulator-5554"
+    tablet7_device = options[:tablet7_device] || "emulator-5556"
+    tablet10_device = options[:tablet10_device] || "emulator-5558"
+    
+    force_logout = options[:force_logout]
+
+    UI.important("⚠️  Ensure you have 3 emulators running!")
+    UI.message("   📱 Phone: #{phone_device}")
+    UI.message("   📟 Tablet 7\": #{tablet7_device}")
+    UI.message("   💻 Tablet 10\": #{tablet10_device}")
+    UI.message("   (If your IDs are different, pass them like: tablet10_device:'emulator-5560')")
+
+    # Phone
+    capture_screenshots_for_device(
+      device: phone_device,
+      folder_name: "phoneScreenshots",
+      force_logout: force_logout
+    )
+
+    # 7-inch Tablet
+    capture_screenshots_for_device(
+      device: tablet7_device,
+      folder_name: "sevenInchScreenshots",
+      force_logout: force_logout
+    )
+
+    # 10-inch Tablet
+    capture_screenshots_for_device(
+      device: tablet10_device,
+      folder_name: "tenInchScreenshots",
+      force_logout: force_logout
+    )
+  end
+  
+  # Helper function to run the screenshot process
+  def capture_screenshots_for_device(device:, folder_name:, force_logout:)
+    UI.message("📸 Capturing screenshots for #{folder_name} on device: #{device}")
+
+    # Define o diretório baseado no tipo (folder_name)
+    base_screenshots_dir = "fastlane/metadata/android/pt-BR/images"
+    target_dir = "#{base_screenshots_dir}/#{folder_name}"
+    
+    # Limpa screenshots anteriores desse tipo
+    FileUtils.rm_rf(Dir.glob("#{target_dir}/*.png"))
+    FileUtils.mkdir_p(target_dir)
+
+    # Executa o teste de integração Flutter
+    Dir.chdir("..") do
+      ENV['FLUTTER_TEST_PLATFORM'] = 'android'
+      # Passa o diretório de destino para o driver Dart via variável de ambiente
+      ENV['SCREENSHOT_DIR'] = "android/#{target_dir}"
+      
+      command_args = [
+        "fvm", "flutter", "drive",
+        "--driver=test_driver/integration_test.dart",
+        "--target=integration_test/screenshot_test.dart",
+        "-d", device
+      ]
+      
+      if force_logout
+        command_args << "--dart-define=FORCE_LOGOUT=#{force_logout}"
+      end
+      
+      begin
+        sh(*command_args)
+      rescue => ex
+        UI.error("❌ Error capturing screenshots for #{folder_name} on #{device}: #{ex}")
+        # Não para o processo inteiro se um falhar, mas avisa
+      end
+    end
+
+    # Lista screenshots capturadas
+    screenshots = Dir.glob("#{target_dir}/*.png")
+    UI.success("✅ Captured #{screenshots.length} screenshots for #{folder_name}")
   end
 end

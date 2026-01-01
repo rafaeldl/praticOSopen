@@ -1,39 +1,72 @@
 fastlane documentation
-================
+----
+
 # Installation
 
 Make sure you have the latest version of the Xcode command line tools installed:
 
-```
+```sh
 xcode-select --install
 ```
 
-Install _fastlane_ using
-```
-[sudo] gem install fastlane -NV
-```
-or alternatively using `brew install fastlane`
+For _fastlane_ installation instructions, see [Installing _fastlane_](https://docs.fastlane.tools/#installing-fastlane)
 
 # Available Actions
+
 ## Android
+
 ### android test
+
+```sh
+[bundle exec] fastlane android test
 ```
-fastlane android test
-```
+
 Runs all the tests
-### android beta
+
+### android build_flutter
+
+```sh
+[bundle exec] fastlane android build_flutter
 ```
-fastlane android beta
-```
-Submit a new Beta Build to Crashlytics Beta
+
+Build the Android App Bundle (AAB) using Flutter
+
 ### android internal
+
+```sh
+[bundle exec] fastlane android internal
 ```
-fastlane android internal
+
+Deploy a new version to the Google Play Internal Track
+
+### android promote_to_production
+
+```sh
+[bundle exec] fastlane android promote_to_production
 ```
-Deploy a new version to the Google Play
+
+Promote Internal to Production
+
+### android screenshots
+
+```sh
+[bundle exec] fastlane android screenshots
+```
+
+Capture screenshots automatically using Flutter integration tests
+
+### android screenshots_all
+
+```sh
+[bundle exec] fastlane android screenshots_all
+```
+
+Capture screenshots for Phone, 7-inch Tablet, and 10-inch Tablet
 
 ----
 
-This README.md is auto-generated and will be re-generated every time [fastlane](https://fastlane.tools) is run.
-More information about fastlane can be found on [fastlane.tools](https://fastlane.tools).
-The documentation of fastlane can be found on [docs.fastlane.tools](https://docs.fastlane.tools).
+This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
+
+More information about _fastlane_ can be found on [fastlane.tools](https://fastlane.tools).
+
+The documentation of _fastlane_ can be found on [docs.fastlane.tools](https://docs.fastlane.tools).

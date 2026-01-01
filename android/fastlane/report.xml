@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="fastlane.lanes">
+    
+    
+    
+      
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000197">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart -d emulator-5554" time="72.280485">
+        
+      </testcase>
+    
+  </testsuite>
+</testsuites>
