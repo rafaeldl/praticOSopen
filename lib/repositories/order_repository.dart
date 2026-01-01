@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/repositories/tenant_order_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderRepository extends Repository<Order?> {
   static String collectionName = 'orders';
+  final TenantOrderRepository _tenantRepo = TenantOrderRepository();
 
   OrderRepository() : super(collectionName);
 
@@ -13,9 +17,101 @@ class OrderRepository extends Repository<Order?> {
   @override
   Map<String, dynamic> toJson(Order? order) => order!.toJson();
 
-  Future<List<Order?>> getOrders() async {
+  Future<String?> _getCompanyId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? companyId = prefs.getString('companyId');
+    return prefs.getString('companyId');
+  }
+
+  @override
+  Future<dynamic> createItem(Order? item, {String? id}) async {
+    if (FeatureFlags.useNewTenantStructure) {
+      final companyId = await _getCompanyId();
+      if (companyId != null && companyId.isNotEmpty) {
+
+        // Ensure ID consistency if dual write
+        if (item?.id == null && id != null) {
+          item?.id = id;
+        }
+
+        await _tenantRepo.save(companyId, item!);
+
+        // If we have dual write disabled, we stop here.
+        // But we must return something similar to what base createItem returns.
+        // base createItem returns Future<dynamic> which is the result of add() or set().
+        if (!FeatureFlags.dualWriteEnabled) {
+          return null; // or Future.value(null)
+        }
+      }
+    }
+
+    // Legacy/Dual Write behavior
+    // We pass the ID if it was generated/assigned in the block above (item.id)
+    return super.createItem(item, id: item?.id ?? id);
+  }
+
+  @override
+  Future<void> updateItem(Order? item) async {
+    if (FeatureFlags.useNewTenantStructure) {
+      final companyId = await _getCompanyId();
+      if (companyId != null && companyId.isNotEmpty) {
+        await _tenantRepo.save(companyId, item!);
+
+        if (!FeatureFlags.dualWriteEnabled) {
+          return;
+        }
+      }
+    }
+
+    // Legacy/Dual Write behavior
+    return super.updateItem(item);
+  }
+
+  @override
+  Future<void> removeItem(String? id) async {
+    if (id == null) return;
+
+    if (FeatureFlags.useNewTenantStructure) {
+      final companyId = await _getCompanyId();
+      if (companyId != null && companyId.isNotEmpty) {
+        await _tenantRepo.remove(companyId, id);
+
+        if (!FeatureFlags.dualWriteEnabled) {
+          return;
+        }
+      }
+    }
+
+    // Legacy/Dual Write behavior
+    return super.removeItem(id);
+  }
+
+  Future<List<Order?>> getOrders() async {
+    final companyId = await _getCompanyId();
+    if (companyId == null) return [];
+
+    if (FeatureFlags.useNewTenantStructure) {
+      try {
+        final stream = _tenantRepo.streamQuery(
+          companyId,
+          orderBy: [QueryOrder('createdAt', descending: true)],
+        );
+
+        if (FeatureFlags.dualReadEnabled) {
+          return stream.handleError((e) {
+             print('Fallback to legacy orders: $e');
+             throw e; // This will be caught by the outer catch block if we await it, but here it's inside stream.
+             // Since we return stream.first, the error propagates to the awaiter of first.
+          }).first;
+        }
+        return stream.first;
+      } catch (e) {
+        if (FeatureFlags.dualReadEnabled) {
+           // Fallthrough to legacy
+        } else {
+          rethrow;
+        }
+      }
+    }
 
     List<QueryArgs> filterList = [QueryArgs('company.id', companyId)];
     List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
@@ -27,9 +123,25 @@ class OrderRepository extends Repository<Order?> {
 
   // Método para buscar uma ordem pelo número
   Future<Order?> getOrderByNumber(int number) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? companyId = prefs.getString('companyId');
-    if (companyId == null) companyId = '';
+    final companyId = await _getCompanyId();
+    if (companyId == null) return null;
+
+    if (FeatureFlags.useNewTenantStructure) {
+      try {
+        final stream = _tenantRepo.streamQuery(
+          companyId,
+          filters: [QueryFilter('number', FilterOperator.isEqualTo, number)],
+        );
+        final list = await stream.first;
+        if (list.isNotEmpty) return list.first;
+         // If empty, check dual read?
+         // If list is empty it means not found, not necessarily an error.
+         // But if migration is partial, maybe we check legacy.
+         if (!FeatureFlags.dualReadEnabled) return null;
+      } catch (e) {
+         if (!FeatureFlags.dualReadEnabled) rethrow;
+      }
+    }
 
     List<QueryArgs> filterList = [
       QueryArgs('company.id', companyId),
@@ -52,9 +164,8 @@ class OrderRepository extends Repository<Order?> {
 
   Future<List<Order?>> getOrdersByCustomPeriod(
       String period, int offset) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? companyId = prefs.getString('companyId');
-    if (companyId == null) companyId = '';
+    final companyId = await _getCompanyId();
+    if (companyId == null) return [];
 
     // Datas de início e fim
     DateTime now = DateTime.now();
@@ -103,6 +214,23 @@ class OrderRepository extends Repository<Order?> {
         endDate = DateTime(now.year, now.month + 1, 1);
     }
 
+    if (FeatureFlags.useNewTenantStructure) {
+       try {
+         final stream = _tenantRepo.streamQuery(
+            companyId,
+            filters: [
+              // Removing .toIso8601String() to pass DateTime directly
+              QueryFilter('createdAt', FilterOperator.isGreaterThanOrEqualTo, startDate),
+              QueryFilter('createdAt', FilterOperator.isLessThan, endDate),
+            ],
+            orderBy: [QueryOrder('createdAt', descending: true)]
+         );
+         return await stream.first;
+       } catch (e) {
+          if (!FeatureFlags.dualReadEnabled) return [];
+       }
+    }
+
     try {
       // Adicionar filtros incluindo os de data
       List<QueryArgs> filterList = [
@@ -128,9 +256,25 @@ class OrderRepository extends Repository<Order?> {
 
   Future<List<Order?>> getOrdersByDateRange(
       DateTime startDate, DateTime endDate) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? companyId = prefs.getString('companyId');
-    if (companyId == null) companyId = '';
+    final companyId = await _getCompanyId();
+    if (companyId == null) return [];
+
+    if (FeatureFlags.useNewTenantStructure) {
+       try {
+         final stream = _tenantRepo.streamQuery(
+            companyId,
+            filters: [
+              // Removing .toIso8601String() to pass DateTime directly
+              QueryFilter('createdAt', FilterOperator.isGreaterThanOrEqualTo, startDate),
+              QueryFilter('createdAt', FilterOperator.isLessThan, endDate),
+            ],
+            orderBy: [QueryOrder('createdAt', descending: true)]
+         );
+         return await stream.first;
+       } catch (e) {
+          if (!FeatureFlags.dualReadEnabled) return [];
+       }
+    }
 
     try {
       // Adicionar filtros incluindo os de data
