@@ -1,9 +1,100 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if
-          request.time < timestamp.date(2021, 10, 24);
+
+    // ══════════════════════════════════════════════════════════════
+    // USUÁRIOS - Global (usuário pode pertencer a múltiplas empresas)
+    // ══════════════════════════════════════════════════════════════
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // ESTRUTURA ANTIGA (manter durante período de migração)
+    // Remover após cleanup completo
+    // ══════════════════════════════════════════════════════════════
+    match /orders/{orderId} {
+      allow read, write: if request.auth != null
+        && resource.data.company.id in request.auth.token.companies;
+    }
+
+    match /customers/{customerId} {
+      allow read, write: if request.auth != null
+        && resource.data.company.id in request.auth.token.companies;
+    }
+
+    match /devices/{deviceId} {
+      allow read, write: if request.auth != null
+        && resource.data.company.id in request.auth.token.companies;
+    }
+
+    match /products/{productId} {
+      allow read, write: if request.auth != null
+        && resource.data.company.id in request.auth.token.companies;
+    }
+
+    match /services/{serviceId} {
+      allow read, write: if request.auth != null
+        && resource.data.company.id in request.auth.token.companies;
+    }
+
+    match /roles/{roleId} {
+      allow read, write: if request.auth != null
+        && resource.data.company.id in request.auth.token.companies;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // NOVA ESTRUTURA - Subcollections por Tenant
+    // ══════════════════════════════════════════════════════════════
+    match /companies/{companyId} {
+      // Documento da empresa - apenas membros podem ler
+      allow read: if request.auth != null
+        && companyId in request.auth.token.companies;
+
+      // Apenas admins podem editar dados da empresa
+      allow write: if request.auth != null
+        && companyId in request.auth.token.companies
+        && request.auth.token.roles[companyId] == 'admin';
+
+      // ────────────────────────────────────────────────────────────
+      // Subcollections - isoladas automaticamente por tenant
+      // ────────────────────────────────────────────────────────────
+      match /orders/{orderId} {
+        allow read, write: if request.auth != null
+          && companyId in request.auth.token.companies;
+
+        // Subcollection de fotos dentro de orders
+        match /photos/{photoId} {
+          allow read, write: if request.auth != null
+            && companyId in request.auth.token.companies;
+        }
+      }
+
+      match /customers/{customerId} {
+        allow read, write: if request.auth != null
+          && companyId in request.auth.token.companies;
+      }
+
+      match /devices/{deviceId} {
+        allow read, write: if request.auth != null
+          && companyId in request.auth.token.companies;
+      }
+
+      match /products/{productId} {
+        allow read, write: if request.auth != null
+          && companyId in request.auth.token.companies;
+      }
+
+      match /services/{serviceId} {
+        allow read, write: if request.auth != null
+          && companyId in request.auth.token.companies;
+      }
+
+      match /roles/{roleId} {
+        allow read, write: if request.auth != null
+          && companyId in request.auth.token.companies;
+      }
     }
   }
 }
