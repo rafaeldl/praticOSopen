@@ -19,7 +19,7 @@ A documentação completa do projeto foi movida para a pasta [`docs/`](docs/).
 - [Configuração Apple Sign In](docs/APPLE_SIGN_IN_SETUP.md)
 - [Multi-Tenancy](docs/MULTI_TENANCY.md)
 - [Diretrizes de UX](docs/UX_GUIDELINES.md)
-- [Agentes IA](docs/AGENTS.md)
+- [Agentes IA](AGENTS.md)
 
 ## 🚀 Desenvolvimento
 
