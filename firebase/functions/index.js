@@ -9,7 +9,7 @@ const db = admin.firestore();
  * [LEGACY] Numeração de OS para estrutura antiga (Field-based).
  * DESATIVADO: Migração concluída para Subcollections.
  */
-exports.firestoreUpdateOSNumber = functions.region('southamerica-east1').firestore.document('orders/{id}').onCreate(async (snapshot, context) => {
+exports.firestoreUpdateOSNumber = functions.region('southamerica-east1').firestore.document('orders/{id}').onCreate(async (_snapshot, _context) => {
   console.log('[LEGACY] firestoreUpdateOSNumber disparada, mas desativada via código.');
   return null;
   /*
