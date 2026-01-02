@@ -4,32 +4,7 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9f7de07b-ccf5-4029-baeb-65b1a1131d66" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Gemfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/src/debug/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/debug/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/fastlane/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/phoneScreenshots/1_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/phoneScreenshots/2_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/phoneScreenshots/3_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/phoneScreenshots/4_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/sevenInchScreenshots/1_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/sevenInchScreenshots/2_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/sevenInchScreenshots/3_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/sevenInchScreenshots/4_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/tenInchScreenshots/1_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/tenInchScreenshots/2_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/tenInchScreenshots/3_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/metadata/android/pt-BR/images/tenInchScreenshots/4_pt-BR.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fastlane/report.xml" beforeDir="false" afterPath="$PROJECT_DIR$/fastlane/report.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/../ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../pubspec.yaml" afterDir="false" />
-    </list>
+    <list default="true" id="9f7de07b-ccf5-4029-baeb-65b1a1131d66" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,7 +13,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=/Users/rafaeldl/.android/avd/Pixel_7.avd)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=/Users/rafaeldl/.android/avd/Medium_Phone.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -81,7 +56,7 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "feature/android-deployment",
+    "git-widget-placeholder": "docs/tenant-migration-plan",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/rafaeldl/Projetos/praticOSopen/android"
   }
