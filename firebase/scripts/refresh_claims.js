@@ -1,8 +1,15 @@
-const admin = require('firebase-admin');
+const { initializeFirebase, admin } = require('./firebase-init');
 const readline = require('readline-sync');
 
-admin.initializeApp();
-const db = admin.firestore();
+// Inicializar Firebase (aceita caminho do service account como argumento)
+let db;
+try {
+  initializeFirebase(process.argv[2]);
+  db = admin.firestore();
+} catch (error) {
+  process.exit(1);
+}
+
 const BATCH_SIZE = 500;
 
 async function refreshClaims() {
@@ -14,7 +21,30 @@ async function refreshClaims() {
     process.exit(0);
   }
 
-  const snapshot = await db.collection('users').get();
+  let snapshot;
+  try {
+    snapshot = await db.collection('users').get();
+  } catch (error) {
+    if (error.message && error.message.includes('Could not load the default credentials')) {
+      console.error('\n❌ ERRO DE AUTENTICAÇÃO ao acessar o Firestore');
+      console.error('As credenciais não foram configuradas corretamente.\n');
+      console.error('⚠️  LEMBRE-SE:');
+      console.error('   O arquivo google-services.json é para o CLIENT SDK (app Flutter),');
+      console.error('   não para o Admin SDK! Você precisa de um Service Account JSON.\n');
+      console.error('📋 SOLUÇÕES:\n');
+      console.error('1. Obtenha um Service Account JSON:');
+      console.error('   https://console.firebase.google.com/project/praticos/settings/serviceaccounts/adminsdk\n');
+      console.error('2. Configure a variável de ambiente:');
+      console.error('   export GOOGLE_APPLICATION_CREDENTIALS="/caminho/para/service-account.json"');
+      console.error('   npm run refresh-claims\n');
+      console.error('3. Ou passe o arquivo como argumento:');
+      console.error('   npm run refresh-claims /caminho/para/service-account.json\n');
+      console.error('📖 Guia completo: firebase/scripts/COMO_OBTER_CREDENCIAIS.md');
+      console.error('🔍 Verifique: npm run verificar-credenciais\n');
+      process.exit(1);
+    }
+    throw error;
+  }
   console.log(`► Usuários encontrados: ${snapshot.size}`);
 
   let batch = db.batch();
@@ -22,7 +52,7 @@ async function refreshClaims() {
   let processed = 0;
 
   for (const doc of snapshot.docs) {
-    batch.update(doc.reference, {
+    batch.update(doc.ref, {
       '_claimsRefreshedAt': admin.firestore.FieldValue.serverTimestamp()
     });
 
@@ -45,4 +75,11 @@ async function refreshClaims() {
   console.log('  Acompanhe os logs da function updateUserClaims.');
 }
 
-refreshClaims().catch(console.error);
+refreshClaims().catch((error) => {
+  console.error('\n❌ ERRO ao executar o script:');
+  console.error(error.message);
+  if (error.stack) {
+    console.error('\nStack trace:', error.stack);
+  }
+  process.exit(1);
+});

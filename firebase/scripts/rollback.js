@@ -1,7 +1,13 @@
-const admin = require('firebase-admin');
+const { initializeFirebase, admin } = require('./firebase-init');
 const readline = require('readline-sync');
 
-admin.initializeApp();
+// Inicializar Firebase (aceita caminho do service account como argumento)
+try {
+  initializeFirebase(process.argv[2]);
+} catch (error) {
+  process.exit(1);
+}
+
 const db = admin.firestore();
 const BATCH_SIZE = 500;
 const COLLECTIONS_TO_MIGRATE = [

@@ -6,7 +6,8 @@
   "scripts": {
     "migrate": "node migrate.js",
     "rollback": "node rollback.js",
-    "refresh-claims": "node refresh_claims.js"
+    "refresh-claims": "node refresh_claims.js",
+    "verificar-credenciais": "node verificar-credenciais.js"
   },
   "dependencies": {
     "firebase-admin": "^12.1.0",

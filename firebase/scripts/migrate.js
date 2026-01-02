@@ -1,10 +1,12 @@
-const admin = require('firebase-admin');
+const { initializeFirebase, admin } = require('./firebase-init');
 const readline = require('readline-sync');
 
-// Inicialização do Firebase Admin
-// Certifique-se de ter as credenciais configuradas (GOOGLE_APPLICATION_CREDENTIALS)
-// ou use 'firebase login' e 'firebase use' antes se rodar localmente com acesso padrão.
-admin.initializeApp();
+// Inicializar Firebase (aceita caminho do service account como argumento)
+try {
+  initializeFirebase(process.argv[2]);
+} catch (error) {
+  process.exit(1);
+}
 
 const db = admin.firestore();
 const BATCH_SIZE = 500;
