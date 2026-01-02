@@ -8,10 +8,28 @@ service cloud.firestore {
     // ════════════════════════════════════════════════════════════════════════
 
     // Verifica se o usuário pertence à empresa usando custom claims
+    // Claims structure: { roles: { 'companyId': 'admin' | 'manager' | 'user' } }
     function belongsToCompany(companyId) {
       return request.auth != null
-        && request.auth.token.companies != null
-        && companyId in request.auth.token.companies;
+        && request.auth.token.roles != null
+        && request.auth.token.roles[companyId] != null;
+    }
+
+    // Verifica se o usuário tem uma role específica na empresa
+    function hasRole(companyId, role) {
+      return belongsToCompany(companyId)
+        && request.auth.token.roles[companyId] == role;
+    }
+
+    // Verifica se o usuário é admin da empresa
+    function isCompanyAdmin(companyId) {
+      return hasRole(companyId, 'admin');
+    }
+
+    // Verifica se o usuário é admin ou manager da empresa
+    function canManage(companyId) {
+      return belongsToCompany(companyId)
+        && request.auth.token.roles[companyId] in ['admin', 'manager'];
     }
 
     // Verifica se é o owner da empresa (para estrutura legada)
@@ -116,11 +134,14 @@ service cloud.firestore {
         allow read, write: if belongsToCompany(companyId);
       }
 
-      match /roles/{roleId} {
+      match /memberships/{userId} {
         allow read: if belongsToCompany(companyId);
-        // Apenas owner pode gerenciar roles
+        // Owner ou admins podem gerenciar memberships
         allow write: if request.auth != null
-          && get(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid;
+          && (
+            get(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid
+            || isCompanyAdmin(companyId)
+          );
       }
     }
   }

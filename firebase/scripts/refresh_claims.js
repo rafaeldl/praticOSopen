@@ -14,8 +14,12 @@ const BATCH_SIZE = 500;
 
 async function refreshClaims() {
   console.log('════════════════════════════════════════════════════════════');
-  console.log('  REFRESH DE USER CLAIMS (NODE.JS)');
+  console.log('  REFRESH DE USER CLAIMS');
   console.log('════════════════════════════════════════════════════════════\n');
+  console.log('Este script força a Cloud Function updateUserClaims a rodar');
+  console.log('para todos os usuários, atualizando seus custom claims.\n');
+  console.log('Estrutura dos claims:');
+  console.log('  { roles: { "companyId": "admin" | "manager" | "user" } }\n');
 
   if (!readline.keyInYN('Deseja forçar a atualização de claims para TODOS os usuários?')) {
     process.exit(0);
@@ -71,8 +75,12 @@ async function refreshClaims() {
     await batch.commit();
   }
 
-  console.log(`\n\n  ✓ Concluído! ${processed} usuários tocados.`);
-  console.log('  Acompanhe os logs da function updateUserClaims.');
+  console.log(`\n\n  ✓ Concluído! ${processed} usuários processados.`);
+  console.log('  A Cloud Function updateUserClaims será disparada para cada um.');
+  console.log('\n  📋 Próximos passos:');
+  console.log('  1. Acompanhe os logs no Firebase Console → Functions');
+  console.log('  2. Os usuários precisarão fazer logout/login para o token atualizar');
+  console.log('  3. Ou use FirebaseAuth.instance.currentUser.getIdToken(true) no app\n');
 }
 
 refreshClaims().catch((error) => {

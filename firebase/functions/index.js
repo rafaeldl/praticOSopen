@@ -21,33 +21,38 @@ exports.firestoreUpdateOSNumber = functions.region('southamerica-east1').firesto
 /**
  * [V2] Numeração de OS para nova estrutura (Subcollections).
  * Gatilho: /companies/{companyId}/orders/{orderId}
- * 
+ *
  * Esta é a função definitiva para o modelo Multi-Tenant.
+ * Usa transação para evitar race conditions na numeração.
  */
 exports.firestoreUpdateTenantOSNumber = functions.region('southamerica-east1').firestore.document('companies/{companyId}/orders/{orderId}').onCreate(async (snapshot, context) => {
   const data = snapshot.data();
   if (data.number) return;
-  
-  // Na nova estrutura, temos o ID da empresa no path
+
   const companyId = context.params.companyId;
   const companyRef = db.collection('companies').doc(companyId);
-  
-  const company = await companyRef.get();
-  if (!company.exists) return;
-  const companyData = company.data();
+  const orderRef = snapshot.ref;
 
-  let nextOrderNumber;
-  let number = companyData.nextOrderNumber;
-  
-  if (!number) {
-    number = 1;
-    nextOrderNumber = 2;
-  } else {
-    nextOrderNumber = admin.firestore.FieldValue.increment(1);
-  }
-  
-  await companyRef.set({nextOrderNumber}, {merge: true});
-  await snapshot.ref.set({number}, {merge: true});
+  // Usa transação para garantir atomicidade na numeração
+  await db.runTransaction(async (transaction) => {
+    const companyDoc = await transaction.get(companyRef);
+
+    if (!companyDoc.exists) {
+      console.error(`Company ${companyId} não encontrada.`);
+      return;
+    }
+
+    const companyData = companyDoc.data();
+    let currentNumber = companyData.nextOrderNumber || 1;
+
+    // Atribui o número atual à ordem
+    transaction.update(orderRef, { number: currentNumber });
+
+    // Incrementa o próximo número na empresa
+    transaction.update(companyRef, { nextOrderNumber: currentNumber + 1 });
+
+    console.log(`OS #${currentNumber} atribuída à ordem ${orderRef.id} da empresa ${companyId}`);
+  });
 });
 
 /**

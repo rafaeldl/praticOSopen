@@ -1,113 +1,248 @@
 # Roteiro de Execução da Migração Multi-Tenant
 
-Este roteiro detalha os passos exatos para executar a migração da arquitetura antiga (Field-Based) para a nova (Subcollections) em produção, assumindo um cenário de **Cutover Direto** (sem período de convivência com versões antigas do App).
+Este roteiro detalha os passos para migrar da arquitetura legada (Field-Based) para a nova (Subcollections com Memberships).
 
 ---
 
-## ⚠️ Pré-Requisitos Críticos
+## Arquitetura
 
-1.  **Backup:** Certifique-se de ter um backup recente do Firestore.
-    ```bash
-    gcloud firestore export gs://praticos.appspot.com/backups/pre-migration-$(date +%Y%m%d)
-    ```
-2.  **Acesso:** Garanta acesso de administrador ao projeto Firebase e ao Google Cloud CLI.
-3.  **Janela de Manutenção:** Recomenda-se executar durante um período de baixo uso, embora o sistema possa permanecer online.
-4.  **Ambiente Node.js:** Tenha Node.js (v18+) instalado para rodar os scripts de migração.
+### Estrutura Legada
+```
+/orders/{id}           → campo company.id para filtrar
+/customers/{id}        → campo company.id para filtrar
+/roles/{id}            → vincula user ↔ company
+/users/{id}            → sem campo companies
+```
 
----
+### Estrutura Nova
+```
+/companies/{companyId}/orders/{id}
+/companies/{companyId}/customers/{id}
+/companies/{companyId}/memberships/{userId}   ← índice reverso
+/users/{id}                                   ← companies: [{ company, role }]
+```
 
-## Passo 1: Deploy da Infraestrutura (Backend)
-
-Primeiro, atualizamos o backend para suportar a nova estrutura e processar os claims de segurança.
-
-1.  **Deploy das Cloud Functions:**
-    Isso publica a nova função de numeração de OS (`firestoreUpdateTenantOSNumber`) e a função de controle de acesso (`updateUserClaims`).
-    ```bash
-    firebase deploy --only functions
-    ```
-
-2.  **Deploy dos Índices:**
-    Cria os índices necessários para as queries nas subcollections.
-    ```bash
-    firebase deploy --only firestore:indexes
-    ```
-
-3.  **Deploy das Security Rules:**
-    Atualiza as regras para permitir leitura/escrita nas novas subcollections baseadas nos Custom Claims.
-    ```bash
-    firebase deploy --only firestore:rules
-    ```
+### Custom Claims
+```json
+{
+  "roles": {
+    "companyId1": "admin",
+    "companyId2": "user"
+  }
+}
+```
 
 ---
 
-## Passo 2: Atualização de Permissões (Claims)
+## Pré-Requisitos
 
-Antes de migrar os dados, os usuários precisam ter permissão para acessá-los no novo local. Este passo atribui os "Custom Claims" (`companies`, `roles`) a todos os usuários existentes.
+1. **Backup do Firestore:**
+   ```bash
+   gcloud firestore export gs://praticos.appspot.com/backups/pre-migration-$(date +%Y%m%d)
+   ```
 
-1.  **Executar Script de Atualização de Claims:**
-    Este script "toca" em todos os usuários, forçando a Cloud Function a rodar e atualizar suas permissões.
-    ```bash
-    cd firebase/scripts
-    npm install # Instala dependências na primeira vez
-    npm run refresh-claims
-    ```
+2. **Acesso:** Admin no Firebase Console e `gcloud` CLI configurado.
 
-2.  **Validação:**
-    Verifique os logs da Cloud Function `updateUserClaims` no console do Firebase para confirmar que as atualizações estão ocorrendo com sucesso ("Claims updated successfully for...").
+3. **Node.js:** v18+ instalado.
 
----
-
-## Passo 3: Migração de Dados
-
-Agora movemos os dados de negócio (Ordens, Clientes, Produtos, etc.) da estrutura raiz para dentro das subcollections das empresas.
-
-1.  **Executar Script de Migração:**
-    ```bash
-    # Dentro de firebase/scripts
-    npm run migrate
-    ```
-
-2.  **Acompanhamento:**
-    O script exibirá no console o progresso da migração por coleção (`orders`, `customers`, etc.).
-    *   Verifique se não há erros críticos no log.
-    *   O script pula documentos que já foram migrados (idempotente).
-
-3.  **Validação:**
-    Acesse o console do Firestore e verifique em `/companies/{companyId}/orders` se os dados aparecem corretamente.
+4. **Credenciais:** Service Account JSON para os scripts.
+   - Obter em: Firebase Console → Project Settings → Service Accounts
+   - Ou definir: `export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"`
 
 ---
 
-## Passo 4: Publicação do App (Frontend)
+## Passo 1: Deploy do Backend
 
-Com o backend pronto e os dados migrados, libere a nova versão do App para os usuários.
+### 1.1 Cloud Functions
+```bash
+cd firebase/functions
+npm install
+firebase deploy --only functions
+```
 
-1.  **Gerar Build:**
-    ```bash
-    flutter build appbundle  # Android
-    flutter build ipa        # iOS
-    ```
+**Funções deployadas:**
+- `updateUserClaims` - Sincroniza `user.companies` → Custom Claims
+- `firestoreUpdateTenantOSNumber` - Numeração automática de OS por tenant
 
-2.  **Publicar nas Lojas:**
-    Envie a atualização para Google Play Store e Apple App Store.
+### 1.2 Índices do Firestore
+```bash
+firebase deploy --only firestore:indexes
+```
+
+### 1.3 Security Rules
+```bash
+firebase deploy --only firestore:rules
+```
+
+**Validação:**
+- [ ] Functions aparecem no Firebase Console → Functions
+- [ ] Índices em "Building" ou "Enabled" no Console → Firestore → Indexes
 
 ---
 
-## Plano de Rollback (Emergência)
+## Passo 2: Migração de Dados
 
-Caso algo crítico falhe e seja necessário voltar atrás:
+### 2.1 Instalar dependências
+```bash
+cd firebase/scripts
+npm install
+```
 
-1.  **Reverter Dados (Se necessário):**
-    Se os dados novos estiverem corrompidos ou inacessíveis, use o script de rollback para tentar sincronizar de volta (note que em Cutover direto, a estrutura antiga parou de receber updates, então ela é um "backup" do estado pré-migração).
-    ```bash
-    # Dentro de firebase/scripts
-    npm run rollback
-    ```
+### 2.2 Executar migração
+```bash
+npm run migrate
+# Ou com credencial explícita:
+npm run migrate /path/to/service-account.json
+```
 
-2.  **Reverter Backend:**
-    Volte o código para o commit anterior à migração e faça redeploy das Functions e Rules.
+**O script executa:**
+1. Copia collections (`orders`, `customers`, `devices`, `products`, `services`) para subcollections
+2. Converte `roles` → `memberships` + popula `user.companies`
 
-3.  **Reverter App:**
-    Se possível, disponibilize uma versão anterior do App ou use Remote Config para desativar funcionalidades quebradas (embora neste caso a mudança foi estrutural no código nativo).
+**Validação:**
+- [ ] Console mostra "MIGRAÇÃO CONCLUÍDA" sem erros
+- [ ] Firestore Console: `/companies/{id}/orders` contém documentos
+- [ ] Firestore Console: `/companies/{id}/memberships` contém usuários
+- [ ] Firestore Console: `/users/{id}` tem campo `companies` populado
+
+---
+
+## Passo 3: Atualizar Custom Claims
+
+```bash
+npm run refresh-claims
+```
+
+**O que faz:**
+- Força a Cloud Function `updateUserClaims` a rodar para todos os usuários
+- Popula `request.auth.token.roles` usado nas Security Rules
+
+**Validação:**
+- [ ] Firebase Console → Functions → Logs mostra "Claims updated successfully"
+- [ ] Testar no app: usuário consegue acessar dados da empresa
+
+---
+
+## Passo 4: Publicar o App
+
+### 4.1 Build
+```bash
+# Android
+flutter build appbundle
+
+# iOS
+flutter build ipa
+```
+
+### 4.2 Publicar
+- Google Play Console → Upload AAB
+- App Store Connect → Upload IPA via Transporter
+
+---
+
+## Validação Pós-Migração
+
+| Teste | Esperado |
+|-------|----------|
+| Login com usuário existente | Acessa dados normalmente |
+| Criar nova OS | Salva em `/companies/{id}/orders` |
+| Adicionar colaborador | Cria em `memberships` + atualiza `user.companies` |
+| Alterar role de colaborador | Atualiza ambos atomicamente |
+| Remover colaborador | Remove de ambos atomicamente |
+
+---
+
+## Plano de Rollback
+
+### Quando usar
+- Erros críticos impedem uso do app
+- Dados corrompidos ou inacessíveis
+- Claims não sincronizando corretamente
+
+### Passos
+
+#### 1. Reverter Dados
+```bash
+cd firebase/scripts
+npm run rollback
+```
+
+**O script executa:**
+1. Copia subcollections de volta para collections raiz
+2. Converte `memberships` → `roles` (estrutura legada)
+3. Remove campo `user.companies` dos usuários
+
+#### 2. Limpar Claims
+```bash
+npm run refresh-claims
+```
+Após rollback, os claims ficarão vazios (user.companies foi removido).
+
+#### 3. Reverter Backend
+```bash
+# Voltar para commit anterior
+git checkout <commit-anterior>
+
+# Redeploy
+firebase deploy --only functions,firestore:rules
+```
+
+#### 4. Reverter App
+- Publicar versão anterior do app nas lojas
+- Ou: usar Remote Config para desativar features quebradas
+
+---
+
+## Limpeza Pós-Validação (Opcional)
+
+Após confirmar que a migração está estável (recomendado: aguardar 1-2 semanas):
+
+```bash
+# Criar script de cleanup para remover dados legados:
+# - /orders/{id} (raiz)
+# - /customers/{id} (raiz)
+# - /roles/{id} (raiz)
+# - etc.
+```
+
+⚠️ **ATENÇÃO:** Só execute após ter certeza absoluta que não precisará de rollback.
+
+---
+
+## Troubleshooting
+
+### Claims não atualizam
+1. Verificar logs da Cloud Function `updateUserClaims`
+2. Confirmar que `user.companies` está populado no Firestore
+3. No app, forçar refresh: `FirebaseAuth.instance.currentUser?.getIdToken(true)`
+
+### Permissão negada no Firestore
+1. Verificar se Security Rules foram deployadas
+2. Confirmar que usuário tem claim para a empresa: `request.auth.token.roles[companyId]`
+3. Testar no Rules Playground do Firebase Console
+
+### Script de migração falha
+1. Verificar credenciais: `npm run verificar-credenciais`
+2. Conferir se Service Account tem permissão de escrita no Firestore
+3. Rodar novamente (script é idempotente)
+
+---
+
+## Comandos Úteis
+
+```bash
+# Verificar credenciais
+npm run verificar-credenciais
+
+# Migrar dados
+npm run migrate
+
+# Atualizar claims
+npm run refresh-claims
+
+# Rollback (emergência)
+npm run rollback
+```
 
 ---
 

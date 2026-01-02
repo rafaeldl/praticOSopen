@@ -102,13 +102,13 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           );
         }
 
-        List<Customer>? customerList = customerStore.customerList!.data;
+        List<Customer?>? customerList = customerStore.customerList!.data;
         return _buildCustomerListContent(customerList);
       },
     );
   }
 
-  Widget _buildCustomerListContent(List<Customer>? customerList) {
+  Widget _buildCustomerListContent(List<Customer?>? customerList) {
     if (customerList == null || customerList.isEmpty) {
       return SliverFillRemaining(
         child: Center(
@@ -128,7 +128,10 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     }
 
     // Filter list
-    List<Customer> filteredList = customerList.where((customer) {
+    List<Customer> filteredList = customerList
+        .where((c) => c != null)
+        .cast<Customer>()
+        .where((customer) {
       if (_searchQuery.isEmpty) return true;
       return (customer.name?.toLowerCase().contains(_searchQuery) ?? false) ||
           (customer.phone?.toLowerCase().contains(_searchQuery) ?? false);
