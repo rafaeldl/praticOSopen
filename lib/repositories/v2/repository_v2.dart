@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/models/base_audit_company.dart';
 import 'package:praticos/repositories/repository.dart';
@@ -263,8 +264,22 @@ abstract class RepositoryV2<T extends BaseAuditCompany?> {
   /// Cria ou atualiza um documento.
   ///
   /// Se `dualWriteEnabled` estiver ativo, escreve em ambas as estruturas.
+  /// Garante que o mesmo ID seja usado em ambas as estruturas.
   Future<void> createItem(String companyId, T item, {String? id}) async {
     final futures = <Future>[];
+
+    // Garante que temos um ID para manter consistência entre as bases
+    if (item?.id == null) {
+      if (id != null) {
+        item?.id = id;
+      } else {
+        // Gera um ID novo se não foi fornecido
+        item?.id = FirebaseFirestore.instance.collection('tmp').doc().id;
+      }
+    }
+    
+    // Atualiza a variável id local caso tenha sido gerada agora
+    id = item?.id;
 
     if (FeatureFlags.shouldWriteToLegacy) {
       futures.add(legacyRepo.createItem(item, id: id));

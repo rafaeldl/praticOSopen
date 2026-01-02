@@ -80,13 +80,15 @@ class TenantDataMigration {
           final currentUpdatedAt = data['updatedAt'];
 
           // Se já existe e é mais novo ou igual, pula
-          // (Assumindo timestamps comparáveis)
-          if (existingUpdatedAt != null &&
-              currentUpdatedAt != null) {
-             // Handle Timestamp vs String or other types comparison if needed
-             // Here assuming standard comparable types
-             // If Firestore Timestamp:
+          if (existingUpdatedAt != null && currentUpdatedAt != null) {
+             // Handle Timestamp vs String or other types comparison
              if (existingUpdatedAt is Timestamp && currentUpdatedAt is Timestamp) {
+                if (existingUpdatedAt.compareTo(currentUpdatedAt) >= 0) {
+                  result.skipped++;
+                  continue;
+                }
+             } else if (existingUpdatedAt is String && currentUpdatedAt is String) {
+                // ISO8601 strings are comparable
                 if (existingUpdatedAt.compareTo(currentUpdatedAt) >= 0) {
                   result.skipped++;
                   continue;
