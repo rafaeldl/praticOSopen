@@ -947,6 +947,86 @@ Future<void> emergencyRollback() async {
 
 ---
 
+## 9. Plano de Execução Detalhado
+
+### 9.1 Arquivos a Criar
+
+| Fase | Arquivo | Descrição |
+|------|---------|-----------|
+| 1.1 | `lib/config/feature_flags.dart` | Feature flags para controle da migração |
+| 1.2 | `lib/repositories/tenant_repository.dart` | Classe base para repositories com subcollections |
+| 1.3 | `lib/repositories/tenant/tenant_order_repository.dart` | Repository de orders por tenant |
+| 1.3 | `lib/repositories/tenant/tenant_customer_repository.dart` | Repository de customers por tenant |
+| 1.3 | `lib/repositories/tenant/tenant_device_repository.dart` | Repository de devices por tenant |
+| 1.3 | `lib/repositories/tenant/tenant_product_repository.dart` | Repository de products por tenant |
+| 1.3 | `lib/repositories/tenant/tenant_service_repository.dart` | Repository de services por tenant |
+| 1.3 | `lib/repositories/tenant/tenant_role_repository.dart` | Repository de roles por tenant |
+| 2.1 | `lib/repositories/v2/repository_v2.dart` | Classe base V2 com dual-write |
+| 2.2 | `lib/repositories/v2/order_repository_v2.dart` | Order repository com dual-write |
+| 2.2 | `lib/repositories/v2/customer_repository_v2.dart` | Customer repository com dual-write |
+| 2.2 | `lib/repositories/v2/device_repository_v2.dart` | Device repository com dual-write |
+| 2.2 | `lib/repositories/v2/product_repository_v2.dart` | Product repository com dual-write |
+| 2.2 | `lib/repositories/v2/service_repository_v2.dart` | Service repository com dual-write |
+| 2.2 | `lib/repositories/v2/role_repository_v2.dart` | Role repository com dual-write |
+| 5.1 | `scripts/migrate_tenant_data.dart` | Script CLI de migração de dados |
+| 5.2 | `scripts/rollback_tenant_data.dart` | Script CLI de rollback |
+| 5.3 | `firebase/functions/src/claims.ts` | Cloud Function para custom claims |
+
+### 9.2 Arquivos a Modificar
+
+| Arquivo | Mudanças |
+|---------|----------|
+| `lib/mobx/order_store.dart` | Usar `OrderRepositoryV2` |
+| `lib/mobx/customer_store.dart` | Usar `CustomerRepositoryV2` |
+| `lib/mobx/device_store.dart` | Usar `DeviceRepositoryV2` |
+| `lib/mobx/product_store.dart` | Usar `ProductRepositoryV2` |
+| `lib/mobx/service_store.dart` | Usar `ServiceRepositoryV2` |
+| `firebase/firestore.rules` | Adicionar regras para subcollections |
+| `firebase/firestore.indexes.json` | Adicionar índices para subcollections |
+
+### 9.3 Decisões de Implementação
+
+| Decisão | Escolha | Justificativa |
+|---------|---------|---------------|
+| Scripts de migração | Standalone CLI | Melhor controle em produção, logs detalhados |
+| Autenticação nas rules | Custom claims | Performance (sem reads extras), escalável |
+| Campo company nos docs | Manter | Permite rollback, útil para debug |
+
+### 9.4 Ordem de Deploy
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│ DESENVOLVIMENTO (sem impacto em produção)                           │
+├─────────────────────────────────────────────────────────────────────┤
+│ 1. Criar feature flags (todas false)                                │
+│ 2. Criar TenantRepository base                                      │
+│ 3. Criar 6 tenant repositories                                      │
+│ 4. Criar RepositoryV2 base                                          │
+│ 5. Criar 6 V2 repositories                                          │
+│ 6. Atualizar stores (usa flags, sem mudança de comportamento)       │
+│ 7. Deploy Cloud Function para custom claims                         │
+│ 8. Deploy security rules e indexes                                  │
+├─────────────────────────────────────────────────────────────────────┤
+│ ATIVAÇÃO GRADUAL                                                    │
+├─────────────────────────────────────────────────────────────────────┤
+│ 9.  dualWriteEnabled = true  → Escritas em ambas estruturas         │
+│ 10. Executar script de migração de dados históricos                 │
+│ 11. Validar integridade dos dados migrados                          │
+│ 12. dualReadEnabled = true   → Leitura nova com fallback            │
+│ 13. Monitorar por 1 semana                                          │
+│ 14. useNewTenantStructure = true → Cutover completo                 │
+├─────────────────────────────────────────────────────────────────────┤
+│ ESTABILIZAÇÃO E CLEANUP (após 4+ semanas)                           │
+├─────────────────────────────────────────────────────────────────────┤
+│ 15. Desativar dual-write                                            │
+│ 16. Backup final da estrutura antiga                                │
+│ 17. Remover dados e código legado                                   │
+│ 18. Remover feature flags                                           │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## Referências
 
 - [Firestore Multi-tenancy Best Practices](https://firebase.google.com/docs/firestore/solutions/aggregation)
@@ -956,5 +1036,5 @@ Future<void> emergencyRollback() async {
 ---
 
 **Documento criado em:** Janeiro 2026
-**Última atualização:** -
+**Última atualização:** Janeiro 2026
 **Responsável:** Equipe PraticOS

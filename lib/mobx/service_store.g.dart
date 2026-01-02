@@ -15,13 +15,13 @@ mixin _$ServiceStore on _ServiceStore, Store {
   );
 
   @override
-  ObservableStream<List<Service>>? get serviceList {
+  ObservableStream<List<Service?>>? get serviceList {
     _$serviceListAtom.reportRead();
     return super.serviceList;
   }
 
   @override
-  set serviceList(ObservableStream<List<Service>>? value) {
+  set serviceList(ObservableStream<List<Service?>>? value) {
     _$serviceListAtom.reportWrite(value, super.serviceList, () {
       super.serviceList = value;
     });

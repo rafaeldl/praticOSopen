@@ -15,13 +15,13 @@ mixin _$CustomerStore on _CustomerStore, Store {
   );
 
   @override
-  ObservableStream<List<Customer>>? get customerList {
+  ObservableStream<List<Customer?>>? get customerList {
     _$customerListAtom.reportRead();
     return super.customerList;
   }
 
   @override
-  set customerList(ObservableStream<List<Customer>>? value) {
+  set customerList(ObservableStream<List<Customer?>>? value) {
     _$customerListAtom.reportWrite(value, super.customerList, () {
       super.customerList = value;
     });
@@ -67,7 +67,7 @@ mixin _$CustomerStore on _CustomerStore, Store {
   }
 
   @override
-  dynamic retrieveCustomer(String? id) {
+  Future<Customer?> retrieveCustomer(String? id) {
     final _$actionInfo = _$_CustomerStoreActionController.startAction(
       name: '_CustomerStore.retrieveCustomer',
     );

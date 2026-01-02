@@ -2,39 +2,126 @@ rules_version = '2';
 service cloud.firestore {
 
   match /databases/{database}/documents {
+
+    // ════════════════════════════════════════════════════════════════════════
+    // HELPER FUNCTIONS
+    // ════════════════════════════════════════════════════════════════════════
+
+    // Verifica se o usuário pertence à empresa usando custom claims
+    function belongsToCompany(companyId) {
+      return request.auth != null
+        && request.auth.token.companies != null
+        && companyId in request.auth.token.companies;
+    }
+
+    // Verifica se é o owner da empresa (para estrutura legada)
+    function isOwner() {
+      return request.auth != null
+        && resource.data.company.id == request.auth.uid;
+    }
+
+    // Verifica se é o owner da empresa (para create)
+    function isOwnerOnCreate() {
+      return request.auth != null
+        && request.resource.data.company['id'] == request.auth.uid;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // GLOBAL COLLECTIONS
+    // ════════════════════════════════════════════════════════════════════════
+
+    // Users - global collection (usuário pode pertencer a múltiplas empresas)
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // LEGACY STRUCTURE (manter durante migração)
+    // Remover após cleanup completo
+    // ════════════════════════════════════════════════════════════════════════
+
     match /companies/{id} {
       allow create: if request.resource.data.owner['id'] == request.auth.uid;
-    	allow read, write: if resource.data.owner.id == request.auth.uid;
+      allow read, write: if resource.data.owner.id == request.auth.uid;
     }
 
     match /customers/{id} {
-      allow create: if request.resource.data.company['id'] == request.auth.uid;
-    	allow read, write: if resource.data.company.id == request.auth.uid;
+      allow create: if isOwnerOnCreate();
+      allow read, write: if isOwner();
     }
 
     match /devices/{id} {
-      allow create: if request.resource.data.company['id'] == request.auth.uid;
-    	allow read, write: if resource.data.company.id == request.auth.uid;
+      allow create: if isOwnerOnCreate();
+      allow read, write: if isOwner();
     }
 
     match /orders/{id} {
-      allow create: if request.resource.data.company['id'] == request.auth.uid;
-    	allow read, write: if resource.data.company.id == request.auth.uid;
+      allow create: if isOwnerOnCreate();
+      allow read, write: if isOwner();
     }
 
     match /products/{id} {
-      allow create: if request.resource.data.company['id'] == request.auth.uid;
-    	allow read, write: if resource.data.company.id == request.auth.uid;
+      allow create: if isOwnerOnCreate();
+      allow read, write: if isOwner();
     }
 
     match /services/{id} {
-      allow create: if request.resource.data.company['id'] == request.auth.uid;
-    	allow read, write: if resource.data.company.id == request.auth.uid;
+      allow create: if isOwnerOnCreate();
+      allow read, write: if isOwner();
     }
 
-    match /users/{id} {
-      allow create: if request.resource.data.company['id'] == request.auth.uid;
-    	allow read, write: if id == request.auth.uid;
+    match /roles/{id} {
+      allow create: if isOwnerOnCreate();
+      allow read, write: if isOwner();
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // NEW SUBCOLLECTION STRUCTURE
+    // Usa custom claims para verificação de acesso
+    // ════════════════════════════════════════════════════════════════════════
+
+    match /companies/{companyId} {
+      // Documento da empresa - membros podem ler, apenas owner pode escrever
+      allow read: if belongsToCompany(companyId)
+        || resource.data.owner.id == request.auth.uid;
+      allow write: if request.auth != null
+        && resource.data.owner.id == request.auth.uid;
+
+      // ──────────────────────────────────────────────────────────────────────
+      // Subcollections - isoladas automaticamente por tenant
+      // ──────────────────────────────────────────────────────────────────────
+
+      match /orders/{orderId} {
+        allow read, write: if belongsToCompany(companyId);
+
+        // Subcollection de fotos dentro de orders
+        match /photos/{photoId} {
+          allow read, write: if belongsToCompany(companyId);
+        }
+      }
+
+      match /customers/{customerId} {
+        allow read, write: if belongsToCompany(companyId);
+      }
+
+      match /devices/{deviceId} {
+        allow read, write: if belongsToCompany(companyId);
+      }
+
+      match /products/{productId} {
+        allow read, write: if belongsToCompany(companyId);
+      }
+
+      match /services/{serviceId} {
+        allow read, write: if belongsToCompany(companyId);
+      }
+
+      match /roles/{roleId} {
+        allow read: if belongsToCompany(companyId);
+        // Apenas owner pode gerenciar roles
+        allow write: if request.auth != null
+          && get(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid;
+      }
     }
   }
 }

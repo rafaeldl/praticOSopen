@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/user.dart';
-import 'package:praticos/repositories/customer_repository.dart';
-import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/repositories/v2/customer_repository_v2.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,11 +12,11 @@ part 'customer_store.g.dart';
 class CustomerStore = _CustomerStore with _$CustomerStore;
 
 abstract class _CustomerStore with Store {
-  final CustomerRepository repository = CustomerRepository();
+  final CustomerRepositoryV2 repository = CustomerRepositoryV2();
   final UserStore userStore = UserStore();
 
   @observable
-  ObservableStream<List<Customer>>? customerList;
+  ObservableStream<List<Customer?>>? customerList;
 
   String? companyId;
 
@@ -30,29 +29,31 @@ abstract class _CustomerStore with Store {
 
   @action
   retrieveCustomers() {
-    customerList = repository.streamQueryList(
-        orderBy: [OrderBy('name')],
-        args: [QueryArgs('company.id', this.companyId)]).asObservable();
+    if (companyId == null) return;
+    customerList = repository.streamCustomers(companyId!).asObservable();
   }
 
   @action
-  retrieveCustomer(String? id) {
-    return repository.getSingle(id);
+  Future<Customer?> retrieveCustomer(String? id) {
+    if (companyId == null || id == null) return Future.value(null);
+    return repository.getSingle(companyId!, id);
   }
 
   @action
   saveCustomer(Customer customer) async {
+    if (companyId == null) return;
     User? user = await (userStore.getSingleUserById());
     customer.createdAt = DateTime.now();
     customer.createdBy = user?.toAggr();
     customer.company = user?.companies![0].company;
     customer.updatedAt = DateTime.now();
     customer.updatedBy = user?.toAggr();
-    await repository.createItem(customer);
+    await repository.createItem(companyId!, customer);
   }
 
   @action
   deleteCustomer(Customer customer) async {
-    await repository.removeItem(customer.id);
+    if (companyId == null) return;
+    await repository.removeItem(companyId!, customer.id);
   }
 }

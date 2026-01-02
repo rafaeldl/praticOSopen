@@ -5,20 +5,18 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_photo.dart';
-import 'package:praticos/repositories/order_repository.dart';
-import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 
 import 'package:praticos/global.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 part 'order_store.g.dart';
 
 class OrderStore = _OrderStore with _$OrderStore;
 
 abstract class _OrderStore with Store {
-  final OrderRepository repository = OrderRepository();
+  final OrderRepositoryV2 repository = OrderRepositoryV2();
   final PhotoService photoService = PhotoService();
 
   Order? order;
@@ -170,6 +168,8 @@ abstract class _OrderStore with Store {
     });
   }
 
+  String? get companyId => Global.companyAggr?.id;
+
   @action
   loadOrder({String? id}) {
     if (id == null) {
@@ -191,7 +191,8 @@ abstract class _OrderStore with Store {
       updatePayment();
       return;
     }
-    repository.getSingle(id).then((value) {
+    if (companyId == null) return;
+    repository.getSingle(companyId!, id).then((value) {
       setOrder(value);
     });
   }
@@ -215,9 +216,9 @@ abstract class _OrderStore with Store {
     }
 
     // Configura o stream se tiver ID
-    if (orderId != null) {
+    if (orderId != null && companyId != null) {
       this.order!.id = orderId;
-      this.orderStream = repository.streamSingle(orderId).asObservable();
+      this.orderStream = repository.streamSingle(companyId!, orderId).asObservable();
     }
 
     customer = order.customer;
@@ -290,7 +291,8 @@ abstract class _OrderStore with Store {
 
   @action
   Future<void> deleteOrder() {
-    return repository.removeItem(order!.id);
+    if (companyId == null) return Future.value();
+    return repository.removeItem(companyId!, order!.id);
   }
 
   void updatePayment() {
@@ -315,33 +317,14 @@ abstract class _OrderStore with Store {
 
   @action
   loadOrders(String? status) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? companyId = prefs.getString('companyId');
-    if (companyId == null) companyId = '';
-
-    List<QueryArgs> filterList = [QueryArgs('company.id', companyId)];
-    List<OrderBy>? orderBy;
-
-    if (status != null) {
-      if (['paid', 'unpaid'].contains(status)) {
-        filterList.add(QueryArgs('payment', status));
-      } else if (status == 'due_date') {
-        filterList.add(
-            QueryArgs('status', ['approved', 'progress'], oper: 'whereIn'));
-        orderBy = orderBy = [OrderBy('dueDate')];
-      } else {
-        filterList.add(QueryArgs('status', status));
-      }
-    }
-
-    if (customerFilter != null) {
-      filterList.add(QueryArgs('customer.id', this.customerFilter!.id));
-    }
-
-    if (orderBy == null) orderBy = [OrderBy('createdAt', descending: true)];
+    if (companyId == null) return;
 
     orderList = repository
-        .streamQueryList(orderBy: orderBy, args: filterList)
+        .streamOrders(
+          companyId!,
+          status: status,
+          customerId: customerFilter?.id,
+        )
         .asObservable();
 
     if (orderList!.hasError) {
@@ -413,11 +396,11 @@ abstract class _OrderStore with Store {
 
   /// Faz o upload de uma foto
   Future<bool> _uploadPhoto(File file) async {
-    if (order == null) return false;
+    if (order == null || companyId == null) return false;
 
     // Garante que a OS seja salva antes do upload
     if (order!.id == null) {
-      await repository.createItem(order);
+      await repository.createItem(companyId!, order);
     }
 
     if (order!.id == null || order!.company?.id == null) return false;
@@ -513,44 +496,44 @@ abstract class _OrderStore with Store {
   }
 
   createItem() {
-    if (order == null) return;
+    if (order == null || companyId == null) return;
 
     if (order!.id == null) {
       // Para nova OS, verifica duplicação pelo número
       if (order!.number != null) {
         // Verifica se existe OS com o mesmo número
-        repository.getOrderByNumber(order!.number!).then((existingOrder) {
+        repository.getOrderByNumber(companyId!, order!.number!).then((existingOrder) {
           if (existingOrder != null) {
             // Se encontrou, usa o ID da existente
             order!.id = existingOrder.id;
-            repository.updateItem(order);
+            repository.updateItem(companyId!, order);
             this.orderStream =
-                repository.streamSingle(order!.id).asObservable();
+                repository.streamSingle(companyId!, order!.id).asObservable();
           } else {
             // Cria nova se não encontrou
-            repository.createItem(order).then((_) {
+            repository.createItem(companyId!, order).then((_) {
               if (order!.id != null) {
                 this.orderStream =
-                    repository.streamSingle(order!.id).asObservable();
+                    repository.streamSingle(companyId!, order!.id).asObservable();
               }
             });
           }
         });
       } else {
         // Cria nova OS sem número
-        repository.createItem(order).then((_) {
+        repository.createItem(companyId!, order).then((_) {
           if (order!.id != null) {
             this.orderStream =
-                repository.streamSingle(order!.id).asObservable();
+                repository.streamSingle(companyId!, order!.id).asObservable();
           }
         });
       }
     } else {
       // Atualiza OS existente
-      repository.updateItem(order).then((_) {
+      repository.updateItem(companyId!, order).then((_) {
         if (this.orderStream == null ||
             this.orderStream!.value?.id != order!.id) {
-          this.orderStream = repository.streamSingle(order!.id).asObservable();
+          this.orderStream = repository.streamSingle(companyId!, order!.id).asObservable();
         }
       });
     }
@@ -594,8 +577,9 @@ abstract class _OrderStore with Store {
 
   @action
   Future<void> loadOrdersForDashboardCustomRange(DateTime start, DateTime end) async {
+    if (companyId == null) return;
     try {
-      final orders = await repository.getOrdersByDateRange(start, end);
+      final orders = await repository.getOrdersByDateRange(companyId!, start, end);
 
       // Filtrar ordens que não são orçamentos
       var filteredOrders =
@@ -725,9 +709,10 @@ abstract class _OrderStore with Store {
 
   @action
   Future<void> loadOrdersForDashboard() async {
+    if (companyId == null) return;
     try {
       final orders = await repository.getOrdersByCustomPeriod(
-          selectedDashboardPeriod, periodOffset);
+          companyId!, selectedDashboardPeriod, periodOffset);
 
       // Filtrar ordens que não são orçamentos
       var filteredOrders =
@@ -898,46 +883,16 @@ abstract class _OrderStore with Store {
   }
 
   Future<void> _fetchOrdersInfinite(String? status) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? companyId = prefs.getString('companyId');
-    if (companyId == null) companyId = '';
+    if (companyId == null) return;
 
     try {
-      firestore.Query query =
-          firestore.FirebaseFirestore.instance.collection('orders');
-
-      // Aplicar filtros
-      query = query.where('company.id', isEqualTo: companyId);
-
-      if (status != null) {
-        if (['paid', 'unpaid'].contains(status)) {
-          query = query.where('payment', isEqualTo: status);
-        } else if (status == 'due_date') {
-          query = query.where('status', whereIn: ['approved', 'progress']);
-          query = query.orderBy('dueDate');
-        } else if (status != 'Todos') {
-          query = query.where('status', isEqualTo: status);
-        }
-      }
-
-      if (customerFilter != null) {
-        query = query.where('customer.id', isEqualTo: customerFilter!.id);
-      }
-
-      // Aplicar ordenação padrão se não for por data de entrega
-      if (status != 'due_date') {
-        query = query.orderBy('createdAt', descending: true);
-      }
-
-      // Aplicar paginação
-      if (_lastDocument != null) {
-        query = query.startAfterDocument(_lastDocument!);
-      }
-
-      query = query.limit(_limit);
-
-      // Buscar documentos
-      final snapshot = await query.get();
+      final snapshot = await repository.getOrdersWithPagination(
+        companyId!,
+        status: status,
+        customerId: customerFilter?.id,
+        limit: _limit,
+        startAfterDocument: _lastDocument,
+      );
 
       if (snapshot.docs.isEmpty) {
         hasMoreOrders = false;
@@ -948,7 +903,11 @@ abstract class _OrderStore with Store {
 
       // Converter para objetos Order e adicionar à lista
       final newOrders = snapshot.docs
-          .map((doc) => Order.fromJson(doc.data() as Map<String, dynamic>))
+          .map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return Order.fromJson(data);
+          })
           .toList();
 
       orders.addAll(newOrders);

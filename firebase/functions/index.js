@@ -33,3 +33,6 @@ exports.firestoreUpdateOSNumber = functions.region('southamerica-east1').firesto
 // exports.helloWorld = functions.https.onRequest((request, response) => {
 //  response.send("Hello from Firebase!");
 // });
+
+const claims = require('./claims');
+exports.updateUserClaims = claims.updateUserClaims;
