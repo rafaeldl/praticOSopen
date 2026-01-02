@@ -12,7 +12,7 @@ Este roteiro detalha os passos exatos para executar a migração da arquitetura 
     ```
 2.  **Acesso:** Garanta acesso de administrador ao projeto Firebase e ao Google Cloud CLI.
 3.  **Janela de Manutenção:** Recomenda-se executar durante um período de baixo uso, embora o sistema possa permanecer online.
-4.  **Ambiente Flutter:** Tenha o ambiente Flutter configurado para rodar os scripts Dart.
+4.  **Ambiente Node.js:** Tenha Node.js (v18+) instalado para rodar os scripts de migração.
 
 ---
 
@@ -47,10 +47,9 @@ Antes de migrar os dados, os usuários precisam ter permissão para acessá-los 
 1.  **Executar Script de Atualização de Claims:**
     Este script "toca" em todos os usuários, forçando a Cloud Function a rodar e atualizar suas permissões.
     ```bash
-    # Na raiz do projeto
-    flutter run -t scripts/refresh_user_claims.dart -d macos
-    # OU, se preferir rodar em um emulador/dispositivo conectado:
-    # flutter run -t scripts/refresh_user_claims.dart
+    cd firebase/scripts
+    npm install # Instala dependências na primeira vez
+    npm run refresh-claims
     ```
 
 2.  **Validação:**
@@ -64,7 +63,8 @@ Agora movemos os dados de negócio (Ordens, Clientes, Produtos, etc.) da estrutu
 
 1.  **Executar Script de Migração:**
     ```bash
-    flutter run -t scripts/migrate_tenant_data.dart -d macos
+    # Dentro de firebase/scripts
+    npm run migrate
     ```
 
 2.  **Acompanhamento:**
@@ -99,7 +99,8 @@ Caso algo crítico falhe e seja necessário voltar atrás:
 1.  **Reverter Dados (Se necessário):**
     Se os dados novos estiverem corrompidos ou inacessíveis, use o script de rollback para tentar sincronizar de volta (note que em Cutover direto, a estrutura antiga parou de receber updates, então ela é um "backup" do estado pré-migração).
     ```bash
-    flutter run -t scripts/rollback_tenant_data.dart -d macos
+    # Dentro de firebase/scripts
+    npm run rollback
     ```
 
 2.  **Reverter Backend:**
