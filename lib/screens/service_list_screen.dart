@@ -103,7 +103,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
       );
     }
 
-    List<Service>? serviceList = serviceStore.serviceList!.value;
+    List<Service?>? serviceList = serviceStore.serviceList!.value;
 
     if (serviceList == null) {
       return const SliverFillRemaining(
@@ -131,8 +131,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
 
     // Filter list based on search query
     final filteredList = _searchQuery.isEmpty
-        ? serviceList
-        : serviceList.where((service) {
+        ? serviceList.whereType<Service>().toList()
+        : serviceList.whereType<Service>().where((service) {
             final name = service.name?.toLowerCase() ?? '';
             return name.contains(_searchQuery);
           }).toList();

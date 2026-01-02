@@ -42,11 +42,11 @@ class _OrderFormState extends State<OrderForm> {
         Order orderArg = args['order'];
 
         if (orderArg.id != null) {
-          _store.repository.getSingle(orderArg.id).then((updatedOrder) {
+          _store.repository.getSingle(_store.companyId!, orderArg.id!).then((updatedOrder) {
             _store.setOrder(updatedOrder ?? orderArg);
           });
         } else if (orderArg.number != null) {
-          _store.repository.getOrderByNumber(orderArg.number!).then((
+          _store.repository.getOrderByNumber(_store.companyId!, orderArg.number!).then((
             existingOrder,
           ) {
             _store.setOrder(existingOrder ?? orderArg);

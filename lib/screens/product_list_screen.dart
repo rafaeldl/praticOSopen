@@ -103,7 +103,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
       );
     }
 
-    List<Product>? productList = productStore.productList!.value;
+    List<Product?>? productList = productStore.productList!.value;
 
     if (productList == null) {
       return const SliverFillRemaining(
@@ -131,8 +131,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
     // Filter list based on search query
     final filteredList = _searchQuery.isEmpty
-        ? productList
-        : productList.where((product) {
+        ? productList.whereType<Product>().toList()
+        : productList.whereType<Product>().where((product) {
             final name = product.name?.toLowerCase() ?? '';
             return name.contains(_searchQuery);
           }).toList();
