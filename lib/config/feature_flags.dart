@@ -12,29 +12,14 @@ class FeatureFlags {
   ///
   /// Quando true, leituras e escritas usam a nova estrutura:
   /// `/companies/{companyId}/{collection}/{docId}`
-  ///
-  /// Quando false, usa a estrutura antiga:
-  /// `/{collection}/{docId}` com filtro `company.id`
-  static const bool useNewTenantStructure = false;
+  static const bool useNewTenantStructure = true;
 
   /// Habilitar dual-write para ambas as estruturas.
-  ///
-  /// Quando true, todas as escritas vão para:
-  /// - Estrutura antiga: `/{collection}/{docId}`
-  /// - Estrutura nova: `/companies/{companyId}/{collection}/{docId}`
-  ///
-  /// Isso garante que ambas as estruturas permaneçam sincronizadas
-  /// durante o período de migração.
+  /// DESATIVADO: Migração direta (Cutover).
   static const bool dualWriteEnabled = false;
 
   /// Habilitar dual-read com fallback para estrutura antiga.
-  ///
-  /// Quando true E useNewTenantStructure = true:
-  /// - Leitura primária: nova estrutura
-  /// - Em caso de erro: fallback para estrutura antiga
-  ///
-  /// Útil para identificar problemas na nova estrutura sem
-  /// causar falhas para o usuário.
+  /// DESATIVADO: Nova estrutura é a única fonte da verdade.
   static const bool dualReadEnabled = false;
 
   // ═══════════════════════════════════════════════════════════════════
