@@ -37,7 +37,8 @@ Toda a documentação técnica e de processos está centralizada para facilitar 
 - [🔐 Configuração de Secrets](docs/ANDROID_GITHUB_SECRETS.md) - Guia para CI/CD no GitHub.
 - [⚙️ Setup Android](docs/ANDROID_SETUP_GUIDE.md) - Configuração do ambiente de desenvolvimento.
 - [🍏 Apple Sign In](docs/APPLE_SIGN_IN_SETUP.md) - Configuração do provedor de autenticação.
-- [📐 Diretrizes de UX](docs/UX_GUIDELINES.md) - Padrões visuais e de interação.
+- [📐 Diretrizes de UX (App)](docs/UX_GUIDELINES.md) - Padrões visuais e de interação (iOS/Cupertino).
+- [🌐 Diretrizes de UX (Web)](docs/WEB_UX_GUIDELINES.md) - Padrões para o site institucional.
 - [👥 Conta Demo](docs/DEMO_ACCOUNT_SETUP.md) - Dados de acesso para teste/review.
 
 ---
