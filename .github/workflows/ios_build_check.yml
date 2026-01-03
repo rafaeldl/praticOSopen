@@ -38,18 +38,7 @@ jobs:
       - name: Accept Xcode license
         run: sudo xcodebuild -license accept
 
-      - name: Download iOS Platform
-        run: xcodebuild -downloadPlatform iOS
-
-      - name: Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-
-      - name: Install bundler
-        working-directory: ios
-        run: gem install bundler
+      # iOS 18.2 simulator já vem pré-instalado no macos-14
 
       - name: Add GoogleService-Info.plist
         working-directory: ios
@@ -58,24 +47,24 @@ jobs:
           /usr/bin/plutil -lint GoogleService-Info.plist
           echo "✅ GoogleService-Info.plist criado"
 
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Pod install
+      - name: Pod install (verbose)
         working-directory: ios
+        timeout-minutes: 20
         run: |
-          if [ ! -d "Pods" ]; then
-            bundle exec pod install --repo-update
-          else
-            bundle exec pod install
-          fi
+          echo "🔍 CocoaPods version:"
+          pod --version
+          echo ""
+          echo "🔍 Ruby version:"
+          ruby --version
+          echo ""
+          echo "🧹 Limpando cache do CocoaPods..."
+          pod cache clean --all || true
+          echo ""
+          echo "📦 Iniciando pod install --verbose..."
+          pod install --repo-update --verbose
 
-      - name: Build iOS app
+      - name: Build iOS (Simulator)
+        timeout-minutes: 20
         run: |
           flutter build ios --simulator --debug
           echo "✅ Build concluído"

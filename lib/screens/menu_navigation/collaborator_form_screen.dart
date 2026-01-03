@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
-import 'package:praticos/mobx/company_store.dart';
+import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/user_role.dart';
 
 class CollaboratorFormScreen extends StatefulWidget {
@@ -9,7 +9,8 @@ class CollaboratorFormScreen extends StatefulWidget {
 }
 
 class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
-  final CompanyStore _companyStore = CompanyStore();
+  // Usa singleton para compartilhar estado com a tela de listagem
+  final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   RolesType _selectedRole = RolesType.user;
@@ -20,7 +21,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await _companyStore.addCollaborator(
+      await _collaboratorStore.addCollaborator(
         _emailController.text.trim(),
         _selectedRole,
       );

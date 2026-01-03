@@ -15,13 +15,13 @@ mixin _$ProductStore on _ProductStore, Store {
   );
 
   @override
-  ObservableStream<List<Product>>? get productList {
+  ObservableStream<List<Product?>>? get productList {
     _$productListAtom.reportRead();
     return super.productList;
   }
 
   @override
-  set productList(ObservableStream<List<Product>>? value) {
+  set productList(ObservableStream<List<Product?>>? value) {
     _$productListAtom.reportWrite(value, super.productList, () {
       super.productList = value;
     });

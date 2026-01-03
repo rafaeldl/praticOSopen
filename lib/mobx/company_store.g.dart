@@ -27,42 +27,6 @@ mixin _$CompanyStore on _CompanyStore, Store {
     });
   }
 
-  late final _$addCollaboratorAsyncAction = AsyncAction(
-    '_CompanyStore.addCollaborator',
-    context: context,
-  );
-
-  @override
-  Future<void> addCollaborator(String email, RolesType role) {
-    return _$addCollaboratorAsyncAction.run(
-      () => super.addCollaborator(email, role),
-    );
-  }
-
-  late final _$removeCollaboratorAsyncAction = AsyncAction(
-    '_CompanyStore.removeCollaborator',
-    context: context,
-  );
-
-  @override
-  Future<void> removeCollaborator(String userId) {
-    return _$removeCollaboratorAsyncAction.run(
-      () => super.removeCollaborator(userId),
-    );
-  }
-
-  late final _$updateCollaboratorRoleAsyncAction = AsyncAction(
-    '_CompanyStore.updateCollaboratorRole',
-    context: context,
-  );
-
-  @override
-  Future<void> updateCollaboratorRole(String userId, RolesType newRole) {
-    return _$updateCollaboratorRoleAsyncAction.run(
-      () => super.updateCollaboratorRole(userId, newRole),
-    );
-  }
-
   late final _$updateCompanyAsyncAction = AsyncAction(
     '_CompanyStore.updateCompany',
     context: context,

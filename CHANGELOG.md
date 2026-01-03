@@ -1,9 +1,16 @@
 # PraticOS - Alterações do aplicativo
 
-## [0.3.0+15]() - 02/10/2020
+## [1.0.0+1] - 02/01/2026
+
+### Mudanças Principais
+- Refatoração completa do sistema, abrangendo telas, funcionalidades e arquitetura interna.
+- Migração para arquitetura multi-tenant robusta para gerenciamento de colaboradores e permissões.
+- Nova estrutura de dados para permissões (Roles) visando escalabilidade.
+- Otimização do fluxo de cadastro e gerenciamento de empresas.
+- Melhorias generalizadas de estabilidade e performance na interface do usuário.
+
+## [0.3.0+15] - 02/10/2020
 
 ### Melhorias
 
 ### Correções
-
-

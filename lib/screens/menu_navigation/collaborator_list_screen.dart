@@ -1,11 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell, DismissDirection;
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:praticos/global.dart';
-import 'package:praticos/mobx/company_store.dart';
-import 'package:praticos/mobx/user_store.dart';
-import 'package:praticos/models/company.dart';
+import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
   @override
@@ -13,18 +11,14 @@ class CollaboratorListScreen extends StatefulWidget {
 }
 
 class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
-  final CompanyStore _companyStore = CompanyStore();
-  final UserStore _userStore = UserStore();
-  Company? _company;
-  bool _isLoading = true;
+  final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
-    _userStore.findCurrentUser();
-    _loadData();
+    _collaboratorStore.loadCollaborators();
   }
 
   @override
@@ -33,18 +27,10 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     super.dispose();
   }
 
-  Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    if (Global.companyAggr?.id != null) {
-      _company = await _companyStore.retrieveCompany(Global.companyAggr!.id);
-    }
-    setState(() => _isLoading = false);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
-      final isAdmin = _isAdmin();
+      final canManage = _collaboratorStore.canManageCollaborators();
       return CupertinoPageScaffold(
         backgroundColor: CupertinoColors.systemGroupedBackground,
         child: Material(
@@ -53,7 +39,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             slivers: [
               CupertinoSliverNavigationBar(
                 largeTitle: const Text('Colaboradores'),
-                trailing: isAdmin
+                trailing: canManage
                     ? CupertinoButton(
                         padding: EdgeInsets.zero,
                         child: const Icon(CupertinoIcons.add),
@@ -61,7 +47,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                           final result = await Navigator.pushNamed(
                               context, '/collaborator_form');
                           if (result == true) {
-                            _loadData();
+                            _collaboratorStore.loadCollaborators();
                           }
                         },
                       )
@@ -79,17 +65,17 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                   ),
                 ),
               ),
-              if (_isLoading)
+              if (_collaboratorStore.isLoading)
                 const SliverFillRemaining(
                   child: Center(child: CupertinoActivityIndicator()),
                 )
-              else if (_company == null)
-                const SliverFillRemaining(
-                  child: Center(child: Text('Empresa não encontrada')),
+              else if (_collaboratorStore.errorMessage != null)
+                SliverFillRemaining(
+                  child: Center(child: Text(_collaboratorStore.errorMessage!)),
                 )
               else
-                _buildList(isAdmin),
-                
+                _buildList(canManage),
+
               const SliverToBoxAdapter(child: SizedBox(height: 100)),
             ],
           ),
@@ -98,17 +84,17 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     });
   }
 
-  Widget _buildList(bool isAdmin) {
-    if (_company!.users == null || _company!.users!.isEmpty) {
+  Widget _buildList(bool canManage) {
+    if (_collaboratorStore.collaborators.isEmpty) {
       return const SliverFillRemaining(
         child: Center(child: Text('Nenhum colaborador encontrado')),
       );
     }
 
     final filteredList = _searchQuery.isEmpty
-        ? _company!.users!
-        : _company!.users!.where((userRole) {
-            final name = userRole.user?.name?.toLowerCase() ?? '';
+        ? _collaboratorStore.collaborators.toList()
+        : _collaboratorStore.collaborators.where((membership) {
+            final name = membership.user?.name?.toLowerCase() ?? '';
             return name.contains(_searchQuery);
           }).toList();
 
@@ -121,19 +107,19 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          final userRole = filteredList[index];
-          return _buildUserRow(userRole, isAdmin, index == filteredList.length - 1);
+          final membership = filteredList[index];
+          return _buildMembershipRow(membership, canManage, index == filteredList.length - 1);
         },
         childCount: filteredList.length,
       ),
     );
   }
 
-  Widget _buildUserRow(UserRoleAggr userRole, bool isAdmin, bool isLast) {
+  Widget _buildMembershipRow(Membership membership, bool canManage, bool isLast) {
     Widget content = Container(
       color: CupertinoColors.systemBackground.resolveFrom(context),
       child: InkWell(
-        onTap: isAdmin ? () => _showActionSheet(userRole) : null,
+        onTap: canManage ? () => _showActionSheet(membership) : null,
         child: Column(
           children: [
             Padding(
@@ -149,7 +135,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      userRole.user?.name?.substring(0, 1).toUpperCase() ?? 'U',
+                      membership.user?.name?.substring(0, 1).toUpperCase() ?? 'U',
                       style: TextStyle(
                         color: CupertinoColors.activeBlue.resolveFrom(context),
                         fontWeight: FontWeight.w600,
@@ -163,7 +149,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          userRole.user?.name ?? 'Usuário sem nome',
+                          membership.user?.name ?? 'Usuário sem nome',
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
@@ -172,7 +158,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          _getRoleLabel(userRole.role),
+                          _getRoleLabel(membership.role),
                           style: TextStyle(
                             fontSize: 14,
                             color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -181,25 +167,26 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                       ],
                     ),
                   ),
-                  if (isAdmin)
+                  if (canManage)
                     Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
                 ],
               ),
             ),
-                          if (!isLast)
-                            Divider(
-                              height: 1,
-                              indent: 72,
-                              color: CupertinoColors.systemGrey5.resolveFrom(context),
-                            ),          ],
+            if (!isLast)
+              Divider(
+                height: 1,
+                indent: 72,
+                color: CupertinoColors.systemGrey5.resolveFrom(context),
+              ),
+          ],
         ),
       ),
     );
 
-    if (!isAdmin) return content;
+    if (!canManage) return content;
 
     return Dismissible(
-      key: Key(userRole.user!.id!),
+      key: Key(membership.userId),
       direction: DismissDirection.horizontal,
       background: Container(
         color: CupertinoColors.systemBlue,
@@ -215,11 +202,11 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
       ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
-          _showEditRoleDialog(userRole);
+          _showEditRoleDialog(membership);
           return false;
         } else {
-          _showRemoveConfirmation(userRole);
-          return false; // Wait for dialog confirmation which handles deletion logic
+          _showRemoveConfirmation(membership);
+          return false;
         }
       },
       child: content,
@@ -238,30 +225,17 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     }
   }
 
-  bool _isAdmin() {
-    if (_userStore.user?.value == null || Global.companyAggr == null) return false;
-
-    final currentCompanyId = Global.companyAggr!.id;
-    final companyRole = _userStore.user!.value!.companies?.firstWhere(
-      (c) => c.company?.id == currentCompanyId,
-      orElse: () => CompanyRoleAggr(),
-    );
-
-    return companyRole?.role == RolesType.admin ||
-        companyRole?.role == RolesType.manager;
-  }
-
-  void _showActionSheet(UserRoleAggr userRole) {
+  void _showActionSheet(Membership membership) {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: Text('Ações para ${userRole.user?.name}'),
+        title: Text('Ações para ${membership.user?.name}'),
         actions: [
           CupertinoActionSheetAction(
             child: const Text('Editar Permissão'),
             onPressed: () {
               Navigator.pop(context);
-              _showEditRoleDialog(userRole);
+              _showEditRoleDialog(membership);
             },
           ),
           CupertinoActionSheetAction(
@@ -269,7 +243,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             child: const Text('Remover da Empresa'),
             onPressed: () {
               Navigator.pop(context);
-              _showRemoveConfirmation(userRole);
+              _showRemoveConfirmation(membership);
             },
           ),
         ],
@@ -281,7 +255,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     );
   }
 
-  void _showEditRoleDialog(UserRoleAggr userRole) {
+  void _showEditRoleDialog(Membership membership) {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
@@ -291,14 +265,11 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             child: Text(_getRoleLabel(role)),
             onPressed: () async {
               Navigator.pop(context);
-              setState(() => _isLoading = true);
               try {
-                await _companyStore.updateCollaboratorRole(
-                    userRole.user!.id!, role);
-                _loadData();
+                await _collaboratorStore.updateCollaboratorRole(
+                    membership.userId, role);
               } catch (e) {
-                // Handle error
-                setState(() => _isLoading = false);
+                _showError(e.toString());
               }
             },
           );
@@ -311,13 +282,13 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     );
   }
 
-  void _showRemoveConfirmation(UserRoleAggr userRole) {
+  void _showRemoveConfirmation(Membership membership) {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: const Text('Remover Colaborador'),
         content: Text(
-            'Tem certeza que deseja remover ${userRole.user?.name} da organização?'),
+            'Tem certeza que deseja remover ${membership.user?.name} da organização?'),
         actions: [
           CupertinoDialogAction(
             child: const Text('Cancelar'),
@@ -327,16 +298,29 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             isDestructiveAction: true,
             onPressed: () async {
               Navigator.pop(context);
-              setState(() => _isLoading = true);
               try {
-                await _companyStore.removeCollaborator(userRole.user!.id!);
-                _loadData();
+                await _collaboratorStore.removeCollaborator(membership.userId);
               } catch (e) {
-                // Handle error
-                setState(() => _isLoading = false);
+                _showError(e.toString());
               }
             },
             child: const Text('Remover'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showError(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Erro'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
           ),
         ],
       ),

@@ -1,0 +1,20 @@
+{
+  "root": true,
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:promise/recommended"
+  ],
+  "rules": {
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-console": "off",
+    "promise/always-return": "off",
+    "promise/catch-or-return": "off"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018
+  }
+}

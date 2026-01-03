@@ -5,31 +5,62 @@ admin.initializeApp();
 
 const db = admin.firestore();
 
-exports.firestoreUpdateOSNumber = functions.region('southamerica-east1').firestore.document('orders/{id}').onCreate(async (snapshot, context) => {
+/**
+ * [LEGACY] Numeração de OS para estrutura antiga (Field-based).
+ * DESATIVADO: Migração concluída para Subcollections.
+ */
+exports.firestoreUpdateOSNumber = functions.region('southamerica-east1').firestore.document('orders/{id}').onCreate(async (_snapshot, _context) => {
+  console.log('[LEGACY] firestoreUpdateOSNumber disparada, mas desativada via código.');
+  return null;
+  /*
   const data = snapshot.data();
-  if (data.number) return;
-  const companyAggr = data.company;
-  if (!companyAggr) return;
-  const companyRef = db.collection('companies').doc(companyAggr.id);
-  const company = await companyRef.get();
-  if (!company.exists) return;
-  const companyData = company.data();
-
-  let nextOrderNumber;
-  let number = companyData.nextOrderNumber;
-  if (!number) {
-    number = 1;
-    nextOrderNumber = 2;
-  } else {
-    nextOrderNumber = admin.firestore.FieldValue.increment(1)
-  }
-  companyRef.set({nextOrderNumber}, {merge: true});
-  snapshot.ref.set({number}, {merge: true});
+  // ... resto do código comentado ...
+  */
 });
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
+/**
+ * [V2] Numeração de OS para nova estrutura (Subcollections).
+ * Gatilho: /companies/{companyId}/orders/{orderId}
+ *
+ * Esta é a função definitiva para o modelo Multi-Tenant.
+ * Usa transação para evitar race conditions na numeração.
+ */
+exports.firestoreUpdateTenantOSNumber = functions.region('southamerica-east1').firestore.document('companies/{companyId}/orders/{orderId}').onCreate(async (snapshot, context) => {
+  const data = snapshot.data();
+  if (data.number) return;
+
+  const companyId = context.params.companyId;
+  const companyRef = db.collection('companies').doc(companyId);
+  const orderRef = snapshot.ref;
+
+  // Usa transação para garantir atomicidade na numeração
+  await db.runTransaction(async (transaction) => {
+    const companyDoc = await transaction.get(companyRef);
+
+    if (!companyDoc.exists) {
+      console.error(`Company ${companyId} não encontrada.`);
+      return;
+    }
+
+    const companyData = companyDoc.data();
+    let currentNumber = companyData.nextOrderNumber || 1;
+
+    // Atribui o número atual à ordem
+    transaction.update(orderRef, { number: currentNumber });
+
+    // Incrementa o próximo número na empresa
+    transaction.update(companyRef, { nextOrderNumber: currentNumber + 1 });
+
+    console.log(`OS #${currentNumber} atribuída à ordem ${orderRef.id} da empresa ${companyId}`);
+  });
+});
+
+/**
+ * [GLOBAL] Gerenciamento de Custom Claims.
+ * Gatilho: /users/{userId}
+ * 
+ * Atualiza os claims de autenticação (companies, roles) sempre que o usuário é modificado.
+ * Essencial para as Security Rules da nova estrutura.
+ */
+const claims = require('./claims');
+exports.updateUserClaims = claims.updateUserClaims;

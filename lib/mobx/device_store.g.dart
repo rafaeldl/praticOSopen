@@ -15,13 +15,13 @@ mixin _$DeviceStore on _DeviceStore, Store {
   );
 
   @override
-  ObservableStream<List<Device>>? get deviceList {
+  ObservableStream<List<Device?>>? get deviceList {
     _$deviceListAtom.reportRead();
     return super.deviceList;
   }
 
   @override
-  set deviceList(ObservableStream<List<Device>>? value) {
+  set deviceList(ObservableStream<List<Device?>>? value) {
     _$deviceListAtom.reportWrite(value, super.deviceList, () {
       super.deviceList = value;
     });

@@ -3,6 +3,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/user_repository.dart';
+import 'package:praticos/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:mobx/mobx.dart';
 
@@ -15,6 +16,7 @@ class UserStore = _UserStore with _$UserStore;
 abstract class _UserStore with Store {
   final CompanyStore companyStore = CompanyStore();
   final UserRepository repository = UserRepository();
+  final AuthService authService = AuthService();
 
   @observable
   ObservableStream<User>? user;
@@ -38,11 +40,17 @@ abstract class _UserStore with Store {
     User newUser = _fillUserFields(firebaseUser);
     Company newCompany = _fillCompanyFields(newUser, firebaseUser.uid);
 
-    UserRole userRole = _fillUserRole(newUser, newCompany);
-    newUser.companies = [userRole.toCompanyRoleAggr()];
-    newCompany.users = [userRole.toUserRoleAggr()];
+    // Adiciona a empresa à lista do usuário (source of truth para claims)
+    CompanyRoleAggr companyRole = CompanyRoleAggr()
+      ..company = newCompany.toAggr()
+      ..role = RolesType.admin;
+    newUser.companies = [companyRole];
 
-    repository.batchedSignup(newUser, newCompany, userRole);
+    await authService.signup(
+      user: newUser,
+      company: newCompany,
+      role: RolesType.admin,
+    );
   }
 
   User _fillUserFields(auth.User firebaseUser) {
@@ -66,12 +74,5 @@ abstract class _UserStore with Store {
       ..updatedBy = user.toAggr()
       ..name = user.name
       ..owner = user.toAggr();
-  }
-
-  UserRole _fillUserRole(User user, Company company) {
-    return UserRole()
-      ..user = user.toAggr()
-      ..company = company.toAggr()
-      ..role = RolesType.admin;
   }
 }

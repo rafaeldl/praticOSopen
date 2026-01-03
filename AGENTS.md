@@ -28,12 +28,12 @@ Este documento fornece contexto e diretrizes para agentes de IA trabalharem no p
 └─────────────────────────────────────────┘
 ```
 
-### Fluxo de Dados
+### Fluxo de Dados (Atualizado v1.0)
 
 ```
 Firebase (Backend)
     ↓
-Repositories (Acesso a dados)
+Repositories (V2 / Tenant-aware)
     ↓
 Stores (Estado reativo - MobX)
     ↓
@@ -41,6 +41,8 @@ UI Screens (Observer widgets)
     ↓
 Interação do Usuário
 ```
+
+**Nota:** O fluxo de cadastro (Signup) agora passa pelo `AuthService` para garantir a criação correta de usuários, empresas e permissões (roles) na nova estrutura multi-tenant.
 
 ---
 
@@ -70,10 +72,13 @@ lib/
 │   ├── service_store.dart      # Estado de serviços
 │   ├── device_store.dart       # Estado de dispositivos
 │   ├── auth_store.dart         # Autenticação
-│   ├── company_store.dart      # Empresa
+│   ├── company_store.dart      # Empresa (Dados gerais)
+│   ├── collaborator_store.dart # Gestão de Colaboradores (Novo!)
 │   └── *.g.dart                # Arquivos gerados (MobX)
 ├── repositories/                # Camada de dados
-│   ├── repository.dart         # Base genérica
+│   ├── repository.dart         # Base genérica (Legada)
+│   ├── v2/                     # Repositories V2 (Dual-Write/Read)
+│   ├── tenant/                 # Repositories Tenant (Subcollections)
 │   ├── order_repository.dart
 │   ├── customer_repository.dart
 │   └── ...
@@ -84,8 +89,46 @@ lib/
 │   ├── dashboard/              # Dashboard financeiro
 │   └── widgets/                # Widgets reutilizáveis
 └── services/                    # Serviços externos
-    └── photo_service.dart      # Firebase Storage
+    ├── photo_service.dart      # Firebase Storage
+    └── auth_service.dart       # Autenticação e Cadastro (Novo!)
 ```
+
+---
+
+## Multi-Tenancy (Arquitetura v1.0)
+
+O sistema migrou para uma arquitetura robusta de multi-tenancy.
+
+### Estrutura de Permissões (Roles)
+- **Antiga:** Collection raiz `roles` e array `users` dentro do documento `companies`. (LEGADO)
+- **Nova:** Subcollection `/companies/{companyId}/roles/{roleId}`.
+- **Gerenciamento:** Feito pelo `CollaboratorStore` usando `RoleRepositoryV2`.
+
+### Onde o `companyId` é aplicado:
+
+1. **Modelos:** Todo modelo que estende `BaseAuditCompany` tem campo `company`
+2. **Repositories:**
+    - `Repository` (Legado): Filtra via `QueryArgs('company.id', companyId)`.
+    - `TenantRepository`: Acessa direto a subcollection `/companies/{companyId}/...`.
+    - `RepositoryV2`: Abstrai a lógica de qual usar (controlado por Feature Flags).
+3. **Stores:** Ao criar entidades, atribui `entity.company = Global.companyAggr`
+4. **Storage:** Fotos salvas em `tenants/{companyId}/orders/{orderId}/photos/`
+
+### Fluxo de autenticação e Claims:
+
+```
+Login (Google/Apple)
+    ↓
+Firebase Auth retorna User
+    ↓
+Custom Claims (Cloud Function) injeta roles no token
+    ↓
+Security Rules validam acesso baseado nas claims
+```
+
+**Scripts de Manutenção:**
+Se as permissões não atualizarem, use os scripts em `firebase/scripts/`:
+- `npm run refresh-claims`: Força atualização das claims de usuários.
 
 ---
 
@@ -109,8 +152,6 @@ Cada entidade tem DUAS classes:
 @JsonSerializable(explicitToJson: true)
 class Customer extends BaseAuditCompany {
   String? name;
-  String? phone;
-  String? email;
   // ... todos os campos
 
   Customer();
@@ -124,7 +165,6 @@ class Customer extends BaseAuditCompany {
 class CustomerAggr {
   String? id;
   String? name;
-  String? phone;
 
   CustomerAggr();
   factory CustomerAggr.fromJson(Map<String, dynamic> json) => _$CustomerAggrFromJson(json);
@@ -132,34 +172,19 @@ class CustomerAggr {
 }
 ```
 
-### 2. Repositories
+### 2. Repositories (V2 Preference)
+
+Prefira usar `RepositoryV2` ou `TenantRepository` para novas features, garantindo compatibilidade futura.
 
 **Estrutura base:**
 ```dart
 class CustomerRepository extends Repository<Customer> {
   static String collectionName = 'customers';
-
-  CustomerRepository() : super(collectionName);
-
-  @override
-  Customer fromJson(data) => Customer.fromJson(data);
-
-  @override
-  Map<String, dynamic> toJson(Customer customer) => customer.toJson();
-
-  // Métodos customizados com filtro de tenant
-  Future<List<Customer>> getCustomers() async {
-    String? companyId = prefs.getString('companyId');
-
-    return getQueryList(
-      args: [QueryArgs('company.id', companyId)],  // SEMPRE filtrar por company
-      orderBy: [OrderBy('name')],
-    );
-  }
+  // ... implementação
 }
 ```
 
-**IMPORTANTE:** Toda query DEVE incluir `QueryArgs('company.id', companyId)` para garantir isolamento de tenant.
+**IMPORTANTE:** Toda query em repositório legado DEVE incluir `QueryArgs('company.id', companyId)`.
 
 ### 3. Stores (MobX)
 
@@ -177,243 +202,9 @@ abstract class _CustomerStore with Store {
   @observable
   ObservableStream<List<Customer>>? customerList;
 
-  @observable
-  Customer? customer;
-
-  // Computed
-  @computed
-  String? get customerName => customer?.name;
-
-  // Actions
-  @action
-  void loadCustomers() {
-    customerList = repository.streamQueryList(
-      args: [QueryArgs('company.id', companyId)],
-    ).asObservable();
-  }
-
-  @action
-  Future<void> saveCustomer(Customer c) async {
-    c.company = Global.companyAggr;
-    c.createdAt = DateTime.now();
-    c.createdBy = Global.userAggr;
-    await repository.createItem(c);
-  }
+  // Actions...
 }
 ```
-
-### 4. Telas (Screens)
-
-**Padrão com Observer:**
-```dart
-class CustomerListScreen extends StatefulWidget {
-  @override
-  _CustomerListScreenState createState() => _CustomerListScreenState();
-}
-
-class _CustomerListScreenState extends State<CustomerListScreen> {
-  late CustomerStore _store;
-
-  @override
-  void initState() {
-    super.initState();
-    _store = CustomerStore();
-    _store.loadCustomers();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Observer(
-        builder: (_) {
-          final customers = _store.customerList?.value ?? [];
-          return ListView.builder(
-            itemCount: customers.length,
-            itemBuilder: (context, index) => CustomerTile(customer: customers[index]),
-          );
-        },
-      ),
-    );
-  }
-}
-```
-
----
-
-## Multi-Tenancy
-
-### Onde o `companyId` é aplicado:
-
-1. **Modelos:** Todo modelo que estende `BaseAuditCompany` tem campo `company`
-2. **Repositories:** Toda query inclui `QueryArgs('company.id', companyId)`
-3. **Stores:** Ao criar entidades, atribui `entity.company = Global.companyAggr`
-4. **Storage:** Fotos salvas em `tenants/{companyId}/orders/{orderId}/photos/`
-
-### Fluxo de autenticação:
-
-```
-Login (Google Sign-In)
-    ↓
-Firebase Auth retorna User
-    ↓
-AuthStore busca/cria Company do usuário
-    ↓
-Salva companyId no SharedPreferences
-    ↓
-Todas queries filtram por company.id
-```
-
----
-
-## Convenções de Nomenclatura
-
-### Arquivos
-- Screens: `*_screen.dart` ou `*_form.dart`
-- Modals: `modal_*.dart`
-- Widgets: `*_widget.dart`
-- Models: singular (`order.dart`, `customer.dart`)
-- Stores: `*_store.dart`
-- Repositories: `*_repository.dart`
-
-### Classes
-- Models: PascalCase (`Order`, `Customer`)
-- Aggregates: sufixo `Aggr` (`OrderAggr`, `CustomerAggr`)
-- Stores: sufixo `Store` (`OrderStore`)
-- Repositories: sufixo `Repository` (`OrderRepository`)
-
-### Coleções Firebase
-- Lowercase, plural: `orders`, `customers`, `products`, `services`, `devices`
-
----
-
-## Como Adicionar Nova Feature
-
-### 1. Criar Model (`lib/models/nova_entidade.dart`)
-
-```dart
-import 'package:praticos/models/base_audit_company.dart';
-import 'package:json_annotation/json_annotation.dart';
-
-part 'nova_entidade.g.dart';
-
-@JsonSerializable(explicitToJson: true)
-class NovaEntidade extends BaseAuditCompany {
-  String? nome;
-  double? valor;
-
-  NovaEntidade();
-  factory NovaEntidade.fromJson(Map<String, dynamic> json) => _$NovaEntidadeFromJson(json);
-  Map<String, dynamic> toJson() => _$NovaEntidadeToJson(this);
-  NovaEntidadeAggr toAggr() => _$NovaEntidadeAggrFromJson(this.toJson());
-}
-
-@JsonSerializable()
-class NovaEntidadeAggr {
-  String? id;
-  String? nome;
-
-  NovaEntidadeAggr();
-  factory NovaEntidadeAggr.fromJson(Map<String, dynamic> json) => _$NovaEntidadeAggrFromJson(json);
-  Map<String, dynamic> toJson() => _$NovaEntidadeAggrToJson(this);
-}
-```
-
-### 2. Criar Repository (`lib/repositories/nova_entidade_repository.dart`)
-
-```dart
-import 'package:praticos/models/nova_entidade.dart';
-import 'package:praticos/repositories/repository.dart';
-
-class NovaEntidadeRepository extends Repository<NovaEntidade> {
-  static String collectionName = 'nova_entidades';
-
-  NovaEntidadeRepository() : super(collectionName);
-
-  @override
-  NovaEntidade fromJson(data) => NovaEntidade.fromJson(data);
-
-  @override
-  Map<String, dynamic> toJson(NovaEntidade entity) => entity.toJson();
-}
-```
-
-### 3. Criar Store (`lib/mobx/nova_entidade_store.dart`)
-
-```dart
-import 'package:mobx/mobx.dart';
-import 'package:praticos/models/nova_entidade.dart';
-import 'package:praticos/repositories/nova_entidade_repository.dart';
-import 'package:praticos/repositories/repository.dart';
-import 'package:praticos/global.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-part 'nova_entidade_store.g.dart';
-
-class NovaEntidadeStore = _NovaEntidadeStore with _$NovaEntidadeStore;
-
-abstract class _NovaEntidadeStore with Store {
-  final NovaEntidadeRepository repository = NovaEntidadeRepository();
-  String? companyId;
-
-  @observable
-  ObservableStream<List<NovaEntidade>>? entityList;
-
-  @observable
-  NovaEntidade? entity;
-
-  _NovaEntidadeStore() {
-    SharedPreferences.getInstance().then((prefs) {
-      companyId = prefs.getString('companyId');
-      loadEntities();
-    });
-  }
-
-  @action
-  void loadEntities() {
-    entityList = repository.streamQueryList(
-      args: [QueryArgs('company.id', companyId)],
-      orderBy: [OrderBy('nome')],
-    ).asObservable();
-  }
-
-  @action
-  Future<void> saveEntity(NovaEntidade e) async {
-    e.company = Global.companyAggr;
-    e.createdAt = DateTime.now();
-    e.createdBy = Global.userAggr;
-    await repository.createItem(e);
-  }
-
-  @action
-  Future<void> deleteEntity(String? id) async {
-    await repository.removeItem(id);
-  }
-}
-```
-
-### 4. Rodar Build Runner
-
-```bash
-flutter pub run build_runner build --delete-conflicting-outputs
-```
-
-### 5. Criar Screens e adicionar rotas em `main.dart`
-
----
-
-## Arquivos Importantes
-
-| Arquivo | Descrição |
-|---------|-----------|
-| `lib/main.dart` | Entry point, rotas, inicialização Firebase |
-| `lib/global.dart` | Estado global (currentUser, companyAggr, userAggr) |
-| `lib/repositories/repository.dart` | Classe base genérica para todos repositories |
-| `lib/models/base_audit_company.dart` | Base para entidades multi-tenant |
-| `lib/mobx/order_store.dart` | Store principal, mais complexo (~700 linhas) |
-| `lib/screens/order_form.dart` | Tela de OS (~990 linhas) |
-| `UX_GUIDELINES.md` | Diretrizes de Design (Apple HIG) |
-| `pubspec.yaml` | Dependências do projeto |
-| `firestore.indexes.json` | Índices compostos do Firestore |
 
 ---
 
@@ -444,120 +235,10 @@ intl: ^0.20.2
 
 ---
 
-## Checklist para Novas Features
-
-### Antes de começar:
-- [ ] Entender o modelo de dados existente
-- [ ] Verificar se a entidade precisa de multi-tenancy (usar `BaseAuditCompany`)
-- [ ] Planejar campos do modelo e agregado
-
-### Durante desenvolvimento:
-- [ ] Criar model com `@JsonSerializable(explicitToJson: true)`
-- [ ] Criar classe Aggr para referências
-- [ ] Criar repository estendendo `Repository<T>`
-- [ ] Criar store com observables e actions
-- [ ] **SEMPRE** filtrar por `company.id` nas queries
-- [ ] Rodar `flutter pub run build_runner build`
-
-### Antes de commit:
-- [ ] Verificar se `.g.dart` foram gerados
-- [ ] Testar isolamento de tenant
-- [ ] Remover prints de debug
-- [ ] Verificar imports organizados
-
----
-
-## Padrões de Query
-
-### Query com filtros:
-```dart
-List<QueryArgs> args = [
-  QueryArgs('company.id', companyId),           // OBRIGATÓRIO
-  QueryArgs('status', 'approved'),              // Igual
-  QueryArgs('total', 100, oper: 'isGreaterThan'), // Maior que
-];
-
-List<OrderBy> orderBy = [
-  OrderBy('createdAt', descending: true),
-];
-
-final results = await repository.getQueryList(
-  args: args,
-  orderBy: orderBy,
-  limit: 10,
-);
-```
-
-### Stream reativo:
-```dart
-@observable
-ObservableStream<List<Order>>? orderList;
-
-@action
-void loadOrders() {
-  orderList = repository.streamQueryList(
-    args: [QueryArgs('company.id', companyId)],
-    orderBy: [OrderBy('createdAt', descending: true)],
-  ).asObservable();
-}
-```
-
----
-
-## Firebase Storage - Organização
-
-Estrutura de pastas:
-```
-tenants/
-└── {companyId}/
-    └── orders/
-        └── {orderId}/
-            └── photos/
-                ├── {timestamp1}.jpg
-                └── {timestamp2}.jpg
-```
-
----
-
-## Temas e Cores
-
-```dart
-// Cores principais (definidas em main.dart)
-primaryColor: Color(0xFF3498db)    // Azul
-secondaryColor: Color(0xFFf1c40f)  // Amarelo
-```
-
----
-
 ## Dicas para Agentes de IA
 
-1. **Sempre verificar multi-tenancy:** Toda nova feature que lida com dados deve filtrar por `company.id`
-
-2. **Seguir o Apple HIG:** Toda nova tela ou alteração de UI deve seguir estritamente o `UX_GUIDELINES.md` e os padrões de design da Apple (Cupertino).
-
-3. **Usar padrão Aggregate:** Ao referenciar outras entidades, use a classe `*Aggr`
-
-3. **Rodar build_runner:** Após modificar models ou stores, sempre rodar:
-   ```bash
-   flutter pub run build_runner build --delete-conflicting-outputs
-   ```
-
-4. **Observer para reatividade:** Envolver widgets que dependem de estado MobX com `Observer(builder: ...)`
-
-5. **Streams para tempo real:** Usar `streamQueryList()` para dados que precisam atualizar automaticamente
-
-6. **SharedPreferences:** O `companyId` e `userId` ficam salvos localmente para uso offline
-
-7. **Não editar arquivos .g.dart:** São gerados automaticamente
-
-8. **Imports organizados:** Dart -> Flutter -> Packages -> Local -> Generated (part)
-
----
-
-## Como Executar o Projeto
-
-1. **Configurar o Flutter:** Certifique-se de ter o Flutter SDK instalado
-2. **Configurar o Firebase:** Crie um projeto no Firebase e adicione os arquivos de configuração
-3. **Instalar dependências:** `flutter pub get`
-4. **Gerar arquivos:** `flutter pub run build_runner build --delete-conflicting-outputs`
-5. **Executar:** `flutter run`
+1. **Multi-Tenancy é Prioridade:** Verifique sempre se está usando a estrutura correta de company/roles.
+2. **Apple HIG:** Design System é Cupertino/iOS-first.
+3. **Build Runner:** `fvm flutter pub run build_runner build --delete-conflicting-outputs` é obrigatório após mudar Stores/Models.
+4. **AuthService:** Use `AuthService` para criar novos usuários, não grave direto no banco.
+5. **CollaboratorStore:** Use este store para gerenciar membros da equipe, não use `CompanyStore` para isso.
