@@ -1,106 +1,184 @@
-# Ajustes PraticOS - Implementacoes Futuras
+# Especificação de Melhorias e Evolução - PraticOS
 
-Este documento detalha funcionalidades planejadas e ajustes desejados.
-Cada item descreve objetivo, comportamento esperado e pontos de atencao.
+**Versão:** 3.0
+**Status:** Em Planejamento
+**Objetivo:** Definir tecnicamente as funcionalidades listadas para o backlog, garantindo estrita aderência ao **Design System (Cupertino/HIG)** definido em `docs/UX_GUIDELINES.md` e à **Arquitetura (Multi-tenant/MobX)** definida em `AGENTS.md`.
 
-## Backlog
+---
 
-### Padronizar a edicao/exclusao nas listagens (swipe)
-- Objetivo: mover acoes de editar/excluir para gesto de arrastar esquerda/direita.
-- Comportamento: gesto revela acoes; menus/context menus nao exibem essas acoes.
-- Telas: listagens de Customer, Device, Product, Service, Order.
-- Observacoes: alinhar com estilo Cupertino e evitar acao duplicada.
+## 1. Padronização de Ações em Listagem (Swipe Actions)
+**ID:** AJ-01
+**Prioridade:** Alta
 
-### Cliente sem imagem de perfil
-- Objetivo: permitir envio de imagem de perfil do cliente.
-- Comportamento: adicionar campo de foto no formulario e exibir na lista/detalhe.
-- Telas: `lib/screens/customers/customer_form_screen.dart`, `lib/screens/customers/customer_list_screen.dart`.
-- Observacoes: salvar em Storage no tenant correto.
+*   **Contexto:** Atualmente, ações de editar/excluir estão inconsistentes (menus de contexto vs swipe).
+*   **Especificação Funcional:** Remover opções dos menus (`...`) e padronizar o swipe em todas as listas (`Customer`, `Device`, `Service`, `Product`, `Order`).
+*   **Diretrizes UX (`docs/UX_GUIDELINES.md` - Section 3):**
+    *   **Widget:** Usar `Dismissible` (ou similar como `flutter_slidable` se configurado para iOS style).
+    *   **Start-to-End (Direita):** **Editar**.
+        *   Background: `CupertinoColors.systemBlue` (ou `systemOrange` se for "Correção").
+        *   Ícone: `CupertinoIcons.pencil`.
+    *   **End-to-Start (Esquerda):** **Excluir**.
+        *   Background: `CupertinoColors.systemRed`.
+        *   Ícone: `CupertinoIcons.trash`.
+    *   **Confirmação:** Exibir `CupertinoAlertDialog` para confirmação destrutiva.
+*   **Critérios de Aceite:**
+    *   [ ] Todas as listagens principais suportam swipe actions.
+    *   [ ] Menus de contexto limpos (sem editar/excluir).
+    *   [ ] Cores respeitam o padrão do sistema (Light/Dark via `CupertinoColors`).
 
-### Busca na lista de OS
-- Objetivo: pesquisar OS por numero, cliente ou dispositivo.
-- Comportamento: campo de busca com debounce e filtro em tempo real.
-- Telas: lista de OS (home).
-- Observacoes: avaliar impacto em offline/cache.
+## 2. Foto de Perfil do Cliente
+**ID:** AJ-02
+**Prioridade:** Média
 
-### Status pago promove para Autorizado
-- Objetivo: se status atual for Orcamento e usuario marcar como pago, mover para Autorizado.
-- Comportamento: regra de negocio aplicada no fluxo de pagamento.
-- Telas: `lib/screens/payment_form_screen.dart`, `lib/mobx/order_store.dart`.
+*   **Contexto:** Clientes sem avatar dificultam a identificação visual rápida.
+*   **Especificação Funcional:** Adicionar upload de foto no cadastro de Cliente.
+*   **Diretrizes Técnicas (`AGENTS.md` - Multi-tenancy):**
+    *   **Storage Path:** `tenants/{companyId}/customers/{customerId}/profile.jpg`.
+    *   **Model:** Atualizar `Customer` e `CustomerAggr` para incluir campo `photoUrl`.
+*   **Diretrizes UX (`docs/UX_GUIDELINES.md` - Section 5):**
+    *   **Posição:** Topo centralizado do `CupertinoListSection`.
+    *   **Interação:** Toque no avatar abre `CupertinoActionSheet` (Câmera/Galeria/Cancelar).
+    *   **Placeholder:** Círculo `CupertinoColors.systemGrey5` com ícone `CupertinoIcons.person_solid`.
+*   **Critérios de Aceite:**
+    *   [ ] Upload redimensiona imagem no client (max 800x800).
+    *   [ ] Imagem visível na lista (avatar) e cabeçalho da OS.
 
-### Listagem de Devices: placa alinhada a direita
-- Objetivo: melhorar leitura da lista mostrando placa alinhada a direita.
-- Comportamento: layout com placa em coluna da direita.
-- Telas: `lib/screens/device_list_screen.dart`.
+## 3. Busca Global na Listagem de OS
+**ID:** AJ-03
+**Prioridade:** Alta
 
-### Filtro de cliente na OS e tema escuro
-- Objetivo: corrigir contraste/cores do indicador de filtro.
-- Comportamento: usar cores do tema atual (dark/light).
-- Telas: `lib/screens/order_form.dart`, widgets relacionados.
+*   **Contexto:** Home Screen precisa de filtragem rápida.
+*   **Especificação Funcional:** Campo de busca no topo da lista de OS.
+*   **Diretrizes UX (`docs/UX_GUIDELINES.md` - Section 5):**
+    *   **Componente:** `CupertinoSearchTextField`.
+    *   **Comportamento:** Filtragem local em tempo real (com debounce).
+*   **Diretrizes Técnicas:**
+    *   **Store:** Implementar *computed* `filteredOrders` no `OrderStore` combinando filtros de texto e status.
+*   **Critérios de Aceite:**
+    *   [ ] Busca por ID (#123), Nome do Cliente e Placa/Serial.
+    *   [ ] Debounce de 500ms implementado.
 
-### Lista de clientes: acoes adicionais
-- Objetivo: adicionar acoes "Filtrar OS" e "Nova OS" por cliente.
-- Comportamento: acoes rapidas no item da lista ou menu contextual.
-- Telas: `lib/screens/customers/customer_list_screen.dart`.
-- Observacoes: definir fluxo para pre-selecionar cliente.
+## 4. Automação de Status Financeiro (Orçamento -> Aprovado)
+**ID:** AJ-04
+**Prioridade:** Média
 
-### Agenda de entrega/instalacao
-- Objetivo: calendario para entregas e instalacoes.
-- Comportamento: criar eventos a partir de OS com data/horario.
-- Telas: nova tela de agenda + integracao com OS.
-- Observacoes: definir permissao e notificacoes.
+*   **Contexto:** Pagamento realizado deve refletir no status operacional.
+*   **Especificação Funcional:** Trigger automático no front-end ao salvar pagamento.
+*   **Regra de Negócio:**
+    *   SE `order.status == OrderStatus.budget`
+    *   E `order.paymentStatus` muda para `PaymentStatus.paid`
+    *   ENTÃO `order.status` = `OrderStatus.approved`.
+*   **Diretrizes Técnicas (`AGENTS.md` - MobX):**
+    *   Implementar action `updatePaymentStatus` no `OrderStore` que contém essa lógica de negócio.
+*   **Critérios de Aceite:**
+    *   [ ] Feedback visual (Toast/SnackBar) informando a mudança de status.
 
-### Criar cliente a partir dos contatos do telefone
-- Objetivo: importar contato como cliente.
-- Comportamento: picker de contatos e mapeamento de campos.
-- Observacoes: solicitar permissao e tratar duplicidade.
+## 5. Termos de Uso e Links Legais
+**ID:** AJ-05
+**Prioridade:** Baixa
 
-### Atualizar Termos de Uso / link no app
-- Objetivo: apontar para termos atualizados.
-- Comportamento: atualizar URL e texto na tela de configuracoes.
-- Telas: `lib/screens/menu_navigation/settings.dart`.
-- Observacoes: manter versoes pt-BR e en.
+*   **Contexto:** Compliance com App Store.
+*   **Especificação Funcional:** Item "Termos de Uso" em Configurações.
+*   **Diretrizes UX:**
+    *   **Navegação:** `CupertinoListTile` com `chevron_right`.
+    *   **Ação:** Abrir via `url_launcher` (mode: `externalApplication`).
+*   **Critérios de Aceite:**
+    *   [ ] Link funcional apontando para URL externa.
 
-### Criar usuario e enviar link por email ao adicionar colaborador
-- Objetivo: fluxo de convite via email com link de acesso.
-- Comportamento: ao criar colaborador, gerar usuario e enviar email.
-- Telas: `lib/screens/menu_navigation/collaborator_form_screen.dart`, `lib/services/auth_service.dart`.
-- Observacoes: garantir claims/roles no tenant.
+## 6. Convite de Colaborador e Criação de Usuário
+**ID:** AJ-06
+**Prioridade:** Alta
 
-### Dados offline
-- Objetivo: leitura e escrita basicas sem conexao.
-- Comportamento: cache local e fila de sincronizacao.
-- Observacoes: definir estrategia de conflitos.
+*   **Contexto:** Simplificar onboarding de funcionários.
+*   **Especificação Funcional:** Cadastro de colaborador dispara criação de usuário Auth e email.
+*   **Diretrizes Técnicas (`AGENTS.md` - Auth):**
+    *   **Service:** Usar `AuthService.inviteUser(email, role, companyId)`.
+    *   **Store:** `CollaboratorStore` deve orquestrar a chamada.
+    *   **Backend:** Não criar senha no app. Usar fluxo de "Password Reset" ou "Email Link" do Firebase Auth.
+*   **Critérios de Aceite:**
+    *   [ ] Usuário criado no Firebase Auth e Firestore (dentro da subcollection `/companies/{id}/roles/`).
+    *   [ ] Email de convite recebido.
 
-### Categorias de empresas e campos
-- Objetivo: ajustar categorias (ex: instalacao de ar, eletronica) e descrever campos.
-- Comportamento: atualizar labels e opcoes no cadastro da empresa.
-- Telas: `lib/screens/menu_navigation/company_form_screen.dart`.
+## 7. Modo Offline e Sincronização
+**ID:** AJ-07
+**Prioridade:** Crítica
 
-### Acumular Marcas e Modelos do device
-- Objetivo: sugestao/autocomplete com marcas/modelos usados.
-- Comportamento: historico agregando entradas anteriores por tenant.
-- Observacoes: manter lista pequena e ordenada por uso.
+*   **Contexto:** Uso em campo sem internet.
+*   **Especificação Funcional:** Persistência local e sincronização transparente.
+*   **Diretrizes Técnicas (`AGENTS.md` - Repositories):**
+    *   **Config:** `persistenceEnabled: true` no Firestore.
+    *   **Repositories:** Garantir uso de `TenantRepository` ou `RepositoryV2` que suportam cache padrão do SDK.
+    *   **Imagens:** Migrar `Image.network` para `CachedNetworkImage`.
+*   **Critérios de Aceite:**
+    *   [ ] App abre e exibe dados (OS, Clientes) em Modo Avião.
+    *   [ ] Escritas offline sincronizam ao reconectar.
 
-### Etapas do servico
-- Objetivo: definir pipeline de etapas para OS/servico.
-- Comportamento: exibir progresso e permitir avancar etapas.
-- Observacoes: alinhar com status atual de OS.
+## 8. Refatoração de Categorias de Empresa
+**ID:** AJ-08
+**Prioridade:** Média
 
-### Perfil do tecnico (sem acesso a valores)
-- Objetivo: papel de tecnico com restricoes financeiras.
-- Comportamento: limitar campos de valores e dashboards.
-- Observacoes: ajustar roles/claims e rules.
+*   **Contexto:** Adaptação a nichos (Refrigeração, Eletrônica).
+*   **Especificação Funcional:** Campos dinâmicos baseados em `company.category`.
+*   **Diretrizes Técnicas:**
+    *   **Model:** Expandir `CompanyCategory` (Enum).
+    *   **UI:** `OrderForm` renderiza blocos de campos condicionalmente.
+*   **Critérios de Aceite:**
+    *   [ ] Categoria "Refrigeração" exibe campos BTUs/Gás.
+    *   [ ] Categoria "Eletrônica" exibe Senha/Acessórios.
 
-### Tela de novidades do sistema
-- Objetivo: exibir changelog/noticias no app.
-- Comportamento: lista de novidades com destaque para versao atual.
-- Observacoes: fonte de dados (statico vs remoto).
+## 9. Autocomplete de Marcas e Modelos
+**ID:** AJ-09
+**Prioridade:** Baixa
 
-## Concluidos
+*   **Contexto:** Facilidade de preenchimento.
+*   **Especificação Funcional:** Sugestão de marcas/modelos usados anteriormente.
+*   **Diretrizes UX:**
+    *   Usar componente de `TypeAhead` ou `Autocomplete` estilizado como `CupertinoTextField`.
+*   **Diretrizes Técnicas:**
+    *   Ler coleção agregada `metadata/{companyId}/brands` (criada via Cloud Function ou mantida localmente).
+*   **Critérios de Aceite:**
+    *   [ ] Digitar "Sam" sugere "Samsung".
 
-### Alterar dados do usuario
-- Status: concluido.
+## 10. Pipeline de Etapas do Serviço
+**ID:** AJ-10
+**Prioridade:** Alta
 
-### Imagens das entidades na tela da OS
-- Status: concluido.
+*   **Contexto:** Status operacional detalhado.
+*   **Especificação Funcional:** Novo campo `stage` na OS.
+*   **Diretrizes Técnicas:**
+    *   **Model:** Adicionar `String? stage` em `Order`.
+*   **Diretrizes UX:**
+    *   Exibir "Stepper" horizontal no topo do detalhe da OS.
+*   **Critérios de Aceite:**
+    *   [ ] Visualização clara da etapa atual.
+
+## 11. Perfil de Acesso: Técnico (Restrição de Valores)
+**ID:** AJ-11
+**Prioridade:** Alta
+
+*   **Contexto:** Privacidade financeira.
+*   **Especificação Funcional:** Role `TECHNICIAN` bloqueia visualização de valores.
+*   **Diretrizes Técnicas (`AGENTS.md` - Roles):**
+    *   **Lógica:** `bool get canViewFinancials => !user.hasRole('TECHNICIAN')`.
+    *   **UI:** Envolver widgets de preço em `Visibility(visible: canViewFinancials, ...)`.
+*   **Critérios de Aceite:**
+    *   [ ] Dashboard financeiro oculto para técnicos.
+    *   [ ] Totais da OS ocultos para técnicos.
+
+## 12. Tela de Novidades (Changelog)
+**ID:** AJ-12
+**Prioridade:** Baixa
+
+*   **Contexto:** Comunicação de atualizações.
+*   **Especificação Funcional:** Modal "O que há de novo".
+*   **Diretrizes UX:**
+    *   Estilo "Sheet" do iOS (modal card).
+*   **Critérios de Aceite:**
+    *   [ ] Exibido apenas na primeira abertura após update.
+
+---
+
+## Histórico de Itens Concluídos
+
+*   [x] **Edição de Perfil de Usuário (AJ-18)**
+*   [x] **Correção de Imagens de Entidades (AJ-19)**

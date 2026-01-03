@@ -2,9 +2,15 @@ name: Release Android
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
     tags:
       - 'v*'
+    paths:
+      - 'android/**'
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
   workflow_dispatch:
 
 jobs:

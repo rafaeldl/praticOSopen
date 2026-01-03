@@ -2,9 +2,15 @@ name: Release iOS
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
     tags:
       - 'v*'
+    paths:
+      - 'ios/**'
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
   workflow_dispatch:
 
 jobs:
