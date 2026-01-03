@@ -39,35 +39,6 @@ jobs:
         run: sudo xcodebuild -license accept
 
       # iOS 18.2 simulator já vem pré-instalado no macos-14
-      # Não precisa baixar 8.7GB do iOS 18.3.1
-
-      # Ruby + Bundler (igual ao release workflow)
-      - name: Ruby (bundler cache)
-        uses: ruby/setup-ruby@v1
-        env:
-          BUNDLE_GEMFILE: ios/Gemfile
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: ios/Pods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Pod install
-        working-directory: ios
-        timeout-minutes: 15
-        run: |
-          if [ ! -d "Pods" ]; then
-            bundle exec pod install --repo-update
-          else
-            bundle exec pod install
-          fi
-          echo "✅ Pod install concluído"
 
       - name: Add GoogleService-Info.plist
         working-directory: ios
@@ -77,8 +48,19 @@ jobs:
           echo "✅ GoogleService-Info.plist criado"
 
       - name: Build iOS (Simulator)
+        timeout-minutes: 30
         run: |
-          flutter build ios --simulator --debug
+          # Flutter vai rodar pod install internamente
+          flutter build ios --simulator --debug --verbose 2>&1 | tee build.log &
+          BUILD_PID=$!
+
+          # Monitor para detectar travamento
+          while kill -0 $BUILD_PID 2>/dev/null; do
+            sleep 60
+            echo "⏳ Build ainda em progresso... $(date)"
+          done
+
+          wait $BUILD_PID
           echo "✅ Build concluído"
 
       - name: Upload build logs (on failure)
