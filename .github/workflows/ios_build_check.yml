@@ -82,7 +82,11 @@ jobs:
       - name: Disable Code Signing for CI
         run: |
           sed -i '' 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = "";/g' ios/Runner.xcodeproj/project.pbxproj
-          echo "✅ Development Team removed for CI build"
+          sed -i '' 's/CODE_SIGN_IDENTITY = .*/CODE_SIGN_IDENTITY = "-";/g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = .*/PROVISIONING_PROFILE_SPECIFIER = "";/g' ios/Runner.xcodeproj/project.pbxproj
+          # Adiciona CODE_SIGNING_ALLOWED = NO ao final dos blocos de build settings se nao existir
+          # Mas como sed é complexo para inserir, vamos confiar na remocao do time e identidade ad-hoc
+          echo "✅ Code signing configurations disabled"
 
       - name: Build iOS app
         env:
