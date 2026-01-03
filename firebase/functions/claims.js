@@ -33,11 +33,20 @@ exports.updateUserClaims = functions.region('southamerica-east1').firestore
     // Estrutura do campo 'companies' no User:
     // List<CompanyRoleAggr> onde CompanyRoleAggr = { company: { id: ... }, role: ... }
     const roles = {};
+    const seenCompanies = new Set();
 
     if (userData.companies && Array.isArray(userData.companies)) {
       userData.companies.forEach(item => {
         if (item.company && item.company.id && item.role) {
           const companyId = item.company.id;
+
+          // Detecta e ignora duplicatas
+          if (seenCompanies.has(companyId)) {
+            console.warn(`[Claims] Duplicate company detected for user ${userId}: ${companyId}. Ignoring duplicate entry.`);
+            return; // Mantém a primeira ocorrência
+          }
+
+          seenCompanies.add(companyId);
           // Converte role para lowercase para consistência nas rules
           roles[companyId] = String(item.role).toLowerCase();
         }

@@ -101,13 +101,16 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       );
     }
 
-    List<Customer>? customerList = customerStore.customerList!.data;
+    final rawData = customerStore.customerList!.data;
 
-    if (customerList == null) {
+    if (rawData == null) {
       return const SliverFillRemaining(
         child: Center(child: CupertinoActivityIndicator()),
       );
     }
+
+    // Filter out null entries from the list
+    final List<Customer> customerList = rawData.whereType<Customer>().toList();
 
     if (customerList.isEmpty) {
       return SliverFillRemaining(
