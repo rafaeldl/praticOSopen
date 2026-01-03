@@ -88,14 +88,21 @@ jobs:
           # Mas como sed é complexo para inserir, vamos confiar na remocao do time e identidade ad-hoc
           echo "✅ Code signing configurations disabled"
 
-      - name: Build iOS app
-        env:
-          COCOAPODS_DISABLE_STATS: 'true'
-          COCOAPODS_DISABLE_DETERMINISTIC_UUIDS: 'true'
-        timeout-minutes: 30
+      - name: Pre-build Flutter
+        run: flutter build ios --config-only
+
+      - name: Build with Xcode (No Signing)
         run: |
-          flutter build ios --simulator --debug
-          echo "✅ Build concluído"
+          set -o pipefail
+          xcodebuild build \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED="NO" \
+            CODE_SIGNING_REQUIRED="NO" \
+            CODE_SIGN_IDENTITY="" \
+            DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING=YES
 
       - name: Upload build logs (on failure)
         if: failure()
