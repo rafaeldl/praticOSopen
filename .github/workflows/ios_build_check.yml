@@ -38,8 +38,8 @@ jobs:
       - name: Accept Xcode license
         run: sudo xcodebuild -license accept
 
-      - name: Download iOS Platform
-        run: xcodebuild -downloadPlatform iOS
+      # iOS 18.2 simulator já vem pré-instalado no macos-14
+      # Não precisa baixar 8.7GB do iOS 18.3.1
 
       # Ruby + Bundler (igual ao release workflow)
       - name: Ruby (bundler cache)
