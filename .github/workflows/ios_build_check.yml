@@ -41,12 +41,33 @@ jobs:
       - name: Download iOS Platform
         run: xcodebuild -downloadPlatform iOS
 
-      - name: Ruby
+      # Ruby + Bundler (igual ao release workflow)
+      - name: Ruby (bundler cache)
         uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GEMFILE: ios/Gemfile
         with:
           ruby-version: '3.2'
           bundler-cache: true
-          working-directory: ios
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Pod install
+        working-directory: ios
+        timeout-minutes: 15
+        run: |
+          if [ ! -d "Pods" ]; then
+            bundle exec pod install --repo-update
+          else
+            bundle exec pod install
+          fi
+          echo "✅ Pod install concluído"
 
       - name: Add GoogleService-Info.plist
         working-directory: ios
@@ -54,30 +75,6 @@ jobs:
           echo -n "${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64 }}" | base64 --decode > GoogleService-Info.plist
           /usr/bin/plutil -lint GoogleService-Info.plist
           echo "✅ GoogleService-Info.plist criado"
-
-      - name: Cache CocoaPods
-        uses: actions/cache@v4
-        with:
-          path: |
-            ios/Pods
-            ~/Library/Caches/CocoaPods
-          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pods-
-
-      - name: Pod install
-        working-directory: ios
-        env:
-          COCOAPODS_DISABLE_STATS: 'true'
-          COCOAPODS_DISABLE_DETERMINISTIC_UUIDS: 'true'
-        timeout-minutes: 10
-        run: |
-          if [ ! -d "Pods" ] || [ ! -f "Podfile.lock" ]; then
-            bundle exec pod install --repo-update
-          else
-            bundle exec pod install
-          fi
-          echo "✅ Pod install concluído"
 
       - name: Disable Code Signing for CI
         run: |
