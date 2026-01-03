@@ -238,7 +238,9 @@ intl: ^0.20.2
 ## Dicas para Agentes de IA
 
 1. **Multi-Tenancy é Prioridade:** Verifique sempre se está usando a estrutura correta de company/roles.
-2. **Apple HIG:** Design System é Cupertino/iOS-first.
+2. **UX/UI Guidelines:**
+    - **App:** Cupertino/iOS-first. Siga `@docs/UX_GUIDELINES.md`.
+    - **Web:** Dark Premium Theme. Siga `@docs/WEB_UX_GUIDELINES.md`.
 3. **Build Runner:** `fvm flutter pub run build_runner build --delete-conflicting-outputs` é obrigatório após mudar Stores/Models.
 4. **AuthService:** Use `AuthService` para criar novos usuários, não grave direto no banco.
 5. **CollaboratorStore:** Use este store para gerenciar membros da equipe, não use `CompanyStore` para isso.
