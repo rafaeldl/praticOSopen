@@ -4,50 +4,596 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soporte - PraticOS</title>
+    <title>PraticOS - Gestión de Órdenes de Servicio Simplificada</title>
+    <meta name="description" content="Sistema completo para gestión de órdenes de servicio, clientes y finanzas. Controle su negocio de forma práctica y eficiente.">
+    <meta name="keywords" content="orden de servicio, gestión, clientes, taller, proveedor de servicios, app">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="PraticOS - Gestión de Órdenes de Servicio">
+    <meta property="og:description" content="Sistema completo para gestión de órdenes de servicio, clientes y finanzas.">
+    <meta property="og:image" content="assets/images/logo.png">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <header>
-        <h1>Soporte PraticOS</h1>
-        <nav>
-            <a href="index-es.html">Inicio</a>
-            <a href="faq-es.html">FAQ</a>
-            <a href="privacy-es.html">Privacidad</a>
-        </nav>
-        <div class="lang-switch">
-            <a href="index.html">Português</a> |
-            <a href="index-en.html">English</a> |
-            <a href="index-es.html">Español</a>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index-es.html" class="nav-logo">
+                <img src="assets/images/logo.png" alt="PraticOS" class="logo-img">
+                <span class="logo-text">Prat<span class="yellow">ic</span><span class="accent">OS</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Funcionalidades</a>
+                <a href="#screenshots">Capturas</a>
+                <a href="#pricing">Planes</a>
+                <a href="faq-es.html">FAQ</a>
+                <a href="#contact">Contacto</a>
+            </div>
+            <div class="nav-actions">
+                <div class="lang-switch">
+                    <a href="index.html">PT</a>
+                    <a href="index-en.html">EN</a>
+                    <a href="index-es.html" class="active">ES</a>
+                </div>
+                <a href="#download" class="btn btn-primary">Descargar App</a>
+            </div>
+            <button class="nav-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
-    </header>
-    <main>
-        <section class="intro">
-            <h2>Bienvenido al Centro de Soporte</h2>
-            <p>¿Necesita ayuda con la aplicación PraticOS? ¡Estamos aquí para ayudarle! Consulte las preguntas
-                frecuentes o contáctenos.</p>
-        </section>
-        <section class="contact">
-            <h3>Contacto</h3>
-            <p>Envíe un correo electrónico a <a href="mailto:praticos@rafsoft.com.br">praticos@rafsoft.com.br</a> o
-                utilice el siguiente formulario:</p>
-            <form class="support-form" action="mailto:praticos@rafsoft.com.br" method="POST" enctype="text/plain">
-                <label for="name">Nombre:</label>
-                <input type="text" id="name" name="Nombre" required>
-                <label for="email">Correo electrónico:</label>
-                <input type="email" id="email" name="Correo" required>
-                <label for="message">Mensaje:</label>
-                <textarea id="message" name="Mensaje" rows="4" required></textarea>
-                <button type="submit">Enviar</button>
-            </form>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2024 PraticOS. Todos los derechos reservados.<br>
-            Desarrollado por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
-        </p>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="badge">Nuevo v2.0 con Multi-Tenancy</div>
+                <h1>Gestione sus <span class="gradient-text">Órdenes de Servicio</span> de forma simple y eficiente</h1>
+                <p class="hero-subtitle">Sistema completo para proveedores de servicios. Controle clientes, órdenes de servicio y finanzas en un solo lugar.</p>
+                <div class="hero-cta">
+                    <a href="#download" class="btn btn-primary btn-large">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Descargar Gratis
+                    </a>
+                    <a href="#demo" class="btn btn-secondary btn-large">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Ver Demo
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">Usuarios activos</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-number">10k+</span>
+                        <span class="stat-label">OS creadas</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-number">4.8</span>
+                        <span class="stat-label">Calificación</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-phones">
+                <div class="phone phone-back">
+                    <div class="phone-frame">
+                        <img src="assets/screenshots/dashboard.png" alt="Dashboard PraticOS" loading="lazy">
+                    </div>
+                </div>
+                <div class="phone phone-front">
+                    <div class="phone-frame">
+                        <img src="assets/screenshots/home.png" alt="Lista de Órdenes de Servicio" loading="lazy">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-scroll">
+            <span>Scroll</span>
+            <div class="scroll-indicator"></div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Funcionalidades</span>
+                <h2>Todo lo que necesita para <span class="gradient-text">gestionar su negocio</span></h2>
+                <p>Herramientas poderosas e intuitivas para aumentar su productividad</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Órdenes de Servicio</h3>
+                    <p>Cree, edite y siga todas sus órdenes de servicio. Agregue fotos, descripciones detalladas y valores.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-yellow">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3>Gestión de Clientes</h3>
+                    <p>Registre y organice sus clientes. Historial completo de servicios, contactos y valores pendientes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-orange">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="20" x2="12" y2="10"></line>
+                            <line x1="18" y1="20" x2="18" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="16"></line>
+                        </svg>
+                    </div>
+                    <h3>Dashboard Financiero</h3>
+                    <p>Visualice facturación, valores recibidos y por recibir. Gráficos e informes por período.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-green">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <h3>Multi-Tenancy</h3>
+                    <p>Soporte para múltiples organizaciones con aislamiento completo de datos. Ideal para franquicias.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-purple">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </div>
+                    <h3>Temas Claro/Oscuro</h3>
+                    <p>Interfaz adaptable a su estilo. Soporte nativo a modo claro y oscuro con diseño Material y Cupertino.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon icon-cyan">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <h3>Autenticación Segura</h3>
+                    <p>Inicio de sesión con Google, Apple o Email. Sus datos protegidos con las mejores prácticas de seguridad.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Screenshots Section -->
+    <section id="screenshots" class="screenshots">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Capturas</span>
+                <h2>Conozca la <span class="gradient-text">interfaz de la app</span></h2>
+                <p>Diseño moderno e intuitivo para la mejor experiencia</p>
+            </div>
+            <div class="screenshots-showcase">
+                <div class="screenshot-item">
+                    <div class="phone-mockup">
+                        <img src="assets/screenshots/login.png" alt="Pantalla de Login" loading="lazy">
+                    </div>
+                    <span class="screenshot-label">Login</span>
+                </div>
+                <div class="screenshot-item">
+                    <div class="phone-mockup">
+                        <img src="assets/screenshots/home.png" alt="Órdenes de Servicio" loading="lazy">
+                    </div>
+                    <span class="screenshot-label">Órdenes de Servicio</span>
+                </div>
+                <div class="screenshot-item featured">
+                    <div class="phone-mockup">
+                        <img src="assets/screenshots/dashboard.png" alt="Dashboard" loading="lazy">
+                    </div>
+                    <span class="screenshot-label">Dashboard</span>
+                </div>
+                <div class="screenshot-item">
+                    <div class="phone-mockup">
+                        <img src="assets/screenshots/customers.png" alt="Clientes" loading="lazy">
+                    </div>
+                    <span class="screenshot-label">Clientes</span>
+                </div>
+                <div class="screenshot-item">
+                    <div class="phone-mockup">
+                        <img src="assets/screenshots/settings.png" alt="Configuraciones" loading="lazy">
+                    </div>
+                    <span class="screenshot-label">Configuraciones</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Planes</span>
+                <h2>Elija el plan <span class="gradient-text">ideal para usted</span></h2>
+                <p>Comience gratis y evolucione según su necesidad</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Gratis</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">0</span>
+                            <span class="period">/mes</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Hasta 50 órdenes de servicio
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Hasta 30 clientes
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Dashboard básico
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Soporte por email
+                        </li>
+                    </ul>
+                    <a href="#download" class="btn btn-outline">Comenzar Gratis</a>
+                </div>
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">Más Popular</div>
+                    <div class="pricing-header">
+                        <h3>Pro</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">9</span>
+                            <span class="period">/mes</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Órdenes ilimitadas
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Clientes ilimitados
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Dashboard completo
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Informes en PDF
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Soporte prioritario
+                        </li>
+                    </ul>
+                    <a href="#download" class="btn btn-primary">Suscribir Pro</a>
+                </div>
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Empresarial</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">29</span>
+                            <span class="period">/mes</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Todo del Pro
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Multi-tenancy
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Múltiples usuarios
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            API de integración
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Soporte dedicado
+                        </li>
+                    </ul>
+                    <a href="#contact" class="btn btn-outline">Hablar con Ventas</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="download">
+        <div class="container">
+            <div class="download-content">
+                <h2>Descargue ahora y comience a <span class="gradient-text">organizar su negocio</span></h2>
+                <p>Disponible para iOS y Android. ¡Comience gratis!</p>
+                <div class="download-buttons">
+                    <a href="#" class="store-button" title="Próximamente en App Store">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                        </svg>
+                        <div class="store-info">
+                            <span class="store-label">Próximamente en</span>
+                            <span class="store-name">App Store</span>
+                        </div>
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos" target="_blank" rel="noopener" class="store-button">
+                        <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                            <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/>
+                        </svg>
+                        <div class="store-info">
+                            <span class="store-label">Disponible en</span>
+                            <span class="store-name">Google Play</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="download-phone">
+                <div class="phone-glow"></div>
+                <div class="phone-mockup large">
+                    <img src="assets/screenshots/login.png" alt="PraticOS App" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Contacto</span>
+                <h2>¿Necesita <span class="gradient-text">ayuda?</span></h2>
+                <p>Nuestro equipo está listo para atenderle</p>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4>Email</h4>
+                            <a href="mailto:praticos@rafsoft.com.br">praticos@rafsoft.com.br</a>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4>FAQ</h4>
+                            <a href="faq-es.html">Preguntas frecuentes</a>
+                        </div>
+                    </div>
+                    <div class="contact-card">
+                        <div class="contact-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4>Privacidad</h4>
+                            <a href="privacy-es.html">Política de privacidad</a>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form" action="mailto:praticos@rafsoft.com.br" method="POST" enctype="text/plain">
+                    <div class="form-group">
+                        <label for="name">Nombre</label>
+                        <input type="text" id="name" name="Nombre" required placeholder="Su nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Correo electrónico</label>
+                        <input type="email" id="email" name="Email" required placeholder="su@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Mensaje</label>
+                        <textarea id="message" name="Mensaje" rows="4" required placeholder="¿Cómo podemos ayudarle?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">Enviar Mensaje</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index-es.html" class="nav-logo">
+                        <img src="assets/images/logo.png" alt="PraticOS" class="logo-img">
+                        <span class="logo-text">Prat<span class="yellow">ic</span><span class="accent">OS</span></span>
+                    </a>
+                    <p>Sistema completo para gestión de órdenes de servicio. Simplifique su negocio.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Producto</h4>
+                    <a href="#features">Funcionalidades</a>
+                    <a href="#pricing">Planes</a>
+                    <a href="#download">Descargar</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Soporte</h4>
+                    <a href="faq-es.html">FAQ</a>
+                    <a href="#contact">Contacto</a>
+                    <a href="privacy-es.html">Privacidad</a>
+                    <a href="terms-es.html">Términos de Uso</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 PraticOS. Todos los derechos reservados.</p>
+                <p>Desarrollado con por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+            </div>
+        </div>
     </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-content">
+            <a href="#features">Funcionalidades</a>
+            <a href="#screenshots">Capturas</a>
+            <a href="#pricing">Planes</a>
+            <a href="faq-es.html">FAQ</a>
+            <a href="#contact">Contacto</a>
+            <div class="mobile-lang">
+                <a href="index.html">PT</a>
+                <a href="index-en.html">EN</a>
+                <a href="index-es.html" class="active">ES</a>
+            </div>
+            <a href="#download" class="btn btn-primary">Descargar App</a>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const body = document.body;
+
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            body.classList.toggle('menu-open');
+        });
+
+        // Close mobile menu on link click
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navToggle.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                body.classList.remove('menu-open');
+            });
+        });
+
+        // Navbar scroll effect
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
 </body>
 
 </html>

@@ -4,52 +4,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAQ - PraticOS</title>
+    <title>FAQ - PráticOS</title>
+    <meta name="description" content="Perguntas frequentes sobre o PráticOS. Encontre respostas para suas dúvidas.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/logo.png">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <header>
-        <h1>Suporte PraticOS</h1>
-        <nav>
-            <a href="index.html">Início</a>
-            <a href="faq.html">FAQ</a>
-            <a href="privacy.html">Privacidade</a>
-        </nav>
-        <div class="lang-switch">
-            <a href="faq.html">Português</a> |
-            <a href="faq-en.html">English</a> |
-            <a href="faq-es.html">Español</a>
+    <!-- Navigation -->
+    <nav class="navbar scrolled">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="assets/images/logo.png" alt="PráticOS" class="logo-img">
+                <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html#features">Funcionalidades</a>
+                <a href="index.html#screenshots">Screenshots</a>
+                <a href="index.html#pricing">Planos</a>
+                <a href="faq.html">FAQ</a>
+                <a href="index.html#contact">Contato</a>
+            </div>
+            <div class="nav-actions">
+                <div class="lang-switch">
+                    <a href="faq.html" class="active">PT</a>
+                    <a href="faq-en.html">EN</a>
+                    <a href="faq-es.html">ES</a>
+                </div>
+                <a href="index.html#download" class="btn btn-primary">Baixar App</a>
+            </div>
+            <button class="nav-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="container">
+            <h1>Perguntas <span class="gradient-text">Frequentes</span></h1>
+            <p>Encontre respostas para as dúvidas mais comuns sobre o PráticOS</p>
         </div>
     </header>
-    <main>
-        <section>
-            <h2>Perguntas Frequentes (FAQ)</h2>
+
+    <!-- FAQ Content -->
+    <main class="page-content">
+        <div class="container">
             <div class="faq-item">
-                <h4>Como faço para criar uma conta no PraticOS?</h4>
-                <p>Basta baixar o aplicativo, abrir e seguir as instruções de cadastro na tela inicial.</p>
+                <h4>Como faço para criar uma conta no PráticOS?</h4>
+                <p>Baixe o aplicativo na App Store ou Google Play, abra o app e escolha uma das opções de login: Google, Apple ou Email. Siga as instruções na tela para completar seu cadastro em poucos segundos.</p>
             </div>
+
             <div class="faq-item">
                 <h4>Esqueci minha senha. O que devo fazer?</h4>
-                <p>Na tela de login, clique em "Esqueci minha senha" e siga as instruções para redefinir.</p>
+                <p>Na tela de login, toque em "Esqueci minha senha" e informe seu email. Você receberá um link para redefinir sua senha. Se estiver usando login social (Google/Apple), basta fazer login novamente com sua conta.</p>
             </div>
+
+            <div class="faq-item">
+                <h4>Posso usar o PráticOS em mais de um dispositivo?</h4>
+                <p>Sim! Seus dados são sincronizados na nuvem via Firebase, então você pode acessar sua conta de qualquer dispositivo. Basta fazer login com a mesma conta.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>Como criar uma nova ordem de serviço?</h4>
+                <p>Na tela inicial, toque no botão "+" no canto superior. Preencha os dados do cliente, descrição do serviço, fotos (se necessário) e valores. Toque em "Salvar" para criar a OS.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>Posso adicionar fotos às ordens de serviço?</h4>
+                <p>Sim! Você pode adicionar várias fotos em cada ordem de serviço para documentar o estado do equipamento, peças trocadas ou resultado final do serviço.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>Como funciona o Dashboard Financeiro?</h4>
+                <p>O Dashboard mostra um resumo do seu faturamento, valores recebidos e a receber. Você pode filtrar por período (hoje, semana, mês, ano) e ver a composição entre serviços e produtos.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>O que é Multi-Tenancy?</h4>
+                <p>Multi-Tenancy permite que você gerencie múltiplas empresas ou filiais em uma única conta, com dados completamente isolados. Ideal para franquias ou prestadores com múltiplos negócios.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>Meus dados estão seguros no PráticOS?</h4>
+                <p>Sim! Utilizamos Firebase para armazenamento, que oferece criptografia em trânsito e em repouso. Seguimos as melhores práticas de segurança e privacidade para proteger suas informações.</p>
+            </div>
+
             <div class="faq-item">
                 <h4>Como entro em contato com o suporte?</h4>
-                <p>Você pode enviar um e-mail para <a href="mailto:praticos@rafsoft.com.br">praticos@rafsoft.com.br</a>
-                    ou
-                    usar o formulário na página inicial deste site.</p>
+                <p>Você pode enviar um email para <a href="mailto:praticos@rafsoft.com.br">praticos@rafsoft.com.br</a> ou usar o formulário de contato em nosso site. Respondemos em até 24 horas úteis.</p>
             </div>
+
             <div class="faq-item">
-                <h4>Meus dados estão seguros no PraticOS?</h4>
-                <p>Sim, seguimos as melhores práticas de segurança e privacidade para proteger suas informações.</p>
+                <h4>Posso exportar relatórios das minhas ordens de serviço?</h4>
+                <p>Sim! No plano Pro e Empresarial você pode gerar relatórios em PDF com detalhes das suas ordens de serviço, facilitando o controle e prestação de contas.</p>
             </div>
-        </section>
+        </div>
     </main>
-    <footer>
-        <p>&copy; 2024 PraticOS. Todos os direitos reservados.<br>
-            Desenvolvido por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
-        </p>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="nav-logo">
+                        <img src="assets/images/logo.png" alt="PráticOS" class="logo-img">
+                        <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                    </a>
+                    <p>Sistema completo para gestão de ordens de serviço. Simplifique seu negócio.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produto</h4>
+                    <a href="index.html#features">Funcionalidades</a>
+                    <a href="index.html#pricing">Planos</a>
+                    <a href="index.html#download">Download</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Suporte</h4>
+                    <a href="faq.html">FAQ</a>
+                    <a href="index.html#contact">Contato</a>
+                    <a href="privacy.html">Privacidade</a>
+                    <a href="terms.html">Termos de Uso</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Empresa</h4>
+                    <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 PráticOS. Todos os direitos reservados.</p>
+                <p>Desenvolvido por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+            </div>
+        </div>
     </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-content">
+            <a href="index.html#features">Funcionalidades</a>
+            <a href="index.html#screenshots">Screenshots</a>
+            <a href="index.html#pricing">Planos</a>
+            <a href="faq.html">FAQ</a>
+            <a href="index.html#contact">Contato</a>
+            <div class="mobile-lang">
+                <a href="faq.html" class="active">PT</a>
+                <a href="faq-en.html">EN</a>
+                <a href="faq-es.html">ES</a>
+            </div>
+            <a href="index.html#download" class="btn btn-primary">Baixar App</a>
+        </div>
+    </div>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const body = document.body;
+
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            body.classList.toggle('menu-open');
+        });
+
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navToggle.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                body.classList.remove('menu-open');
+            });
+        });
+    </script>
 </body>
 
 </html>
