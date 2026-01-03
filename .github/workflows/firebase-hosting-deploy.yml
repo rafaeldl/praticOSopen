@@ -16,10 +16,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Authenticate to Firebase
+        uses: google-github-actions/auth@v2
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRATICOS }}'
-          channelId: live
-          projectId: praticos
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRATICOS }}'
+
+      - name: Setup Firebase CLI
+        uses: FirebaseExtended/action-setup-firebase@v0
+        with:
+          version: latest
+
+      - name: Deploy to Firebase Hosting
+        working-directory: firebase
+        run: firebase deploy --only hosting --project praticos
