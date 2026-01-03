@@ -76,30 +76,10 @@ jobs:
           /usr/bin/plutil -lint GoogleService-Info.plist
           echo "✅ GoogleService-Info.plist criado"
 
-      - name: Disable Code Signing for CI
+      - name: Build iOS (Simulator)
         run: |
-          sed -i '' 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = "";/g' ios/Runner.xcodeproj/project.pbxproj
-          sed -i '' 's/CODE_SIGN_IDENTITY = .*/CODE_SIGN_IDENTITY = "-";/g' ios/Runner.xcodeproj/project.pbxproj
-          sed -i '' 's/PROVISIONING_PROFILE_SPECIFIER = .*/PROVISIONING_PROFILE_SPECIFIER = "";/g' ios/Runner.xcodeproj/project.pbxproj
-          # Adiciona CODE_SIGNING_ALLOWED = NO ao final dos blocos de build settings se nao existir
-          # Mas como sed é complexo para inserir, vamos confiar na remocao do time e identidade ad-hoc
-          echo "✅ Code signing configurations disabled"
-
-      - name: Pre-build Flutter
-        run: flutter build ios --config-only
-
-      - name: Build with Xcode (No Signing)
-        run: |
-          set -o pipefail
-          xcodebuild build \
-            -workspace ios/Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Debug \
-            -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED="NO" \
-            CODE_SIGNING_REQUIRED="NO" \
-            CODE_SIGN_IDENTITY="" \
-            DISABLE_MANUAL_TARGET_ORDER_BUILD_WARNING=YES
+          flutter build ios --simulator --debug
+          echo "✅ Build concluído"
 
       - name: Upload build logs (on failure)
         if: failure()
