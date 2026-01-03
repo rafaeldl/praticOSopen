@@ -2,7 +2,10 @@
   "name": "PraticOS",
   "version": "1.0.0",
   "scripts": {
-    "deploy": "firebase deploy --only hosting"
+    "deploy": "firebase deploy --only hosting",
+    "deploy:functions": "firebase deploy --only functions",
+    "serve": "firebase serve --only hosting",
+    "serve:functions": "firebase serve --only functions"
   },
   "private": true
 }

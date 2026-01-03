@@ -2,7 +2,10 @@ name: iOS Build Check
 
 on:
   pull_request:
-    branches: [ master, main ]
+    branches: [ master ]
+    paths:
+      - 'lib/**'
+      - 'ios/**'
 
 jobs:
   build-check:

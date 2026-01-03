@@ -2,7 +2,10 @@ name: Android Build Check
 
 on:
   pull_request:
-    branches: [ master, main ]
+    branches: [ master ]
+    paths:
+      - 'lib/**'
+      - 'android/**'
 
 jobs:
   build-check:
