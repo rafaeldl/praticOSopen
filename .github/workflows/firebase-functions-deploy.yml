@@ -1,0 +1,48 @@
+# .github/workflows/firebase-functions-deploy.yml
+
+name: Deploy Firebase Functions
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'firebase/functions/**' # Executa a action apenas se houver mudanças nas functions
+  workflow_dispatch:
+
+jobs:
+  deploy_functions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: firebase/functions/package-lock.json
+
+      - name: Install dependencies
+        working-directory: firebase/functions
+        run: npm ci
+
+      - name: Run lint
+        working-directory: firebase/functions
+        run: npm run lint || true
+
+      - name: Authenticate to Firebase
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRATICOS }}'
+
+      - name: Setup Firebase CLI
+        uses: FirebaseExtended/action-setup-firebase@v0
+        with:
+          version: latest
+
+      - name: Deploy to Firebase Functions
+        working-directory: firebase
+        run: firebase deploy --only functions --project praticos
+
