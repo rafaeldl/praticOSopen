@@ -40,6 +40,15 @@ jobs:
 
       # iOS 18.2 simulator já vem pré-instalado no macos-14
 
+      # Ruby + Bundler (igual ao release workflow)
+      - name: Ruby (bundler cache)
+        uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GEMFILE: ios/Gemfile
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
       - name: Add GoogleService-Info.plist
         working-directory: ios
         run: |
@@ -47,27 +56,29 @@ jobs:
           /usr/bin/plutil -lint GoogleService-Info.plist
           echo "✅ GoogleService-Info.plist criado"
 
-      - name: Pod install (verbose)
-        working-directory: ios
-        timeout-minutes: 20
-        run: |
-          echo "🔍 CocoaPods version:"
-          pod --version
-          echo ""
-          echo "🔍 Ruby version:"
-          ruby --version
-          echo ""
-          echo "🧹 Limpando cache do CocoaPods..."
-          pod cache clean --all || true
-          echo ""
-          echo "📦 Iniciando pod install --verbose..."
-          pod install --repo-update --verbose
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
 
-      - name: Build iOS (Simulator)
-        timeout-minutes: 20
+      - name: Pod install
+        working-directory: ios
+        timeout-minutes: 15
         run: |
-          flutter build ios --simulator --debug
-          echo "✅ Build concluído"
+          if [ ! -d "Pods" ]; then
+            bundle exec pod install --repo-update
+          else
+            bundle exec pod install
+          fi
+          echo "✅ Pod install concluído"
+
+      - name: Build iOS (Fastlane)
+        working-directory: ios
+        timeout-minutes: 45
+        run: bundle exec fastlane build_check
 
       - name: Upload build logs (on failure)
         if: failure()

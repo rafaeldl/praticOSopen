@@ -1,6 +1,25 @@
 default_platform(:ios)
 
 platform :ios do
+  desc "Build check para CI (simulador, sem assinatura)"
+  lane :build_check do
+    # Gera arquivos Flutter necessários (não faz build completo, não roda pod install)
+    Dir.chdir("..") do
+      sh("flutter", "build", "ios", "--config-only", "--simulator", "--debug")
+    end
+
+    # Build com xcodebuild para simulador (não precisa de certificados)
+    xcodebuild(
+      workspace: "Runner.xcworkspace",
+      scheme: "Runner",
+      configuration: "Debug",
+      destination: "generic/platform=iOS Simulator",
+      xcargs: "CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO"
+    )
+
+    UI.success("✅ Build check concluído com sucesso!")
+  end
+
   desc "Retorna o próximo build number (último do TestFlight + 1)"
   lane :get_next_build_number do
     app_store_connect_api_key(
