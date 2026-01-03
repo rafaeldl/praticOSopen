@@ -47,20 +47,26 @@ jobs:
           /usr/bin/plutil -lint GoogleService-Info.plist
           echo "✅ GoogleService-Info.plist criado"
 
-      - name: Build iOS (Simulator)
-        timeout-minutes: 30
+      - name: Pod install (verbose)
+        working-directory: ios
+        timeout-minutes: 20
         run: |
-          # Flutter vai rodar pod install internamente
-          flutter build ios --simulator --debug --verbose 2>&1 | tee build.log &
-          BUILD_PID=$!
+          echo "🔍 CocoaPods version:"
+          pod --version
+          echo ""
+          echo "🔍 Ruby version:"
+          ruby --version
+          echo ""
+          echo "🧹 Limpando cache do CocoaPods..."
+          pod cache clean --all || true
+          echo ""
+          echo "📦 Iniciando pod install --verbose..."
+          pod install --repo-update --verbose
 
-          # Monitor para detectar travamento
-          while kill -0 $BUILD_PID 2>/dev/null; do
-            sleep 60
-            echo "⏳ Build ainda em progresso... $(date)"
-          done
-
-          wait $BUILD_PID
+      - name: Build iOS (Simulator)
+        timeout-minutes: 20
+        run: |
+          flutter build ios --simulator --debug
           echo "✅ Build concluído"
 
       - name: Upload build logs (on failure)
