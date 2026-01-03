@@ -58,21 +58,37 @@ jobs:
       - name: Cache CocoaPods
         uses: actions/cache@v4
         with:
-          path: ios/Pods
+          path: |
+            ios/Pods
+            ~/Library/Caches/CocoaPods
           key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-pods-
 
       - name: Pod install
         working-directory: ios
+        env:
+          COCOAPODS_DISABLE_STATS: 'true'
+          COCOAPODS_DISABLE_DETERMINISTIC_UUIDS: 'true'
+        timeout-minutes: 10
         run: |
-          if [ ! -d "Pods" ]; then
+          if [ ! -d "Pods" ] || [ ! -f "Podfile.lock" ]; then
             bundle exec pod install --repo-update
           else
             bundle exec pod install
           fi
+          echo "✅ Pod install concluído"
+
+      - name: Disable Code Signing for CI
+        run: |
+          sed -i '' 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = "";/g' ios/Runner.xcodeproj/project.pbxproj
+          echo "✅ Development Team removed for CI build"
 
       - name: Build iOS app
+        env:
+          COCOAPODS_DISABLE_STATS: 'true'
+          COCOAPODS_DISABLE_DETERMINISTIC_UUIDS: 'true'
+        timeout-minutes: 30
         run: |
           flutter build ios --simulator --debug
           echo "✅ Build concluído"
