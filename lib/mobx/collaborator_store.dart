@@ -132,10 +132,18 @@ abstract class _CollaboratorStore with Store {
 
       final companyId = Global.companyAggr!.id!;
 
-      // 2. Verifica se já é membro
+      // 2. Verifica se já é membro (membership collection)
       final isMember = await _membershipRepo.isMember(companyId, user.id!);
       if (isMember) {
         throw Exception('Usuário já é colaborador desta empresa.');
+      }
+
+      // 2b. Verifica se já existe no array user.companies (evita duplicatas)
+      final alreadyInCompanies = user.companies?.any(
+        (c) => c.company?.id == companyId
+      ) ?? false;
+      if (alreadyInCompanies) {
+        throw Exception('Usuário já possui acesso a esta empresa.');
       }
 
       // 3. Usa batch para garantir atomicidade

@@ -47,9 +47,9 @@ class _CustomerOsListState extends State<CustomerOsList> {
       );
     }
 
-    List<Customer>? customerList = customerStore.customerList!.data;
+    final rawData = customerStore.customerList!.data;
 
-    if (customerList == null || customerList.isEmpty) {
+    if (rawData == null || rawData.isEmpty) {
       return Center(
         child: Text(
           'Não há clientes cadastrados',
@@ -61,7 +61,8 @@ class _CustomerOsListState extends State<CustomerOsList> {
       );
     }
 
-    List<Customer> list = customerStore.customerList!.data;
+    // Filter out null entries from the list
+    final List<Customer> list = rawData.whereType<Customer>().toList();
 
     return Container(
       padding: EdgeInsets.all(0.0),

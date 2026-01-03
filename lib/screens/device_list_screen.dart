@@ -106,13 +106,16 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
       );
     }
 
-    List<Device>? deviceList = store.deviceList!.data;
+    final rawData = store.deviceList!.data;
 
-    if (deviceList == null) {
+    if (rawData == null) {
       return const SliverFillRemaining(
         child: Center(child: CupertinoActivityIndicator()),
       );
     }
+
+    // Filter out null entries from the list
+    final List<Device> deviceList = rawData.whereType<Device>().toList();
 
     if (deviceList.isEmpty) {
       return SliverFillRemaining(
