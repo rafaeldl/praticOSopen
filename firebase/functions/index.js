@@ -58,9 +58,19 @@ exports.firestoreUpdateTenantOSNumber = functions.region('southamerica-east1').f
 /**
  * [GLOBAL] Gerenciamento de Custom Claims.
  * Gatilho: /users/{userId}
- * 
+ *
  * Atualiza os claims de autenticação (companies, roles) sempre que o usuário é modificado.
  * Essencial para as Security Rules da nova estrutura.
  */
 const claims = require('./claims');
 exports.updateUserClaims = claims.updateUserClaims;
+
+/**
+ * [HTTP] Recebimento de logs de eventos do carro.
+ * Endpoint: POST /receiveCarEventLogs
+ *
+ * Recebe eventos do Android Automotive (velocidade, marcha, temperatura, etc.)
+ * e salva no Firestore em /carSessions/{sessionId}/events/{eventId}
+ */
+const carEventLogs = require('./carEventLogs');
+exports.receiveCarEventLogs = carEventLogs.receiveCarEventLogs;
