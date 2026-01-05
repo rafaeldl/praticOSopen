@@ -50,12 +50,34 @@ class SegmentConfigService {
     'actions.edit_customer': 'Editar Cliente',
     'actions.create_service_order': 'Nova OS',
     'actions.edit_service_order': 'Editar OS',
+    'actions.create_service': 'Novo Serviço',
+    'actions.edit_service': 'Editar Serviço',
+    'actions.create_product': 'Novo Produto',
+    'actions.edit_product': 'Editar Produto',
+    'actions.remove': 'Remover',
+    'actions.confirm_deletion': 'Confirmar exclusão',
+    'actions.retry_again': 'Tentar novamente',
 
     // Status
     'status.pending': 'Pendente',
     'status.in_progress': 'Em Andamento',
     'status.completed': 'Concluído',
     'status.cancelled': 'Cancelado',
+
+    // Messages
+    'messages.no_results_found': 'Nenhum resultado encontrado',
+    'messages.required': 'Obrigatório',
+
+    // Photos
+    'photos.change': 'Alterar Foto',
+    'photos.add': 'Adicionar Foto',
+    'photos.delete': 'Excluir Foto',
+    'photos.set_as_cover': 'Definir como Capa',
+
+    // Products
+    'product.quantity': 'Quantidade',
+    'product.unit_value': 'Valor unitário',
+    'product.total': 'Total',
 
     // Comum
     'common.save': 'Salvar',
@@ -69,6 +91,22 @@ class SegmentConfigService {
     'common.export': 'Exportar',
     'common.import': 'Importar',
     'common.print': 'Imprimir',
+    'common.notes': 'Observações',
+  };
+
+  // Mapeamento de chaves técnicas de status para label keys
+  static const Map<String, String> _statusKeyMapping = {
+    'quote': 'status.quote',
+    'approved': 'status.approved',
+    'progress': 'status.in_progress',
+    'done': 'status.completed',
+    'canceled': 'status.cancelled',
+  };
+
+  // Labels padrão para status (compatibilidade com Order.statusMap)
+  static const Map<String, String> _statusDefaults = {
+    'status.quote': 'Orçamento',
+    'status.approved': 'Aprovado',
   };
 
   /// Define o idioma atual
@@ -134,6 +172,37 @@ class SegmentConfigService {
   String get customerPlural => label('customer._entity_plural');
   String get serviceOrder => label('service_order._entity');
   String get serviceOrderPlural => label('service_order._entity_plural');
+
+  /// Obtém label de status customizado
+  ///
+  /// Mapeia chaves técnicas para labels (com fallback)
+  /// Ex: 'quote' → 'Orçamento' (ou customizado por segmento)
+  String getStatus(String? statusKey) {
+    if (statusKey == null) return 'Pendente';
+    // Primeiro tenta mapear a chave técnica para label key
+    final labelKey = _statusKeyMapping[statusKey];
+    if (labelKey == null) {
+      return statusKey; // Chave desconhecida, retorna ela mesma
+    }
+
+    // Busca nos overrides do segmento
+    if (_labelCache.containsKey(labelKey)) {
+      return _labelCache[labelKey]!;
+    }
+
+    // Busca nos status defaults
+    if (_statusDefaults.containsKey(labelKey)) {
+      return _statusDefaults[labelKey]!;
+    }
+
+    // Busca nos system defaults (pending, in_progress, completed, cancelled)
+    if (_systemDefaults.containsKey(labelKey)) {
+      return _systemDefaults[labelKey]!;
+    }
+
+    // Fallback final
+    return statusKey;
+  }
 
   /// Obtém todos os campos customizados de um namespace
   List<CustomField> fieldsFor(String namespace) {

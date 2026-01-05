@@ -1,9 +1,12 @@
 import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/constants/label_keys.dart';
 
 class DeviceFormScreen extends StatefulWidget {
   const DeviceFormScreen({Key? key}) : super(key: key);
@@ -49,10 +52,11 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
   }
 
   Future<void> _pickImage() async {
+    final config = context.read<SegmentConfigProvider>();
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Alterar Foto'),
+        title: Text(config.label(LabelKeys.changePhoto)),
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
             child: const Text('Tirar Foto'),
@@ -78,7 +82,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
+          child: Text(config.label(LabelKeys.cancel)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -87,16 +91,20 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing ? "Editar Veículo" : "Novo Veículo"),
+        middle: Text(_isEditing
+            ? config.label(LabelKeys.editDevice)
+            : config.label(LabelKeys.createDevice)),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isLoading ? null : _saveDevice,
           child: _isLoading
               ? const CupertinoActivityIndicator()
-              : const Text("Salvar", style: TextStyle(fontWeight: FontWeight.bold)),
+              : Text(config.label(LabelKeys.save), style: const TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
       child: SafeArea(
@@ -173,29 +181,29 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   _buildCupertinoFormField(
-                    label: "Fabricante",
+                    label: config.label(LabelKeys.deviceBrand),
                     initialValue: _device?.manufacturer,
                     placeholder: "Ex: Fiat, VW",
                     textCapitalization: TextCapitalization.words,
                     onSaved: (val) => _device?.manufacturer = val,
-                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                    validator: (val) => val == null || val.isEmpty ? config.label(LabelKeys.required) : null,
                   ),
                   _buildCupertinoFormField(
-                    label: "Modelo",
+                    label: config.label(LabelKeys.deviceModel),
                     initialValue: _device?.name,
                     placeholder: "Ex: Uno, Gol",
                     textCapitalization: TextCapitalization.words,
                     onSaved: (val) => _device?.name = val,
-                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                    validator: (val) => val == null || val.isEmpty ? config.label(LabelKeys.required) : null,
                   ),
                   _buildCupertinoFormField(
-                    label: "Placa",
+                    label: config.label(LabelKeys.deviceSerialNumber),
                     initialValue: _device?.serial,
                     placeholder: "ABC1D23",
                     textCapitalization: TextCapitalization.characters,
                     inputFormatters: [TextInputMask(mask: 'AAA9N99')],
                     onSaved: (val) => _device?.serial = val?.toUpperCase(),
-                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                    validator: (val) => val == null || val.isEmpty ? config.label(LabelKeys.required) : null,
                   ),
                 ],
               ),

@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/constants/label_keys.dart';
 
 class OrderServiceScreen extends StatefulWidget {
   const OrderServiceScreen({Key? key}) : super(key: key);
@@ -76,18 +79,22 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing ? 'Editar Serviço' : 'Novo Serviço'),
+        middle: Text(_isEditing
+            ? config.label(LabelKeys.editService)
+            : config.label(LabelKeys.createService)),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isLoading ? null : _saveService,
           child: _isLoading
               ? const CupertinoActivityIndicator()
-              : const Text(
-                  'Salvar',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+              : Text(
+                  config.label(LabelKeys.save),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
         ),
       ),
@@ -106,13 +113,13 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   _buildServiceNameField(context),
-                  _buildValueField(context),
+                  _buildValueField(context, config),
                 ],
               ),
 
               CupertinoListSection.insetGrouped(
                 header: Text(
-                  'OBSERVAÇÕES',
+                  config.label(LabelKeys.notes).toUpperCase(),
                   style: TextStyle(
                     fontSize: 13,
                     color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -167,7 +174,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
     );
   }
 
-  Widget _buildValueField(BuildContext context) {
+  Widget _buildValueField(BuildContext context, SegmentConfigProvider config) {
     final initialValue = orderServiceIndex == null
         ? _convertToCurrency(_service?.value)
         : _convertToCurrency(_orderService.value);
@@ -196,7 +203,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
           style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Obrigatório';
+              return config.label(LabelKeys.required);
             }
             return null;
           },

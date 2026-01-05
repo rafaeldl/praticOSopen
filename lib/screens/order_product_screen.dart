@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/constants/label_keys.dart';
 
 class OrderProductScreen extends StatefulWidget {
   const OrderProductScreen({Key? key}) : super(key: key);
@@ -124,18 +127,20 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing ? 'Editar Produto' : 'Novo Produto'),
+        middle: Text(_isEditing ? config.label(LabelKeys.editProduct) : config.label(LabelKeys.createProduct)),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isLoading ? null : _saveProduct,
           child: _isLoading
               ? const CupertinoActivityIndicator()
-              : const Text(
-                  'Salvar',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+              : Text(
+                  config.label(LabelKeys.save),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
         ),
       ),
@@ -154,15 +159,15 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   _buildProductNameField(context),
-                  _buildQuantityField(context),
-                  _buildValueField(context),
-                  _buildTotalField(context),
+                  _buildQuantityField(context, config),
+                  _buildValueField(context, config),
+                  _buildTotalField(context, config),
                 ],
               ),
 
               CupertinoListSection.insetGrouped(
                 header: Text(
-                  'OBSERVAÇÕES',
+                  config.label(LabelKeys.notes).toUpperCase(),
                   style: TextStyle(
                     fontSize: 13,
                     color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -203,11 +208,11 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
     );
   }
 
-  Widget _buildQuantityField(BuildContext context) {
+  Widget _buildQuantityField(BuildContext context, SegmentConfigProvider config) {
     return CupertinoListTile(
-      title: const SizedBox(
+      title: SizedBox(
         width: 100,
-        child: Text('Quantidade', style: TextStyle(fontSize: 16)),
+        child: Text(config.label(LabelKeys.quantity), style: const TextStyle(fontSize: 16)),
       ),
       additionalInfo: SizedBox(
         width: 80,
@@ -221,7 +226,7 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
           style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Obrigatório';
+              return config.label(LabelKeys.required);
             }
             final qty = int.tryParse(value);
             if (qty == null || qty <= 0) {
@@ -237,11 +242,11 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
     );
   }
 
-  Widget _buildValueField(BuildContext context) {
+  Widget _buildValueField(BuildContext context, SegmentConfigProvider config) {
     return CupertinoListTile(
-      title: const SizedBox(
+      title: SizedBox(
         width: 120,
-        child: Text('Valor unitário', style: TextStyle(fontSize: 16)),
+        child: Text(config.label(LabelKeys.unitValue), style: const TextStyle(fontSize: 16)),
       ),
       additionalInfo: SizedBox(
         width: 150,
@@ -262,7 +267,7 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
           style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Obrigatório';
+              return config.label(LabelKeys.required);
             }
             return null;
           },
@@ -274,13 +279,13 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
     );
   }
 
-  Widget _buildTotalField(BuildContext context) {
+  Widget _buildTotalField(BuildContext context, SegmentConfigProvider config) {
     return CupertinoListTile(
-      title: const SizedBox(
+      title: SizedBox(
         width: 80,
         child: Text(
-          'Total',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          config.label(LabelKeys.total),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
       additionalInfo: Text(

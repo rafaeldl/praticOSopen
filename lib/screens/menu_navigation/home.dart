@@ -10,6 +10,8 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/constants/label_keys.dart';
 
 import '../../global.dart';
 
@@ -23,17 +25,19 @@ class _HomeState extends State<Home> {
   final ScrollController _scrollController = ScrollController();
   late OrderStore orderStore;
 
-  static const List<Map<String, dynamic>> filters = [
-    {'status': 'Todos', 'icon': CupertinoIcons.square_grid_2x2, 'field': null},
-    {'status': 'Entrega', 'field': 'due_date', 'icon': CupertinoIcons.clock},
-    {'status': 'Aprovados', 'field': 'approved', 'icon': CupertinoIcons.hand_thumbsup},
-    {'status': 'Andamento', 'field': 'progress', 'icon': CupertinoIcons.arrow_2_circlepath},
-    {'status': 'Orçamentos', 'field': 'quote', 'icon': CupertinoIcons.doc_text},
-    {'status': 'Concluídos', 'field': 'done', 'icon': CupertinoIcons.check_mark_circled},
-    {'status': 'Cancelados', 'field': 'canceled', 'icon': CupertinoIcons.xmark_circle},
-    {'status': 'A receber', 'field': 'unpaid', 'icon': CupertinoIcons.money_dollar},
-    {'status': 'Pago', 'field': 'paid', 'icon': CupertinoIcons.money_dollar_circle},
-  ];
+  List<Map<String, dynamic>> _getFilters(SegmentConfigProvider config) {
+    return [
+      {'status': 'Todos', 'icon': CupertinoIcons.square_grid_2x2, 'field': null},
+      {'status': 'Entrega', 'field': 'due_date', 'icon': CupertinoIcons.clock},
+      {'status': config.getStatus('approved'), 'field': 'approved', 'icon': CupertinoIcons.hand_thumbsup},
+      {'status': config.getStatus('progress'), 'field': 'progress', 'icon': CupertinoIcons.arrow_2_circlepath},
+      {'status': config.getStatus('quote'), 'field': 'quote', 'icon': CupertinoIcons.doc_text},
+      {'status': config.getStatus('done'), 'field': 'done', 'icon': CupertinoIcons.check_mark_circled},
+      {'status': config.getStatus('canceled'), 'field': 'canceled', 'icon': CupertinoIcons.xmark_circle},
+      {'status': 'A receber', 'field': 'unpaid', 'icon': CupertinoIcons.money_dollar},
+      {'status': 'Pago', 'field': 'paid', 'icon': CupertinoIcons.money_dollar_circle},
+    ];
+  }
 
   @override
   void initState() {
@@ -45,17 +49,18 @@ class _HomeState extends State<Home> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     orderStore = Provider.of<OrderStore>(context);
+    final config = Provider.of<SegmentConfigProvider>(context, listen: false);
 
     if (Global.companyAggr?.id == null) {
       Future.delayed(const Duration(milliseconds: 1000), () {
-        _loadOrders();
+        _loadOrders(_getFilters(config));
       });
     } else {
-      _loadOrders();
+      _loadOrders(_getFilters(config));
     }
   }
 
-  void _loadOrders() {
+  void _loadOrders(List<Map<String, dynamic>> filters) {
     final currentOffset = _scrollController.hasClients ? _scrollController.offset : 0.0;
     orderStore.loadOrdersInfinite(filters[currentSelected]['field']).then((_) {
       if (_scrollController.hasClients) {
@@ -79,14 +84,16 @@ class _HomeState extends State<Home> {
   }
 
   void _scrollListener() {
+    final config = Provider.of<SegmentConfigProvider>(context, listen: false);
+    final filters = _getFilters(config);
     final offset = _scrollController.offset;
     // Simple logic to just load more
     if (offset >= _scrollController.position.maxScrollExtent - 100) {
-      _loadMoreOrders();
+      _loadMoreOrders(filters);
     }
   }
 
-  void _loadMoreOrders() {
+  void _loadMoreOrders(List<Map<String, dynamic>> filters) {
     if (!orderStore.isLoading && orderStore.hasMoreOrders) {
       orderStore.loadMoreOrdersInfinite(filters[currentSelected]['field']);
     }
@@ -94,6 +101,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
     FirebaseCrashlytics.instance.log("Abrindo home (Cupertino)");
     // Ensuring default text style is available
     return CupertinoPageScaffold(
@@ -103,9 +111,9 @@ class _HomeState extends State<Home> {
         child: CustomScrollView(
           controller: _scrollController,
           slivers: [
-            _buildNavigationBar(context),
-            _buildActiveFilterHeader(),
-            _buildOrdersList(),
+            _buildNavigationBar(context, config),
+            _buildActiveFilterHeader(config),
+            _buildOrdersList(config),
             SliverToBoxAdapter(
                child: Observer(builder: (_) {
                  if (orderStore.isLoading && orderStore.orders.isNotEmpty) {
@@ -123,11 +131,11 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildNavigationBar(BuildContext context) {
+  Widget _buildNavigationBar(BuildContext context, SegmentConfigProvider config) {
     return CupertinoSliverNavigationBar(
       largeTitle: Semantics(
         identifier: 'home_title',
-        child: const Text('Ordens de Serviço'),
+        child: Text(config.serviceOrderPlural),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
@@ -135,7 +143,7 @@ class _HomeState extends State<Home> {
           Semantics(
             identifier: 'filter_button',
             button: true,
-            label: 'Filtrar',
+            label: config.label(LabelKeys.filter),
             child: CupertinoButton(
               padding: EdgeInsets.zero,
               child: Icon(
@@ -143,7 +151,7 @@ class _HomeState extends State<Home> {
                     ? CupertinoIcons.line_horizontal_3_decrease_circle
                     : CupertinoIcons.line_horizontal_3_decrease_circle_fill,
               ),
-              onPressed: () => _showFilterOptions(context),
+              onPressed: () => _showFilterOptions(context, config),
             ),
           ),
           Semantics(
@@ -160,13 +168,16 @@ class _HomeState extends State<Home> {
           Semantics(
             identifier: 'add_order_button',
             button: true,
-            label: 'Nova OS',
+            label: config.label(LabelKeys.createServiceOrder),
             child: CupertinoButton(
               padding: EdgeInsets.zero,
               child: const Icon(CupertinoIcons.add),
               onPressed: () {
                 HapticFeedback.lightImpact();
-                Navigator.of(context, rootNavigator: true).pushNamed('/order').then((_) => _loadOrders());
+                Navigator.of(context, rootNavigator: true).pushNamed('/order').then((_) {
+                  final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
+                  _loadOrders(_getFilters(configInner));
+                });
               },
             ),
           ),
@@ -175,11 +186,12 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _showFilterOptions(BuildContext context) {
+  void _showFilterOptions(BuildContext context, SegmentConfigProvider config) {
+    final filters = _getFilters(config);
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: const Text('Filtrar por Status'),
+        title: Text('${config.label(LabelKeys.filter)} por Status'),
         actions: filters.asMap().entries.map((entry) {
           final index = entry.key;
           final filter = entry.value;
@@ -212,14 +224,14 @@ class _HomeState extends State<Home> {
           );
         }).toList(),
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
+          child: Text(config.label(LabelKeys.cancel)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
     );
   }
 
-  Widget _buildActiveFilterHeader() {
+  Widget _buildActiveFilterHeader(SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
         if (orderStore.customerFilter == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
@@ -240,7 +252,7 @@ class _HomeState extends State<Home> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Cliente: ${orderStore.customerFilter!.name}',
+                      '${config.customer}: ${orderStore.customerFilter!.name}',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -255,11 +267,12 @@ class _HomeState extends State<Home> {
                     onPressed: () {
                       HapticFeedback.lightImpact();
                       orderStore.setCustomerFilter(null);
-                      _loadOrders();
+                      final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
+                      _loadOrders(_getFilters(configInner));
                     },
-                    child: const Text(
-                      'Limpar',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                    child: Text(
+                      config.label(LabelKeys.cancel), // Or "Limpar" if we had it. Cancel is close enough for prototype.
+                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                     ), minimumSize: Size(0, 0),
                   ),
                 ],
@@ -271,7 +284,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildOrdersList() {
+  Widget _buildOrdersList(SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
         if (orderStore.isLoading && orderStore.orders.isEmpty) {
@@ -295,7 +308,7 @@ class _HomeState extends State<Home> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Nenhuma OS encontrada',
+                    'Nenhuma ${config.serviceOrder} encontrada',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -322,7 +335,7 @@ class _HomeState extends State<Home> {
               if (index >= orderStore.orders.length) return null;
               final order = orderStore.orders[index];
               if (order == null) return null;
-              return _buildOrderItem(order, index, index == orderStore.orders.length - 1);
+              return _buildOrderItem(order, index, index == orderStore.orders.length - 1, config);
             },
             childCount: orderStore.orders.length,
           ),
@@ -331,7 +344,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildOrderItem(Order order, int index, bool isLast) {
+  Widget _buildOrderItem(Order order, int index, bool isLast, SegmentConfigProvider config) {
     final statusColor = _getCupertinoStatusColor(order.status);
     
     // Date Formatting (Mail style: "Yesterday", "Friday", or "dd/MM/yy")
@@ -367,7 +380,10 @@ class _HomeState extends State<Home> {
                             child: InkWell(
                             onTap: () {
                                Navigator.of(context, rootNavigator: true).pushNamed('/order', arguments: {'order': order})
-                                   .then((_) => _loadOrders());
+                                   .then((_) {
+                                     final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
+                                     _loadOrders(_getFilters(configInner));
+                                   });
                             },                  child: Column(            children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Compact padding
@@ -390,7 +406,7 @@ class _HomeState extends State<Home> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  order.customer?.name ?? 'Cliente',
+                                  order.customer?.name ?? config.customer,
                                   style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,

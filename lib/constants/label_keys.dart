@@ -114,6 +114,34 @@ class LabelKeys {
   /// Exemplo: "Editar OS"
   static const editServiceOrder = 'actions.edit_service_order';
 
+  /// Label de ação "criar service"
+  /// Exemplo: "Novo Serviço"
+  static const createService = 'actions.create_service';
+
+  /// Label de ação "editar service"
+  /// Exemplo: "Editar Serviço"
+  static const editService = 'actions.edit_service';
+
+  /// Label de ação "criar product"
+  /// Exemplo: "Novo Produto"
+  static const createProduct = 'actions.create_product';
+
+  /// Label de ação "editar product"
+  /// Exemplo: "Editar Produto"
+  static const editProduct = 'actions.edit_product';
+
+  /// Label de ação "remover"
+  /// Exemplo: "Remover"
+  static const remove = 'actions.remove';
+
+  /// Label de ação "confirmar exclusão"
+  /// Exemplo: "Confirmar exclusão"
+  static const confirmDeletion = 'actions.confirm_deletion';
+
+  /// Label de ação "tentar novamente"
+  /// Exemplo: "Tentar novamente"
+  static const retryAgain = 'actions.retry_again';
+
   // ════════════════════════════════════════════════════════════
   // STATUS
   // ════════════════════════════════════════════════════════════
@@ -133,6 +161,45 @@ class LabelKeys {
   /// Status "cancelado"
   /// Exemplo: "Cancelado"
   static const statusCancelled = 'status.cancelled';
+
+  // ════════════════════════════════════════════════════════════
+  // MESSAGES (Mensagens do sistema)
+  // ════════════════════════════════════════════════════════════
+
+  /// Mensagem "Nenhum resultado encontrado"
+  static const noResultsFound = 'messages.no_results_found';
+
+  /// Mensagem "Obrigatório" (validação de campo)
+  static const required = 'messages.required';
+
+  // ════════════════════════════════════════════════════════════
+  // PHOTOS (Fotos e imagens)
+  // ════════════════════════════════════════════════════════════
+
+  /// Label "Alterar Foto"
+  static const changePhoto = 'photos.change';
+
+  /// Label "Adicionar Foto"
+  static const addPhoto = 'photos.add';
+
+  /// Label "Excluir Foto"
+  static const deletePhoto = 'photos.delete';
+
+  /// Label "Definir como Capa"
+  static const setAsCover = 'photos.set_as_cover';
+
+  // ════════════════════════════════════════════════════════════
+  // PRODUCTS (Produtos e Serviços)
+  // ════════════════════════════════════════════════════════════
+
+  /// Label "Quantidade"
+  static const quantity = 'product.quantity';
+
+  /// Label "Valor unitário"
+  static const unitValue = 'product.unit_value';
+
+  /// Label "Total"
+  static const total = 'product.total';
 
   // ════════════════════════════════════════════════════════════
   // COMUM
@@ -181,4 +248,7 @@ class LabelKeys {
   /// Label de ação "imprimir"
   /// Exemplo: "Imprimir"
   static const print = 'common.print';
+
+  /// Label "Observações" ou "Notas"
+  static const notes = 'common.notes';
 }

@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell; 
+import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell;
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/constants/label_keys.dart';
 
 class DeviceListScreen extends StatefulWidget {
   @override
@@ -30,6 +33,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
     args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     final isSelectionMode = args != null && args!.containsKey('order');
 
@@ -40,7 +44,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Veículos'),
+              largeTitle: Text(config.devicePlural),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
@@ -58,7 +62,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar veículo',
+                  placeholder: 'Buscar ${config.device.toLowerCase()}',
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -80,6 +84,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   }
 
   Widget _buildBody(bool isSelectionMode) {
+    final config = context.read<SegmentConfigProvider>();
+
     if (store.deviceList == null) {
       return const SliverFillRemaining(
         child: Center(child: CupertinoActivityIndicator()),
@@ -94,10 +100,10 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             children: [
               const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
               const SizedBox(height: 16),
-              const Text('Erro ao carregar veículos'),
+              Text('Erro ao carregar ${config.devicePlural.toLowerCase()}'),
               const SizedBox(height: 16),
               CupertinoButton(
-                child: const Text('Tentar novamente'),
+                child: Text(config.label(LabelKeys.retryAgain)),
                 onPressed: () => store.retrieveDevices(),
               )
             ],
@@ -126,7 +132,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
               Icon(CupertinoIcons.car_detailed, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
               const SizedBox(height: 16),
               Text(
-                'Nenhum veículo cadastrado',
+                'Nenhum ${config.device.toLowerCase()} cadastrado',
                 style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
               ),
             ],
@@ -148,9 +154,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           }).toList();
 
     if (filteredList.isEmpty) {
-      return const SliverFillRemaining(
+      return SliverFillRemaining(
         child: Center(
-          child: Text('Nenhum resultado encontrado'),
+          child: Text(config.label(LabelKeys.noResultsFound)),
         ),
       );
     }
@@ -160,14 +166,14 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         (context, index) {
           if (index >= filteredList.length) return null;
           final device = filteredList[index];
-          return _buildDeviceItem(device, isSelectionMode, index == filteredList.length - 1);
+          return _buildDeviceItem(device, isSelectionMode, index == filteredList.length - 1, config);
         },
         childCount: filteredList.length,
       ),
     );
   }
 
-  Widget _buildDeviceItem(Device device, bool isSelectionMode, bool isLast) {
+  Widget _buildDeviceItem(Device device, bool isSelectionMode, bool isLast, SegmentConfigProvider config) {
     return Dismissible(
       key: Key(device.id!),
       direction: DismissDirection.horizontal,
@@ -199,16 +205,16 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           return await showCupertinoDialog<bool>(
             context: context,
             builder: (context) => CupertinoAlertDialog(
-              title: const Text('Confirmar exclusão'),
-              content: Text('Deseja remover o veículo "${device.name}"?'),
+              title: Text(config.label(LabelKeys.confirmDeletion)),
+              content: Text('Deseja remover o ${config.device.toLowerCase()} "${device.name}"?'),
               actions: [
                 CupertinoDialogAction(
-                  child: const Text('Cancelar'),
+                  child: Text(config.label(LabelKeys.cancel)),
                   onPressed: () => Navigator.pop(context, false),
                 ),
                 CupertinoDialogAction(
                   isDestructiveAction: true,
-                  child: const Text('Remover'),
+                  child: Text(config.label(LabelKeys.remove)),
                   onPressed: () => Navigator.pop(context, true),
                 ),
               ],

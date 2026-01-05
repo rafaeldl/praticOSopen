@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 /// Representa um campo customizado ou label override de um segmento
 class CustomField {
   final String key;

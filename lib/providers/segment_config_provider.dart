@@ -75,6 +75,16 @@ class SegmentConfigProvider extends ChangeNotifier {
   String get serviceOrder => _service.serviceOrder;
   String get serviceOrderPlural => _service.serviceOrderPlural;
 
+  /// Obtém label de status customizado
+  ///
+  /// Mapeia chaves técnicas para labels customizados:
+  /// - 'quote' → 'Orçamento'
+  /// - 'approved' → 'Aprovado'
+  /// - 'progress' → 'Em Andamento' / 'Em Conserto' / 'Em Manutenção'
+  /// - 'done' → 'Concluído' / 'Pronto para Retirada'
+  /// - 'canceled' → 'Cancelado'
+  String getStatus(String? statusKey) => _service.getStatus(statusKey);
+
   // ════════════════════════════════════════════════════════════
   // CUSTOM FIELDS
   // ════════════════════════════════════════════════════════════

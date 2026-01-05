@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 
 class CustomerOsList extends StatefulWidget {
   @override
@@ -12,15 +14,16 @@ class _CustomerOsListState extends State<CustomerOsList> {
   CustomerStore customerStore = CustomerStore();
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ordens de Serviço'),
+        title: Text(config.serviceOrderPlural),
       ),
       body: SafeArea(
         child: Container(
           child: Observer(
             builder: (_) {
-              return _buildCustomerOsList(customerStore);
+              return _buildCustomerOsList(customerStore, config);
             },
           ),
         ),
@@ -28,7 +31,7 @@ class _CustomerOsListState extends State<CustomerOsList> {
     );
   }
 
-  Widget _buildCustomerOsList(CustomerStore customerStore) {
+  Widget _buildCustomerOsList(CustomerStore customerStore, SegmentConfigProvider config) {
     if (customerStore.customerList == null) {
       return Center(
         child: ElevatedButton(
@@ -52,8 +55,8 @@ class _CustomerOsListState extends State<CustomerOsList> {
     if (rawData == null || rawData.isEmpty) {
       return Center(
         child: Text(
-          'Não há clientes cadastrados',
-          style: TextStyle(
+          'Nenhum ${config.customer.toLowerCase()} cadastrado',
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w400,
           ),
@@ -65,8 +68,8 @@ class _CustomerOsListState extends State<CustomerOsList> {
     final List<Customer> list = rawData.whereType<Customer>().toList();
 
     return Container(
-      padding: EdgeInsets.all(0.0),
-      margin: EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(0.0),
+      margin: const EdgeInsets.all(20.0),
       child: ListView.separated(
         itemCount: list.length,
         itemBuilder: (context, index) {
@@ -77,13 +80,13 @@ class _CustomerOsListState extends State<CustomerOsList> {
             onDismissed: (direction) {
               customerStore.deleteCustomer(customer);
               ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Cliente ${customer.name} removido")));
+                  SnackBar(content: Text("${config.customer} ${customer.name} removido")));
             },
-            background: Container(color: Colors.red, child: Icon(Icons.cancel)),
+            background: Container(color: Colors.red, child: const Icon(Icons.cancel)),
             child: ListTile(
               title: Text(customer.name!),
               subtitle: Text(customer.phone!),
-              trailing: Icon(Icons.keyboard_arrow_right),
+              trailing: const Icon(Icons.keyboard_arrow_right),
               onTap: () {
                 print('on tap');
               },
@@ -91,7 +94,7 @@ class _CustomerOsListState extends State<CustomerOsList> {
           );
         },
         separatorBuilder: (context, index) {
-          return Divider();
+          return const Divider();
         },
       ),
     );

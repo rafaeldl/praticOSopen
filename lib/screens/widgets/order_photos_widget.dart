@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show ScaffoldMessenger, SnackBar; 
+import 'package:provider/provider.dart';
 // Keeping Material for ScaffoldMessenger/SnackBar reliance or specific Icons if needed, 
 // but preferring Cupertino.
 
@@ -7,6 +8,8 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/constants/label_keys.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
@@ -19,6 +22,7 @@ class OrderPhotosWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
     return Observer(
       builder: (_) {
         // Show loading indicator while uploading
@@ -28,12 +32,12 @@ class OrderPhotosWidget extends StatelessWidget {
             alignment: Alignment.center,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                CupertinoActivityIndicator(),
-                SizedBox(height: 8),
+              children: [
+                const CupertinoActivityIndicator(),
+                const SizedBox(height: 8),
                 Text(
                   'Enviando foto...',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: CupertinoColors.secondaryLabel,
                     fontSize: 13,
                   ),
@@ -49,36 +53,36 @@ class OrderPhotosWidget extends StatelessWidget {
         }
 
         // Show photos grid
-        return _buildPhotosGrid(context);
+        return _buildPhotosGrid(context, config);
       },
     );
   }
 
-  Widget _buildPhotosGrid(BuildContext context) {
+  Widget _buildPhotosGrid(BuildContext context, SegmentConfigProvider config) {
     return Column(
       children: [
         // Foto de capa (primeira foto)
         if (store.photos.isNotEmpty) 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _buildCoverPhoto(context),
+            child: _buildCoverPhoto(context, config),
           ),
         const SizedBox(height: 8),
         // Grid das outras fotos
         if (store.photos.length > 1) 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _buildThumbnailGrid(context),
+            child: _buildThumbnailGrid(context, config),
           ),
       ],
     );
   }
 
-  Widget _buildCoverPhoto(BuildContext context) {
+  Widget _buildCoverPhoto(BuildContext context, SegmentConfigProvider config) {
     final OrderPhoto coverPhoto = store.photos.first;
     
     return GestureDetector(
-      onTap: () => _showPhotoViewer(context, 0),
+      onTap: () => _showPhotoViewer(context, 0, config),
       child: Stack(
         children: [
           Container(
@@ -136,14 +140,14 @@ class OrderPhotosWidget extends StatelessWidget {
           Positioned(
             top: 4,
             right: 4,
-            child: _buildPhotoActionButton(context, 0),
+            child: _buildPhotoActionButton(context, 0, config),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildThumbnailGrid(BuildContext context) {
+  Widget _buildThumbnailGrid(BuildContext context, SegmentConfigProvider config) {
     final thumbnailPhotos = store.photos.skip(1).toList();
 
     return GridView.builder(
@@ -161,7 +165,7 @@ class OrderPhotosWidget extends StatelessWidget {
         final actualIndex = index + 1; // +1 porque pulamos a primeira foto
 
         return GestureDetector(
-          onTap: () => _showPhotoViewer(context, actualIndex),
+          onTap: () => _showPhotoViewer(context, actualIndex, config),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -177,7 +181,7 @@ class OrderPhotosWidget extends StatelessWidget {
               Positioned(
                 top: 4,
                 right: 4,
-                child: _buildPhotoActionButton(context, actualIndex, small: true),
+                child: _buildPhotoActionButton(context, actualIndex, config, small: true),
               ),
             ],
           ),
@@ -186,10 +190,10 @@ class OrderPhotosWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildPhotoActionButton(BuildContext context, int index, {bool small = false}) {
+  Widget _buildPhotoActionButton(BuildContext context, int index, SegmentConfigProvider config, {bool small = false}) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      onPressed: () => _showActionSheet(context, index),
+      onPressed: () => _showActionSheet(context, index, config),
       child: Container(
         padding: EdgeInsets.all(small ? 4 : 6),
         decoration: BoxDecoration(
@@ -205,14 +209,14 @@ class OrderPhotosWidget extends StatelessWidget {
     );
   }
 
-  void _showActionSheet(BuildContext context, int index) {
+  void _showActionSheet(BuildContext context, int index, SegmentConfigProvider config) {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
         actions: [
           if (index > 0)
             CupertinoActionSheetAction(
-              child: const Text('Definir como Capa'),
+              child: Text(config.label(LabelKeys.setAsCover)),
               onPressed: () {
                 Navigator.pop(context);
                 store.setPhotoCover(index);
@@ -224,26 +228,26 @@ class OrderPhotosWidget extends StatelessWidget {
         ],
         cancelButton: CupertinoActionSheetAction(
           isDestructiveAction: true,
-          child: const Text('Excluir Foto'),
+          child: Text(config.label(LabelKeys.deletePhoto)),
           onPressed: () {
             Navigator.pop(context);
-            _confirmDeletePhoto(context, index);
+            _confirmDeletePhoto(context, index, config);
           },
         ),
       ),
     );
   }
 
-  void _confirmDeletePhoto(BuildContext context, int index) {
+  void _confirmDeletePhoto(BuildContext context, int index, SegmentConfigProvider config) {
     showCupertinoDialog(
       context: context,
       builder: (dialogContext) {
         return CupertinoAlertDialog(
-          title: const Text('Excluir foto?'),
+          title: Text('${config.label(LabelKeys.delete)}?'),
           content: const Text('Esta ação não pode ser desfeita.'),
           actions: [
             CupertinoDialogAction(
-              child: const Text('Cancelar'),
+              child: Text(config.label(LabelKeys.cancel)),
               onPressed: () => Navigator.pop(dialogContext),
             ),
             CupertinoDialogAction(
@@ -264,7 +268,7 @@ class OrderPhotosWidget extends StatelessWidget {
                   }
                 }
               },
-              child: const Text('Excluir'),
+              child: Text(config.label(LabelKeys.delete)),
             ),
           ],
         );
@@ -272,7 +276,7 @@ class OrderPhotosWidget extends StatelessWidget {
     );
   }
 
-  void _showPhotoViewer(BuildContext context, int initialIndex) {
+  void _showPhotoViewer(BuildContext context, int initialIndex, SegmentConfigProvider config) {
     Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (context) => PhotoViewerScreen(
@@ -285,6 +289,7 @@ class OrderPhotosWidget extends StatelessWidget {
           onSetCover: (index) {
             store.setPhotoCover(index);
           },
+          config: config,
         ),
       ),
     );
@@ -297,6 +302,7 @@ class PhotoViewerScreen extends StatefulWidget {
   final int initialIndex;
   final Future<bool> Function(int index) onDelete;
   final void Function(int index) onSetCover;
+  final SegmentConfigProvider config;
 
   const PhotoViewerScreen({
     Key? key,
@@ -304,6 +310,7 @@ class PhotoViewerScreen extends StatefulWidget {
     required this.initialIndex,
     required this.onDelete,
     required this.onSetCover,
+    required this.config,
   }) : super(key: key);
 
   @override
@@ -362,7 +369,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
 
       await Share.shareXFiles(
         [XFile(file.path)],
-        text: 'Foto da Ordem de Serviço',
+        text: 'Foto da ${widget.config.serviceOrder}',
         sharePositionOrigin: box != null
             ? box.localToGlobal(Offset.zero) & box.size
             : Rect.fromLTWH(0, 0, size.width, size.height / 2),
@@ -451,11 +458,11 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
       context: context,
       builder: (BuildContext context) {
         return CupertinoAlertDialog(
-          title: const Text('Excluir foto?'),
+          title: Text('${widget.config.label(LabelKeys.delete)}?'),
           content: const Text('Esta ação não pode ser desfeita.'),
           actions: [
             CupertinoDialogAction(
-              child: const Text('Cancelar'),
+              child: Text(widget.config.label(LabelKeys.cancel)),
               onPressed: () => Navigator.pop(context),
             ),
             CupertinoDialogAction(
@@ -479,7 +486,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
                   } 
                 }
               },
-              child: const Text('Excluir'),
+              child: Text(widget.config.label(LabelKeys.delete)),
             ),
           ],
         );

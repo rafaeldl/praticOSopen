@@ -8,6 +8,8 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/constants/label_keys.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -22,6 +24,7 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     _userStore.findCurrentUser();
     final themeStore = Provider.of<ThemeStore>(context);
+    final config = context.watch<SegmentConfigProvider>();
 
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -101,7 +104,7 @@ class _SettingsState extends State<Settings> {
                         title: const Text('Trocar Empresa'),
                         subtitle: const Text('Alternar entre organizações'),
                         trailing: const CupertinoListTileChevron(),
-                        onTap: () => _showCompanySelectionModal(context),
+                        onTap: () => _showCompanySelectionModal(context, config),
                       ),
                     ],
                   );
@@ -132,7 +135,7 @@ class _SettingsState extends State<Settings> {
                     _buildSettingsTile(
                       icon: CupertinoIcons.car_detailed,
                       color: CupertinoColors.systemGreen,
-                      title: 'Veículos',
+                      title: config.devicePlural,
                       onTap: () => Navigator.pushNamed(context, '/device_list'),
                     ),
                     _buildSettingsTile(
@@ -167,7 +170,7 @@ class _SettingsState extends State<Settings> {
                     title: const Text('Modo Noturno'),
                     additionalInfo: Text(_getThemeModeText(themeStore.themeMode)),
                     trailing: const CupertinoListTileChevron(),
-                    onTap: () => _showThemeSelectionDialog(context, themeStore),
+                    onTap: () => _showThemeSelectionDialog(context, themeStore, config),
                   ),
                 ],
               ),
@@ -186,7 +189,7 @@ class _SettingsState extends State<Settings> {
                       child: const Icon(CupertinoIcons.arrow_right_square_fill, color: CupertinoColors.white, size: 20),
                     ),
                     title: const Text('Sair', style: TextStyle(color: CupertinoColors.systemRed)),
-                    onTap: () => _showLogoutConfirmation(context),
+                    onTap: () => _showLogoutConfirmation(context, config),
                   ),
                 ],
               ),
@@ -263,7 +266,7 @@ class _SettingsState extends State<Settings> {
     }
   }
 
-  void _showThemeSelectionDialog(BuildContext context, ThemeStore themeStore) {
+  void _showThemeSelectionDialog(BuildContext context, ThemeStore themeStore, SegmentConfigProvider config) {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
@@ -283,14 +286,14 @@ class _SettingsState extends State<Settings> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
+          child: Text(config.label(LabelKeys.cancel)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
     );
   }
 
-  void _showLogoutConfirmation(BuildContext context) {
+  void _showLogoutConfirmation(BuildContext context, SegmentConfigProvider config) {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
@@ -298,7 +301,7 @@ class _SettingsState extends State<Settings> {
         content: const Text('Tem certeza que deseja sair?'),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(config.label(LabelKeys.cancel)),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -314,7 +317,7 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  void _showCompanySelectionModal(BuildContext context) {
+  void _showCompanySelectionModal(BuildContext context, SegmentConfigProvider config) {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
@@ -332,7 +335,7 @@ class _SettingsState extends State<Settings> {
           );
         }).toList() ?? [],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
+          child: Text(config.label(LabelKeys.cancel)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
