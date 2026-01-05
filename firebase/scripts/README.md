@@ -49,6 +49,17 @@ npm run refresh-claims
 
 ## 📋 Scripts Disponíveis
 
+### `seed-segments`
+Popula a collection `segments` com os segmentos iniciais do sistema (HVAC, Automotivo, etc.).
+
+```bash
+npm run seed-segments
+# ou com arquivo de credenciais
+npm run seed-segments /caminho/service-account-key.json
+```
+
+**Nota:** Execute este script após configurar um novo ambiente ou para atualizar os segmentos existentes.
+
 ### `refresh-claims`
 Atualiza o campo `_claimsRefreshedAt` em todos os usuários para forçar o refresh de claims.
 

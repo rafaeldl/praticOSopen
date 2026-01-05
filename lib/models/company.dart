@@ -14,6 +14,7 @@ class Company extends BaseAudit {
   String? logo;
   String? phone;
   String? site;
+  String? segment; // ID do segmento de negócio (hvac, automotive, etc.)
   UserAggr? owner;
   List<UserRoleAggr>? users;
 

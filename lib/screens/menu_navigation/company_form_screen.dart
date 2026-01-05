@@ -2,6 +2,7 @@ import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
@@ -20,6 +21,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
 
   bool _isLoading = true;
   Company? _company;
+  Map<String, dynamic>? _selectedSegment;
 
   @override
   void initState() {
@@ -31,8 +33,27 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     setState(() => _isLoading = true);
     if (Global.companyAggr?.id != null) {
       _company = await _companyStore.retrieveCompany(Global.companyAggr!.id);
+      if (_company?.segment != null) {
+        await _loadSegment(_company!.segment!);
+      }
     }
     setState(() => _isLoading = false);
+  }
+
+  Future<void> _loadSegment(String segmentId) async {
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('segments')
+          .doc(segmentId)
+          .get();
+      if (doc.exists) {
+        setState(() {
+          _selectedSegment = {'id': segmentId, ...doc.data()!};
+        });
+      }
+    } catch (e) {
+      // Ignorar erro silenciosamente
+    }
   }
 
   Future<void> _submit() async {
@@ -63,6 +84,60 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  Future<void> _pickSegment() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('segments')
+          .where('active', isEqualTo: true)
+          .orderBy('name')
+          .get();
+
+      final segments = snapshot.docs
+          .map((doc) => {'id': doc.id, ...doc.data()})
+          .toList();
+
+      if (segments.isEmpty) return;
+
+      if (!mounted) return;
+
+      showCupertinoModalPopup(
+        context: context,
+        builder: (BuildContext context) => CupertinoActionSheet(
+          title: const Text('Selecionar Segmento'),
+          message: const Text('Escolha o ramo de atuação da empresa'),
+          actions: segments.map((segment) {
+            return CupertinoActionSheetAction(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    segment['icon'] ?? '🔧',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(segment['name'] ?? 'Sem nome'),
+                ],
+              ),
+              onPressed: () {
+                setState(() {
+                  _selectedSegment = segment;
+                  _company?.segment = segment['id'];
+                });
+                Navigator.pop(context);
+              },
+            );
+          }).toList(),
+          cancelButton: CupertinoActionSheetAction(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+      );
+    } catch (e) {
+      // Ignorar erro silenciosamente
     }
   }
 
@@ -212,6 +287,53 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     textAlign: TextAlign.right,
                     onSaved: (val) => _company?.name = val,
                     validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                  ),
+                  GestureDetector(
+                    onTap: _pickSegment,
+                    child: Container(
+                      color: CupertinoColors.systemBackground,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Row(
+                        children: [
+                          const Text(
+                            "Segmento",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          const Spacer(),
+                          if (_selectedSegment != null) ...[
+                            Text(
+                              _selectedSegment!['icon'] ?? '🔧',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(width: 4),
+                            Flexible(
+                              child: Text(
+                                _selectedSegment!['name'] ?? 'Sem nome',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: CupertinoColors.label.resolveFrom(context),
+                                ),
+                                textAlign: TextAlign.right,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ] else
+                            Text(
+                              "Selecionar",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: CupertinoColors.placeholderText.resolveFrom(context),
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            CupertinoIcons.chevron_forward,
+                            size: 20,
+                            color: CupertinoColors.systemGrey.resolveFrom(context),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   CupertinoTextFormFieldRow(
                     prefix: const Text("Email", style: TextStyle(fontSize: 16)),

@@ -9,7 +9,7 @@ import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/login.dart';
-import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
+import 'package:praticos/screens/auth_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
 
   Widget _buildHome(_authStore) {
     if (_authStore.currentUser != null && _authStore.currentUser.data != null) {
-      return NavigationController();
+      return AuthWrapper(authStore: _authStore);
     } else {
       return LoginPage();
     }
