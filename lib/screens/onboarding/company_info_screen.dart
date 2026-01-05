@@ -14,7 +14,7 @@ class CompanyInfoScreen extends StatefulWidget {
   final String? initialLogoUrl;
 
   const CompanyInfoScreen({
-    Key? key,
+    super.key,
     this.companyId,
     this.initialName,
     this.initialAddress,
@@ -22,7 +22,7 @@ class CompanyInfoScreen extends StatefulWidget {
     this.initialEmail,
     this.initialSite,
     this.initialLogoUrl,
-  }) : super(key: key);
+  });
 
   @override
   State<CompanyInfoScreen> createState() => _CompanyInfoScreenState();

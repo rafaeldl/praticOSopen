@@ -3,7 +3,7 @@ import 'package:praticos/models/service.dart';
 import 'package:flutter/material.dart';
 
 class InfoFormScreen extends StatelessWidget {
-  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final Service _service = Service();
   final ServiceStore _serviceStore = ServiceStore();
 

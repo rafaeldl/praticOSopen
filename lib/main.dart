@@ -99,9 +99,9 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  Widget _buildHome(_authStore) {
-    if (_authStore.currentUser != null && _authStore.currentUser.data != null) {
-      return AuthWrapper(authStore: _authStore);
+  Widget _buildHome(authStore) {
+    if (authStore.currentUser != null && authStore.currentUser.data != null) {
+      return AuthWrapper(authStore: authStore);
     } else {
       return LoginPage();
     }

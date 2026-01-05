@@ -15,7 +15,7 @@ class SelectSegmentScreen extends StatefulWidget {
   final XFile? logoFile;
 
   const SelectSegmentScreen({
-    Key? key,
+    super.key,
     this.companyId,
     required this.companyName,
     required this.address,
@@ -23,7 +23,7 @@ class SelectSegmentScreen extends StatefulWidget {
     required this.email,
     this.site,
     this.logoFile,
-  }) : super(key: key);
+  });
 
   @override
   State<SelectSegmentScreen> createState() => _SelectSegmentScreenState();

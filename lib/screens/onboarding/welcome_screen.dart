@@ -11,7 +11,7 @@ class WelcomeScreen extends StatelessWidget {
   final String? initialLogoUrl;
 
   const WelcomeScreen({
-    Key? key,
+    super.key,
     this.companyId,
     this.initialName,
     this.initialAddress,
@@ -19,7 +19,7 @@ class WelcomeScreen extends StatelessWidget {
     this.initialEmail,
     this.initialSite,
     this.initialLogoUrl,
-  }) : super(key: key);
+  });
 
   void _startSetup(BuildContext context) {
     Navigator.push(
@@ -54,7 +54,7 @@ class WelcomeScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(22), // iOS App Icon style
                   boxShadow: [
                     BoxShadow(
-                      color: CupertinoColors.systemGrey.withOpacity(0.2),
+                      color: CupertinoColors.systemGrey.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),

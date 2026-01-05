@@ -7,7 +7,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 
 class CustomerFormScreen extends StatefulWidget {
-  const CustomerFormScreen({Key? key}) : super(key: key);
+  const CustomerFormScreen({super.key});
 
   @override
   State<CustomerFormScreen> createState() => _CustomerFormScreenState();

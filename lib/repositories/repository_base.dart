@@ -26,5 +26,5 @@ class Page<T extends BaseAudit> {
 
   int getSize() => content.length;
 
-  bool hasContent() => content.length > 0 ? true : false;
+  bool hasContent() => content.isNotEmpty ? true : false;
 }

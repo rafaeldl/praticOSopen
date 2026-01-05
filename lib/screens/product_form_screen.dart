@@ -6,7 +6,7 @@ import 'package:praticos/models/product.dart';
 import 'package:praticos/widgets/cached_image.dart';
 
 class ProductFormScreen extends StatefulWidget {
-  const ProductFormScreen({Key? key}) : super(key: key);
+  const ProductFormScreen({super.key});
 
   @override
   State<ProductFormScreen> createState() => _ProductFormScreenState();

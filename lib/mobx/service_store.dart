@@ -29,7 +29,7 @@ abstract class _ServiceStore with Store {
 
   _ServiceStore() {
     SharedPreferences.getInstance().then((value) {
-      this.companyId = value.getString('companyId');
+      companyId = value.getString('companyId');
       retrieveServices();
     });
   }

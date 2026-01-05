@@ -224,12 +224,13 @@ class _OrderFormState extends State<OrderForm> {
                     final index = entry.key;
                     final service = entry.value;
                     return _buildServiceRow(context, service, index, index == services.length - 1, config);
-                  }).toList(),
+                  }),
               ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: CupertinoButton(
+                onPressed: _addService,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -238,7 +239,6 @@ class _OrderFormState extends State<OrderForm> {
                     Text(config.label(LabelKeys.createService)),
                   ],
                 ),
-                onPressed: _addService,
               ),
             ),
           ],
@@ -272,12 +272,13 @@ class _OrderFormState extends State<OrderForm> {
                     final index = entry.key;
                     final product = entry.value;
                     return _buildProductRow(context, product, index, index == products.length - 1, config);
-                  }).toList(),
+                  }),
               ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: CupertinoButton(
+                onPressed: _addProduct,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -286,7 +287,6 @@ class _OrderFormState extends State<OrderForm> {
                      Text(config.label(LabelKeys.createProduct)),
                   ],
                 ),
-                onPressed: _addProduct,
               ),
             ),
           ],
@@ -686,11 +686,11 @@ class _OrderFormState extends State<OrderForm> {
            );
          }).toList(),
          cancelButton: CupertinoActionSheetAction(
-            child: Text(config.label(LabelKeys.cancel)),
             isDefaultAction: true,
             onPressed: () {
               Navigator.pop(context);
             },
+            child: Text(config.label(LabelKeys.cancel)),
           ),
        ),
      );
@@ -844,7 +844,9 @@ class _OrderFormState extends State<OrderForm> {
             child: Text(config.label(LabelKeys.delete)),
             onPressed: () {
               _store.deleteOrder().then((_) {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                if (mounted) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }
               });
             },
           ),
@@ -911,7 +913,7 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   String _convertToCurrency(double? total) {
-    if (total == null) total = 0.0;
+    total ??= 0.0;
     NumberFormat numberFormat = NumberFormat.currency(
       locale: 'pt-BR',
       symbol: 'R\$',
@@ -1012,7 +1014,7 @@ class _OrderFormState extends State<OrderForm> {
         filename: "${config.serviceOrder}-${order.number ?? 'NOVA'}.pdf",
       );
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         navigator.pop();
 
         showCupertinoDialog(
@@ -1504,7 +1506,7 @@ class _OrderFormState extends State<OrderForm> {
             _modernTableCell(_convertToCurrency(p.total), baseFont, alignRight: true),
           ],
         );
-      }).toList(),
+      }),
     ],
   );
 }
@@ -1534,7 +1536,7 @@ pw.Widget _printServices(Order order, pw.Font baseFont, pw.Font boldFont) {
             _modernTableCell(_convertToCurrency(s.value), baseFont, alignRight: true),
           ],
         );
-      }).toList(),
+      }),
     ],
   );
 }

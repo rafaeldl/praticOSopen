@@ -22,7 +22,7 @@ abstract class _CustomerStore with Store {
 
   _CustomerStore() {
     SharedPreferences.getInstance().then((value) {
-      this.companyId = value.getString('companyId');
+      companyId = value.getString('companyId');
       retrieveCustomers();
     });
   }

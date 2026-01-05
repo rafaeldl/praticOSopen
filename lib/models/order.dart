@@ -42,15 +42,16 @@ class Order extends BaseAuditCompany {
   Order();
 
   factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$OrderToJson(this);
-  OrderAggr toAggr() => _$OrderAggrFromJson(this.toJson());
+  OrderAggr toAggr() => _$OrderAggrFromJson(toJson());
 
   int compareToCustomer(Order? b) {
     if (b == null) return 0;
     String name = b.customer?.name?.toString() ?? '';
-    int? compare = this.customer?.name?.toString().compareTo(name);
-    if (compare == 0 && b.number != null && this.number != null) {
-      compare = b.number!.compareTo(this.number!);
+    int? compare = customer?.name?.toString().compareTo(name);
+    if (compare == 0 && b.number != null && number != null) {
+      compare = b.number!.compareTo(number!);
     }
     return compare ?? 0;
   }
@@ -58,9 +59,9 @@ class Order extends BaseAuditCompany {
   int compareToDueDate(Order? b) {
     if (b == null) return 0;
     String name = b.customer?.name?.toString() ?? '';
-    int? compare = this.customer?.name.toString().compareTo(name);
-    if (compare == 0 && b.dueDate != null && this.dueDate != null) {
-      compare = b.dueDate!.compareTo(this.dueDate!);
+    int? compare = customer?.name.toString().compareTo(name);
+    if (compare == 0 && b.dueDate != null && dueDate != null) {
+      compare = b.dueDate!.compareTo(dueDate!);
     }
     return compare ?? 0;
   }
@@ -74,6 +75,7 @@ class OrderAggr extends BaseAuditCompanyAggr {
   OrderAggr();
   factory OrderAggr.fromJson(Map<String, dynamic> json) =>
       _$OrderAggrFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$OrderAggrToJson(this);
 }
 

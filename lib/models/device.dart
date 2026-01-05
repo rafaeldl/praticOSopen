@@ -16,8 +16,9 @@ class Device extends BaseAuditCompany {
 
   Device();
   factory Device.fromJson(Map<String, dynamic> json) => _$DeviceFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$DeviceToJson(this);
-  DeviceAggr toAggr() => _$DeviceAggrFromJson(this.toJson());
+  DeviceAggr toAggr() => _$DeviceAggrFromJson(toJson());
 }
 
 @JsonSerializable()
@@ -29,5 +30,6 @@ class DeviceAggr extends BaseAuditCompanyAggr {
   DeviceAggr();
   factory DeviceAggr.fromJson(Map<String, dynamic> json) =>
       _$DeviceAggrFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$DeviceAggrToJson(this);
 }

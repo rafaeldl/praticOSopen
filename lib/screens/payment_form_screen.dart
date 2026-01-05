@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 
 class PaymentFormScreen extends StatefulWidget {
-  const PaymentFormScreen({Key? key}) : super(key: key);
+  const PaymentFormScreen({super.key});
 
   @override
   State<PaymentFormScreen> createState() => _PaymentFormScreenState();

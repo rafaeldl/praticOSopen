@@ -159,12 +159,14 @@ abstract class _OrderStore with Store {
   _OrderStore() {
     autorun((_) {
       // Protege contra valores nulos
-      if (this.orderStream == null ||
-          this.orderStream!.data == null ||
-          this.order == null) return;
+      if (orderStream == null ||
+          orderStream!.data == null ||
+          order == null) {
+        return;
+      }
 
       // Atualiza o número da OS a partir do stream
-      this.order!.number = this.orderStream!.data.number;
+      order!.number = orderStream!.data.number;
     });
   }
 
@@ -207,18 +209,18 @@ abstract class _OrderStore with Store {
     this.order = order;
 
     // Atualiza a data de criação
-    this.createdAt = order.createdAt;
+    createdAt = order.createdAt;
 
     // Se não tiver data de criação, define uma
     if (this.order!.createdAt == null) {
       this.order!.createdAt = DateTime.now();
-      this.createdAt = this.order!.createdAt;
+      createdAt = this.order!.createdAt;
     }
 
     // Configura o stream se tiver ID
     if (orderId != null && companyId != null) {
       this.order!.id = orderId;
-      this.orderStream = repository.streamSingle(companyId!, orderId).asObservable();
+      orderStream = repository.streamSingle(companyId!, orderId).asObservable();
     }
 
     customer = order.customer;
@@ -254,7 +256,7 @@ abstract class _OrderStore with Store {
 
   setDueDate(DateTime date) {
     order!.dueDate = date;
-    this.dueDate = dateToString(date);
+    dueDate = dateToString(date);
     createItem();
   }
 
@@ -282,8 +284,8 @@ abstract class _OrderStore with Store {
 
   @action
   updateOrder() {
-    services = this.order!.services!.asObservable();
-    products = this.order!.products!.asObservable();
+    services = order!.services!.asObservable();
+    products = order!.products!.asObservable();
     updatePayment();
     updateTotal();
     createItem();
@@ -296,22 +298,22 @@ abstract class _OrderStore with Store {
   }
 
   void updatePayment() {
-    if (this.order == null) return;
+    if (order == null) return;
 
-    if (['quote', 'canceled'].contains(this.order!.status)) {
-      this.order!.payment = null;
-      this.payment = '';
+    if (['quote', 'canceled'].contains(order!.status)) {
+      order!.payment = null;
+      payment = '';
       return;
     }
 
-    if (this.order!.payment == null) {
-      this.order!.payment = 'unpaid';
+    if (order!.payment == null) {
+      order!.payment = 'unpaid';
     }
 
-    if (this.order!.payment == 'paid') {
-      this.payment = 'Pago';
-    } else if (this.order!.payment == 'unpaid') {
-      this.payment = 'A receber';
+    if (order!.payment == 'paid') {
+      payment = 'Pago';
+    } else if (order!.payment == 'unpaid') {
+      payment = 'A receber';
     }
   }
 
@@ -472,7 +474,7 @@ abstract class _OrderStore with Store {
   @action
   setDiscount(double value) {
     order!.discount = value;
-    this.discount = value;
+    discount = value;
     updateTotal();
     createItem();
   }
@@ -488,7 +490,7 @@ abstract class _OrderStore with Store {
     });
 
     if (order?.discount == null) order!.discount = 0.0;
-    this.discount = order?.discount;
+    discount = order?.discount;
     temp -= order!.discount!;
 
     order?.total = temp;
@@ -507,13 +509,13 @@ abstract class _OrderStore with Store {
             // Se encontrou, usa o ID da existente
             order!.id = existingOrder.id;
             repository.updateItem(companyId!, order);
-            this.orderStream =
+            orderStream =
                 repository.streamSingle(companyId!, order!.id).asObservable();
           } else {
             // Cria nova se não encontrou
             repository.createItem(companyId!, order).then((_) {
               if (order!.id != null) {
-                this.orderStream =
+                orderStream =
                     repository.streamSingle(companyId!, order!.id).asObservable();
               }
             });
@@ -523,7 +525,7 @@ abstract class _OrderStore with Store {
         // Cria nova OS sem número
         repository.createItem(companyId!, order).then((_) {
           if (order!.id != null) {
-            this.orderStream =
+            orderStream =
                 repository.streamSingle(companyId!, order!.id).asObservable();
           }
         });
@@ -531,9 +533,9 @@ abstract class _OrderStore with Store {
     } else {
       // Atualiza OS existente
       repository.updateItem(companyId!, order).then((_) {
-        if (this.orderStream == null ||
-            this.orderStream!.value?.id != order!.id) {
-          this.orderStream = repository.streamSingle(companyId!, order!.id).asObservable();
+        if (orderStream == null ||
+            orderStream!.value?.id != order!.id) {
+          orderStream = repository.streamSingle(companyId!, order!.id).asObservable();
         }
       });
     }

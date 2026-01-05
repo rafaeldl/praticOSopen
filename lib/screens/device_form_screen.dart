@@ -9,7 +9,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 
 class DeviceFormScreen extends StatefulWidget {
-  const DeviceFormScreen({Key? key}) : super(key: key);
+  const DeviceFormScreen({super.key});
 
   @override
   State<DeviceFormScreen> createState() => _DeviceFormScreenState();

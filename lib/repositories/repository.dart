@@ -44,36 +44,40 @@ abstract class Repository<T extends BaseAudit?> {
     if (args != null) {
       for (QueryArgs arg in args) {
         String oper = arg.oper;
-        if (ref == null)
+        if (ref == null) {
           ref = Function.apply(
-              collref.where, [arg.key], {new Symbol(oper): arg.value});
-        else
+              collref.where, [arg.key], {Symbol(oper): arg.value});
+        } else {
           ref = Function.apply(
-              ref.where, [arg.key], {new Symbol(oper): arg.value});
+              ref.where, [arg.key], {Symbol(oper): arg.value});
+        }
       }
     }
     if (orderBy != null) {
-      orderBy.forEach((order) {
-        if (ref == null)
+      for (var order in orderBy) {
+        if (ref == null) {
           ref = collref.orderBy(order.field, descending: order.descending);
-        else
-          ref = ref!.orderBy(order.field, descending: order.descending);
-      });
+        } else {
+          ref = ref.orderBy(order.field, descending: order.descending);
+        }
+      }
     }
     if (limit != null) {
-      if (ref == null)
+      if (ref == null) {
         ref = collref.limit(limit);
-      else
-        ref = ref!.limit(limit);
+      } else {
+        ref = ref.limit(limit);
+      }
     }
     if (startAfter != null && orderBy != null) {
       ref = ref!.startAfter([startAfter]);
     }
     QuerySnapshot query;
-    if (ref != null)
-      query = await ref!.get();
-    else
+    if (ref != null) {
+      query = await ref.get();
+    } else {
       query = await collref.get();
+    }
 
     return query.docs.map((doc) {
       return _fromJsonID(doc.id, doc.data() as Map<String, dynamic>);
@@ -86,21 +90,23 @@ abstract class Repository<T extends BaseAudit?> {
     Query? ref;
     if (orderBy != null) {
       for (var order in orderBy) {
-        if (ref == null)
+        if (ref == null) {
           ref = collref.orderBy(order.field, descending: order.descending);
-        else
+        } else {
           ref = ref.orderBy(order.field, descending: order.descending);
+        }
       }
     }
     if (args != null) {
       for (QueryArgs arg in args) {
         String oper = arg.oper;
-        if (ref == null)
+        if (ref == null) {
           ref = Function.apply(
-              collref.where, [arg.key], {new Symbol(oper): arg.value});
-        else
+              collref.where, [arg.key], {Symbol(oper): arg.value});
+        } else {
           ref = Function.apply(
-              ref.where, [arg.key], {new Symbol(oper): arg.value});
+              ref.where, [arg.key], {Symbol(oper): arg.value});
+        }
       }
     }
     if (ref != null) {
@@ -112,10 +118,11 @@ abstract class Repository<T extends BaseAudit?> {
       return querySnapshot.map((snap) => snap.docs.map((doc) {
             return _fromJsonID(doc.id, doc.data() as Map<String, dynamic>);
           }).toList());
-    } else
+    } else {
       return collref.snapshots().map((snap) => snap.docs.map((doc) {
             return _fromJsonID(doc.id, doc.data() as Map<String, dynamic>);
           }).toList());
+    }
   }
 
   T _fromJsonID(String? id, Map<String, dynamic> data) {

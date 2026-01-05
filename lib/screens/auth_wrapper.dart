@@ -15,7 +15,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 class AuthWrapper extends StatelessWidget {
   final AuthStore authStore;
 
-  const AuthWrapper({Key? key, required this.authStore}) : super(key: key);
+  const AuthWrapper({super.key, required this.authStore});
 
   @override
   Widget build(BuildContext context) {

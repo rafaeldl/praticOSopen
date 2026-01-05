@@ -269,11 +269,11 @@ class _HomeState extends State<Home> {
                       orderStore.setCustomerFilter(null);
                       final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
                       _loadOrders(_getFilters(configInner));
-                    },
+                    }, minimumSize: Size(0, 0),
                     child: Text(
                       config.label(LabelKeys.cancel), // Or "Limpar" if we had it. Cancel is close enough for prototype.
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                    ), minimumSize: Size(0, 0),
+                    ),
                   ),
                 ],
               ),

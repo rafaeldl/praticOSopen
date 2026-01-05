@@ -12,7 +12,7 @@ part 'auth_store.g.dart';
 class AuthStore = _AuthStore with _$AuthStore;
 
 abstract class _AuthStore with Store {
-  AuthRepository _auth = AuthRepository();
+  final AuthRepository _auth = AuthRepository();
 
   CompanyStore companyStore = CompanyStore();
   UserStore userStore = UserStore();

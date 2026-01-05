@@ -14,8 +14,9 @@ class User extends BaseAudit {
 
   User();
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$UserToJson(this);
-  UserAggr toAggr() => _$UserAggrFromJson(this.toJson());
+  UserAggr toAggr() => _$UserAggrFromJson(toJson());
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -25,5 +26,6 @@ class UserAggr extends Base {
   UserAggr();
   factory UserAggr.fromJson(Map<String, dynamic> json) =>
       _$UserAggrFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$UserAggrToJson(this);
 }

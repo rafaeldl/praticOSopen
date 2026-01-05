@@ -10,7 +10,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 
 class OrderServiceScreen extends StatefulWidget {
-  const OrderServiceScreen({Key? key}) : super(key: key);
+  const OrderServiceScreen({super.key});
 
   @override
   State<OrderServiceScreen> createState() => _OrderServiceScreenState();

@@ -18,7 +18,7 @@ import 'dart:io';
 class OrderPhotosWidget extends StatelessWidget {
   final OrderStore store;
 
-  const OrderPhotosWidget({Key? key, required this.store}) : super(key: key);
+  const OrderPhotosWidget({super.key, required this.store});
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +193,7 @@ class OrderPhotosWidget extends StatelessWidget {
   Widget _buildPhotoActionButton(BuildContext context, int index, SegmentConfigProvider config, {bool small = false}) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      onPressed: () => _showActionSheet(context, index, config),
+      onPressed: () => _showActionSheet(context, index, config), minimumSize: Size(0, 0),
       child: Container(
         padding: EdgeInsets.all(small ? 4 : 6),
         decoration: BoxDecoration(
@@ -205,7 +205,7 @@ class OrderPhotosWidget extends StatelessWidget {
           color: CupertinoColors.white,
           size: small ? 16 : 20,
         ),
-      ), minimumSize: Size(0, 0),
+      ),
     );
   }
 
@@ -305,13 +305,13 @@ class PhotoViewerScreen extends StatefulWidget {
   final SegmentConfigProvider config;
 
   const PhotoViewerScreen({
-    Key? key,
+    super.key,
     required this.photos,
     required this.initialIndex,
     required this.onDelete,
     required this.onSetCover,
     required this.config,
-  }) : super(key: key);
+  });
 
   @override
   _PhotoViewerScreenState createState() => _PhotoViewerScreenState();
@@ -367,6 +367,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
       final box = context.findRenderObject() as RenderBox?;
       final size = MediaQuery.of(context).size;
 
+      // ignore: deprecated_member_use
       await Share.shareXFiles(
         [XFile(file.path)],
         text: 'Foto da ${widget.config.serviceOrder}',
@@ -410,6 +411,7 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
           children: [
              CupertinoButton(
               padding: EdgeInsets.zero,
+              onPressed: _sharePhoto,
                child: _isSharing
                 ? const SizedBox(
                     width: 20,
@@ -417,7 +419,6 @@ class _PhotoViewerScreenState extends State<PhotoViewerScreen> {
                     child: CupertinoActivityIndicator(color: CupertinoColors.white)
                   )
                 : const Icon(CupertinoIcons.share, color: CupertinoColors.white),
-              onPressed: _sharePhoto,
             ),
              CupertinoButton(
               padding: EdgeInsets.zero,

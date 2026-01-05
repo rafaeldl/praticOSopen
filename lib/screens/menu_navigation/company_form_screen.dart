@@ -11,7 +11,7 @@ import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 
 class CompanyFormScreen extends StatefulWidget {
-  const CompanyFormScreen({Key? key}) : super(key: key);
+  const CompanyFormScreen({super.key});
 
   @override
   State<CompanyFormScreen> createState() => _CompanyFormScreenState();

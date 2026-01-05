@@ -13,7 +13,7 @@ class OrderItemRow extends StatelessWidget {
   final VoidCallback? onDelete;
 
   const OrderItemRow({
-    Key? key,
+    super.key,
     this.title = '',
     this.description = '',
     this.quantity,
@@ -22,7 +22,7 @@ class OrderItemRow extends StatelessWidget {
     this.fallbackIcon,
     this.onTap,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

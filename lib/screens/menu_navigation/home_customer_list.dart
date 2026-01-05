@@ -16,7 +16,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
   CustomerStore customerStore = CustomerStore();
   late OrderStore orderStore;
   late BottomNavigationBarStore navegationStore;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
   @override

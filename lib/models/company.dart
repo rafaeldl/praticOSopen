@@ -21,8 +21,9 @@ class Company extends BaseAudit {
   Company();
   factory Company.fromJson(Map<String, dynamic> json) =>
       _$CompanyFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$CompanyToJson(this);
-  CompanyAggr toAggr() => _$CompanyAggrFromJson(this.toJson());
+  CompanyAggr toAggr() => _$CompanyAggrFromJson(toJson());
 }
 
 @JsonSerializable(explicitToJson: true)
@@ -32,5 +33,6 @@ class CompanyAggr extends Base {
   CompanyAggr();
   factory CompanyAggr.fromJson(Map<String, dynamic> json) =>
       _$CompanyAggrFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$CompanyAggrToJson(this);
 }

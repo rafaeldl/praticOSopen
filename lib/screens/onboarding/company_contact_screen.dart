@@ -13,7 +13,7 @@ class CompanyContactScreen extends StatefulWidget {
   final String? initialSite;
 
   const CompanyContactScreen({
-    Key? key,
+    super.key,
     this.companyId,
     required this.companyName,
     this.address,
@@ -21,7 +21,7 @@ class CompanyContactScreen extends StatefulWidget {
     this.initialPhone,
     this.initialEmail,
     this.initialSite,
-  }) : super(key: key);
+  });
 
   @override
   State<CompanyContactScreen> createState() => _CompanyContactScreenState();

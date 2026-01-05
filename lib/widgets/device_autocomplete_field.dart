@@ -13,7 +13,7 @@ class DeviceAutocompleteField extends StatefulWidget {
   final String? brandId; // ID da brand selecionada (para modelos)
 
   const DeviceAutocompleteField({
-    Key? key,
+    super.key,
     required this.companyId,
     required this.label,
     required this.type,
@@ -21,7 +21,7 @@ class DeviceAutocompleteField extends StatefulWidget {
     required this.onSelected,
     this.brandFilter,
     this.brandId,
-  }) : super(key: key);
+  });
 
   @override
   State<DeviceAutocompleteField> createState() =>
