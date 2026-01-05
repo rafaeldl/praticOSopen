@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9f7de07b-ccf5-4029-baeb-65b1a1131d66" name="Changes" comment="" />
+    <list default="true" id="9f7de07b-ccf5-4029-baeb-65b1a1131d66" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../lib/screens/onboarding/company_info_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../lib/screens/onboarding/company_info_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lib/screens/onboarding/select_segment_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../lib/screens/onboarding/select_segment_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../lib/widgets/device_autocomplete_field.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../lib/widgets/device_autocomplete_field.dart" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -56,7 +60,7 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "docs/tenant-migration-plan",
+    "git-widget-placeholder": "feature/device-catalog-mvp",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/rafaeldl/Projetos/praticOSopen/android"
   }

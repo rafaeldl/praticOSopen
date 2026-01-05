@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:easy_mask/easy_mask.dart';
 import 'select_segment_screen.dart';
 
 class CompanyInfoScreen extends StatefulWidget {
@@ -38,7 +39,7 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
       // Navega para escolha de segmento, passando os dados
       Navigator.push(
         context,
-        MaterialPageRoute(
+        CupertinoPageRoute(
           builder: (context) => SelectSegmentScreen(
             companyId: widget.companyId,
             companyName: _nameController.text,
@@ -52,87 +53,101 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Criar Empresa'),
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Criar Empresa'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
+      child: SafeArea(
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'Bem-vindo ao PráticOS!',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Vamos começar com alguns dados da sua empresa',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
+              const SizedBox(height: 20),
+              
+              // Cabeçalho de boas-vindas
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    Text(
+                      'Bem-vindo ao PráticOS!',
+                      style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
+                      textAlign: TextAlign.center,
                     ),
-              ),
-              const SizedBox(height: 32),
-
-              // Nome da empresa
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nome da Empresa *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.business),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Vamos começar com alguns dados da sua empresa',
+                      style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Nome da empresa é obrigatório';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 16),
+              
+              const SizedBox(height: 20),
 
-              // Telefone
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(
-                  labelText: 'Telefone *',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.phone),
-                  hintText: '(00) 00000-0000',
-                ),
-                keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Telefone é obrigatório';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Endereço (opcional)
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(
-                  labelText: 'Endereço (Opcional)',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.location_on),
-                ),
-                maxLines: 2,
+              // Formulário Agrupado estilo iOS
+              CupertinoListSection.insetGrouped(
+                header: const Text('DADOS BÁSICOS'),
+                children: [
+                  CupertinoTextFormFieldRow(
+                    controller: _nameController,
+                    prefix: const Text('Nome'),
+                    placeholder: 'Nome da Empresa',
+                    textCapitalization: TextCapitalization.words,
+                    textAlign: TextAlign.right,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Obrigatório';
+                      }
+                      return null;
+                    },
+                  ),
+                  CupertinoTextFormFieldRow(
+                    controller: _phoneController,
+                    prefix: const Text('Telefone'),
+                    placeholder: '(00) 00000-0000',
+                    keyboardType: TextInputType.phone,
+                    textAlign: TextAlign.right,
+                    inputFormatters: [
+                      TextInputMask(mask: ['(99) 9999-9999', '(99) 99999-9999'])
+                    ],
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Obrigatório';
+                      }
+                      return null;
+                    },
+                  ),
+                  CupertinoTextFormFieldRow(
+                    controller: _addressController,
+                    prefix: const Text('Endereço'),
+                    placeholder: 'Opcional',
+                    textCapitalization: TextCapitalization.sentences,
+                    textAlign: TextAlign.right,
+                    maxLines: 2,
+                  ),
+                ],
               ),
 
               const Spacer(),
 
-              ElevatedButton(
-                onPressed: _next,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+              // Botão de Ação
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: CupertinoButton.filled(
+                    onPressed: _next,
+                    child: const Text('Próximo'),
+                  ),
                 ),
-                child: const Text('Próximo'),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
             ],
           ),
         ),

@@ -120,7 +120,16 @@ abstract class Repository<T extends BaseAudit?> {
 
   T _fromJsonID(String? id, Map<String, dynamic> data) {
     Map<String, dynamic> dataId = {};
-    dataId.addAll(data);
+    
+    // Converte Timestamps para String ISO8601 antes de passar para o generated code
+    data.forEach((key, value) {
+      if (value is Timestamp) {
+        dataId[key] = value.toDate().toIso8601String();
+      } else {
+        dataId[key] = value;
+      }
+    });
+    
     dataId['id'] = id;
     return fromJson(dataId);
   }

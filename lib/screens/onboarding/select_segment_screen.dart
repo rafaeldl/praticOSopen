@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -24,13 +24,13 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
   bool _isCreating = false;
 
   Future<void> _saveCompany(
-    BuildContext context,
     String segmentId,
     Map<String, dynamic> segmentData,
   ) async {
     if (_isCreating) return;
 
     setState(() => _isCreating = true);
+    debugPrint('🚀 _saveCompany started');
 
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -39,27 +39,24 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
       final db = FirebaseFirestore.instance;
 
       if (widget.companyId != null) {
+        debugPrint('🔄 Updating company ${widget.companyId}...');
         // Atualiza empresa existente
         await db.collection('companies').doc(widget.companyId).update({
           'name': widget.companyName,
           'phone': widget.phone,
           'address': widget.address,
           'segment': segmentId,
-          'updatedAt': FieldValue.serverTimestamp(),
+          'updatedAt': DateTime.now().toIso8601String(),
         });
+        debugPrint('✅ Company updated successfully');
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Empresa atualizada com sucesso!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-
+          debugPrint('➡ Navigating to /');
           // Redireciona para home
-          Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
         }
       } else {
+        debugPrint('✨ Creating new company...');
         // Cria nova empresa
         final companyRef = await db.collection('companies').add({
           'name': widget.companyName,
@@ -67,38 +64,44 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
           'address': widget.address,
           'segment': segmentId,
           'owner': user.uid,
-          'createdAt': FieldValue.serverTimestamp(),
-          'updatedAt': FieldValue.serverTimestamp(),
+          'createdAt': DateTime.now().toIso8601String(),
+          'updatedAt': DateTime.now().toIso8601String(),
         });
+        debugPrint('✅ Company created: ${companyRef.id}');
 
+        debugPrint('👤 Updating user profile...');
         // Adiciona o usuário como membro da empresa
         await db.collection('users').doc(user.uid).set({
           'email': user.email,
           'name': user.displayName ?? user.email?.split('@')[0],
           'companies': FieldValue.arrayUnion([companyRef.id]),
-          'updatedAt': FieldValue.serverTimestamp(),
+          'updatedAt': DateTime.now().toIso8601String(),
         }, SetOptions(merge: true));
+        debugPrint('✅ User profile updated');
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Empresa criada com sucesso!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-
-          // Redireciona para home
-          Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
+          debugPrint('➡ Navigating to /');
+          // Redireciona para home imediatamente
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
         }
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('❌ Error in _saveCompany: $e');
+      debugPrint(stack.toString());
       setState(() => _isCreating = false);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar empresa: $e'),
-            backgroundColor: Colors.red,
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Erro'),
+            content: Text(e.toString()),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
           ),
         );
       }
@@ -107,135 +110,137 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Qual o ramo do seu negócio?'),
-        centerTitle: true,
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Escolha o Ramo'),
       ),
-      body: _isCreating
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
-                  Text(widget.companyId != null
-                      ? 'Atualizando empresa...'
-                      : 'Criando empresa...'),
-                ],
-              ),
-            )
-          : StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('segments')
-                  .where('active', isEqualTo: true)
-                  .orderBy('name')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                        const SizedBox(height: 16),
-                        const Text('Erro ao carregar segmentos'),
-                        const SizedBox(height: 8),
-                        Text(
-                          snapshot.error.toString(),
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+      child: SafeArea(
+        child: DefaultTextStyle(
+          style: CupertinoTheme.of(context).textTheme.textStyle,
+          child: _isCreating
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CupertinoActivityIndicator(radius: 16),
+                      const SizedBox(height: 16),
+                      Text(
+                        widget.companyId != null
+                            ? 'Atualizando...'
+                            : 'Configurando sua empresa...',
+                        style: const TextStyle(color: CupertinoColors.secondaryLabel),
+                      ),
+                    ],
+                  ),
+                )
+              : StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('segments')
+                    .where('active', isEqualTo: true)
+                    .orderBy('name')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          'Erro ao carregar segmentos: ${snapshot.error}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: CupertinoColors.systemRed),
                         ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final segments = snapshot.data?.docs ?? [];
-
-                if (segments.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.inbox, size: 48, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text('Nenhum segmento disponível'),
-                      ],
-                    ),
-                  );
-                }
-
-                return Column(
-                  children: [
-                    // Cabeçalho
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.business_center,
-                            size: 48,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            widget.companyName,
-                            style: Theme.of(context).textTheme.headlineSmall,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Selecione o ramo de atuação para personalizar o sistema',
-                            style: TextStyle(color: Colors.grey[600]),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
                       ),
-                    ),
+                    );
+                  }
 
-                    // Lista de segmentos
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: segments.length,
-                        itemBuilder: (context, index) {
-                          final segment = segments[index].data() as Map<String, dynamic>;
-                          final segmentId = segments[index].id;
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CupertinoActivityIndicator());
+                  }
 
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 12,
-                              ),
-                              leading: Text(
-                                segment['icon'] ?? '🔧',
-                                style: const TextStyle(fontSize: 32),
-                              ),
-                              title: Text(
-                                segment['name'] ?? 'Sem nome',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                              onTap: () => _saveCompany(context, segmentId, segment),
+                  final segments = snapshot.data?.docs ?? [];
+
+                  if (segments.isEmpty) {
+                    return const Center(
+                      child: Text('Nenhum segmento disponível'),
+                    );
+                  }
+
+                  return Column(
+                    children: [
+                      // Cabeçalho explicativo
+                      Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              CupertinoIcons.briefcase,
+                              size: 48,
+                              color: CupertinoColors.activeBlue,
                             ),
-                          );
-                        },
+                            const SizedBox(height: 16),
+                            Text(
+                              widget.companyName,
+                              style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Selecione o ramo de atuação para personalizar o sistema para você.',
+                              textAlign: TextAlign.center,
+                              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
+
+                      // Lista de Segmentos estilo iOS
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: CupertinoListSection.insetGrouped(
+                            header: const Text('SEGMENTOS DISPONÍVEIS'),
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            children: segments.map((doc) {
+                              final segment = doc.data() as Map<String, dynamic>;
+                              final segmentId = doc.id;
+
+                              return CupertinoListTile.notched(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12, // Aumenta a altura interna
+                                ),
+                                leading: Text(
+                                  segment['icon'] ?? '🔧',
+                                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                    fontSize: 24,
+                                  ),
+                                ),
+                                title: Text(
+                                  segment['name'] ?? 'Sem nome',
+                                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                trailing: const Icon(
+                                  CupertinoIcons.chevron_forward,
+                                  color: CupertinoColors.systemGrey3,
+                                  size: 18,
+                                ),
+                                onTap: () => _saveCompany(segmentId, segment),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+        ),
+      ),
     );
   }
 }

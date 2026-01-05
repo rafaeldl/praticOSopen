@@ -280,7 +280,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Nome", style: TextStyle(fontSize: 16)),
+                    prefix: const Text("Nome"),
                     initialValue: _company?.name,
                     placeholder: "Nome da Empresa",
                     textCapitalization: TextCapitalization.words,
@@ -290,53 +290,38 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                   ),
                   GestureDetector(
                     onTap: _pickSegment,
-                    child: Container(
-                      color: CupertinoColors.systemBackground,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Row(
-                        children: [
-                          const Text(
-                            "Segmento",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          const Spacer(),
-                          if (_selectedSegment != null) ...[
-                            Text(
-                              _selectedSegment!['icon'] ?? '🔧',
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
+                    child: CupertinoFormRow(
+                      prefix: const Text("Segmento"),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16.0), // Respiro entre label e valor
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
                               child: Text(
-                                _selectedSegment!['name'] ?? 'Sem nome',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: CupertinoColors.label.resolveFrom(context),
+                                _selectedSegment?['name'] ?? "Selecionar",
+                                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                  color: _selectedSegment != null
+                                      ? CupertinoColors.label.resolveFrom(context)
+                                      : CupertinoColors.placeholderText.resolveFrom(context),
                                 ),
                                 textAlign: TextAlign.right,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                          ] else
-                            Text(
-                              "Selecionar",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: CupertinoColors.placeholderText.resolveFrom(context),
-                              ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              CupertinoIcons.chevron_forward,
+                              size: 20,
+                              color: CupertinoColors.systemGrey2.resolveFrom(context),
                             ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            CupertinoIcons.chevron_forward,
-                            size: 20,
-                            color: CupertinoColors.systemGrey.resolveFrom(context),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Email", style: TextStyle(fontSize: 16)),
+                    prefix: const Text("Email"),
                     initialValue: _company?.email,
                     placeholder: "contato@empresa.com",
                     keyboardType: TextInputType.emailAddress,
@@ -344,7 +329,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     onSaved: (val) => _company?.email = val,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Telefone", style: TextStyle(fontSize: 16)),
+                    prefix: const Text("Telefone"),
                     initialValue: _company?.phone,
                     placeholder: "(00) 00000-0000",
                     keyboardType: TextInputType.phone,
@@ -353,7 +338,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     onSaved: (val) => _company?.phone = val,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Endereço", style: TextStyle(fontSize: 16)),
+                    prefix: const Text("Endereço"),
                     initialValue: _company?.address,
                     placeholder: "Endereço completo",
                     textCapitalization: TextCapitalization.sentences,
@@ -362,7 +347,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     onSaved: (val) => _company?.address = val,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Site", style: TextStyle(fontSize: 16)),
+                    prefix: const Text("Site"),
                     initialValue: _company?.site,
                     placeholder: "www.empresa.com.br",
                     keyboardType: TextInputType.url,

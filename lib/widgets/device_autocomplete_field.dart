@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Autocomplete, Colors, Material, Offset, BoxShadow; 
 import '../models/device_catalog_item.dart';
 import '../repositories/device_catalog_repository.dart';
 
@@ -99,38 +100,89 @@ class _DeviceAutocompleteFieldState extends State<DeviceAutocompleteField> {
           _controller.text = controller.text;
         }
 
-        return TextField(
-          controller: controller,
-          focusNode: focusNode,
-          decoration: InputDecoration(
-            labelText: widget.label,
-            border: const OutlineInputBorder(),
-            suffixIcon: const Icon(Icons.arrow_drop_down),
-          ),
-          onSubmitted: (value) {
-            if (value.isNotEmpty) {
-              _handleSelection(value);
-            }
-          },
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (widget.label.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(left: 4, bottom: 4),
+                child: Text(
+                  widget.label.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: CupertinoColors.secondaryLabel,
+                  ),
+                ),
+              ),
+            ],
+            CupertinoTextField(
+              controller: controller,
+              focusNode: focusNode,
+              placeholder: 'Selecione ou digite...',
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              textAlign: TextAlign.right,
+              decoration: BoxDecoration(
+                color: CupertinoColors.tertiarySystemFill,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              suffix: const Padding(
+                padding: EdgeInsets.only(right: 8.0),
+                child: Icon(
+                  CupertinoIcons.chevron_down,
+                  size: 16,
+                  color: CupertinoColors.systemGrey,
+                ),
+              ),
+              onSubmitted: (value) {
+                if (value.isNotEmpty) {
+                  _handleSelection(value);
+                }
+              },
+            ),
+          ],
         );
       },
       optionsViewBuilder: (context, onSelected, options) {
         return Align(
           alignment: Alignment.topLeft,
           child: Material(
-            elevation: 4,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 200, maxWidth: 300),
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                itemCount: options.length,
-                itemBuilder: (context, index) {
-                  final option = options.elementAt(index);
-                  return ListTile(
-                    title: Text(option),
-                    onTap: () => onSelected(option),
-                  );
-                },
+            color: Colors.transparent,
+            child: Container(
+              width: 300,
+              margin: const EdgeInsets.only(top: 8),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemBackground.resolveFrom(context),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: CupertinoColors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 250),
+                  child: ListView.separated(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    separatorBuilder: (context, index) => Container(
+                      height: 1,
+                      color: CupertinoColors.separator.resolveFrom(context),
+                      margin: const EdgeInsets.only(left: 16),
+                    ),
+                    itemBuilder: (context, index) {
+                      final option = options.elementAt(index);
+                      return CupertinoListTile(
+                        title: Text(option),
+                        onTap: () => onSelected(option),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),
