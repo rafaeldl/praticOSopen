@@ -1,19 +1,28 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 
 class SelectSegmentScreen extends StatefulWidget {
-  final String? companyId; // ID da empresa existente (se houver)
+  final String? companyId;
   final String companyName;
-  final String phone;
   final String address;
+  final String phone;
+  final String email;
+  final String? site;
+  final XFile? logoFile;
 
   const SelectSegmentScreen({
     Key? key,
     this.companyId,
     required this.companyName,
-    required this.phone,
     required this.address,
+    required this.phone,
+    required this.email,
+    this.site,
+    this.logoFile,
   }) : super(key: key);
 
   @override
@@ -23,6 +32,22 @@ class SelectSegmentScreen extends StatefulWidget {
 class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
   bool _isCreating = false;
 
+  Future<String?> _uploadLogo(String companyId) async {
+    if (widget.logoFile == null) return null;
+    try {
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('companies')
+          .child(companyId)
+          .child('logo.jpg');
+      
+      await ref.putFile(File(widget.logoFile!.path));
+      return await ref.getDownloadURL();
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> _saveCompany(
     String segmentId,
     Map<String, dynamic> segmentData,
@@ -30,67 +55,57 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
     if (_isCreating) return;
 
     setState(() => _isCreating = true);
-    debugPrint('🚀 _saveCompany started');
 
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) throw Exception('Usuário não autenticado');
 
       final db = FirebaseFirestore.instance;
+      String? logoUrl;
+
+      final String targetCompanyId = widget.companyId ?? db.collection('companies').doc().id;
+
+      if (widget.logoFile != null) {
+        logoUrl = await _uploadLogo(targetCompanyId);
+      }
+
+      final commonData = {
+        'name': widget.companyName,
+        'phone': widget.phone,
+        'address': widget.address,
+        'email': widget.email,
+        'site': widget.site,
+        'segment': segmentId,
+        'updatedAt': DateTime.now().toIso8601String(),
+        if (logoUrl != null) 'logo': logoUrl,
+      };
 
       if (widget.companyId != null) {
-        debugPrint('🔄 Updating company ${widget.companyId}...');
-        // Atualiza empresa existente
-        await db.collection('companies').doc(widget.companyId).update({
-          'name': widget.companyName,
-          'phone': widget.phone,
-          'address': widget.address,
-          'segment': segmentId,
-          'updatedAt': DateTime.now().toIso8601String(),
-        });
-        debugPrint('✅ Company updated successfully');
-
-        if (context.mounted) {
-          debugPrint('➡ Navigating to /');
-          // Redireciona para home
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-        }
+        await db.collection('companies').doc(widget.companyId).update(commonData);
       } else {
-        debugPrint('✨ Creating new company...');
-        // Cria nova empresa
-        final companyRef = await db.collection('companies').add({
-          'name': widget.companyName,
-          'phone': widget.phone,
-          'address': widget.address,
-          'segment': segmentId,
+        await db.collection('companies').doc(targetCompanyId).set({
+          ...commonData,
           'owner': user.uid,
           'createdAt': DateTime.now().toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
         });
-        debugPrint('✅ Company created: ${companyRef.id}');
-
-        debugPrint('👤 Updating user profile...');
-        // Adiciona o usuário como membro da empresa
+        
         await db.collection('users').doc(user.uid).set({
           'email': user.email,
           'name': user.displayName ?? user.email?.split('@')[0],
-          'companies': FieldValue.arrayUnion([companyRef.id]),
+          'companies': FieldValue.arrayUnion([targetCompanyId]),
           'updatedAt': DateTime.now().toIso8601String(),
         }, SetOptions(merge: true));
-        debugPrint('✅ User profile updated');
+      }
 
-        if (context.mounted) {
-          debugPrint('➡ Navigating to /');
-          // Redireciona para home imediatamente
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-        }
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
       }
     } catch (e, stack) {
       debugPrint('❌ Error in _saveCompany: $e');
       debugPrint(stack.toString());
-      setState(() => _isCreating = false);
+      if (mounted) setState(() => _isCreating = false);
 
-      if (context.mounted) {
+      if (mounted) {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(

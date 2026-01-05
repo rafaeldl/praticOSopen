@@ -47,8 +47,11 @@ class AuthWrapper extends StatelessWidget {
                 return CompanyInfoScreen(
                   companyId: result.companyId,
                   initialName: result.companyName,
-                  initialPhone: result.companyPhone,
                   initialAddress: result.companyAddress,
+                  initialLogoUrl: result.companyLogo,
+                  initialPhone: result.companyPhone,
+                  initialEmail: result.companyEmail,
+                  initialSite: result.companySite,
                 );
               }
 
@@ -76,8 +79,11 @@ class AuthWrapper extends StatelessWidget {
               return CompanyInfoScreen(
                 companyId: result.companyId,
                 initialName: result.companyName,
-                initialPhone: result.companyPhone,
                 initialAddress: result.companyAddress,
+                initialLogoUrl: result.companyLogo,
+                initialPhone: result.companyPhone,
+                initialEmail: result.companyEmail,
+                initialSite: result.companySite,
               );
             }
 
@@ -124,6 +130,7 @@ class AuthWrapper extends StatelessWidget {
       }
 
       final companyData = companyDoc.data()!;
+      
       final segment = companyData['segment'] as String?;
       final needsOnboarding = segment == null || segment.isEmpty;
 
@@ -134,6 +141,9 @@ class AuthWrapper extends StatelessWidget {
         companyName: companyData['name'] as String?,
         companyPhone: companyData['phone'] as String?,
         companyAddress: companyData['address'] as String?,
+        companyEmail: companyData['email'] as String?,
+        companySite: companyData['site'] as String?,
+        companyLogo: companyData['logo'] as String?,
       );
     } catch (e) {
       return _CompanyCheckResult(hasCompany: false, needsOnboarding: true);
@@ -148,6 +158,9 @@ class _CompanyCheckResult {
   final String? companyName;
   final String? companyPhone;
   final String? companyAddress;
+  final String? companyEmail;
+  final String? companySite;
+  final String? companyLogo;
 
   _CompanyCheckResult({
     required this.hasCompany,
@@ -156,5 +169,8 @@ class _CompanyCheckResult {
     this.companyName,
     this.companyPhone,
     this.companyAddress,
+    this.companyEmail,
+    this.companySite,
+    this.companyLogo,
   });
 }
