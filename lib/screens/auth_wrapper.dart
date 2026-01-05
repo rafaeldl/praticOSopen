@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
-import 'package:praticos/screens/onboarding/company_info_screen.dart';
+import 'package:praticos/screens/onboarding/welcome_screen.dart';
+import 'package:praticos/screens/loading_screen.dart';
 
 /// Widget que verifica se o usuário tem empresa cadastrada E segmento definido
 /// Se sim → NavigationController (Home)
@@ -24,11 +25,7 @@ class AuthWrapper extends StatelessWidget {
             future: _checkUserCompany(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(
-                  body: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
+                return const LoadingScreen();
               }
 
               if (snapshot.hasData) {
@@ -36,15 +33,11 @@ class AuthWrapper extends StatelessWidget {
 
                 if (result.hasCompany && !result.needsOnboarding) {
                   // Tem empresa com segmento, aguarda o store carregar
-                  return const Scaffold(
-                    body: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
+                  return const LoadingScreen();
                 }
 
                 // Não tem empresa OU não tem segmento → Onboarding
-                return CompanyInfoScreen(
+                return WelcomeScreen(
                   companyId: result.companyId,
                   initialName: result.companyName,
                   initialAddress: result.companyAddress,
@@ -56,7 +49,7 @@ class AuthWrapper extends StatelessWidget {
               }
 
               // Fallback para onboarding vazio
-              return const CompanyInfoScreen();
+              return const WelcomeScreen();
             },
           );
         }
@@ -66,17 +59,13 @@ class AuthWrapper extends StatelessWidget {
           future: _checkUserCompany(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
+              return const LoadingScreen();
             }
 
             if (snapshot.hasData && snapshot.data!.needsOnboarding) {
               // Empresa existe mas não tem segmento → Onboarding com dados
               final result = snapshot.data!;
-              return CompanyInfoScreen(
+              return WelcomeScreen(
                 companyId: result.companyId,
                 initialName: result.companyName,
                 initialAddress: result.companyAddress,
