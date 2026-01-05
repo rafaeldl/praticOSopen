@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/cupertino.dart';
 import '../models/custom_field.dart';
 import '../services/segment_config_service.dart';
 
@@ -24,6 +24,24 @@ class SegmentConfigProvider extends ChangeNotifier {
 
   /// Idioma atual
   String get locale => _service.currentLocale;
+
+  /// Obtém o ícone do dispositivo baseado no segmento
+  IconData get deviceIcon {
+    switch (segmentId) {
+      case 'automotive':
+        return CupertinoIcons.car_detailed;
+      case 'computers':
+        return CupertinoIcons.device_laptop;
+      case 'smartphones':
+        return CupertinoIcons.device_phone_portrait;
+      case 'hvac':
+        return CupertinoIcons.snow;
+      case 'appliances':
+        return CupertinoIcons.bolt_horizontal_circle; // Eletrodomésticos
+      default:
+        return CupertinoIcons.tag; // Genérico
+    }
+  }
 
   /// Inicializa com um segmento específico
   Future<void> initialize(String segmentId, {String locale = 'pt-BR'}) async {

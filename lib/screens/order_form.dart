@@ -146,7 +146,7 @@ class _OrderFormState extends State<OrderForm> {
             ),
             _buildListTile(
               context: context,
-              icon: CupertinoIcons.wrench,
+              icon: config.deviceIcon,
               title: config.device,
               value: _store.deviceName,
               placeholder: "Selecionar ${config.device}",

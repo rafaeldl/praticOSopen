@@ -133,7 +133,7 @@ class _SettingsState extends State<Settings> {
                       ),
                     ],
                     _buildSettingsTile(
-                      icon: CupertinoIcons.car_detailed,
+                      icon: config.deviceIcon,
                       color: CupertinoColors.systemGreen,
                       title: config.devicePlural,
                       onTap: () => Navigator.pushNamed(context, '/device_list'),
