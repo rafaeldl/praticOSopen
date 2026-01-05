@@ -2,11 +2,13 @@ import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 
 class CompanyFormScreen extends StatefulWidget {
   const CompanyFormScreen({Key? key}) : super(key: key);
@@ -72,6 +74,13 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
 
       if (Global.companyAggr != null && _company!.id == Global.companyAggr!.id) {
         Global.companyAggr!.name = _company!.name;
+        
+        if (_company!.segment != null) {
+          final provider = context.read<SegmentConfigProvider>();
+          if (mounted && provider.segmentId != _company!.segment) {
+            provider.initialize(_company!.segment!);
+          }
+        }
       }
       
       if (mounted) {
