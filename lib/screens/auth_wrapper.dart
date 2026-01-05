@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
 import 'package:praticos/screens/onboarding/welcome_screen.dart';
 import 'package:praticos/screens/loading_screen.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 
 /// Widget que verifica se o usuário tem empresa cadastrada E segmento definido
 /// Se sim → NavigationController (Home)
@@ -76,8 +78,10 @@ class AuthWrapper extends StatelessWidget {
               );
             }
 
-            // Tudo OK → Home
-            return NavigationController();
+            // Tudo OK → Carregar segmento e depois Home
+            return _SegmentLoader(
+              companyId: authStore.companyAggr!.id!,
+            );
           },
         );
       },
@@ -162,4 +166,88 @@ class _CompanyCheckResult {
     this.companySite,
     this.companyLogo,
   });
+}
+
+/// Widget que carrega a configuração do segmento antes de mostrar o app
+class _SegmentLoader extends StatefulWidget {
+  final String companyId;
+
+  const _SegmentLoader({required this.companyId});
+
+  @override
+  State<_SegmentLoader> createState() => _SegmentLoaderState();
+}
+
+class _SegmentLoaderState extends State<_SegmentLoader> {
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSegmentConfig();
+  }
+
+  Future<void> _loadSegmentConfig() async {
+    try {
+      // Buscar segmento da empresa
+      final companyDoc = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(widget.companyId)
+          .get();
+
+      if (!companyDoc.exists) {
+        throw Exception('Empresa não encontrada');
+      }
+
+      final segment = companyDoc.data()?['segment'] as String?;
+
+      if (segment == null || segment.isEmpty) {
+        throw Exception('Empresa sem segmento definido');
+      }
+
+      // Carregar configuração do segmento
+      final segmentProvider = context.read<SegmentConfigProvider>();
+      await segmentProvider.initialize(segment);
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const LoadingScreen();
+    }
+
+    if (_error != null) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Erro ao carregar configuração'),
+              const SizedBox(height: 8),
+              Text(
+                _error!,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return NavigationController();
+  }
 }

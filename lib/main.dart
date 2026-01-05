@@ -19,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:praticos/routes.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 
 AuthStore _authStore = AuthStore();
 
@@ -38,6 +39,9 @@ Future<void> main() async {
           create: (_) => BottomNavigationBarStore(),
         ),
         Provider<ThemeStore>(create: (_) => ThemeStore()),
+        ChangeNotifierProvider<SegmentConfigProvider>(
+          create: (_) => SegmentConfigProvider(),
+        ),
       ],
       child: MyApp(),
     ),
