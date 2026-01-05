@@ -9,355 +9,195 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/images/logo.png">
 
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Support Page Specific Styles */
+        /* Apple HIG-Inspired Support Page */
         :root {
-            --support-orange: #FF6F0F;
-            --support-yellow: #FFD43A;
-            --support-red: #FF3B5C;
-            --support-blue: #4A9BD9;
+            --apple-blue: #007AFF;
+            --apple-gray: #86868B;
+            --apple-gray-light: #F5F5F7;
+            --apple-gray-dark: #1D1D1F;
+            --apple-separator: rgba(0, 0, 0, 0.08);
+            --apple-separator-dark: rgba(255, 255, 255, 0.1);
         }
 
-        /* Hero Section with Radiant Background */
+        /* Override body for cleaner Apple aesthetic */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', 'Roboto', sans-serif;
+            background: #fff;
+            color: #1d1d1f;
+        }
+
+        /* Hero Section - Clean and Minimal */
         .support-hero {
-            position: relative;
-            min-height: 60vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            padding: 120px 24px 80px;
-        }
-
-        .support-hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -20%;
-            width: 140%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 40%,
-                rgba(255, 111, 15, 0.15) 0%,
-                rgba(255, 212, 58, 0.08) 25%,
-                transparent 50%);
-            animation: heroGlow 8s ease-in-out infinite alternate;
-        }
-
-        .support-hero::after {
-            content: '';
-            position: absolute;
-            top: -30%;
-            right: -10%;
-            width: 80%;
-            height: 150%;
-            background: radial-gradient(circle at 70% 50%,
-                rgba(255, 212, 58, 0.12) 0%,
-                rgba(255, 111, 15, 0.06) 30%,
-                transparent 50%);
-            animation: heroGlow 10s ease-in-out infinite alternate-reverse;
-        }
-
-        @keyframes heroGlow {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            100% { transform: translate(20px, -20px) scale(1.1); opacity: 0.8; }
-        }
-
-        .support-hero-content {
-            position: relative;
-            z-index: 1;
+            padding: 140px 24px 80px;
             text-align: center;
-            max-width: 800px;
-        }
-
-        .support-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 20px;
-            background: linear-gradient(135deg, rgba(255, 111, 15, 0.2), rgba(255, 212, 58, 0.2));
-            border: 1px solid rgba(255, 111, 15, 0.3);
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--support-yellow);
-            margin-bottom: 24px;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .support-badge::before {
-            content: '●';
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+            background: #fff;
         }
 
         .support-hero h1 {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(3rem, 8vw, 5rem);
-            font-weight: 800;
-            margin-bottom: 20px;
-            line-height: 1.1;
-            animation: fadeInUp 0.8s ease-out 0.2s backwards;
-        }
-
-        .support-hero-gradient {
-            background: linear-gradient(135deg, #fff 20%, var(--support-orange) 45%, var(--support-yellow) 70%, #fff 95%);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: shimmer 3s linear infinite;
-        }
-
-        @keyframes shimmer {
-            to { background-position: 200% center; }
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
         }
 
         .support-hero p {
-            font-size: clamp(1.1rem, 2vw, 1.3rem);
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 40px;
-            animation: fadeInUp 1s ease-out 0.4s backwards;
+            font-size: 1.25rem;
+            color: #86868b;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.5;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Quick Actions Grid */
+        /* Quick Actions - Card Grid */
         .quick-actions {
-            padding: 80px 24px;
-            position: relative;
+            padding: 60px 24px;
+            background: #f5f5f7;
+        }
+
+        .actions-container {
+            max-width: 980px;
+            margin: 0 auto;
         }
 
         .actions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 32px;
-            max-width: 1200px;
-            margin: 0 auto;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
 
         .action-card {
-            position: relative;
-            background: linear-gradient(145deg, rgba(26, 34, 53, 0.6), rgba(15, 21, 32, 0.4));
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 24px;
+            background: #fff;
+            border-radius: 18px;
             padding: 40px 32px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-        }
-
-        .action-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg,
-                rgba(255, 111, 15, 0.1) 0%,
-                rgba(255, 212, 58, 0.05) 100%);
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid rgba(0, 0, 0, 0.04);
         }
 
         .action-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(255, 111, 15, 0.4);
-            box-shadow:
-                0 20px 60px rgba(0, 0, 0, 0.4),
-                0 0 80px rgba(255, 111, 15, 0.2);
-        }
-
-        .action-card:hover::before {
-            opacity: 1;
+            transform: scale(1.02);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         .action-icon {
-            position: relative;
-            width: 72px;
-            height: 72px;
-            margin-bottom: 24px;
-            border-radius: 20px;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            background: #007aff;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.4s ease;
-        }
-
-        .action-card:hover .action-icon {
-            transform: scale(1.1) rotate(-5deg);
-        }
-
-        .action-card:nth-child(1) .action-icon {
-            background: linear-gradient(135deg, rgba(255, 111, 15, 0.25), rgba(255, 111, 15, 0.1));
-        }
-
-        .action-card:nth-child(2) .action-icon {
-            background: linear-gradient(135deg, rgba(255, 212, 58, 0.25), rgba(255, 212, 58, 0.1));
-        }
-
-        .action-card:nth-child(3) .action-icon {
-            background: linear-gradient(135deg, rgba(74, 155, 217, 0.25), rgba(74, 155, 217, 0.1));
-        }
-
-        .action-icon svg {
-            position: relative;
-            z-index: 1;
         }
 
         .action-card h3 {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            font-size: 1.375rem;
+            font-weight: 600;
+            color: #1d1d1f;
             margin-bottom: 12px;
-            color: #fff;
-            position: relative;
+            letter-spacing: -0.01em;
         }
 
         .action-card p {
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.6;
-            margin-bottom: 20px;
-            position: relative;
+            font-size: 1rem;
+            color: #86868b;
+            line-height: 1.5;
+            margin-bottom: 24px;
         }
 
         .action-link {
-            position: relative;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            color: var(--support-orange);
-            font-weight: 600;
-            font-size: 1.05rem;
-            transition: all 0.3s ease;
+            gap: 6px;
+            color: #007aff;
+            font-size: 1.0625rem;
+            font-weight: 400;
+            text-decoration: none;
+            transition: opacity 0.2s;
         }
 
-        .action-card:hover .action-link {
-            color: var(--support-yellow);
-            gap: 12px;
+        .action-link:hover {
+            opacity: 0.7;
         }
 
         .action-link svg {
-            transition: transform 0.3s ease;
+            width: 14px;
+            height: 14px;
         }
 
-        .action-card:hover .action-link svg {
-            transform: translateX(4px);
-        }
-
-        /* Contact Methods Section */
+        /* Contact Section - List Style */
         .contact-section {
             padding: 80px 24px;
-            background: linear-gradient(180deg,
-                rgba(255, 111, 15, 0.03) 0%,
-                rgba(255, 212, 58, 0.02) 50%,
-                transparent 100%);
+            background: #fff;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .section-header p {
+            font-size: 1.125rem;
+            color: #86868b;
         }
 
         .contact-container {
-            max-width: 1000px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
-        .section-title {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(2rem, 5vw, 3rem);
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 60px;
-            background: linear-gradient(135deg, #fff 30%, var(--support-orange) 60%, var(--support-yellow) 90%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
         .contact-list {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.06);
         }
 
         .contact-item {
-            display: flex;
-            gap: 24px;
-            padding: 32px;
-            background: linear-gradient(135deg,
-                rgba(26, 34, 53, 0.4),
-                rgba(15, 21, 32, 0.2));
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            padding: 28px 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            transition: background-color 0.2s;
         }
 
-        .contact-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: linear-gradient(180deg, var(--support-orange), var(--support-yellow));
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
+        .contact-item:last-child {
+            border-bottom: none;
         }
 
         .contact-item:hover {
-            transform: translateX(8px);
-            border-color: rgba(255, 111, 15, 0.2);
+            background: rgba(0, 0, 0, 0.02);
         }
 
-        .contact-item:hover::before {
-            transform: scaleY(1);
-        }
-
-        .contact-icon-wrapper {
-            flex-shrink: 0;
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, rgba(255, 111, 15, 0.2), rgba(255, 212, 58, 0.1));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .contact-item:hover .contact-icon-wrapper {
-            transform: rotate(-10deg) scale(1.1);
-            background: linear-gradient(135deg, rgba(255, 111, 15, 0.3), rgba(255, 212, 58, 0.2));
-        }
-
-        .contact-content h4 {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
+        .contact-item h4 {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            font-size: 1.0625rem;
+            font-weight: 600;
+            color: #1d1d1f;
             margin-bottom: 8px;
-            color: #fff;
         }
 
-        .contact-content p {
-            color: rgba(255, 255, 255, 0.7);
+        .contact-item p {
+            font-size: 0.9375rem;
+            color: #86868b;
             line-height: 1.6;
             margin-bottom: 12px;
         }
@@ -365,205 +205,213 @@
         .contact-links {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 20px;
         }
 
         .contact-links a {
-            color: var(--support-orange);
-            font-weight: 600;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .contact-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--support-yellow);
-            transform: scaleX(0);
-            transition: transform 0.2s ease;
+            color: #007aff;
+            font-size: 0.9375rem;
+            text-decoration: none;
+            transition: opacity 0.2s;
         }
 
         .contact-links a:hover {
-            color: var(--support-yellow);
+            opacity: 0.7;
         }
 
-        .contact-links a:hover::after {
-            transform: scaleX(1);
+        .contact-links span {
+            color: #d2d2d7;
         }
 
-        /* FAQ Preview */
+        /* FAQ Section */
         .faq-section {
             padding: 80px 24px;
+            background: #f5f5f7;
         }
 
         .faq-container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
+        .faq-list {
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
         .faq-item {
-            background: linear-gradient(135deg,
-                rgba(26, 34, 53, 0.3),
-                rgba(15, 21, 32, 0.2));
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 16px;
-            padding: 28px 32px;
-            margin-bottom: 16px;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            padding: 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            transition: background-color 0.2s;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
         }
 
         .faq-item:hover {
-            border-color: rgba(255, 111, 15, 0.3);
-            transform: translateX(8px);
-            background: linear-gradient(135deg,
-                rgba(26, 34, 53, 0.5),
-                rgba(15, 21, 32, 0.3));
+            background: rgba(0, 0, 0, 0.02);
         }
 
         .faq-item h4 {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.15rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+            font-size: 1.0625rem;
             font-weight: 600;
-            color: #fff;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .faq-item h4::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--support-orange), var(--support-yellow));
-            flex-shrink: 0;
+            color: #1d1d1f;
+            margin-bottom: 8px;
         }
 
         .faq-item p {
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.7;
-            padding-left: 18px;
+            font-size: 0.9375rem;
+            color: #86868b;
+            line-height: 1.6;
+        }
+
+        .faq-cta {
+            text-align: center;
+            margin-top: 32px;
         }
 
         /* CTA Section */
         .cta-section {
-            padding: 100px 24px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle,
-                rgba(255, 111, 15, 0.15) 0%,
-                rgba(255, 212, 58, 0.08) 30%,
-                transparent 70%);
-            animation: ctaPulse 4s ease-in-out infinite;
-        }
-
-        @keyframes ctaPulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
-            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            padding: 80px 24px;
+            background: #fff;
         }
 
         .cta-content {
-            position: relative;
-            max-width: 700px;
+            max-width: 680px;
             margin: 0 auto;
             text-align: center;
-            background: linear-gradient(135deg,
-                rgba(26, 34, 53, 0.6),
-                rgba(15, 21, 32, 0.4));
-            border: 2px solid rgba(255, 111, 15, 0.2);
-            border-radius: 32px;
+            background: #f5f5f7;
+            border-radius: 18px;
             padding: 60px 40px;
-            backdrop-filter: blur(20px);
         }
 
         .cta-content h3 {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(1.8rem, 4vw, 2.5rem);
-            font-weight: 800;
-            margin-bottom: 16px;
-            background: linear-gradient(135deg, #fff, var(--support-orange));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
         }
 
         .cta-content p {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.125rem;
+            color: #86868b;
             margin-bottom: 32px;
         }
 
         .cta-button {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            padding: 18px 40px;
-            background: linear-gradient(135deg, var(--support-orange), var(--support-yellow));
-            color: #0A0E17;
-            font-family: 'Syne', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border-radius: 50px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 40px rgba(255, 111, 15, 0.3);
+            gap: 8px;
+            padding: 12px 24px;
+            background: #007aff;
+            color: #fff;
+            font-size: 1.0625rem;
+            font-weight: 400;
+            border-radius: 980px;
+            text-decoration: none;
+            transition: background-color 0.2s;
         }
 
         .cta-button:hover {
-            transform: translateY(-4px) scale(1.05);
-            box-shadow: 0 20px 60px rgba(255, 111, 15, 0.5);
+            background: #0051d5;
+        }
+
+        /* Buttons */
+        .btn-outline {
+            display: inline-block;
+            padding: 12px 24px;
+            color: #007aff;
+            border: 1px solid #007aff;
+            border-radius: 980px;
+            font-size: 1.0625rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background: #007aff;
+            color: #fff;
         }
 
         /* Responsive */
         @media (max-width: 768px) {
+            .support-hero {
+                padding: 100px 24px 60px;
+            }
+
+            .support-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .quick-actions,
+            .contact-section,
+            .faq-section,
+            .cta-section {
+                padding: 60px 20px;
+            }
+
             .actions-grid {
                 grid-template-columns: 1fr;
             }
 
-            .contact-item {
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            .support-hero {
-                min-height: 50vh;
-                padding: 100px 24px 60px;
+            .cta-content {
+                padding: 48px 28px;
             }
         }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #000;
+                color: #f5f5f7;
+            }
 
-        ::-webkit-scrollbar-track {
-            background: #0A0E17;
-        }
+            .support-hero,
+            .contact-section,
+            .cta-section {
+                background: #000;
+            }
 
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, var(--support-orange), var(--support-yellow));
-            border-radius: 6px;
-        }
+            .support-hero h1,
+            .section-header h2,
+            .contact-item h4,
+            .faq-item h4,
+            .cta-content h3 {
+                color: #f5f5f7;
+            }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, var(--support-yellow), var(--support-orange));
+            .quick-actions,
+            .faq-section {
+                background: #000;
+            }
+
+            .action-card,
+            .contact-list,
+            .faq-list {
+                background: #1d1d1f;
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .contact-item,
+            .faq-item {
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .contact-item:hover,
+            .faq-item:hover,
+            .action-card:hover {
+                background: #2d2d2f;
+            }
+
+            .cta-content {
+                background: #1d1d1f;
+            }
         }
     </style>
 </head>
@@ -601,150 +449,112 @@
 
     <!-- Hero Section -->
     <section class="support-hero">
-        <div class="support-hero-content">
-            <div class="support-badge">
-                Disponível 24/7
-            </div>
-            <h1>
-                Como podemos <span class="support-hero-gradient">ajudar você?</span>
-            </h1>
-            <p>Estamos aqui para garantir que você tenha a melhor experiência com o PráticOS</p>
-        </div>
+        <h1>Como podemos ajudar?</h1>
+        <p>Encontre respostas, entre em contato ou obtenha suporte personalizado</p>
     </section>
 
     <!-- Quick Actions -->
     <section class="quick-actions">
-        <div class="actions-grid">
-            <div class="action-card">
-                <div class="action-icon">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                        <polyline points="22,6 12,13 2,6"/>
-                    </svg>
+        <div class="actions-container">
+            <div class="actions-grid">
+                <div class="action-card">
+                    <div class="action-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                    </div>
+                    <h3>Email de Suporte</h3>
+                    <p>Entre em contato com nossa equipe. Respondemos em até 24 horas úteis.</p>
+                    <a href="mailto:praticos@rafsoft.com.br" class="action-link">
+                        praticos@rafsoft.com.br
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </a>
                 </div>
-                <h3>Email de Suporte</h3>
-                <p>Entre em contato com nossa equipe. Respondemos em até 24 horas úteis com soluções personalizadas para você.</p>
-                <a href="mailto:praticos@rafsoft.com.br" class="action-link">
-                    praticos@rafsoft.com.br
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                        <polyline points="12 5 19 12 12 19"/>
-                    </svg>
-                </a>
-            </div>
 
-            <div class="action-card">
-                <div class="action-icon">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#FFD43A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
+                <div class="action-card">
+                    <div class="action-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <h3>Perguntas Frequentes</h3>
+                    <p>Respostas rápidas para as dúvidas mais comuns sobre o PráticOS.</p>
+                    <a href="faq.html" class="action-link">
+                        Acessar FAQ
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </a>
                 </div>
-                <h3>Perguntas Frequentes</h3>
-                <p>Encontre respostas instantâneas para as dúvidas mais comuns. Nosso FAQ completo está sempre atualizado.</p>
-                <a href="faq.html" class="action-link">
-                    Acessar FAQ
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                        <polyline points="12 5 19 12 12 19"/>
-                    </svg>
-                </a>
-            </div>
 
-            <div class="action-card">
-                <div class="action-icon">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4A9BD9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                        <polyline points="10 9 9 9 8 9"/>
-                    </svg>
+                <div class="action-card">
+                    <div class="action-icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <h3>Documentação</h3>
+                    <p>Guias e tutoriais para aproveitar todas as funcionalidades.</p>
+                    <a href="faq.html" class="action-link">
+                        Ver Documentação
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"/>
+                        </svg>
+                    </a>
                 </div>
-                <h3>Documentação</h3>
-                <p>Guias detalhados e tutoriais passo a passo para aproveitar ao máximo todas as funcionalidades.</p>
-                <a href="faq.html" class="action-link">
-                    Ver Documentação
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                        <polyline points="12 5 19 12 12 19"/>
-                    </svg>
-                </a>
             </div>
         </div>
     </section>
 
     <!-- Contact Methods -->
     <section class="contact-section">
+        <div class="section-header">
+            <h2>Outras formas de ajuda</h2>
+            <p>Escolha a melhor opção para sua necessidade</p>
+        </div>
         <div class="contact-container">
-            <h2 class="section-title">Outras Formas de Ajuda</h2>
-
             <div class="contact-list">
                 <div class="contact-item">
-                    <div class="contact-icon-wrapper">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                        </svg>
-                    </div>
-                    <div class="contact-content">
-                        <h4>Dúvidas sobre o aplicativo</h4>
-                        <p>Tem dúvidas sobre alguma funcionalidade? Consulte nosso FAQ ou entre em contato diretamente conosco.</p>
-                        <div class="contact-links">
-                            <a href="faq.html">Ver FAQ</a>
-                            <span style="color: rgba(255,255,255,0.3);">•</span>
-                            <a href="mailto:praticos@rafsoft.com.br">Enviar email</a>
-                        </div>
+                    <h4>Dúvidas sobre o aplicativo</h4>
+                    <p>Tem dúvidas sobre alguma funcionalidade? Consulte nosso FAQ ou entre em contato diretamente.</p>
+                    <div class="contact-links">
+                        <a href="faq.html">Ver FAQ</a>
+                        <span>•</span>
+                        <a href="mailto:praticos@rafsoft.com.br">Enviar email</a>
                     </div>
                 </div>
 
                 <div class="contact-item">
-                    <div class="contact-icon-wrapper">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                            <line x1="12" y1="9" x2="12" y2="13"/>
-                            <line x1="12" y1="17" x2="12.01" y2="17"/>
-                        </svg>
-                    </div>
-                    <div class="contact-content">
-                        <h4>Relatar um problema</h4>
-                        <p>Encontrou um bug? Nos ajude a melhorar! Descreva o problema e inclua capturas de tela se possível.</p>
-                        <div class="contact-links">
-                            <a href="mailto:praticos@rafsoft.com.br">Relatar problema</a>
-                        </div>
+                    <h4>Relatar um problema</h4>
+                    <p>Encontrou um bug? Nos ajude a melhorar! Descreva o problema e inclua capturas de tela se possível.</p>
+                    <div class="contact-links">
+                        <a href="mailto:praticos@rafsoft.com.br">Relatar problema</a>
                     </div>
                 </div>
 
                 <div class="contact-item">
-                    <div class="contact-icon-wrapper">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
-                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                        </svg>
-                    </div>
-                    <div class="contact-content">
-                        <h4>Sugerir melhorias</h4>
-                        <p>Tem uma ideia incrível? Adoramos ouvir feedback! Sua sugestão pode ser o próximo grande recurso.</p>
-                        <div class="contact-links">
-                            <a href="mailto:praticos@rafsoft.com.br">Enviar sugestão</a>
-                        </div>
+                    <h4>Sugerir melhorias</h4>
+                    <p>Tem uma ideia para melhorar o PráticOS? Adoramos ouvir feedback! Envie suas sugestões.</p>
+                    <div class="contact-links">
+                        <a href="mailto:praticos@rafsoft.com.br">Enviar sugestão</a>
                     </div>
                 </div>
 
                 <div class="contact-item">
-                    <div class="contact-icon-wrapper">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                    </div>
-                    <div class="contact-content">
-                        <h4>Gerenciar minha conta</h4>
-                        <p>Questões sobre conta, assinatura, privacidade ou exclusão de dados? Gerencie tudo no app ou fale conosco.</p>
-                        <div class="contact-links">
-                            <a href="privacy.html">Política de Privacidade</a>
-                            <span style="color: rgba(255,255,255,0.3);">•</span>
-                            <a href="mailto:praticos@rafsoft.com.br">Contato</a>
-                        </div>
+                    <h4>Gerenciar minha conta</h4>
+                    <p>Questões sobre conta, assinatura, privacidade ou exclusão de dados? Gerencie tudo no app ou fale conosco.</p>
+                    <div class="contact-links">
+                        <a href="privacy.html">Política de Privacidade</a>
+                        <span>•</span>
+                        <a href="mailto:praticos@rafsoft.com.br">Contato</a>
                     </div>
                 </div>
             </div>
@@ -754,30 +564,34 @@
     <!-- FAQ Preview -->
     <section class="faq-section">
         <div class="faq-container">
-            <h2 class="section-title">Perguntas Frequentes</h2>
-
-            <div class="faq-item">
-                <h4>Como faço para criar uma conta no PráticOS?</h4>
-                <p>Baixe o aplicativo na App Store ou Google Play, abra o app e escolha uma das opções de login: Google, Apple ou Email. O processo é rápido e seguro.</p>
+            <div class="section-header">
+                <h2>Perguntas Frequentes</h2>
             </div>
 
-            <div class="faq-item">
-                <h4>Como excluir minha conta?</h4>
-                <p>Você pode excluir sua conta diretamente no aplicativo: vá em Ajustes > Conta > Excluir Conta. Esta ação é permanente e remove todos os seus dados.</p>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <h4>Como faço para criar uma conta no PráticOS?</h4>
+                    <p>Baixe o aplicativo na App Store ou Google Play, abra o app e escolha uma das opções de login: Google, Apple ou Email.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Como excluir minha conta?</h4>
+                    <p>Você pode excluir sua conta diretamente no aplicativo: vá em Ajustes > Conta > Excluir Conta. Esta ação é permanente e remove todos os seus dados.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Meus dados estão seguros?</h4>
+                    <p>Sim! Utilizamos Firebase com criptografia em trânsito e em repouso. Seguimos as melhores práticas de segurança.</p>
+                </div>
+
+                <div class="faq-item">
+                    <h4>Como entro em contato com o suporte?</h4>
+                    <p>Envie um email para praticos@rafsoft.com.br. Respondemos em até 24 horas úteis.</p>
+                </div>
             </div>
 
-            <div class="faq-item">
-                <h4>Meus dados estão seguros?</h4>
-                <p>Sim! Utilizamos Firebase com criptografia em trânsito e em repouso. Seguimos rigorosamente as melhores práticas de segurança e privacidade.</p>
-            </div>
-
-            <div class="faq-item">
-                <h4>Como entro em contato com o suporte?</h4>
-                <p>Envie um email para praticos@rafsoft.com.br. Respondemos em até 24 horas úteis com soluções personalizadas.</p>
-            </div>
-
-            <div style="text-align: center; margin-top: 40px;">
-                <a href="faq.html" class="btn btn-outline">Ver todas as perguntas</a>
+            <div class="faq-cta">
+                <a href="faq.html" class="btn-outline">Ver todas as perguntas</a>
             </div>
         </div>
     </section>
@@ -786,12 +600,11 @@
     <section class="cta-section">
         <div class="cta-content">
             <h3>Precisa de mais ajuda?</h3>
-            <p>Nossa equipe está pronta para resolver qualquer dúvida ou problema</p>
+            <p>Nossa equipe está pronta para resolver qualquer dúvida</p>
             <a href="mailto:praticos@rafsoft.com.br" class="cta-button">
                 Falar com o Suporte
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                    <polyline points="12 5 19 12 12 19"/>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="9 18 15 12 9 6"/>
                 </svg>
             </a>
         </div>
@@ -867,28 +680,6 @@
                 mobileMenu.classList.remove('active');
                 body.classList.remove('menu-open');
             });
-        });
-
-        // Add smooth scroll reveal animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.action-card, .contact-item, .faq-item').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
         });
     </script>
 </body>
