@@ -55,7 +55,7 @@ class AuthService {
   /// This includes:
   /// 1. User document (`/users/{userId}`)
   /// 2. User memberships in all companies
-  /// 3. If user is the last admin of a company, deletes the company and all its data
+  /// 3. If user is the owner of a company, deletes the company and all its data
   Future<void> deleteUserData(String userId) async {
     WriteBatch batch = _db.batch();
 
@@ -80,28 +80,27 @@ class AuthService {
               .doc(userId);
           batch.delete(membershipRef);
 
-          // Check if user is the only admin/owner
-          var memberships = await _db
-              .collection('companies')
-              .doc(companyId)
-              .collection('memberships')
-              .get();
+          // Check if user is the owner of the company
+          var companyDoc = await _db.collection('companies').doc(companyId).get();
 
-          var hasOtherAdmins = memberships.docs.any((doc) {
-            return doc.id != userId &&
-                (doc.data()['role'] == 'admin' ||
-                    doc.data()['role'] == 'manager');
-          });
+          if (companyDoc.exists) {
+            var companyData = companyDoc.data();
+            var ownerId = companyData?['ownerId'];
 
-          // If no other admins, delete the company and all its data
-          if (!hasOtherAdmins) {
-            // Delete company subcollections (service_orders, customers, etc.)
-            // Note: In production, this should ideally be done via Cloud Functions
-            // to handle large datasets and avoid timeout issues
+            // If user is the owner, delete the company and all its data
+            if (ownerId == userId) {
+              // Delete company subcollections (service_orders, customers, etc.)
+              // Note: In production, this should ideally be done via Cloud Functions
+              // to handle large datasets and avoid timeout issues
 
-            // Delete the company document
-            var companyRef = _db.collection('companies').doc(companyId);
-            batch.delete(companyRef);
+              // For now, we'll delete the main collections
+              // Cloud Functions should handle the cleanup of nested subcollections
+
+              // Delete the company document
+              var companyRef = _db.collection('companies').doc(companyId);
+              batch.delete(companyRef);
+            }
+            // If user is not the owner, only the membership is deleted (already done above)
           }
         }
       }
