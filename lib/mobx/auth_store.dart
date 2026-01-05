@@ -2,6 +2,7 @@ import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/repositories/auth_repository.dart';
+import 'package:praticos/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,7 @@ class AuthStore = _AuthStore with _$AuthStore;
 
 abstract class _AuthStore with Store {
   final AuthRepository _auth = AuthRepository();
+  final AuthService _authService = AuthService();
 
   CompanyStore companyStore = CompanyStore();
   UserStore userStore = UserStore();
@@ -130,5 +132,39 @@ abstract class _AuthStore with Store {
   @action
   Future<void> sendPasswordResetEmail(String email) {
     return _auth.sendPasswordResetEmail(email);
+  }
+
+  @action
+  Future<void> deleteAccount() async {
+    final user = currentUser?.value;
+    if (user == null) {
+      throw Exception('No authenticated user to delete');
+    }
+
+    try {
+      // 1. Delete all Firestore data
+      await _authService.deleteUserData(user.uid);
+
+      // 2. Clear local preferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove("userId");
+      await prefs.remove("userDisplayName");
+      await prefs.remove("userEmail");
+      await prefs.remove("userPhoto");
+      await prefs.remove("companyId");
+      await prefs.remove("companyName");
+
+      // 3. Clear global state
+      Global.currentUser = null;
+      Global.companyAggr = null;
+
+      // 4. Delete Firebase Auth account
+      await _auth.deleteAccount();
+
+      logout = true;
+    } catch (e) {
+      print('Error deleting account: $e');
+      rethrow;
+    }
   }
 }

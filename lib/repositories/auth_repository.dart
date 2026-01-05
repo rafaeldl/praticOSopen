@@ -120,6 +120,25 @@ class AuthRepository {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
+  /// Deletes the current user's account from Firebase Auth.
+  /// Note: Firestore data cleanup should be handled separately via Cloud Functions
+  /// or before calling this method, as this only deletes the authentication account.
+  Future<void> deleteAccount() async {
+    final User? user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user to delete');
+    }
+
+    // Delete the Firebase Auth account
+    await user.delete();
+
+    // Sign out from Google if applicable
+    await _googleSignIn.signOut();
+
+    currentUser = null;
+    print("User account deleted");
+  }
+
   String _generateNonce([int length = 32]) {
     final charset =
         '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
