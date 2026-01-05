@@ -1,7 +1,7 @@
 Novidades nesta versão:
 
-• Tela de login redesenhada seguindo as diretrizes Apple HIG
-• Melhorias na interface e experiência do usuário
-• Correções de bugs e otimizações de desempenho
+• Adaptação dinâmica para diferentes segmentos (Automotivo, Climatização, Informática, etc).
+• Ícones e termos personalizados conforme o ramo da sua empresa.
+• Melhorias na interface e correções de bugs.
 
 Obrigado por usar o PraticOS!
