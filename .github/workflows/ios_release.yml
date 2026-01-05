@@ -65,6 +65,17 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      # 🔍 Check for Metadata/Screenshot changes
+      - name: Check for metadata changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            screenshots:
+              - 'ios/fastlane/screenshots/**'
+            metadata:
+              - 'ios/fastlane/metadata/**'
+
       # 🔐 Importa o certificado .p12 no keychain
       - name: Import distribution cert
         uses: apple-actions/import-codesign-certs@v2
@@ -151,7 +162,10 @@ jobs:
           PROFILE_NAME: ${{ env.PROFILE_NAME }}
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
-        run: bundle exec fastlane release_store
+        run: |
+          bundle exec fastlane release_store \
+            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }} \
+            skip_metadata:${{ steps.filter.outputs.metadata == 'false' }}
 
       - name: Upload fastlane logs (on failure)
         if: failure()
