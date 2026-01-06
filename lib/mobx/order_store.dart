@@ -5,6 +5,8 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_photo.dart';
+import 'package:praticos/models/order_form.dart' as of_model;
+import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
@@ -18,6 +20,7 @@ class OrderStore = _OrderStore with _$OrderStore;
 abstract class _OrderStore with Store {
   final OrderRepositoryV2 repository = OrderRepositoryV2();
   final PhotoService photoService = PhotoService();
+  final FormsService formsService = FormsService();
 
   Order? order;
 
@@ -26,6 +29,9 @@ abstract class _OrderStore with Store {
 
   @observable
   ObservableStream<Order?>? orderStream;
+
+  @observable
+  ObservableStream<List<of_model.OrderForm>>? formsStream;
 
   @observable
   String? dueDate;
@@ -221,6 +227,7 @@ abstract class _OrderStore with Store {
     if (orderId != null && companyId != null) {
       this.order!.id = orderId;
       orderStream = repository.streamSingle(companyId!, orderId).asObservable();
+      formsStream = formsService.getOrderForms(companyId!, orderId).asObservable();
     }
 
     customer = order.customer;

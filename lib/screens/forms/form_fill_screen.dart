@@ -54,11 +54,10 @@ class _FormFillScreenState extends State<FormFillScreen> {
       }
     });
 
-    await _formsService.saveResponse(widget.orderId, _currentForm.id, newResponse);
+    await _formsService.saveResponse(widget.companyId, widget.orderId, _currentForm.id, newResponse);
   }
 
   Future<void> _addPhoto(String itemId, ImageSource source) async {
-    // Usar PhotoService para seleção e tratamento de imagem (HEIC, resize)
     final File? file;
     if (source == ImageSource.camera) {
       file = await _photoService.takePhoto();
@@ -74,7 +73,6 @@ class _FormFillScreenState extends State<FormFillScreen> {
       final fileName = '${itemId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final storagePath = 'tenants/${widget.companyId}/orders/${widget.orderId}/forms/${_currentForm.id}/$fileName';
 
-      // Upload usando PhotoService (já converte para JPEG se necessário)
       final url = await _photoService.uploadImage(
         file: file,
         storagePath: storagePath,
@@ -92,7 +90,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
         photoUrls: currentPhotos,
       );
 
-      await _formsService.saveResponse(widget.orderId, _currentForm.id, newResponse);
+      await _formsService.saveResponse(widget.companyId, widget.orderId, _currentForm.id, newResponse);
 
       setState(() {
         final index = _currentForm.responses.indexWhere((r) => r.itemId == itemId);
@@ -104,24 +102,30 @@ class _FormFillScreenState extends State<FormFillScreen> {
       });
     } catch (e) {
       print('Erro ao enviar foto: $e');
-      if (mounted) {
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content: const Text('Não foi possível enviar a foto. Tente novamente.'),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }
     } finally {
       setState(() => _isUploading = false);
     }
+  }
+
+  Future<void> _deletePhoto(String itemId, String url) async {
+    final currentResponse = _currentForm.getResponse(itemId);
+    if (currentResponse == null) return;
+
+    final List<String> currentPhotos = List.from(currentResponse.photoUrls);
+    currentPhotos.remove(url);
+
+    final newResponse = FormResponse(
+      itemId: itemId,
+      value: currentResponse.value,
+      photoUrls: currentPhotos,
+    );
+
+    setState(() {
+      final index = _currentForm.responses.indexWhere((r) => r.itemId == itemId);
+      _currentForm.responses[index] = newResponse;
+    });
+
+    await _formsService.saveResponse(widget.companyId, widget.orderId, _currentForm.id, newResponse);
   }
 
   Future<void> _finishForm() async {
@@ -154,7 +158,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
     }
 
     setState(() => _isSaving = true);
-    await _formsService.updateStatus(widget.orderId, _currentForm.id, FormStatus.completed);
+    await _formsService.updateStatus(widget.companyId, widget.orderId, _currentForm.id, FormStatus.completed);
     if (mounted) {
       setState(() => _isSaving = false);
       Navigator.pop(context);
@@ -169,6 +173,11 @@ class _FormFillScreenState extends State<FormFillScreen> {
         slivers: [
           CupertinoSliverNavigationBar(
             largeTitle: Text(_currentForm.title),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Text('Fechar'),
+              onPressed: () => Navigator.pop(context),
+            ),
             trailing: _isSaving 
               ? const CupertinoActivityIndicator()
               : CupertinoButton(
@@ -272,17 +281,33 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
       case FormItemType.checklist:
       case FormItemType.select:
+        final bool isChecklist = item.type == FormItemType.checklist;
+        String displayValue = 'Selecionar';
+        
+        if (response?.value != null) {
+          if (isChecklist && response!.value is List) {
+            final List list = response.value;
+            displayValue = list.isEmpty ? 'Selecionar' : list.join(', ');
+          } else {
+            displayValue = response!.value.toString();
+          }
+        }
+
         return CupertinoListTile(
           title: label,
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                response?.value?.toString() ?? 'Selecionar',
-                style: TextStyle(
-                  color: response?.value != null 
-                      ? CupertinoColors.label.resolveFrom(context) 
-                      : CupertinoColors.secondaryLabel.resolveFrom(context),
+              Flexible(
+                child: Text(
+                  displayValue,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: response?.value != null 
+                        ? CupertinoColors.label.resolveFrom(context) 
+                        : CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
                 ),
               ),
               const SizedBox(width: 6),
@@ -301,7 +326,6 @@ class _FormFillScreenState extends State<FormFillScreen> {
     final photos = response?.photoUrls ?? [];
     final hasPhotos = photos.isNotEmpty;
     
-    // Se não tem fotos e não é obrigatório/exclusivo, mostra botão discreto
     if (!hasPhotos) {
        return Padding(
          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -325,7 +349,6 @@ class _FormFillScreenState extends State<FormFillScreen> {
        );
     }
     
-    // Se tem fotos, mostra lista horizontal compacta
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 0, 12),
       child: SizedBox(
@@ -333,7 +356,6 @@ class _FormFillScreenState extends State<FormFillScreen> {
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: [
-             // Botão de Adicionar (+)
              GestureDetector(
                 onTap: () => _showPhotoSourceSheet(item.id),
                 child: Container(
@@ -352,25 +374,27 @@ class _FormFillScreenState extends State<FormFillScreen> {
                 ),
               ),
               
-            // Lista de Fotos
-            ...photos.map((url) => Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  url,
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (ctx, child, progress) {
-                    if (progress == null) return child;
-                    return Container(
-                      width: 50, 
-                      height: 50, 
-                      color: CupertinoColors.systemGrey6.resolveFrom(context),
-                      child: const CupertinoActivityIndicator(),
-                    );
-                  },
+            ...photos.map((url) => GestureDetector(
+              onTap: () => _showPhotoOptions(item.id, url),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    url,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (ctx, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        width: 50, 
+                        height: 50, 
+                        color: CupertinoColors.systemGrey6.resolveFrom(context),
+                        child: const CupertinoActivityIndicator(),
+                      );
+                    },
+                  ),
                 ),
               ),
             )),
@@ -381,20 +405,62 @@ class _FormFillScreenState extends State<FormFillScreen> {
   }
 
   void _showOptionsPicker(FormItemDefinition item) {
+    final bool isChecklist = item.type == FormItemType.checklist;
     final options = item.options ?? [];
+    final currentResponse = _currentForm.getResponse(item.id);
+    
+    if (isChecklist) {
+      Navigator.push(
+        context,
+        CupertinoPageRoute(
+          builder: (context) => ChecklistSelectionScreen(
+            title: item.label,
+            options: options,
+            initialSelected: List<String>.from(currentResponse?.value ?? []),
+          ),
+        ),
+      ).then((selected) {
+        if (selected != null) {
+          _saveItemResponse(item.id, selected);
+        }
+      });
+    } else {
+      showCupertinoModalPopup(
+        context: context,
+        builder: (ctx) => CupertinoActionSheet(
+          title: Text(item.label),
+          actions: options.map((opt) {
+            return CupertinoActionSheetAction(
+              onPressed: () {
+                _saveItemResponse(item.id, opt);
+                Navigator.pop(ctx);
+              },
+              child: Text(opt),
+            );
+          }).toList(),
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+        ),
+      );
+    }
+  }
+
+  void _showPhotoOptions(String itemId, String url) {
     showCupertinoModalPopup(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: Text(item.label),
-        actions: options.map((opt) {
-          return CupertinoActionSheetAction(
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
             onPressed: () {
-              _saveItemResponse(item.id, opt);
               Navigator.pop(ctx);
+              _deletePhoto(itemId, url);
             },
-            child: Text(opt),
-          );
-        }).toList(),
+            child: const Text('Remover Foto'),
+          ),
+        ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(ctx),
           child: const Text('Cancelar'),
@@ -427,6 +493,84 @@ class _FormFillScreenState extends State<FormFillScreen> {
           onPressed: () => Navigator.pop(ctx),
           child: const Text('Cancelar'),
         ),
+      ),
+    );
+  }
+}
+
+/// Tela Auxiliar para Seleção Múltipla (Checklist)
+class ChecklistSelectionScreen extends StatefulWidget {
+  final String title;
+  final List<String> options;
+  final List<String> initialSelected;
+
+  const ChecklistSelectionScreen({
+    super.key,
+    required this.title,
+    required this.options,
+    required this.initialSelected,
+  });
+
+  @override
+  _ChecklistSelectionScreenState createState() => _ChecklistSelectionScreenState();
+}
+
+class _ChecklistSelectionScreenState extends State<ChecklistSelectionScreen> {
+  late List<String> _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = List.from(widget.initialSelected);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: CustomScrollView(
+        slivers: [
+          CupertinoSliverNavigationBar(
+            largeTitle: Text(widget.title),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.pop(context),
+            ),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => Navigator.pop(context, _selected),
+              child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ),
+          SliverSafeArea(
+            top: false,
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                CupertinoListSection.insetGrouped(
+                  children: widget.options.map((opt) {
+                    final bool isSelected = _selected.contains(opt);
+                    return CupertinoListTile(
+                      title: Text(opt),
+                      trailing: isSelected 
+                          ? const Icon(CupertinoIcons.check_mark, color: CupertinoColors.activeBlue) 
+                          : null,
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selected.remove(opt);
+                          } else {
+                            _selected.add(opt);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ]),
+            ),
+          ),
+        ],
       ),
     );
   }

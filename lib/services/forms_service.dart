@@ -1,9 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
+import 'package:praticos/config/feature_flags.dart';
 
 class FormsService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  /// Helper para obter a referência da coleção de formulários da OS
+  /// Respeita a estrutura multi-tenant (V2 ou Legada)
+  CollectionReference<Map<String, dynamic>> _getFormsCollection(
+      String companyId, String orderId) {
+    if (FeatureFlags.shouldReadFromNew) {
+      return _db
+          .collection('companies')
+          .doc(companyId)
+          .collection('orders')
+          .doc(orderId)
+          .collection('forms');
+    } else {
+      return _db.collection('orders').doc(orderId).collection('forms');
+    }
+  }
 
   /// Busca templates de formulários disponíveis (Globais do Segmento + Da Empresa)
   Future<List<FormDefinition>> getAvailableTemplates(
@@ -26,7 +43,7 @@ class FormsService {
       print('Erro ao buscar templates globais: $e');
     }
 
-    // 2. Templates da Empresa (se houver companyId)
+    // 2. Templates da Empresa
     if (companyId != null && companyId.isNotEmpty) {
       try {
         final companySnapshot = await _db
@@ -48,11 +65,8 @@ class FormsService {
   }
 
   /// Busca formulários vinculados a uma OS (tempo real)
-  Stream<List<OrderForm>> getOrderForms(String orderId) {
-    return _db
-        .collection('orders')
-        .doc(orderId)
-        .collection('forms')
+  Stream<List<OrderForm>> getOrderForms(String companyId, String orderId) {
+    return _getFormsCollection(companyId, orderId)
         .orderBy('startedAt', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
@@ -60,13 +74,14 @@ class FormsService {
             .toList());
   }
 
-  /// Adiciona um novo formulário à OS baseado em um template
-  Future<void> addFormToOrder(String orderId, FormDefinition template) async {
+  /// Adiciona um novo formulário à OS baseado em um template e retorna a instância criada
+  Future<OrderForm> addFormToOrder(
+      String companyId, String orderId, FormDefinition template) async {
     final orderForm = OrderForm(
       id: '', // Será gerado pelo Firestore
       formDefinitionId: template.id,
       title: template.title,
-      items: template.items, // Copia os itens para congelar a versão
+      items: template.items,
       status: FormStatus.pending,
       startedAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -74,19 +89,18 @@ class FormsService {
     );
 
     final data = orderForm.toJson();
-    data.remove('id'); // Remove ID para o Firestore gerar um novo
+    data.remove('id');
 
-    await _db.collection('orders').doc(orderId).collection('forms').add(data);
+    final docRef = await _getFormsCollection(companyId, orderId).add(data);
+    orderForm.id = docRef.id;
+    
+    return orderForm;
   }
 
   /// Salva a resposta de um item do formulário
   Future<void> saveResponse(
-      String orderId, String formId, FormResponse response) async {
-    final formRef = _db
-        .collection('orders')
-        .doc(orderId)
-        .collection('forms')
-        .doc(formId);
+      String companyId, String orderId, String formId, FormResponse response) async {
+    final formRef = _getFormsCollection(companyId, orderId).doc(formId);
 
     return _db.runTransaction((transaction) async {
       final snapshot = await transaction.get(formRef);
@@ -94,7 +108,6 @@ class FormsService {
 
       final orderForm = _orderFormFromJson(snapshot.id, snapshot.data()!);
 
-      // Atualiza ou adiciona a resposta na lista
       final index =
           orderForm.responses.indexWhere((r) => r.itemId == response.itemId);
       if (index >= 0) {
@@ -103,10 +116,8 @@ class FormsService {
         orderForm.responses.add(response);
       }
 
-      // Verifica progresso simples: se começou a responder, muda para in_progress
       if (orderForm.status == FormStatus.pending &&
           orderForm.responses.isNotEmpty) {
-        // Não mudamos automaticamente para completed, deixamos o usuário finalizar
         orderForm.status = FormStatus.inProgress;
       }
 
@@ -120,7 +131,7 @@ class FormsService {
 
   /// Atualiza o status do formulário (ex: Finalizar)
   Future<void> updateStatus(
-      String orderId, String formId, FormStatus status) async {
+      String companyId, String orderId, String formId, FormStatus status) async {
     final Map<String, dynamic> updateData = {
       'status': _statusToString(status),
       'updatedAt': DateTime.now().toIso8601String(),
@@ -130,18 +141,17 @@ class FormsService {
       updateData['completedAt'] = DateTime.now().toIso8601String();
     }
 
-    await _db
-        .collection('orders')
-        .doc(orderId)
-        .collection('forms')
-        .doc(formId)
-        .update(updateData);
+    await _getFormsCollection(companyId, orderId).doc(formId).update(updateData);
+  }
+
+  /// Remove um formulário da OS
+  Future<void> deleteOrderForm(String companyId, String orderId, String formId) async {
+    await _getFormsCollection(companyId, orderId).doc(formId).delete();
   }
 
   // --- Helpers ---
 
   String _statusToString(FormStatus status) {
-    // Mapeamento manual para garantir compatibilidade com o @JsonValue do model
     switch (status) {
       case FormStatus.pending:
         return 'pending';

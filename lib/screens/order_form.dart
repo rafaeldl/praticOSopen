@@ -210,11 +210,13 @@ class _OrderFormState extends State<OrderForm> {
   Widget _buildFormsSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
-        if (_store.order?.id == null) return const SizedBox(); // Só mostra se a OS já estiver salva
+        final hasOrder = _store.order?.id != null && _store.companyId != null;
 
         return StreamBuilder<List<of_model.OrderForm>>(
-          stream: _formsService.getOrderForms(_store.order!.id!),
+          stream: _store.formsStream,
+          initialData: _store.formsStream?.value,
           builder: (context, snapshot) {
+            final isLoading = hasOrder && snapshot.connectionState == ConnectionState.waiting;
             final forms = snapshot.data ?? [];
             
             return Column(
@@ -222,7 +224,12 @@ class _OrderFormState extends State<OrderForm> {
                 _buildGroupedSection(
                   header: "FORMULÁRIOS E CHECKLISTS",
                   children: [
-                    if (forms.isEmpty)
+                    if (isLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(child: CupertinoActivityIndicator()),
+                      )
+                    else if (forms.isEmpty)
                       _buildListTile(
                         context: context,
                         title: "Nenhum formulário",
@@ -271,28 +278,69 @@ class _OrderFormState extends State<OrderForm> {
     final percent = (progress * 100).toInt();
     final isCompleted = form.status == of_model.FormStatus.completed;
 
-    return _buildItemRow(
+    return _buildDismissibleItem(
       context: context,
-      title: form.title,
-      subtitle: isCompleted ? "Concluído" : "$answered de $total respondidos ($percent%)",
-      trailing: "", // Poderia usar um Icon check aqui
-      onTap: () {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => FormFillScreen(
-              orderId: _store.order!.id!,
-              companyId: _store.companyId!,
-              orderForm: form,
+      index: form.id.hashCode, // Usando hash do ID para chave única do Dismissible
+      onDelete: () => _confirmDeleteForm(form),
+      child: _buildItemRow(
+        context: context,
+        title: form.title,
+        subtitle: isCompleted ? "Concluído" : "$answered de $total respondidos ($percent%)",
+        trailing: "", // Poderia usar um Icon check aqui
+        onTap: () {
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+              fullscreenDialog: true,
+              builder: (context) => FormFillScreen(
+                orderId: _store.order!.id!,
+                companyId: _store.companyId!,
+                orderForm: form,
+              ),
             ),
+          );
+        },
+        isLast: isLast,
+      ),
+    );
+  }
+
+  void _confirmDeleteForm(of_model.OrderForm form) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Remover Formulário'),
+        content: Text('Deseja remover "${form.title}" desta OS?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
           ),
-        );
-      },
-      isLast: isLast,
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _formsService.deleteOrderForm(_store.companyId!, _store.order!.id!, form.id);
+            },
+            child: const Text('Remover'),
+          ),
+        ],
+      ),
     );
   }
 
   void _addForm(SegmentConfigProvider config) async {
+    // Se a OS ainda não foi salva, salva automaticamente
+    if (_store.order?.id == null) {
+      if (_store.companyId == null) return;
+      
+      await _store.repository.createItem(_store.companyId!, _store.order!);
+      _store.setOrder(_store.order); // Atualiza estado com novo ID
+    }
+
+    // Double check após salvar
+    if (_store.order?.id == null) return;
+
     final segmentId = config.segmentId ?? 'other';
 
     final template = await Navigator.push(
@@ -305,8 +353,22 @@ class _OrderFormState extends State<OrderForm> {
       ),
     );
 
-    if (template != null && _store.order?.id != null) {
-      await _formsService.addFormToOrder(_store.order!.id!, template);
+    if (template != null && _store.order?.id != null && _store.companyId != null) {
+      final newForm = await _formsService.addFormToOrder(_store.companyId!, _store.order!.id!, template);
+      
+      if (mounted) {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            fullscreenDialog: true,
+            builder: (context) => FormFillScreen(
+              orderId: _store.order!.id!,
+              companyId: _store.companyId!,
+              orderForm: newForm,
+            ),
+          ),
+        );
+      }
     }
   }
 
