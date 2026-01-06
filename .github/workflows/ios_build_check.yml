@@ -80,7 +80,7 @@ jobs:
 
       - name: Build iOS (Fastlane)
         working-directory: ios
-        timeout-minutes: 45
+        timeout-minutes: 60
         run: bundle exec fastlane build_check
 
       - name: Upload build logs (on failure)

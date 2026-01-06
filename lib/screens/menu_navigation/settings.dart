@@ -191,6 +191,19 @@ class _SettingsState extends State<Settings> {
                     title: const Text('Sair', style: TextStyle(color: CupertinoColors.systemRed)),
                     onTap: () => _showLogoutConfirmation(context, config),
                   ),
+                  CupertinoListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemRed,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(CupertinoIcons.trash_fill, color: CupertinoColors.white, size: 20),
+                    ),
+                    title: const Text('Excluir Conta', style: TextStyle(color: CupertinoColors.systemRed)),
+                    subtitle: const Text('Remover permanentemente todos os dados'),
+                    onTap: () => _showDeleteAccountConfirmation(context, config),
+                  ),
                 ],
               ),
 
@@ -338,6 +351,94 @@ class _SettingsState extends State<Settings> {
           child: Text(config.label(LabelKeys.cancel)),
           onPressed: () => Navigator.pop(context),
         ),
+      ),
+    );
+  }
+
+  void _showDeleteAccountConfirmation(BuildContext context, SegmentConfigProvider config) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Excluir Conta'),
+        content: const Text(
+          'Esta ação é permanente e não pode ser desfeita.\n\n'
+          'Todos os seus dados, incluindo ordens de serviço, clientes e configurações '
+          'serão removidos permanentemente.\n\n'
+          'Tem certeza que deseja continuar?',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(config.label(LabelKeys.cancel)),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(context);
+              _showDeleteAccountFinalConfirmation(context);
+            },
+            child: const Text('Continuar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountFinalConfirmation(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Confirmação Final'),
+        content: const Text(
+          'Esta é sua última chance de cancelar.\n\n'
+          'Confirma a exclusão permanente da sua conta?',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(context);
+
+              // Show loading indicator
+              showCupertinoDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(
+                  child: CupertinoActivityIndicator(radius: 20),
+                ),
+              );
+
+              try {
+                await _authStore.deleteAccount();
+                // The auth state change will automatically redirect to login
+              } catch (e) {
+                Navigator.pop(context); // Close loading
+                showCupertinoDialog(
+                  context: context,
+                  builder: (context) => CupertinoAlertDialog(
+                    title: const Text('Erro'),
+                    content: Text(
+                      'Não foi possível excluir sua conta. '
+                      'Por favor, tente novamente ou entre em contato com o suporte.\n\n'
+                      'Erro: ${e.toString()}',
+                    ),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: const Text('OK'),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            child: const Text('Excluir Permanentemente'),
+          ),
+        ],
       ),
     );
   }
