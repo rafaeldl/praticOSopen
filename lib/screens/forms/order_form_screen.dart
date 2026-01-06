@@ -66,15 +66,19 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
 
   void _updateResponse(String itemId, dynamic value) {
     setState(() {
-      final responseIndex = _formState.responses?.indexWhere((r) => r.itemId == itemId) ?? -1;
+      if (_formState.responses == null) {
+        _formState.responses = [];
+      }
+
+      final responseIndex = _formState.responses!.indexWhere((r) => r.itemId == itemId);
+
       if (responseIndex != -1) {
         _formState.responses![responseIndex].value = value;
       } else {
-        // Should not happen if initialized correctly
+        // Create new response if missing
+        _formState.responses!.add(FormResponseItem(itemId: itemId, value: value));
       }
     });
-    // Auto-save or save on exit? MVP says fill. Let's auto-save for better UX or provide Save button.
-    // Spec says "Preenchimento ...".
     widget.formStore.saveFormResponse(widget.orderId, _formState);
   }
 
@@ -175,8 +179,44 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
                 return _buildFormItem(item);
               }).toList(),
             ),
+            if (_formState.status != 'completed')
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+                child: CupertinoButton.filled(
+                  child: const Text("Finalizar Preenchimento"),
+                  onPressed: _completeForm,
+                ),
+              ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _completeForm() {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text("Finalizar Formulário"),
+        content: const Text("Deseja marcar este formulário como concluído?"),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text("Cancelar"),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text("Finalizar"),
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() {
+                _formState.status = 'completed';
+              });
+              widget.formStore.saveFormResponse(widget.orderId, _formState);
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
     );
   }

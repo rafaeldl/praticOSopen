@@ -19,6 +19,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/mobx/form_store.dart';
 import 'package:praticos/screens/forms/form_template_list_screen.dart';
 import 'package:praticos/screens/forms/order_form_screen.dart';
+import 'package:praticos/models/form/order_form.dart' as form_model;
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
@@ -69,6 +70,12 @@ class _OrderFormState extends State<OrderForm> {
         _formStore.loadOrderForms(_store.order!.id!);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _formStore.dispose();
+    super.dispose();
   }
 
   @override

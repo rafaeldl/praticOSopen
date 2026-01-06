@@ -85,6 +85,18 @@ mixin _$FormStore on _FormStore, Store {
     return _$loadOrderFormsAsyncAction.run(() => super.loadOrderForms(orderId));
   }
 
+  final _$disposeAction = Action('_FormStore.dispose');
+
+  @override
+  void dispose() {
+    final _$actionInfo = _$disposeAction.name;
+    try {
+      return super.dispose();
+    } finally {
+      _$disposeAction.endAction(_$actionInfo);
+    }
+  }
+
   final _$getOrLoadFormDefinitionAsyncAction =
       AsyncAction('_FormStore.getOrLoadFormDefinition');
 

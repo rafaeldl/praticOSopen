@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/form/form_definition.dart';
@@ -13,6 +14,8 @@ class FormStore = _FormStore with _$FormStore;
 abstract class _FormStore with Store {
   final FormRepository _repository = FormRepository();
   final PhotoService _photoService = PhotoService();
+
+  StreamSubscription? _orderFormsSubscription;
 
   @observable
   ObservableList<FormDefinition> availableForms = ObservableList<FormDefinition>();
@@ -43,13 +46,19 @@ abstract class _FormStore with Store {
   @action
   Future<void> loadOrderForms(String orderId) async {
     isLoading = true;
-    _repository.getOrderForms(orderId).listen((forms) {
+    await _orderFormsSubscription?.cancel();
+    _orderFormsSubscription = _repository.getOrderForms(orderId).listen((forms) {
       orderForms = ObservableList.of(forms);
       isLoading = false;
     }, onError: (e) {
       errorMessage = e.toString();
       isLoading = false;
     });
+  }
+
+  @action
+  void dispose() {
+    _orderFormsSubscription?.cancel();
   }
 
   @action
