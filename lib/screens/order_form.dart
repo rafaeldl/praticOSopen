@@ -16,6 +16,9 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/mobx/form_store.dart';
+import 'package:praticos/screens/forms/form_template_list_screen.dart';
+import 'package:praticos/screens/forms/order_form_screen.dart';
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
@@ -31,6 +34,7 @@ class OrderForm extends StatefulWidget {
 
 class _OrderFormState extends State<OrderForm> {
   late OrderStore _store;
+  final FormStore _formStore = FormStore();
 
   @override
   void initState() {
@@ -60,6 +64,10 @@ class _OrderFormState extends State<OrderForm> {
       } else {
         _store.loadOrder();
       }
+    }).then((_) {
+      if (_store.order?.id != null) {
+        _formStore.loadOrderForms(_store.order!.id!);
+      }
     });
   }
 
@@ -81,6 +89,7 @@ class _OrderFormState extends State<OrderForm> {
                   _buildPhotosSection(context),
                   _buildClientDeviceSection(context, config),
                   _buildStatusDatesSection(context, config),
+                  _buildFormsSection(context),
                   _buildServicesSection(context, config),
                   _buildProductsSection(context, config),
                   _buildTotalSection(context, config),
@@ -154,6 +163,86 @@ class _OrderFormState extends State<OrderForm> {
               showChevron: true,
               isLast: true,
             ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFormsSection(BuildContext context) {
+    return Observer(
+      builder: (_) {
+        final forms = _formStore.orderForms;
+        return Column(
+          children: [
+            _buildGroupedSection(
+              header: "FORMULÁRIOS & CHECKLISTS",
+              children: [
+                if (forms.isEmpty)
+                  _buildListTile(
+                    context: context,
+                    title: "Nenhum formulário",
+                    value: "",
+                    placeholder: "",
+                    onTap: () {},
+                    showChevron: false,
+                    isLast: true,
+                    textColor: CupertinoColors.secondaryLabel,
+                  )
+                else
+                  ...forms.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final form = entry.value;
+                    return _buildListTile(
+                      context: context,
+                      title: form.title ?? "Formulário",
+                      value: form.status == 'completed' ? 'Concluído' : 'Pendente',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => OrderFormScreen(
+                              orderForm: form,
+                              formStore: _formStore,
+                              orderId: _store.order!.id!,
+                            ),
+                          ),
+                        );
+                      },
+                      showChevron: true,
+                      isLast: index == forms.length - 1,
+                      valueColor: form.status == 'completed'
+                          ? CupertinoColors.activeGreen
+                          : CupertinoColors.systemOrange,
+                    );
+                  }),
+              ],
+            ),
+            if (_store.order?.id != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: CupertinoButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                        builder: (context) => FormTemplateListScreen(
+                          formStore: _formStore,
+                          orderId: _store.order!.id!,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(CupertinoIcons.add_circled_solid),
+                      SizedBox(width: 8),
+                      Text("Adicionar Formulário"),
+                    ],
+                  ),
+                ),
+              ),
           ],
         );
       },
