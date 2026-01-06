@@ -199,7 +199,7 @@ class _OrderFormState extends State<OrderForm> {
                 else
                   ...forms.asMap().entries.map((entry) {
                     final index = entry.key;
-                    final form = entry.value;
+                    final form_model.OrderForm form = entry.value;
                     return _buildListTile(
                       context: context,
                       title: form.title ?? "Formulário",

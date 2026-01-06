@@ -160,7 +160,7 @@ class _OrderFormScreenState extends State<OrderFormScreen> {
   @override
   Widget build(BuildContext context) {
     if (_definition == null || _definition!.items == null) {
-      return CupertinoPageScaffold(
+      return const CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(middle: Text('Erro')),
         child: Center(child: Text('Definição do formulário não encontrada.')),
       );
