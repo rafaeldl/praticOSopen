@@ -1,4 +1,6 @@
 Novidades nesta versão:
+- Exclusão de conta: Agora você pode excluir sua conta e todos os dados diretamente no app (Ajustes > Conta > Excluir Conta).
+- Central de Suporte: Nova página de suporte funcional no site para ajudá-lo com dúvidas e assistência.
 - Adaptação dinâmica para diferentes segmentos (Automotivo, Climatização, Informática, etc).
 - Ícones e termos personalizados conforme o ramo da sua empresa.
 - Melhorias na interface e correções de bugs.
