@@ -132,6 +132,25 @@ Se as permissões não atualizarem, use os scripts em `firebase/scripts/`:
 
 ---
 
+## Formulários Dinâmicos (Nova Feature)
+
+Arquitetura para checklists, vistorias e perguntas personalizadas. Detalhes em `@docs/formularios_dinamicos.md`.
+
+### Estrutura
+- **Templates:** Definições do formulário (`FormTemplate`).
+    - Escopo Empresa: `/companies/{companyId}/form_templates/{formId}`
+    - Escopo Segmento (Global): `/segments/{segmentId}/form_templates/{formId}`
+- **Instâncias:** Dados preenchidos vinculados à OS (`FormInstance`).
+    - Path: `/companies/{companyId}/orders/{orderId}/forms/{instanceId}`
+- **Fotos:** Armazenadas por item do formulário em `tenants/{companyId}/orders/{orderId}/forms/{instanceId}/items/{itemId}/`
+
+### Regras de Negócio
+1. **Obrigatoriedade:** Serviços (`Service`) e Produtos (`Product`) podem exigir templates específicos (`requiredFormTemplateRefs`).
+2. **Bloqueio:** A OS não pode ser fechada/concluída se houver formulários obrigatórios com status diferente de `completed`.
+3. **Validação:** Feita no client (App) antes de submeter status `completed`.
+
+---
+
 ## Padrões de Código
 
 ### 1. Modelos (Models)

@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType, Divider, InkWell;
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/services/forms_service.dart';
 
@@ -51,35 +52,38 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: CustomScrollView(
-        slivers: [
-          CupertinoSliverNavigationBar(
-            largeTitle: const Text('Modelos'),
-            leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(),
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          slivers: [
+            CupertinoSliverNavigationBar(
+              largeTitle: const Text('Modelos'),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: const Icon(CupertinoIcons.add),
+                onPressed: () {
+                  // TODO: Navegar para tela de criação de template
+                  // Navigator.push(...)
+                },
+              ),
             ),
-          ),
-          SliverToBoxAdapter(
-            child: _buildBody(),
-          ),
-        ],
+            _buildBody(),
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const SizedBox(
-        height: 300,
+      return const SliverFillRemaining(
         child: Center(child: CupertinoActivityIndicator()),
       );
     }
 
     if (_templates == null || _templates!.isEmpty) {
-      return SizedBox(
-        height: 300,
+      return SliverFillRemaining(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -87,14 +91,13 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
               Icon(
                 CupertinoIcons.doc_text_search,
                 size: 64,
-                color: CupertinoColors.systemGrey3.resolveFrom(context),
+                color: CupertinoColors.systemGrey.resolveFrom(context),
               ),
               const SizedBox(height: 16),
               Text(
                 'Nenhum modelo disponível',
                 style: TextStyle(
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  fontSize: 16,
                 ),
               ),
             ],
@@ -103,36 +106,97 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
       );
     }
 
-    return CupertinoListSection.insetGrouped(
-      header: const Text('MODELOS DISPONÍVEIS'),
-      children: _templates!.map((template) {
-        return CupertinoListTile(
-          title: Text(template.title),
-          subtitle: template.description != null && template.description!.isNotEmpty
-              ? Text(
-                  template.description!,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                )
-              : null,
-          leading: Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: CupertinoColors.activeBlue.resolveFrom(context).withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          if (index >= _templates!.length) return null;
+          final template = _templates![index];
+          final isLast = index == _templates!.length - 1;
+          return _buildTemplateItem(template, isLast);
+        },
+        childCount: _templates!.length,
+      ),
+    );
+  }
+
+  Widget _buildTemplateItem(FormDefinition template, bool isLast) {
+    return Container(
+      color: CupertinoColors.systemBackground.resolveFrom(context),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).pop(template);
+        },
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  // Avatar
+                  _buildTemplateAvatar(template),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          template.title,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: CupertinoColors.label.resolveFrom(context),
+                          ),
+                        ),
+                        if (template.description != null &&
+                            template.description!.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            template.description!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    CupertinoIcons.chevron_right,
+                    size: 16,
+                    color: CupertinoColors.systemGrey3.resolveFrom(context),
+                  ),
+                ],
+              ),
             ),
-            child: Icon(
-              CupertinoIcons.doc_text, 
-              size: 20, 
-              color: CupertinoColors.activeBlue.resolveFrom(context)
-            ),
-          ),
-          trailing: const Icon(CupertinoIcons.add_circled, color: CupertinoColors.activeBlue),
-          onTap: () {
-            Navigator.of(context).pop(template);
-          },
-        );
-      }).toList(),
+            if (!isLast)
+              Divider(
+                height: 1,
+                indent: 76, // Avatar (48) + Padding (16+12)
+                color: CupertinoColors.systemGrey5.resolveFrom(context),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTemplateAvatar(FormDefinition template) {
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(
+        color: CupertinoColors.activeBlue.resolveFrom(context).withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      alignment: Alignment.center,
+      child: Icon(
+        CupertinoIcons.doc_text,
+        size: 24,
+        color: CupertinoColors.activeBlue.resolveFrom(context),
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
@@ -28,6 +29,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
   late OrderForm _currentForm;
   bool _isUploading = false;
   bool _isSaving = false;
+  String? _uploadingItemId;
 
   @override
   void initState() {
@@ -36,6 +38,8 @@ class _FormFillScreenState extends State<FormFillScreen> {
   }
 
   Future<void> _saveItemResponse(String itemId, dynamic value) async {
+    HapticFeedback.selectionClick();
+
     final currentResponse = _currentForm.getResponse(itemId);
     final photoUrls = currentResponse?.photoUrls ?? [];
 
@@ -67,7 +71,10 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
     if (file == null) return;
 
-    setState(() => _isUploading = true);
+    setState(() {
+      _isUploading = true;
+      _uploadingItemId = itemId;
+    });
 
     try {
       final fileName = '${itemId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -100,14 +107,36 @@ class _FormFillScreenState extends State<FormFillScreen> {
           _currentForm.responses.add(newResponse);
         }
       });
+
+      HapticFeedback.mediumImpact();
     } catch (e) {
-      print('Erro ao enviar foto: $e');
+      HapticFeedback.heavyImpact();
+      if (mounted) {
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Erro ao Enviar Foto'),
+            content: const Text('Não foi possível enviar a foto. Tente novamente.'),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     } finally {
-      setState(() => _isUploading = false);
+      setState(() {
+        _isUploading = false;
+        _uploadingItemId = null;
+      });
     }
   }
 
   Future<void> _deletePhoto(String itemId, String url) async {
+    HapticFeedback.mediumImpact();
+
     final currentResponse = _currentForm.getResponse(itemId);
     if (currentResponse == null) return;
 
@@ -132,20 +161,21 @@ class _FormFillScreenState extends State<FormFillScreen> {
     final missingRequired = _currentForm.items.where((item) {
       if (!item.required) return false;
       final response = _currentForm.getResponse(item.id);
-      
+
       if (item.type == FormItemType.photoOnly) {
-         return response == null || response.photoUrls.isEmpty;
+        return response == null || response.photoUrls.isEmpty;
       }
-      
+
       return response == null || response.value == null || response.value.toString().isEmpty;
     }).toList();
 
     if (missingRequired.isNotEmpty) {
+      HapticFeedback.heavyImpact();
       showCupertinoDialog(
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
           title: const Text('Campos Obrigatórios'),
-          content: Text('Por favor preencha:\n${missingRequired.map((e) => "• ${e.label}").join("\n") }'),
+          content: Text('Por favor preencha:\n${missingRequired.map((e) => "• ${e.label}").join("\n")}'),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.pop(ctx),
@@ -158,248 +188,159 @@ class _FormFillScreenState extends State<FormFillScreen> {
     }
 
     setState(() => _isSaving = true);
-    await _formsService.updateStatus(widget.companyId, widget.orderId, _currentForm.id, FormStatus.completed);
-    if (mounted) {
-      setState(() => _isSaving = false);
-      Navigator.pop(context);
-    }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: CustomScrollView(
-        slivers: [
-          CupertinoSliverNavigationBar(
-            largeTitle: Text(_currentForm.title),
-            leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Text('Fechar'),
-              onPressed: () => Navigator.pop(context),
-            ),
-            trailing: _isSaving 
-              ? const CupertinoActivityIndicator()
-              : CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: _finishForm,
-                  child: const Text('Concluir', style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-          ),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                if (_isUploading)
-                  Container(
-                    width: double.infinity,
-                    color: CupertinoColors.secondarySystemBackground.resolveFrom(context),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        CupertinoActivityIndicator(),
-                        SizedBox(width: 8),
-                        Text("Enviando foto...", style: TextStyle(fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                ..._currentForm.items.map((item) => _buildFormItem(item)),
-                const SizedBox(height: 40),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+    try {
+      await _formsService.updateStatus(widget.companyId, widget.orderId, _currentForm.id, FormStatus.completed);
 
-  Widget _buildFormItem(FormItemDefinition item) {
-    final response = _currentForm.getResponse(item.id);
-    
-    final labelWidget = Text.rich(
-      TextSpan(
-        text: item.label,
-        style: TextStyle(
-          fontSize: 16,
-          color: CupertinoColors.label.resolveFrom(context),
-        ),
-        children: [
-          if (item.required)
-            const TextSpan(text: ' *', style: TextStyle(color: CupertinoColors.systemRed)),
-        ],
-      ),
-    );
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        setState(() => _isSaving = false);
+        Navigator.pop(context, true);
+      }
+    } catch (e) {
+      if (mounted) {
+        HapticFeedback.heavyImpact();
+        setState(() => _isSaving = false);
 
-    return CupertinoListSection.insetGrouped(
-      header: item.type == FormItemType.photoOnly ? labelWidget : null,
-      children: [
-        if (item.type != FormItemType.photoOnly)
-          _buildInputWidget(item, response, labelWidget),
-
-        if (item.allowPhotos || item.type == FormItemType.photoOnly)
-          _buildPhotoRow(item, response),
-      ],
-    );
-  }
-
-  Widget _buildInputWidget(FormItemDefinition item, FormResponse? response, Widget label) {
-    switch (item.type) {
-      case FormItemType.text:
-      case FormItemType.number:
-        return CupertinoTextFormFieldRow(
-          prefix: label,
-          placeholder: 'Digitar',
-          initialValue: response?.value?.toString(),
-          textAlign: TextAlign.right,
-          style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
-          keyboardType: item.type == FormItemType.number 
-              ? TextInputType.number 
-              : TextInputType.text,
-          onChanged: (val) => _saveItemResponse(item.id, val),
-        );
-      
-      case FormItemType.boolean:
-        return CupertinoListTile(
-          title: label,
-          trailing: CupertinoSlidingSegmentedControl<bool>(
-            groupValue: response?.value as bool?,
-            children: const {
-              true: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text('Sim', style: TextStyle(fontSize: 14)),
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Erro'),
+            content: const Text('Não foi possível concluir o formulário. Tente novamente.'),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
               ),
-              false: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text('Não', style: TextStyle(fontSize: 14)),
-              ),
-            },
-            onValueChanged: (newValue) {
-              if (newValue != null) _saveItemResponse(item.id, newValue);
-            },
-          ),
-        );
-
-      case FormItemType.checklist:
-      case FormItemType.select:
-        final bool isChecklist = item.type == FormItemType.checklist;
-        String displayValue = 'Selecionar';
-        
-        if (response?.value != null) {
-          if (isChecklist && response!.value is List) {
-            final List list = response.value;
-            displayValue = list.isEmpty ? 'Selecionar' : list.join(', ');
-          } else {
-            displayValue = response!.value.toString();
-          }
-        }
-
-        return CupertinoListTile(
-          title: label,
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  displayValue,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: response?.value != null 
-                        ? CupertinoColors.label.resolveFrom(context) 
-                        : CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 6),
-              Icon(CupertinoIcons.chevron_right, size: 14, color: CupertinoColors.systemGrey3.resolveFrom(context)),
             ],
           ),
-          onTap: () => _showOptionsPicker(item),
         );
-
-      default:
-        return const SizedBox();
+      }
     }
   }
 
-  Widget _buildPhotoRow(FormItemDefinition item, FormResponse? response) {
-    final photos = response?.photoUrls ?? [];
-    final hasPhotos = photos.isNotEmpty;
-    
-    if (!hasPhotos) {
-       return Padding(
-         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-         child: GestureDetector(
-           onTap: () => _showPhotoSourceSheet(item.id),
-           behavior: HitTestBehavior.opaque,
-           child: Row(
-             children: [
-               Icon(CupertinoIcons.camera, size: 20, color: CupertinoColors.activeBlue.resolveFrom(context)),
-               const SizedBox(width: 8),
-               Text(
-                 "Adicionar Foto",
-                 style: TextStyle(
-                   color: CupertinoColors.activeBlue.resolveFrom(context),
-                   fontSize: 15,
-                 ),
-               ),
-             ],
-           ),
-         ),
-       );
+  Future<void> _reopenForm() async {
+    setState(() => _isSaving = true);
+
+    try {
+      await _formsService.updateStatus(widget.companyId, widget.orderId, _currentForm.id, FormStatus.inProgress);
+
+      if (mounted) {
+        HapticFeedback.mediumImpact();
+        setState(() {
+          _currentForm.status = FormStatus.inProgress;
+          _isSaving = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        HapticFeedback.heavyImpact();
+        setState(() => _isSaving = false);
+
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Erro'),
+            content: const Text('Não foi possível reabrir o formulário. Tente novamente.'),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
-    
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 0, 12),
-      child: SizedBox(
-        height: 50,
-        child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: [
-             GestureDetector(
-                onTap: () => _showPhotoSourceSheet(item.id),
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  margin: const EdgeInsets.only(right: 12),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.systemGrey6.resolveFrom(context),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    CupertinoIcons.plus,
-                    color: CupertinoColors.activeBlue.resolveFrom(context),
-                    size: 24,
-                  ),
-                ),
-              ),
-              
-            ...photos.map((url) => GestureDetector(
-              onTap: () => _showPhotoOptions(item.id, url),
-              child: Padding(
-                padding: const EdgeInsets.only(right: 12),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    url,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (ctx, child, progress) {
-                      if (progress == null) return child;
-                      return Container(
-                        width: 50, 
-                        height: 50, 
-                        color: CupertinoColors.systemGrey6.resolveFrom(context),
-                        child: const CupertinoActivityIndicator(),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            )),
-          ],
+  }
+
+  void _showPhotoPreview(String url) {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => _PhotoPreviewScreen(url: url),
+        fullscreenDialog: true,
+      ),
+    );
+  }
+
+  void _showPhotoSourceSheet(String itemId) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _addPhoto(itemId, ImageSource.camera);
+            },
+            child: const Text('Tirar Foto'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _addPhoto(itemId, ImageSource.gallery);
+            },
+            child: const Text('Escolher da Galeria'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Cancelar'),
         ),
+      ),
+    );
+  }
+
+  void _showPhotoOptions(String itemId, String url) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showPhotoPreview(url);
+            },
+            child: const Text('Ver Foto'),
+          ),
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(ctx);
+              _confirmDeletePhoto(itemId, url);
+            },
+            child: const Text('Remover Foto'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Cancelar'),
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeletePhoto(String itemId, String url) {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Remover Foto'),
+        content: const Text('Tem certeza que deseja remover esta foto?'),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(ctx);
+              _deletePhoto(itemId, url);
+            },
+            child: const Text('Remover'),
+          ),
+        ],
       ),
     );
   }
@@ -408,12 +349,12 @@ class _FormFillScreenState extends State<FormFillScreen> {
     final bool isChecklist = item.type == FormItemType.checklist;
     final options = item.options ?? [];
     final currentResponse = _currentForm.getResponse(item.id);
-    
+
     if (isChecklist) {
       Navigator.push(
         context,
         CupertinoPageRoute(
-          builder: (context) => ChecklistSelectionScreen(
+          builder: (context) => _ChecklistSelectionScreen(
             title: item.label,
             options: options,
             initialSelected: List<String>.from(currentResponse?.value ?? []),
@@ -447,65 +388,395 @@ class _FormFillScreenState extends State<FormFillScreen> {
     }
   }
 
-  void _showPhotoOptions(String itemId, String url) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(ctx);
-              _deletePhoto(itemId, url);
-            },
-            child: const Text('Remover Foto'),
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: CustomScrollView(
+        slivers: [
+          CupertinoSliverNavigationBar(
+            largeTitle: Text(_currentForm.title),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            trailing: _isSaving
+                ? const CupertinoActivityIndicator()
+                : CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: _currentForm.status == FormStatus.completed
+                        ? _reopenForm
+                        : _finishForm,
+                    child: Text(
+                      _currentForm.status == FormStatus.completed ? 'Reabrir' : 'Concluir',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+          ),
+          SliverSafeArea(
+            top: false,
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                if (_currentForm.status == FormStatus.completed)
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemGreen.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          CupertinoIcons.checkmark_seal_fill,
+                          color: CupertinoColors.systemGreen,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Formulário concluído',
+                            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                              color: CupertinoColors.systemGreen,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ..._currentForm.items.map((item) => _buildFormSection(item)),
+                const SizedBox(height: 40),
+              ]),
+            ),
           ),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancelar'),
-        ),
       ),
     );
   }
 
-  void _showPhotoSourceSheet(String itemId) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _addPhoto(itemId, ImageSource.camera);
-            },
-            child: const Text('Tirar Foto'),
+  Widget _buildFormSection(FormItemDefinition item) {
+    final response = _currentForm.getResponse(item.id);
+    final photos = response?.photoUrls ?? [];
+    final isUploadingThis = _isUploading && _uploadingItemId == item.id;
+
+    return CupertinoListSection.insetGrouped(
+      header: _buildSectionHeader(item, photos.length, isUploadingThis),
+      children: [
+        _buildInputTile(item, response),
+        if (photos.isNotEmpty) _buildPhotosTile(item.id, photos),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader(FormItemDefinition item, int photoCount, bool isUploading) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text.rich(
+            TextSpan(
+              text: item.label,
+              children: [
+                if (item.required)
+                  const TextSpan(
+                    text: ' *',
+                    style: TextStyle(color: CupertinoColors.systemRed),
+                  ),
+              ],
+            ),
           ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _addPhoto(itemId, ImageSource.gallery);
-            },
-            child: const Text('Escolher da Galeria'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancelar'),
+        ),
+        if (item.allowPhotos || item.type == FormItemType.photoOnly)
+          isUploading
+              ? const Padding(
+                  padding: EdgeInsets.only(left: 8),
+                  child: CupertinoActivityIndicator(radius: 8),
+                )
+              : CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => _showPhotoSourceSheet(item.id),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (photoCount > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Text(
+                            '$photoCount',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                            ),
+                          ),
+                        ),
+                      Icon(
+                        CupertinoIcons.camera,
+                        size: 18,
+                        color: CupertinoColors.activeBlue.resolveFrom(context),
+                      ),
+                    ],
+                  ),
+                ),
+      ],
+    );
+  }
+
+  Widget _buildInputTile(FormItemDefinition item, FormResponse? response) {
+    switch (item.type) {
+      case FormItemType.text:
+      case FormItemType.number:
+        return _TextInputTile(
+          item: item,
+          response: response,
+          onChanged: (val) => _saveItemResponse(item.id, val),
+        );
+
+      case FormItemType.boolean:
+        return _BooleanInputTile(
+          item: item,
+          response: response,
+          onChanged: (val) => _saveItemResponse(item.id, val),
+        );
+
+      case FormItemType.checklist:
+      case FormItemType.select:
+        return _SelectInputTile(
+          item: item,
+          response: response,
+          onTap: () => _showOptionsPicker(item),
+        );
+
+      case FormItemType.photoOnly:
+        final photos = response?.photoUrls ?? [];
+        if (photos.isEmpty) {
+          return CupertinoListTile(
+            title: Text(
+              'Toque no ícone da câmera para adicionar',
+              style: TextStyle(
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                fontSize: 15,
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildPhotosTile(String itemId, List<String> photos) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: SizedBox(
+        height: 60,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: photos.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final url = photos[index];
+            return GestureDetector(
+              onTap: () => _showPhotoOptions(itemId, url),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  url,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (ctx, child, progress) {
+                    if (progress == null) return child;
+                    return Container(
+                      width: 60,
+                      height: 60,
+                      color: CupertinoColors.systemGrey5.resolveFrom(context),
+                      child: const Center(child: CupertinoActivityIndicator()),
+                    );
+                  },
+                  errorBuilder: (ctx, error, stack) {
+                    return Container(
+                      width: 60,
+                      height: 60,
+                      color: CupertinoColors.systemGrey5.resolveFrom(context),
+                      child: const Icon(CupertinoIcons.exclamationmark_triangle, size: 20),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 }
 
-/// Tela Auxiliar para Seleção Múltipla (Checklist)
-class ChecklistSelectionScreen extends StatefulWidget {
+/// Campo de texto no padrão iOS
+class _TextInputTile extends StatefulWidget {
+  final FormItemDefinition item;
+  final FormResponse? response;
+  final Function(String) onChanged;
+
+  const _TextInputTile({
+    required this.item,
+    required this.response,
+    required this.onChanged,
+  });
+
+  @override
+  State<_TextInputTile> createState() => _TextInputTileState();
+}
+
+class _TextInputTileState extends State<_TextInputTile> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.response?.value?.toString());
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoTextFormFieldRow(
+      controller: _controller,
+      placeholder: 'Digitar',
+      textAlign: TextAlign.right,
+      style: CupertinoTheme.of(context).textTheme.textStyle,
+      placeholderStyle: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+        color: CupertinoColors.placeholderText.resolveFrom(context),
+      ),
+      keyboardType: widget.item.type == FormItemType.number
+          ? const TextInputType.numberWithOptions(decimal: true)
+          : TextInputType.text,
+      textInputAction: TextInputAction.next,
+      onChanged: widget.onChanged,
+    );
+  }
+}
+
+/// Campo boolean no padrão iOS
+class _BooleanInputTile extends StatelessWidget {
+  final FormItemDefinition item;
+  final FormResponse? response;
+  final Function(bool) onChanged;
+
+  const _BooleanInputTile({
+    required this.item,
+    required this.response,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final boolValue = response?.value as bool?;
+
+    return CupertinoListTile(
+      title: const SizedBox.shrink(),
+      trailing: CupertinoSlidingSegmentedControl<bool>(
+        groupValue: boolValue,
+        children: {
+          true: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: Text(
+              'Sim',
+              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
+            ),
+          ),
+          false: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: Text(
+              'Não',
+              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
+            ),
+          ),
+        },
+        onValueChanged: (newValue) {
+          if (newValue != null) onChanged(newValue);
+        },
+      ),
+    );
+  }
+}
+
+/// Campo select/checklist no padrão iOS
+class _SelectInputTile extends StatelessWidget {
+  final FormItemDefinition item;
+  final FormResponse? response;
+  final VoidCallback onTap;
+
+  const _SelectInputTile({
+    required this.item,
+    required this.response,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isChecklist = item.type == FormItemType.checklist;
+    String displayValue = 'Selecionar';
+    bool hasValue = false;
+
+    final responseValue = response?.value;
+    if (responseValue != null) {
+      if (isChecklist && responseValue is List) {
+        if (responseValue.isNotEmpty) {
+          displayValue = responseValue.join(', ');
+          hasValue = true;
+        }
+      } else {
+        displayValue = responseValue.toString();
+        hasValue = responseValue.toString().isNotEmpty;
+      }
+    }
+
+    return CupertinoListTile(
+      title: const SizedBox.shrink(),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 200),
+            child: Text(
+              displayValue,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                color: hasValue
+                    ? CupertinoColors.label.resolveFrom(context)
+                    : CupertinoColors.placeholderText.resolveFrom(context),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Icon(
+            CupertinoIcons.chevron_right,
+            size: 16,
+            color: CupertinoColors.systemGrey2.resolveFrom(context),
+          ),
+        ],
+      ),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onTap();
+      },
+    );
+  }
+}
+
+/// Tela de seleção múltipla (Checklist)
+class _ChecklistSelectionScreen extends StatefulWidget {
   final String title;
   final List<String> options;
   final List<String> initialSelected;
 
-  const ChecklistSelectionScreen({
-    super.key,
+  const _ChecklistSelectionScreen({
     required this.title,
     required this.options,
     required this.initialSelected,
@@ -515,7 +786,7 @@ class ChecklistSelectionScreen extends StatefulWidget {
   _ChecklistSelectionScreenState createState() => _ChecklistSelectionScreenState();
 }
 
-class _ChecklistSelectionScreenState extends State<ChecklistSelectionScreen> {
+class _ChecklistSelectionScreenState extends State<_ChecklistSelectionScreen> {
   late List<String> _selected;
 
   @override
@@ -540,7 +811,7 @@ class _ChecklistSelectionScreenState extends State<ChecklistSelectionScreen> {
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: () => Navigator.pop(context, _selected),
-              child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text('OK', style: TextStyle(fontWeight: FontWeight.w600)),
             ),
           ),
           SliverSafeArea(
@@ -551,11 +822,15 @@ class _ChecklistSelectionScreenState extends State<ChecklistSelectionScreen> {
                   children: widget.options.map((opt) {
                     final bool isSelected = _selected.contains(opt);
                     return CupertinoListTile(
-                      title: Text(opt),
-                      trailing: isSelected 
-                          ? const Icon(CupertinoIcons.check_mark, color: CupertinoColors.activeBlue) 
+                      title: Text(
+                        opt,
+                        style: CupertinoTheme.of(context).textTheme.textStyle,
+                      ),
+                      trailing: isSelected
+                          ? const Icon(CupertinoIcons.checkmark, color: CupertinoColors.activeBlue)
                           : null,
                       onTap: () {
+                        HapticFeedback.selectionClick();
                         setState(() {
                           if (isSelected) {
                             _selected.remove(opt);
@@ -571,6 +846,68 @@ class _ChecklistSelectionScreenState extends State<ChecklistSelectionScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Tela de Preview de Foto
+class _PhotoPreviewScreen extends StatelessWidget {
+  final String url;
+
+  const _PhotoPreviewScreen({required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.black,
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.black,
+        border: null,
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Fechar', style: TextStyle(color: CupertinoColors.white)),
+        ),
+      ),
+      child: SafeArea(
+        child: Center(
+          child: InteractiveViewer(
+            minScale: 0.5,
+            maxScale: 4.0,
+            child: Image.network(
+              url,
+              fit: BoxFit.contain,
+              loadingBuilder: (ctx, child, progress) {
+                if (progress == null) return child;
+                return const Center(
+                  child: CupertinoActivityIndicator(color: CupertinoColors.white),
+                );
+              },
+              errorBuilder: (ctx, error, stack) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        CupertinoIcons.exclamationmark_triangle,
+                        color: CupertinoColors.white,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Erro ao carregar foto',
+                        style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                          color: CupertinoColors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
       ),
     );
   }
