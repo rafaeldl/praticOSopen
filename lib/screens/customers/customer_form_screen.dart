@@ -1,10 +1,13 @@
 import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/constants/label_keys.dart';
 
 class CustomerFormScreen extends StatefulWidget {
-  const CustomerFormScreen({Key? key}) : super(key: key);
+  const CustomerFormScreen({super.key});
 
   @override
   State<CustomerFormScreen> createState() => _CustomerFormScreenState();
@@ -48,16 +51,21 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing ? "Editar Cliente" : "Novo Cliente"),
+        middle: Text(_isEditing
+            ? config.label(LabelKeys.editCustomer)
+            : config.label(LabelKeys.createCustomer)),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isLoading ? null : _saveCustomer,
           child: _isLoading
               ? const CupertinoActivityIndicator()
-              : const Text("Salvar", style: TextStyle(fontWeight: FontWeight.bold)),
+              : Text(config.label(LabelKeys.save),
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
       child: SafeArea(
@@ -89,16 +97,21 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Nome", style: TextStyle(fontSize: 16)),
+                    prefix: Text(config.label(LabelKeys.customerName),
+                        style: const TextStyle(fontSize: 16)),
                     initialValue: _customer?.name,
-                    placeholder: "Nome do cliente",
+                    placeholder:
+                        "Nome do ${config.customer.toLowerCase()}",
                     textCapitalization: TextCapitalization.words,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _customer?.name = val,
-                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                    validator: (val) => val == null || val.isEmpty
+                        ? config.label(LabelKeys.required)
+                        : null,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Telefone", style: TextStyle(fontSize: 16)),
+                    prefix: Text(config.label(LabelKeys.customerPhone),
+                        style: const TextStyle(fontSize: 16)),
                     initialValue: _customer?.phone, // Note: Mask might need controller logic if buggy, but trying standard first
                     placeholder: "(00) 00000-0000",
                     keyboardType: TextInputType.phone,
@@ -107,7 +120,8 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                     onSaved: (val) => _customer?.phone = val?.replaceAll(RegExp(r'\D'), ''),
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Email", style: TextStyle(fontSize: 16)),
+                    prefix: Text(config.label(LabelKeys.customerEmail),
+                        style: const TextStyle(fontSize: 16)),
                     initialValue: _customer?.email,
                     placeholder: "email@exemplo.com",
                     keyboardType: TextInputType.emailAddress,
@@ -115,7 +129,8 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                     onSaved: (val) => _customer?.email = val,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Endereço", style: TextStyle(fontSize: 16)),
+                    prefix: Text(config.label(LabelKeys.customerAddress),
+                        style: const TextStyle(fontSize: 16)),
                     initialValue: _customer?.address,
                     placeholder: "Endereço completo",
                     textCapitalization: TextCapitalization.sentences,

@@ -6,7 +6,7 @@ import 'package:praticos/models/service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 
 class ServiceFormScreen extends StatefulWidget {
-  const ServiceFormScreen({Key? key}) : super(key: key);
+  const ServiceFormScreen({super.key});
 
   @override
   State<ServiceFormScreen> createState() => _ServiceFormScreenState();

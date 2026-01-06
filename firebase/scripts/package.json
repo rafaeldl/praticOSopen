@@ -4,6 +4,7 @@
   "description": "Scripts for migrating PraticOS to multi-tenant architecture",
   "main": "index.js",
   "scripts": {
+    "seed-segments": "node seed_segments.js",
     "migrate": "node migrate.js",
     "rollback": "node rollback.js",
     "refresh-claims": "node refresh_claims.js",

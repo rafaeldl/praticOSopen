@@ -15,10 +15,11 @@ class UserRole extends BaseAuditCompany {
   UserRole();
   factory UserRole.fromJson(Map<String, dynamic> json) =>
       _$UserRoleFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$UserRoleToJson(this);
-  UserRoleAggr toUserRoleAggr() => _$UserRoleAggrFromJson(this.toJson());
+  UserRoleAggr toUserRoleAggr() => _$UserRoleAggrFromJson(toJson());
   CompanyRoleAggr toCompanyRoleAggr() =>
-      _$CompanyRoleAggrFromJson(this.toJson());
+      _$CompanyRoleAggrFromJson(toJson());
 }
 
 @JsonSerializable(explicitToJson: true)

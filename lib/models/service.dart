@@ -14,8 +14,9 @@ class Service extends BaseAuditCompany {
   Service();
   factory Service.fromJson(Map<String, dynamic> json) =>
       _$ServiceFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$ServiceToJson(this);
-  ServiceAggr toAggr() => _$ServiceAggrFromJson(this.toJson());
+  ServiceAggr toAggr() => _$ServiceAggrFromJson(toJson());
 }
 
 @JsonSerializable()
@@ -27,5 +28,6 @@ class ServiceAggr extends BaseAuditCompanyAggr {
   ServiceAggr();
   factory ServiceAggr.fromJson(Map<String, dynamic> json) =>
       _$ServiceAggrFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$ServiceAggrToJson(this);
 }

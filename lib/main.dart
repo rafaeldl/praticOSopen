@@ -9,7 +9,7 @@ import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/login.dart';
-import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
+import 'package:praticos/screens/auth_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -19,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:praticos/routes.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 
 AuthStore _authStore = AuthStore();
 
@@ -38,6 +39,9 @@ Future<void> main() async {
           create: (_) => BottomNavigationBarStore(),
         ),
         Provider<ThemeStore>(create: (_) => ThemeStore()),
+        ChangeNotifierProvider<SegmentConfigProvider>(
+          create: (_) => SegmentConfigProvider(),
+        ),
       ],
       child: MyApp(),
     ),
@@ -95,9 +99,9 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  Widget _buildHome(_authStore) {
-    if (_authStore.currentUser != null && _authStore.currentUser.data != null) {
-      return NavigationController();
+  Widget _buildHome(authStore) {
+    if (authStore.currentUser != null && authStore.currentUser.data != null) {
+      return AuthWrapper(authStore: authStore);
     } else {
       return LoginPage();
     }

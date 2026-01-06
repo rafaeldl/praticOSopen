@@ -29,7 +29,7 @@ abstract class _ProductStore with Store {
 
   _ProductStore() {
     SharedPreferences.getInstance().then((value) {
-      this.companyId = value.getString('companyId');
+      companyId = value.getString('companyId');
       retrieveProducts();
     });
   }

@@ -53,14 +53,23 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Segments - global collection (read-only para usuários autenticados)
+    match /segments/{segmentId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Apenas via Admin SDK (script de seed)
+    }
+
     // ════════════════════════════════════════════════════════════════════════
     // LEGACY STRUCTURE (manter durante migração)
     // Remover após cleanup completo
     // ════════════════════════════════════════════════════════════════════════
 
     match /companies/{id} {
-      allow create: if request.resource.data.owner['id'] == request.auth.uid;
-      allow read, write: if resource.data.owner.id == request.auth.uid;
+      allow create: if request.auth != null;
+      allow read, write: if request.auth != null && (
+        resource.data.owner == request.auth.uid || 
+        (resource.data.owner is map && resource.data.owner.id == request.auth.uid)
+      );
     }
 
     match /customers/{id} {
@@ -101,9 +110,14 @@ service cloud.firestore {
     match /companies/{companyId} {
       // Documento da empresa - membros podem ler, apenas owner pode escrever
       allow read: if belongsToCompany(companyId)
-        || resource.data.owner.id == request.auth.uid;
+        || resource.data.owner == request.auth.uid
+        || (resource.data.owner is map && resource.data.owner.id == request.auth.uid);
+      
       allow write: if request.auth != null
-        && resource.data.owner.id == request.auth.uid;
+        && (
+          resource.data.owner == request.auth.uid 
+          || (resource.data.owner is map && resource.data.owner.id == request.auth.uid)
+        );
 
       // ──────────────────────────────────────────────────────────────────────
       // Subcollections - isoladas automaticamente por tenant
@@ -142,6 +156,14 @@ service cloud.firestore {
             get(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid
             || isCompanyAdmin(companyId)
           );
+      }
+
+      match /brands/{brandId} {
+        allow read, write: if belongsToCompany(companyId);
+      }
+
+      match /deviceCatalog/{itemId} {
+        allow read, write: if belongsToCompany(companyId);
       }
     }
   }

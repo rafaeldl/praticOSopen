@@ -60,6 +60,11 @@ platform :android do
   lane :deploy_with_metadata do |options|
     # Default track is internal, but can be overridden (e.g., 'production')
     track = options[:track] || 'internal'
+    
+    # Opções para pular uploads se não houver alterações (detectado pelo CI)
+    skip_screenshots = options[:skip_screenshots] || false
+    skip_images = options[:skip_images] || false
+    skip_metadata = options[:skip_metadata] || false
 
     # 1. Carregar credenciais (garante que json_key_data esteja disponível se precisar)
     
@@ -79,46 +84,25 @@ platform :android do
     new_version_code = current_version_code + 1
     UI.message("Version Code atual na loja: #{current_version_code}. Novo Version Code: #{new_version_code}")
 
-    
-
     # 3. Buildar com o novo código
-
     build_flutter(version_code: new_version_code)
 
-    
-
     # Define o caminho padrão ou usa a variável de ambiente se disponível
-
     json_key_path = 'fastlane/play_store_credentials.json'
-
     json_key_data = ENV['ANDROID_PLAY_STORE_CREDENTIALS']
 
-    
-
     # 4. Upload completo
-
     upload_to_play_store(
-
       track: track,
-
       aab: '../build/app/outputs/bundle/release/app-release.aab',
-
       # Usa o conteúdo da variável de ambiente se existir, senão usa o arquivo
-
       json_key_data: json_key_data, 
-
       json_key: json_key_data ? nil : json_key_path,
-
       skip_upload_apk: true,
-
-      skip_upload_images: false,      # Ativa upload de imagens
-
-      skip_upload_screenshots: false, # Ativa upload de screenshots
-
-      skip_upload_metadata: false     # Ativa upload de metadados
-
+      skip_upload_images: skip_images,      # Dinâmico
+      skip_upload_screenshots: skip_screenshots, # Dinâmico
+      skip_upload_metadata: skip_metadata     # Dinâmico
     )
-
   end
   desc "Promote Internal to Production"
   lane :promote_to_production do

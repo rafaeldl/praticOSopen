@@ -9,7 +9,7 @@ import 'package:praticos/routes.dart';
 import 'home.dart';
 
 class NavigationController extends StatefulWidget {
-  NavigationController({Key? key}) : super(key: key);
+  const NavigationController({super.key});
 
   @override
   _NavigationControllerState createState() => _NavigationControllerState();

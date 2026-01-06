@@ -1,5 +1,13 @@
 # PraticOS - Alterações do aplicativo
 
+## [1.0.1+2] - 05/01/2026
+
+### Novidades
+- **Segmentação Dinâmica:** Adaptação de labels e ícones conforme o ramo de atuação (Automotivo, Climatização, etc).
+- **Customização:** Ícones de dispositivos personalizados por segmento (Carro, Neve, Tag, etc).
+- **Interface:** Atualizações visuais nas telas de OS e Configurações para maior consistência.
+- **Correções:** Ajustes na navegação e recarregamento de configurações.
+
 ## [1.0.0+1] - 02/01/2026
 
 ### Mudanças Principais

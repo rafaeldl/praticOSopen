@@ -49,6 +49,23 @@ npm run refresh-claims
 
 ## 📋 Scripts Disponíveis
 
+### `seed-segments`
+Popula a collection `segments` com os segmentos iniciais do sistema (HVAC, Automotivo, Celulares, etc.).
+
+```bash
+npm run seed-segments
+# ou com arquivo de credenciais
+npm run seed-segments /caminho/service-account-key.json
+```
+
+**O que faz:**
+- Cria 6 segmentos: automotive, hvac, smartphones, computers, appliances, other
+- Configura labels dinâmicos por segmento (ex: "Dispositivo" → "Veículo")
+- Adiciona campos customizados específicos (ex: Ano, Quilometragem para automotive)
+- Suporte a i18n (pt-BR e en-US)
+
+**Nota:** Execute após configurar um novo ambiente ou para atualizar segmentos existentes. O script atualiza (merge) documentos existentes de forma segura.
+
 ### `refresh-claims`
 Atualiza o campo `_claimsRefreshedAt` em todos os usuários para forçar o refresh de claims.
 

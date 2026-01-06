@@ -14,8 +14,9 @@ class Product extends BaseAuditCompany {
   Product();
   factory Product.fromJson(Map<String, dynamic> json) =>
       _$ProductFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$ProductToJson(this);
-  ProductAggr toAggr() => _$ProductAggrFromJson(this.toJson());
+  ProductAggr toAggr() => _$ProductAggrFromJson(toJson());
 }
 
 @JsonSerializable()
@@ -27,5 +28,6 @@ class ProductAggr extends BaseAuditCompanyAggr {
   ProductAggr();
   factory ProductAggr.fromJson(Map<String, dynamic> json) =>
       _$ProductAggrFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$ProductAggrToJson(this);
 }

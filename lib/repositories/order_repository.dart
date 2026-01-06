@@ -29,7 +29,7 @@ class OrderRepository extends Repository<Order?> {
   Future<Order?> getOrderByNumber(int number) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? companyId = prefs.getString('companyId');
-    if (companyId == null) companyId = '';
+    companyId ??= '';
 
     List<QueryArgs> filterList = [
       QueryArgs('company.id', companyId),
@@ -54,7 +54,7 @@ class OrderRepository extends Repository<Order?> {
       String period, int offset) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? companyId = prefs.getString('companyId');
-    if (companyId == null) companyId = '';
+    companyId ??= '';
 
     // Datas de início e fim
     DateTime now = DateTime.now();
@@ -130,7 +130,7 @@ class OrderRepository extends Repository<Order?> {
       DateTime startDate, DateTime endDate) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? companyId = prefs.getString('companyId');
-    if (companyId == null) companyId = '';
+    companyId ??= '';
 
     try {
       // Adicionar filtros incluindo os de data

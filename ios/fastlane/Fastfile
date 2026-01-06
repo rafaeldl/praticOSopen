@@ -119,7 +119,10 @@ platform :ios do
   end
 
   desc "Build + Upload para App Store (com metadados e screenshots)"
-  lane :release_store do
+  lane :release_store do |options|
+    skip_screenshots = options[:skip_screenshots] || false
+    skip_metadata = options[:skip_metadata] || false
+
     app_store_connect_api_key(
       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
       issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
@@ -167,8 +170,8 @@ platform :ios do
     # 🚀 Upload para App Store
     upload_to_app_store(
       force: true, # Pula confirmação de HTML preview
-      skip_screenshots: false,
-      skip_metadata: false,
+      skip_screenshots: skip_screenshots,
+      skip_metadata: skip_metadata,
       submit_for_review: false, # Apenas upload, revisão manual
       run_precheck_before_submit: false # Evita erro de API Key com IAP
     )

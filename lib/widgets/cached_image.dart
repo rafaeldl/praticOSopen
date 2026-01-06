@@ -36,7 +36,7 @@ class CachedImage extends StatelessWidget {
   final int? memCacheHeight;
 
   const CachedImage({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.fit = BoxFit.cover,
     this.width,
@@ -47,7 +47,7 @@ class CachedImage extends StatelessWidget {
     this.placeholderColor,
     this.memCacheWidth,
     this.memCacheHeight,
-  }) : super(key: key);
+  });
 
   /// Factory para thumbnails pequenos (lista de OSs)
   factory CachedImage.thumbnail({

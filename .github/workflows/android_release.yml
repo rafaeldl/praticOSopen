@@ -47,6 +47,17 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      # 🔍 Check for Metadata/Screenshot changes
+      - name: Check for metadata changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            screenshots:
+              - 'android/fastlane/metadata/android/*/images/**'
+            metadata:
+              - 'android/fastlane/metadata/**'
+
       # 🔐 Restore Secrets
       
       - name: Make gradlew executable
@@ -83,4 +94,9 @@ jobs:
         env:
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
-        run: bundle exec fastlane deploy_with_metadata track:production
+        run: |
+          bundle exec fastlane deploy_with_metadata \
+            track:production \
+            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }} \
+            skip_images:${{ steps.filter.outputs.screenshots == 'false' }} \
+            skip_metadata:${{ steps.filter.outputs.metadata == 'false' }}

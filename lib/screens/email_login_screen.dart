@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/mobx/auth_store.dart';
 
 class EmailLoginScreen extends StatefulWidget {
-  const EmailLoginScreen({Key? key}) : super(key: key);
+  const EmailLoginScreen({super.key});
 
   @override
   State<EmailLoginScreen> createState() => _EmailLoginScreenState();

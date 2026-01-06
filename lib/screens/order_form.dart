@@ -8,6 +8,7 @@ import 'package:flutter/material.dart' show Colors, ScaffoldMessenger, SnackBar,
 
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -16,6 +17,8 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/constants/label_keys.dart';
 
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -62,6 +65,7 @@ class _OrderFormState extends State<OrderForm> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
     // Using CupertinoPageScaffold for iOS look
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -69,17 +73,17 @@ class _OrderFormState extends State<OrderForm> {
         type: MaterialType.transparency,
         child: CustomScrollView(
           slivers: [
-            _buildNavigationBar(context),
+            _buildNavigationBar(context, config),
             SliverSafeArea(
               top: false, // Navigation bar handles top safe area
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildPhotosSection(context),
-                  _buildClientDeviceSection(context),
-                  _buildStatusDatesSection(context),
-                  _buildServicesSection(context),
-                  _buildProductsSection(context),
-                  _buildTotalSection(context),
+                  _buildClientDeviceSection(context, config),
+                  _buildStatusDatesSection(context, config),
+                  _buildServicesSection(context, config),
+                  _buildProductsSection(context, config),
+                  _buildTotalSection(context, config),
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -90,12 +94,12 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildNavigationBar(BuildContext context) {
+  Widget _buildNavigationBar(BuildContext context, SegmentConfigProvider config) {
     return CupertinoSliverNavigationBar(
       largeTitle: Observer(
         builder: (_) {
           Order? os = _store.orderStream?.value;
-          return Text(os?.number != null ? "OS #${os!.number}" : "Nova OS");
+          return Text(os?.number != null ? "OS #${os!.number}" : config.label(LabelKeys.createServiceOrder));
         },
       ),
       trailing: Row(
@@ -104,12 +108,12 @@ class _OrderFormState extends State<OrderForm> {
           CupertinoButton(
             padding: EdgeInsets.zero,
             child: const Icon(CupertinoIcons.camera),
-            onPressed: () => _showAddPhotoOptions(),
+            onPressed: () => _showAddPhotoOptions(config),
           ),
           CupertinoButton(
             padding: EdgeInsets.zero,
             child: const Icon(CupertinoIcons.ellipsis_circle),
-            onPressed: () => _showActionSheet(context),
+            onPressed: () => _showActionSheet(context, config),
           ),
         ],
       ),
@@ -125,27 +129,27 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildClientDeviceSection(BuildContext context) {
+  Widget _buildClientDeviceSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
         return _buildGroupedSection(
-          header: "CLIENTE E VEÍCULO",
+          header: "${config.customer.toUpperCase()} E ${config.device.toUpperCase()}",
           children: [
             _buildListTile(
               context: context,
               icon: CupertinoIcons.person_fill,
-              title: "Cliente",
+              title: config.customer,
               value: _store.customerName,
-              placeholder: "Selecionar Cliente",
+              placeholder: "Selecionar ${config.customer}",
               onTap: _selectCustomer,
               showChevron: true,
             ),
             _buildListTile(
               context: context,
-              icon: CupertinoIcons.car_detailed,
-              title: "Veículo",
+              icon: config.deviceIcon,
+              title: config.device,
               value: _store.deviceName,
-              placeholder: "Selecionar Veículo",
+              placeholder: "Selecionar ${config.device}",
               onTap: _selectDevice,
               showChevron: true,
               isLast: true,
@@ -156,7 +160,7 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildStatusDatesSection(BuildContext context) {
+  Widget _buildStatusDatesSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
         return _buildGroupedSection(
@@ -166,8 +170,8 @@ class _OrderFormState extends State<OrderForm> {
               context: context,
               icon: CupertinoIcons.flag_fill,
               title: "Status",
-              value: Order.statusMap[_store.status] ?? 'Pendente',
-              onTap: _selectStatus,
+              value: config.getStatus(_store.status),
+              onTap: () => _selectStatus(config),
               showChevron: true,
               valueColor: _getStatusColorCupertino(_store.status),
             ),
@@ -195,7 +199,7 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildServicesSection(BuildContext context) {
+  Widget _buildServicesSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
         final services = _store.services ?? [];
@@ -219,22 +223,22 @@ class _OrderFormState extends State<OrderForm> {
                   ...services.asMap().entries.map((entry) {
                     final index = entry.key;
                     final service = entry.value;
-                    return _buildServiceRow(context, service, index, index == services.length - 1);
-                  }).toList(),
+                    return _buildServiceRow(context, service, index, index == services.length - 1, config);
+                  }),
               ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: CupertinoButton(
+                onPressed: _addService,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(CupertinoIcons.add_circled_solid),
-                    SizedBox(width: 8),
-                    Text("Adicionar Serviço"),
+                  children: [
+                    const Icon(CupertinoIcons.add_circled_solid),
+                    const SizedBox(width: 8),
+                    Text(config.label(LabelKeys.createService)),
                   ],
                 ),
-                onPressed: _addService,
               ),
             ),
           ],
@@ -243,7 +247,7 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildProductsSection(BuildContext context) {
+  Widget _buildProductsSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
         final products = _store.products ?? [];
@@ -267,22 +271,22 @@ class _OrderFormState extends State<OrderForm> {
                   ...products.asMap().entries.map((entry) {
                     final index = entry.key;
                     final product = entry.value;
-                    return _buildProductRow(context, product, index, index == products.length - 1);
-                  }).toList(),
+                    return _buildProductRow(context, product, index, index == products.length - 1, config);
+                  }),
               ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: CupertinoButton(
+                onPressed: _addProduct,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                     Icon(CupertinoIcons.add_circled_solid),
-                     SizedBox(width: 8),
-                     Text("Adicionar Produto"),
+                  children: [
+                     const Icon(CupertinoIcons.add_circled_solid),
+                     const SizedBox(width: 8),
+                     Text(config.label(LabelKeys.createProduct)),
                   ],
                 ),
-                onPressed: _addProduct,
               ),
             ),
           ],
@@ -291,7 +295,7 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildTotalSection(BuildContext context) {
+  Widget _buildTotalSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
         final total = _store.total ?? 0.0;
@@ -314,7 +318,7 @@ class _OrderFormState extends State<OrderForm> {
               ),
              _buildListTile(
               context: context,
-              title: "Total",
+              title: config.label(LabelKeys.total),
               value: _convertToCurrency(total),
               onTap: () {},
               showChevron: false,
@@ -325,7 +329,7 @@ class _OrderFormState extends State<OrderForm> {
               context: context,
               title: "Situação",
               value: isPaid ? "PAGO" : "A RECEBER",
-              onTap: _showPaymentOptions,
+              onTap: () => _showPaymentOptions(config),
               showChevron: true,
               valueColor: isPaid ? CupertinoColors.activeGreen : CupertinoColors.systemOrange,
               isLast: true,
@@ -442,11 +446,11 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
   
-  Widget _buildServiceRow(BuildContext context, dynamic service, int index, bool isLast) {
+  Widget _buildServiceRow(BuildContext context, dynamic service, int index, bool isLast, SegmentConfigProvider config) {
     return _buildDismissibleItem(
       context: context,
       index: index,
-      onDelete: () => _confirmDeleteService(index),
+      onDelete: () => _confirmDeleteService(index, config),
       child: _buildItemRow(
         context: context,
         title: service.service?.name ?? "Serviço",
@@ -458,11 +462,11 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildProductRow(BuildContext context, dynamic product, int index, bool isLast) {
+  Widget _buildProductRow(BuildContext context, dynamic product, int index, bool isLast, SegmentConfigProvider config) {
     return _buildDismissibleItem(
       context: context,
       index: index,
-      onDelete: () => _confirmDeleteProduct(index),
+      onDelete: () => _confirmDeleteProduct(index, config),
       child: _buildItemRow(
         context: context,
         title: product.product?.name ?? "Produto",
@@ -579,33 +583,33 @@ class _OrderFormState extends State<OrderForm> {
 
   // --- Actions ---
 
-  void _showActionSheet(BuildContext context) {
+  void _showActionSheet(BuildContext context, SegmentConfigProvider config) {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Opções da OS'),
+        title: Text('Opções da ${config.serviceOrder}'),
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
             child: const Text('Compartilhar PDF'),
             onPressed: () {
               Navigator.pop(context);
-              _onShare(context, _store.order);
+              _onShare(context, _store.order, config);
             },
           ),
           CupertinoActionSheetAction(
-            child: const Text('Adicionar Foto'),
+            child: Text(config.label(LabelKeys.addPhoto)),
             onPressed: () {
               Navigator.pop(context);
-              _showAddPhotoOptions();
+              _showAddPhotoOptions(config);
             },
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           isDestructiveAction: true,
-          child: const Text('Excluir OS'),
+          child: Text('Excluir ${config.serviceOrder}'),
           onPressed: () {
             Navigator.pop(context);
-            _showDeleteConfirmation();
+            _showDeleteConfirmation(config);
           },
         ),
       ),
@@ -661,38 +665,38 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _selectStatus() {
+  void _selectStatus(SegmentConfigProvider config) {
      // Assuming ModalStatus().showModal returns a Future<String?>
      // We should adapt it to CupertinoActionSheet or keep using it if it's custom.
      // To follow strict HIG, let's use ActionSheet here.
      
-     final statuses = Order.statusMap;
+     final statusKeys = ['quote', 'approved', 'progress', 'done', 'canceled'];
      
      showCupertinoModalPopup(
        context: context,
        builder: (context) => CupertinoActionSheet(
          title: const Text("Alterar Status"),
-         actions: statuses.entries.map((entry) {
+         actions: statusKeys.map((key) {
            return CupertinoActionSheetAction(
-             child: Text(entry.value),
+             child: Text(config.getStatus(key)),
              onPressed: () {
-               _store.setStatus(entry.key);
+               _store.setStatus(key);
                Navigator.pop(context);
              },
            );
          }).toList(),
          cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancelar'),
             isDefaultAction: true,
             onPressed: () {
               Navigator.pop(context);
             },
+            child: Text(config.label(LabelKeys.cancel)),
           ),
        ),
      );
   }
 
-  void _showPaymentOptions() {
+  void _showPaymentOptions(SegmentConfigProvider config) {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
@@ -729,7 +733,7 @@ class _OrderFormState extends State<OrderForm> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text("Cancelar"),
+          child: Text(config.label(LabelKeys.cancel)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -774,21 +778,21 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _confirmDeleteService(int index) {
+  void _confirmDeleteService(int index, SegmentConfigProvider config) {
     final service = _store.services?[index];
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Remover Serviço'),
-        content: Text('Deseja remover "${service?.service?.name ?? 'este serviço'}" da OS?'),
+        title: Text('${config.label(LabelKeys.remove)} ${config.label(LabelKeys.editService).split(' ').last}'),
+        content: Text('Deseja remover "${service?.service?.name ?? 'este serviço'}" da ${config.serviceOrder}?'),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(config.label(LabelKeys.cancel)),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            child: const Text('Remover'),
+            child: Text(config.label(LabelKeys.remove)),
             onPressed: () {
               Navigator.pop(context);
               _store.deleteService(index);
@@ -799,21 +803,21 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _confirmDeleteProduct(int index) {
+  void _confirmDeleteProduct(int index, SegmentConfigProvider config) {
     final product = _store.products?[index];
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Remover Produto'),
-        content: Text('Deseja remover "${product?.product?.name ?? 'este produto'}" da OS?'),
+        title: Text('${config.label(LabelKeys.remove)} ${config.label(LabelKeys.editProduct).split(' ').last}'),
+        content: Text('Deseja remover "${product?.product?.name ?? 'este produto'}" da ${config.serviceOrder}?'),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(config.label(LabelKeys.cancel)),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            child: const Text('Remover'),
+            child: Text(config.label(LabelKeys.remove)),
             onPressed: () {
               Navigator.pop(context);
               _store.deleteProduct(index);
@@ -824,23 +828,25 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _showDeleteConfirmation() {
+  void _showDeleteConfirmation(SegmentConfigProvider config) {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Excluir OS'),
-        content: const Text('Tem certeza que deseja excluir esta Ordem de Serviço?'),
+        title: Text('Excluir ${config.serviceOrder}'),
+        content: Text('Tem certeza que deseja excluir esta ${config.serviceOrder}?'),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(config.label(LabelKeys.cancel)),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            child: const Text('Excluir'),
+            child: Text(config.label(LabelKeys.delete)),
             onPressed: () {
               _store.deleteOrder().then((_) {
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                if (mounted) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                }
               });
             },
           ),
@@ -849,11 +855,11 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
   
-  void _showAddPhotoOptions() {
+  void _showAddPhotoOptions(SegmentConfigProvider config) {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: const Text("Adicionar Foto"),
+        title: Text(config.label(LabelKeys.addPhoto)),
         actions: [
            CupertinoActionSheetAction(
             child: const Text("Tirar Foto"),
@@ -881,7 +887,7 @@ class _OrderFormState extends State<OrderForm> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text("Cancelar"),
+          child: Text(config.label(LabelKeys.cancel)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -907,7 +913,7 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   String _convertToCurrency(double? total) {
-    if (total == null) total = 0.0;
+    total ??= 0.0;
     NumberFormat numberFormat = NumberFormat.currency(
       locale: 'pt-BR',
       symbol: 'R\$',
@@ -916,7 +922,7 @@ class _OrderFormState extends State<OrderForm> {
   }
   
   // PDF Generation Logic (Kept mostly as is, just function signature matches)
-  _onShare(BuildContext context, Order? order) async {
+  _onShare(BuildContext context, Order? order, SegmentConfigProvider config) async {
     if (order == null) return;
 
     // Store navigator reference before async operations
@@ -988,13 +994,13 @@ class _OrderFormState extends State<OrderForm> {
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(40),
           header: (pw.Context context) {
-            return _buildHeader(company, order, primaryColor, darkGray, baseFont, boldFont, logoImage);
+            return _buildHeader(company, order, primaryColor, darkGray, baseFont, boldFont, config, logoImage);
           },
           footer: (pw.Context context) {
             return _buildFooter(context, darkGray, baseFont);
           },
           build: (pw.Context context) {
-            return _printLayoutContent(order, customer, company, photoImages, baseFont, boldFont);
+            return _printLayoutContent(order, customer, company, photoImages, baseFont, boldFont, config);
           },
         ),
       );
@@ -1005,10 +1011,10 @@ class _OrderFormState extends State<OrderForm> {
 
       await Printing.sharePdf(
         bytes: await doc.save(),
-        filename: "OS-${order.number == null ? 'NOVA' : order.number}.pdf",
+        filename: "${config.serviceOrder}-${order.number ?? 'NOVA'}.pdf",
       );
     } catch (e) {
-      if (mounted) {
+      if (context.mounted) {
         navigator.pop();
 
         showCupertinoDialog(
@@ -1048,9 +1054,9 @@ class _OrderFormState extends State<OrderForm> {
   }
   
   // Re-implementing PDF helpers to ensure self-contained file (except models)
-  pw.Widget _buildHeader(Company company, Order order, PdfColor primaryColor, PdfColor darkGray, pw.Font baseFont, pw.Font boldFont, [pw.MemoryImage? logoImage]) {
+  pw.Widget _buildHeader(Company company, Order order, PdfColor primaryColor, PdfColor darkGray, pw.Font baseFont, pw.Font boldFont, SegmentConfigProvider config, [pw.MemoryImage? logoImage]) {
     final statusColor = _getStatusColor(order.status);
-    final statusText = Order.statusMap[order.status] ?? 'Pendente';
+    final statusText = config.getStatus(order.status);
 
     return pw.Column(
       children: [
@@ -1122,7 +1128,7 @@ class _OrderFormState extends State<OrderForm> {
                     crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
                       pw.Text(
-                        'ORDEM DE SERVICO',
+                        config.serviceOrder.toUpperCase(),
                         style: pw.TextStyle(
                           font: boldFont,
                           fontSize: 8.0,
@@ -1233,7 +1239,7 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  List<pw.Widget> _printLayoutContent(Order order, Customer? customer, Company company, List<pw.MemoryImage>? photoImages, pw.Font baseFont, pw.Font boldFont) {
+  List<pw.Widget> _printLayoutContent(Order order, Customer? customer, Company company, List<pw.MemoryImage>? photoImages, pw.Font baseFont, pw.Font boldFont, SegmentConfigProvider config) {
     final PdfColor primaryColor = PdfColor.fromHex('#1565C0');
     final PdfColor darkGray = PdfColor.fromHex('#616161');
     final PdfColor lightGray = PdfColor.fromHex('#F8F9FA');
@@ -1265,7 +1271,7 @@ class _OrderFormState extends State<OrderForm> {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    'CLIENTE',
+                    config.customer.toUpperCase(),
                     style: pw.TextStyle(font: boldFont, fontSize: 8, color: primaryColor, letterSpacing: 0.5),
                   ),
                   pw.SizedBox(height: 6),
@@ -1299,7 +1305,7 @@ class _OrderFormState extends State<OrderForm> {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    'VEICULO',
+                    config.device.toUpperCase(),
                     style: pw.TextStyle(font: boldFont, fontSize: 8, color: primaryColor, letterSpacing: 0.5),
                   ),
                   pw.SizedBox(height: 6),
@@ -1412,8 +1418,8 @@ class _OrderFormState extends State<OrderForm> {
             children: [
               pw.Container(width: 250, child: pw.Divider(color: PdfColors.grey600, thickness: 0.5)),
               pw.SizedBox(height: 4),
-              pw.Text(customer?.name ?? 'Cliente', style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey800)),
-              pw.Text('Assinatura do Cliente', style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.grey500)),
+              pw.Text(customer?.name ?? config.customer, style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey800)),
+              pw.Text('Assinatura do ${config.customer}', style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.grey500)),
             ],
           ),
         ],
@@ -1500,7 +1506,7 @@ class _OrderFormState extends State<OrderForm> {
             _modernTableCell(_convertToCurrency(p.total), baseFont, alignRight: true),
           ],
         );
-      }).toList(),
+      }),
     ],
   );
 }
@@ -1530,7 +1536,7 @@ pw.Widget _printServices(Order order, pw.Font baseFont, pw.Font boldFont) {
             _modernTableCell(_convertToCurrency(s.value), baseFont, alignRight: true),
           ],
         );
-      }).toList(),
+      }),
     ],
   );
 }
