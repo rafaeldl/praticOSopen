@@ -51,44 +51,54 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        middle: const Text('Selecionar Formulário'),
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      child: SafeArea(
-        child: _buildBody(),
+      child: CustomScrollView(
+        slivers: [
+          CupertinoSliverNavigationBar(
+            largeTitle: const Text('Modelos'),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Text('Cancelar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: _buildBody(),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CupertinoActivityIndicator());
+      return const SizedBox(
+        height: 300,
+        child: Center(child: CupertinoActivityIndicator()),
+      );
     }
 
     if (_templates == null || _templates!.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              CupertinoIcons.doc_text_search,
-              size: 64,
-              color: CupertinoColors.systemGrey3.resolveFrom(context),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Nenhum formulário disponível',
-              style: TextStyle(
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                fontSize: 16,
+      return SizedBox(
+        height: 300,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                CupertinoIcons.doc_text_search,
+                size: 64,
+                color: CupertinoColors.systemGrey3.resolveFrom(context),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                'Nenhum modelo disponível',
+                style: TextStyle(
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -106,13 +116,16 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                 )
               : null,
           leading: Container(
-            padding: const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              // Usando withValues para evitar warning de depreciação do withOpacity
               color: CupertinoColors.activeBlue.resolveFrom(context).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(CupertinoIcons.doc_text, size: 20),
+            child: Icon(
+              CupertinoIcons.doc_text, 
+              size: 20, 
+              color: CupertinoColors.activeBlue.resolveFrom(context)
+            ),
           ),
           trailing: const Icon(CupertinoIcons.add_circled, color: CupertinoColors.activeBlue),
           onTap: () {
