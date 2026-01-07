@@ -383,14 +383,17 @@ abstract class _OrderStore with Store {
     createItem();
   }
 
-  /// Adiciona uma foto da galeria
+  /// Adiciona uma ou mais fotos da galeria
   @action
   Future<bool> addPhotoFromGallery() async {
-    final File? file = await photoService.pickImageFromGallery();
-    if (file != null) {
-      return await _uploadPhoto(file);
+    final List<File> files = await photoService.pickMultipleImagesFromGallery();
+    if (files.isEmpty) return false;
+
+    if (files.length == 1) {
+      return await _uploadPhoto(files.first);
+    } else {
+      return await _uploadMultiplePhotos(files);
     }
-    return false;
   }
 
   /// Adiciona uma foto da câmera
@@ -438,6 +441,57 @@ abstract class _OrderStore with Store {
     } catch (e) {
       isUploadingPhoto = false;
       print('Erro no upload da foto: $e');
+      return false;
+    }
+  }
+
+  /// Faz o upload de múltiplas fotos
+  Future<bool> _uploadMultiplePhotos(List<File> files) async {
+    if (order == null || companyId == null) return false;
+
+    // Garante que a OS seja salva antes do upload
+    if (order!.id == null) {
+      await repository.createItem(companyId!, order);
+    }
+
+    if (order!.id == null || order!.company?.id == null) return false;
+
+    isUploadingPhoto = true;
+    int successCount = 0;
+
+    try {
+      if (order!.photos == null) {
+        order!.photos = [];
+      }
+
+      for (final file in files) {
+        try {
+          final OrderPhoto? photo = await photoService.uploadOrderPhoto(
+            file: file,
+            companyId: order!.company!.id!,
+            orderId: order!.id!,
+          );
+
+          if (photo != null) {
+            order!.photos!.add(photo);
+            photos.add(photo);
+            successCount++;
+          }
+        } catch (e) {
+          print('Erro no upload de uma foto: $e');
+        }
+      }
+
+      isUploadingPhoto = false;
+
+      if (successCount > 0) {
+        createItem();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      isUploadingPhoto = false;
+      print('Erro no upload das fotos: $e');
       return false;
     }
   }
