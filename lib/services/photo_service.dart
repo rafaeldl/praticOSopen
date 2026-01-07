@@ -1,9 +1,7 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:praticos/models/order_photo.dart';
@@ -21,15 +19,11 @@ class PhotoService {
   // Proteção contra chamadas múltiplas (static para funcionar entre instâncias)
   static bool _isPickingImage = false;
 
-  // Detecta se está no iOS
-  bool get _isIOS => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
-
   // ============================================================
   // SELEÇÃO DE IMAGENS
   // ============================================================
 
   /// Abre a galeria para selecionar uma imagem
-  /// No iOS usa file_picker para evitar bug do HEIC no simulador
   Future<File?> pickImageFromGallery() async {
     if (_isPickingImage) {
       print('PhotoService: Picker já ativo, ignorando');
@@ -38,9 +32,6 @@ class PhotoService {
 
     _isPickingImage = true;
     try {
-      if (_isIOS) {
-        return await _pickWithFilePicker();
-      }
       return await _pickWithImagePicker(ImageSource.gallery);
     } finally {
       _isPickingImage = false;
@@ -72,22 +63,6 @@ class PhotoService {
       return image != null ? File(image.path) : null;
     } catch (e) {
       print('PhotoService: image_picker erro: $e');
-      return null;
-    }
-  }
-
-  Future<File?> _pickWithFilePicker() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-      );
-      if (result != null && result.files.single.path != null) {
-        return File(result.files.single.path!);
-      }
-      return null;
-    } catch (e) {
-      print('PhotoService: file_picker erro: $e');
       return null;
     }
   }
