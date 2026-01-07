@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/models/company.dart';
+import 'package:praticos/mobx/user_store.dart';
+import 'package:praticos/mobx/company_store.dart';
 
 class SelectSegmentScreen extends StatefulWidget {
   final String? companyId;
@@ -61,40 +64,70 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
       if (user == null) throw Exception('Usuário não autenticado');
 
       final db = FirebaseFirestore.instance;
-      String? logoUrl;
-
       final String targetCompanyId = widget.companyId ?? db.collection('companies').doc().id;
 
+      // Upload da logo primeiro (se existir)
+      String? logoUrl;
       if (widget.logoFile != null) {
         logoUrl = await _uploadLogo(targetCompanyId);
       }
 
-      final commonData = {
-        'name': widget.companyName,
-        'phone': widget.phone,
-        'address': widget.address,
-        'email': widget.email,
-        'site': widget.site,
-        'segment': segmentId,
-        'updatedAt': DateTime.now().toIso8601String(),
-        if (logoUrl != null) 'logo': logoUrl,
-      };
-
       if (widget.companyId != null) {
-        await db.collection('companies').doc(widget.companyId).update(commonData);
+        // ATUALIZAR empresa existente usando CompanyStore
+        final companyStore = CompanyStore();
+        final userStore = UserStore();
+
+        final existingCompany = await companyStore.retrieveCompany(widget.companyId);
+        final dbUser = await userStore.findUserById(user.uid);
+
+        if (dbUser == null) {
+          throw Exception('Usuário não encontrado no Firestore');
+        }
+
+        // Atualiza os campos
+        existingCompany.name = widget.companyName;
+        existingCompany.phone = widget.phone;
+        existingCompany.address = widget.address;
+        existingCompany.email = widget.email;
+        existingCompany.site = widget.site;
+        existingCompany.segment = segmentId;
+        existingCompany.updatedAt = DateTime.now();
+        existingCompany.updatedBy = dbUser.toAggr();
+        if (logoUrl != null) {
+          existingCompany.logo = logoUrl;
+        }
+
+        // Usa o store para salvar
+        await companyStore.updateCompany(existingCompany);
       } else {
-        await db.collection('companies').doc(targetCompanyId).set({
-          ...commonData,
-          'owner': user.uid,
-          'createdAt': DateTime.now().toIso8601String(),
-        });
-        
-        await db.collection('users').doc(user.uid).set({
-          'email': user.email,
-          'name': user.displayName ?? user.email?.split('@')[0],
-          'companies': FieldValue.arrayUnion([targetCompanyId]),
-          'updatedAt': DateTime.now().toIso8601String(),
-        }, SetOptions(merge: true));
+        // CRIAR nova empresa usando UserStore (forma correta)
+        final userStore = UserStore();
+        final dbUser = await userStore.findUserById(user.uid);
+
+        if (dbUser == null) {
+          throw Exception('Usuário não encontrado no Firestore');
+        }
+
+        final userAggr = dbUser.toAggr();
+
+        // Cria o objeto Company completo com TODOS os campos de auditoria
+        final company = Company()
+          ..id = targetCompanyId
+          ..name = widget.companyName
+          ..phone = widget.phone
+          ..address = widget.address
+          ..email = widget.email
+          ..site = widget.site
+          ..segment = segmentId
+          ..logo = logoUrl
+          ..owner = userAggr
+          ..createdAt = DateTime.now()
+          ..createdBy = userAggr
+          ..updatedAt = DateTime.now()
+          ..updatedBy = userAggr;
+
+        // Usa o UserStore que cria empresa + vínculo usuário + membership corretamente
+        await userStore.createCompanyForUser(company);
       }
 
       if (mounted) {

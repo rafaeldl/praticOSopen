@@ -30,6 +30,12 @@ abstract class _UserStore with Store {
     }
   }
 
+  /// Busca um usuário por ID do Firestore (retorna Future)
+  @action
+  Future<User?> findUserById(String userId) async {
+    return await repository.findUserById(userId);
+  }
+
   Future<User?> getSingleUserById() async {
     print("Global.currentUser.uid ${Global.currentUser!.uid}");
     return await repository.findUserById(Global.currentUser!.uid);
