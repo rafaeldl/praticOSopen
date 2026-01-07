@@ -1215,8 +1215,8 @@ class _OrderFormState extends State<OrderForm> {
             margin: const pw.EdgeInsets.all(32),
             header: (pw.Context ctx) {
               return _buildFormPageHeader(
-                form, order, company, primaryColor, darkColor, mutedColor,
-                baseFont, boldFont, lightFont, config, logoImage
+                form, order, company, darkColor, mutedColor,
+                boldFont, lightFont, config, logoImage
               );
             },
             footer: (pw.Context ctx) {
@@ -1226,7 +1226,7 @@ class _OrderFormState extends State<OrderForm> {
               return _buildFormPageContent(
                 form, formPhotos[form.id] ?? [],
                 baseFont, boldFont, lightFont,
-                primaryColor, accentColor, darkColor, mutedColor, lightBg, borderColor
+                accentColor, darkColor, mutedColor, lightBg, borderColor
               );
             },
           ),
@@ -1318,17 +1318,6 @@ class _OrderFormState extends State<OrderForm> {
         return PdfColor.fromHex('#8b5cf6'); // Roxo
       default:
         return PdfColor.fromHex('#6b7280'); // Cinza
-    }
-  }
-
-  String _getStatusIcon(String? status) {
-    switch (status) {
-      case 'approved': return '✓';
-      case 'done': return '✔';
-      case 'canceled': return '✕';
-      case 'quote': return '○';
-      case 'progress': return '◎';
-      default: return '•';
     }
   }
 
@@ -2067,10 +2056,8 @@ class _OrderFormState extends State<OrderForm> {
     of_model.OrderForm form,
     Order order,
     Company company,
-    PdfColor primaryColor,
     PdfColor darkColor,
     PdfColor mutedColor,
-    pw.Font baseFont,
     pw.Font boldFont,
     pw.Font lightFont,
     SegmentConfigProvider config,
@@ -2208,7 +2195,6 @@ class _OrderFormState extends State<OrderForm> {
     pw.Font baseFont,
     pw.Font boldFont,
     pw.Font lightFont,
-    PdfColor primaryColor,
     PdfColor accentColor,
     PdfColor darkColor,
     PdfColor mutedColor,
