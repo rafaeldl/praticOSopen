@@ -830,10 +830,12 @@ class _PhotoGalleryScreen extends StatefulWidget {
 class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
   late PageController _pageController;
   late int _currentIndex;
+  late List<String> _photos;
 
   @override
   void initState() {
     super.initState();
+    _photos = List.from(widget.photos);
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
   }
@@ -857,7 +859,7 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
           child: const Icon(CupertinoIcons.back, color: CupertinoColors.white),
         ),
         middle: Text(
-          '${_currentIndex + 1} de ${widget.photos.length}',
+          '${_currentIndex + 1} de ${_photos.length}',
           style: const TextStyle(color: CupertinoColors.white),
         ),
         trailing: CupertinoButton(
@@ -869,14 +871,14 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
       child: SafeArea(
         child: PageView.builder(
           controller: _pageController,
-          itemCount: widget.photos.length,
+          itemCount: _photos.length,
           onPageChanged: (index) {
             setState(() {
               _currentIndex = index;
             });
           },
           itemBuilder: (context, index) {
-            final url = widget.photos[index];
+            final url = _photos[index];
             return InteractiveViewer(
               minScale: 0.5,
               maxScale: 3.0,
@@ -939,16 +941,18 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
                 final success = await widget.onDelete(_currentIndex);
 
                 if (mounted && success) {
-                  if (widget.photos.length <= 1) {
-                    Navigator.pop(context);
-                  } else {
-                    setState(() {
-                      if (_currentIndex >= widget.photos.length - 1) {
-                        _currentIndex = widget.photos.length - 2;
+                  setState(() {
+                    _photos.removeAt(_currentIndex);
+
+                    if (_photos.isEmpty) {
+                      Navigator.pop(context);
+                    } else {
+                      if (_currentIndex >= _photos.length) {
+                        _currentIndex = _photos.length - 1;
                         _pageController.jumpToPage(_currentIndex);
                       }
-                    });
-                  }
+                    }
+                  });
                 }
               },
               child: const Text('Remover'),
