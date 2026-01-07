@@ -5,7 +5,6 @@ import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
-import 'package:praticos/services/authorization_service.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
   @override

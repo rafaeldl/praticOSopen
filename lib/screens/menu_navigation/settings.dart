@@ -7,7 +7,6 @@ import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/models/permission.dart';
-import 'package:praticos/models/user_role.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -119,9 +118,6 @@ class _SettingsState extends State<Settings> {
               Observer(builder: (context) {
                 final canManageCompany = _authService.hasPermission(PermissionType.manageCompany);
                 final canManageUsers = _authService.hasPermission(PermissionType.manageUsers);
-                final canManageDevices = _authService.hasPermission(PermissionType.manageDevices);
-                final canManageServices = _authService.hasPermission(PermissionType.manageServices);
-                final canManageProducts = _authService.hasPermission(PermissionType.manageProducts);
                 final canManageForms = _authService.hasPermission(PermissionType.manageForms);
                 final canViewDevices = _authService.hasPermission(PermissionType.viewDevices);
                 final canViewServices = _authService.hasPermission(PermissionType.viewServices);
@@ -319,11 +315,6 @@ class _SettingsState extends State<Settings> {
       trailing: const CupertinoListTileChevron(),
       onTap: onTap,
     );
-  }
-  
-  /// @deprecated Use AuthorizationService instead
-  bool _isAdmin() {
-    return _authService.isAdmin;
   }
 
   String _getThemeModeText(ThemeMode mode) {
