@@ -305,64 +305,6 @@ class _FormFillScreenState extends State<FormFillScreen> {
     );
   }
 
-  void _showPhotoOptions(String itemId, int photoIndex) {
-    final response = _currentForm.getResponse(itemId);
-    final url = response?.photoUrls[photoIndex];
-
-    if (url == null) return;
-
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _showPhotoPreview(itemId, photoIndex);
-            },
-            child: const Text('Ver Foto'),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(ctx);
-              _confirmDeletePhoto(itemId, url);
-            },
-            child: const Text('Remover Foto'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancelar'),
-        ),
-      ),
-    );
-  }
-
-  void _confirmDeletePhoto(String itemId, String url) {
-    showCupertinoDialog(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Remover Foto'),
-        content: const Text('Tem certeza que deseja remover esta foto?'),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(ctx);
-              _deletePhoto(itemId, url);
-            },
-            child: const Text('Remover'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showOptionsPicker(FormItemDefinition item) {
     final bool isChecklist = item.type == FormItemType.checklist;
     final options = item.options ?? [];
@@ -594,7 +536,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           itemBuilder: (context, index) {
             final url = photos[index];
             return GestureDetector(
-              onTap: () => _showPhotoOptions(itemId, index),
+              onTap: () => _showPhotoPreview(itemId, index),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
