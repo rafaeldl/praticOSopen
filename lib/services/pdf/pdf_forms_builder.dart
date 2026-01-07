@@ -26,7 +26,7 @@ class PdfFormsBuilder {
   // HEADER DO FORMULARIO
   // ============================================
 
-  /// Constroi o header da pagina de formulario
+  /// Constroi o header da pagina de formulario com fundo azul
   pw.Widget buildFormHeader({
     required Company company,
     required Order order,
@@ -38,103 +38,121 @@ class PdfFormsBuilder {
 
     return pw.Column(
       children: [
-        pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            // Logo + Form Title
-            pw.Expanded(
-              flex: 3,
-              child: pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  if (logoImage != null) ...[
-                    pw.Container(
-                      width: 40,
-                      height: 40,
-                      child: pw.Image(logoImage!, fit: pw.BoxFit.contain),
+        // Header com fundo azul gradiente
+        pw.Container(
+          width: double.infinity,
+          decoration: pw.BoxDecoration(
+            gradient: pw.LinearGradient(
+              colors: [
+                PdfStyles.primaryColor,
+                const PdfColor.fromInt(0xFF0d47a1), // Azul mais escuro
+              ],
+              begin: pw.Alignment.centerLeft,
+              end: pw.Alignment.centerRight,
+            ),
+          ),
+          padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Logo + Form Title
+              pw.Expanded(
+                flex: 3,
+                child: pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    if (logoImage != null) ...[
+                      pw.Container(
+                        width: 40,
+                        height: 40,
+                        decoration: pw.BoxDecoration(
+                          color: PdfColors.white,
+                          borderRadius: pw.BorderRadius.circular(4),
+                        ),
+                        padding: const pw.EdgeInsets.all(4),
+                        child: pw.Image(logoImage!, fit: pw.BoxFit.contain),
+                      ),
+                      pw.SizedBox(width: 12),
+                    ],
+                    pw.Expanded(
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            form.title.toUpperCase(),
+                            style: pw.TextStyle(
+                              font: boldFont,
+                              fontSize: 14.0,
+                              color: PdfColors.white,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                          pw.SizedBox(height: 3),
+                          pw.Text(
+                            company.name ?? '',
+                            style: pw.TextStyle(
+                              font: boldFont,
+                              fontSize: 9.0,
+                              color: PdfColors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    pw.SizedBox(width: 12),
                   ],
-                  pw.Expanded(
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          form.title,
-                          style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 14.0,
-                            color: PdfColors.grey800,
-                          ),
-                        ),
-                        pw.SizedBox(height: 4),
-                        pw.Text(
-                          company.name ?? '',
-                          style: pw.TextStyle(
-                            font: baseFont,
-                            fontSize: 9.0,
-                            color: PdfStyles.textSecondary,
-                          ),
-                        ),
-                      ],
+                ),
+              ),
+
+              // OS Number and Form Info
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                children: [
+                  pw.Text(
+                    '${config.serviceOrder.toUpperCase()} Nº',
+                    style: pw.TextStyle(
+                      font: baseFont,
+                      fontSize: 7.0,
+                      color: PdfColors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  pw.Text(
+                    order.number?.toString() ?? "NOVA",
+                    style: pw.TextStyle(
+                      font: boldFont,
+                      fontSize: 20.0,
+                      color: PdfColors.white,
+                    ),
+                  ),
+                  pw.SizedBox(height: 3),
+                  pw.Text(
+                    DateFormat('dd/MM/yyyy').format(formDate),
+                    style: pw.TextStyle(
+                      font: baseFont,
+                      fontSize: 8.0,
+                      color: PdfColors.white,
+                    ),
+                  ),
+                  pw.SizedBox(height: 3),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.white,
+                      borderRadius: pw.BorderRadius.circular(2),
+                    ),
+                    child: pw.Text(
+                      statusText.toUpperCase(),
+                      style: pw.TextStyle(
+                        font: boldFont,
+                        fontSize: 6.5,
+                        color: statusColor,
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
-
-            // OS Number and Form Info
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                // OS Badge (smaller)
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: pw.BoxDecoration(
-                    color: PdfStyles.primaryColor,
-                    borderRadius: pw.BorderRadius.circular(4),
-                  ),
-                  child: pw.Text(
-                    '${config.serviceOrder.toUpperCase()} #${order.number?.toString() ?? "NOVA"}',
-                    style: pw.TextStyle(
-                      font: boldFont,
-                      fontSize: 9.0,
-                      color: PdfColors.white,
-                    ),
-                  ),
-                ),
-                pw.SizedBox(height: 6),
-                // Date
-                pw.Text(
-                  'Data: ${DateFormat('dd/MM/yyyy').format(formDate)}',
-                  style: pw.TextStyle(
-                    font: baseFont,
-                    fontSize: 9.0,
-                    color: PdfStyles.textSecondary,
-                  ),
-                ),
-                pw.SizedBox(height: 4),
-                // Status Badge
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: PdfStyles.statusBadgeDecoration(statusColor),
-                  child: pw.Text(
-                    statusText.toUpperCase(),
-                    style: pw.TextStyle(
-                      font: boldFont,
-                      fontSize: 8.0,
-                      color: statusColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 12),
-        pw.Container(
-          height: 1,
-          color: PdfStyles.borderColor,
+            ],
+          ),
         ),
         pw.SizedBox(height: 12),
       ],
@@ -173,21 +191,27 @@ class PdfFormsBuilder {
     required FormResponse? response,
     required List<pw.MemoryImage> photos,
   }) {
+    final hasPhotos = photos.isNotEmpty;
+    final responseContent = _buildResponseContent(item, response);
+    final hasContent = responseContent is! pw.SizedBox;
+
     return pw.Container(
-      margin: const pw.EdgeInsets.only(bottom: 12),
+      margin: const pw.EdgeInsets.only(bottom: 6),
       decoration: PdfStyles.cardDecoration(backgroundColor: PdfColors.white),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           // Header do card com label e indicador
           pw.Container(
-            padding: const pw.EdgeInsets.all(10),
+            padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             decoration: pw.BoxDecoration(
               color: PdfStyles.backgroundLight,
-              borderRadius: const pw.BorderRadius.only(
-                topLeft: pw.Radius.circular(6),
-                topRight: pw.Radius.circular(6),
-              ),
+              borderRadius: hasContent || hasPhotos
+                  ? const pw.BorderRadius.only(
+                      topLeft: pw.Radius.circular(4),
+                      topRight: pw.Radius.circular(4),
+                    )
+                  : pw.BorderRadius.circular(4),
             ),
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -197,7 +221,7 @@ class PdfFormsBuilder {
                     item.label,
                     style: pw.TextStyle(
                       font: boldFont,
-                      fontSize: 10,
+                      fontSize: 9,
                       color: PdfColors.grey800,
                     ),
                   ),
@@ -208,45 +232,34 @@ class PdfFormsBuilder {
             ),
           ),
 
-          // Conteudo do card baseado no tipo
-          pw.Container(
-            padding: const pw.EdgeInsets.all(10),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                // Valor da resposta formatado
-                _buildResponseContent(item, response),
+          // Conteudo do card baseado no tipo (somente se houver conteudo ou fotos)
+          if (hasContent || hasPhotos)
+            pw.Container(
+              padding: const pw.EdgeInsets.all(8),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  // Valor da resposta formatado
+                  if (hasContent) responseContent,
 
-                // Fotos do item
-                if (photos.isNotEmpty) ...[
-                  pw.SizedBox(height: 10),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.only(top: 8),
-                    decoration: const pw.BoxDecoration(
-                      border: pw.Border(
-                        top: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
-                      ),
+                  // Fotos do item
+                  if (hasPhotos) ...[
+                    if (hasContent) pw.SizedBox(height: 8),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.only(top: 6),
+                      decoration: hasContent
+                          ? const pw.BoxDecoration(
+                              border: pw.Border(
+                                top: pw.BorderSide(color: PdfColors.grey200, width: 0.5),
+                              ),
+                            )
+                          : null,
+                      child: buildItemPhotosGrid(photos),
                     ),
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          'FOTOS DO ITEM:',
-                          style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 8,
-                            color: PdfStyles.textSecondary,
-                          ),
-                        ),
-                        pw.SizedBox(height: 6),
-                        buildItemPhotosGrid(photos),
-                      ],
-                    ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
         ],
       ),
     );
@@ -466,20 +479,20 @@ class PdfFormsBuilder {
     final photosToShow = photos.take(8).toList();
 
     return pw.Wrap(
-      spacing: 6,
-      runSpacing: 6,
+      spacing: 5,
+      runSpacing: 5,
       children: photosToShow.map((image) {
         return pw.Container(
-          width: 80,
-          height: 80,
+          width: 75,
+          height: 75,
           decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.grey300, width: 1),
-            borderRadius: pw.BorderRadius.circular(4),
+            border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
+            borderRadius: pw.BorderRadius.circular(3),
           ),
           child: pw.ClipRRect(
-            verticalRadius: 4,
-            horizontalRadius: 4,
-            child: pw.Image(image, fit: pw.BoxFit.cover),
+            verticalRadius: 3,
+            horizontalRadius: 3,
+            child: pw.Image(image, fit: pw.BoxFit.contain),
           ),
         );
       }).toList(),
@@ -506,41 +519,6 @@ class PdfFormsBuilder {
       form: form,
     ));
 
-    // Informacao de progresso
-    final answeredCount = form.responses.length;
-    final totalCount = form.items.length;
-    widgets.add(
-      pw.Container(
-        margin: const pw.EdgeInsets.only(bottom: 16),
-        padding: const pw.EdgeInsets.all(10),
-        decoration: pw.BoxDecoration(
-          color: PdfStyles.backgroundLighter,
-          borderRadius: pw.BorderRadius.circular(4),
-        ),
-        child: pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Text(
-              'Itens do Formulario',
-              style: pw.TextStyle(
-                font: boldFont,
-                fontSize: 10,
-                color: PdfStyles.primaryDark,
-              ),
-            ),
-            pw.Text(
-              '$answeredCount de $totalCount respondidos',
-              style: pw.TextStyle(
-                font: baseFont,
-                fontSize: 9,
-                color: PdfStyles.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-
     // Cards de cada item
     for (final item in form.items) {
       final response = form.getResponse(item.id);
@@ -556,32 +534,137 @@ class PdfFormsBuilder {
     return widgets;
   }
 
-  /// Constroi o footer para paginas de formulario
-  pw.Widget buildFormFooter(pw.Context context, OrderForm form) {
+  /// Constroi o footer para paginas de formulario com informacoes do PraticOS
+  pw.Widget buildFormFooter(
+    pw.Context context,
+    OrderForm form,
+    pw.MemoryImage? praticosLogo,
+    pw.MemoryImage? appStoreBadge,
+    pw.MemoryImage? playStoreBadge,
+  ) {
+    const appStoreUrl = 'https://apps.apple.com/br/app/praticos/id1534604555';
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos';
+    const siteUrl = 'https://praticos.web.app';
+
     return pw.Container(
       margin: const pw.EdgeInsets.only(top: 20),
-      padding: const pw.EdgeInsets.only(top: 10),
+      padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 20),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300, width: 0.5)),
+        border: pw.Border(
+          top: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+        ),
       ),
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
-          pw.Text(
-            'Formulario: ${form.title}',
-            style: pw.TextStyle(
-              font: baseFont,
-              fontSize: 8,
-              color: PdfStyles.textSecondary,
-            ),
+          // Nome do formulario e paginacao (em coluna)
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Formulario: ${form.title}',
+                style: pw.TextStyle(
+                  font: baseFont,
+                  fontSize: 7,
+                  color: PdfStyles.textSecondary,
+                ),
+              ),
+              pw.SizedBox(height: 2),
+              pw.Text(
+                'Pagina ${context.pageNumber} de ${context.pagesCount}',
+                style: pw.TextStyle(
+                  font: baseFont,
+                  fontSize: 7,
+                  color: PdfStyles.textSecondary,
+                ),
+              ),
+            ],
           ),
-          pw.Text(
-            'Pagina ${context.pageNumber} de ${context.pagesCount}',
-            style: pw.TextStyle(
-              font: baseFont,
-              fontSize: 8,
-              color: PdfStyles.textSecondary,
-            ),
+
+          // Logo + Texto PraticOS + Site com link
+          pw.Row(
+            mainAxisSize: pw.MainAxisSize.min,
+            children: [
+              if (praticosLogo != null) ...[
+                pw.Container(
+                  width: 16,
+                  height: 16,
+                  child: pw.Image(praticosLogo, fit: pw.BoxFit.contain),
+                ),
+                pw.SizedBox(width: 6),
+              ],
+              pw.Text(
+                'Gerado por PraticOS | ',
+                style: pw.TextStyle(
+                  font: baseFont,
+                  fontSize: 7,
+                  color: PdfStyles.textSecondary,
+                ),
+              ),
+              pw.UrlLink(
+                destination: siteUrl,
+                child: pw.Text(
+                  'https://praticos.web.app',
+                  style: pw.TextStyle(
+                    font: boldFont,
+                    fontSize: 7,
+                    color: PdfStyles.primaryColor,
+                    decoration: pw.TextDecoration.underline,
+                  ),
+                ),
+              ),
+              pw.SizedBox(width: 10),
+
+              // Badges das lojas
+              pw.UrlLink(
+                destination: appStoreUrl,
+                child: appStoreBadge != null
+                    ? pw.Container(
+                        height: 18,
+                        child: pw.Image(appStoreBadge, fit: pw.BoxFit.contain),
+                      )
+                    : pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        decoration: pw.BoxDecoration(
+                          color: PdfColors.black,
+                          borderRadius: pw.BorderRadius.circular(3),
+                        ),
+                        child: pw.Text(
+                          'App Store',
+                          style: pw.TextStyle(
+                            font: boldFont,
+                            fontSize: 5,
+                            color: PdfColors.white,
+                          ),
+                        ),
+                      ),
+              ),
+              pw.SizedBox(width: 4),
+              pw.UrlLink(
+                destination: playStoreUrl,
+                child: playStoreBadge != null
+                    ? pw.Container(
+                        height: 18,
+                        child: pw.Image(playStoreBadge, fit: pw.BoxFit.contain),
+                      )
+                    : pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        decoration: pw.BoxDecoration(
+                          color: PdfColors.black,
+                          borderRadius: pw.BorderRadius.circular(3),
+                        ),
+                        child: pw.Text(
+                          'Google Play',
+                          style: pw.TextStyle(
+                            font: boldFont,
+                            fontSize: 5,
+                            color: PdfColors.white,
+                          ),
+                        ),
+                      ),
+              ),
+            ],
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 
@@ -5,6 +6,38 @@ import 'package:http/http.dart' as http;
 class PdfImageLoader {
   /// Cache de imagens em memoria
   final Map<String, pw.MemoryImage> _cache = {};
+
+  /// Carrega o logo do PraticOS dos assets locais
+  Future<pw.MemoryImage?> loadPraticosLogo() async {
+    return _loadAssetImage('assets/images/icon.png', 'praticos_logo');
+  }
+
+  /// Carrega o badge da App Store
+  Future<pw.MemoryImage?> loadAppStoreBadge() async {
+    return _loadAssetImage('assets/images/appstore_badge.png', 'appstore_badge');
+  }
+
+  /// Carrega o badge da Play Store
+  Future<pw.MemoryImage?> loadPlayStoreBadge() async {
+    return _loadAssetImage('assets/images/playstore_badge.png', 'playstore_badge');
+  }
+
+  /// Carrega uma imagem dos assets locais
+  Future<pw.MemoryImage?> _loadAssetImage(String assetPath, String cacheKey) async {
+    if (_cache.containsKey(cacheKey)) {
+      return _cache[cacheKey];
+    }
+
+    try {
+      final data = await rootBundle.load(assetPath);
+      final image = pw.MemoryImage(data.buffer.asUint8List());
+      _cache[cacheKey] = image;
+      return image;
+    } catch (e) {
+      // Falha silenciosa - imagem e opcional
+    }
+    return null;
+  }
 
   /// Download do logo da empresa
   ///

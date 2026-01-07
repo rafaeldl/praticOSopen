@@ -100,49 +100,34 @@ class PdfMainOsBuilder {
                             ),
                           ),
                           pw.SizedBox(height: 3),
-                          // Contatos organizados sem bolinhas
-                          pw.Column(
-                            crossAxisAlignment: pw.CrossAxisAlignment.start,
-                            children: [
-                              if (company.phone != null && company.phone!.isNotEmpty)
-                                pw.Text(
-                                  company.phone!,
-                                  style: pw.TextStyle(
-                                    font: baseFont,
-                                    fontSize: 8.0,
-                                    color: PdfColors.white,
-                                  ),
-                                ),
-                              if (company.email != null && company.email!.isNotEmpty)
-                                pw.Text(
-                                  company.email!,
-                                  style: pw.TextStyle(
-                                    font: baseFont,
-                                    fontSize: 8.0,
-                                    color: PdfColors.white,
-                                  ),
-                                ),
-                              if (company.site != null && company.site!.isNotEmpty)
-                                pw.Text(
-                                  company.site!,
-                                  style: pw.TextStyle(
-                                    font: baseFont,
-                                    fontSize: 8.0,
-                                    color: PdfColors.white,
-                                  ),
-                                ),
-                              if (company.address != null && company.address!.isNotEmpty)
-                                pw.Text(
-                                  company.address!,
-                                  style: pw.TextStyle(
-                                    font: baseFont,
-                                    fontSize: 7.5,
-                                    color: PdfColors.white,
-                                  ),
-                                  maxLines: 2,
-                                ),
-                            ],
-                          ),
+                          // Contatos da empresa
+                          if (company.phone != null && company.phone!.isNotEmpty)
+                            pw.Text(
+                              company.phone!,
+                              style: pw.TextStyle(
+                                font: baseFont,
+                                fontSize: 8.0,
+                                color: PdfColors.white,
+                              ),
+                            ),
+                          if (company.email != null && company.email!.isNotEmpty)
+                            pw.Text(
+                              company.email!,
+                              style: pw.TextStyle(
+                                font: baseFont,
+                                fontSize: 8.0,
+                                color: PdfColors.white,
+                              ),
+                            ),
+                          if (company.site != null && company.site!.isNotEmpty)
+                            pw.Text(
+                              company.site!,
+                              style: pw.TextStyle(
+                                font: baseFont,
+                                fontSize: 8.0,
+                                color: PdfColors.white,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -211,56 +196,156 @@ class PdfMainOsBuilder {
   // FOOTER
   // ============================================
 
-  /// Constroi o footer com fundo azul completo
-  pw.Widget buildFooter(pw.Context context, Company company) {
-    final contacts = <String>[];
-    if (company.phone != null && company.phone!.isNotEmpty) {
-      contacts.add(company.phone!);
-    }
-    if (company.email != null && company.email!.isNotEmpty) {
-      contacts.add(company.email!);
-    }
-    if (company.site != null && company.site!.isNotEmpty) {
-      contacts.add(company.site!);
-    }
-    if (company.address != null && company.address!.isNotEmpty) {
-      contacts.add(company.address!);
-    }
+  /// Constroi o footer com informacoes do PraticOS
+  pw.Widget buildFooter(
+    pw.Context context,
+    pw.MemoryImage? praticosLogo,
+    pw.MemoryImage? appStoreBadge,
+    pw.MemoryImage? playStoreBadge,
+  ) {
+    const appStoreUrl = 'https://apps.apple.com/br/app/praticos/id1534604555';
+    const playStoreUrl = 'https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos';
+    const siteUrl = 'https://praticos.web.app';
 
     return pw.Container(
       margin: const pw.EdgeInsets.only(top: 20),
-      width: double.infinity,
-      decoration: pw.BoxDecoration(
-        gradient: pw.LinearGradient(
-          colors: [
-            PdfStyles.primaryColor,
-            const PdfColor.fromInt(0xFF0d47a1),
-          ],
-          begin: pw.Alignment.centerLeft,
-          end: pw.Alignment.centerRight,
+      padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      decoration: const pw.BoxDecoration(
+        border: pw.Border(
+          top: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
         ),
       ),
-      padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-      child: pw.Column(
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
-          pw.Text(
-            contacts.join(' | '),
-            textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(
-              font: baseFont,
-              fontSize: 8,
-              color: PdfColors.white,
-            ),
-          ),
-          pw.SizedBox(height: 4),
+          // Paginacao
           pw.Text(
             'Pagina ${context.pageNumber} de ${context.pagesCount}',
-            textAlign: pw.TextAlign.center,
             style: pw.TextStyle(
               font: baseFont,
               fontSize: 7,
-              color: const PdfColor.fromInt(0xFFB0B0B0),
+              color: PdfStyles.textSecondary,
             ),
+          ),
+
+          // Logo + Texto PraticOS + Site com link
+          pw.Row(
+            mainAxisSize: pw.MainAxisSize.min,
+            children: [
+              if (praticosLogo != null) ...[
+                pw.Container(
+                  width: 16,
+                  height: 16,
+                  child: pw.Image(praticosLogo, fit: pw.BoxFit.contain),
+                ),
+                pw.SizedBox(width: 6),
+              ],
+              pw.Text(
+                'Gerado por PraticOS | ',
+                style: pw.TextStyle(
+                  font: baseFont,
+                  fontSize: 7,
+                  color: PdfStyles.textSecondary,
+                ),
+              ),
+              pw.UrlLink(
+                destination: siteUrl,
+                child: pw.Text(
+                  'https://praticos.web.app',
+                  style: pw.TextStyle(
+                    font: boldFont,
+                    fontSize: 7,
+                    color: PdfStyles.primaryColor,
+                    decoration: pw.TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // Badges das lojas
+          pw.Row(
+            mainAxisSize: pw.MainAxisSize.min,
+            children: [
+              // App Store
+              pw.UrlLink(
+                destination: appStoreUrl,
+                child: appStoreBadge != null
+                    ? pw.Container(
+                        height: 16,
+                        child: pw.Image(appStoreBadge, fit: pw.BoxFit.contain),
+                      )
+                    : pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: pw.BoxDecoration(
+                          color: PdfColors.black,
+                          borderRadius: pw.BorderRadius.circular(4),
+                        ),
+                        child: pw.Row(
+                          mainAxisSize: pw.MainAxisSize.min,
+                          children: [
+                            pw.Text(
+                              '',
+                              style: pw.TextStyle(
+                                font: baseFont,
+                                fontSize: 10,
+                                color: PdfColors.white,
+                              ),
+                            ),
+                            pw.SizedBox(width: 3),
+                            pw.Text(
+                              'App Store',
+                              style: pw.TextStyle(
+                                font: boldFont,
+                                fontSize: 6,
+                                color: PdfColors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
+              pw.SizedBox(width: 6),
+              // Play Store
+              pw.UrlLink(
+                destination: playStoreUrl,
+                child: playStoreBadge != null
+                    ? pw.Container(
+                        height: 20,
+                        child: pw.Image(playStoreBadge, fit: pw.BoxFit.contain),
+                      )
+                    : pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                        decoration: pw.BoxDecoration(
+                          color: PdfColors.black,
+                          borderRadius: pw.BorderRadius.circular(4),
+                        ),
+                        child: pw.Row(
+                          mainAxisSize: pw.MainAxisSize.min,
+                          children: [
+                            pw.Text(
+                              '▶',
+                              style: pw.TextStyle(
+                                font: baseFont,
+                                fontSize: 8,
+                                color: PdfColors.green400,
+                              ),
+                            ),
+                            pw.SizedBox(width: 3),
+                            pw.Text(
+                              'Google Play',
+                              style: pw.TextStyle(
+                                font: boldFont,
+                                fontSize: 6,
+                                color: PdfColors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
+            ],
           ),
         ],
       ),
@@ -722,7 +807,7 @@ class PdfMainOsBuilder {
               child: pw.ClipRRect(
                 verticalRadius: 4,
                 horizontalRadius: 4,
-                child: pw.Image(image, fit: pw.BoxFit.cover),
+                child: pw.Image(image, fit: pw.BoxFit.contain),
               ),
             );
           }).toList(),
