@@ -62,15 +62,20 @@ class _FormFillScreenState extends State<FormFillScreen> {
   }
 
   Future<void> _addPhoto(String itemId, ImageSource source) async {
-    final File? file;
     if (source == ImageSource.camera) {
-      file = await _photoService.takePhoto();
+      final file = await _photoService.takePhoto();
+      if (file != null) {
+        await _uploadSinglePhoto(itemId, file);
+      }
     } else {
-      file = await _photoService.pickImageFromGallery();
+      final files = await _photoService.pickMultipleImagesFromGallery();
+      if (files.isNotEmpty) {
+        await _uploadMultiplePhotos(itemId, files);
+      }
     }
+  }
 
-    if (file == null) return;
-
+  Future<void> _uploadSinglePhoto(String itemId, File file) async {
     setState(() {
       _isUploading = true;
       _uploadingItemId = itemId;
@@ -117,6 +122,83 @@ class _FormFillScreenState extends State<FormFillScreen> {
           builder: (ctx) => CupertinoAlertDialog(
             title: const Text('Erro ao Enviar Foto'),
             content: const Text('Não foi possível enviar a foto. Tente novamente.'),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isUploading = false;
+        _uploadingItemId = null;
+      });
+    }
+  }
+
+  Future<void> _uploadMultiplePhotos(String itemId, List<File> files) async {
+    setState(() {
+      _isUploading = true;
+      _uploadingItemId = itemId;
+    });
+
+    try {
+      final currentResponse = _currentForm.getResponse(itemId);
+      final List<String> currentPhotos = List.from(currentResponse?.photoUrls ?? []);
+      int successCount = 0;
+
+      for (final file in files) {
+        try {
+          final fileName = '${itemId}_${DateTime.now().millisecondsSinceEpoch}_$successCount.jpg';
+          final storagePath = 'tenants/${widget.companyId}/orders/${widget.orderId}/forms/${_currentForm.id}/$fileName';
+
+          final url = await _photoService.uploadImage(
+            file: file,
+            storagePath: storagePath,
+          );
+
+          if (url != null) {
+            currentPhotos.add(url);
+            successCount++;
+          }
+        } catch (e) {
+          print('Erro ao fazer upload de uma foto: $e');
+        }
+      }
+
+      if (successCount > 0) {
+        final newResponse = FormResponse(
+          itemId: itemId,
+          value: currentResponse?.value,
+          photoUrls: currentPhotos,
+        );
+
+        await _formsService.saveResponse(widget.companyId, widget.orderId, _currentForm.id, newResponse);
+
+        setState(() {
+          final index = _currentForm.responses.indexWhere((r) => r.itemId == itemId);
+          if (index >= 0) {
+            _currentForm.responses[index] = newResponse;
+          } else {
+            _currentForm.responses.add(newResponse);
+          }
+        });
+
+        HapticFeedback.mediumImpact();
+      } else {
+        throw Exception('Nenhuma foto foi enviada com sucesso');
+      }
+    } catch (e) {
+      HapticFeedback.heavyImpact();
+      if (mounted) {
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Erro ao Enviar Fotos'),
+            content: const Text('Não foi possível enviar as fotos. Tente novamente.'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),

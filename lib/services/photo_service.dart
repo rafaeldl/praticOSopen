@@ -38,6 +38,28 @@ class PhotoService {
     }
   }
 
+  /// Abre a galeria para selecionar múltiplas imagens
+  Future<List<File>> pickMultipleImagesFromGallery() async {
+    if (_isPickingImage) {
+      print('PhotoService: Picker já ativo, ignorando');
+      return [];
+    }
+
+    _isPickingImage = true;
+    try {
+      final List<XFile> images = await _picker.pickMultiImage(
+        requestFullMetadata: false,
+        imageQuality: 100,
+      );
+      return images.map((xfile) => File(xfile.path)).toList();
+    } catch (e) {
+      print('PhotoService: multi image_picker erro: $e');
+      return [];
+    } finally {
+      _isPickingImage = false;
+    }
+  }
+
   /// Abre a câmera para tirar uma foto
   Future<File?> takePhoto() async {
     if (_isPickingImage) {
