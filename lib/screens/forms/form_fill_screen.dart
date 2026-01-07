@@ -254,11 +254,24 @@ class _FormFillScreenState extends State<FormFillScreen> {
     }
   }
 
-  void _showPhotoPreview(String url) {
+  void _showPhotoPreview(String itemId, int photoIndex) {
+    final response = _currentForm.getResponse(itemId);
+    final photos = response?.photoUrls ?? [];
+
+    if (photos.isEmpty) return;
+
     Navigator.push(
       context,
       CupertinoPageRoute(
-        builder: (context) => _PhotoPreviewScreen(url: url),
+        builder: (context) => _PhotoGalleryScreen(
+          photos: photos,
+          initialIndex: photoIndex,
+          onDelete: (index) async {
+            final url = photos[index];
+            await _deletePhoto(itemId, url);
+            return true;
+          },
+        ),
         fullscreenDialog: true,
       ),
     );
@@ -292,7 +305,12 @@ class _FormFillScreenState extends State<FormFillScreen> {
     );
   }
 
-  void _showPhotoOptions(String itemId, String url) {
+  void _showPhotoOptions(String itemId, int photoIndex) {
+    final response = _currentForm.getResponse(itemId);
+    final url = response?.photoUrls[photoIndex];
+
+    if (url == null) return;
+
     showCupertinoModalPopup(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
@@ -300,7 +318,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(ctx);
-              _showPhotoPreview(url);
+              _showPhotoPreview(itemId, photoIndex);
             },
             child: const Text('Ver Foto'),
           ),
@@ -576,7 +594,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           itemBuilder: (context, index) {
             final url = photos[index];
             return GestureDetector(
-              onTap: () => _showPhotoOptions(itemId, url),
+              onTap: () => _showPhotoOptions(itemId, index),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
@@ -851,64 +869,151 @@ class _ChecklistSelectionScreenState extends State<_ChecklistSelectionScreen> {
   }
 }
 
-/// Tela de Preview de Foto
-class _PhotoPreviewScreen extends StatelessWidget {
-  final String url;
+/// Tela de galeria de fotos com navegação
+class _PhotoGalleryScreen extends StatefulWidget {
+  final List<String> photos;
+  final int initialIndex;
+  final Future<bool> Function(int index) onDelete;
 
-  const _PhotoPreviewScreen({required this.url});
+  const _PhotoGalleryScreen({
+    required this.photos,
+    required this.initialIndex,
+    required this.onDelete,
+  });
+
+  @override
+  _PhotoGalleryScreenState createState() => _PhotoGalleryScreenState();
+}
+
+class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
+  late PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.black,
       navigationBar: CupertinoNavigationBar(
-        backgroundColor: CupertinoColors.black,
+        backgroundColor: CupertinoColors.black.withValues(alpha: 0.8),
         border: null,
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.pop(context),
-          child: const Text('Fechar', style: TextStyle(color: CupertinoColors.white)),
+          child: const Icon(CupertinoIcons.back, color: CupertinoColors.white),
+        ),
+        middle: Text(
+          '${_currentIndex + 1} de ${widget.photos.length}',
+          style: const TextStyle(color: CupertinoColors.white),
+        ),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _confirmDelete,
+          child: const Icon(CupertinoIcons.trash, color: CupertinoColors.white),
         ),
       ),
       child: SafeArea(
-        child: Center(
-          child: InteractiveViewer(
-            minScale: 0.5,
-            maxScale: 4.0,
-            child: Image.network(
-              url,
-              fit: BoxFit.contain,
-              loadingBuilder: (ctx, child, progress) {
-                if (progress == null) return child;
-                return const Center(
-                  child: CupertinoActivityIndicator(color: CupertinoColors.white),
-                );
-              },
-              errorBuilder: (ctx, error, stack) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        CupertinoIcons.exclamationmark_triangle,
-                        color: CupertinoColors.white,
-                        size: 48,
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: widget.photos.length,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            final url = widget.photos[index];
+            return InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 3.0,
+              child: Center(
+                child: Image.network(
+                  url,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (ctx, child, progress) {
+                    if (progress == null) return child;
+                    return const Center(
+                      child: CupertinoActivityIndicator(color: CupertinoColors.white),
+                    );
+                  },
+                  errorBuilder: (ctx, error, stack) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            CupertinoIcons.exclamationmark_triangle,
+                            color: CupertinoColors.white,
+                            size: 48,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Erro ao carregar foto',
+                            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                              color: CupertinoColors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Erro ao carregar foto',
-                        style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                          color: CupertinoColors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
         ),
       ),
+    );
+  }
+
+  void _confirmDelete() {
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext) {
+        return CupertinoAlertDialog(
+          title: const Text('Remover Foto'),
+          content: const Text('Tem certeza que deseja remover esta foto?'),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancelar'),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+                final success = await widget.onDelete(_currentIndex);
+
+                if (mounted && success) {
+                  if (widget.photos.length <= 1) {
+                    Navigator.pop(context);
+                  } else {
+                    setState(() {
+                      if (_currentIndex >= widget.photos.length - 1) {
+                        _currentIndex = widget.photos.length - 2;
+                        _pageController.jumpToPage(_currentIndex);
+                      }
+                    });
+                  }
+                }
+              },
+              child: const Text('Remover'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
