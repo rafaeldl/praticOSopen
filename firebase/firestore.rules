@@ -53,6 +53,43 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Invites - convites para colaboradores
+    // Qualquer membro admin/manager de uma empresa pode criar convites
+    // O convidado pode ler convites direcionados ao seu email
+    // O convidado pode atualizar status (aceitar/rejeitar)
+    match /invites/{inviteId} {
+      // Permite criar se autenticado e é admin/manager da empresa do convite
+      allow create: if request.auth != null
+        && request.resource.data.company != null
+        && request.resource.data.company.id != null
+        && canManage(request.resource.data.company.id);
+
+      // Permite ler se é o dono do convite (email) ou admin/manager da empresa
+      // Nota: novos usuários podem não ter claims ainda, então verificamos email diretamente
+      allow read: if request.auth != null
+        && (
+          request.auth.token.email == resource.data.email
+          || (
+            resource.data.company != null
+            && resource.data.company.id != null
+            && request.auth.token.roles != null
+            && request.auth.token.roles[resource.data.company.id] in ['admin', 'manager']
+          )
+        );
+
+      // Permite atualizar status se é o dono do convite (email)
+      allow update: if request.auth != null
+        && request.auth.token.email == resource.data.email
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+
+      // Permite deletar se é admin/manager da empresa
+      allow delete: if request.auth != null
+        && resource.data.company != null
+        && resource.data.company.id != null
+        && request.auth.token.roles != null
+        && request.auth.token.roles[resource.data.company.id] in ['admin', 'manager'];
+    }
+
     // Segments - global collection (read-only para usuários autenticados)
     match /segments/{segmentId} {
       allow read: if request.auth != null;

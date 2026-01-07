@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell, DismissDirection;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
+import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 
@@ -85,12 +86,6 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   }
 
   Widget _buildList(bool canManage) {
-    if (_collaboratorStore.collaborators.isEmpty) {
-      return const SliverFillRemaining(
-        child: Center(child: Text('Nenhum colaborador encontrado')),
-      );
-    }
-
     final filteredList = _searchQuery.isEmpty
         ? _collaboratorStore.collaborators.toList()
         : _collaboratorStore.collaborators.where((membership) {
@@ -98,19 +93,221 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             return name.contains(_searchQuery);
           }).toList();
 
-    if (filteredList.isEmpty) {
+    final filteredInvites = _searchQuery.isEmpty
+        ? _collaboratorStore.pendingInvites.toList()
+        : _collaboratorStore.pendingInvites.where((invite) {
+            final email = invite.email?.toLowerCase() ?? '';
+            return email.contains(_searchQuery);
+          }).toList();
+
+    if (filteredList.isEmpty && filteredInvites.isEmpty) {
       return const SliverFillRemaining(
-        child: Center(child: Text('Nenhum resultado encontrado')),
+        child: Center(child: Text('Nenhum colaborador encontrado')),
       );
     }
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
-          final membership = filteredList[index];
-          return _buildMembershipRow(membership, canManage, index == filteredList.length - 1);
+          // Primeiro mostramos os convites pendentes
+          if (filteredInvites.isNotEmpty) {
+            if (index == 0) {
+              return _buildSectionHeader('CONVITES PENDENTES');
+            }
+            if (index <= filteredInvites.length) {
+              final invite = filteredInvites[index - 1];
+              return _buildInviteRow(invite, canManage, index == filteredInvites.length);
+            }
+            // Depois os colaboradores ativos
+            if (index == filteredInvites.length + 1) {
+              return _buildSectionHeader('COLABORADORES');
+            }
+            final membershipIndex = index - filteredInvites.length - 2;
+            if (membershipIndex < filteredList.length) {
+              final membership = filteredList[membershipIndex];
+              return _buildMembershipRow(membership, canManage, membershipIndex == filteredList.length - 1);
+            }
+          } else {
+            // Sem convites, mostra só os colaboradores
+            final membership = filteredList[index];
+            return _buildMembershipRow(membership, canManage, index == filteredList.length - 1);
+          }
+          return const SizedBox.shrink();
         },
-        childCount: filteredList.length,
+        childCount: filteredInvites.isNotEmpty
+            ? filteredList.length + filteredInvites.length + 2 // +2 para os headers
+            : filteredList.length,
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInviteRow(Invite invite, bool canManage, bool isLast) {
+    Widget content = Container(
+      color: CupertinoColors.systemBackground.resolveFrom(context),
+      child: InkWell(
+        onTap: canManage ? () => _showInviteActionSheet(invite) : null,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemOrange.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      CupertinoIcons.envelope_badge,
+                      size: 22,
+                      color: CupertinoColors.systemOrange,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          invite.email ?? 'Email não informado',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w600,
+                            color: CupertinoColors.label.resolveFrom(context),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.systemOrange.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'Pendente',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: CupertinoColors.systemOrange,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _getRoleLabel(invite.role),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (canManage)
+                    Icon(CupertinoIcons.chevron_right, size: 16, color: CupertinoColors.systemGrey3.resolveFrom(context)),
+                ],
+              ),
+            ),
+            if (!isLast)
+              Divider(
+                height: 1,
+                indent: 72,
+                color: CupertinoColors.systemGrey5.resolveFrom(context),
+              ),
+          ],
+        ),
+      ),
+    );
+
+    if (!canManage) return content;
+
+    return Dismissible(
+      key: Key('invite_${invite.id}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: CupertinoColors.systemRed,
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Icon(CupertinoIcons.trash, color: Colors.white),
+      ),
+      confirmDismiss: (direction) async {
+        _showCancelInviteConfirmation(invite);
+        return false;
+      },
+      child: content,
+    );
+  }
+
+  void _showInviteActionSheet(Invite invite) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        title: Text('Convite para ${invite.email}'),
+        message: const Text('Este convite está pendente. O usuário verá o convite quando se cadastrar no sistema.'),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            child: const Text('Cancelar Convite'),
+            onPressed: () {
+              Navigator.pop(context);
+              _showCancelInviteConfirmation(invite);
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: const Text('Fechar'),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+    );
+  }
+
+  void _showCancelInviteConfirmation(Invite invite) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Cancelar Convite'),
+        content: Text(
+            'Tem certeza que deseja cancelar o convite para ${invite.email}?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Não'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await _collaboratorStore.cancelInvite(invite.id!);
+              } catch (e) {
+                _showError(e.toString());
+              }
+            },
+            child: const Text('Sim, Cancelar'),
+          ),
+        ],
       ),
     );
   }
