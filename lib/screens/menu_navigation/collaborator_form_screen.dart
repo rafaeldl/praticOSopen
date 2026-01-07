@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/mobx/collaborator_store.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 
 class CollaboratorFormScreen extends StatefulWidget {
@@ -13,7 +14,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
   final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  RolesType _selectedRole = RolesType.user;
+  RolesType _selectedRole = RolesType.tecnico; // Default para técnico
   bool _isLoading = false;
 
   Future<void> _submit() async {
@@ -41,10 +42,39 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Selecionar Permissão'),
-        actions: RolesType.values.map((role) {
+        title: const Text('Selecionar Perfil'),
+        message: const Text('Escolha o perfil de acesso do colaborador'),
+        actions: RolePermissions.availableRoles.map((role) {
+          final isSelected = _selectedRole == role;
           return CupertinoActionSheetAction(
-            child: Text(_getRoleLabel(role)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${RolePermissions.getRoleIcon(role)} ${RolePermissions.getRoleLabel(role)}',
+                      style: TextStyle(
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 8),
+                      const Icon(CupertinoIcons.checkmark, size: 16),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  RolePermissions.getRoleDescription(role),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+              ],
+            ),
             onPressed: () {
               setState(() => _selectedRole = role);
               Navigator.pop(context);
@@ -60,14 +90,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
   }
 
   String _getRoleLabel(RolesType role) {
-    switch (role) {
-      case RolesType.admin:
-        return 'Administrador';
-      case RolesType.manager:
-        return 'Gerente';
-      case RolesType.user:
-        return 'Usuário';
-    }
+    return RolePermissions.getRoleLabel(role);
   }
 
   @override

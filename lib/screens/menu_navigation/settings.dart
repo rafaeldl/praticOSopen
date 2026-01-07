@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show ThemeMode, Material, MaterialType; 
+import 'package:flutter/material.dart' show ThemeMode, Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
@@ -19,6 +21,7 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   final UserStore _userStore = UserStore();
   final AuthStore _authStore = AuthStore();
+  final AuthorizationService _authService = AuthorizationService.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -112,49 +115,100 @@ class _SettingsState extends State<Settings> {
                 return const SizedBox.shrink();
               }),
 
-              // Admin/Management Section
+              // Admin/Management Section - RBAC based
               Observer(builder: (context) {
-                final isAdmin = _isAdmin();
-                return CupertinoListSection.insetGrouped(
-                  header: const Text('GERENCIAMENTO'),
+                final canManageCompany = _authService.hasPermission(PermissionType.manageCompany);
+                final canManageUsers = _authService.hasPermission(PermissionType.manageUsers);
+                final canManageDevices = _authService.hasPermission(PermissionType.manageDevices);
+                final canManageServices = _authService.hasPermission(PermissionType.manageServices);
+                final canManageProducts = _authService.hasPermission(PermissionType.manageProducts);
+                final canManageForms = _authService.hasPermission(PermissionType.manageForms);
+                final canViewDevices = _authService.hasPermission(PermissionType.viewDevices);
+                final canViewServices = _authService.hasPermission(PermissionType.viewServices);
+                final canViewProducts = _authService.hasPermission(PermissionType.viewProducts);
+
+                // Mostra o perfil atual do usuário
+                final roleLabel = _authService.currentRoleLabel;
+                final roleDescription = _authService.currentRoleDescription;
+
+                return Column(
                   children: [
-                    if (isAdmin) ...[
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.briefcase_fill,
-                        color: CupertinoColors.systemOrange,
-                        title: 'Dados da Empresa',
-                        onTap: () => Navigator.pushNamed(context, '/company_form'),
-                      ),
-                      _buildSettingsTile(
-                        icon: CupertinoIcons.person_3_fill,
-                        color: CupertinoColors.systemBlue,
-                        title: 'Colaboradores',
-                        onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
-                      ),
-                    ],
-                    _buildSettingsTile(
-                      icon: config.deviceIcon,
-                      color: CupertinoColors.systemGreen,
-                      title: config.devicePlural,
-                      onTap: () => Navigator.pushNamed(context, '/device_list'),
+                    // Mostra o perfil do usuário atual
+                    CupertinoListSection.insetGrouped(
+                      header: const Text('SEU PERFIL'),
+                      children: [
+                        CupertinoListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: CupertinoColors.activeBlue,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Icon(CupertinoIcons.person_badge_plus_fill, color: CupertinoColors.white, size: 20),
+                          ),
+                          title: Text(roleLabel),
+                          subtitle: Text(roleDescription),
+                        ),
+                      ],
                     ),
-                    _buildSettingsTile(
-                      icon: CupertinoIcons.wrench_fill,
-                      color: CupertinoColors.systemIndigo,
-                      title: 'Serviços',
-                      onTap: () => Navigator.pushNamed(context, '/service_list'),
-                    ),
-                    _buildSettingsTile(
-                      icon: CupertinoIcons.cube_box_fill,
-                      color: CupertinoColors.systemPink,
-                      title: 'Produtos',
-                      onTap: () => Navigator.pushNamed(context, '/product_list'),
-                    ),
-                    _buildSettingsTile(
-                      icon: CupertinoIcons.doc_text_fill,
-                      color: CupertinoColors.systemTeal,
-                      title: 'Formulários',
-                      onTap: () => Navigator.pushNamed(context, '/form_template_list'),
+
+                    CupertinoListSection.insetGrouped(
+                      header: const Text('GERENCIAMENTO'),
+                      children: [
+                        // Dados da Empresa - apenas Admin
+                        if (canManageCompany)
+                          _buildSettingsTile(
+                            icon: CupertinoIcons.briefcase_fill,
+                            color: CupertinoColors.systemOrange,
+                            title: 'Dados da Empresa',
+                            onTap: () => Navigator.pushNamed(context, '/company_form'),
+                          ),
+
+                        // Colaboradores - apenas Admin
+                        if (canManageUsers)
+                          _buildSettingsTile(
+                            icon: CupertinoIcons.person_3_fill,
+                            color: CupertinoColors.systemBlue,
+                            title: 'Colaboradores',
+                            onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
+                          ),
+
+                        // Dispositivos - Admin/Supervisor podem gerenciar, outros podem visualizar
+                        if (canViewDevices)
+                          _buildSettingsTile(
+                            icon: config.deviceIcon,
+                            color: CupertinoColors.systemGreen,
+                            title: config.devicePlural,
+                            onTap: () => Navigator.pushNamed(context, '/device_list'),
+                          ),
+
+                        // Serviços - Admin/Supervisor podem gerenciar
+                        if (canViewServices)
+                          _buildSettingsTile(
+                            icon: CupertinoIcons.wrench_fill,
+                            color: CupertinoColors.systemIndigo,
+                            title: 'Serviços',
+                            onTap: () => Navigator.pushNamed(context, '/service_list'),
+                          ),
+
+                        // Produtos - Admin/Supervisor podem gerenciar
+                        if (canViewProducts)
+                          _buildSettingsTile(
+                            icon: CupertinoIcons.cube_box_fill,
+                            color: CupertinoColors.systemPink,
+                            title: 'Produtos',
+                            onTap: () => Navigator.pushNamed(context, '/product_list'),
+                          ),
+
+                        // Formulários - Admin/Supervisor podem gerenciar
+                        if (canManageForms)
+                          _buildSettingsTile(
+                            icon: CupertinoIcons.doc_text_fill,
+                            color: CupertinoColors.systemTeal,
+                            title: 'Formulários',
+                            onTap: () => Navigator.pushNamed(context, '/form_template_list'),
+                          ),
+                      ],
                     ),
                   ],
                 );
@@ -267,14 +321,9 @@ class _SettingsState extends State<Settings> {
     );
   }
   
+  /// @deprecated Use AuthorizationService instead
   bool _isAdmin() {
-    if (_userStore.user?.value == null || Global.companyAggr == null) return false;
-    final currentCompanyId = Global.companyAggr!.id;
-    final companyRole = _userStore.user!.value!.companies?.firstWhere(
-      (c) => c.company?.id == currentCompanyId,
-      orElse: () => CompanyRoleAggr(),
-    );
-    return companyRole?.role == RolesType.admin || companyRole?.role == RolesType.manager;
+    return _authService.isAdmin;
   }
 
   String _getThemeModeText(ThemeMode mode) {

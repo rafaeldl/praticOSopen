@@ -2,13 +2,42 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
 /**
+ * Perfis de usuário no PraticOS (RBAC)
+ *
+ * Hierarquia de perfis:
+ * - admin: Administrador - Acesso total ao sistema
+ * - gerente: Gerente (Financeiro) - Gestão financeira
+ * - supervisor: Supervisor - Gestão operacional
+ * - consultor: Consultor (Vendedor) - Perfil comercial
+ * - tecnico: Técnico - Execução de serviços
+ *
+ * Roles legados (mapeados automaticamente):
+ * - manager -> supervisor
+ * - user -> tecnico
+ */
+const ROLE_MAPPINGS = {
+  'manager': 'supervisor',
+  'user': 'tecnico'
+};
+
+/**
+ * Normaliza roles legados para os novos perfis.
+ * @param {string} role - O role a ser normalizado
+ * @returns {string} O role normalizado
+ */
+function normalizeRole(role) {
+  const lowerRole = String(role).toLowerCase();
+  return ROLE_MAPPINGS[lowerRole] || lowerRole;
+}
+
+/**
  * Atualiza Custom Claims quando um usuário é criado ou modificado.
  *
  * Claims structure:
  * {
  *   roles: {
  *     'companyId1': 'admin',
- *     'companyId2': 'user',
+ *     'companyId2': 'tecnico',
  *     ...
  *   }
  * }
@@ -16,6 +45,7 @@ const admin = require('firebase-admin');
  * Uso nas Security Rules:
  * - Verificar acesso: request.auth.token.roles[companyId] != null
  * - Verificar role: request.auth.token.roles[companyId] == 'admin'
+ * - Verificar múltiplos roles: request.auth.token.roles[companyId] in ['admin', 'gerente']
  */
 exports.updateUserClaims = functions.region('southamerica-east1').firestore
   .document('users/{userId}')
@@ -47,8 +77,8 @@ exports.updateUserClaims = functions.region('southamerica-east1').firestore
           }
 
           seenCompanies.add(companyId);
-          // Converte role para lowercase para consistência nas rules
-          roles[companyId] = String(item.role).toLowerCase();
+          // Normaliza e converte role para lowercase para consistência nas rules
+          roles[companyId] = normalizeRole(item.role);
         }
       });
     }

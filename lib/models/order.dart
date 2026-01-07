@@ -26,6 +26,9 @@ class Order extends BaseAuditCompany {
   String? status;
   int? number;
 
+  /// Técnico atribuído à OS (para controle de acesso RBAC)
+  UserAggr? assignedTo;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 

@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell, DismissDirection;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
+import 'package:praticos/services/authorization_service.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
   @override
@@ -214,15 +216,12 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   }
 
   String _getRoleLabel(RolesType? role) {
-    if (role == null) return 'Usuário';
-    switch (role) {
-      case RolesType.admin:
-        return 'Administrador';
-      case RolesType.manager:
-        return 'Gerente';
-      case RolesType.user:
-        return 'Usuário';
-    }
+    if (role == null) return 'Técnico';
+    return RolePermissions.getRoleLabel(role);
+  }
+
+  String _getRoleDescription(RolesType role) {
+    return RolePermissions.getRoleDescription(role);
   }
 
   void _showActionSheet(Membership membership) {
@@ -259,17 +258,48 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: const Text('Selecionar Nova Permissão'),
-        actions: RolesType.values.map((role) {
+        title: const Text('Selecionar Perfil'),
+        message: const Text('Escolha o perfil de acesso do colaborador'),
+        actions: RolePermissions.availableRoles.map((role) {
+          final isSelected = membership.role == role;
           return CupertinoActionSheetAction(
-            child: Text(_getRoleLabel(role)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${RolePermissions.getRoleIcon(role)} ${_getRoleLabel(role)}',
+                      style: TextStyle(
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 8),
+                      const Icon(CupertinoIcons.checkmark, size: 16),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _getRoleDescription(role),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+              ],
+            ),
             onPressed: () async {
               Navigator.pop(context);
-              try {
-                await _collaboratorStore.updateCollaboratorRole(
-                    membership.userId, role);
-              } catch (e) {
-                _showError(e.toString());
+              if (role != membership.role) {
+                try {
+                  await _collaboratorStore.updateCollaboratorRole(
+                      membership.userId, role);
+                } catch (e) {
+                  _showError(e.toString());
+                }
               }
             },
           );
