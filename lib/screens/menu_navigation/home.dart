@@ -426,7 +426,7 @@ class _HomeState extends State<Home> {
                                     style: TextStyle(
                                       fontSize: 15,
                                       color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                                      fontWeight: FontWeight.w400,
+                                      fontWeight: order.payment == 'paid' ? FontWeight.bold : FontWeight.w400,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
