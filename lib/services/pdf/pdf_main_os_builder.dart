@@ -35,165 +35,174 @@ class PdfMainOsBuilder {
   // HEADER
   // ============================================
 
-  /// Constroi o header com logo, empresa, numero da OS e status
+  /// Constroi o header com fundo azul completo
   pw.Widget buildHeader(Company company, Order order) {
-    final statusColor = PdfStyles.getStatusColor(order.status);
     final statusText = config.getStatus(order.status);
 
     return pw.Column(
       children: [
-        pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            // Logo + Company Info
-            pw.Expanded(
-              flex: 3,
-              child: pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  if (logoImage != null) ...[
-                    pw.Container(
-                      width: 50,
-                      height: 50,
-                      child: pw.Image(logoImage!, fit: pw.BoxFit.contain),
-                    ),
-                    pw.SizedBox(width: 12),
-                  ],
-                  pw.Expanded(
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          company.name ?? '',
-                          style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 16.0,
-                            color: PdfColors.grey800,
-                          ),
-                        ),
-                        pw.SizedBox(height: 4),
-                        if (company.phone != null && company.phone!.isNotEmpty)
-                          pw.Text(
-                            company.phone!,
-                            style: pw.TextStyle(
-                              font: baseFont,
-                              fontSize: 9.0,
-                              color: PdfStyles.textSecondary,
-                            ),
-                          ),
-                        if (company.email != null && company.email!.isNotEmpty)
-                          pw.Text(
-                            company.email!,
-                            style: pw.TextStyle(
-                              font: baseFont,
-                              fontSize: 9.0,
-                              color: PdfStyles.textSecondary,
-                            ),
-                          ),
-                        if (company.address != null && company.address!.isNotEmpty)
-                          pw.Text(
-                            company.address!,
-                            style: pw.TextStyle(
-                              font: baseFont,
-                              fontSize: 9.0,
-                              color: PdfStyles.textSecondary,
-                            ),
-                            maxLines: 2,
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // OS Number and Info
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                // OS Badge
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: pw.BoxDecoration(
-                    color: PdfStyles.primaryColor,
-                    borderRadius: pw.BorderRadius.circular(4),
-                  ),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.center,
-                    children: [
-                      pw.Text(
-                        config.serviceOrder.toUpperCase(),
-                        style: pw.TextStyle(
-                          font: boldFont,
-                          fontSize: 8.0,
-                          color: PdfColors.white,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      pw.SizedBox(height: 2),
-                      pw.Text(
-                        '#${order.number?.toString() ?? "NOVA"}',
-                        style: pw.TextStyle(
-                          font: boldFont,
-                          fontSize: 18.0,
-                          color: PdfColors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                pw.SizedBox(height: 8),
-                // Date
-                if (order.createdAt != null)
-                  pw.Text(
-                    'Data: ${DateFormat('dd/MM/yyyy').format(order.createdAt!)}',
-                    style: pw.TextStyle(
-                      font: baseFont,
-                      fontSize: 9.0,
-                      color: PdfStyles.textSecondary,
-                    ),
-                  ),
-                if (order.dueDate != null) ...[
-                  pw.SizedBox(height: 2),
-                  pw.Text(
-                    'Previsao: ${DateFormat('dd/MM/yyyy').format(order.dueDate!)}',
-                    style: pw.TextStyle(
-                      font: baseFont,
-                      fontSize: 9.0,
-                      color: PdfStyles.textSecondary,
-                    ),
-                  ),
-                ],
-                pw.SizedBox(height: 6),
-                // Status Badge
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: PdfStyles.statusBadgeDecoration(statusColor),
-                  child: pw.Text(
-                    statusText.toUpperCase(),
-                    style: pw.TextStyle(
-                      font: boldFont,
-                      fontSize: 8.0,
-                      color: statusColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 16),
+        // Header com fundo azul completo
         pw.Container(
-          height: 2,
+          width: double.infinity,
           decoration: pw.BoxDecoration(
             gradient: pw.LinearGradient(
-              colors: [PdfStyles.primaryColor, PdfColors.grey300],
+              colors: [
+                PdfStyles.primaryColor,
+                const PdfColor.fromInt(0xFF0d47a1), // Azul mais escuro
+              ],
               begin: pw.Alignment.centerLeft,
               end: pw.Alignment.centerRight,
             ),
           ),
+          padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              // Logo + Company Info
+              pw.Expanded(
+                flex: 3,
+                child: pw.Row(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    if (logoImage != null) ...[
+                      pw.Container(
+                        width: 40,
+                        height: 40,
+                        decoration: pw.BoxDecoration(
+                          color: PdfColors.white,
+                          borderRadius: pw.BorderRadius.circular(4),
+                        ),
+                        padding: const pw.EdgeInsets.all(4),
+                        child: pw.Image(logoImage!, fit: pw.BoxFit.contain),
+                      ),
+                      pw.SizedBox(width: 12),
+                    ],
+                    pw.Expanded(
+                      child: pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            config.serviceOrder.toUpperCase(),
+                            style: pw.TextStyle(
+                              font: boldFont,
+                              fontSize: 16.0,
+                              color: PdfColors.white,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          pw.SizedBox(height: 3),
+                          pw.Text(
+                            company.name ?? '',
+                            style: pw.TextStyle(
+                              font: boldFont,
+                              fontSize: 10.0,
+                              color: PdfColors.white,
+                            ),
+                          ),
+                          pw.SizedBox(height: 3),
+                          // Contatos organizados sem bolinhas
+                          pw.Column(
+                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                            children: [
+                              if (company.phone != null && company.phone!.isNotEmpty)
+                                pw.Text(
+                                  company.phone!,
+                                  style: pw.TextStyle(
+                                    font: baseFont,
+                                    fontSize: 8.0,
+                                    color: PdfColors.white,
+                                  ),
+                                ),
+                              if (company.email != null && company.email!.isNotEmpty)
+                                pw.Text(
+                                  company.email!,
+                                  style: pw.TextStyle(
+                                    font: baseFont,
+                                    fontSize: 8.0,
+                                    color: PdfColors.white,
+                                  ),
+                                ),
+                              if (company.site != null && company.site!.isNotEmpty)
+                                pw.Text(
+                                  company.site!,
+                                  style: pw.TextStyle(
+                                    font: baseFont,
+                                    fontSize: 8.0,
+                                    color: PdfColors.white,
+                                  ),
+                                ),
+                              if (company.address != null && company.address!.isNotEmpty)
+                                pw.Text(
+                                  company.address!,
+                                  style: pw.TextStyle(
+                                    font: baseFont,
+                                    fontSize: 7.5,
+                                    color: PdfColors.white,
+                                  ),
+                                  maxLines: 2,
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // OS Number and Info
+              pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.end,
+                children: [
+                  pw.Text(
+                    '${config.serviceOrder.toUpperCase()} Nº',
+                    style: pw.TextStyle(
+                      font: baseFont,
+                      fontSize: 7.0,
+                      color: PdfColors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  pw.Text(
+                    order.number?.toString() ?? "NOVA",
+                    style: pw.TextStyle(
+                      font: boldFont,
+                      fontSize: 20.0,
+                      color: PdfColors.white,
+                    ),
+                  ),
+                  pw.SizedBox(height: 3),
+                  if (order.createdAt != null)
+                    pw.Text(
+                      DateFormat('dd/MM/yyyy').format(order.createdAt!),
+                      style: pw.TextStyle(
+                        font: baseFont,
+                        fontSize: 8.0,
+                        color: PdfColors.white,
+                      ),
+                    ),
+                  pw.SizedBox(height: 3),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.white,
+                      borderRadius: pw.BorderRadius.circular(2),
+                    ),
+                    child: pw.Text(
+                      statusText.toUpperCase(),
+                      style: pw.TextStyle(
+                        font: boldFont,
+                        fontSize: 6.5,
+                        color: PdfStyles.primaryDark,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-        pw.SizedBox(height: 16),
+        pw.SizedBox(height: 12),
       ],
     );
   }
@@ -202,31 +211,55 @@ class PdfMainOsBuilder {
   // FOOTER
   // ============================================
 
-  /// Constroi o footer com paginacao e creditos
-  pw.Widget buildFooter(pw.Context context) {
+  /// Constroi o footer com fundo azul completo
+  pw.Widget buildFooter(pw.Context context, Company company) {
+    final contacts = <String>[];
+    if (company.phone != null && company.phone!.isNotEmpty) {
+      contacts.add(company.phone!);
+    }
+    if (company.email != null && company.email!.isNotEmpty) {
+      contacts.add(company.email!);
+    }
+    if (company.site != null && company.site!.isNotEmpty) {
+      contacts.add(company.site!);
+    }
+    if (company.address != null && company.address!.isNotEmpty) {
+      contacts.add(company.address!);
+    }
+
     return pw.Container(
       margin: const pw.EdgeInsets.only(top: 20),
-      padding: const pw.EdgeInsets.only(top: 10),
-      decoration: const pw.BoxDecoration(
-        border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300, width: 0.5)),
+      width: double.infinity,
+      decoration: pw.BoxDecoration(
+        gradient: pw.LinearGradient(
+          colors: [
+            PdfStyles.primaryColor,
+            const PdfColor.fromInt(0xFF0d47a1),
+          ],
+          begin: pw.Alignment.centerLeft,
+          end: pw.Alignment.centerRight,
+        ),
       ),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      padding: const pw.EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+      child: pw.Column(
         children: [
           pw.Text(
-            'Documento gerado eletronicamente pelo PraticOS - praticos.web.app',
+            contacts.join(' | '),
+            textAlign: pw.TextAlign.center,
             style: pw.TextStyle(
               font: baseFont,
               fontSize: 8,
-              color: PdfStyles.textSecondary,
+              color: PdfColors.white,
             ),
           ),
+          pw.SizedBox(height: 4),
           pw.Text(
             'Pagina ${context.pageNumber} de ${context.pagesCount}',
+            textAlign: pw.TextAlign.center,
             style: pw.TextStyle(
               font: baseFont,
-              fontSize: 8,
-              color: PdfStyles.textSecondary,
+              fontSize: 7,
+              color: const PdfColor.fromInt(0xFFB0B0B0),
             ),
           ),
         ],

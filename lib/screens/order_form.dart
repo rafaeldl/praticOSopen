@@ -1186,8 +1186,24 @@ class _OrderFormState extends State<OrderForm> {
 
       Customer? customer;
       if (order.customer != null) {
-        CustomerStore customerStore = CustomerStore();
-        customer = await customerStore.retrieveCustomer(order.customer?.id);
+        if (order.customer!.id != null && _store.companyId != null) {
+          try {
+            CustomerStore customerStore = CustomerStore();
+            customerStore.companyId = _store.companyId;
+            customer = await customerStore.retrieveCustomer(order.customer!.id);
+          } catch (e) {
+            // Silently fail and use fallback
+          }
+        }
+
+        // Fallback: usar dados do agregado se a busca falhou
+        if (customer == null) {
+          customer = Customer()
+            ..id = order.customer!.id
+            ..name = order.customer!.name
+            ..phone = order.customer!.phone
+            ..email = order.customer!.email;
+        }
       }
 
       // 2. Buscar formularios anexados a OS

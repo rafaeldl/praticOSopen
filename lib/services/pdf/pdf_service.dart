@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:praticos/models/company.dart';
@@ -102,7 +101,7 @@ class PdfService {
             return mainOsBuilder.buildHeader(data.company, data.order);
           },
           footer: (pw.Context context) {
-            return mainOsBuilder.buildFooter(context);
+            return mainOsBuilder.buildFooter(context, data.company);
           },
           build: (pw.Context context) {
             return mainOsBuilder.buildContent(
@@ -155,20 +154,11 @@ class PdfService {
     await Printing.sharePdf(bytes: bytes, filename: filename);
   }
 
-  /// Carrega as fontes com fallback
+  /// Carrega as fontes (usando Helvetica nativa)
   Future<(pw.Font, pw.Font)> _loadFonts() async {
-    pw.Font baseFont;
-    pw.Font boldFont;
-
-    try {
-      baseFont = await PdfGoogleFonts.nunitoSansRegular();
-      boldFont = await PdfGoogleFonts.nunitoSansBold();
-    } catch (e) {
-      // Fallback para Helvetica se Google Fonts falhar
-      baseFont = pw.Font.helvetica();
-      boldFont = pw.Font.helveticaBold();
-    }
-
+    // Usar fontes nativas do PDF (não requer assets)
+    final baseFont = pw.Font.helvetica();
+    final boldFont = pw.Font.helveticaBold();
     return (baseFont, boldFont);
   }
 
