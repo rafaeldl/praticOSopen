@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
@@ -46,14 +45,11 @@ abstract class _AuthStore with Store {
       // Check if there is a last selected company saved
       String? lastCompanyId = prefs.getString('companyId');
 
-      debugPrint('🔐 AuthStore: Usuário logado ${user.email}, lastCompanyId=$lastCompanyId');
-
       if (lastCompanyId != null &&
           dbUser != null &&
           dbUser.companies != null &&
           dbUser.companies!.any((c) => c.company?.id == lastCompanyId)) {
         // Load the saved company if the user still belongs to it
-        debugPrint('📊 AuthStore: Carregando empresa salva: $lastCompanyId');
         company = await companyStore.retrieveCompany(lastCompanyId);
       } else if (dbUser != null &&
           dbUser.companies != null &&
@@ -61,16 +57,12 @@ abstract class _AuthStore with Store {
           dbUser.companies!.first.company != null &&
           dbUser.companies!.first.company!.id != null) {
         // Retrieve the first company associated with the user
-        debugPrint('📊 AuthStore: Carregando primeira empresa do usuário: ${dbUser.companies!.first.company!.id}');
         company = await companyStore
             .retrieveCompany(dbUser.companies!.first.company!.id!);
       } else {
         // Fallback for legacy or owner-only logic
-        debugPrint('📊 AuthStore: Carregando empresa por owner');
         company = await companyStore.getCompanyByOwnerId(user.uid);
       }
-
-      debugPrint('✅ AuthStore: Empresa carregada: ${company.name} (id=${company.id}, segment=${company.segment})');
 
       Global.currentUser = user;
 

@@ -53,6 +53,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
                 // Tem empresa mas precisa onboarding → Onboarding com dados
                 return WelcomeScreen(
+                  authStore: widget.authStore,
                   companyId: result.companyId,
                   initialName: result.companyName,
                   initialAddress: result.companyAddress,
@@ -84,6 +85,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
               // Empresa existe mas não tem segmento → Onboarding com dados
               final result = snapshot.data!;
               return WelcomeScreen(
+                authStore: widget.authStore,
                 companyId: result.companyId,
                 initialName: result.companyName,
                 initialAddress: result.companyAddress,
@@ -96,6 +98,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
             // Tudo OK → Carregar segmento e depois Home
             return _SegmentLoader(
+              key: ValueKey(widget.authStore.companyAggr!.id!),
               companyId: widget.authStore.companyAggr!.id!,
             );
           },
@@ -123,6 +126,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => WelcomeScreen(
+                    authStore: widget.authStore,
                     companyId: result.companyId,
                     initialName: result.companyName,
                     initialAddress: result.companyAddress,
@@ -143,6 +147,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
         // Sem convites → Onboarding normal
         return WelcomeScreen(
+          authStore: widget.authStore,
           companyId: result.companyId,
           initialName: result.companyName,
           initialAddress: result.companyAddress,
@@ -258,7 +263,7 @@ class _CompanyCheckResult {
 class _SegmentLoader extends StatefulWidget {
   final String companyId;
 
-  const _SegmentLoader({required this.companyId});
+  const _SegmentLoader({super.key, required this.companyId});
 
   @override
   State<_SegmentLoader> createState() => _SegmentLoaderState();
@@ -293,6 +298,8 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
       }
 
       // Carregar configuração do segmento
+      // Como o widget tem key única baseada no companyId, ele é recriado quando muda
+      // Então o initialize sempre será chamado para a empresa correta
       final segmentProvider = context.read<SegmentConfigProvider>();
       await segmentProvider.initialize(segment);
 
