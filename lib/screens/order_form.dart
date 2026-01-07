@@ -82,16 +82,15 @@ class _OrderFormState extends State<OrderForm> {
           slivers: [
             _buildNavigationBar(context, config),
             SliverSafeArea(
-              top: false, // Navigation bar handles top safe area
+              top: false,
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildPhotosSection(context),
                   _buildClientDeviceSection(context, config),
-                  _buildStatusDatesSection(context, config),
-                  _buildFormsSection(context, config),
+                  _buildSummarySection(context, config),
                   _buildServicesSection(context, config),
                   _buildProductsSection(context, config),
-                  _buildTotalSection(context, config),
+                  _buildFormsSection(context, config),
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -129,11 +128,84 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   Widget _buildPhotosSection(BuildContext context) {
-    // Keeping OrderPhotosWidget but wrapping it to look integrated if needed.
-    // Ideally, we'd style it more 'Apple-like' here.
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
       child: OrderPhotosWidget(store: _store),
+    );
+  }
+
+  /// Seção de resumo - Status, Total e Datas no padrão iOS
+  Widget _buildSummarySection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(
+      builder: (_) {
+        final total = _store.total ?? 0.0;
+        final discount = _store.discount ?? 0.0;
+        final payment = _store.payment ?? '';
+        final isPaid = payment == 'Pago' || payment == 'paid';
+        final hasCreatedDate = _store.order?.id != null;
+
+        return _buildGroupedSection(
+          header: "RESUMO",
+          children: [
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.flag_fill,
+              title: "Status",
+              value: config.getStatus(_store.status),
+              onTap: () => _selectStatus(config),
+              showChevron: true,
+              valueColor: _getStatusColorCupertino(_store.status),
+            ),
+            if (hasCreatedDate)
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.clock,
+                title: "Criado em",
+                value: _store.formattedCreatedDate,
+                onTap: () {},
+                showChevron: false,
+              ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.calendar,
+              title: "Entrega",
+              value: _store.dueDate ?? 'Definir',
+              placeholder: "Definir",
+              onTap: _selectDueDate,
+              showChevron: true,
+            ),
+            if (discount > 0)
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.tag_fill,
+                title: "Desconto",
+                value: "- ${_convertToCurrency(discount)}",
+                onTap: () {},
+                showChevron: false,
+                valueColor: CupertinoColors.systemRed,
+              ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.money_dollar_circle_fill,
+              title: config.label(LabelKeys.total),
+              value: _convertToCurrency(total),
+              onTap: () => _showPaymentOptions(config),
+              showChevron: true,
+              isBold: true,
+            ),
+            _buildListTile(
+              context: context,
+              icon: isPaid ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.clock_fill,
+              title: "Pagamento",
+              value: isPaid ? "Pago" : "A Receber",
+              onTap: () => _showPaymentOptions(config),
+              showChevron: true,
+              valueColor: isPaid ? CupertinoColors.systemGreen : CupertinoColors.systemOrange,
+              isLast: true,
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -167,46 +239,6 @@ class _OrderFormState extends State<OrderForm> {
       },
     );
   }
-
-  Widget _buildStatusDatesSection(BuildContext context, SegmentConfigProvider config) {
-    return Observer(
-      builder: (_) {
-        return _buildGroupedSection(
-          header: "DETALHES",
-          children: [
-            _buildListTile(
-              context: context,
-              icon: CupertinoIcons.flag_fill,
-              title: "Status",
-              value: config.getStatus(_store.status),
-              onTap: () => _selectStatus(config),
-              showChevron: true,
-              valueColor: _getStatusColorCupertino(_store.status),
-            ),
-            _buildListTile(
-              context: context,
-              icon: CupertinoIcons.calendar,
-              title: "Criado em",
-              value: _store.formattedCreatedDate,
-              onTap: () {}, // Read only
-              showChevron: false,
-            ),
-            _buildListTile(
-              context: context,
-              icon: CupertinoIcons.time_solid,
-              title: "Entrega",
-              value: _store.dueDate ?? 'Definir Data',
-              placeholder: "Definir Data",
-              onTap: _selectDueDate,
-              showChevron: true,
-              isLast: true,
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildFormsSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
@@ -218,50 +250,33 @@ class _OrderFormState extends State<OrderForm> {
           builder: (context, snapshot) {
             final isLoading = hasOrder && snapshot.connectionState == ConnectionState.waiting;
             final forms = snapshot.data ?? [];
-            
-            return Column(
+
+            return _buildGroupedSection(
+              header: "FORMULÁRIOS",
+              trailing: forms.isNotEmpty ? _buildAddButton(onTap: () => _addForm(config)) : null,
               children: [
-                _buildGroupedSection(
-                  header: "FORMULÁRIOS E CHECKLISTS",
-                  children: [
-                    if (isLoading)
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(child: CupertinoActivityIndicator()),
-                      )
-                    else if (forms.isEmpty)
-                      _buildListTile(
-                        context: context,
-                        title: "Nenhum formulário",
-                        value: "",
-                        placeholder: "",
-                        onTap: () {},
-                        showChevron: false,
-                        isLast: true,
-                        textColor: CupertinoColors.secondaryLabel,
-                      )
-                    else
-                      ...forms.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final form = entry.value;
-                        return _buildFormRow(context, form, index == forms.length - 1);
-                      }),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: CupertinoButton(
-                    onPressed: () => _addForm(config),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                         Icon(CupertinoIcons.doc_text_fill),
-                         SizedBox(width: 8),
-                         Text("Adicionar Formulário"),
-                      ],
-                    ),
-                  ),
-                ),
+                if (isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: CupertinoActivityIndicator()),
+                  )
+                else if (forms.isEmpty)
+                  _buildListTile(
+                    context: context,
+                    icon: CupertinoIcons.plus_circle,
+                    title: "Adicionar Formulário",
+                    value: "",
+                    onTap: () => _addForm(config),
+                    showChevron: true,
+                    isLast: true,
+                    textColor: CupertinoTheme.of(context).primaryColor,
+                  )
+                else
+                  ...forms.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final form = entry.value;
+                    return _buildFormRow(context, form, index == forms.length - 1);
+                  }),
               ],
             );
           },
@@ -271,22 +286,17 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   Widget _buildFormRow(BuildContext context, of_model.OrderForm form, bool isLast) {
-    // Calculando progresso simples
     final total = form.items.length;
-    final answered = form.responses.length; // Assumindo que resposta existe = respondido
+    final answered = form.responses.length;
     final progress = total > 0 ? (answered / total) : 0.0;
     final percent = (progress * 100).toInt();
     final isCompleted = form.status == of_model.FormStatus.completed;
 
     return _buildDismissibleItem(
       context: context,
-      index: form.id.hashCode, // Usando hash do ID para chave única do Dismissible
+      index: form.id.hashCode,
       onDelete: () => _confirmDeleteForm(form),
-      child: _buildItemRow(
-        context: context,
-        title: form.title,
-        subtitle: isCompleted ? "Concluído" : "$answered de $total respondidos ($percent%)",
-        trailing: "", // Poderia usar um Icon check aqui
+      child: GestureDetector(
         onTap: () {
           Navigator.push(
             context,
@@ -300,7 +310,80 @@ class _OrderFormState extends State<OrderForm> {
             ),
           );
         },
-        isLast: isLast,
+        child: Container(
+          color: Colors.transparent,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    // Indicador de status
+                    Container(
+                      width: 24,
+                      height: 24,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCompleted
+                          ? CupertinoColors.systemGreen
+                          : CupertinoColors.systemOrange,
+                      ),
+                      child: Icon(
+                        isCompleted
+                          ? CupertinoIcons.checkmark
+                          : CupertinoIcons.clock,
+                        size: 14,
+                        color: CupertinoColors.white,
+                      ),
+                    ),
+                    // Título e subtítulo
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            form.title,
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: CupertinoColors.label.resolveFrom(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isCompleted
+                              ? "Concluído"
+                              : "$answered de $total ($percent%)",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isCompleted
+                                ? CupertinoColors.systemGreen
+                                : CupertinoColors.systemOrange,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Chevron
+                    Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 16,
+                      color: CupertinoColors.systemGrey3.resolveFrom(context),
+                    ),
+                  ],
+                ),
+              ),
+              if (!isLast)
+                Divider(
+                  height: 1,
+                  indent: 52,
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -373,44 +456,28 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final services = _store.services ?? [];
-        return Column(
+
+        return _buildGroupedSection(
+          header: "SERVIÇOS",
+          trailing: services.isNotEmpty ? _buildAddButton(onTap: _addService) : null,
           children: [
-             _buildGroupedSection(
-              header: "SERVIÇOS",
-              children: [
-                if (services.isEmpty)
-                  _buildListTile(
-                    context: context,
-                    title: "Nenhum serviço",
-                    value: "",
-                    placeholder: "",
-                    onTap: () {},
-                    showChevron: false,
-                    isLast: true,
-                    textColor: CupertinoColors.secondaryLabel,
-                  )
-                else
-                  ...services.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final service = entry.value;
-                    return _buildServiceRow(context, service, index, index == services.length - 1, config);
-                  }),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: CupertinoButton(
-                onPressed: _addService,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(CupertinoIcons.add_circled_solid),
-                    const SizedBox(width: 8),
-                    Text(config.label(LabelKeys.createService)),
-                  ],
-                ),
-              ),
-            ),
+            if (services.isEmpty)
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.plus_circle,
+                title: config.label(LabelKeys.createService),
+                value: "",
+                onTap: _addService,
+                showChevron: true,
+                isLast: true,
+                textColor: CupertinoTheme.of(context).primaryColor,
+              )
+            else
+              ...services.asMap().entries.map((entry) {
+                final index = entry.key;
+                final service = entry.value;
+                return _buildServiceRow(context, service, index, index == services.length - 1, config);
+              }),
           ],
         );
       },
@@ -421,89 +488,28 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final products = _store.products ?? [];
-        return Column(
-          children: [
-            _buildGroupedSection(
-              header: "PEÇAS E PRODUTOS",
-              children: [
-                if (products.isEmpty)
-                  _buildListTile(
-                    context: context,
-                    title: "Nenhum produto",
-                    value: "",
-                    placeholder: "",
-                    onTap: () {},
-                    showChevron: false,
-                    isLast: true,
-                    textColor: CupertinoColors.secondaryLabel,
-                  )
-                else
-                  ...products.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final product = entry.value;
-                    return _buildProductRow(context, product, index, index == products.length - 1, config);
-                  }),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: CupertinoButton(
-                onPressed: _addProduct,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                     const Icon(CupertinoIcons.add_circled_solid),
-                     const SizedBox(width: 8),
-                     Text(config.label(LabelKeys.createProduct)),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
-  Widget _buildTotalSection(BuildContext context, SegmentConfigProvider config) {
-    return Observer(
-      builder: (_) {
-        final total = _store.total ?? 0.0;
-        final discount = _store.discount ?? 0.0;
-        final payment = _store.payment ?? '';
-        final isPaid = payment == 'Pago';
-        
         return _buildGroupedSection(
-          header: "TOTALIZAÇÃO",
+          header: "PEÇAS E PRODUTOS",
+          trailing: products.isNotEmpty ? _buildAddButton(onTap: _addProduct) : null,
           children: [
-            if (discount > 0)
+            if (products.isEmpty)
               _buildListTile(
                 context: context,
-                title: "Desconto",
-                value: "- ${_convertToCurrency(discount)}",
-                onTap: () {},
-                showChevron: false,
-                textColor: CupertinoColors.systemRed,
-                valueColor: CupertinoColors.systemRed,
-              ),
-             _buildListTile(
-              context: context,
-              title: config.label(LabelKeys.total),
-              value: _convertToCurrency(total),
-              onTap: () {},
-              showChevron: false,
-              isBold: true,
-              valueColor: CupertinoColors.label.resolveFrom(context),
-            ),
-             _buildListTile(
-              context: context,
-              title: "Situação",
-              value: isPaid ? "PAGO" : "A RECEBER",
-              onTap: () => _showPaymentOptions(config),
-              showChevron: true,
-              valueColor: isPaid ? CupertinoColors.activeGreen : CupertinoColors.systemOrange,
-              isLast: true,
-            ),
+                icon: CupertinoIcons.plus_circle,
+                title: config.label(LabelKeys.createProduct),
+                value: "",
+                onTap: _addProduct,
+                showChevron: true,
+                isLast: true,
+                textColor: CupertinoTheme.of(context).primaryColor,
+              )
+            else
+              ...products.asMap().entries.map((entry) {
+                final index = entry.key;
+                final product = entry.value;
+                return _buildProductRow(context, product, index, index == products.length - 1, config);
+              }),
           ],
         );
       },
@@ -515,20 +521,28 @@ class _OrderFormState extends State<OrderForm> {
   Widget _buildGroupedSection({
     required String header,
     required List<Widget> children,
+    Widget? trailing,
   }) {
     return Builder(
       builder: (context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(32, 24, 16, 8),
-            child: Text(
-              header,
-              style: TextStyle(
-                fontSize: 13,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                fontWeight: FontWeight.w500,
-              ),
+            padding: const EdgeInsets.fromLTRB(32, 24, 20, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  header,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                if (trailing != null) trailing,
+              ],
             ),
           ),
           Container(
@@ -542,6 +556,24 @@ class _OrderFormState extends State<OrderForm> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Botão de adicionar no padrão iOS (texto azul simples)
+  Widget _buildAddButton({required VoidCallback onTap, String label = 'Adicionar'}) {
+    return Builder(
+      builder: (context) => CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        onPressed: onTap,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 17,
+            color: CupertinoTheme.of(context).primaryColor,
+          ),
+        ),
       ),
     );
   }
@@ -836,12 +868,8 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   void _selectStatus(SegmentConfigProvider config) {
-     // Assuming ModalStatus().showModal returns a Future<String?>
-     // We should adapt it to CupertinoActionSheet or keep using it if it's custom.
-     // To follow strict HIG, let's use ActionSheet here.
-     
      final statusKeys = ['quote', 'approved', 'progress', 'done', 'canceled'];
-     
+
      showCupertinoModalPopup(
        context: context,
        builder: (context) => CupertinoActionSheet(
@@ -850,8 +878,8 @@ class _OrderFormState extends State<OrderForm> {
            return CupertinoActionSheetAction(
              child: Text(config.getStatus(key)),
              onPressed: () {
-               _store.setStatus(key);
                Navigator.pop(context);
+               _trySetStatus(key, config);
              },
            );
          }).toList(),
@@ -864,6 +892,46 @@ class _OrderFormState extends State<OrderForm> {
           ),
        ),
      );
+  }
+
+  /// Tenta alterar o status, verificando se há formulários pendentes
+  void _trySetStatus(String newStatus, SegmentConfigProvider config) {
+    // Se não for "done", permite alterar diretamente
+    if (newStatus != 'done') {
+      _store.setStatus(newStatus);
+      return;
+    }
+
+    // Verifica se há formulários pendentes
+    final forms = _store.formsStream?.value ?? [];
+    final pendingForms = forms.where(
+      (form) => form.status != of_model.FormStatus.completed
+    ).toList();
+
+    if (pendingForms.isEmpty) {
+      // Todos os formulários estão concluídos, permite alterar
+      _store.setStatus(newStatus);
+      return;
+    }
+
+    // Há formulários pendentes, mostra alerta
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Checklists Pendentes'),
+        content: Text(
+          pendingForms.length == 1
+            ? 'O checklist "${pendingForms.first.title}" ainda não foi concluído.'
+            : '${pendingForms.length} checklists ainda não foram concluídos:\n\n${pendingForms.map((f) => '• ${f.title}').join('\n')}',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showPaymentOptions(SegmentConfigProvider config) {
