@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
@@ -17,6 +18,7 @@ abstract class _UserStore with Store {
   final CompanyStore companyStore = CompanyStore();
   final UserRepository repository = UserRepository();
   final AuthService authService = AuthService();
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @observable
   ObservableStream<User>? user;
@@ -33,22 +35,42 @@ abstract class _UserStore with Store {
     return await repository.findUserById(Global.currentUser!.uid);
   }
 
+  /// Cria o documento do usuário se não existir.
+  ///
+  /// IMPORTANTE: Não cria mais empresa automaticamente.
+  /// O usuário vai para o onboarding onde pode:
+  /// - Aceitar convites pendentes de outras empresas
+  /// - Criar sua própria empresa
   createUserIfNotExist(auth.User firebaseUser) async {
-    User? user = await repository.findUserById(firebaseUser.uid);
-    if (user != null) return;
+    User? existingUser = await repository.findUserById(firebaseUser.uid);
+    if (existingUser != null) return;
 
+    // Cria apenas o documento do usuário (sem empresa)
     User newUser = _fillUserFields(firebaseUser);
-    Company newCompany = _fillCompanyFields(newUser, firebaseUser.uid);
+    newUser.companies = []; // Começa sem empresas
 
-    // Adiciona a empresa à lista do usuário (source of truth para claims)
+    await _db.collection('users').doc(newUser.id).set(newUser.toJson());
+  }
+
+  /// Cria uma empresa para o usuário atual (usado no onboarding).
+  Future<void> createCompanyForUser(Company company) async {
+    final userId = Global.currentUser?.uid;
+    if (userId == null) return;
+
+    User? user = await repository.findUserById(userId);
+    if (user == null) return;
+
+    // Adiciona a empresa à lista do usuário
     CompanyRoleAggr companyRole = CompanyRoleAggr()
-      ..company = newCompany.toAggr()
+      ..company = company.toAggr()
       ..role = RolesType.admin;
-    newUser.companies = [companyRole];
+
+    user.companies ??= [];
+    user.companies!.add(companyRole);
 
     await authService.signup(
-      user: newUser,
-      company: newCompany,
+      user: user,
+      company: company,
       role: RolesType.admin,
     );
   }

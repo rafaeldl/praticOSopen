@@ -21,20 +21,69 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
 
     setState(() => _isLoading = true);
     try {
-      await _collaboratorStore.addCollaborator(
+      final wasAddedDirectly = await _collaboratorStore.addCollaborator(
         _emailController.text.trim(),
         _selectedRole,
       );
       if (mounted) {
-        Navigator.pop(context, true);
+        if (wasAddedDirectly) {
+          // Usuário já existia e foi adicionado diretamente
+          _showSuccessDialog(
+            'Colaborador Adicionado',
+            'O colaborador foi adicionado à empresa com sucesso.',
+          );
+        } else {
+          // Usuário não existia, convite foi criado
+          _showSuccessDialog(
+            'Convite Enviado',
+            'O usuário ainda não está cadastrado no sistema. Um convite foi criado e aparecerá quando ele se cadastrar.',
+          );
+        }
       }
     } catch (e) {
-      // Error handling
+      if (mounted) {
+        _showErrorDialog(e.toString().replaceAll('Exception: ', ''));
+      }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  void _showSuccessDialog(String title, String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.pop(context); // Fecha o dialog
+              Navigator.pop(this.context, true); // Volta para a lista
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Erro'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showRolePicker() {

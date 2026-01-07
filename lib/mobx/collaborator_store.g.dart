@@ -27,6 +27,24 @@ mixin _$CollaboratorStore on _CollaboratorStore, Store {
     });
   }
 
+  late final _$pendingInvitesAtom = Atom(
+    name: '_CollaboratorStore.pendingInvites',
+    context: context,
+  );
+
+  @override
+  ObservableList<Invite> get pendingInvites {
+    _$pendingInvitesAtom.reportRead();
+    return super.pendingInvites;
+  }
+
+  @override
+  set pendingInvites(ObservableList<Invite> value) {
+    _$pendingInvitesAtom.reportWrite(value, super.pendingInvites, () {
+      super.pendingInvites = value;
+    });
+  }
+
   late final _$isLoadingAtom = Atom(
     name: '_CollaboratorStore.isLoading',
     context: context,
@@ -73,16 +91,36 @@ mixin _$CollaboratorStore on _CollaboratorStore, Store {
     return _$loadCollaboratorsAsyncAction.run(() => super.loadCollaborators());
   }
 
+  late final _$loadPendingInvitesAsyncAction = AsyncAction(
+    '_CollaboratorStore.loadPendingInvites',
+    context: context,
+  );
+
+  @override
+  Future<void> loadPendingInvites() {
+    return _$loadPendingInvitesAsyncAction.run(() => super.loadPendingInvites());
+  }
+
   late final _$addCollaboratorAsyncAction = AsyncAction(
     '_CollaboratorStore.addCollaborator',
     context: context,
   );
 
   @override
-  Future<void> addCollaborator(String email, RolesType roleType) {
+  Future<bool> addCollaborator(String email, RolesType roleType) {
     return _$addCollaboratorAsyncAction.run(
       () => super.addCollaborator(email, roleType),
     );
+  }
+
+  late final _$cancelInviteAsyncAction = AsyncAction(
+    '_CollaboratorStore.cancelInvite',
+    context: context,
+  );
+
+  @override
+  Future<void> cancelInvite(String inviteId) {
+    return _$cancelInviteAsyncAction.run(() => super.cancelInvite(inviteId));
   }
 
   late final _$updateCollaboratorRoleAsyncAction = AsyncAction(
@@ -113,6 +151,7 @@ mixin _$CollaboratorStore on _CollaboratorStore, Store {
   String toString() {
     return '''
 collaborators: ${collaborators},
+pendingInvites: ${pendingInvites},
 isLoading: ${isLoading},
 errorMessage: ${errorMessage}
     ''';

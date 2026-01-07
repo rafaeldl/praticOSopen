@@ -4,25 +4,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/mobx/invite_store.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
 import 'package:praticos/screens/onboarding/welcome_screen.dart';
+import 'package:praticos/screens/onboarding/pending_invites_screen.dart';
 import 'package:praticos/screens/loading_screen.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 
 /// Widget que verifica se o usuário tem empresa cadastrada E segmento definido
 /// Se sim → NavigationController (Home)
-/// Se não → CompanyInfoScreen (Onboarding)
-class AuthWrapper extends StatelessWidget {
+/// Se não tem empresa → Verifica convites pendentes
+/// Se tem convites → PendingInvitesScreen
+/// Se não tem convites → WelcomeScreen (criar empresa)
+class AuthWrapper extends StatefulWidget {
   final AuthStore authStore;
 
   const AuthWrapper({super.key, required this.authStore});
+
+  @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  final InviteStore _inviteStore = InviteStore.instance;
 
   @override
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) {
         // Aguarda carregar companyAggr
-        if (authStore.companyAggr == null) {
+        if (widget.authStore.companyAggr == null) {
           return FutureBuilder<_CompanyCheckResult>(
             future: _checkUserCompany(),
             builder: (context, snapshot) {
@@ -38,7 +49,12 @@ class AuthWrapper extends StatelessWidget {
                   return const LoadingScreen();
                 }
 
-                // Não tem empresa OU não tem segmento → Onboarding
+                // Não tem empresa → Verificar se tem convites pendentes
+                if (!result.hasCompany) {
+                  return _buildOnboardingDecision(result);
+                }
+
+                // Tem empresa mas precisa onboarding → Onboarding com dados
                 return WelcomeScreen(
                   companyId: result.companyId,
                   initialName: result.companyName,
@@ -50,8 +66,11 @@ class AuthWrapper extends StatelessWidget {
                 );
               }
 
-              // Fallback para onboarding vazio
-              return const WelcomeScreen();
+              // Fallback: verifica convites
+              return _buildOnboardingDecision(_CompanyCheckResult(
+                hasCompany: false,
+                needsOnboarding: true,
+              ));
             },
           );
         }
@@ -80,12 +99,82 @@ class AuthWrapper extends StatelessWidget {
 
             // Tudo OK → Carregar segmento e depois Home
             return _SegmentLoader(
-              companyId: authStore.companyAggr!.id!,
+              companyId: widget.authStore.companyAggr!.id!,
             );
           },
         );
       },
     );
+  }
+
+  /// Decide se mostra tela de convites ou de criação de empresa
+  Widget _buildOnboardingDecision(_CompanyCheckResult result) {
+    return FutureBuilder<bool>(
+      future: _checkPendingInvites(),
+      builder: (context, inviteSnapshot) {
+        if (inviteSnapshot.connectionState == ConnectionState.waiting) {
+          return const LoadingScreen();
+        }
+
+        final hasPendingInvites = inviteSnapshot.data ?? false;
+
+        if (hasPendingInvites) {
+          // Tem convites pendentes → Mostrar tela de convites
+          return PendingInvitesScreen(
+            onCreateCompany: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WelcomeScreen(
+                    companyId: result.companyId,
+                    initialName: result.companyName,
+                    initialAddress: result.companyAddress,
+                    initialLogoUrl: result.companyLogo,
+                    initialPhone: result.companyPhone,
+                    initialEmail: result.companyEmail,
+                    initialSite: result.companySite,
+                  ),
+                ),
+              );
+            },
+            onInviteAccepted: () {
+              // Força rebuild para verificar novamente
+              setState(() {});
+            },
+          );
+        }
+
+        // Sem convites → Onboarding normal
+        return WelcomeScreen(
+          companyId: result.companyId,
+          initialName: result.companyName,
+          initialAddress: result.companyAddress,
+          initialLogoUrl: result.companyLogo,
+          initialPhone: result.companyPhone,
+          initialEmail: result.companyEmail,
+          initialSite: result.companySite,
+        );
+      },
+    );
+  }
+
+  /// Verifica se o usuário tem convites pendentes
+  Future<bool> _checkPendingInvites() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user?.email == null) return false;
+
+      final invites = await FirebaseFirestore.instance
+          .collection('invites')
+          .where('email', isEqualTo: user!.email!.toLowerCase())
+          .where('status', isEqualTo: 'pending')
+          .limit(1)
+          .get();
+
+      return invites.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
   }
 
   /// Verifica se o usuário tem empresa associada e se ela tem segmento definido
@@ -111,7 +200,7 @@ class AuthWrapper extends StatelessWidget {
       }
 
       // Pega a primeira empresa (ou a empresa já carregada no store)
-      final companyId = authStore.companyAggr?.id ?? companies[0];
+      final companyId = widget.authStore.companyAggr?.id ?? companies[0];
 
       final companyDoc = await FirebaseFirestore.instance
           .collection('companies')

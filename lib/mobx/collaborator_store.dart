@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
+import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 import 'package:praticos/repositories/user_repository.dart';
 
@@ -26,10 +28,14 @@ class CollaboratorStore extends _CollaboratorStore with _$CollaboratorStore {
 abstract class _CollaboratorStore with Store {
   final TenantMembershipRepository _membershipRepo = TenantMembershipRepository();
   final UserRepository _userRepository = UserRepository();
+  final InviteRepository _inviteRepository = InviteRepository();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @observable
   ObservableList<Membership> collaborators = ObservableList<Membership>();
+
+  @observable
+  ObservableList<Invite> pendingInvites = ObservableList<Invite>();
 
   @observable
   bool isLoading = false;
@@ -103,10 +109,30 @@ abstract class _CollaboratorStore with Store {
 
       collaborators.clear();
       collaborators.addAll(memberships);
+
+      // Também carrega os convites pendentes
+      await loadPendingInvites();
     } catch (e) {
       errorMessage = e.toString();
     } finally {
       isLoading = false;
+    }
+  }
+
+  /// Carrega os convites pendentes da empresa atual.
+  @action
+  Future<void> loadPendingInvites() async {
+    if (Global.companyAggr?.id == null) return;
+
+    try {
+      final invites = await _inviteRepository.getPendingByCompany(
+        Global.companyAggr!.id!,
+      );
+
+      pendingInvites.clear();
+      pendingInvites.addAll(invites);
+    } catch (e) {
+      print('[CollaboratorStore] Erro ao carregar convites: $e');
     }
   }
 
@@ -116,21 +142,31 @@ abstract class _CollaboratorStore with Store {
 
   /// Adiciona um colaborador à empresa.
   ///
+  /// Se o usuário já existir no sistema:
   /// 1. Atualiza `user.companies` (source of truth, dispara Cloud Function)
   /// 2. Cria documento em `memberships/{userId}` (índice reverso)
+  ///
+  /// Se o usuário não existir:
+  /// 1. Cria um convite pendente na collection `/invites`
+  /// 2. Quando o usuário se registrar, verá o convite para aceitar
+  ///
+  /// Retorna `true` se foi adicionado diretamente, `false` se foi criado convite.
   @action
-  Future<void> addCollaborator(String email, RolesType roleType) async {
-    if (Global.companyAggr?.id == null) return;
+  Future<bool> addCollaborator(String email, RolesType roleType) async {
+    if (Global.companyAggr?.id == null) return false;
 
     isLoading = true;
     try {
-      // 1. Busca o usuário pelo email
-      final user = await _userRepository.findUserByEmail(email);
-      if (user == null) {
-        throw Exception('Usuário não encontrado com o email: $email');
-      }
-
       final companyId = Global.companyAggr!.id!;
+      final normalizedEmail = email.toLowerCase().trim();
+
+      // 1. Busca o usuário pelo email
+      final user = await _userRepository.findUserByEmail(normalizedEmail);
+
+      // Se o usuário não existe, cria um convite
+      if (user == null) {
+        return await _createInvite(normalizedEmail, roleType);
+      }
 
       // 2. Verifica se já é membro (membership collection)
       final isMember = await _membershipRepo.isMember(companyId, user.id!);
@@ -180,6 +216,51 @@ abstract class _CollaboratorStore with Store {
       // 5. Recarrega lista
       await loadCollaborators();
 
+      return true; // Adicionado diretamente
+
+    } catch (e) {
+      errorMessage = e.toString();
+      rethrow;
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  /// Cria um convite para um email que ainda não é usuário do sistema.
+  Future<bool> _createInvite(String email, RolesType roleType) async {
+    final companyId = Global.companyAggr!.id!;
+
+    // Verifica se já existe um convite pendente para este email nesta empresa
+    final existingInvite = await _inviteRepository.existsPendingInvite(
+      email,
+      companyId,
+    );
+    if (existingInvite) {
+      throw Exception('Já existe um convite pendente para este email.');
+    }
+
+    // Cria o convite
+    final invite = Invite()
+      ..email = email
+      ..company = Global.companyAggr
+      ..role = roleType
+      ..invitedBy = Global.userAggr;
+
+    await _inviteRepository.create(invite);
+
+    // Recarrega lista de convites
+    await loadPendingInvites();
+
+    return false; // Convite criado (não adicionado diretamente)
+  }
+
+  /// Cancela um convite pendente.
+  @action
+  Future<void> cancelInvite(String inviteId) async {
+    isLoading = true;
+    try {
+      await _inviteRepository.delete(inviteId);
+      await loadPendingInvites();
     } catch (e) {
       errorMessage = e.toString();
       rethrow;
