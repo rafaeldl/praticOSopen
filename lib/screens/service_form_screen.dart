@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:praticos/mobx/service_store.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/screens/service_bundles_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceFormScreen extends StatefulWidget {
   const ServiceFormScreen({super.key});
@@ -18,7 +20,8 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
   final ServiceStore _serviceStore = ServiceStore();
   bool _isLoading = false;
   bool _initialized = false;
-  
+  String? _companyId;
+
   late final CurrencyTextInputFormatter _currencyFormatter;
   final TextEditingController _valueController = TextEditingController();
 
@@ -30,6 +33,16 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       symbol: 'R\$',
       decimalDigits: 2,
     );
+    _loadCompanyId();
+  }
+
+  Future<void> _loadCompanyId() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _companyId = prefs.getString('companyId');
+      });
+    }
   }
 
   @override
@@ -222,6 +235,9 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
                   ),
                 ],
               ),
+
+              // Bundles Section
+              _buildBundlesSection(context),
             ],
           ),
         ),
@@ -236,5 +252,70 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
       symbol: 'R\$',
     );
     return numberFormat.format(total);
+  }
+
+  Widget _buildBundlesSection(BuildContext context) {
+    final formCount = _service?.formBundles?.length ?? 0;
+    final productCount = _service?.productBundles?.length ?? 0;
+    final totalItems = formCount + productCount;
+
+    return CupertinoListSection.insetGrouped(
+      header: Text(
+        'KIT DO SERVIÇO',
+        style: TextStyle(
+          fontSize: 13,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        ),
+      ),
+      footer: Text(
+        'Configure formulários e produtos que serão adicionados automaticamente à OS quando este serviço for selecionado.',
+        style: TextStyle(
+          fontSize: 13,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        ),
+      ),
+      children: [
+        CupertinoListTile(
+          leading: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: CupertinoColors.activeBlue.resolveFrom(context).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              CupertinoIcons.cube_box_fill,
+              size: 20,
+              color: CupertinoColors.activeBlue.resolveFrom(context),
+            ),
+          ),
+          title: const Text('Configurar Kit'),
+          additionalInfo: Text(
+            totalItems > 0 ? '$totalItems ${totalItems == 1 ? 'item' : 'itens'}' : 'Nenhum',
+            style: TextStyle(
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+          ),
+          trailing: const CupertinoListTileChevron(),
+          onTap: _companyId == null ? null : () async {
+            final result = await Navigator.push<Service>(
+              context,
+              CupertinoPageRoute(
+                builder: (context) => ServiceBundlesScreen(
+                  service: _service!,
+                  companyId: _companyId!,
+                ),
+              ),
+            );
+            if (result != null && mounted) {
+              setState(() {
+                _service = result;
+              });
+            }
+          },
+        ),
+      ],
+    );
   }
 }

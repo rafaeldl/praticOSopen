@@ -109,8 +109,9 @@ class FormsService {
   }
 
   /// Adiciona um novo formulário à OS baseado em um template e retorna a instância criada
+  /// [isRequired] indica se o preenchimento do formulário é obrigatório (definido pelo bundle)
   Future<OrderForm> addFormToOrder(
-      String companyId, String orderId, FormDefinition template) async {
+      String companyId, String orderId, FormDefinition template, {bool isRequired = false}) async {
     final orderForm = OrderForm(
       id: '', // Será gerado pelo Firestore
       formDefinitionId: template.id!,
@@ -120,6 +121,7 @@ class FormsService {
       startedAt: DateTime.now(),
       updatedAt: DateTime.now(),
       responses: [],
+      isRequired: isRequired,
     );
 
     final data = orderForm.toJson();
@@ -127,7 +129,7 @@ class FormsService {
 
     final docRef = await _getFormsCollection(companyId, orderId).add(data);
     orderForm.id = docRef.id;
-    
+
     return orderForm;
   }
 

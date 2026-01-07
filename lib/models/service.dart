@@ -1,6 +1,7 @@
 import 'package:praticos/models/base_audit_company.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
+import 'package:praticos/models/service_bundle.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'service.g.dart';
@@ -11,6 +12,12 @@ class Service extends BaseAuditCompany {
   double? value;
   String? photo;
 
+  /// Formulários que serão adicionados automaticamente quando este serviço for selecionado
+  List<ServiceFormBundle>? formBundles;
+
+  /// Produtos que serão adicionados automaticamente quando este serviço for selecionado
+  List<ServiceProductBundle>? productBundles;
+
   Service();
   factory Service.fromJson(Map<String, dynamic> json) =>
       _$ServiceFromJson(json);
@@ -19,11 +26,17 @@ class Service extends BaseAuditCompany {
   ServiceAggr toAggr() => _$ServiceAggrFromJson(toJson());
 }
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class ServiceAggr extends BaseAuditCompanyAggr {
   String? name;
   double? value;
   String? photo;
+
+  /// Formulários que serão adicionados automaticamente quando este serviço for selecionado
+  List<ServiceFormBundle>? formBundles;
+
+  /// Produtos que serão adicionados automaticamente quando este serviço for selecionado
+  List<ServiceProductBundle>? productBundles;
 
   ServiceAggr();
   factory ServiceAggr.fromJson(Map<String, dynamic> json) =>

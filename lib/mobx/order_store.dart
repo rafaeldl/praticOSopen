@@ -6,8 +6,11 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
+import 'package:praticos/models/service.dart';
+import 'package:praticos/models/service_bundle.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
+import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
@@ -353,6 +356,83 @@ abstract class _OrderStore with Store {
     services!.add(orderService);
     updateTotal();
     createItem();
+
+    // Adiciona bundles automaticamente (formulários e produtos)
+    _addServiceBundles(orderService.service);
+  }
+
+  /// Adiciona automaticamente formulários e produtos do bundle do serviço
+  Future<void> _addServiceBundles(ServiceAggr? serviceAggr) async {
+    if (serviceAggr == null || companyId == null) return;
+
+    // Adiciona formulários do bundle
+    if (serviceAggr.formBundles != null && serviceAggr.formBundles!.isNotEmpty) {
+      for (final formBundle in serviceAggr.formBundles!) {
+        await _addFormFromBundle(formBundle);
+      }
+    }
+
+    // Adiciona produtos do bundle
+    if (serviceAggr.productBundles != null && serviceAggr.productBundles!.isNotEmpty) {
+      final productRepo = ProductRepositoryV2();
+      for (final productBundle in serviceAggr.productBundles!) {
+        await _addProductFromBundle(productBundle, productRepo);
+      }
+    }
+  }
+
+  /// Adiciona um formulário do bundle à OS
+  Future<void> _addFormFromBundle(ServiceFormBundle formBundle) async {
+    if (companyId == null || order?.id == null) return;
+
+    try {
+      // Busca o template do formulário
+      final templates = await formsService.getCompanyTemplates(companyId!);
+      final template = templates.firstWhere(
+        (t) => t.id == formBundle.formId,
+        orElse: () => throw Exception('Template não encontrado'),
+      );
+
+      // Adiciona o formulário à OS com a flag de obrigatório
+      await formsService.addFormToOrder(
+        companyId!,
+        order!.id!,
+        template,
+        isRequired: formBundle.isRequired,
+      );
+    } catch (e) {
+      print('Erro ao adicionar formulário do bundle: $e');
+    }
+  }
+
+  /// Adiciona um produto do bundle à OS
+  Future<void> _addProductFromBundle(
+    ServiceProductBundle productBundle,
+    ProductRepositoryV2 productRepo,
+  ) async {
+    if (companyId == null) return;
+
+    try {
+      // Busca o produto pelo ID
+      final product = await productRepo.getSingle(companyId!, productBundle.productId);
+      if (product == null) return;
+
+      // Cria o OrderProduct
+      final orderProduct = OrderProduct()
+        ..product = product.toAggr()
+        ..quantity = productBundle.quantity
+        ..value = productBundle.value ?? product.value
+        ..total = (productBundle.value ?? product.value ?? 0) * productBundle.quantity
+        ..photo = product.photo;
+
+      // Adiciona à ordem
+      order!.products!.add(orderProduct);
+      products!.add(orderProduct);
+      updateTotal();
+      createItem();
+    } catch (e) {
+      print('Erro ao adicionar produto do bundle: $e');
+    }
   }
 
   @action

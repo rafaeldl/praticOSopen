@@ -25,7 +25,13 @@ Service _$ServiceFromJson(Map<String, dynamic> json) => Service()
       : CompanyAggr.fromJson(json['company'] as Map<String, dynamic>)
   ..name = json['name'] as String?
   ..value = (json['value'] as num?)?.toDouble()
-  ..photo = json['photo'] as String?;
+  ..photo = json['photo'] as String?
+  ..formBundles = (json['formBundles'] as List<dynamic>?)
+      ?.map((e) => ServiceFormBundle.fromJson(e as Map<String, dynamic>))
+      .toList()
+  ..productBundles = (json['productBundles'] as List<dynamic>?)
+      ?.map((e) => ServiceProductBundle.fromJson(e as Map<String, dynamic>))
+      .toList();
 
 Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
   'id': instance.id,
@@ -37,13 +43,21 @@ Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
   'name': instance.name,
   'value': instance.value,
   'photo': instance.photo,
+  'formBundles': instance.formBundles?.map((e) => e.toJson()).toList(),
+  'productBundles': instance.productBundles?.map((e) => e.toJson()).toList(),
 };
 
 ServiceAggr _$ServiceAggrFromJson(Map<String, dynamic> json) => ServiceAggr()
   ..id = json['id'] as String?
   ..name = json['name'] as String?
   ..value = (json['value'] as num?)?.toDouble()
-  ..photo = json['photo'] as String?;
+  ..photo = json['photo'] as String?
+  ..formBundles = (json['formBundles'] as List<dynamic>?)
+      ?.map((e) => ServiceFormBundle.fromJson(e as Map<String, dynamic>))
+      .toList()
+  ..productBundles = (json['productBundles'] as List<dynamic>?)
+      ?.map((e) => ServiceProductBundle.fromJson(e as Map<String, dynamic>))
+      .toList();
 
 Map<String, dynamic> _$ServiceAggrToJson(ServiceAggr instance) =>
     <String, dynamic>{
@@ -51,4 +65,6 @@ Map<String, dynamic> _$ServiceAggrToJson(ServiceAggr instance) =>
       'name': instance.name,
       'value': instance.value,
       'photo': instance.photo,
+      'formBundles': instance.formBundles?.map((e) => e.toJson()).toList(),
+      'productBundles': instance.productBundles?.map((e) => e.toJson()).toList(),
     };

@@ -22,6 +22,10 @@ class OrderForm {
   DateTime? completedAt;
   DateTime? updatedAt;
 
+  /// Indica se o preenchimento deste formulário é obrigatório
+  /// (definido pelo bundle do serviço)
+  bool isRequired;
+
   OrderForm({
     required this.id,
     required this.formDefinitionId,
@@ -32,6 +36,7 @@ class OrderForm {
     this.startedAt,
     this.completedAt,
     this.updatedAt,
+    this.isRequired = false,
   });
 
   factory OrderForm.fromJson(Map<String, dynamic> json) =>
