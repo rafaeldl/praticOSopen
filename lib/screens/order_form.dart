@@ -1197,13 +1197,11 @@ class _OrderFormState extends State<OrderForm> {
         }
 
         // Fallback: usar dados do agregado se a busca falhou
-        if (customer == null) {
-          customer = Customer()
-            ..id = order.customer!.id
-            ..name = order.customer!.name
-            ..phone = order.customer!.phone
-            ..email = order.customer!.email;
-        }
+        customer ??= Customer()
+          ..id = order.customer!.id
+          ..name = order.customer!.name
+          ..phone = order.customer!.phone
+          ..email = order.customer!.email;
       }
 
       // 2. Buscar formularios anexados a OS
