@@ -17,6 +17,8 @@ import 'package:praticos/screens/service_form_screen.dart';
 import 'package:praticos/screens/service_list_screen.dart';
 import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
 import 'package:praticos/screens/onboarding/company_info_screen.dart';
+import 'package:praticos/screens/forms/form_template_list_screen.dart';
+import 'package:praticos/screens/forms/form_template_form_screen.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   '/onboarding': (context) => const CompanyInfoScreen(),
@@ -37,4 +39,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/collaborator_list': (context) => CollaboratorListScreen(),
   '/collaborator_form': (context) => CollaboratorFormScreen(),
   '/company_form': (context) => CompanyFormScreen(),
+  '/form_template_list': (context) => FormTemplateListScreen(),
+  '/form_template_form': (context) => FormTemplateFormScreen(),
 };

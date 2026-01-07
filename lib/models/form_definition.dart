@@ -1,29 +1,34 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:praticos/models/base_audit_company.dart';
+import 'package:praticos/models/user.dart';
+import 'package:praticos/models/company.dart';
 
 part 'form_definition.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class FormDefinition {
-  String id;
+class FormDefinition extends BaseAuditCompany {
   String title;
   String? description;
   bool isActive;
   List<FormItemDefinition> items;
-  DateTime? createdAt;
-  DateTime? updatedAt;
 
   FormDefinition({
-    required this.id,
+    String? id,
     required this.title,
     this.description,
     this.isActive = true,
     this.items = const [],
-    this.createdAt,
-    this.updatedAt,
-  });
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    this.id = id;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+  }
 
   factory FormDefinition.fromJson(Map<String, dynamic> json) =>
       _$FormDefinitionFromJson(json);
+  @override
   Map<String, dynamic> toJson() => _$FormDefinitionToJson(this);
 }
 

@@ -79,7 +79,7 @@ class FormsService {
       String companyId, String orderId, FormDefinition template) async {
     final orderForm = OrderForm(
       id: '', // Será gerado pelo Firestore
-      formDefinitionId: template.id,
+      formDefinitionId: template.id!,
       title: template.title,
       items: template.items,
       status: FormStatus.pending,

@@ -8,34 +8,46 @@ part of 'form_definition.dart';
 
 FormDefinition _$FormDefinitionFromJson(Map<String, dynamic> json) =>
     FormDefinition(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String?,
-      isActive: json['isActive'] as bool? ?? true,
-      items:
-          (json['items'] as List<dynamic>?)
-              ?.map(
-                (e) => FormItemDefinition.fromJson(e as Map<String, dynamic>),
-              )
-              .toList() ??
-          const [],
-      createdAt: json['createdAt'] == null
+        id: json['id'] as String?,
+        title: json['title'] as String,
+        description: json['description'] as String?,
+        isActive: json['isActive'] as bool? ?? true,
+        items:
+            (json['items'] as List<dynamic>?)
+                ?.map(
+                  (e) => FormItemDefinition.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            const [],
+        createdAt: json['createdAt'] == null
+            ? null
+            : DateTime.parse(json['createdAt'] as String),
+        updatedAt: json['updatedAt'] == null
+            ? null
+            : DateTime.parse(json['updatedAt'] as String),
+      )
+      ..createdBy = json['createdBy'] == null
           ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
+          : UserAggr.fromJson(json['createdBy'] as Map<String, dynamic>)
+      ..updatedBy = json['updatedBy'] == null
           ? null
-          : DateTime.parse(json['updatedAt'] as String),
-    );
+          : UserAggr.fromJson(json['updatedBy'] as Map<String, dynamic>)
+      ..company = json['company'] == null
+          ? null
+          : CompanyAggr.fromJson(json['company'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$FormDefinitionToJson(FormDefinition instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'createdBy': instance.createdBy?.toJson(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'updatedBy': instance.updatedBy?.toJson(),
+      'company': instance.company?.toJson(),
       'title': instance.title,
       'description': instance.description,
       'isActive': instance.isActive,
       'items': instance.items.map((e) => e.toJson()).toList(),
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
     };
 
 FormItemDefinition _$FormItemDefinitionFromJson(Map<String, dynamic> json) =>
