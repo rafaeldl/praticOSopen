@@ -185,12 +185,45 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
   }
 
   Widget _buildGlobalTemplates() {
-    if (templateStore.globalTemplateList == null ||
-        templateStore.globalTemplateList!.value == null) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    // Debug info
+    print('[FormTemplateList] Building global templates');
+    print('[FormTemplateList] globalTemplateList: ${templateStore.globalTemplateList}');
+    print('[FormTemplateList] hasValue: ${templateStore.globalTemplateList?.value != null}');
+
+    if (templateStore.globalTemplateList == null) {
+      print('[FormTemplateList] globalTemplateList is null');
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'DEBUG: globalTemplateList is null (segmentId: ${templateStore.segmentId})',
+            style: TextStyle(color: CupertinoColors.systemRed, fontSize: 12),
+          ),
+        ),
+      );
+    }
+
+    if (templateStore.globalTemplateList!.value == null) {
+      print('[FormTemplateList] globalTemplateList.value is null');
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              const CupertinoActivityIndicator(),
+              const SizedBox(height: 8),
+              Text(
+                'DEBUG: Carregando templates globais... (segmentId: ${templateStore.segmentId})',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     final globalList = templateStore.globalTemplateList!.value!;
+    print('[FormTemplateList] globalList count: ${globalList.length}');
 
     // Filter based on search query
     final filteredGlobalList = _searchQuery.isEmpty

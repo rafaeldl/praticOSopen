@@ -81,6 +81,24 @@ mixin _$FormTemplateStore on _FormTemplateStore, Store {
     });
   }
 
+  late final _$segmentIdAtom = Atom(
+    name: '_FormTemplateStore.segmentId',
+    context: context,
+  );
+
+  @override
+  String? get segmentId {
+    _$segmentIdAtom.reportRead();
+    return super.segmentId;
+  }
+
+  @override
+  set segmentId(String? value) {
+    _$segmentIdAtom.reportWrite(value, super.segmentId, () {
+      super.segmentId = value;
+    });
+  }
+
   late final _$saveTemplateAsyncAction = AsyncAction(
     '_FormTemplateStore.saveTemplate',
     context: context,
@@ -174,7 +192,8 @@ mixin _$FormTemplateStore on _FormTemplateStore, Store {
 templateList: ${templateList},
 globalTemplateList: ${globalTemplateList},
 isUploading: ${isUploading},
-isImporting: ${isImporting}
+isImporting: ${isImporting},
+segmentId: ${segmentId}
     ''';
   }
 }
