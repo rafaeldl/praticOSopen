@@ -83,6 +83,24 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$formsStreamAtom = Atom(
+    name: '_OrderStore.formsStream',
+    context: context,
+  );
+
+  @override
+  ObservableStream<List<of_model.OrderForm>>? get formsStream {
+    _$formsStreamAtom.reportRead();
+    return super.formsStream;
+  }
+
+  @override
+  set formsStream(ObservableStream<List<of_model.OrderForm>>? value) {
+    _$formsStreamAtom.reportWrite(value, super.formsStream, () {
+      super.formsStream = value;
+    });
+  }
+
   late final _$dueDateAtom = Atom(
     name: '_OrderStore.dueDate',
     context: context,
@@ -1058,6 +1076,7 @@ mixin _$OrderStore on _OrderStore, Store {
     return '''
 orderList: ${orderList},
 orderStream: ${orderStream},
+formsStream: ${formsStream},
 dueDate: ${dueDate},
 status: ${status},
 createdAt: ${createdAt},

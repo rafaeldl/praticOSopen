@@ -51,3 +51,6 @@ web/stacktrace.js.map
 # Symbols and metadata
 symbol-names.txt
 .firebase/
+
+# Auto Claude data directory
+.auto-claude/

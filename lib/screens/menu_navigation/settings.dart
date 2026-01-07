@@ -150,6 +150,12 @@ class _SettingsState extends State<Settings> {
                       title: 'Produtos',
                       onTap: () => Navigator.pushNamed(context, '/product_list'),
                     ),
+                    _buildSettingsTile(
+                      icon: CupertinoIcons.doc_text_fill,
+                      color: CupertinoColors.systemTeal,
+                      title: 'Formulários',
+                      onTap: () => Navigator.pushNamed(context, '/form_template_list'),
+                    ),
                   ],
                 );
               }),

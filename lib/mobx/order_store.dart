@@ -5,6 +5,8 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_photo.dart';
+import 'package:praticos/models/order_form.dart' as of_model;
+import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
@@ -18,6 +20,7 @@ class OrderStore = _OrderStore with _$OrderStore;
 abstract class _OrderStore with Store {
   final OrderRepositoryV2 repository = OrderRepositoryV2();
   final PhotoService photoService = PhotoService();
+  final FormsService formsService = FormsService();
 
   Order? order;
 
@@ -26,6 +29,9 @@ abstract class _OrderStore with Store {
 
   @observable
   ObservableStream<Order?>? orderStream;
+
+  @observable
+  ObservableStream<List<of_model.OrderForm>>? formsStream;
 
   @observable
   String? dueDate;
@@ -221,6 +227,7 @@ abstract class _OrderStore with Store {
     if (orderId != null && companyId != null) {
       this.order!.id = orderId;
       orderStream = repository.streamSingle(companyId!, orderId).asObservable();
+      formsStream = formsService.getOrderForms(companyId!, orderId).asObservable();
     }
 
     customer = order.customer;
@@ -376,14 +383,17 @@ abstract class _OrderStore with Store {
     createItem();
   }
 
-  /// Adiciona uma foto da galeria
+  /// Adiciona uma ou mais fotos da galeria
   @action
   Future<bool> addPhotoFromGallery() async {
-    final File? file = await photoService.pickImageFromGallery();
-    if (file != null) {
-      return await _uploadPhoto(file);
+    final List<File> files = await photoService.pickMultipleImagesFromGallery();
+    if (files.isEmpty) return false;
+
+    if (files.length == 1) {
+      return await _uploadPhoto(files.first);
+    } else {
+      return await _uploadMultiplePhotos(files);
     }
-    return false;
   }
 
   /// Adiciona uma foto da câmera
@@ -431,6 +441,57 @@ abstract class _OrderStore with Store {
     } catch (e) {
       isUploadingPhoto = false;
       print('Erro no upload da foto: $e');
+      return false;
+    }
+  }
+
+  /// Faz o upload de múltiplas fotos
+  Future<bool> _uploadMultiplePhotos(List<File> files) async {
+    if (order == null || companyId == null) return false;
+
+    // Garante que a OS seja salva antes do upload
+    if (order!.id == null) {
+      await repository.createItem(companyId!, order);
+    }
+
+    if (order!.id == null || order!.company?.id == null) return false;
+
+    isUploadingPhoto = true;
+    int successCount = 0;
+
+    try {
+      if (order!.photos == null) {
+        order!.photos = [];
+      }
+
+      for (final file in files) {
+        try {
+          final OrderPhoto? photo = await photoService.uploadOrderPhoto(
+            file: file,
+            companyId: order!.company!.id!,
+            orderId: order!.id!,
+          );
+
+          if (photo != null) {
+            order!.photos!.add(photo);
+            photos.add(photo);
+            successCount++;
+          }
+        } catch (e) {
+          print('Erro no upload de uma foto: $e');
+        }
+      }
+
+      isUploadingPhoto = false;
+
+      if (successCount > 0) {
+        createItem();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      isUploadingPhoto = false;
+      print('Erro no upload das fotos: $e');
       return false;
     }
   }

@@ -57,6 +57,12 @@ service cloud.firestore {
     match /segments/{segmentId} {
       allow read: if request.auth != null;
       allow write: if false; // Apenas via Admin SDK (script de seed)
+
+      // Formulários globais do segmento (read-only)
+      match /forms/{formId} {
+        allow read: if request.auth != null;
+        allow write: if false; // Apenas via Admin SDK (script de seed)
+      }
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -130,6 +136,11 @@ service cloud.firestore {
         match /photos/{photoId} {
           allow read, write: if belongsToCompany(companyId);
         }
+
+        // Subcollection de formulários dentro de orders
+        match /forms/{formId} {
+          allow read, write: if belongsToCompany(companyId);
+        }
       }
 
       match /customers/{customerId} {
@@ -163,6 +174,16 @@ service cloud.firestore {
       }
 
       match /deviceCatalog/{itemId} {
+        allow read, write: if belongsToCompany(companyId);
+      }
+
+      // Templates de formulários da empresa
+      match /forms/{formId} {
+        allow read, write: if belongsToCompany(companyId);
+      }
+
+      // Legado: form_templates (pode ser removido após migração)
+      match /form_templates/{formId} {
         allow read, write: if belongsToCompany(companyId);
       }
     }

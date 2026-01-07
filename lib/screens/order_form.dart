@@ -20,6 +20,12 @@ import 'package:praticos/screens/widgets/order_photos_widget.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 
+// Formulários Dinâmicos
+import 'package:praticos/models/order_form.dart' as of_model; // Alias para evitar conflito com esta classe OrderForm
+import 'package:praticos/services/forms_service.dart';
+import 'package:praticos/screens/forms/form_selection_screen.dart';
+import 'package:praticos/screens/forms/form_fill_screen.dart';
+
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -31,6 +37,7 @@ class OrderForm extends StatefulWidget {
 
 class _OrderFormState extends State<OrderForm> {
   late OrderStore _store;
+  final FormsService _formsService = FormsService();
 
   @override
   void initState() {
@@ -81,6 +88,7 @@ class _OrderFormState extends State<OrderForm> {
                   _buildPhotosSection(context),
                   _buildClientDeviceSection(context, config),
                   _buildStatusDatesSection(context, config),
+                  _buildFormsSection(context, config),
                   _buildServicesSection(context, config),
                   _buildProductsSection(context, config),
                   _buildTotalSection(context, config),
@@ -197,6 +205,168 @@ class _OrderFormState extends State<OrderForm> {
         );
       },
     );
+  }
+
+  Widget _buildFormsSection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(
+      builder: (_) {
+        final hasOrder = _store.order?.id != null && _store.companyId != null;
+
+        return StreamBuilder<List<of_model.OrderForm>>(
+          stream: _store.formsStream,
+          initialData: _store.formsStream?.value,
+          builder: (context, snapshot) {
+            final isLoading = hasOrder && snapshot.connectionState == ConnectionState.waiting;
+            final forms = snapshot.data ?? [];
+            
+            return Column(
+              children: [
+                _buildGroupedSection(
+                  header: "FORMULÁRIOS E CHECKLISTS",
+                  children: [
+                    if (isLoading)
+                      const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(child: CupertinoActivityIndicator()),
+                      )
+                    else if (forms.isEmpty)
+                      _buildListTile(
+                        context: context,
+                        title: "Nenhum formulário",
+                        value: "",
+                        placeholder: "",
+                        onTap: () {},
+                        showChevron: false,
+                        isLast: true,
+                        textColor: CupertinoColors.secondaryLabel,
+                      )
+                    else
+                      ...forms.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final form = entry.value;
+                        return _buildFormRow(context, form, index == forms.length - 1);
+                      }),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: CupertinoButton(
+                    onPressed: () => _addForm(config),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                         Icon(CupertinoIcons.doc_text_fill),
+                         SizedBox(width: 8),
+                         Text("Adicionar Formulário"),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildFormRow(BuildContext context, of_model.OrderForm form, bool isLast) {
+    // Calculando progresso simples
+    final total = form.items.length;
+    final answered = form.responses.length; // Assumindo que resposta existe = respondido
+    final progress = total > 0 ? (answered / total) : 0.0;
+    final percent = (progress * 100).toInt();
+    final isCompleted = form.status == of_model.FormStatus.completed;
+
+    return _buildDismissibleItem(
+      context: context,
+      index: form.id.hashCode, // Usando hash do ID para chave única do Dismissible
+      onDelete: () => _confirmDeleteForm(form),
+      child: _buildItemRow(
+        context: context,
+        title: form.title,
+        subtitle: isCompleted ? "Concluído" : "$answered de $total respondidos ($percent%)",
+        trailing: "", // Poderia usar um Icon check aqui
+        onTap: () {
+          Navigator.push(
+            context,
+            CupertinoPageRoute(
+              fullscreenDialog: true,
+              builder: (context) => FormFillScreen(
+                orderId: _store.order!.id!,
+                companyId: _store.companyId!,
+                orderForm: form,
+              ),
+            ),
+          );
+        },
+        isLast: isLast,
+      ),
+    );
+  }
+
+  void _confirmDeleteForm(of_model.OrderForm form) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Remover Formulário'),
+        content: Text('Deseja remover "${form.title}" desta OS?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _formsService.deleteOrderForm(_store.companyId!, _store.order!.id!, form.id);
+            },
+            child: const Text('Remover'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _addForm(SegmentConfigProvider config) async {
+    // Se a OS ainda não foi salva, salva automaticamente
+    if (_store.order?.id == null) {
+      if (_store.companyId == null) return;
+      
+      await _store.repository.createItem(_store.companyId!, _store.order!);
+      _store.setOrder(_store.order); // Atualiza estado com novo ID
+    }
+
+    // Double check após salvar
+    if (_store.order?.id == null || _store.companyId == null) return;
+
+    final template = await Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => FormSelectionScreen(
+          companyId: _store.companyId!,
+        ),
+      ),
+    );
+
+    if (template != null && _store.order?.id != null && _store.companyId != null) {
+      final newForm = await _formsService.addFormToOrder(_store.companyId!, _store.order!.id!, template);
+      
+      if (mounted) {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            fullscreenDialog: true,
+            builder: (context) => FormFillScreen(
+              orderId: _store.order!.id!,
+              companyId: _store.companyId!,
+              orderForm: newForm,
+            ),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildServicesSection(BuildContext context, SegmentConfigProvider config) {

@@ -31,6 +31,18 @@ service firebase.storage {
       allow list: if isAuthenticated();
     }
 
+    // Regras para fotos de formulários dentro de ordens de serviço
+    match /tenants/{companyId}/orders/{orderId}/forms/{formId}/{photoId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidImage();
+      allow update: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+
+    match /tenants/{companyId}/orders/{orderId}/forms/{formId} {
+      allow list: if isAuthenticated();
+    }
+
     // Regras para fotos de produtos
     match /tenants/{companyId}/products/{productId}/{photoId} {
       allow read: if isAuthenticated();

@@ -24,6 +24,7 @@ Sistema operacional prático e intuitivo para gestão de ordens de serviço e cl
 - 📊 Dashboard com indicadores de performance.
 - 🌗 Suporte a Modo Claro e Escuro (Material & Cupertino).
 - 🏢 **Multi-Tenancy v1.0:** Suporte completo a múltiplas organizações com isolamento de dados.
+- 📋 **Formulários Dinâmicos:** Criação de checklists e vistorias personalizados por empresa ou segmento.
 - 🔐 Autenticação via Google, Apple e Email/Senha.
 
 ---
@@ -34,6 +35,7 @@ Toda a documentação técnica e de processos está centralizada para facilitar 
 
 - **[🚀 Guia de Deploy (Android & iOS)](docs/DEPLOYMENT.md)** - **Leia primeiro** para entender o fluxo de publicação.
 - [🤖 Agentes IA](AGENTS.md) - Contexto e arquitetura para desenvolvimento assistido.
+- [📋 Formulários Dinâmicos](docs/formularios_dinamicos.md) - Especificação técnica de checklists e vistorias.
 - [🔐 Configuração de Secrets](docs/ANDROID_GITHUB_SECRETS.md) - Guia para CI/CD no GitHub.
 - [⚙️ Setup Android](docs/ANDROID_SETUP_GUIDE.md) - Configuração do ambiente de desenvolvimento.
 - [🍏 Apple Sign In](docs/APPLE_SIGN_IN_SETUP.md) - Configuração do provedor de autenticação.
