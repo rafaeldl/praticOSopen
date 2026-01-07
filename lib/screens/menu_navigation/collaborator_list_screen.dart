@@ -170,7 +170,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: CupertinoColors.systemOrange.withOpacity(0.15),
+                      color: CupertinoColors.systemOrange.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
@@ -199,7 +199,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: CupertinoColors.systemOrange.withOpacity(0.15),
+                                color: CupertinoColors.systemOrange.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: const Text(

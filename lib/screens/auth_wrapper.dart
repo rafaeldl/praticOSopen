@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/auth_store.dart';
-import 'package:praticos/mobx/invite_store.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
 import 'package:praticos/screens/onboarding/welcome_screen.dart';
 import 'package:praticos/screens/onboarding/pending_invites_screen.dart';
@@ -26,8 +25,6 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
-  final InviteStore _inviteStore = InviteStore.instance;
-
   @override
   Widget build(BuildContext context) {
     return Observer(

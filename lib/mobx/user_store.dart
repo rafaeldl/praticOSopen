@@ -86,15 +86,4 @@ abstract class _UserStore with Store {
     newUser.updatedBy = newUser.toAggr();
     return newUser;
   }
-
-  Company _fillCompanyFields(User user, String companyId) {
-    return Company()
-      ..id = companyId
-      ..createdAt = DateTime.now()
-      ..createdBy = user.toAggr()
-      ..updatedAt = DateTime.now()
-      ..updatedBy = user.toAggr()
-      ..name = user.name
-      ..owner = user.toAggr();
-  }
 }

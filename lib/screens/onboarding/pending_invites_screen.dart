@@ -156,7 +156,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: CupertinoColors.activeBlue.withOpacity(0.1),
+                              color: CupertinoColors.activeBlue.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -275,7 +275,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: CupertinoColors.systemGrey.withOpacity(0.1),
+            color: CupertinoColors.systemGrey.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -292,7 +292,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: CupertinoColors.activeBlue.withOpacity(0.1),
+                    color: CupertinoColors.activeBlue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(

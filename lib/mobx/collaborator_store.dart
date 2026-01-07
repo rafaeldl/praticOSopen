@@ -143,8 +143,9 @@ abstract class _CollaboratorStore with Store {
   /// Adiciona um colaborador à empresa.
   ///
   /// Se o usuário já existir no sistema:
-  /// 1. Atualiza `user.companies` (source of truth, dispara Cloud Function)
-  /// 2. Cria documento em `memberships/{userId}` (índice reverso)
+  /// 1. Verifica se já é membro (em memberships e user.companies)
+  /// 2. Se não for, cria os vínculos necessários (atualiza user.companies e cria membership)
+  /// 3. Se houver inconsistência, corrige automaticamente
   ///
   /// Se o usuário não existir:
   /// 1. Cria um convite pendente na collection `/invites`
@@ -168,53 +169,52 @@ abstract class _CollaboratorStore with Store {
         return await _createInvite(normalizedEmail, roleType);
       }
 
-      // 2. Verifica se já é membro (membership collection)
-      final isMember = await _membershipRepo.isMember(companyId, user.id!);
-      if (isMember) {
-        throw Exception('Usuário já é colaborador desta empresa.');
-      }
-
-      // 2b. Verifica se já existe no array user.companies (evita duplicatas)
+      // 2. Verifica se já está em ambos os lugares
+      final isMemberInMemberships = await _membershipRepo.isMember(companyId, user.id!);
       final alreadyInCompanies = user.companies?.any(
         (c) => c.company?.id == companyId
       ) ?? false;
-      if (alreadyInCompanies) {
-        throw Exception('Usuário já possui acesso a esta empresa.');
+
+      // Se está em ambos os lugares, já é colaborador
+      if (isMemberInMemberships && alreadyInCompanies) {
+        throw Exception('Usuário já é colaborador desta empresa.');
       }
 
-      // 3. Usa batch para garantir atomicidade
+      // 3. Se há inconsistência ou não é membro, corrige e adiciona
+      // Usa batch para garantir atomicidade
       final batch = _db.batch();
 
-      // 3a. Atualiza user.companies (source of truth)
-      final userRef = _db.collection('users').doc(user.id);
-      final newCompanyRole = CompanyRoleAggr()
-        ..company = Global.companyAggr
-        ..role = roleType;
+      // 3a. Atualiza user.companies se não existir (source of truth)
+      if (!alreadyInCompanies) {
+        final userRef = _db.collection('users').doc(user.id);
+        final newCompanyRole = CompanyRoleAggr()
+          ..company = Global.companyAggr
+          ..role = roleType;
 
-      user.companies ??= [];
-      user.companies!.add(newCompanyRole);
-      batch.update(userRef, {'companies': user.companies!.map((c) => c.toJson()).toList()});
+        user.companies ??= [];
+        user.companies!.add(newCompanyRole);
+        batch.update(userRef, {'companies': user.companies!.map((c) => c.toJson()).toList()});
+      }
 
-      // 3b. Cria membership (índice reverso)
-      final membershipRef = _db
-          .collection('companies')
-          .doc(companyId)
-          .collection('memberships')
-          .doc(user.id);
+      // 3b. Cria membership (índice reverso) se não existir
+      if (!isMemberInMemberships) {
+        final membershipRef = _db
+            .collection('companies')
+            .doc(companyId)
+            .collection('memberships')
+            .doc(user.id);
 
-      final membership = Membership(
-        userId: user.id!,
-        user: user.toAggr(),
-        role: roleType,
-        joinedAt: DateTime.now(),
-      );
-      batch.set(membershipRef, membership.toJson());
+        final membership = Membership(
+          userId: user.id!,
+          user: user.toAggr(),
+          role: roleType,
+          joinedAt: DateTime.now(),
+        );
+        batch.set(membershipRef, membership.toJson());
+      }
 
-      // 4. Commit atômico
+      // 4. Commit atômico (mesmo que ambos já existam, não faz mal)
       await batch.commit();
-
-      // 5. Recarrega lista
-      await loadCollaborators();
 
       return true; // Adicionado diretamente
 
@@ -223,6 +223,8 @@ abstract class _CollaboratorStore with Store {
       rethrow;
     } finally {
       isLoading = false;
+      // Sempre recarrega a lista, mesmo em caso de erro
+      await loadCollaborators();
     }
   }
 
