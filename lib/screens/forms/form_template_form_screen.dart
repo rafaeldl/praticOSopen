@@ -180,20 +180,6 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
     );
   }
 
-  void _reorderItems() {
-    Navigator.push(
-      context,
-      CupertinoPageRoute(
-        builder: (context) => _ReorderItemsScreen(
-          items: _items,
-          onReorder: (newOrder) {
-            setState(() => _items = newOrder);
-          },
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -260,23 +246,10 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
                   const SizedBox(height: 20),
 
                   // Itens
-                  CupertinoListSection.insetGrouped(
-                    header: Row(
+                  if (_items.isEmpty)
+                    CupertinoListSection.insetGrouped(
+                      header: const Text('ITENS DO FORMULÁRIO'),
                       children: [
-                        const Expanded(child: Text('ITENS DO FORMULÁRIO')),
-                        if (_items.length > 1)
-                          CupertinoButton(
-                            padding: EdgeInsets.zero,
-                            onPressed: _reorderItems,
-                            child: const Text(
-                              'Reordenar',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                          ),
-                      ],
-                    ),
-                    children: [
-                      if (_items.isEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: Center(
@@ -288,66 +261,166 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
                               ),
                             ),
                           ),
-                        )
-                      else
-                        ..._items.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final item = entry.value;
-                          return CupertinoListTile(
-                            leading: Icon(
-                              _getIconForType(item.type),
-                              color: CupertinoColors.systemTeal,
-                            ),
-                            title: Text(item.label),
-                            subtitle: Text(
-                              _getTypeLabel(item.type) +
-                                  (item.required ? ' · Obrigatório' : ''),
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: CupertinoColors.secondaryLabel
-                                    .resolveFrom(context),
-                              ),
-                            ),
-                            trailing: Row(
-                              children: [
-                                CupertinoButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: () => _editItem(index),
-                                  child: const Icon(
-                                    CupertinoIcons.pencil,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                CupertinoButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: () => _deleteItem(index),
-                                  child: const Icon(
-                                    CupertinoIcons.trash,
-                                    size: 20,
-                                    color: CupertinoColors.systemRed,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      CupertinoListTile(
-                        leading: const Icon(
-                          CupertinoIcons.add_circled,
-                          color: CupertinoColors.activeBlue,
                         ),
-                        title: const Text(
-                          'Adicionar Item',
-                          style: TextStyle(
+                        CupertinoListTile(
+                          leading: const Icon(
+                            CupertinoIcons.add_circled,
                             color: CupertinoColors.activeBlue,
-                            fontWeight: FontWeight.w500,
+                          ),
+                          title: const Text(
+                            'Adicionar Item',
+                            style: TextStyle(
+                              color: CupertinoColors.activeBlue,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          onTap: _addItem,
+                        ),
+                      ],
+                    )
+                  else
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(32, 8, 16, 8),
+                          child: Row(
+                            children: [
+                              const Expanded(
+                                child: Text(
+                                  'ITENS DO FORMULÁRIO',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: CupertinoColors.secondaryLabel,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                'Arraste para reordenar',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: CupertinoColors.systemGrey
+                                      .resolveFrom(context),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        onTap: _addItem,
-                      ),
-                    ],
-                  ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemBackground
+                                .resolveFrom(context),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: ReorderableListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            onReorder: (oldIndex, newIndex) {
+                              setState(() {
+                                if (newIndex > oldIndex) {
+                                  newIndex -= 1;
+                                }
+                                final item = _items.removeAt(oldIndex);
+                                _items.insert(newIndex, item);
+                              });
+                              HapticFeedback.mediumImpact();
+                            },
+                            itemCount: _items.length,
+                            itemBuilder: (context, index) {
+                              final item = _items[index];
+                              return Container(
+                                key: Key(item.id),
+                                decoration: BoxDecoration(
+                                  border: index > 0
+                                      ? Border(
+                                          top: BorderSide(
+                                            color: CupertinoColors.systemGrey5
+                                                .resolveFrom(context),
+                                            width: 0.5,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                                child: CupertinoListTile(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
+                                  leading: Row(
+                                    children: [
+                                      Icon(
+                                        CupertinoIcons.bars,
+                                        size: 20,
+                                        color: CupertinoColors.systemGrey
+                                            .resolveFrom(context),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Icon(
+                                        _getIconForType(item.type),
+                                        color: CupertinoColors.systemTeal,
+                                      ),
+                                    ],
+                                  ),
+                                  title: Text(item.label),
+                                  subtitle: Text(
+                                    _getTypeLabel(item.type) +
+                                        (item.required ? ' · Obrigatório' : ''),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: CupertinoColors.secondaryLabel
+                                          .resolveFrom(context),
+                                    ),
+                                  ),
+                                  trailing: Row(
+                                    children: [
+                                      CupertinoButton(
+                                        padding: EdgeInsets.zero,
+                                        onPressed: () => _editItem(index),
+                                        child: const Icon(
+                                          CupertinoIcons.pencil,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      CupertinoButton(
+                                        padding: EdgeInsets.zero,
+                                        onPressed: () => _deleteItem(index),
+                                        child: const Icon(
+                                          CupertinoIcons.trash,
+                                          size: 20,
+                                          color: CupertinoColors.systemRed,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 8, left: 16, right: 16),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemBackground
+                                .resolveFrom(context),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: CupertinoListTile(
+                            leading: const Icon(
+                              CupertinoIcons.add_circled,
+                              color: CupertinoColors.activeBlue,
+                            ),
+                            title: const Text(
+                              'Adicionar Item',
+                              style: TextStyle(
+                                color: CupertinoColors.activeBlue,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            onTap: _addItem,
+                          ),
+                        ),
+                      ],
+                    ),
 
                   const SizedBox(height: 100),
                 ],
@@ -643,83 +716,5 @@ class __ItemFormSheetState extends State<_ItemFormSheet> {
       case FormItemType.photoOnly:
         return 'Apenas foto';
     }
-  }
-}
-
-// Tela para reordenar itens
-class _ReorderItemsScreen extends StatefulWidget {
-  final List<FormItemDefinition> items;
-  final Function(List<FormItemDefinition>) onReorder;
-
-  const _ReorderItemsScreen({
-    required this.items,
-    required this.onReorder,
-  });
-
-  @override
-  __ReorderItemsScreenState createState() => __ReorderItemsScreenState();
-}
-
-class __ReorderItemsScreenState extends State<_ReorderItemsScreen> {
-  late List<FormItemDefinition> _items;
-
-  @override
-  void initState() {
-    super.initState();
-    _items = List.from(widget.items);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
-        ),
-        middle: const Text('Reordenar Itens'),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () {
-            widget.onReorder(_items);
-            Navigator.pop(context);
-          },
-          child: const Text(
-            'Concluir',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: ReorderableListView(
-          onReorder: (oldIndex, newIndex) {
-            setState(() {
-              if (newIndex > oldIndex) {
-                newIndex -= 1;
-              }
-              final item = _items.removeAt(oldIndex);
-              _items.insert(newIndex, item);
-            });
-            HapticFeedback.selectionClick();
-          },
-          children: _items.map((item) {
-            return Container(
-              key: Key(item.id),
-              color: CupertinoColors.systemBackground.resolveFrom(context),
-              margin: const EdgeInsets.symmetric(vertical: 1),
-              child: CupertinoListTile(
-                leading: Icon(
-                  CupertinoIcons.bars,
-                  color: CupertinoColors.systemGrey.resolveFrom(context),
-                ),
-                title: Text(item.label),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
   }
 }

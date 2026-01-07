@@ -27,6 +27,24 @@ mixin _$FormTemplateStore on _FormTemplateStore, Store {
     });
   }
 
+  late final _$globalTemplateListAtom = Atom(
+    name: '_FormTemplateStore.globalTemplateList',
+    context: context,
+  );
+
+  @override
+  ObservableStream<List<FormDefinition>>? get globalTemplateList {
+    _$globalTemplateListAtom.reportRead();
+    return super.globalTemplateList;
+  }
+
+  @override
+  set globalTemplateList(ObservableStream<List<FormDefinition>>? value) {
+    _$globalTemplateListAtom.reportWrite(value, super.globalTemplateList, () {
+      super.globalTemplateList = value;
+    });
+  }
+
   late final _$isUploadingAtom = Atom(
     name: '_FormTemplateStore.isUploading',
     context: context,
@@ -42,6 +60,24 @@ mixin _$FormTemplateStore on _FormTemplateStore, Store {
   set isUploading(bool value) {
     _$isUploadingAtom.reportWrite(value, super.isUploading, () {
       super.isUploading = value;
+    });
+  }
+
+  late final _$isImportingAtom = Atom(
+    name: '_FormTemplateStore.isImporting',
+    context: context,
+  );
+
+  @override
+  bool get isImporting {
+    _$isImportingAtom.reportRead();
+    return super.isImporting;
+  }
+
+  @override
+  set isImporting(bool value) {
+    _$isImportingAtom.reportWrite(value, super.isImporting, () {
+      super.isImporting = value;
     });
   }
 
@@ -91,6 +127,18 @@ mixin _$FormTemplateStore on _FormTemplateStore, Store {
     );
   }
 
+  late final _$importGlobalTemplateAsyncAction = AsyncAction(
+    '_FormTemplateStore.importGlobalTemplate',
+    context: context,
+  );
+
+  @override
+  Future<void> importGlobalTemplate(FormDefinition globalTemplate) {
+    return _$importGlobalTemplateAsyncAction.run(
+      () => super.importGlobalTemplate(globalTemplate),
+    );
+  }
+
   late final _$_FormTemplateStoreActionController = ActionController(
     name: '_FormTemplateStore',
     context: context,
@@ -109,10 +157,24 @@ mixin _$FormTemplateStore on _FormTemplateStore, Store {
   }
 
   @override
+  dynamic retrieveGlobalTemplates() {
+    final _$actionInfo = _$_FormTemplateStoreActionController.startAction(
+      name: '_FormTemplateStore.retrieveGlobalTemplates',
+    );
+    try {
+      return super.retrieveGlobalTemplates();
+    } finally {
+      _$_FormTemplateStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 templateList: ${templateList},
-isUploading: ${isUploading}
+globalTemplateList: ${globalTemplateList},
+isUploading: ${isUploading},
+isImporting: ${isImporting}
     ''';
   }
 }
