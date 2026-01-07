@@ -28,7 +28,6 @@ class FormTemplateRepositoryV2 extends RepositoryV2<FormDefinition?> {
 
       if (FeatureFlags.shouldFallbackToLegacy) {
         return stream.handleError((error) {
-          print('[FormTemplateRepositoryV2] Fallback streamTemplates: $error');
           return _legacy.streamQueryList(
             orderBy: [OrderBy('title')],
             args: [QueryArgs('company.id', companyId)],
@@ -52,7 +51,6 @@ class FormTemplateRepositoryV2 extends RepositoryV2<FormDefinition?> {
         return await _tenant.getActiveTemplates(companyId);
       } catch (e) {
         if (FeatureFlags.shouldFallbackToLegacy) {
-          print('[FormTemplateRepositoryV2] Fallback getActiveTemplates: $e');
           return await _legacy.getQueryList(
             args: [
               QueryArgs('company.id', companyId),

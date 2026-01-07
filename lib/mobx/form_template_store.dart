@@ -36,7 +36,6 @@ abstract class _FormTemplateStore with Store {
   _FormTemplateStore() {
     SharedPreferences.getInstance().then((value) async {
       companyId = value.getString('companyId');
-      print('[FormTemplateStore] companyId: $companyId');
 
       retrieveTemplates();
 
@@ -48,23 +47,19 @@ abstract class _FormTemplateStore with Store {
               .doc(companyId)
               .get();
 
-          print('[FormTemplateStore] Company doc exists: ${companyDoc.exists}');
-
           if (companyDoc.exists) {
             final segment = companyDoc.data()?['segment'] as String?;
-            print('[FormTemplateStore] segmentId from firestore: $segment');
 
             // Usa runInAction para garantir que a atualização seja observável
             runInAction(() {
               segmentId = segment;
-              print('[FormTemplateStore] segmentId set to: $segmentId');
             });
 
             // Chama retrieveGlobalTemplates DEPOIS de setar o segmentId
             retrieveGlobalTemplates();
           }
         } catch (e) {
-          print('[FormTemplateStore] Erro ao buscar segmentId: $e');
+          // Erro ao buscar segmentId
         }
       }
     });
@@ -81,13 +76,10 @@ abstract class _FormTemplateStore with Store {
 
   @action
   retrieveGlobalTemplates() {
-    print('[FormTemplateStore] retrieveGlobalTemplates called. segmentId: $segmentId');
     if (segmentId == null) {
-      print('[FormTemplateStore] segmentId is null, skipping global templates');
       globalTemplateList = null;
       return;
     }
-    print('[FormTemplateStore] Streaming global templates for segment: $segmentId');
     globalTemplateList = segmentRepository.streamTemplates(segmentId!).asObservable();
   }
 

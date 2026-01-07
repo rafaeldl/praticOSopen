@@ -1,432 +1,525 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Material, MaterialType, ReorderableListView;
+import 'package:flutter/material.dart' show Divider, Colors, ReorderableListView, Material, MaterialType;
 import 'package:flutter/services.dart';
 import 'package:praticos/mobx/form_template_store.dart';
 import 'package:praticos/models/form_definition.dart';
 
 class FormTemplateFormScreen extends StatefulWidget {
+  const FormTemplateFormScreen({super.key});
+
   @override
-  _FormTemplateFormScreenState createState() =>
-      _FormTemplateFormScreenState();
+  State<FormTemplateFormScreen> createState() => _FormTemplateFormScreenState();
 }
 
 class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FormTemplateStore _store = FormTemplateStore();
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
 
-  FormDefinition? _existingTemplate;
+  FormDefinition? _template;
   List<FormItemDefinition> _items = [];
   bool _isActive = true;
-  bool _isSaving = false;
+  bool _isLoading = false;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
       final args =
-          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
       if (args != null && args.containsKey('template')) {
-        setState(() {
-          _existingTemplate = args['template'] as FormDefinition;
-          _titleController.text = _existingTemplate!.title;
-          _descriptionController.text = _existingTemplate!.description ?? '';
-          _items = List.from(_existingTemplate!.items);
-          _isActive = _existingTemplate!.isActive;
-        });
+        _template = args['template'] as FormDefinition;
+        _items = List.from(_template!.items);
+        _isActive = _template!.isActive;
+      } else {
+        _template = FormDefinition(
+          id: FirebaseFirestore.instance.collection('tmp').doc().id,
+          title: '',
+          isActive: true,
+          items: [],
+        );
       }
-    });
+      _initialized = true;
+    }
   }
 
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
+  bool get _isEditing => _template?.createdAt != null;
 
   Future<void> _saveTemplate() async {
-    if (_titleController.text.trim().isEmpty) {
-      HapticFeedback.heavyImpact();
-      showCupertinoDialog(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-          title: const Text('Título obrigatório'),
-          content: const Text('Por favor, informe o título do formulário.'),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     if (_items.isEmpty) {
       HapticFeedback.heavyImpact();
-      showCupertinoDialog(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-          title: const Text('Adicione itens'),
-          content:
-              const Text('Por favor, adicione pelo menos um item ao formulário.'),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
+      _showAlert(
+        'Adicione itens',
+        'Por favor, adicione pelo menos um item ao formulário.',
       );
       return;
     }
 
-    setState(() => _isSaving = true);
+    setState(() => _isLoading = true);
+    _formKey.currentState!.save();
 
     try {
-      final template = FormDefinition(
-        id: _existingTemplate?.id ?? FirebaseFirestore.instance.collection('tmp').doc().id,
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty
-            ? null
-            : _descriptionController.text.trim(),
-        isActive: _isActive,
-        items: _items,
-        createdAt: _existingTemplate?.createdAt ?? DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
+      _template!.items = _items;
+      _template!.isActive = _isActive;
 
-      if (_existingTemplate != null) {
-        await _store.updateTemplate(template);
+      if (_isEditing) {
+        await _store.updateTemplate(_template!);
       } else {
-        await _store.saveTemplate(template);
+        await _store.saveTemplate(_template!);
       }
 
       if (mounted) {
         HapticFeedback.mediumImpact();
-        Navigator.pop(context, true);
+        Navigator.pop(context, _template);
       }
     } catch (e) {
       if (mounted) {
         HapticFeedback.heavyImpact();
-        setState(() => _isSaving = false);
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content: const Text('Não foi possível salvar o formulário. Tente novamente.'),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        setState(() => _isLoading = false);
+        _showAlert('Erro', 'Não foi possível salvar o formulário.');
       }
     }
   }
 
-  void _addItem() {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => _ItemFormSheet(
-        onSave: (item) {
-          setState(() => _items.add(item));
-          HapticFeedback.mediumImpact();
-        },
-      ),
-    );
-  }
-
-  void _editItem(int index) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => _ItemFormSheet(
-        existingItem: _items[index],
-        onSave: (item) {
-          setState(() => _items[index] = item);
-          HapticFeedback.mediumImpact();
-        },
-      ),
-    );
-  }
-
-  void _deleteItem(int index) {
-    HapticFeedback.mediumImpact();
+  void _showAlert(String title, String message) {
     showCupertinoDialog(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Remover item'),
-        content: Text('Deseja remover "${_items[index].label}"?'),
+        title: Text(title),
+        content: Text(message),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(ctx);
-              setState(() => _items.removeAt(index));
-            },
-            child: const Text('Remover'),
+            child: const Text('OK'),
           ),
         ],
       ),
     );
   }
 
+  void _addItem() {
+    _showItemEditor(null, (item) {
+      setState(() => _items.add(item));
+      HapticFeedback.selectionClick();
+    });
+  }
+
+  void _editItem(int index) {
+    _showItemEditor(_items[index], (item) {
+      setState(() => _items[index] = item);
+      HapticFeedback.selectionClick();
+    });
+  }
+
+  void _showItemEditor(FormItemDefinition? existingItem, Function(FormItemDefinition) onSave) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => _ItemFormSheet(
+        existingItem: existingItem,
+        onSave: onSave,
+      ),
+    );
+  }
+
+  void _onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) newIndex -= 1;
+      final item = _items.removeAt(oldIndex);
+      _items.insert(newIndex, item);
+    });
+    HapticFeedback.mediumImpact();
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: Material(
-        type: MaterialType.transparency,
-        child: CustomScrollView(
-          slivers: [
-            CupertinoSliverNavigationBar(
-              largeTitle: Text(
-                  _existingTemplate == null ? 'Novo Formulário' : 'Editar Formulário'),
-              leading: CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancelar'),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(_isEditing ? 'Editar Formulário' : 'Novo Formulário'),
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _isLoading ? null : _saveTemplate,
+          child: _isLoading
+              ? const CupertinoActivityIndicator()
+              : const Text('Salvar', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
+      ),
+      child: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
+
+              // Header Icon
+              Center(
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemGrey5.resolveFrom(context),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    CupertinoIcons.doc_text,
+                    size: 50,
+                    color: CupertinoColors.systemGrey.resolveFrom(context),
+                  ),
+                ),
               ),
-              trailing: _isSaving
-                  ? const CupertinoActivityIndicator()
-                  : CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: _saveTemplate,
-                      child: const Text(
-                        'Salvar',
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ),
-            ),
-            SliverToBoxAdapter(
-              child: Column(
+              const SizedBox(height: 20),
+
+              // Basic Info Section
+              CupertinoListSection.insetGrouped(
+                header: const Text('INFORMAÇÕES'),
                 children: [
-                  const SizedBox(height: 20),
-                  // Título e Descrição
-                  CupertinoListSection.insetGrouped(
-                    header: const Text('INFORMAÇÕES BÁSICAS'),
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text('Título', style: TextStyle(fontSize: 16)),
+                    initialValue: _template?.title,
+                    placeholder: 'Nome do formulário',
+                    textCapitalization: TextCapitalization.sentences,
+                    textAlign: TextAlign.right,
+                    onSaved: (val) => _template?.title = val ?? '',
+                    validator: (val) =>
+                        val == null || val.trim().isEmpty ? 'Obrigatório' : null,
+                  ),
+                  CupertinoTextFormFieldRow(
+                    prefix: const Text('Descrição', style: TextStyle(fontSize: 16)),
+                    initialValue: _template?.description,
+                    placeholder: 'Opcional',
+                    textCapitalization: TextCapitalization.sentences,
+                    textAlign: TextAlign.right,
+                    maxLines: 2,
+                    onSaved: (val) => _template?.description =
+                        val?.trim().isEmpty == true ? null : val?.trim(),
+                  ),
+                ],
+              ),
+
+              // Status Section
+              CupertinoListSection.insetGrouped(
+                header: const Text('CONFIGURAÇÕES'),
+                children: [
+                  CupertinoListTile(
+                    title: const Text('Ativo'),
+                    trailing: CupertinoSwitch(
+                      value: _isActive,
+                      onChanged: (value) {
+                        setState(() => _isActive = value);
+                        HapticFeedback.selectionClick();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              // Items Section
+              _buildItemsSection(),
+
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 24, 32, 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'ITENS DO FORMULÁRIO (${_items.length})',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ),
+              if (_items.isNotEmpty)
+                Text(
+                  'Arraste para reordenar',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+            ],
+          ),
+        ),
+
+        // Items List Container
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: CupertinoColors.systemBackground.resolveFrom(context),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              if (_items.isEmpty)
+                // Empty State
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  child: Column(
                     children: [
-                      CupertinoTextFormFieldRow(
-                        controller: _titleController,
-                        placeholder: 'Título do formulário',
-                        prefix: const Text('Título'),
-                        maxLength: 100,
-                        textCapitalization: TextCapitalization.sentences,
+                      Icon(
+                        CupertinoIcons.doc_text_search,
+                        size: 40,
+                        color: CupertinoColors.systemGrey3.resolveFrom(context),
                       ),
-                      CupertinoTextFormFieldRow(
-                        controller: _descriptionController,
-                        placeholder: 'Descrição (opcional)',
-                        prefix: const Text('Descrição'),
-                        maxLines: 3,
-                        maxLength: 500,
-                        textCapitalization: TextCapitalization.sentences,
+                      const SizedBox(height: 8),
+                      Text(
+                        'Nenhum item adicionado',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                          decoration: TextDecoration.none,
+                          fontSize: 13,
+                        ),
                       ),
-                      CupertinoListTile(
-                        title: const Text('Status'),
-                        trailing: CupertinoSwitch(
-                          value: _isActive,
-                          onChanged: (value) {
-                            setState(() => _isActive = value);
-                            HapticFeedback.selectionClick();
-                          },
+                      const SizedBox(height: 4),
+                      Text(
+                        'Toque em "Adicionar Item" abaixo',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                          decoration: TextDecoration.none,
                         ),
                       ),
                     ],
                   ),
+                )
+              else
+                // Reorderable List
+                Material(
+                  type: MaterialType.transparency,
+                  child: ReorderableListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    buildDefaultDragHandles: false,
+                    itemCount: _items.length,
+                    onReorder: _onReorder,
+                    proxyDecorator: (child, index, animation) {
+                      return Material(
+                        color: Colors.transparent,
+                        elevation: 4,
+                        shadowColor: Colors.black26,
+                        borderRadius: BorderRadius.circular(10),
+                        child: child,
+                      );
+                    },
+                    itemBuilder: (context, index) {
+                      final item = _items[index];
+                      return _buildDismissibleItemTile(
+                        key: ValueKey(item.id),
+                        item: item,
+                        index: index,
+                        isLast: index == _items.length - 1,
+                      );
+                    },
+                  ),
+                ),
 
-                  const SizedBox(height: 20),
-
-                  // Itens
-                  if (_items.isEmpty)
-                    CupertinoListSection.insetGrouped(
-                      header: const Text('ITENS DO FORMULÁRIO'),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Center(
-                            child: Text(
-                              'Nenhum item adicionado',
-                              style: TextStyle(
-                                color: CupertinoColors.secondaryLabel
-                                    .resolveFrom(context),
-                              ),
-                            ),
-                          ),
-                        ),
-                        CupertinoListTile(
-                          leading: const Icon(
-                            CupertinoIcons.add_circled,
-                            color: CupertinoColors.activeBlue,
-                          ),
-                          title: const Text(
-                            'Adicionar Item',
-                            style: TextStyle(
-                              color: CupertinoColors.activeBlue,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          onTap: _addItem,
-                        ),
-                      ],
-                    )
-                  else
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(32, 8, 16, 8),
-                          child: Row(
-                            children: [
-                              const Expanded(
-                                child: Text(
-                                  'ITENS DO FORMULÁRIO',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: CupertinoColors.secondaryLabel,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                'Arraste para reordenar',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: CupertinoColors.systemGrey
-                                      .resolveFrom(context),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.systemBackground
-                                .resolveFrom(context),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: ReorderableListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            onReorder: (oldIndex, newIndex) {
-                              setState(() {
-                                if (newIndex > oldIndex) {
-                                  newIndex -= 1;
-                                }
-                                final item = _items.removeAt(oldIndex);
-                                _items.insert(newIndex, item);
-                              });
-                              HapticFeedback.mediumImpact();
-                            },
-                            itemCount: _items.length,
-                            itemBuilder: (context, index) {
-                              final item = _items[index];
-                              return Container(
-                                key: Key(item.id),
-                                decoration: BoxDecoration(
-                                  border: index > 0
-                                      ? Border(
-                                          top: BorderSide(
-                                            color: CupertinoColors.systemGrey5
-                                                .resolveFrom(context),
-                                            width: 0.5,
-                                          ),
-                                        )
-                                      : null,
-                                ),
-                                child: CupertinoListTile(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 12),
-                                  leading: Row(
-                                    children: [
-                                      Icon(
-                                        CupertinoIcons.bars,
-                                        size: 20,
-                                        color: CupertinoColors.systemGrey
-                                            .resolveFrom(context),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Icon(
-                                        _getIconForType(item.type),
-                                        color: CupertinoColors.systemTeal,
-                                      ),
-                                    ],
-                                  ),
-                                  title: Text(item.label),
-                                  subtitle: Text(
-                                    _getTypeLabel(item.type) +
-                                        (item.required ? ' · Obrigatório' : ''),
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: CupertinoColors.secondaryLabel
-                                          .resolveFrom(context),
-                                    ),
-                                  ),
-                                  trailing: Row(
-                                    children: [
-                                      CupertinoButton(
-                                        padding: EdgeInsets.zero,
-                                        onPressed: () => _editItem(index),
-                                        child: const Icon(
-                                          CupertinoIcons.pencil,
-                                          size: 20,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      CupertinoButton(
-                                        padding: EdgeInsets.zero,
-                                        onPressed: () => _deleteItem(index),
-                                        child: const Icon(
-                                          CupertinoIcons.trash,
-                                          size: 20,
-                                          color: CupertinoColors.systemRed,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 8, left: 16, right: 16),
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.systemBackground
-                                .resolveFrom(context),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: CupertinoListTile(
-                            leading: const Icon(
-                              CupertinoIcons.add_circled,
-                              color: CupertinoColors.activeBlue,
-                            ),
-                            title: const Text(
-                              'Adicionar Item',
-                              style: TextStyle(
-                                color: CupertinoColors.activeBlue,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            onTap: _addItem,
-                          ),
-                        ),
-                      ],
+              // Add Button
+              CupertinoButton(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                onPressed: _addItem,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      CupertinoIcons.plus_circle_fill,
+                      color: CupertinoColors.activeBlue,
+                      size: 20,
                     ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Adicionar Item',
+                      style: TextStyle(
+                        color: CupertinoColors.activeBlue,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
 
-                  const SizedBox(height: 100),
-                ],
+        // Footer hint
+        if (_items.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
+            child: Text(
+              'Deslize um item para a esquerda para excluir',
+              style: TextStyle(
+                fontSize: 12,
+                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                decoration: TextDecoration.none,
               ),
             ),
-          ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildDismissibleItemTile({
+    required Key key,
+    required FormItemDefinition item,
+    required int index,
+    required bool isLast,
+  }) {
+    return Dismissible(
+      key: key,
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        color: CupertinoColors.systemRed,
+        child: const Icon(
+          CupertinoIcons.trash_fill,
+          color: CupertinoColors.white,
+        ),
+      ),
+      confirmDismiss: (_) async {
+        HapticFeedback.mediumImpact();
+        return await showCupertinoDialog<bool>(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Remover item'),
+            content: Text('Deseja remover "${item.label}"?'),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              CupertinoDialogAction(
+                isDestructiveAction: true,
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Remover'),
+              ),
+            ],
+          ),
+        ) ?? false;
+      },
+      onDismissed: (_) {
+        setState(() => _items.removeAt(index));
+        HapticFeedback.mediumImpact();
+      },
+      child: Material(
+        type: MaterialType.transparency,
+        child: Container(
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: Row(
+                  children: [
+                    // Drag Handle
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          CupertinoIcons.line_horizontal_3,
+                          size: 20,
+                          color: CupertinoColors.systemGrey.resolveFrom(context),
+                        ),
+                      ),
+                    ),
+
+                    // Type Icon
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemTeal.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        _getIconForType(item.type),
+                        size: 18,
+                        color: CupertinoColors.systemTeal,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Content
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => _editItem(index),
+                        behavior: HitTestBehavior.opaque,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              item.label,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: CupertinoColors.label.resolveFrom(context),
+                                decoration: TextDecoration.none,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${_getTypeLabel(item.type)}${item.required ? ' · Obrigatório' : ''}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                decoration: TextDecoration.none,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Edit chevron
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => _editItem(index),
+                      child: Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 16,
+                        color: CupertinoColors.systemGrey3.resolveFrom(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!isLast)
+                Divider(
+                  height: 1,
+                  indent: 68, // Drag handle + icon + spacing
+                  color: CupertinoColors.separator.resolveFrom(context),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -439,7 +532,7 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
       case FormItemType.number:
         return CupertinoIcons.number;
       case FormItemType.boolean:
-        return CupertinoIcons.check_mark_circled;
+        return CupertinoIcons.checkmark_circle;
       case FormItemType.select:
         return CupertinoIcons.chevron_down_circle;
       case FormItemType.checklist:
@@ -467,7 +560,10 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
   }
 }
 
-// Sheet para adicionar/editar item
+// ============================================================================
+// Item Form Sheet
+// ============================================================================
+
 class _ItemFormSheet extends StatefulWidget {
   final FormItemDefinition? existingItem;
   final Function(FormItemDefinition) onSave;
@@ -478,81 +574,39 @@ class _ItemFormSheet extends StatefulWidget {
   });
 
   @override
-  __ItemFormSheetState createState() => __ItemFormSheetState();
+  State<_ItemFormSheet> createState() => _ItemFormSheetState();
 }
 
-class __ItemFormSheetState extends State<_ItemFormSheet> {
-  final TextEditingController _labelController = TextEditingController();
-  final TextEditingController _optionsController = TextEditingController();
+class _ItemFormSheetState extends State<_ItemFormSheet> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  FormItemType _type = FormItemType.text;
-  bool _required = false;
-  bool _allowPhotos = true;
+  late String _label;
+  late FormItemType _type;
+  late bool _required;
+  late bool _allowPhotos;
+  late String _optionsText;
 
   @override
   void initState() {
     super.initState();
-    if (widget.existingItem != null) {
-      _labelController.text = widget.existingItem!.label;
-      _type = widget.existingItem!.type;
-      _required = widget.existingItem!.required;
-      _allowPhotos = widget.existingItem!.allowPhotos;
-      if (widget.existingItem!.options != null) {
-        _optionsController.text = widget.existingItem!.options!.join('\n');
-      }
-    }
+    final item = widget.existingItem;
+    _label = item?.label ?? '';
+    _type = item?.type ?? FormItemType.text;
+    _required = item?.required ?? false;
+    _allowPhotos = item?.allowPhotos ?? true;
+    _optionsText = item?.options?.join('\n') ?? '';
   }
 
-  @override
-  void dispose() {
-    _labelController.dispose();
-    _optionsController.dispose();
-    super.dispose();
-  }
+  bool get _needsOptions =>
+      _type == FormItemType.select || _type == FormItemType.checklist;
 
   void _save() {
-    if (_labelController.text.trim().isEmpty) {
-      HapticFeedback.heavyImpact();
-      showCupertinoDialog(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
-          title: const Text('Label obrigatório'),
-          content: const Text('Por favor, informe o label do item.'),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
 
-    final needsOptions = _type == FormItemType.select || _type == FormItemType.checklist;
     List<String>? options;
-
-    if (needsOptions) {
-      final optionsText = _optionsController.text.trim();
-      if (optionsText.isEmpty) {
-        HapticFeedback.heavyImpact();
-        showCupertinoDialog(
-          context: context,
-          builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Opções obrigatórias'),
-            content: const Text('Por favor, informe as opções (uma por linha).'),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
-        return;
-      }
-
-      options = optionsText
+    if (_needsOptions) {
+      options = _optionsText
           .split('\n')
           .map((e) => e.trim())
           .where((e) => e.isNotEmpty)
@@ -564,7 +618,7 @@ class __ItemFormSheetState extends State<_ItemFormSheet> {
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
             title: const Text('Mínimo de opções'),
-            content: const Text('Por favor, informe pelo menos 2 opções.'),
+            content: const Text('Informe pelo menos 2 opções.'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
@@ -578,8 +632,9 @@ class __ItemFormSheetState extends State<_ItemFormSheet> {
     }
 
     final item = FormItemDefinition(
-      id: widget.existingItem?.id ?? FirebaseFirestore.instance.collection('tmp').doc().id,
-      label: _labelController.text.trim(),
+      id: widget.existingItem?.id ??
+          FirebaseFirestore.instance.collection('tmp').doc().id,
+      label: _label.trim(),
       type: _type,
       options: options,
       required: _required,
@@ -592,88 +647,149 @@ class __ItemFormSheetState extends State<_ItemFormSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final needsOptions = _type == FormItemType.select || _type == FormItemType.checklist;
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              width: 36,
+              height: 5,
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGrey3.resolveFrom(context),
+                borderRadius: BorderRadius.circular(2.5),
+              ),
+            ),
 
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: CupertinoNavigationBar(
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
-        ),
-        middle: Text(widget.existingItem == null ? 'Novo Item' : 'Editar Item'),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _save,
-          child: const Text(
-            'Salvar',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: SafeArea(
-          child: ListView(
-            children: [
-              const SizedBox(height: 20),
-              CupertinoListSection.insetGrouped(
+            // Navigation bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CupertinoTextFormFieldRow(
-                    controller: _labelController,
-                    placeholder: 'Ex: Temperatura do ambiente',
-                    prefix: const Text('Label'),
-                    textCapitalization: TextCapitalization.sentences,
+                  CupertinoButton(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancelar'),
                   ),
-                  CupertinoListTile(
-                    title: const Text('Tipo'),
-                    trailing: CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => _showTypePicker(),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(_getTypeLabel(_type)),
-                          const SizedBox(width: 4),
-                          const Icon(CupertinoIcons.chevron_right, size: 14),
-                        ],
-                      ),
+                  Text(
+                    widget.existingItem == null ? 'Novo Item' : 'Editar Item',
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: CupertinoColors.label.resolveFrom(context),
+                      decoration: TextDecoration.none,
                     ),
                   ),
-                  if (needsOptions)
-                    CupertinoTextFormFieldRow(
-                      controller: _optionsController,
-                      placeholder: 'Uma opção por linha',
-                      prefix: const Text('Opções'),
-                      maxLines: 5,
-                      textCapitalization: TextCapitalization.sentences,
-                    ),
-                  if (_type != FormItemType.photoOnly)
-                    CupertinoListTile(
-                      title: const Text('Obrigatório'),
-                      trailing: CupertinoSwitch(
-                        value: _required,
-                        onChanged: (value) {
-                          setState(() => _required = value);
-                          HapticFeedback.selectionClick();
-                        },
-                      ),
-                    ),
-                  CupertinoListTile(
-                    title: const Text('Permitir fotos'),
-                    trailing: CupertinoSwitch(
-                      value: _allowPhotos,
-                      onChanged: (value) {
-                        setState(() => _allowPhotos = value);
-                        HapticFeedback.selectionClick();
-                      },
+                  CupertinoButton(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    onPressed: _save,
+                    child: const Text(
+                      'Salvar',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
+
+            const Divider(height: 1),
+
+          // Content
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                padding: const EdgeInsets.only(top: 12),
+                children: [
+                  // Label and Type
+                  CupertinoListSection.insetGrouped(
+                    header: const Text('CONFIGURAÇÃO DO ITEM'),
+                    children: [
+                      CupertinoTextFormFieldRow(
+                        prefix: const Text('Label', style: TextStyle(fontSize: 16)),
+                        initialValue: _label,
+                        placeholder: 'Ex: Estado da pintura',
+                        textCapitalization: TextCapitalization.sentences,
+                        textAlign: TextAlign.right,
+                        onSaved: (val) => _label = val ?? '',
+                        validator: (val) =>
+                            val == null || val.trim().isEmpty ? 'Obrigatório' : null,
+                      ),
+                      CupertinoListTile(
+                        title: const Text('Tipo'),
+                        additionalInfo: Text(_getTypeLabel(_type)),
+                        trailing: const CupertinoListTileChevron(),
+                        onTap: _showTypePicker,
+                      ),
+                    ],
+                  ),
+
+                  // Options (conditional)
+                  if (_needsOptions)
+                    CupertinoListSection.insetGrouped(
+                      header: const Text('OPÇÕES'),
+                      footer: const Text('Digite uma opção por linha'),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: CupertinoTextField(
+                            placeholder: 'Opção 1\nOpção 2\nOpção 3',
+                            maxLines: 5,
+                            controller: TextEditingController(text: _optionsText),
+                            onChanged: (val) => _optionsText = val,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: BoxDecoration(
+                              color: CupertinoColors.systemBackground.resolveFrom(context),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  // Settings
+                  CupertinoListSection.insetGrouped(
+                    header: const Text('OPÇÕES'),
+                    children: [
+                      if (_type != FormItemType.photoOnly)
+                        CupertinoListTile(
+                          title: const Text('Obrigatório'),
+                          trailing: CupertinoSwitch(
+                            value: _required,
+                            onChanged: (val) {
+                              setState(() => _required = val);
+                              HapticFeedback.selectionClick();
+                            },
+                          ),
+                        ),
+                      CupertinoListTile(
+                        title: const Text('Permitir fotos'),
+                        subtitle: const Text('Usuário pode anexar fotos a este item'),
+                        trailing: CupertinoSwitch(
+                          value: _allowPhotos,
+                          onChanged: (val) {
+                            setState(() => _allowPhotos = val);
+                            HapticFeedback.selectionClick();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
           ),
+          ],
         ),
       ),
     );
@@ -684,13 +800,42 @@ class __ItemFormSheetState extends State<_ItemFormSheet> {
       context: context,
       builder: (ctx) => CupertinoActionSheet(
         title: const Text('Tipo do Item'),
+        message: const Text('Selecione o tipo de resposta esperada'),
         actions: FormItemType.values.map((type) {
+          final isSelected = type == _type;
           return CupertinoActionSheetAction(
             onPressed: () {
               setState(() => _type = type);
               Navigator.pop(ctx);
+              HapticFeedback.selectionClick();
             },
-            child: Text(_getTypeLabel(type)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _getIconForType(type),
+                  size: 20,
+                  color: isSelected
+                      ? CupertinoColors.activeBlue
+                      : CupertinoColors.label.resolveFrom(context),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  _getTypeLabel(type),
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                if (isSelected) ...[
+                  const SizedBox(width: 8),
+                  const Icon(
+                    CupertinoIcons.checkmark,
+                    size: 18,
+                    color: CupertinoColors.activeBlue,
+                  ),
+                ],
+              ],
+            ),
           );
         }).toList(),
         cancelButton: CupertinoActionSheetAction(
@@ -699,6 +844,23 @@ class __ItemFormSheetState extends State<_ItemFormSheet> {
         ),
       ),
     );
+  }
+
+  IconData _getIconForType(FormItemType type) {
+    switch (type) {
+      case FormItemType.text:
+        return CupertinoIcons.textformat;
+      case FormItemType.number:
+        return CupertinoIcons.number;
+      case FormItemType.boolean:
+        return CupertinoIcons.checkmark_circle;
+      case FormItemType.select:
+        return CupertinoIcons.chevron_down_circle;
+      case FormItemType.checklist:
+        return CupertinoIcons.checkmark_square;
+      case FormItemType.photoOnly:
+        return CupertinoIcons.camera;
+    }
   }
 
   String _getTypeLabel(FormItemType type) {

@@ -22,7 +22,40 @@ class FormsService {
     }
   }
 
+  /// Busca templates de formulários disponíveis SOMENTE da empresa
+  /// (Formulários globais devem ser importados antes de usar)
+  Future<List<FormDefinition>> getCompanyTemplates(String companyId) async {
+    if (companyId.isEmpty) return [];
+
+    try {
+      final snapshot = await _db
+          .collection('companies')
+          .doc(companyId)
+          .collection('forms')
+          .get();
+
+      // Filtra ativos e ordena por título em memória (evita índice composto)
+      final templates = <FormDefinition>[];
+      for (final doc in snapshot.docs) {
+        try {
+          final template = _definitionFromJson(doc.id, doc.data());
+          if (template.isActive) {
+            templates.add(template);
+          }
+        } catch (e) {
+          // Log silencioso - formulário legado não compatível
+        }
+      }
+      templates.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+
+      return templates;
+    } catch (e) {
+      return [];
+    }
+  }
+
   /// Busca templates de formulários disponíveis (Globais do Segmento + Da Empresa)
+  /// @deprecated Use getCompanyTemplates() para seleção na OS
   Future<List<FormDefinition>> getAvailableTemplates(
       String segmentId, String? companyId) async {
     List<FormDefinition> templates = [];
@@ -33,12 +66,11 @@ class FormsService {
           .collection('segments')
           .doc(segmentId)
           .collection('forms')
-          .where('isActive', isEqualTo: true)
           .get();
 
       templates.addAll(segmentSnapshot.docs
           .map((doc) => _definitionFromJson(doc.id, doc.data()))
-          .toList());
+          .where((t) => t.isActive));
     } catch (e) {
       print('Erro ao buscar templates globais: $e');
     }
@@ -50,16 +82,18 @@ class FormsService {
             .collection('companies')
             .doc(companyId)
             .collection('forms')
-            .where('isActive', isEqualTo: true)
             .get();
 
         templates.addAll(companySnapshot.docs
             .map((doc) => _definitionFromJson(doc.id, doc.data()))
-            .toList());
+            .where((t) => t.isActive));
       } catch (e) {
         print('Erro ao buscar templates da empresa: $e');
       }
     }
+
+    // Ordena por título em memória
+    templates.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
 
     return templates;
   }
@@ -166,6 +200,42 @@ class FormsService {
     final map = Map<String, dynamic>.from(data);
     _convertTimestamp(map, 'createdAt');
     _convertTimestamp(map, 'updatedAt');
+
+    // Normaliza campos legados: name -> title
+    if (map['title'] == null && map['name'] != null) {
+      map['title'] = map['name'];
+    }
+
+    // Normaliza campos legados: fields -> items
+    if (map['items'] == null && map['fields'] != null) {
+      map['items'] = map['fields'];
+    }
+
+    // Garante que todos os items tenham IDs válidos (string)
+    if (map['items'] is List) {
+      final items = map['items'] as List;
+      for (int i = 0; i < items.length; i++) {
+        if (items[i] is Map<String, dynamic>) {
+          final item = items[i] as Map<String, dynamic>;
+
+          // Converte ID numérico para string ou gera novo
+          final itemId = item['id'];
+          if (itemId == null) {
+            item['id'] = _db.collection('tmp').doc().id;
+          } else if (itemId is! String) {
+            item['id'] = itemId.toString();
+          } else if (itemId.isEmpty) {
+            item['id'] = _db.collection('tmp').doc().id;
+          }
+
+          // Normaliza requiresPhoto -> allowPhotos
+          if (item['allowPhotos'] == null && item['requiresPhoto'] != null) {
+            item['allowPhotos'] = item['requiresPhoto'];
+          }
+        }
+      }
+    }
+
     return FormDefinition.fromJson({...map, 'id': id});
   }
 

@@ -339,16 +339,13 @@ class _OrderFormState extends State<OrderForm> {
     }
 
     // Double check após salvar
-    if (_store.order?.id == null) return;
-
-    final segmentId = config.segmentId ?? 'other';
+    if (_store.order?.id == null || _store.companyId == null) return;
 
     final template = await Navigator.push(
       context,
       CupertinoPageRoute(
         builder: (context) => FormSelectionScreen(
-          segmentId: segmentId,
-          companyId: _store.companyId,
+          companyId: _store.companyId!,
         ),
       ),
     );

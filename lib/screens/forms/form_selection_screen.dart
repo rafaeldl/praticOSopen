@@ -4,13 +4,11 @@ import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/services/forms_service.dart';
 
 class FormSelectionScreen extends StatefulWidget {
-  final String segmentId;
-  final String? companyId;
+  final String companyId;
 
   const FormSelectionScreen({
     super.key,
-    required this.segmentId,
-    this.companyId,
+    required this.companyId,
   });
 
   @override
@@ -30,10 +28,7 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
 
   Future<void> _loadTemplates() async {
     try {
-      final templates = await _formsService.getAvailableTemplates(
-        widget.segmentId,
-        widget.companyId,
-      );
+      final templates = await _formsService.getCompanyTemplates(widget.companyId);
       if (mounted) {
         setState(() {
           _templates = templates;
@@ -57,13 +52,12 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Modelos'),
+              largeTitle: const Text('Formulários'),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
                 onPressed: () {
-                  // TODO: Navegar para tela de criação de template
-                  // Navigator.push(...)
+                  Navigator.pushNamed(context, '/form_template_form');
                 },
               ),
             ),
@@ -85,22 +79,36 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
     if (_templates == null || _templates!.isEmpty) {
       return SliverFillRemaining(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                CupertinoIcons.doc_text_search,
-                size: 64,
-                color: CupertinoColors.systemGrey.resolveFrom(context),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Nenhum modelo disponível',
-                style: TextStyle(
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  CupertinoIcons.doc_text_search,
+                  size: 64,
+                  color: CupertinoColors.systemGrey.resolveFrom(context),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Text(
+                  'Nenhum formulário cadastrado',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.label.resolveFrom(context),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Cadastre formulários em Ajustes > Formulários ou importe modelos globais.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
