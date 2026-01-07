@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
@@ -39,17 +40,20 @@ abstract class _AuthStore with Store {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await userStore.createUserIfNotExist(user);
 
-      var dbUser = await userStore.repository.findUserById(user.uid);
+      var dbUser = await userStore.findUserById(user.uid);
       Company company;
 
       // Check if there is a last selected company saved
       String? lastCompanyId = prefs.getString('companyId');
+
+      debugPrint('🔐 AuthStore: Usuário logado ${user.email}, lastCompanyId=$lastCompanyId');
 
       if (lastCompanyId != null &&
           dbUser != null &&
           dbUser.companies != null &&
           dbUser.companies!.any((c) => c.company?.id == lastCompanyId)) {
         // Load the saved company if the user still belongs to it
+        debugPrint('📊 AuthStore: Carregando empresa salva: $lastCompanyId');
         company = await companyStore.retrieveCompany(lastCompanyId);
       } else if (dbUser != null &&
           dbUser.companies != null &&
@@ -57,12 +61,16 @@ abstract class _AuthStore with Store {
           dbUser.companies!.first.company != null &&
           dbUser.companies!.first.company!.id != null) {
         // Retrieve the first company associated with the user
+        debugPrint('📊 AuthStore: Carregando primeira empresa do usuário: ${dbUser.companies!.first.company!.id}');
         company = await companyStore
             .retrieveCompany(dbUser.companies!.first.company!.id!);
       } else {
         // Fallback for legacy or owner-only logic
+        debugPrint('📊 AuthStore: Carregando empresa por owner');
         company = await companyStore.getCompanyByOwnerId(user.uid);
       }
+
+      debugPrint('✅ AuthStore: Empresa carregada: ${company.name} (id=${company.id}, segment=${company.segment})');
 
       Global.currentUser = user;
 
@@ -88,6 +96,51 @@ abstract class _AuthStore with Store {
   Future<void> switchCompany(String companyId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Company company = await companyStore.retrieveCompany(companyId);
+
+    if (company.id != null) {
+      prefs.setString('companyId', company.id!);
+    }
+    if (company.name != null) {
+      prefs.setString('companyName', company.name!);
+    }
+    companyAggr = company.toAggr();
+    Global.companyAggr = companyAggr;
+  }
+
+  /// Recarrega os dados do usuário e empresa do Firestore
+  /// Útil após criar uma nova empresa no onboarding
+  @action
+  Future<void> reloadUserAndCompany() async {
+    User? user = currentUser?.value;
+    if (user == null) return;
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Busca o usuário atualizado do Firestore
+    var dbUser = await userStore.findUserById(user.uid);
+    Company company;
+
+    // Check if there is a last selected company saved
+    String? lastCompanyId = prefs.getString('companyId');
+
+    if (lastCompanyId != null &&
+        dbUser != null &&
+        dbUser.companies != null &&
+        dbUser.companies!.any((c) => c.company?.id == lastCompanyId)) {
+      // Load the saved company if the user still belongs to it
+      company = await companyStore.retrieveCompany(lastCompanyId);
+    } else if (dbUser != null &&
+        dbUser.companies != null &&
+        dbUser.companies!.isNotEmpty &&
+        dbUser.companies!.first.company != null &&
+        dbUser.companies!.first.company!.id != null) {
+      // Retrieve the first company associated with the user
+      company = await companyStore
+          .retrieveCompany(dbUser.companies!.first.company!.id!);
+    } else {
+      // Fallback for legacy or owner-only logic
+      company = await companyStore.getCompanyByOwnerId(user.uid);
+    }
 
     if (company.id != null) {
       prefs.setString('companyId', company.id!);
