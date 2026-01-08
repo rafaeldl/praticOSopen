@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Divider, InkWell;
 import 'package:praticos/models/form_definition.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/repositories/segment/segment_form_template_repository.dart';
 import 'package:praticos/services/forms_service.dart';
+import 'package:provider/provider.dart';
 
 class FormSelectionScreen extends StatefulWidget {
   final String companyId;
@@ -17,8 +20,13 @@ class FormSelectionScreen extends StatefulWidget {
 
 class _FormSelectionScreenState extends State<FormSelectionScreen> {
   final FormsService _formsService = FormsService();
-  List<FormDefinition>? _templates;
+  final SegmentFormTemplateRepository _segmentRepository = SegmentFormTemplateRepository();
+  final TextEditingController _searchController = TextEditingController();
+
+  List<FormDefinition>? _companyTemplates;
+  List<FormDefinition>? _globalTemplates;
   bool _isLoading = true;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -26,12 +34,34 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
     _loadTemplates();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadTemplates() async {
     try {
-      final templates = await _formsService.getCompanyTemplates(widget.companyId);
+      // Carrega templates da empresa
+      final companyTemplates = await _formsService.getCompanyTemplates(widget.companyId);
+
+      // Carrega templates globais do segmento
+      List<FormDefinition> globalTemplates = [];
+      final segmentProvider = context.read<SegmentConfigProvider>();
+      final segmentId = segmentProvider.segmentId;
+
+      if (segmentId != null && segmentId.isNotEmpty) {
+        try {
+          globalTemplates = await _segmentRepository.getActiveTemplates(segmentId);
+        } catch (e) {
+          // Ignora erro ao carregar globais - continua sem eles
+        }
+      }
+
       if (mounted) {
         setState(() {
-          _templates = templates;
+          _companyTemplates = companyTemplates;
+          _globalTemplates = globalTemplates;
           _isLoading = false;
         });
       }
@@ -39,8 +69,16 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
-      print('Erro ao carregar templates: $e');
     }
+  }
+
+  List<FormDefinition> _filterTemplates(List<FormDefinition> templates) {
+    if (_searchQuery.isEmpty) return templates;
+    return templates.where((template) {
+      final title = template.title.toLowerCase();
+      final description = template.description?.toLowerCase() ?? '';
+      return title.contains(_searchQuery) || description.contains(_searchQuery);
+    }).toList();
   }
 
   @override
@@ -52,13 +90,27 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Formulários'),
+              largeTitle: const Text('Procedimentos'),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/form_template_form');
+                  Navigator.pushNamed(context, '/form_template_form').then((_) {
+                    _loadTemplates();
+                  });
                 },
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: CupertinoSearchTextField(
+                  controller: _searchController,
+                  placeholder: 'Buscar procedimento',
+                  onChanged: (value) {
+                    setState(() => _searchQuery = value.toLowerCase());
+                  },
+                ),
               ),
             ),
             _buildBody(),
@@ -76,7 +128,17 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
       );
     }
 
-    if (_templates == null || _templates!.isEmpty) {
+    final filteredCompanyTemplates = _companyTemplates != null
+        ? _filterTemplates(_companyTemplates!)
+        : <FormDefinition>[];
+    final filteredGlobalTemplates = _globalTemplates != null
+        ? _filterTemplates(_globalTemplates!)
+        : <FormDefinition>[];
+
+    final hasCompanyTemplates = filteredCompanyTemplates.isNotEmpty;
+    final hasGlobalTemplates = filteredGlobalTemplates.isNotEmpty;
+
+    if (!hasCompanyTemplates && !hasGlobalTemplates) {
       return SliverFillRemaining(
         child: Center(
           child: Padding(
@@ -91,22 +153,26 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Nenhum formulário cadastrado',
+                  _searchQuery.isEmpty
+                      ? 'Nenhum procedimento disponível'
+                      : 'Nenhum resultado encontrado',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: CupertinoColors.label.resolveFrom(context),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Cadastre formulários em Ajustes > Formulários ou importe modelos globais.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                if (_searchQuery.isEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Toque em + para criar seu primeiro procedimento.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -115,19 +181,47 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
     }
 
     return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          if (index >= _templates!.length) return null;
-          final template = _templates![index];
-          final isLast = index == _templates!.length - 1;
-          return _buildTemplateItem(template, isLast);
-        },
-        childCount: _templates!.length,
+      delegate: SliverChildListDelegate([
+        // Seção: Templates da Empresa
+        if (hasCompanyTemplates) ...[
+          _buildSectionHeader('Da Empresa'),
+          ..._buildTemplateList(filteredCompanyTemplates),
+        ],
+
+        // Seção: Templates Globais
+        if (hasGlobalTemplates) ...[
+          _buildSectionHeader('Globais'),
+          ..._buildTemplateList(filteredGlobalTemplates, isGlobal: true),
+        ],
+      ]),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 8),
+      child: Text(
+        title.toUpperCase(),
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        ),
       ),
     );
   }
 
-  Widget _buildTemplateItem(FormDefinition template, bool isLast) {
+  List<Widget> _buildTemplateList(List<FormDefinition> templates, {bool isGlobal = false}) {
+    return templates.asMap().entries.map((entry) {
+      final index = entry.key;
+      final template = entry.value;
+      final isLast = index == templates.length - 1;
+      return _buildTemplateItem(template, isLast, isGlobal: isGlobal);
+    }).toList();
+  }
+
+  Widget _buildTemplateItem(FormDefinition template, bool isLast, {bool isGlobal = false}) {
     return Container(
       color: CupertinoColors.systemBackground.resolveFrom(context),
       child: InkWell(
@@ -141,7 +235,7 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
               child: Row(
                 children: [
                   // Avatar
-                  _buildTemplateAvatar(template),
+                  _buildTemplateAvatar(template, isGlobal: isGlobal),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -168,6 +262,14 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                             ),
                           ),
                         ],
+                        const SizedBox(height: 2),
+                        Text(
+                          '${template.items.length} ${template.items.length == 1 ? 'item' : 'itens'}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: CupertinoColors.systemGrey.resolveFrom(context),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -191,19 +293,23 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
     );
   }
 
-  Widget _buildTemplateAvatar(FormDefinition template) {
+  Widget _buildTemplateAvatar(FormDefinition template, {bool isGlobal = false}) {
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: CupertinoColors.activeBlue.resolveFrom(context).withValues(alpha: 0.1),
+        color: isGlobal
+            ? CupertinoColors.systemBlue.withValues(alpha: 0.15)
+            : CupertinoColors.systemTeal.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,
       child: Icon(
-        CupertinoIcons.doc_text,
+        isGlobal ? CupertinoIcons.globe : CupertinoIcons.doc_text_fill,
         size: 24,
-        color: CupertinoColors.activeBlue.resolveFrom(context),
+        color: isGlobal
+            ? CupertinoColors.systemBlue
+            : CupertinoColors.systemTeal,
       ),
     );
   }

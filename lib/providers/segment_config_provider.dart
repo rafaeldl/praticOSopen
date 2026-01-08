@@ -38,6 +38,16 @@ class SegmentConfigProvider extends ChangeNotifier {
         return CupertinoIcons.snow;
       case 'appliances':
         return CupertinoIcons.bolt_horizontal_circle; // Eletrodomésticos
+      case 'electrical':
+        return CupertinoIcons.bolt;
+      case 'plumbing':
+        return CupertinoIcons.drop;
+      case 'security':
+        return CupertinoIcons.video_camera_solid;
+      case 'solar':
+        return CupertinoIcons.sun_max;
+      case 'printers':
+        return CupertinoIcons.printer;
       default:
         return CupertinoIcons.tag; // Genérico
     }

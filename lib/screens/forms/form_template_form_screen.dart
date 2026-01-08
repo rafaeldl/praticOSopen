@@ -53,7 +53,7 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
       HapticFeedback.heavyImpact();
       _showAlert(
         'Adicione itens',
-        'Por favor, adicione pelo menos um item ao formulário.',
+        'Por favor, adicione pelo menos um item ao procedimento.',
       );
       return;
     }
@@ -79,7 +79,7 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
       if (mounted) {
         HapticFeedback.heavyImpact();
         setState(() => _isLoading = false);
-        _showAlert('Erro', 'Não foi possível salvar o formulário.');
+        _showAlert('Erro', 'Não foi possível salvar o procedimento.');
       }
     }
   }
@@ -138,7 +138,7 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing ? 'Editar Formulário' : 'Novo Formulário'),
+        middle: Text(_isEditing ? 'Editar Procedimento' : 'Novo Procedimento'),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.pop(context),
@@ -184,7 +184,7 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
                   CupertinoTextFormFieldRow(
                     prefix: const Text('Título', style: TextStyle(fontSize: 16)),
                     initialValue: _template?.title,
-                    placeholder: 'Nome do formulário',
+                    placeholder: 'Nome do procedimento',
                     textCapitalization: TextCapitalization.sentences,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _template?.title = val ?? '',
