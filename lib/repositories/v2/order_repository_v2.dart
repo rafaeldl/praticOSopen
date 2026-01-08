@@ -1,19 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
-import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/models/order.dart';
-import 'package:praticos/repositories/order_repository.dart';
-import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/v2/repository_v2.dart';
 
-/// Repository V2 para Orders com suporte a dual-write/dual-read.
+/// Repository V2 para Orders usando subcollections por tenant.
+///
+/// Path: `/companies/{companyId}/orders/{orderId}`
 class OrderRepositoryV2 extends RepositoryV2<Order?> {
-  final OrderRepository _legacy = OrderRepository();
   final TenantOrderRepository _tenant = TenantOrderRepository();
-
-  @override
-  Repository<Order?> get legacyRepo => _legacy;
 
   @override
   TenantRepository<Order?> get tenantRepo => _tenant;
@@ -24,34 +19,12 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
 
   /// Busca todas as orders do tenant.
   Future<List<Order?>> getOrders(String companyId) async {
-    if (FeatureFlags.shouldReadFromNew) {
-      try {
-        return await _tenant.getOrders(companyId);
-      } catch (e) {
-        if (FeatureFlags.shouldFallbackToLegacy) {
-          print('[OrderRepositoryV2] Fallback getOrders: $e');
-          return await _legacy.getOrders();
-        }
-        rethrow;
-      }
-    }
-    return await _legacy.getOrders();
+    return await _tenant.getOrders(companyId);
   }
 
   /// Busca uma order pelo número.
   Future<Order?> getOrderByNumber(String companyId, int number) async {
-    if (FeatureFlags.shouldReadFromNew) {
-      try {
-        return await _tenant.getOrderByNumber(companyId, number);
-      } catch (e) {
-        if (FeatureFlags.shouldFallbackToLegacy) {
-          print('[OrderRepositoryV2] Fallback getOrderByNumber: $e');
-          return await _legacy.getOrderByNumber(number);
-        }
-        rethrow;
-      }
-    }
-    return await _legacy.getOrderByNumber(number);
+    return await _tenant.getOrderByNumber(companyId, number);
   }
 
   /// Busca orders por período.
@@ -65,18 +38,7 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     String period,
     int offset,
   ) async {
-    if (FeatureFlags.shouldReadFromNew) {
-      try {
-        return await _tenant.getOrdersByCustomPeriod(companyId, period, offset);
-      } catch (e) {
-        if (FeatureFlags.shouldFallbackToLegacy) {
-          print('[OrderRepositoryV2] Fallback getOrdersByCustomPeriod: $e');
-          return await _legacy.getOrdersByCustomPeriod(period, offset);
-        }
-        rethrow;
-      }
-    }
-    return await _legacy.getOrdersByCustomPeriod(period, offset);
+    return await _tenant.getOrdersByCustomPeriod(companyId, period, offset);
   }
 
   /// Busca orders por intervalo de datas.
@@ -85,18 +47,7 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     DateTime startDate,
     DateTime endDate,
   ) async {
-    if (FeatureFlags.shouldReadFromNew) {
-      try {
-        return await _tenant.getOrdersByDateRange(companyId, startDate, endDate);
-      } catch (e) {
-        if (FeatureFlags.shouldFallbackToLegacy) {
-          print('[OrderRepositoryV2] Fallback getOrdersByDateRange: $e');
-          return await _legacy.getOrdersByDateRange(startDate, endDate);
-        }
-        rethrow;
-      }
-    }
-    return await _legacy.getOrdersByDateRange(startDate, endDate);
+    return await _tenant.getOrdersByDateRange(companyId, startDate, endDate);
   }
 
   /// Stream de orders com filtros opcionais.
@@ -106,67 +57,12 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     String? payment,
     String? customerId,
   }) {
-    if (FeatureFlags.shouldReadFromNew) {
-      final stream = _tenant.streamOrders(
-        companyId,
-        status: status,
-        payment: payment,
-        customerId: customerId,
-      );
-
-      if (FeatureFlags.shouldFallbackToLegacy) {
-        return stream.handleError((error) {
-          print('[OrderRepositoryV2] Fallback streamOrders: $error');
-          // Fallback para método legado
-          List<QueryArgs> filterList = [QueryArgs('company.id', companyId)];
-          List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
-
-          if (status != null) {
-            if (['paid', 'unpaid'].contains(status)) {
-              filterList.add(QueryArgs('payment', status));
-            } else if (status == 'due_date') {
-              filterList.add(
-                QueryArgs('status', ['approved', 'progress'], oper: 'whereIn'),
-              );
-              orderBy = [OrderBy('dueDate')];
-            } else {
-              filterList.add(QueryArgs('status', status));
-            }
-          }
-
-          if (customerId != null) {
-            filterList.add(QueryArgs('customer.id', customerId));
-          }
-
-          return _legacy.streamQueryList(orderBy: orderBy, args: filterList);
-        });
-      }
-
-      return stream;
-    }
-
-    // Estrutura legada
-    List<QueryArgs> filterList = [QueryArgs('company.id', companyId)];
-    List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
-
-    if (status != null) {
-      if (['paid', 'unpaid'].contains(status)) {
-        filterList.add(QueryArgs('payment', status));
-      } else if (status == 'due_date') {
-        filterList.add(
-          QueryArgs('status', ['approved', 'progress'], oper: 'whereIn'),
-        );
-        orderBy = [OrderBy('dueDate')];
-      } else {
-        filterList.add(QueryArgs('status', status));
-      }
-    }
-
-    if (customerId != null) {
-      filterList.add(QueryArgs('customer.id', customerId));
-    }
-
-    return _legacy.streamQueryList(orderBy: orderBy, args: filterList);
+    return _tenant.streamOrders(
+      companyId,
+      status: status,
+      payment: payment,
+      customerId: customerId,
+    );
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -183,15 +79,8 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
   }) async {
     final FirebaseFirestore db = FirebaseFirestore.instance;
 
-    Query<Map<String, dynamic>> query;
-
-    if (FeatureFlags.shouldReadFromNew) {
-      // Nova estrutura: subcollection
-      query = db.collection('companies').doc(companyId).collection('orders');
-    } else {
-      // Estrutura legada: collection raiz com filtro
-      query = db.collection('orders').where('company.id', isEqualTo: companyId);
-    }
+    Query<Map<String, dynamic>> query =
+        db.collection('companies').doc(companyId).collection('orders');
 
     // Aplicar filtros
     if (status != null) {
