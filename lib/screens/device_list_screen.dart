@@ -126,16 +126,32 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     if (deviceList.isEmpty) {
       return SliverFillRemaining(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(CupertinoIcons.car_detailed, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
-              const SizedBox(height: 16),
-              Text(
-                'Nenhum ${config.device.toLowerCase()} cadastrado',
-                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(config.deviceIcon, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
+                const SizedBox(height: 16),
+                Text(
+                  'Nenhum ${config.device.toLowerCase()} cadastrado',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.label.resolveFrom(context),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Toque em + para adicionar seu primeiro ${config.device.toLowerCase()}.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

@@ -51,14 +51,23 @@ class SegmentFormTemplateRepository {
 
   /// Busca templates ativos do segmento.
   Future<List<FormDefinition>> getActiveTemplates(String segmentId) async {
-    final snapshot = await _getCollection(segmentId)
-        .where('isActive', isEqualTo: true)
-        .orderBy('title')
-        .get();
+    final snapshot = await _getCollection(segmentId).get();
 
-    return snapshot.docs
-        .map((doc) => _fromJsonID(doc.id, doc.data()))
-        .toList();
+    final forms = <FormDefinition>[];
+    for (final doc in snapshot.docs) {
+      try {
+        final form = _fromJsonID(doc.id, doc.data());
+        if (form.isActive) {
+          forms.add(form);
+        }
+      } catch (e) {
+        print('[SegmentFormTemplateRepo] Error parsing doc ${doc.id}: $e');
+      }
+    }
+
+    // Ordena por título em memória
+    forms.sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+    return forms;
   }
 
   /// Busca um template específico por ID.

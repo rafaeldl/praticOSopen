@@ -288,7 +288,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
             title: const Text('Erro'),
-            content: const Text('Não foi possível concluir o formulário. Tente novamente.'),
+            content: const Text('Não foi possível concluir o procedimento. Tente novamente.'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
@@ -368,7 +368,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
             title: const Text('Erro'),
-            content: const Text('Não foi possível reabrir o formulário. Tente novamente.'),
+            content: const Text('Não foi possível reabrir o procedimento. Tente novamente.'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
@@ -523,7 +523,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Formulário concluído',
+                            'Procedimento concluído',
                             style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                               color: CupertinoColors.systemGreen,
                               fontWeight: FontWeight.w500,

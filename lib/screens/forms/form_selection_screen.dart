@@ -21,15 +21,23 @@ class FormSelectionScreen extends StatefulWidget {
 class _FormSelectionScreenState extends State<FormSelectionScreen> {
   final FormsService _formsService = FormsService();
   final SegmentFormTemplateRepository _segmentRepository = SegmentFormTemplateRepository();
+  final TextEditingController _searchController = TextEditingController();
 
   List<FormDefinition>? _companyTemplates;
   List<FormDefinition>? _globalTemplates;
   bool _isLoading = true;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _loadTemplates();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadTemplates() async {
@@ -64,6 +72,15 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
     }
   }
 
+  List<FormDefinition> _filterTemplates(List<FormDefinition> templates) {
+    if (_searchQuery.isEmpty) return templates;
+    return templates.where((template) {
+      final title = template.title.toLowerCase();
+      final description = template.description?.toLowerCase() ?? '';
+      return title.contains(_searchQuery) || description.contains(_searchQuery);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -73,13 +90,27 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Formulários'),
+              largeTitle: const Text('Procedimentos'),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
                 onPressed: () {
-                  Navigator.pushNamed(context, '/form_template_form');
+                  Navigator.pushNamed(context, '/form_template_form').then((_) {
+                    _loadTemplates();
+                  });
                 },
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: CupertinoSearchTextField(
+                  controller: _searchController,
+                  placeholder: 'Buscar procedimento',
+                  onChanged: (value) {
+                    setState(() => _searchQuery = value.toLowerCase());
+                  },
+                ),
               ),
             ),
             _buildBody(),
@@ -97,8 +128,15 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
       );
     }
 
-    final hasCompanyTemplates = _companyTemplates != null && _companyTemplates!.isNotEmpty;
-    final hasGlobalTemplates = _globalTemplates != null && _globalTemplates!.isNotEmpty;
+    final filteredCompanyTemplates = _companyTemplates != null
+        ? _filterTemplates(_companyTemplates!)
+        : <FormDefinition>[];
+    final filteredGlobalTemplates = _globalTemplates != null
+        ? _filterTemplates(_globalTemplates!)
+        : <FormDefinition>[];
+
+    final hasCompanyTemplates = filteredCompanyTemplates.isNotEmpty;
+    final hasGlobalTemplates = filteredGlobalTemplates.isNotEmpty;
 
     if (!hasCompanyTemplates && !hasGlobalTemplates) {
       return SliverFillRemaining(
@@ -115,22 +153,26 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Nenhum formulário disponível',
+                  _searchQuery.isEmpty
+                      ? 'Nenhum procedimento disponível'
+                      : 'Nenhum resultado encontrado',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: CupertinoColors.label.resolveFrom(context),
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Cadastre formulários em Ajustes > Formulários.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                if (_searchQuery.isEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Toque em + para criar seu primeiro procedimento.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -143,13 +185,13 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
         // Seção: Templates da Empresa
         if (hasCompanyTemplates) ...[
           _buildSectionHeader('Da Empresa'),
-          ..._buildTemplateList(_companyTemplates!),
+          ..._buildTemplateList(filteredCompanyTemplates),
         ],
 
         // Seção: Templates Globais
         if (hasGlobalTemplates) ...[
           _buildSectionHeader('Globais'),
-          ..._buildTemplateList(_globalTemplates!, isGlobal: true),
+          ..._buildTemplateList(filteredGlobalTemplates, isGlobal: true),
         ],
       ]),
     );
@@ -220,6 +262,14 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                             ),
                           ),
                         ],
+                        const SizedBox(height: 2),
+                        Text(
+                          '${template.items.length} ${template.items.length == 1 ? 'item' : 'itens'}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: CupertinoColors.systemGrey.resolveFrom(context),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -244,22 +294,22 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
   }
 
   Widget _buildTemplateAvatar(FormDefinition template, {bool isGlobal = false}) {
-    final color = isGlobal
-        ? CupertinoColors.systemOrange.resolveFrom(context)
-        : CupertinoColors.activeBlue.resolveFrom(context);
-
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: isGlobal
+            ? CupertinoColors.systemBlue.withValues(alpha: 0.15)
+            : CupertinoColors.systemTeal.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,
       child: Icon(
-        isGlobal ? CupertinoIcons.globe : CupertinoIcons.doc_text,
+        isGlobal ? CupertinoIcons.globe : CupertinoIcons.doc_text_fill,
         size: 24,
-        color: color,
+        color: isGlobal
+            ? CupertinoColors.systemBlue
+            : CupertinoColors.systemTeal,
       ),
     );
   }

@@ -249,7 +249,7 @@ class _OrderFormState extends State<OrderForm> {
             final forms = snapshot.data ?? [];
 
             return _buildGroupedSection(
-              header: "FORMULÁRIOS",
+              header: "PROCEDIMENTOS",
               trailing: forms.isNotEmpty ? _buildAddButton(onTap: () => _addForm(config)) : null,
               children: [
                 if (isLoading)
@@ -261,7 +261,7 @@ class _OrderFormState extends State<OrderForm> {
                   _buildListTile(
                     context: context,
                     icon: CupertinoIcons.plus_circle,
-                    title: "Adicionar Formulário",
+                    title: "Adicionar Procedimento",
                     value: "",
                     onTap: () => _addForm(config),
                     showChevron: true,
@@ -389,7 +389,7 @@ class _OrderFormState extends State<OrderForm> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Remover Formulário'),
+        title: const Text('Remover Procedimento'),
         content: Text('Deseja remover "${form.title}" desta OS?'),
         actions: [
           CupertinoDialogAction(
