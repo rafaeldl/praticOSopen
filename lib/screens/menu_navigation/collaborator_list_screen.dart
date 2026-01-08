@@ -3,8 +3,8 @@ import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divi
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/invite.dart';
+import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/user_role.dart';
-import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
   @override
@@ -383,7 +383,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     if (!canManage) return content;
 
     return Dismissible(
-      key: Key(membership.userId),
+      key: Key(membership.userId!),
       direction: DismissDirection.horizontal,
       background: Container(
         color: CupertinoColors.systemBlue,
@@ -464,7 +464,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
               Navigator.pop(context);
               try {
                 await _collaboratorStore.updateCollaboratorRole(
-                    membership.userId, role);
+                    membership.userId!, role);
               } catch (e) {
                 _showError(e.toString());
               }
@@ -496,7 +496,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             onPressed: () async {
               Navigator.pop(context);
               try {
-                await _collaboratorStore.removeCollaborator(membership.userId);
+                await _collaboratorStore.removeCollaborator(membership.userId!);
               } catch (e) {
                 _showError(e.toString());
               }

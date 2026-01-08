@@ -34,6 +34,16 @@ mixin _$UserStore on _UserStore, Store {
     return _$findCurrentUserAsyncAction.run(() => super.findCurrentUser());
   }
 
+  late final _$findUserByIdAsyncAction = AsyncAction(
+    '_UserStore.findUserById',
+    context: context,
+  );
+
+  @override
+  Future<User?> findUserById(String userId) {
+    return _$findUserByIdAsyncAction.run(() => super.findUserById(userId));
+  }
+
   @override
   String toString() {
     return '''
