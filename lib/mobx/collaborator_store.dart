@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/invite.dart';
+import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
@@ -208,9 +209,8 @@ abstract class _CollaboratorStore with Store {
           userId: user.id!,
           user: user.toAggr(),
           role: roleType,
-          joinedAt: DateTime.now(),
         );
-        batch.set(membershipRef, membership.toJson());
+        batch.set(membershipRef, membership.toFirestore());
       }
 
       // 4. Commit atômico (mesmo que ambos já existam, não faz mal)

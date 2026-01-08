@@ -22,14 +22,14 @@ Invite _$InviteFromJson(Map<String, dynamic> json) => Invite()
   ..status = $enumDecodeNullable(_$InviteStatusEnumMap, json['status']);
 
 Map<String, dynamic> _$InviteToJson(Invite instance) => <String, dynamic>{
-      'id': instance.id,
-      'email': instance.email,
-      'company': instance.company?.toJson(),
-      'role': _$RolesTypeEnumMap[instance.role],
-      'invitedBy': instance.invitedBy?.toJson(),
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'status': _$InviteStatusEnumMap[instance.status],
-    };
+  'id': instance.id,
+  'email': instance.email,
+  'company': instance.company?.toJson(),
+  'role': _$RolesTypeEnumMap[instance.role],
+  'invitedBy': instance.invitedBy?.toJson(),
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'status': _$InviteStatusEnumMap[instance.status],
+};
 
 const _$RolesTypeEnumMap = {
   RolesType.admin: 'admin',

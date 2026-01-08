@@ -196,10 +196,16 @@ service cloud.firestore {
         allow read, write: if belongsToCompany(companyId);
       }
 
-      match /memberships/{userId} {
+      match /memberships/{memberId} {
         allow read: if belongsToCompany(companyId);
-        // Owner ou admins podem gerenciar memberships
-        allow write: if request.auth != null
+        // Permite criar seu próprio membership (signup) ou owner/admin gerenciar outros
+        allow create: if request.auth != null
+          && (
+            request.auth.uid == memberId  // Self-membership (signup)
+            || isCompanyAdmin(companyId)
+          );
+        // Update/delete apenas owner ou admin
+        allow update, delete: if request.auth != null
           && (
             get(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid
             || isCompanyAdmin(companyId)

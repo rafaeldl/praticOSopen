@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:praticos/models/user.dart';
+import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/user_role.dart';
 
 /// Repository para memberships (índice reverso de colaboradores por empresa).
@@ -8,15 +8,6 @@ import 'package:praticos/models/user_role.dart';
 ///
 /// Esta collection serve como índice para listar rapidamente os colaboradores
 /// de uma empresa. O source of truth é `user.companies`.
-///
-/// Estrutura do documento:
-/// ```json
-/// {
-///   "role": "admin" | "manager" | "user",
-///   "user": { "id": "...", "name": "...", "email": "..." },
-///   "joinedAt": Timestamp
-/// }
-/// ```
 class TenantMembershipRepository {
   static const String collectionName = 'memberships';
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -34,14 +25,14 @@ class TenantMembershipRepository {
   Future<Membership?> getMembership(String companyId, String userId) async {
     final doc = await _getCollection(companyId).doc(userId).get();
     if (!doc.exists) return null;
-    return Membership.fromJson(doc.id, doc.data()!);
+    return Membership.fromFirestore(doc.id, doc.data()!);
   }
 
   /// Stream de membership de um usuário específico.
   Stream<Membership?> streamMembership(String companyId, String userId) {
     return _getCollection(companyId).doc(userId).snapshots().map((doc) {
       if (!doc.exists) return null;
-      return Membership.fromJson(doc.id, doc.data()!);
+      return Membership.fromFirestore(doc.id, doc.data()!);
     });
   }
 
@@ -49,7 +40,7 @@ class TenantMembershipRepository {
   Future<List<Membership>> listMemberships(String companyId) async {
     final snapshot = await _getCollection(companyId).get();
     return snapshot.docs
-        .map((doc) => Membership.fromJson(doc.id, doc.data()))
+        .map((doc) => Membership.fromFirestore(doc.id, doc.data()))
         .toList();
   }
 
@@ -57,7 +48,7 @@ class TenantMembershipRepository {
   Stream<List<Membership>> streamMemberships(String companyId) {
     return _getCollection(companyId).snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => Membership.fromJson(doc.id, doc.data()))
+          .map((doc) => Membership.fromFirestore(doc.id, doc.data()))
           .toList();
     });
   }
@@ -68,7 +59,7 @@ class TenantMembershipRepository {
         .where('role', isEqualTo: role.name)
         .get();
     return snapshot.docs
-        .map((doc) => Membership.fromJson(doc.id, doc.data()))
+        .map((doc) => Membership.fromFirestore(doc.id, doc.data()))
         .toList();
   }
 
@@ -83,7 +74,7 @@ class TenantMembershipRepository {
     String userId,
     Membership membership,
   ) {
-    return _getCollection(companyId).doc(userId).set(membership.toJson());
+    return _getCollection(companyId).doc(userId).set(membership.toFirestore());
   }
 
   /// Atualiza apenas a role de um membership.
@@ -112,43 +103,5 @@ class TenantMembershipRepository {
   Future<bool> isAdmin(String companyId, String userId) async {
     final membership = await getMembership(companyId, userId);
     return membership?.role == RolesType.admin;
-  }
-}
-
-/// Modelo para membership (índice reverso).
-/// Representa a participação de um usuário em uma empresa.
-class Membership {
-  final String userId;
-  final UserAggr? user;
-  final RolesType role;
-  final DateTime? joinedAt;
-
-  Membership({
-    required this.userId,
-    this.user,
-    required this.role,
-    this.joinedAt,
-  });
-
-  factory Membership.fromJson(String odId, Map<String, dynamic> json) {
-    return Membership(
-      userId: odId,
-      user: json['user'] != null ? UserAggr.fromJson(json['user']) : null,
-      role: RolesType.values.firstWhere(
-        (r) => r.name == json['role'],
-        orElse: () => RolesType.user,
-      ),
-      joinedAt: json['joinedAt'] != null
-          ? (json['joinedAt'] as Timestamp).toDate()
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'user': user?.toJson(),
-      'role': role.name,
-      'joinedAt': joinedAt ?? FieldValue.serverTimestamp(),
-    };
   }
 }

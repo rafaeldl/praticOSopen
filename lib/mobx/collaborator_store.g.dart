@@ -98,7 +98,9 @@ mixin _$CollaboratorStore on _CollaboratorStore, Store {
 
   @override
   Future<void> loadPendingInvites() {
-    return _$loadPendingInvitesAsyncAction.run(() => super.loadPendingInvites());
+    return _$loadPendingInvitesAsyncAction.run(
+      () => super.loadPendingInvites(),
+    );
   }
 
   late final _$addCollaboratorAsyncAction = AsyncAction(

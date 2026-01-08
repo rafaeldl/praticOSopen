@@ -61,10 +61,14 @@ abstract class _UserStore with Store {
   /// Cria uma empresa para o usuário atual (usado no onboarding).
   Future<void> createCompanyForUser(Company company) async {
     final userId = Global.currentUser?.uid;
-    if (userId == null) return;
+    if (userId == null) {
+      throw Exception('Usuário não autenticado');
+    }
 
     User? user = await repository.findUserById(userId);
-    if (user == null) return;
+    if (user == null) {
+      throw Exception('Usuário não encontrado no Firestore');
+    }
 
     // Adiciona a empresa à lista do usuário
     CompanyRoleAggr companyRole = CompanyRoleAggr()
