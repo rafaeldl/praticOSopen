@@ -354,6 +354,291 @@ const SEGMENTS = [
   },
 
   // ═══════════════════════════════════════════════════════════
+  // ELÉTRICA (Residencial/Predial)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'electrical',
+    name: 'Elétrica (Residencial/Predial)',
+    icon: '⚡️',
+    active: true,
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Instalação', 'en-US': 'Installation' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Instalações', 'en-US': 'Installations' }
+      },
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Instalação', 'en-US': 'Add Installation' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Execução', 'en-US': 'In Progress' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Liberado', 'en-US': 'Released' }
+      },
+
+      // Campos (para evolução futura de campos dinâmicos)
+      {
+        key: 'device.voltage',
+        type: 'select',
+        labels: { 'pt-BR': 'Tensão do Local', 'en-US': 'Site Voltage' },
+        options: ['110V', '220V', 'Bivolt', 'Trifásico'],
+        section: 'Especificações',
+        order: 1,
+      },
+      {
+        key: 'device.mainBreaker',
+        type: 'number',
+        labels: { 'pt-BR': 'Disjuntor Geral (A)', 'en-US': 'Main Breaker (A)' },
+        min: 1,
+        max: 400,
+        section: 'Especificações',
+        order: 2,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // HIDRÁULICA (Encanador)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'plumbing',
+    name: 'Hidráulica (Encanador)',
+    icon: '💧',
+    active: true,
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Instalação', 'en-US': 'Installation' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Instalações', 'en-US': 'Installations' }
+      },
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Instalação', 'en-US': 'Add Installation' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Atendimento', 'en-US': 'In Service' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Resolvido', 'en-US': 'Resolved' }
+      },
+
+      // Campos (para evolução futura)
+      {
+        key: 'device.waterType',
+        type: 'select',
+        labels: { 'pt-BR': 'Tipo de Água', 'en-US': 'Water Type' },
+        options: ['Fria', 'Quente', 'Ambas'],
+        section: 'Especificações',
+        order: 1,
+      },
+      {
+        key: 'device.pressure',
+        type: 'select',
+        labels: { 'pt-BR': 'Pressão', 'en-US': 'Pressure' },
+        options: ['Baixa', 'Normal', 'Alta', 'Não avaliada'],
+        section: 'Especificações',
+        order: 2,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // SEGURANÇA ELETRÔNICA (CFTV/Alarmes)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'security',
+    name: 'Segurança Eletrônica (CFTV/Alarmes)',
+    icon: '📹',
+    active: true,
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Sistema', 'en-US': 'System' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems' }
+      },
+      {
+        key: 'device.serialNumber',
+        type: 'label',
+        labels: { 'pt-BR': 'Identificador', 'en-US': 'Identifier' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Instalação', 'en-US': 'Installing' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Operacional', 'en-US': 'Operational' }
+      },
+
+      // Campos (para evolução futura)
+      {
+        key: 'device.systemType',
+        type: 'select',
+        labels: { 'pt-BR': 'Tipo de Sistema', 'en-US': 'System Type' },
+        options: ['CFTV', 'Alarme', 'Cerca elétrica', 'Controle de acesso', 'Interfonia'],
+        section: 'Especificações',
+        order: 1,
+      },
+      {
+        key: 'device.channels',
+        type: 'select',
+        labels: { 'pt-BR': 'Canais', 'en-US': 'Channels' },
+        options: ['4', '8', '16', '32'],
+        section: 'Especificações',
+        order: 2,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // ENERGIA SOLAR
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'solar',
+    name: 'Energia Solar',
+    icon: '☀️',
+    active: true,
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Sistema', 'en-US': 'System' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems' }
+      },
+      {
+        key: 'device.serialNumber',
+        type: 'label',
+        labels: { 'pt-BR': 'Nº do Inversor', 'en-US': 'Inverter Serial' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Instalação', 'en-US': 'Installing' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Gerando', 'en-US': 'Generating' }
+      },
+
+      // Campos (para evolução futura)
+      {
+        key: 'device.kwp',
+        type: 'number',
+        labels: { 'pt-BR': 'Potência do Sistema (kWp)', 'en-US': 'System Power (kWp)' },
+        min: 0,
+        max: 999,
+        section: 'Especificações',
+        order: 1,
+      },
+      {
+        key: 'device.panelCount',
+        type: 'number',
+        labels: { 'pt-BR': 'Qtd. de Placas', 'en-US': 'Panel Count' },
+        min: 0,
+        max: 999,
+        section: 'Especificações',
+        order: 2,
+      },
+      {
+        key: 'device.installationDate',
+        type: 'date',
+        labels: { 'pt-BR': 'Data de Instalação', 'en-US': 'Installation Date' },
+        section: 'Instalação',
+        order: 3,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // IMPRESSORAS / COPIADORAS
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'printers',
+    name: 'Impressoras / Copiadoras',
+    icon: '🖨️',
+    active: true,
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Impressora', 'en-US': 'Printer' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Impressoras', 'en-US': 'Printers' }
+      },
+      {
+        key: 'device.serialNumber',
+        type: 'label',
+        labels: { 'pt-BR': 'Número de Série', 'en-US': 'Serial Number' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Manutenção', 'en-US': 'Under Maintenance' }
+      },
+
+      // Campos (para evolução futura)
+      {
+        key: 'device.technology',
+        type: 'select',
+        labels: { 'pt-BR': 'Tecnologia', 'en-US': 'Technology' },
+        options: ['Laser', 'Jato de tinta', 'Térmica', 'Matricial', 'Outra'],
+        section: 'Especificações',
+        order: 1,
+      },
+      {
+        key: 'device.isColor',
+        type: 'select',
+        labels: { 'pt-BR': 'Colorida?', 'en-US': 'Color?' },
+        options: ['Sim', 'Não'],
+        section: 'Especificações',
+        order: 2,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // OUTRO (Genérico)
   // ═══════════════════════════════════════════════════════════
   {

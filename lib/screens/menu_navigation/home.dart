@@ -425,7 +425,7 @@ class _HomeState extends State<Home> {
                                     _formatCurrency(order.total),
                                     style: TextStyle(
                                       fontSize: 15,
-                                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                      color: order.payment == 'paid' ? CupertinoColors.label.resolveFrom(context) : CupertinoColors.secondaryLabel.resolveFrom(context),
                                       fontWeight: order.payment == 'paid' ? FontWeight.bold : FontWeight.w400,
                                     ),
                                   ),
