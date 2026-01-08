@@ -55,6 +55,18 @@ mixin _$AuthStore on _AuthStore, Store {
     return _$switchCompanyAsyncAction.run(() => super.switchCompany(companyId));
   }
 
+  late final _$reloadUserAndCompanyAsyncAction = AsyncAction(
+    '_AuthStore.reloadUserAndCompany',
+    context: context,
+  );
+
+  @override
+  Future<void> reloadUserAndCompany() {
+    return _$reloadUserAndCompanyAsyncAction.run(
+      () => super.reloadUserAndCompany(),
+    );
+  }
+
   late final _$signOutGoogleAsyncAction = AsyncAction(
     '_AuthStore.signOutGoogle',
     context: context,

@@ -40,7 +40,7 @@ abstract class _AuthStore with Store {
       await userStore.createUserIfNotExist(user);
 
       var dbUser = await userStore.findUserById(user.uid);
-      Company company;
+      Company? company;
 
       // Check if there is a last selected company saved
       String? lastCompanyId = prefs.getString('companyId');
@@ -71,6 +71,13 @@ abstract class _AuthStore with Store {
       prefs.setString('userEmail', user.email ?? '');
       if (user.photoURL != null) {
         prefs.setString('userPhoto', user.photoURL!);
+      }
+
+      // Se não encontrou empresa, usuário vai para onboarding
+      if (company == null) {
+        companyAggr = null;
+        Global.companyAggr = null;
+        return;
       }
 
       if (company.id != null) {
@@ -110,7 +117,7 @@ abstract class _AuthStore with Store {
 
     // Busca o usuário atualizado do Firestore
     var dbUser = await userStore.findUserById(user.uid);
-    Company company;
+    Company? company;
 
     // Check if there is a last selected company saved
     String? lastCompanyId = prefs.getString('companyId');
@@ -132,6 +139,13 @@ abstract class _AuthStore with Store {
     } else {
       // Fallback for legacy or owner-only logic
       company = await companyStore.getCompanyByOwnerId(user.uid);
+    }
+
+    // Se não encontrou empresa, mantém null
+    if (company == null) {
+      companyAggr = null;
+      Global.companyAggr = null;
+      return;
     }
 
     if (company.id != null) {

@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/invite.dart';
+import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/invite_repository.dart';
-import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 import 'package:praticos/repositories/user_repository.dart';
 
 part 'invite_store.g.dart';
@@ -114,9 +114,8 @@ abstract class _InviteStore with Store {
         userId: userId,
         user: user.toAggr(),
         role: role,
-        joinedAt: DateTime.now(),
       );
-      batch.set(membershipRef, membership.toJson());
+      batch.set(membershipRef, membership.toFirestore());
 
       // 3c. Atualiza status do convite
       final inviteRef = _db.collection('invites').doc(invite.id);

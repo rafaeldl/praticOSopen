@@ -13,9 +13,9 @@ mixin _$InviteStore on _InviteStore, Store {
 
   @override
   bool get hasPendingInvites => (_$hasPendingInvitesComputed ??= Computed<bool>(
-        () => super.hasPendingInvites,
-        name: '_InviteStore.hasPendingInvites',
-      )).value;
+    () => super.hasPendingInvites,
+    name: '_InviteStore.hasPendingInvites',
+  )).value;
 
   late final _$pendingInvitesAtom = Atom(
     name: '_InviteStore.pendingInvites',
@@ -78,7 +78,9 @@ mixin _$InviteStore on _InviteStore, Store {
 
   @override
   Future<void> loadPendingInvites() {
-    return _$loadPendingInvitesAsyncAction.run(() => super.loadPendingInvites());
+    return _$loadPendingInvitesAsyncAction.run(
+      () => super.loadPendingInvites(),
+    );
   }
 
   late final _$acceptInviteAsyncAction = AsyncAction(
