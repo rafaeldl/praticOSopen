@@ -321,13 +321,18 @@ class _FormFillScreenState extends State<FormFillScreen> {
   Future<void> _handleClose() async {
     // Se já está concluído ou não está completo, apenas fecha
     if (_currentForm.status == FormStatus.completed || !_isFormComplete()) {
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
       return;
     }
 
     // Formulário completo mas não marcado como concluído - auto-concluir
-    setState(() => _isSaving = true);
+    if (mounted) {
+      setState(() => _isSaving = true);
+    }
 
+    bool completed = false;
     try {
       await _formsService.updateStatus(
         widget.companyId,
@@ -336,12 +341,13 @@ class _FormFillScreenState extends State<FormFillScreen> {
         FormStatus.completed
       );
       HapticFeedback.mediumImpact();
+      completed = true;
     } catch (e) {
       // Se falhar, apenas fecha sem concluir
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);
-        Navigator.pop(context, true);
+        Navigator.pop(context, completed);
       }
     }
   }
