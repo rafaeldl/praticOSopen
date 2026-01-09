@@ -373,10 +373,13 @@ abstract class _OrderStore with Store {
       order!.payment = 'unpaid';
     }
 
+    // Calcular display do payment baseado no valor pago
+    final paid = order!.paidAmount ?? 0.0;
     if (order!.payment == 'paid') {
       payment = 'Pago';
-    } else if (order!.payment == 'unpaid') {
-      payment = 'A receber';
+    } else {
+      // Se tem pagamento parcial, mostrar "Parcial" na UI
+      payment = paid > 0 ? 'Parcial' : 'A receber';
     }
   }
 
@@ -679,15 +682,15 @@ abstract class _OrderStore with Store {
     final totalValue = order!.total ?? 0.0;
     final paid = order!.paidAmount ?? 0.0;
 
-    if (paid <= 0) {
-      order!.payment = 'unpaid';
-      payment = 'A receber';
-    } else if (paid >= totalValue) {
+    // No banco: apenas 'unpaid' ou 'paid'
+    // 'partial' é calculado em memória baseado em paidAmount
+    if (paid >= totalValue && totalValue > 0) {
       order!.payment = 'paid';
       payment = 'Pago';
     } else {
-      order!.payment = 'partial';
-      payment = 'Parcial';
+      order!.payment = 'unpaid';
+      // Se tem pagamento parcial, mostrar "Parcial" na UI
+      payment = paid > 0 ? 'Parcial' : 'A receber';
     }
   }
 

@@ -23,7 +23,7 @@ class Order extends BaseAuditCompany {
   DateTime? dueDate;
   bool? done;
   bool? paid;
-  String? payment; // unpaid, paid, partial
+  String? payment; // unpaid, paid (partial is calculated in memory based on paidAmount)
   String? status;
   int? number;
 
