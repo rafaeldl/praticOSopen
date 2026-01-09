@@ -171,9 +171,8 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   _buildProductNameField(context),
-                  // Apenas mostrar quantidade se pode editar campos principais
-                  if (canEditMainFields)
-                    _buildQuantityField(context, config),
+                  // Mostrar quantidade (desabilitado se não puder editar)
+                  _buildQuantityField(context, config, enabled: canEditMainFields),
                   // Apenas mostrar campos de valores se usuário pode ver preços E pode editar campos principais
                   if (_authService.hasPermission(PermissionType.viewPrices) && canEditMainFields) ...[
                     _buildValueField(context, config),
@@ -225,7 +224,7 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
     );
   }
 
-  Widget _buildQuantityField(BuildContext context, SegmentConfigProvider config) {
+  Widget _buildQuantityField(BuildContext context, SegmentConfigProvider config, {bool enabled = true}) {
     return CupertinoListTile(
       title: SizedBox(
         width: 100,
@@ -236,11 +235,16 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
         child: CupertinoTextFormFieldRow(
           controller: _quantityController,
           placeholder: '1',
+          enabled: enabled,
           keyboardType: TextInputType.number,
           textAlign: TextAlign.right,
           padding: EdgeInsets.zero,
           decoration: null,
-          style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
+          style: TextStyle(
+            color: enabled 
+                ? CupertinoColors.label.resolveFrom(context)
+                : CupertinoColors.secondaryLabel.resolveFrom(context)
+          ),
           validator: (value) {
             if (value == null || value.isEmpty) {
               return config.label(LabelKeys.required);

@@ -856,6 +856,15 @@ class _OrderFormState extends State<OrderForm> {
   void _showActionSheet(BuildContext context, SegmentConfigProvider config) {
     // Verificar se o usuário pode visualizar valores (necessário para gerar PDF completo)
     final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+    
+    // Verificar permissão de exclusão
+    bool canDelete = false;
+    if (_authService.isAdmin) {
+      canDelete = true;
+    } else if (_authService.isManager || _authService.isSupervisor) {
+      // Gerente e Supervisor só podem excluir em status 'Orçamento'
+      canDelete = _store.status == 'quote';
+    }
 
     showCupertinoModalPopup<void>(
       context: context,
@@ -880,11 +889,13 @@ class _OrderFormState extends State<OrderForm> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          isDestructiveAction: true,
-          child: Text('Excluir ${config.serviceOrder}'),
+          isDestructiveAction: canDelete,
+          child: Text(canDelete ? 'Excluir ${config.serviceOrder}' : config.label(LabelKeys.cancel)),
           onPressed: () {
             Navigator.pop(context);
-            _showDeleteConfirmation(config);
+            if (canDelete) {
+              _showDeleteConfirmation(config);
+            }
           },
         ),
       ),
