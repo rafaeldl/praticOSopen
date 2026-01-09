@@ -175,6 +175,34 @@ class AuthorizationService {
     return hasPermission(PermissionType.assignOrder);
   }
 
+  /// Verifica se o usuário pode editar campos principais da OS.
+  ///
+  /// Supervisor e Técnico só podem editar serviços, produtos, procedimentos,
+  /// data de entrega, cliente e device enquanto o status for 'quote' (orçamento).
+  /// Após aprovação, apenas podem editar observações de serviços/produtos.
+  ///
+  /// Admin, Manager e Consultant podem editar em qualquer status.
+  bool canEditOrderMainFields(Order order) {
+    if (!canAccessOrder(order)) return false;
+
+    final role = normalizedRole;
+    if (role == null) return false;
+
+    // Admin, Manager e Consultant podem editar sempre
+    if (role == RolesType.admin ||
+        role == RolesType.manager ||
+        role == RolesType.consultant) {
+      return hasPermission(PermissionType.editOrder);
+    }
+
+    // Supervisor e Técnico só podem editar enquanto status for 'quote'
+    if (role == RolesType.supervisor || role == RolesType.technician) {
+      return order.status == 'quote' && hasPermission(PermissionType.editOrder);
+    }
+
+    return false;
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // DATA VISIBILITY
   // ═══════════════════════════════════════════════════════════════════

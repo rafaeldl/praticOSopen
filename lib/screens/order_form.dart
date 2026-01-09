@@ -176,6 +176,9 @@ class _OrderFormState extends State<OrderForm> {
               placeholder: "Definir",
               onTap: _selectDueDate,
               showChevron: true,
+              enabled: _store.order != null
+                  ? _authService.canEditOrderMainFields(_store.order!)
+                  : true,
             ),
             // Apenas mostrar desconto se usuário pode ver preços
             if (canViewPrices && discount > 0)
@@ -220,6 +223,10 @@ class _OrderFormState extends State<OrderForm> {
   Widget _buildClientDeviceSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
+        final canEditFields = _store.order != null
+            ? _authService.canEditOrderMainFields(_store.order!)
+            : true;
+
         return _buildGroupedSection(
           header: "${config.customer.toUpperCase()} E ${config.device.toUpperCase()}",
           children: [
@@ -231,6 +238,7 @@ class _OrderFormState extends State<OrderForm> {
               placeholder: "Selecionar ${config.customer}",
               onTap: _selectCustomer,
               showChevron: true,
+              enabled: canEditFields,
             ),
             _buildListTile(
               context: context,
@@ -241,6 +249,7 @@ class _OrderFormState extends State<OrderForm> {
               onTap: _selectDevice,
               showChevron: true,
               isLast: true,
+              enabled: canEditFields,
             ),
           ],
         );
@@ -464,10 +473,15 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final services = _store.services ?? [];
+        final canEditFields = _store.order != null
+            ? _authService.canEditOrderMainFields(_store.order!)
+            : true;
 
         return _buildGroupedSection(
           header: "SERVIÇOS",
-          trailing: services.isNotEmpty ? _buildAddButton(onTap: _addService) : null,
+          trailing: services.isNotEmpty && canEditFields
+              ? _buildAddButton(onTap: _addService)
+              : null,
           children: [
             if (services.isEmpty)
               _buildListTile(
@@ -479,6 +493,7 @@ class _OrderFormState extends State<OrderForm> {
                 showChevron: true,
                 isLast: true,
                 textColor: CupertinoTheme.of(context).primaryColor,
+                enabled: canEditFields,
               )
             else
               ...services.asMap().entries.map((entry) {
@@ -496,10 +511,15 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final products = _store.products ?? [];
+        final canEditFields = _store.order != null
+            ? _authService.canEditOrderMainFields(_store.order!)
+            : true;
 
         return _buildGroupedSection(
           header: "PEÇAS E PRODUTOS",
-          trailing: products.isNotEmpty ? _buildAddButton(onTap: _addProduct) : null,
+          trailing: products.isNotEmpty && canEditFields
+              ? _buildAddButton(onTap: _addProduct)
+              : null,
           children: [
             if (products.isEmpty)
               _buildListTile(
@@ -511,6 +531,7 @@ class _OrderFormState extends State<OrderForm> {
                 showChevron: true,
                 isLast: true,
                 textColor: CupertinoTheme.of(context).primaryColor,
+                enabled: canEditFields,
               )
             else
               ...products.asMap().entries.map((entry) {
@@ -598,10 +619,11 @@ class _OrderFormState extends State<OrderForm> {
     Color? valueColor,
     Color? textColor,
     bool isBold = false,
+    bool enabled = true,
   }) {
     final hasValue = value != null && value.isNotEmpty;
     return GestureDetector(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       child: Container(
         color: Colors.transparent, // Hit test
         child: Column(
@@ -619,7 +641,9 @@ class _OrderFormState extends State<OrderForm> {
                       title,
                       style: TextStyle(
                         fontSize: 17,
-                        color: textColor ?? CupertinoColors.label.resolveFrom(context),
+                        color: enabled
+                            ? (textColor ?? CupertinoColors.label.resolveFrom(context))
+                            : CupertinoColors.tertiaryLabel.resolveFrom(context),
                         fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
@@ -628,12 +652,14 @@ class _OrderFormState extends State<OrderForm> {
                     hasValue ? value : placeholder,
                     style: TextStyle(
                       fontSize: 17,
-                      color: hasValue
-                          ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
-                          : CupertinoColors.placeholderText.resolveFrom(context),
+                      color: enabled
+                          ? (hasValue
+                              ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
+                              : CupertinoColors.placeholderText.resolveFrom(context))
+                          : CupertinoColors.tertiaryLabel.resolveFrom(context),
                     ),
                   ),
-                  if (showChevron) ...[
+                  if (showChevron && enabled) ...[
                     const SizedBox(width: 6),
                     Icon(
                       CupertinoIcons.chevron_right,
@@ -659,11 +685,16 @@ class _OrderFormState extends State<OrderForm> {
   Widget _buildServiceRow(BuildContext context, dynamic service, int index, bool isLast, SegmentConfigProvider config) {
     // Verificar se o usuário pode visualizar valores financeiros
     final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+    // Verificar se pode editar campos principais (incluindo delete)
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
 
     return _buildDismissibleItem(
       context: context,
       index: index,
       onDelete: () => _confirmDeleteService(index, config),
+      canDelete: canEditFields,
       child: _buildItemRow(
         context: context,
         title: service.service?.name ?? "Serviço",
@@ -678,11 +709,16 @@ class _OrderFormState extends State<OrderForm> {
   Widget _buildProductRow(BuildContext context, dynamic product, int index, bool isLast, SegmentConfigProvider config) {
     // Verificar se o usuário pode visualizar valores financeiros
     final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+    // Verificar se pode editar campos principais (incluindo delete)
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
 
     return _buildDismissibleItem(
       context: context,
       index: index,
       onDelete: () => _confirmDeleteProduct(index, config),
+      canDelete: canEditFields,
       child: _buildItemRow(
         context: context,
         title: product.product?.name ?? "Produto",
@@ -699,7 +735,13 @@ class _OrderFormState extends State<OrderForm> {
     required int index,
     required VoidCallback onDelete,
     required Widget child,
+    bool canDelete = true,
   }) {
+    // Se não pode deletar, retorna apenas o child sem o Dismissible
+    if (!canDelete) {
+      return child;
+    }
+
     return Dismissible(
       key: ValueKey('item_$index'),
       direction: DismissDirection.endToStart,
