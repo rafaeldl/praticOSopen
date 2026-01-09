@@ -156,16 +156,6 @@ class AuthorizationService {
     }
   }
 
-  /// Verifica se uma OS está atribuída ao usuário.
-  bool _isOrderAssignedToUser(Order order, String userId) {
-    // Verifica pelo campo assignedTo (UserAggr tem campo id)
-    if (order.assignedTo?.id == userId) {
-      return true;
-    }
-    // Fallback: verifica pelo createdBy para compatibilidade
-    return order.createdBy?.id == userId;
-  }
-
   /// Verifica se o usuário pode editar uma OS específica.
   bool canEditOrder(Order order) {
     if (!canAccessOrder(order)) return false;
