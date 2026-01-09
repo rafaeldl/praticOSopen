@@ -8,6 +8,8 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/permission.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -23,10 +25,13 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int currentSelected = 0;
   final ScrollController _scrollController = ScrollController();
+  final AuthorizationService _authService = AuthorizationService.instance;
   late OrderStore orderStore;
 
   List<Map<String, dynamic>> _getFilters(SegmentConfigProvider config) {
-    return [
+    final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+
+    final baseFilters = [
       {'status': 'Todos', 'icon': CupertinoIcons.square_grid_2x2, 'field': null},
       {'status': 'Entrega', 'field': 'due_date', 'icon': CupertinoIcons.clock},
       {'status': config.getStatus('approved'), 'field': 'approved', 'icon': CupertinoIcons.hand_thumbsup},
@@ -34,9 +39,17 @@ class _HomeState extends State<Home> {
       {'status': config.getStatus('quote'), 'field': 'quote', 'icon': CupertinoIcons.doc_text},
       {'status': config.getStatus('done'), 'field': 'done', 'icon': CupertinoIcons.check_mark_circled},
       {'status': config.getStatus('canceled'), 'field': 'canceled', 'icon': CupertinoIcons.xmark_circle},
-      {'status': 'A receber', 'field': 'unpaid', 'icon': CupertinoIcons.money_dollar},
-      {'status': 'Pago', 'field': 'paid', 'icon': CupertinoIcons.money_dollar_circle},
     ];
+
+    // Apenas adicionar filtros financeiros se usuário tem permissão
+    if (canViewPrices) {
+      baseFilters.addAll([
+        {'status': 'A receber', 'field': 'unpaid', 'icon': CupertinoIcons.money_dollar},
+        {'status': 'Pago', 'field': 'paid', 'icon': CupertinoIcons.money_dollar_circle},
+      ]);
+    }
+
+    return baseFilters;
   }
 
   @override
@@ -421,15 +434,18 @@ class _HomeState extends State<Home> {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    _formatCurrency(order.total),
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: order.payment == 'paid' ? CupertinoColors.label.resolveFrom(context) : CupertinoColors.secondaryLabel.resolveFrom(context),
-                                      fontWeight: order.payment == 'paid' ? FontWeight.bold : FontWeight.w400,
+                                  // Apenas mostrar valor se usuário tem permissão
+                                  if (_authService.hasPermission(PermissionType.viewPrices)) ...[
+                                    Text(
+                                      _formatCurrency(order.total),
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: order.payment == 'paid' ? CupertinoColors.label.resolveFrom(context) : CupertinoColors.secondaryLabel.resolveFrom(context),
+                                        fontWeight: order.payment == 'paid' ? FontWeight.bold : FontWeight.w400,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
+                                    const SizedBox(width: 8),
+                                  ],
                                   // Status Dot (Now on the right)
                                   Container(
                                     width: 8,
