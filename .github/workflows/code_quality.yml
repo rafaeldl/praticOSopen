@@ -3,6 +3,10 @@ name: Code Quality
 on:
   push:
     branches: [ "**" ]
+    paths:
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
 
 jobs:
   analyze:

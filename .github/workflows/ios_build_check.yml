@@ -4,8 +4,9 @@ on:
   pull_request:
     branches: [ master ]
     paths:
-      - 'lib/**'
       - 'ios/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
 
 jobs:
   build-check:
