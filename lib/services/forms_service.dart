@@ -1,25 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
-import 'package:praticos/config/feature_flags.dart';
 
 class FormsService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   /// Helper para obter a referência da coleção de formulários da OS
-  /// Respeita a estrutura multi-tenant (V2 ou Legada)
+  /// Path: `/companies/{companyId}/orders/{orderId}/forms`
   CollectionReference<Map<String, dynamic>> _getFormsCollection(
       String companyId, String orderId) {
-    if (FeatureFlags.shouldReadFromNew) {
-      return _db
-          .collection('companies')
-          .doc(companyId)
-          .collection('orders')
-          .doc(orderId)
-          .collection('forms');
-    } else {
-      return _db.collection('orders').doc(orderId).collection('forms');
-    }
+    return _db
+        .collection('companies')
+        .doc(companyId)
+        .collection('orders')
+        .doc(orderId)
+        .collection('forms');
   }
 
   /// Busca templates de formulários disponíveis SOMENTE da empresa

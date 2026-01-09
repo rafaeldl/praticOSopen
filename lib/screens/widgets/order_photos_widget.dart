@@ -59,22 +59,11 @@ class OrderPhotosWidget extends StatelessWidget {
   }
 
   Widget _buildPhotosGrid(BuildContext context, SegmentConfigProvider config) {
-    return Column(
-      children: [
-        // Foto de capa (primeira foto)
-        if (store.photos.isNotEmpty) 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _buildCoverPhoto(context, config),
-          ),
-        const SizedBox(height: 8),
-        // Grid das outras fotos
-        if (store.photos.length > 1) 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: _buildThumbnailGrid(context, config),
-          ),
-      ],
+    if (store.photos.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: _buildCoverPhoto(context, config),
     );
   }
 
@@ -144,49 +133,6 @@ class OrderPhotosWidget extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildThumbnailGrid(BuildContext context, SegmentConfigProvider config) {
-    final thumbnailPhotos = store.photos.skip(1).toList();
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-      ),
-      itemCount: thumbnailPhotos.length,
-      itemBuilder: (context, index) {
-        final photo = thumbnailPhotos[index];
-        final actualIndex = index + 1; // +1 porque pulamos a primeira foto
-
-        return GestureDetector(
-          onTap: () => _showPhotoViewer(context, actualIndex, config),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: CachedImage(
-                  imageUrl: photo.url!,
-                  fit: BoxFit.cover,
-                  borderRadius: BorderRadius.circular(8),
-                  memCacheWidth: 200, // Otimiza para thumbnails
-                ),
-              ),
-              Positioned(
-                top: 4,
-                right: 4,
-                child: _buildPhotoActionButton(context, actualIndex, config, small: true),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 

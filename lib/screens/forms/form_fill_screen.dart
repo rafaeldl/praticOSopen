@@ -288,7 +288,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
             title: const Text('Erro'),
-            content: const Text('Não foi possível concluir o formulário. Tente novamente.'),
+            content: const Text('Não foi possível concluir o procedimento. Tente novamente.'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
@@ -297,6 +297,51 @@ class _FormFillScreenState extends State<FormFillScreen> {
             ],
           ),
         );
+      }
+    }
+  }
+
+  /// Verifica se todos os campos obrigatórios foram preenchidos
+  bool _isFormComplete() {
+    for (final item in _currentForm.items) {
+      if (!item.required) continue;
+
+      final response = _currentForm.getResponse(item.id);
+
+      if (item.type == FormItemType.photoOnly) {
+        if (response == null || response.photoUrls.isEmpty) return false;
+      } else {
+        if (response == null || response.value == null || response.value.toString().isEmpty) return false;
+      }
+    }
+    return true;
+  }
+
+  /// Lida com o fechamento da tela, auto-concluindo se estiver completo
+  Future<void> _handleClose() async {
+    // Se já está concluído ou não está completo, apenas fecha
+    if (_currentForm.status == FormStatus.completed || !_isFormComplete()) {
+      Navigator.pop(context);
+      return;
+    }
+
+    // Formulário completo mas não marcado como concluído - auto-concluir
+    setState(() => _isSaving = true);
+
+    try {
+      await _formsService.updateStatus(
+        widget.companyId,
+        widget.orderId,
+        _currentForm.id,
+        FormStatus.completed
+      );
+      HapticFeedback.mediumImpact();
+    } catch (e) {
+      // Se falhar, apenas fecha sem concluir
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+        Navigator.pop(context, true);
       }
     }
   }
@@ -323,7 +368,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
             title: const Text('Erro'),
-            content: const Text('Não foi possível reabrir o formulário. Tente novamente.'),
+            content: const Text('Não foi possível reabrir o procedimento. Tente novamente.'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
@@ -440,8 +485,8 @@ class _FormFillScreenState extends State<FormFillScreen> {
             largeTitle: Text(_currentForm.title),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              onPressed: _handleClose,
+              child: const Text('Fechar'),
             ),
             trailing: _isSaving
                 ? const CupertinoActivityIndicator()
@@ -478,7 +523,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Formulário concluído',
+                            'Procedimento concluído',
                             style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                               color: CupertinoColors.systemGreen,
                               fontWeight: FontWeight.w500,

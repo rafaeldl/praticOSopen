@@ -23,8 +23,10 @@ abstract class _CompanyStore with Store {
         as FutureOr<Company?>);
   }
 
-  Future<Company> getCompanyByOwnerId(String id) async {
-    return await repository.getSingleQuery([QueryArgs('owner.id', id)]);
+  Future<Company?> getCompanyByOwnerId(String id) async {
+    final companies = await repository.getQueryList(args: [QueryArgs('owner.id', id)]);
+    if (companies.isEmpty) return null;
+    return companies.first;
   }
 
   @action

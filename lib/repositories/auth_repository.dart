@@ -19,13 +19,26 @@ class AuthRepository {
   }
 
   Future<User> signInWithGoogle() async {
+    // Desconecta sessão anterior para permitir escolher outra conta
+    // Isso é especialmente útil no simulador iOS
+    try {
+      await _googleSignIn.disconnect();
+    } catch (_) {
+      // Ignora erro se não havia sessão anterior
+    }
+
     final GoogleSignInAccount? googleSignInAccount =
         await (_googleSignIn.signIn());
-    final GoogleSignInAuthentication? googleSignInAuthentication =
-        await googleSignInAccount?.authentication;
+
+    if (googleSignInAccount == null) {
+      throw Exception('Login cancelado pelo usuário');
+    }
+
+    final GoogleSignInAuthentication googleSignInAuthentication =
+        await googleSignInAccount.authentication;
     final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication?.accessToken,
-      idToken: googleSignInAuthentication?.idToken,
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
     );
     final UserCredential authResult =
         await _auth.signInWithCredential(credential);

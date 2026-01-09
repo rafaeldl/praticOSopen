@@ -201,7 +201,7 @@ class _SettingsState extends State<Settings> {
                           _buildSettingsTile(
                             icon: CupertinoIcons.doc_text_fill,
                             color: CupertinoColors.systemTeal,
-                            title: 'Formulários',
+                            title: 'Procedimentos',
                             onTap: () => Navigator.pushNamed(context, '/form_template_list'),
                           ),
                       ],

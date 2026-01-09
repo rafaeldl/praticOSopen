@@ -114,16 +114,32 @@ class _ProductListScreenState extends State<ProductListScreen> {
     if (productList.isEmpty) {
       return SliverFillRemaining(
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(CupertinoIcons.cube_box, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
-              const SizedBox(height: 16),
-              Text(
-                'Nenhum produto cadastrado',
-                style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.cube_box, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
+                const SizedBox(height: 16),
+                Text(
+                  'Nenhum produto cadastrado',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.label.resolveFrom(context),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Toque em + para adicionar seu primeiro produto.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

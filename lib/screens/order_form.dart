@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, ScaffoldMessenger, SnackBar, Material, MaterialType, Divider; 
 // Keeping Material for some specific helpers or if absolutely needed, but main UI is Cupertino.
@@ -26,9 +25,7 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
 
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+import 'package:praticos/services/pdf/pdf_service.dart';
 
 class OrderForm extends StatefulWidget {
   @override
@@ -82,16 +79,15 @@ class _OrderFormState extends State<OrderForm> {
           slivers: [
             _buildNavigationBar(context, config),
             SliverSafeArea(
-              top: false, // Navigation bar handles top safe area
+              top: false,
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildPhotosSection(context),
                   _buildClientDeviceSection(context, config),
-                  _buildStatusDatesSection(context, config),
-                  _buildFormsSection(context, config),
+                  _buildSummarySection(context, config),
                   _buildServicesSection(context, config),
                   _buildProductsSection(context, config),
-                  _buildTotalSection(context, config),
+                  _buildFormsSection(context, config),
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -129,11 +125,84 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   Widget _buildPhotosSection(BuildContext context) {
-    // Keeping OrderPhotosWidget but wrapping it to look integrated if needed.
-    // Ideally, we'd style it more 'Apple-like' here.
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
       child: OrderPhotosWidget(store: _store),
+    );
+  }
+
+  /// Seção de resumo - Status, Total e Datas no padrão iOS
+  Widget _buildSummarySection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(
+      builder: (_) {
+        final total = _store.total ?? 0.0;
+        final discount = _store.discount ?? 0.0;
+        final payment = _store.payment ?? '';
+        final isPaid = payment == 'Pago' || payment == 'paid';
+        final hasCreatedDate = _store.order?.id != null;
+
+        return _buildGroupedSection(
+          header: "RESUMO",
+          children: [
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.flag_fill,
+              title: "Status",
+              value: config.getStatus(_store.status),
+              onTap: () => _selectStatus(config),
+              showChevron: true,
+              valueColor: _getStatusColorCupertino(_store.status),
+            ),
+            if (hasCreatedDate)
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.clock,
+                title: "Criado em",
+                value: _store.formattedCreatedDate,
+                onTap: () {},
+                showChevron: false,
+              ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.calendar,
+              title: "Entrega",
+              value: _store.dueDate ?? 'Definir',
+              placeholder: "Definir",
+              onTap: _selectDueDate,
+              showChevron: true,
+            ),
+            if (discount > 0)
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.tag_fill,
+                title: "Desconto",
+                value: "- ${_convertToCurrency(discount)}",
+                onTap: () {},
+                showChevron: false,
+                valueColor: CupertinoColors.systemRed,
+              ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.money_dollar_circle_fill,
+              title: config.label(LabelKeys.total),
+              value: _convertToCurrency(total),
+              onTap: () => _showPaymentOptions(config),
+              showChevron: true,
+              isBold: true,
+            ),
+            _buildListTile(
+              context: context,
+              icon: isPaid ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.clock_fill,
+              title: "Pagamento",
+              value: isPaid ? "Pago" : "A Receber",
+              onTap: () => _showPaymentOptions(config),
+              showChevron: true,
+              valueColor: isPaid ? CupertinoColors.systemGreen : CupertinoColors.systemOrange,
+              isLast: true,
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -167,46 +236,6 @@ class _OrderFormState extends State<OrderForm> {
       },
     );
   }
-
-  Widget _buildStatusDatesSection(BuildContext context, SegmentConfigProvider config) {
-    return Observer(
-      builder: (_) {
-        return _buildGroupedSection(
-          header: "DETALHES",
-          children: [
-            _buildListTile(
-              context: context,
-              icon: CupertinoIcons.flag_fill,
-              title: "Status",
-              value: config.getStatus(_store.status),
-              onTap: () => _selectStatus(config),
-              showChevron: true,
-              valueColor: _getStatusColorCupertino(_store.status),
-            ),
-            _buildListTile(
-              context: context,
-              icon: CupertinoIcons.calendar,
-              title: "Criado em",
-              value: _store.formattedCreatedDate,
-              onTap: () {}, // Read only
-              showChevron: false,
-            ),
-            _buildListTile(
-              context: context,
-              icon: CupertinoIcons.time_solid,
-              title: "Entrega",
-              value: _store.dueDate ?? 'Definir Data',
-              placeholder: "Definir Data",
-              onTap: _selectDueDate,
-              showChevron: true,
-              isLast: true,
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildFormsSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
@@ -218,50 +247,33 @@ class _OrderFormState extends State<OrderForm> {
           builder: (context, snapshot) {
             final isLoading = hasOrder && snapshot.connectionState == ConnectionState.waiting;
             final forms = snapshot.data ?? [];
-            
-            return Column(
+
+            return _buildGroupedSection(
+              header: "PROCEDIMENTOS",
+              trailing: forms.isNotEmpty ? _buildAddButton(onTap: () => _addForm(config)) : null,
               children: [
-                _buildGroupedSection(
-                  header: "FORMULÁRIOS E CHECKLISTS",
-                  children: [
-                    if (isLoading)
-                      const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(child: CupertinoActivityIndicator()),
-                      )
-                    else if (forms.isEmpty)
-                      _buildListTile(
-                        context: context,
-                        title: "Nenhum formulário",
-                        value: "",
-                        placeholder: "",
-                        onTap: () {},
-                        showChevron: false,
-                        isLast: true,
-                        textColor: CupertinoColors.secondaryLabel,
-                      )
-                    else
-                      ...forms.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final form = entry.value;
-                        return _buildFormRow(context, form, index == forms.length - 1);
-                      }),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: CupertinoButton(
-                    onPressed: () => _addForm(config),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                         Icon(CupertinoIcons.doc_text_fill),
-                         SizedBox(width: 8),
-                         Text("Adicionar Formulário"),
-                      ],
-                    ),
-                  ),
-                ),
+                if (isLoading)
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(child: CupertinoActivityIndicator()),
+                  )
+                else if (forms.isEmpty)
+                  _buildListTile(
+                    context: context,
+                    icon: CupertinoIcons.plus_circle,
+                    title: "Adicionar Procedimento",
+                    value: "",
+                    onTap: () => _addForm(config),
+                    showChevron: true,
+                    isLast: true,
+                    textColor: CupertinoTheme.of(context).primaryColor,
+                  )
+                else
+                  ...forms.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final form = entry.value;
+                    return _buildFormRow(context, form, index == forms.length - 1);
+                  }),
               ],
             );
           },
@@ -271,22 +283,17 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   Widget _buildFormRow(BuildContext context, of_model.OrderForm form, bool isLast) {
-    // Calculando progresso simples
     final total = form.items.length;
-    final answered = form.responses.length; // Assumindo que resposta existe = respondido
+    final answered = form.responses.length;
     final progress = total > 0 ? (answered / total) : 0.0;
     final percent = (progress * 100).toInt();
     final isCompleted = form.status == of_model.FormStatus.completed;
 
     return _buildDismissibleItem(
       context: context,
-      index: form.id.hashCode, // Usando hash do ID para chave única do Dismissible
+      index: form.id.hashCode,
       onDelete: () => _confirmDeleteForm(form),
-      child: _buildItemRow(
-        context: context,
-        title: form.title,
-        subtitle: isCompleted ? "Concluído" : "$answered de $total respondidos ($percent%)",
-        trailing: "", // Poderia usar um Icon check aqui
+      child: GestureDetector(
         onTap: () {
           Navigator.push(
             context,
@@ -300,7 +307,80 @@ class _OrderFormState extends State<OrderForm> {
             ),
           );
         },
-        isLast: isLast,
+        child: Container(
+          color: Colors.transparent,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    // Indicador de status
+                    Container(
+                      width: 24,
+                      height: 24,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCompleted
+                          ? CupertinoColors.systemGreen
+                          : CupertinoColors.systemOrange,
+                      ),
+                      child: Icon(
+                        isCompleted
+                          ? CupertinoIcons.checkmark
+                          : CupertinoIcons.clock,
+                        size: 14,
+                        color: CupertinoColors.white,
+                      ),
+                    ),
+                    // Título e subtítulo
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            form.title,
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: CupertinoColors.label.resolveFrom(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            isCompleted
+                              ? "Concluído"
+                              : "$answered de $total ($percent%)",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isCompleted
+                                ? CupertinoColors.systemGreen
+                                : CupertinoColors.systemOrange,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Chevron
+                    Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 16,
+                      color: CupertinoColors.systemGrey3.resolveFrom(context),
+                    ),
+                  ],
+                ),
+              ),
+              if (!isLast)
+                Divider(
+                  height: 1,
+                  indent: 52,
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -309,7 +389,7 @@ class _OrderFormState extends State<OrderForm> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Remover Formulário'),
+        title: const Text('Remover Procedimento'),
         content: Text('Deseja remover "${form.title}" desta OS?'),
         actions: [
           CupertinoDialogAction(
@@ -373,44 +453,28 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final services = _store.services ?? [];
-        return Column(
+
+        return _buildGroupedSection(
+          header: "SERVIÇOS",
+          trailing: services.isNotEmpty ? _buildAddButton(onTap: _addService) : null,
           children: [
-             _buildGroupedSection(
-              header: "SERVIÇOS",
-              children: [
-                if (services.isEmpty)
-                  _buildListTile(
-                    context: context,
-                    title: "Nenhum serviço",
-                    value: "",
-                    placeholder: "",
-                    onTap: () {},
-                    showChevron: false,
-                    isLast: true,
-                    textColor: CupertinoColors.secondaryLabel,
-                  )
-                else
-                  ...services.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final service = entry.value;
-                    return _buildServiceRow(context, service, index, index == services.length - 1, config);
-                  }),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: CupertinoButton(
-                onPressed: _addService,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(CupertinoIcons.add_circled_solid),
-                    const SizedBox(width: 8),
-                    Text(config.label(LabelKeys.createService)),
-                  ],
-                ),
-              ),
-            ),
+            if (services.isEmpty)
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.plus_circle,
+                title: config.label(LabelKeys.createService),
+                value: "",
+                onTap: _addService,
+                showChevron: true,
+                isLast: true,
+                textColor: CupertinoTheme.of(context).primaryColor,
+              )
+            else
+              ...services.asMap().entries.map((entry) {
+                final index = entry.key;
+                final service = entry.value;
+                return _buildServiceRow(context, service, index, index == services.length - 1, config);
+              }),
           ],
         );
       },
@@ -421,89 +485,28 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final products = _store.products ?? [];
-        return Column(
-          children: [
-            _buildGroupedSection(
-              header: "PEÇAS E PRODUTOS",
-              children: [
-                if (products.isEmpty)
-                  _buildListTile(
-                    context: context,
-                    title: "Nenhum produto",
-                    value: "",
-                    placeholder: "",
-                    onTap: () {},
-                    showChevron: false,
-                    isLast: true,
-                    textColor: CupertinoColors.secondaryLabel,
-                  )
-                else
-                  ...products.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final product = entry.value;
-                    return _buildProductRow(context, product, index, index == products.length - 1, config);
-                  }),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: CupertinoButton(
-                onPressed: _addProduct,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                     const Icon(CupertinoIcons.add_circled_solid),
-                     const SizedBox(width: 8),
-                     Text(config.label(LabelKeys.createProduct)),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
-  Widget _buildTotalSection(BuildContext context, SegmentConfigProvider config) {
-    return Observer(
-      builder: (_) {
-        final total = _store.total ?? 0.0;
-        final discount = _store.discount ?? 0.0;
-        final payment = _store.payment ?? '';
-        final isPaid = payment == 'Pago';
-        
         return _buildGroupedSection(
-          header: "TOTALIZAÇÃO",
+          header: "PEÇAS E PRODUTOS",
+          trailing: products.isNotEmpty ? _buildAddButton(onTap: _addProduct) : null,
           children: [
-            if (discount > 0)
+            if (products.isEmpty)
               _buildListTile(
                 context: context,
-                title: "Desconto",
-                value: "- ${_convertToCurrency(discount)}",
-                onTap: () {},
-                showChevron: false,
-                textColor: CupertinoColors.systemRed,
-                valueColor: CupertinoColors.systemRed,
-              ),
-             _buildListTile(
-              context: context,
-              title: config.label(LabelKeys.total),
-              value: _convertToCurrency(total),
-              onTap: () {},
-              showChevron: false,
-              isBold: true,
-              valueColor: CupertinoColors.label.resolveFrom(context),
-            ),
-             _buildListTile(
-              context: context,
-              title: "Situação",
-              value: isPaid ? "PAGO" : "A RECEBER",
-              onTap: () => _showPaymentOptions(config),
-              showChevron: true,
-              valueColor: isPaid ? CupertinoColors.activeGreen : CupertinoColors.systemOrange,
-              isLast: true,
-            ),
+                icon: CupertinoIcons.plus_circle,
+                title: config.label(LabelKeys.createProduct),
+                value: "",
+                onTap: _addProduct,
+                showChevron: true,
+                isLast: true,
+                textColor: CupertinoTheme.of(context).primaryColor,
+              )
+            else
+              ...products.asMap().entries.map((entry) {
+                final index = entry.key;
+                final product = entry.value;
+                return _buildProductRow(context, product, index, index == products.length - 1, config);
+              }),
           ],
         );
       },
@@ -515,20 +518,28 @@ class _OrderFormState extends State<OrderForm> {
   Widget _buildGroupedSection({
     required String header,
     required List<Widget> children,
+    Widget? trailing,
   }) {
     return Builder(
       builder: (context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(32, 24, 16, 8),
-            child: Text(
-              header,
-              style: TextStyle(
-                fontSize: 13,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                fontWeight: FontWeight.w500,
-              ),
+            padding: const EdgeInsets.fromLTRB(32, 24, 20, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  header,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                if (trailing != null) trailing,
+              ],
             ),
           ),
           Container(
@@ -542,6 +553,24 @@ class _OrderFormState extends State<OrderForm> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Botão de adicionar no padrão iOS (texto azul simples)
+  Widget _buildAddButton({required VoidCallback onTap, String label = 'Adicionar'}) {
+    return Builder(
+      builder: (context) => CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        onPressed: onTap,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 17,
+            color: CupertinoTheme.of(context).primaryColor,
+          ),
+        ),
       ),
     );
   }
@@ -836,12 +865,8 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   void _selectStatus(SegmentConfigProvider config) {
-     // Assuming ModalStatus().showModal returns a Future<String?>
-     // We should adapt it to CupertinoActionSheet or keep using it if it's custom.
-     // To follow strict HIG, let's use ActionSheet here.
-     
      final statusKeys = ['quote', 'approved', 'progress', 'done', 'canceled'];
-     
+
      showCupertinoModalPopup(
        context: context,
        builder: (context) => CupertinoActionSheet(
@@ -850,8 +875,8 @@ class _OrderFormState extends State<OrderForm> {
            return CupertinoActionSheetAction(
              child: Text(config.getStatus(key)),
              onPressed: () {
-               _store.setStatus(key);
                Navigator.pop(context);
+               _trySetStatus(key, config);
              },
            );
          }).toList(),
@@ -864,6 +889,46 @@ class _OrderFormState extends State<OrderForm> {
           ),
        ),
      );
+  }
+
+  /// Tenta alterar o status, verificando se há formulários pendentes
+  void _trySetStatus(String newStatus, SegmentConfigProvider config) {
+    // Se não for "done", permite alterar diretamente
+    if (newStatus != 'done') {
+      _store.setStatus(newStatus);
+      return;
+    }
+
+    // Verifica se há formulários pendentes
+    final forms = _store.formsStream?.value ?? [];
+    final pendingForms = forms.where(
+      (form) => form.status != of_model.FormStatus.completed
+    ).toList();
+
+    if (pendingForms.isEmpty) {
+      // Todos os formulários estão concluídos, permite alterar
+      _store.setStatus(newStatus);
+      return;
+    }
+
+    // Há formulários pendentes, mostra alerta
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Checklists Pendentes'),
+        content: Text(
+          pendingForms.length == 1
+            ? 'O checklist "${pendingForms.first.title}" ainda não foi concluído.'
+            : '${pendingForms.length} checklists ainda não foram concluídos:\n\n${pendingForms.map((f) => '• ${f.title}').join('\n')}',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showPaymentOptions(SegmentConfigProvider config) {
@@ -1091,7 +1156,7 @@ class _OrderFormState extends State<OrderForm> {
     return numberFormat.format(total);
   }
   
-  // PDF Generation Logic (Kept mostly as is, just function signature matches)
+  // PDF Generation Logic - Usando novo PdfService
   _onShare(BuildContext context, Order? order, SegmentConfigProvider config) async {
     if (order == null) return;
 
@@ -1115,74 +1180,54 @@ class _OrderFormState extends State<OrderForm> {
     );
 
     try {
+      // 1. Coletar dados
       CompanyStore companyStore = CompanyStore();
       Company company = await companyStore.retrieveCompany(order.company!.id);
 
-      // Download company logo
-      pw.MemoryImage? logoImage;
-      if (company.logo != null && company.logo!.isNotEmpty) {
-        try {
-          final response = await http.get(Uri.parse(company.logo!));
-          if (response.statusCode == 200) {
-            logoImage = pw.MemoryImage(response.bodyBytes);
-          }
-        } catch (e) {
-          // Logo optional, continue without it
-        }
-      }
-
       Customer? customer;
       if (order.customer != null) {
-        CustomerStore customerStore = CustomerStore();
-        customer = await customerStore.retrieveCustomer(order.customer?.id);
+        if (order.customer!.id != null && _store.companyId != null) {
+          try {
+            CustomerStore customerStore = CustomerStore();
+            customerStore.companyId = _store.companyId;
+            customer = await customerStore.retrieveCustomer(order.customer!.id);
+          } catch (e) {
+            // Silently fail and use fallback
+          }
+        }
+
+        // Fallback: usar dados do agregado se a busca falhou
+        customer ??= Customer()
+          ..id = order.customer!.id
+          ..name = order.customer!.name
+          ..phone = order.customer!.phone
+          ..email = order.customer!.email;
       }
 
-      List<pw.MemoryImage>? photoImages;
-      if (order.photos != null && order.photos!.isNotEmpty) {
-        photoImages = await _downloadPhotos(order);
+      // 2. Buscar formularios anexados a OS
+      List<of_model.OrderForm> forms = [];
+      if (_store.companyId != null && order.id != null) {
+        forms = await _formsService
+            .getOrderForms(_store.companyId!, order.id!)
+            .first;
       }
 
-      // Load fonts with Unicode support for Portuguese characters
-      pw.Font baseFont;
-      pw.Font boldFont;
-      try {
-        baseFont = await PdfGoogleFonts.nunitoSansRegular();
-        boldFont = await PdfGoogleFonts.nunitoSansBold();
-      } catch (e) {
-        // Fallback to Helvetica if Google Fonts fail to load
-        baseFont = pw.Font.helvetica();
-        boldFont = pw.Font.helveticaBold();
-      }
-
-      final doc = pw.Document();
-
-      final PdfColor primaryColor = PdfColor.fromHex('#2196F3');
-      final PdfColor darkGray = PdfColor.fromHex('#757575');
-
-      doc.addPage(
-        pw.MultiPage(
-          pageFormat: PdfPageFormat.a4,
-          margin: const pw.EdgeInsets.all(40),
-          header: (pw.Context context) {
-            return _buildHeader(company, order, primaryColor, darkGray, baseFont, boldFont, config, logoImage);
-          },
-          footer: (pw.Context context) {
-            return _buildFooter(context, darkGray, baseFont);
-          },
-          build: (pw.Context context) {
-            return _printLayoutContent(order, customer, company, photoImages, baseFont, boldFont, config);
-          },
-        ),
+      // 3. Criar dados para o PDF
+      final pdfData = OsPdfData(
+        order: order,
+        customer: customer,
+        company: company,
+        forms: forms,
+        config: config,
       );
+
+      // 4. Gerar e compartilhar PDF
+      final pdfService = PdfService();
+      await pdfService.shareOsPdf(pdfData);
 
       if (mounted) {
         navigator.pop();
       }
-
-      await Printing.sharePdf(
-        bytes: await doc.save(),
-        filename: "${config.serviceOrder}-${order.number ?? 'NOVA'}.pdf",
-      );
     } catch (e) {
       if (context.mounted) {
         navigator.pop();
@@ -1203,606 +1248,4 @@ class _OrderFormState extends State<OrderForm> {
       }
     }
   }
-
-  Future<List<pw.MemoryImage>> _downloadPhotos(Order order) async {
-    List<pw.MemoryImage> images = [];
-    final photosToDownload = order.photos!.take(6).toList();
-    for (var photo in photosToDownload) {
-      try {
-        if (photo.url != null && photo.url!.isNotEmpty) {
-          final response = await http.get(Uri.parse(photo.url!));
-          if (response.statusCode == 200) {
-            final image = pw.MemoryImage(response.bodyBytes);
-            images.add(image);
-          }
-        }
-      } catch (e) {
-        print('Erro ao baixar foto: $e');
-      }
-    }
-    return images;
-  }
-  
-  // Re-implementing PDF helpers to ensure self-contained file (except models)
-  pw.Widget _buildHeader(Company company, Order order, PdfColor primaryColor, PdfColor darkGray, pw.Font baseFont, pw.Font boldFont, SegmentConfigProvider config, [pw.MemoryImage? logoImage]) {
-    final statusColor = _getStatusColor(order.status);
-    final statusText = config.getStatus(order.status);
-
-    return pw.Column(
-      children: [
-        pw.Row(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            // Logo + Company Info
-            pw.Expanded(
-              flex: 3,
-              child: pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  if (logoImage != null) ...[
-                    pw.Container(
-                      width: 50,
-                      height: 50,
-                      child: pw.Image(logoImage, fit: pw.BoxFit.contain),
-                    ),
-                    pw.SizedBox(width: 12),
-                  ],
-                  pw.Expanded(
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          company.name ?? '',
-                          style: pw.TextStyle(
-                            font: boldFont,
-                            fontSize: 16.0,
-                            color: PdfColors.grey800,
-                          ),
-                        ),
-                        pw.SizedBox(height: 4),
-                        if (company.phone != null && company.phone!.isNotEmpty)
-                          pw.Text(
-                            company.phone!,
-                            style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
-                          ),
-                        if (company.email != null && company.email!.isNotEmpty)
-                          pw.Text(
-                            company.email!,
-                            style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
-                          ),
-                        if (company.address != null && company.address!.isNotEmpty)
-                          pw.Text(
-                            company.address!,
-                            style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
-                            maxLines: 2,
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // OS Number and Info
-            pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.end,
-              children: [
-                // OS Badge
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: pw.BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: pw.BorderRadius.circular(4),
-                  ),
-                  child: pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.center,
-                    children: [
-                      pw.Text(
-                        config.serviceOrder.toUpperCase(),
-                        style: pw.TextStyle(
-                          font: boldFont,
-                          fontSize: 8.0,
-                          color: PdfColors.white,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      pw.SizedBox(height: 2),
-                      pw.Text(
-                        '#${order.number?.toString() ?? "NOVA"}',
-                        style: pw.TextStyle(
-                          font: boldFont,
-                          fontSize: 18.0,
-                          color: PdfColors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                pw.SizedBox(height: 8),
-                // Date
-                pw.Text(
-                  'Data: ${DateFormat('dd/MM/yyyy').format(order.createdAt!)}',
-                  style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
-                ),
-                if (order.dueDate != null) ...[
-                  pw.SizedBox(height: 2),
-                  pw.Text(
-                    'Previsao: ${DateFormat('dd/MM/yyyy').format(order.dueDate!)}',
-                    style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: darkGray),
-                  ),
-                ],
-                pw.SizedBox(height: 6),
-                // Status Badge
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: pw.BoxDecoration(
-                    color: statusColor.shade(0.9),
-                    borderRadius: pw.BorderRadius.circular(3),
-                    border: pw.Border.all(color: statusColor, width: 0.5),
-                  ),
-                  child: pw.Text(
-                    statusText.toUpperCase(),
-                    style: pw.TextStyle(
-                      font: boldFont,
-                      fontSize: 8.0,
-                      color: statusColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        pw.SizedBox(height: 16),
-        pw.Container(
-          height: 2,
-          decoration: pw.BoxDecoration(
-            gradient: pw.LinearGradient(
-              colors: [primaryColor, PdfColors.grey300],
-              begin: pw.Alignment.centerLeft,
-              end: pw.Alignment.centerRight,
-            ),
-          ),
-        ),
-        pw.SizedBox(height: 16),
-      ],
-    );
-  }
-
-  PdfColor _getStatusColor(String? status) {
-    switch (status) {
-      case 'approved':
-        return PdfColors.blue700;
-      case 'done':
-        return PdfColors.green700;
-      case 'canceled':
-        return PdfColors.red700;
-      case 'quote':
-        return PdfColors.orange700;
-      case 'progress':
-        return PdfColors.purple700;
-      default:
-        return PdfColors.grey600;
-    }
-  }
-
-  pw.Widget _buildFooter(pw.Context context, PdfColor darkGray, pw.Font baseFont) {
-    return pw.Container(
-      margin: const pw.EdgeInsets.only(top: 20),
-      padding: const pw.EdgeInsets.only(top: 10),
-      decoration: const pw.BoxDecoration(
-        border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300, width: 0.5)),
-      ),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(
-            'Documento gerado eletronicamente pelo PraticOS - praticos.web.app',
-            style: pw.TextStyle(font: baseFont, fontSize: 8, color: darkGray),
-          ),
-          pw.Text(
-            'Pagina ${context.pageNumber} de ${context.pagesCount}',
-            style: pw.TextStyle(font: baseFont, fontSize: 8, color: darkGray),
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<pw.Widget> _printLayoutContent(Order order, Customer? customer, Company company, List<pw.MemoryImage>? photoImages, pw.Font baseFont, pw.Font boldFont, SegmentConfigProvider config) {
-    final PdfColor primaryColor = PdfColor.fromHex('#1565C0');
-    final PdfColor darkGray = PdfColor.fromHex('#616161');
-    final PdfColor lightGray = PdfColor.fromHex('#F8F9FA');
-    final PdfColor borderColor = PdfColor.fromHex('#E0E0E0');
-
-    double totalServices = order.services?.fold(0.0, (sum, s) => sum! + (s.value ?? 0)) ?? 0.0;
-    double totalProducts = order.products?.fold(0.0, (sum, p) => sum! + (p.total ?? 0)) ?? 0.0;
-    double subtotal = totalServices + totalProducts;
-    double discount = order.discount ?? 0.0;
-    double total = order.total ?? 0.0;
-
-    final isPaid = order.payment == 'paid';
-
-    return [
-      // Client & Vehicle Cards
-      pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          // Client Card
-          pw.Expanded(
-            child: pw.Container(
-              padding: const pw.EdgeInsets.all(12),
-              decoration: pw.BoxDecoration(
-                color: lightGray,
-                borderRadius: pw.BorderRadius.circular(6),
-                border: pw.Border.all(color: borderColor, width: 0.5),
-              ),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    config.customer.toUpperCase(),
-                    style: pw.TextStyle(font: boldFont, fontSize: 8, color: primaryColor, letterSpacing: 0.5),
-                  ),
-                  pw.SizedBox(height: 6),
-                  pw.Text(
-                    customer?.name ?? 'Nao informado',
-                    style: pw.TextStyle(font: boldFont, fontSize: 12, color: PdfColors.grey800),
-                  ),
-                  if (customer?.phone != null && customer!.phone!.isNotEmpty) ...[
-                    pw.SizedBox(height: 4),
-                    pw.Text(customer.phone!, style: pw.TextStyle(font: baseFont, fontSize: 9, color: darkGray)),
-                  ],
-                  if (customer?.email != null && customer!.email!.isNotEmpty) ...[
-                    pw.SizedBox(height: 2),
-                    pw.Text(customer.email!, style: pw.TextStyle(font: baseFont, fontSize: 9, color: darkGray)),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          pw.SizedBox(width: 12),
-          // Vehicle Card
-          pw.Expanded(
-            child: pw.Container(
-              padding: const pw.EdgeInsets.all(12),
-              decoration: pw.BoxDecoration(
-                color: lightGray,
-                borderRadius: pw.BorderRadius.circular(6),
-                border: pw.Border.all(color: borderColor, width: 0.5),
-              ),
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    config.device.toUpperCase(),
-                    style: pw.TextStyle(font: boldFont, fontSize: 8, color: primaryColor, letterSpacing: 0.5),
-                  ),
-                  pw.SizedBox(height: 6),
-                  pw.Text(
-                    order.device?.name ?? 'Nao informado',
-                    style: pw.TextStyle(font: boldFont, fontSize: 12, color: PdfColors.grey800),
-                  ),
-                  if (order.device?.serial != null && order.device!.serial!.isNotEmpty) ...[
-                    pw.SizedBox(height: 4),
-                    pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.grey300,
-                        borderRadius: pw.BorderRadius.circular(3),
-                      ),
-                      child: pw.Text(
-                        order.device!.serial!,
-                        style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey800),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      pw.SizedBox(height: 20),
-
-      // Services Section
-      if (order.services != null && order.services!.isNotEmpty) ...[
-        _buildSectionHeader('SERVICOS', '${order.services!.length} itens', primaryColor, baseFont, boldFont),
-        pw.SizedBox(height: 8),
-        _printServices(order, baseFont, boldFont),
-        pw.SizedBox(height: 16),
-      ],
-
-      // Products Section
-      if (order.products != null && order.products!.isNotEmpty) ...[
-        _buildSectionHeader('PECAS E PRODUTOS', '${order.products!.length} itens', primaryColor, baseFont, boldFont),
-        pw.SizedBox(height: 8),
-        _printProduct(order, baseFont, boldFont),
-        pw.SizedBox(height: 16),
-      ],
-
-      // Summary Section
-      pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.end,
-        children: [
-          pw.Container(
-            width: 220,
-            decoration: pw.BoxDecoration(
-              borderRadius: pw.BorderRadius.circular(6),
-              border: pw.Border.all(color: borderColor, width: 0.5),
-            ),
-            child: pw.Column(
-              children: [
-                // Summary rows
-                pw.Container(
-                  padding: const pw.EdgeInsets.all(10),
-                  child: pw.Column(
-                    children: [
-                      if (totalServices > 0) _buildSummaryRow('Servicos', totalServices, baseFont, boldFont),
-                      if (totalProducts > 0) _buildSummaryRow('Produtos', totalProducts, baseFont, boldFont),
-                      pw.Divider(color: borderColor, height: 16),
-                      _buildSummaryRow('Subtotal', subtotal, baseFont, boldFont),
-                      if (discount > 0) _buildSummaryRow('Desconto', -discount, baseFont, boldFont, color: PdfColors.red600),
-                    ],
-                  ),
-                ),
-                // Total
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                  decoration: pw.BoxDecoration(
-                    color: isPaid ? PdfColors.green700 : primaryColor,
-                    borderRadius: const pw.BorderRadius.only(
-                      bottomLeft: pw.Radius.circular(5),
-                      bottomRight: pw.Radius.circular(5),
-                    ),
-                  ),
-                  child: pw.Row(
-                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                    children: [
-                      pw.Text(
-                        isPaid ? 'TOTAL PAGO' : 'TOTAL A PAGAR',
-                        style: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 9),
-                      ),
-                      pw.Text(
-                        _convertToCurrency(total),
-                        style: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 14),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-
-      pw.SizedBox(height: 30),
-
-      // Signature Section
-      pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.start,
-        children: [
-          pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Container(width: 250, child: pw.Divider(color: PdfColors.grey600, thickness: 0.5)),
-              pw.SizedBox(height: 4),
-              pw.Text(customer?.name ?? config.customer, style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey800)),
-              pw.Text('Assinatura do ${config.customer}', style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.grey500)),
-            ],
-          ),
-        ],
-      ),
-
-      // Photos Section
-      if (order.photos != null && order.photos!.isNotEmpty) ...[
-        pw.SizedBox(height: 20),
-        pw.Divider(color: borderColor),
-        pw.SizedBox(height: 12),
-        _buildSectionHeader('REGISTRO FOTOGRAFICO', '${order.photos!.length} fotos', primaryColor, baseFont, boldFont),
-        pw.SizedBox(height: 10),
-        _printPhotos(order, photoImages),
-      ],
-    ];
-  }
-
-  pw.Widget _buildSectionHeader(String title, String subtitle, PdfColor color, pw.Font baseFont, pw.Font boldFont) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Text(
-          title,
-          style: pw.TextStyle(
-            font: boldFont,
-            color: color,
-            fontSize: 10,
-            letterSpacing: 0.5,
-          ),
-        ),
-        pw.Text(
-          subtitle,
-          style: pw.TextStyle(
-            font: baseFont,
-            color: PdfColors.grey500,
-            fontSize: 8,
-          ),
-        ),
-      ],
-    );
-  }
-
-  pw.Widget _buildSummaryRow(String label, double value, pw.Font baseFont, pw.Font boldFont, {bool isBold = false, PdfColor? color}) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 2),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(label, style: pw.TextStyle(font: isBold ? boldFont : baseFont, fontSize: 10)),
-          pw.Text(_convertToCurrency(value), style: pw.TextStyle(font: isBold ? boldFont : baseFont, fontSize: 10, color: color)),
-        ],
-      ),
-    );
-  }
-  
-  pw.Widget _printProduct(Order order, pw.Font baseFont, pw.Font boldFont) {
-  return pw.Table(
-    border: pw.TableBorder(
-      bottom: const pw.BorderSide(color: PdfColors.grey300, width: 0.5),
-      horizontalInside: const pw.BorderSide(color: PdfColors.grey200, width: 0.5),
-    ),
-    columnWidths: {
-      0: const pw.FixedColumnWidth(40),
-      1: const pw.FlexColumnWidth(3),
-      2: const pw.FixedColumnWidth(70),
-      3: const pw.FixedColumnWidth(70),
-    },
-    children: [
-      pw.TableRow(
-        decoration: pw.BoxDecoration(color: PdfColor.fromHex('#F5F5F5')),
-        children: [
-          _modernTableHeader('QTD', boldFont),
-          _modernTableHeader('DESCRICAO', boldFont),
-          _modernTableHeader('UNIT.', boldFont, alignRight: true),
-          _modernTableHeader('TOTAL', boldFont, alignRight: true),
-        ],
-      ),
-      ...order.products!.map((p) {
-        return pw.TableRow(
-          children: [
-            _modernTableCell(p.quantity.toString(), baseFont, alignCenter: true),
-            _modernTableCell("${p.product?.name} ${p.description != null ? '- ${p.description}' : ''}", baseFont),
-            _modernTableCell(_convertToCurrency(p.value), baseFont, alignRight: true),
-            _modernTableCell(_convertToCurrency(p.total), baseFont, alignRight: true),
-          ],
-        );
-      }),
-    ],
-  );
-}
-
-pw.Widget _printServices(Order order, pw.Font baseFont, pw.Font boldFont) {
-  return pw.Table(
-    border: pw.TableBorder(
-      bottom: const pw.BorderSide(color: PdfColors.grey300, width: 0.5),
-      horizontalInside: const pw.BorderSide(color: PdfColors.grey200, width: 0.5),
-    ),
-    columnWidths: {
-      0: const pw.FlexColumnWidth(3),
-      1: const pw.FixedColumnWidth(80),
-    },
-    children: [
-      pw.TableRow(
-        decoration: pw.BoxDecoration(color: PdfColor.fromHex('#F5F5F5')),
-        children: [
-          _modernTableHeader('DESCRICAO DO SERVICO', boldFont),
-          _modernTableHeader('VALOR', boldFont, alignRight: true),
-        ],
-      ),
-      ...order.services!.map((s) {
-        return pw.TableRow(
-          children: [
-            _modernTableCell("${s.service?.name} ${s.description != null ? '- ${s.description}' : ''}", baseFont),
-            _modernTableCell(_convertToCurrency(s.value), baseFont, alignRight: true),
-          ],
-        );
-      }),
-    ],
-  );
-}
-
-pw.Widget _modernTableHeader(String text, pw.Font boldFont, {bool alignRight = false}) {
-  return pw.Padding(
-    padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-    child: pw.Text(
-      text,
-      textAlign: alignRight ? pw.TextAlign.right : pw.TextAlign.left,
-      style: pw.TextStyle(
-        font: boldFont,
-        fontSize: 8.0,
-        color: PdfColor.fromHex('#616161'),
-      ),
-    ),
-  );
-}
-
-pw.Widget _modernTableCell(String text, pw.Font baseFont, {bool alignRight = false, bool alignCenter = false}) {
-  return pw.Padding(
-    padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-    child: pw.Text(
-      text,
-      textAlign: alignRight ? pw.TextAlign.right : (alignCenter ? pw.TextAlign.center : pw.TextAlign.left),
-      style: pw.TextStyle(font: baseFont, fontSize: 9.0, color: PdfColors.black),
-    ),
-  );
-}
-
-pw.Widget _printPhotos(Order order, [List<pw.MemoryImage>? photoImages]) {
-  if (order.photos == null || order.photos!.isEmpty) {
-    return pw.SizedBox();
-  }
-
-  return pw.Column(
-    crossAxisAlignment: pw.CrossAxisAlignment.start,
-    children: [
-      pw.Text(
-        'Fotos Anexadas (${order.photos!.length})',
-        style: pw.TextStyle(
-          fontWeight: pw.FontWeight.bold,
-          fontSize: 14.0,
-          color: PdfColor.fromHex('#1976D2'),
-        ),
-      ),
-      pw.SizedBox(height: 12),
-
-      if (photoImages != null && photoImages.isNotEmpty)
-        pw.GridView(
-          crossAxisCount: 3,
-          childAspectRatio: 1,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          children: photoImages.map((image) {
-            return pw.Container(
-              decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: PdfColors.grey300, width: 1),
-                borderRadius: pw.BorderRadius.circular(4),
-              ),
-              child: pw.ClipRRect(
-                verticalRadius: 4,
-                horizontalRadius: 4,
-                child: pw.Image(image, fit: pw.BoxFit.cover),
-              ),
-            );
-          }).toList(),
-        )
-      else
-        pw.Container(
-          padding: const pw.EdgeInsets.all(12),
-          decoration: pw.BoxDecoration(
-            color: PdfColor.fromHex('#F5F5F5'),
-            borderRadius: pw.BorderRadius.circular(6),
-          ),
-          child: pw.Row(
-            children: [
-              pw.Icon(
-                const pw.IconData(0xe412),
-                size: 16,
-                color: PdfColor.fromHex('#757575'),
-              ),
-              pw.SizedBox(width: 8),
-              pw.Text(
-                'Fotos disponíveis no sistema digital',
-                style: pw.TextStyle(
-                  fontSize: 10.0,
-                  color: PdfColor.fromHex('#757575'),
-                  fontStyle: pw.FontStyle.italic,
-                ),
-              ),
-            ],
-          ),
-        ),
-    ],
-  );
-}
-
 }

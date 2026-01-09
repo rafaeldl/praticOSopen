@@ -36,7 +36,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Formulários'),
+              largeTitle: const Text('Procedimentos'),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
@@ -52,7 +52,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar formulário',
+                  placeholder: 'Buscar procedimento',
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -96,7 +96,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                 const Icon(CupertinoIcons.exclamationmark_circle,
                     size: 48, color: CupertinoColors.systemRed),
                 const SizedBox(height: 16),
-                const Text('Erro ao carregar formulários'),
+                const Text('Erro ao carregar procedimentos'),
                 const SizedBox(height: 16),
                 CupertinoButton(
                   child: const Text('Tentar novamente'),
@@ -135,7 +135,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
             return Padding(
               padding: const EdgeInsets.fromLTRB(32, 16, 16, 8),
               child: Text(
-                'MEUS FORMULÁRIOS',
+                'MEUS PROCEDIMENTOS',
                 style: TextStyle(
                   fontSize: 13,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -158,7 +158,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                     const SizedBox(height: 12),
                     Text(
                       _searchQuery.isEmpty
-                          ? 'Nenhum formulário cadastrado'
+                          ? 'Nenhum procedimento cadastrado'
                           : 'Nenhum resultado encontrado',
                       style: TextStyle(
                           color:
@@ -222,7 +222,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'FORMULÁRIOS GLOBAIS',
+                      'PROCEDIMENTOS GLOBAIS',
                       style: TextStyle(
                         fontSize: 13,
                         color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -284,7 +284,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                 builder: (context) => CupertinoAlertDialog(
                   title: const Text('Confirmar exclusão'),
                   content: Text(
-                      'Deseja remover o formulário "${template.title}"?'),
+                      'Deseja remover o procedimento "${template.title}"?'),
                   actions: [
                     CupertinoDialogAction(
                       child: const Text('Cancelar'),
@@ -558,9 +558,9 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Importar Formulário'),
+        title: const Text('Importar Procedimento'),
         content: Text(
-            'Deseja importar o formulário "${template.title}" para sua empresa?\n\nVocê poderá editá-lo após a importação.'),
+            'Deseja importar o procedimento "${template.title}" para sua empresa?\n\nVocê poderá editá-lo após a importação.'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, false),
@@ -584,7 +584,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
             title: const Text('Sucesso'),
-            content: const Text('Formulário importado com sucesso!'),
+            content: const Text('Procedimento importado com sucesso!'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
@@ -601,7 +601,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
           builder: (ctx) => CupertinoAlertDialog(
             title: const Text('Erro'),
             content:
-                const Text('Não foi possível importar o formulário. Tente novamente.'),
+                const Text('Não foi possível importar o procedimento. Tente novamente.'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
