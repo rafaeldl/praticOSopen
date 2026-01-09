@@ -1,7 +1,13 @@
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
+
+enum PaymentFormMode {
+  payment,
+  discount,
+}
 
 class PaymentFormScreen extends StatefulWidget {
   const PaymentFormScreen({super.key});
@@ -11,22 +17,23 @@ class PaymentFormScreen extends StatefulWidget {
 }
 
 class _PaymentFormScreenState extends State<PaymentFormScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _initialized = false;
   final TextEditingController _valueController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   final NumberFormat numberFormat = NumberFormat.currency(
     locale: 'pt-BR',
     symbol: 'R\$',
   );
 
-  double? value;
+  PaymentFormMode _mode = PaymentFormMode.payment;
   OrderStore? _store;
 
   @override
   void dispose() {
     _valueController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -36,192 +43,403 @@ class _PaymentFormScreenState extends State<PaymentFormScreen> {
     if (!_initialized) {
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-      if (args != null && args.containsKey('orderStore')) {
-        _store = args['orderStore'];
+      if (args != null) {
+        if (args.containsKey('orderStore')) {
+          _store = args['orderStore'];
+        }
+        if (args.containsKey('mode')) {
+          _mode = args['mode'] as PaymentFormMode;
+        }
       }
-      _valueController.text = _convertToCurrency(_store?.discount);
+
+      // Pré-preenche com valor restante no modo pagamento
+      if (_mode == PaymentFormMode.payment && _store != null) {
+        final remaining = _store!.remainingBalance;
+        if (remaining > 0) {
+          _valueController.text = _convertToCurrency(remaining);
+        }
+      }
+
       _initialized = true;
     }
   }
 
-  void _saveDiscount() {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
-      _formKey.currentState!.save();
-      Navigator.pop(context, value);
+  double _parseValue(String value) {
+    final cleanValue = value
+        .replaceAll(RegExp(r'R\$'), '')
+        .replaceAll(RegExp(r'BRL'), '')
+        .replaceAll(RegExp(r'\.'), '')
+        .replaceAll(RegExp(r','), '.')
+        .trim();
+    return double.tryParse(cleanValue) ?? 0;
+  }
+
+  String? _validateValue(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Preencha o valor';
     }
+
+    final valueDouble = _parseValue(value);
+    if (valueDouble <= 0) {
+      return 'O valor deve ser maior que zero';
+    }
+
+    if (_mode == PaymentFormMode.discount) {
+      // Desconto não pode ser maior que o saldo restante
+      if (_store != null && valueDouble > _store!.remainingBalance) {
+        return 'Desconto não pode ser maior que o saldo';
+      }
+    }
+
+    if (_mode == PaymentFormMode.payment) {
+      // Pagamento não pode ser maior que o saldo restante
+      if (_store != null && valueDouble > _store!.remainingBalance) {
+        return 'Pagamento não pode ser maior que o saldo';
+      }
+    }
+
+    return null;
+  }
+
+  void _save() {
+    final error = _validateValue(_valueController.text);
+    if (error != null) {
+      _showError(error);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final value = _parseValue(_valueController.text);
+    final description = _descriptionController.text.isNotEmpty
+        ? _descriptionController.text
+        : null;
+
+    if (_mode == PaymentFormMode.payment) {
+      _store?.addPayment(value, description: description);
+    } else {
+      _store?.addDiscountTransaction(value, description: description);
+    }
+
+    Navigator.pop(context, true);
+  }
+
+  void _showError(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Atenção'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final isPayment = _mode == PaymentFormMode.payment;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Desconto'),
-        elevation: 0,
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(isPayment ? 'Registrar Pagamento' : 'Conceder Desconto'),
+        trailing: _isLoading
+            ? const CupertinoActivityIndicator()
+            : CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: _save,
+                child: const Text('Salvar'),
+              ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header icon
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundColor: theme.colorScheme.primaryContainer,
-                    child: Icon(
-                      Icons.local_offer,
-                      size: 40,
-                      color: theme.colorScheme.primary,
-                    ),
-                  ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    // Ícone de header
+                    _buildHeaderIcon(isPayment),
+                    const SizedBox(height: 20),
+                    // Card de informação do saldo
+                    _buildBalanceCard(),
+                    const SizedBox(height: 20),
+                    // Formulário
+                    _buildFormSection(isPayment),
+                    const SizedBox(height: 20),
+                    // Botões de ação rápida
+                    if (isPayment) _buildQuickActions(),
+                  ],
                 ),
-                const SizedBox(height: 8),
-
-                // Info card
-                Card(
-                  elevation: 0,
-                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: theme.colorScheme.primary,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Total da OS',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              Text(
-                                _convertToCurrency(_store?.total),
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Discount field
-                _buildValueField(theme),
-                const SizedBox(height: 32),
-
-                // Save button
-                FilledButton.icon(
-                  onPressed: _isLoading ? null : _saveDiscount,
-                  icon: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.check),
-                  label: Text(_isLoading ? 'Salvando...' : 'Aplicar Desconto'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  InputDecoration _inputDecoration({
-    required String label,
-    required IconData icon,
-    String? hint,
-  }) {
-    return InputDecoration(
-      labelText: label,
-      hintText: hint,
-      prefixIcon: Icon(icon),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+  Widget _buildHeaderIcon(bool isPayment) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: isPayment
+            ? CupertinoColors.systemGreen.withValues(alpha: 0.15)
+            : CupertinoColors.systemOrange.withValues(alpha: 0.15),
+        shape: BoxShape.circle,
       ),
-      filled: true,
+      child: Icon(
+        isPayment ? CupertinoIcons.money_dollar_circle : CupertinoIcons.tag_fill,
+        size: 40,
+        color: isPayment
+            ? CupertinoColors.systemGreen
+            : CupertinoColors.systemOrange,
+      ),
     );
   }
 
-  Widget _buildValueField(ThemeData theme) {
-    return TextFormField(
-      controller: _valueController,
-      decoration: _inputDecoration(
-        label: 'Valor do desconto',
-        icon: Icons.local_offer_outlined,
-        hint: 'R\$ 0,00',
-      ),
-      inputFormatters: [
-        CurrencyTextInputFormatter.currency(
-          locale: 'pt_BR',
-          symbol: 'R\$',
-          decimalDigits: 2,
+  Widget _buildBalanceCard() {
+    final total = _store?.total ?? 0.0;
+    final paid = _store?.paidAmount ?? 0.0;
+    final remaining = _store?.remainingBalance ?? 0.0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(10),
         ),
-      ],
-      keyboardType: TextInputType.number,
-      style: theme.textTheme.headlineSmall?.copyWith(
-        fontWeight: FontWeight.bold,
+        child: Column(
+          children: [
+            _buildInfoRow(
+              'Total da OS',
+              _convertToCurrency(total),
+              CupertinoColors.label.resolveFrom(context),
+            ),
+            Divider(
+              height: 1,
+              indent: 16,
+              color: CupertinoColors.systemGrey5.resolveFrom(context),
+            ),
+            _buildInfoRow(
+              'Já pago',
+              _convertToCurrency(paid),
+              CupertinoColors.systemGreen,
+            ),
+            Divider(
+              height: 1,
+              indent: 16,
+              color: CupertinoColors.systemGrey5.resolveFrom(context),
+            ),
+            _buildInfoRow(
+              'Saldo restante',
+              _convertToCurrency(remaining),
+              remaining > 0
+                  ? CupertinoColors.systemOrange
+                  : CupertinoColors.systemGreen,
+              isBold: true,
+            ),
+          ],
+        ),
       ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Preencha o valor do desconto';
-        }
+    );
+  }
 
-        final cleanValue = value
-            .replaceAll(RegExp(r'R\$'), '')
-            .replaceAll(RegExp(r'BRL'), '')
-            .replaceAll(RegExp(r'\.'), '')
-            .replaceAll(RegExp(r','), '.')
-            .trim();
+  Widget _buildInfoRow(String label, String value, Color valueColor,
+      {bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 17,
+              color: CupertinoColors.label.resolveFrom(context),
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              color: valueColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-        final valueDouble = double.tryParse(cleanValue) ?? 0;
-        if (_store?.total != null && valueDouble > _store!.total!) {
-          return 'Desconto não pode ser maior que o total';
-        }
-        return null;
-      },
-      onSaved: (String? value) {
-        final cleanValue = value!
-            .replaceAll(RegExp(r'R\$'), '')
-            .replaceAll(RegExp(r'BRL'), '')
-            .replaceAll(RegExp(r'\.'), '')
-            .replaceAll(RegExp(r','), '.')
-            .trim();
+  Widget _buildFormSection(bool isPayment) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Campo de valor
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isPayment ? 'Valor do pagamento' : 'Valor do desconto',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  CupertinoTextField(
+                    controller: _valueController,
+                    placeholder: 'R\$ 0,00',
+                    prefix: Padding(
+                      padding: const EdgeInsets.only(left: 12),
+                      child: Icon(
+                        isPayment
+                            ? CupertinoIcons.money_dollar
+                            : CupertinoIcons.tag,
+                        color: CupertinoColors.systemGrey.resolveFrom(context),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 14,
+                    ),
+                    inputFormatters: [
+                      CurrencyTextInputFormatter.currency(
+                        locale: 'pt_BR',
+                        symbol: 'R\$',
+                        decimalDigits: 2,
+                      ),
+                    ],
+                    keyboardType: TextInputType.number,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: CupertinoColors.label.resolveFrom(context),
+                    ),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemGrey6.resolveFrom(context),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Divider(
+              height: 1,
+              indent: 16,
+              color: CupertinoColors.systemGrey5.resolveFrom(context),
+            ),
+            // Campo de descrição
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Observação (opcional)',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  CupertinoTextField(
+                    controller: _descriptionController,
+                    placeholder: isPayment
+                        ? 'Ex: Pagamento em dinheiro'
+                        : 'Ex: Desconto de fidelidade',
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 14,
+                    ),
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: 17,
+                      color: CupertinoColors.label.resolveFrom(context),
+                    ),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemGrey6.resolveFrom(context),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-        this.value = double.tryParse(cleanValue) ?? 0;
-      },
+  Widget _buildQuickActions() {
+    final remaining = _store?.remainingBalance ?? 0.0;
+
+    if (remaining <= 0) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: CupertinoButton(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          onPressed: () {
+            _valueController.text = _convertToCurrency(remaining);
+          },
+          child: Row(
+            children: [
+              Icon(
+                CupertinoIcons.checkmark_circle,
+                color: CupertinoTheme.of(context).primaryColor,
+                size: 22,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Pagar valor total restante',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: CupertinoTheme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              Text(
+                _convertToCurrency(remaining),
+                style: TextStyle(
+                  fontSize: 17,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   String _convertToCurrency(double? total) {
-    if (total == null || total == 0) return '';
+    total ??= 0.0;
     return numberFormat.format(total);
   }
 }

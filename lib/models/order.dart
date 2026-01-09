@@ -3,6 +3,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order_photo.dart';
+import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
@@ -22,12 +23,47 @@ class Order extends BaseAuditCompany {
   DateTime? dueDate;
   bool? done;
   bool? paid;
-  String? payment; // unpaid, paid
+  String? payment; // unpaid, paid, partial
   String? status;
   int? number;
 
+  /// Valor total pago (soma dos pagamentos parciais)
+  double? paidAmount;
+
+  /// Lista de transações de pagamento e desconto
+  List<PaymentTransaction>? transactions;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
+
+  /// Calcula o saldo restante a pagar
+  double get remainingBalance {
+    final totalValue = total ?? 0.0;
+    final paid = paidAmount ?? 0.0;
+    return totalValue - paid;
+  }
+
+  /// Verifica se está totalmente pago
+  bool get isFullyPaid => remainingBalance <= 0;
+
+  /// Verifica se tem pagamento parcial
+  bool get hasPartialPayment => (paidAmount ?? 0) > 0 && !isFullyPaid;
+
+  /// Retorna o total de descontos das transações
+  double get totalDiscounts {
+    if (transactions == null || transactions!.isEmpty) return discount ?? 0.0;
+    return transactions!
+        .where((t) => t.type == PaymentTransactionType.discount)
+        .fold(0.0, (sum, t) => sum + t.amount);
+  }
+
+  /// Retorna o total de pagamentos das transações
+  double get totalPayments {
+    if (transactions == null || transactions!.isEmpty) return paidAmount ?? 0.0;
+    return transactions!
+        .where((t) => t.type == PaymentTransactionType.payment)
+        .fold(0.0, (sum, t) => sum + t.amount);
+  }
 
   static Map statusMap = {
     'quote': 'Orçamento',

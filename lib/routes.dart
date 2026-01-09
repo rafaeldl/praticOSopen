@@ -8,6 +8,7 @@ import 'package:praticos/screens/menu_navigation/collaborator_list_screen.dart';
 import 'package:praticos/screens/menu_navigation/company_form_screen.dart';
 import 'package:praticos/screens/order_service_screen.dart';
 import 'package:praticos/screens/payment_form_screen.dart';
+import 'package:praticos/screens/payment_history_screen.dart';
 import 'package:praticos/screens/product_form_screen.dart';
 import 'package:praticos/screens/product_list_screen.dart';
 import 'package:praticos/screens/customers/customer_form_screen.dart';
@@ -35,6 +36,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/order_service': (context) => OrderServiceScreen(),
   '/order_product': (context) => OrderProductScreen(),
   '/payment_form_screen': (context) => PaymentFormScreen(),
+  '/payment_history': (context) => PaymentHistoryScreen(),
   '/financial_dashboard_simple': (context) => FinancialDashboardSimple(),
   '/collaborator_list': (context) => CollaboratorListScreen(),
   '/collaborator_form': (context) => CollaboratorFormScreen(),
