@@ -657,6 +657,9 @@ class _OrderFormState extends State<OrderForm> {
   }
   
   Widget _buildServiceRow(BuildContext context, dynamic service, int index, bool isLast, SegmentConfigProvider config) {
+    // Verificar se o usuário pode visualizar valores financeiros
+    final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+
     return _buildDismissibleItem(
       context: context,
       index: index,
@@ -665,7 +668,7 @@ class _OrderFormState extends State<OrderForm> {
         context: context,
         title: service.service?.name ?? "Serviço",
         subtitle: service.description,
-        trailing: _convertToCurrency(service.value),
+        trailing: canViewPrices ? _convertToCurrency(service.value) : "",
         onTap: () => _editService(index),
         isLast: isLast,
       ),
@@ -673,6 +676,9 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   Widget _buildProductRow(BuildContext context, dynamic product, int index, bool isLast, SegmentConfigProvider config) {
+    // Verificar se o usuário pode visualizar valores financeiros
+    final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+
     return _buildDismissibleItem(
       context: context,
       index: index,
@@ -681,7 +687,7 @@ class _OrderFormState extends State<OrderForm> {
         context: context,
         title: product.product?.name ?? "Produto",
         subtitle: "${product.quantity}x • ${product.description ?? ''}",
-        trailing: _convertToCurrency(product.total),
+        trailing: canViewPrices ? _convertToCurrency(product.total) : "",
         onTap: () => _editProduct(index),
         isLast: isLast,
       ),
@@ -794,18 +800,23 @@ class _OrderFormState extends State<OrderForm> {
   // --- Actions ---
 
   void _showActionSheet(BuildContext context, SegmentConfigProvider config) {
+    // Verificar se o usuário pode visualizar valores (necessário para gerar PDF completo)
+    final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text('Opções da ${config.serviceOrder}'),
         actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: const Text('Compartilhar PDF'),
-            onPressed: () {
-              Navigator.pop(context);
-              _onShare(context, _store.order, config);
-            },
-          ),
+          // Apenas exibir opção de PDF para usuários com acesso a valores
+          if (canViewPrices)
+            CupertinoActionSheetAction(
+              child: const Text('Compartilhar PDF'),
+              onPressed: () {
+                Navigator.pop(context);
+                _onShare(context, _store.order, config);
+              },
+            ),
           CupertinoActionSheetAction(
             child: Text(config.label(LabelKeys.addPhoto)),
             onPressed: () {
