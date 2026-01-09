@@ -84,7 +84,7 @@ abstract class _CollaboratorStore with Store {
 
     if (myMembership != null) {
       return myMembership.role == RolesType.admin ||
-          myMembership.role == RolesType.manager;
+          myMembership.role == RolesType.supervisor;
     }
 
     return false;

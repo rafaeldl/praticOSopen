@@ -67,6 +67,7 @@ abstract class _InviteStore with Store {
     try {
       final userId = Global.currentUser!.uid;
       final companyId = invite.company?.id;
+      // ignore: deprecated_member_use_from_same_package
       final role = invite.role ?? RolesType.user;
 
       if (companyId == null) {

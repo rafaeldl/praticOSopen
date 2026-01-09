@@ -37,10 +37,20 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
     switch (role) {
       case RolesType.admin:
         return 'Administrador';
-      case RolesType.manager:
+      case RolesType.gerente:
         return 'Gerente';
+      case RolesType.supervisor:
+        return 'Supervisor';
+      case RolesType.consultor:
+        return 'Consultor';
+      case RolesType.tecnico:
+        return 'Técnico';
+      // ignore: deprecated_member_use_from_same_package
+      case RolesType.manager:
+        return 'Supervisor';
+      // ignore: deprecated_member_use_from_same_package
       case RolesType.user:
-        return 'Membro';
+        return 'Técnico';
     }
   }
 

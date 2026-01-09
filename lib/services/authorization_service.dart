@@ -1,9 +1,9 @@
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
+import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
-import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 
 /// Serviço de autorização centralizado para o PraticOS.
 ///
@@ -43,12 +43,13 @@ class AuthorizationService {
       return null;
     }
 
-    final membership = _collaboratorStore.collaborators.cast<Membership?>().firstWhere(
-      (m) => m?.userId == Global.currentUser!.uid,
-      orElse: () => null,
+    final currentUserId = Global.currentUser!.uid;
+    final membership = _collaboratorStore.collaborators.firstWhere(
+      (m) => m.userId == currentUserId || m.user?.id == currentUserId,
+      orElse: () => Membership(),
     );
 
-    return membership?.role;
+    return membership.role;
   }
 
   /// Retorna o perfil normalizado (converte roles legados).
@@ -140,12 +141,12 @@ class AuthorizationService {
 
       case RolesType.consultor:
         // Apenas OS que criou
-        return order.createdBy == currentUserId;
+        return order.createdBy?.id == currentUserId;
 
       case RolesType.tecnico:
         // Apenas OS atribuídas (assignedTo) ou que criou
         return _isOrderAssignedToUser(order, currentUserId) ||
-            order.createdBy == currentUserId;
+            order.createdBy?.id == currentUserId;
 
       default:
         return false;
@@ -154,12 +155,12 @@ class AuthorizationService {
 
   /// Verifica se uma OS está atribuída ao usuário.
   bool _isOrderAssignedToUser(Order order, String userId) {
-    // Verifica pelo campo assignedTo
+    // Verifica pelo campo assignedTo (UserAggr tem campo id)
     if (order.assignedTo?.id == userId) {
       return true;
     }
     // Fallback: verifica pelo createdBy para compatibilidade
-    return order.createdBy == userId;
+    return order.createdBy?.id == userId;
   }
 
   /// Verifica se o usuário pode editar uma OS específica.
@@ -255,14 +256,14 @@ class AuthorizationService {
 
       case RolesType.consultor:
         // Apenas OS que criou
-        return orders.where((o) => o.createdBy == currentUserId).toList();
+        return orders.where((o) => o.createdBy?.id == currentUserId).toList();
 
       case RolesType.tecnico:
         // Apenas OS atribuídas ou que criou
         return orders
             .where((o) =>
                 _isOrderAssignedToUser(o, currentUserId) ||
-                o.createdBy == currentUserId)
+                o.createdBy?.id == currentUserId)
             .toList();
 
       default:
