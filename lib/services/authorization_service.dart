@@ -174,6 +174,38 @@ class AuthorizationService {
     return hasPermission(PermissionType.assignOrder);
   }
 
+  /// Verifica se o usuário pode deletar uma OS específica.
+  ///
+  /// Regras:
+  /// - Admin: pode deletar sempre
+  /// - Manager e Supervisor: podem deletar apenas se status for 'quote'
+  /// - Consultant e Technician: podem deletar apenas OS que criaram, em status 'quote'
+  bool canDeleteOrder(Order order) {
+    if (!canAccessOrder(order)) return false;
+
+    final role = normalizedRole;
+    if (role == null) return false;
+    if (Global.currentUser == null) return false;
+
+    final currentUserId = Global.currentUser!.uid;
+    final isCreator = order.createdBy?.id == currentUserId;
+
+    switch (role) {
+      case RolesType.admin:
+        return true;
+
+      case RolesType.manager:
+      case RolesType.supervisor:
+        // Podem deletar apenas se status for 'quote'
+        return order.status == 'quote';
+
+      case RolesType.consultant:
+      case RolesType.technician:
+        // Podem deletar apenas OS que criaram, em status 'quote'
+        return isCreator && order.status == 'quote';
+    }
+  }
+
   /// Verifica se o usuário pode editar campos principais da OS.
   ///
   /// Supervisor e Técnico só podem editar serviços, produtos, procedimentos,

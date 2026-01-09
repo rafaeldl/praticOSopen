@@ -237,8 +237,22 @@ service cloud.firestore {
           || hasRole(companyId, 'technician')
         );
 
-        // Deleção: apenas admin e supervisor
-        allow delete: if canAssignOrders(companyId);
+        // Deleção:
+        // - Admin e Supervisor podem deletar (via canAssignOrders)
+        // - Consultant e Technician podem deletar apenas OS que criaram, em status 'quote'
+        allow delete: if belongsToCompany(companyId) && (
+          canAssignOrders(companyId)
+          || (
+            // Permite deletar se é o criador e status é 'quote'
+            resource.data.createdBy != null
+            && resource.data.createdBy.id == request.auth.uid
+            && resource.data.status == 'quote'
+            && (
+              hasRole(companyId, 'consultant')
+              || hasRole(companyId, 'technician')
+            )
+          )
+        );
 
         // Subcollection de fotos dentro de orders
         match /photos/{photoId} {

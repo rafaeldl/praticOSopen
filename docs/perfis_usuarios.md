@@ -156,6 +156,7 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 - ✅ Visualizar apenas OS que criou
 - ✅ Criar novas OS
 - ✅ Editar suas próprias OS
+- ✅ Deletar OS que criou (apenas quando status = 'Orçamento')
 - ❌ Atribuir técnicos
 - ❌ Executar serviços
 - ❌ Visualizar OS de outros (Admin pode reatribuir em caso de férias/ausência)
@@ -198,6 +199,7 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
   - ✅ Adicionar/editar/remover serviços e produtos
   - ✅ Alterar cliente e dispositivo
   - ✅ Alterar data de entrega
+- ✅ Deletar OS que criou (apenas quando status = 'Orçamento')
 - ⚠️ Edição limitada **após status 'Orçamento'**
   - ✅ Editar apenas observações/descrições de serviços e produtos
   - ❌ Não pode alterar valores, quantidades ou campos principais
@@ -495,9 +497,9 @@ Mensagem: "Não é possível alterar o status desta OS com seu perfil atual."
 | Editar OS | ✅ | ✅ | ✅ | ✅* | ❌ |
 | Atribuir técnicos | ✅ | ❌ | ✅ | ❌ | ❌ |
 | Executar OS | ✅ | ❌ | ✅ | ❌ | ✅ |
-| Deletar OS | ✅ | ✅* | ✅* | ❌ | ❌ |
+| Deletar OS | ✅ | ✅* | ✅* | ✅* | ✅* |
 
-*Gerente e Supervisor podem deletar apenas se status for 'Orçamento'
+*Gerente e Supervisor podem deletar apenas se status for 'Orçamento'. Consultor e Técnico podem deletar apenas OS que criaram, em status 'Orçamento'.
 
 *Consultor pode editar apenas suas próprias OS
 
