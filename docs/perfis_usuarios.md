@@ -520,7 +520,7 @@ Mensagem: "Não é possível alterar o status desta OS com seu perfil atual."
 | Ver produtos | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Gerenciar serviços | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Ver serviços | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Gerenciar dispositivos | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Gerenciar dispositivos | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Ver dispositivos | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### Formulários/Procedimentos
