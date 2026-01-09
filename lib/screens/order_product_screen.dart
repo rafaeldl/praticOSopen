@@ -53,6 +53,9 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
         if (args.containsKey('product')) {
           _product = args['product'];
           _orderProduct.product = _product!.toAggr();
+          // Initialize value and quantity defaults if new product
+          _orderProduct.value ??= _product!.value;
+          _orderProduct.quantity ??= 1;
         }
 
         if (args.containsKey('orderProductIndex')) {

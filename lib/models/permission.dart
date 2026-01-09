@@ -255,6 +255,7 @@ class RolePermissions {
     PermissionType.viewAllOrders,
     PermissionType.viewAssignedOrders,
     PermissionType.viewOwnOrders,
+    PermissionType.editOrder,
     // Dados Financeiros (acesso total)
     PermissionType.viewPrices,
     PermissionType.viewBilling,
@@ -320,6 +321,8 @@ class RolePermissions {
   static final Set<PermissionType> _technicianPermissions = {
     // Ordens de Serviço (apenas atribuídas)
     PermissionType.viewAssignedOrders,
+    PermissionType.createOrder,
+    PermissionType.editOrder,
     PermissionType.executeOrder,
     // Visualização básica
     PermissionType.viewCustomers,

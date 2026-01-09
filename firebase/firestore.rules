@@ -33,8 +33,14 @@ service cloud.firestore {
       return hasRole(companyId, 'admin');
     }
 
-    // Verifica se o usuário pode gerenciar a empresa (admin ou supervisor)
+    // Verifica se o usuário pode gerenciar a empresa (admin apenas)
     function canManageCompany(companyId) {
+      return belongsToCompany(companyId)
+        && request.auth.token.roles[companyId] == 'admin';
+    }
+
+    // Verifica se o usuário pode gerenciar dispositivos (admin ou supervisor)
+    function canManageDevices(companyId) {
       return belongsToCompany(companyId)
         && request.auth.token.roles[companyId] in ['admin', 'supervisor'];
     }
@@ -50,10 +56,10 @@ service cloud.firestore {
       return isCompanyAdmin(companyId);
     }
 
-    // Verifica se o usuário pode criar/editar OS (admin, supervisor, consultant)
+    // Verifica se o usuário pode criar/editar OS (admin, supervisor, consultant, technician)
     function canManageOrders(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'supervisor', 'consultant'];
+        && request.auth.token.roles[companyId] in ['admin', 'supervisor', 'consultant', 'technician'];
     }
 
     // Verifica se o usuário pode executar OS (todos os perfis)
@@ -222,6 +228,8 @@ service cloud.firestore {
         allow update: if belongsToCompany(companyId) && (
           // Admin pode tudo
           isCompanyAdmin(companyId)
+          // Manager pode editar (ajustes financeiros)
+          || hasRole(companyId, 'manager')
           // Supervisor pode gerenciar todas as OS
           || hasRole(companyId, 'supervisor')
           // Manager pode apenas visualizar (sem write)
@@ -265,7 +273,7 @@ service cloud.firestore {
       // ──────────────────────────────────────────────────────────────────────
       match /devices/{deviceId} {
         allow read: if belongsToCompany(companyId);
-        allow write: if canManageCompany(companyId);
+        allow write: if canManageDevices(companyId);
       }
 
       // ──────────────────────────────────────────────────────────────────────

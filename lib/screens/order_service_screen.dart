@@ -49,6 +49,8 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
         if (args.containsKey('service')) {
           _service = args['service'];
           _orderService.service = _service!.toAggr();
+          // Initialize value from service to ensure it's not null if field is hidden
+          _orderService.value ??= _service!.value;
         }
 
         if (args.containsKey('orderServiceIndex')) {

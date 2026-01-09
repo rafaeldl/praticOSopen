@@ -66,7 +66,7 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 #### Ordens de Serviço
 - ✅ Visualizar todas as OS (somente leitura)
 - ❌ Criar novas OS
-- ❌ Editar OS
+- ✅ Editar OS (Permite ajustes fiscais/financeiros e correções)
 - ❌ Atribuir técnicos
 - ❌ Executar serviços
 
@@ -157,7 +157,7 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 - ✅ Editar suas próprias OS
 - ❌ Atribuir técnicos
 - ❌ Executar serviços
-- ❌ Visualizar OS de outros
+- ❌ Visualizar OS de outros (Admin pode reatribuir em caso de férias/ausência)
 
 #### Dados Financeiros
 - ✅ Visualizar valores e preços (para orçamentos)
@@ -192,7 +192,7 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 
 #### Ordens de Serviço
 - ✅ Visualizar apenas OS atribuídas (sem valores financeiros)
-- ❌ Criar novas OS
+- ✅ Criar novas OS (Inicia em 'Orçamento' para precificação posterior)
 - ✅ Editar OS **apenas quando status = 'Orçamento'**
   - ✅ Adicionar/editar/remover serviços e produtos
   - ✅ Alterar cliente e dispositivo
@@ -488,8 +488,8 @@ Mensagem: "Não é possível alterar o status desta OS com seu perfil atual."
 | Ver todas as OS | ✅ | ✅ | ✅ | ❌ | ❌ |
 | Ver OS atribuídas | ✅ | ✅ | ✅ | ❌ | ✅ |
 | Ver OS próprias | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Criar OS | ✅ | ❌ | ✅ | ✅ | ❌ |
-| Editar OS | ✅ | ❌ | ✅ | ✅* | ❌ |
+| Criar OS | ✅ | ❌ | ✅ | ✅ | ✅ |
+| Editar OS | ✅ | ✅ | ✅ | ✅* | ❌ |
 | Atribuir técnicos | ✅ | ❌ | ✅ | ❌ | ❌ |
 | Executar OS | ✅ | ❌ | ✅ | ❌ | ✅ |
 | Deletar OS | ✅ | ❌ | ✅ | ❌ | ❌ |
@@ -511,9 +511,9 @@ Mensagem: "Não é possível alterar o status desta OS com seu perfil atual."
 |-----------|-------|---------|------------|-----------|---------|
 | Gerenciar clientes | ✅ | ❌ | ✅ | ✅ | ❌ |
 | Ver clientes | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Gerenciar produtos | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Gerenciar produtos | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Ver produtos | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Gerenciar serviços | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Gerenciar serviços | ✅ | ❌ | ❌ | ❌ | ❌ |
 | Ver serviços | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Gerenciar dispositivos | ✅ | ❌ | ✅ | ❌ | ❌ |
 | Ver dispositivos | ✅ | ✅ | ✅ | ✅ | ✅ |
