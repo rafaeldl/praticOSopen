@@ -132,6 +132,12 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
 
+    // Verifica se pode editar campos principais (valor, quantidade, produto)
+    // Sempre permite editar descrição/observações
+    final canEditMainFields = _orderStore?.order != null
+        ? _authService.canEditOrderMainFields(_orderStore!.order!)
+        : true;
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
@@ -162,9 +168,11 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   _buildProductNameField(context),
-                  _buildQuantityField(context, config),
-                  // Apenas mostrar campos de valores se usuário pode ver preços
-                  if (_authService.hasPermission(PermissionType.viewPrices)) ...[
+                  // Apenas mostrar quantidade se pode editar campos principais
+                  if (canEditMainFields)
+                    _buildQuantityField(context, config),
+                  // Apenas mostrar campos de valores se usuário pode ver preços E pode editar campos principais
+                  if (_authService.hasPermission(PermissionType.viewPrices) && canEditMainFields) ...[
                     _buildValueField(context, config),
                     _buildTotalField(context, config),
                   ],
