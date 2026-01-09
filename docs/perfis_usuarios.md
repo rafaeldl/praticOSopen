@@ -44,9 +44,10 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 - ✅ Gerenciar serviços
 - ✅ Gerenciar dispositivos/equipamentos
 
-#### Formulários
+#### Formulários/Procedimentos
 - ✅ Preencher formulários
 - ✅ Gerenciar templates de formulários
+- ✅ Reabrir procedimentos concluídos
 
 #### Administração
 - ✅ Gerenciar usuários e colaboradores
@@ -86,9 +87,10 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 - ✅ Visualizar dispositivos
 - ❌ Gerenciar cadastros
 
-#### Formulários
+#### Formulários/Procedimentos
 - ❌ Preencher formulários
 - ❌ Gerenciar templates
+- ✅ Reabrir procedimentos concluídos (se tiver acesso)
 
 #### Administração
 - ❌ Sem acesso administrativo
@@ -133,9 +135,10 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 - ❌ Gerenciar serviços (sem ver preços)
 - ✅ Gerenciar dispositivos
 
-#### Formulários
+#### Formulários/Procedimentos
 - ✅ Preencher formulários
 - ✅ Gerenciar templates de formulários
+- ✅ Reabrir procedimentos concluídos
 
 #### Administração
 - ❌ Sem acesso administrativo
@@ -171,9 +174,10 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 - ✅ Visualizar serviços
 - ✅ Visualizar dispositivos
 
-#### Formulários
+#### Formulários/Procedimentos
 - ✅ Preencher formulários
 - ❌ Gerenciar templates
+- ❌ Reabrir procedimentos concluídos
 
 #### Administração
 - ❌ Sem acesso administrativo
@@ -218,9 +222,10 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 - ❌ Visualizar serviços (valores ocultos nas listas)
 - ✅ Visualizar dispositivos (para execução)
 
-#### Formulários
+#### Formulários/Procedimentos
 - ✅ Preencher formulários e checklists
 - ❌ Gerenciar templates
+- ❌ Reabrir procedimentos concluídos
 
 #### Fotos
 - ✅ Anexar fotos às OS
@@ -291,6 +296,50 @@ Após a OS sair do status **'Orçamento'**, as restrições se aplicam:
 - ✅ Não têm restrições baseadas em status
 - ✅ Manager vê valores financeiros
 - ✅ Consultant vê valores apenas das próprias OSs
+
+---
+
+## Restrições de Procedimentos (Formulários/Checklists)
+
+### Procedimentos em Andamento (inProgress)
+
+Enquanto um procedimento está em andamento:
+- ✅ Todos os perfis com acesso podem preencher campos
+- ✅ Todos podem adicionar e remover fotos
+- ✅ Todos podem concluir o procedimento
+
+### Procedimentos Concluídos (completed)
+
+Quando um procedimento é marcado como **concluído**, ele entra em modo **somente leitura**:
+
+#### Comportamento Visual:
+- 🔒 Todos os campos ficam desabilitados
+- 🔒 Campos de texto: `enabled: false`
+- 🔒 Campos booleanos: opacidade reduzida (50%) + `AbsorbPointer`
+- 🔒 Campos de seleção: chevron cinza, sem resposta a toques
+- 🔒 Botão de câmera (adicionar foto): removido
+- 🔒 Botão de lixeira (deletar foto): removido da galeria
+- ✅ Banner verde "Procedimento concluído" exibido no topo
+
+#### Quem pode reabrir procedimentos concluídos?
+
+| Perfil | Pode Reabrir? |
+|--------|---------------|
+| Admin | ✅ Sim |
+| Gerente | ✅ Sim |
+| Supervisor | ✅ Sim |
+| Consultor | ❌ Não |
+| Técnico | ❌ Não |
+
+#### Comportamento do botão "Reabrir":
+- **Admin, Gerente, Supervisor**: Botão "Reabrir" visível na barra de navegação
+- **Consultor, Técnico**: Botão não aparece; se tentarem acessar programaticamente, recebem diálogo de erro
+
+#### Mensagem de Erro:
+```
+Título: "Sem Permissão"
+Mensagem: "Apenas Administradores, Gerentes e Supervisores podem reabrir procedimentos concluídos."
+```
 
 ---
 
@@ -450,6 +499,14 @@ Mensagem: "Não é possível alterar o status desta OS com seu perfil atual."
 | Ver serviços | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Gerenciar dispositivos | ✅ | ❌ | ✅ | ❌ | ❌ |
 | Ver dispositivos | ✅ | ✅ | ✅ | ✅ | ✅ |
+
+### Formulários/Procedimentos
+
+| Permissão | Admin | Gerente | Supervisor | Consultor | Técnico |
+|-----------|-------|---------|------------|-----------|---------|
+| Preencher procedimentos | ✅ | ❌ | ✅ | ✅ | ✅ |
+| Gerenciar templates | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Reabrir concluídos | ✅ | ✅ | ✅ | ❌ | ❌ |
 
 ### Administração
 
@@ -640,11 +697,43 @@ R: Sim, se a OS estiver no status "Aprovado", o Técnico pode marcá-la como "Co
 **P: Admin pode reverter o status de uma OS de 'Concluído' para 'Em Andamento'?**
 R: Sim. Admin e Gerente são os únicos perfis que podem alterar o status de uma OS concluída, permitindo reabrir ou corrigir OSs quando necessário.
 
+**P: Quem pode reabrir um procedimento (formulário/checklist) concluído?**
+R: Apenas **Admin, Gerente e Supervisor** podem reabrir procedimentos concluídos. Consultor e Técnico não têm essa permissão - o botão "Reabrir" não aparece para eles.
+
+**P: Por que procedimentos concluídos ficam em modo somente leitura?**
+R: Para garantir a integridade dos dados coletados. Uma vez que o procedimento é marcado como concluído, assume-se que o trabalho foi finalizado e os dados representam o estado final. Apenas usuários com privilégios (Admin/Gerente/Supervisor) podem reabrir para correções quando necessário.
+
+**P: Posso adicionar fotos em um procedimento concluído?**
+R: Não. Após conclusão, o procedimento entra em modo somente leitura. Para adicionar fotos, um Admin, Gerente ou Supervisor deve reabrir o procedimento primeiro.
+
 ---
 
 ## Changelog - Implementações Recentes
 
 ### Janeiro 2026
+
+#### Modo Somente Leitura para Procedimentos Concluídos (09/01/2026)
+- **Implementado:** Controle de edição e reabertura de procedimentos baseado em RBAC
+- **Afeta:** Todos os perfis
+- **Commit:** `3fab8bf` - feat: restrict form editing and reopening based on RBAC
+
+**Mudanças - Procedimentos Concluídos:**
+- Procedimentos com status `completed` entram em modo somente leitura
+- Campos de texto desabilitados (`enabled: false`)
+- Campos booleanos com opacidade reduzida e `AbsorbPointer`
+- Campos de seleção sem resposta a toques, chevron cinza
+- Botão de câmera (adicionar foto) removido
+- Botão de lixeira (deletar foto) removido da galeria
+
+**Mudanças - Reabertura:**
+- Novo método `canReopenCompletedForms` em AuthorizationService
+- **Admin, Gerente e Supervisor** podem reabrir procedimentos concluídos
+- **Consultor e Técnico** não podem reabrir (botão oculto)
+- Diálogo de erro ao tentar reabrir sem permissão
+
+**Arquivos modificados:**
+- `lib/services/authorization_service.dart` - Novo getter `canReopenCompletedForms`
+- `lib/screens/forms/form_fill_screen.dart` - Modo leitura, botão reabrir condicional, widgets de input com `isReadOnly`
 
 #### Controle de Fluxo de Status + Restrições de Procedimentos (09/01/2026)
 - **Implementado:** Sistema de controle rigoroso de transições de status e restrições para procedimentos
