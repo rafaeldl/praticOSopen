@@ -89,6 +89,77 @@ O sistema usa isolamento por empresa (tenant). **Toda operação deve considerar
 
 ## Padrões de Código
 
+### Convenções de Nomenclatura (OBRIGATÓRIO)
+
+**SEMPRE use inglês para código, tipos e dados:**
+
+```dart
+// ✅ CORRETO - Inglês
+class OrderStatus {
+  static const pending = 'pending';
+  static const approved = 'approved';
+  static const completed = 'completed';
+}
+
+enum PaymentMethod {
+  cash,
+  creditCard,
+  debitCard,
+  pix
+}
+
+// ❌ ERRADO - Português
+class StatusOS {
+  static const pendente = 'pendente';
+  static const aprovado = 'aprovado';
+  static const concluido = 'concluido';
+}
+```
+
+**Regras:**
+1. **Classes, variáveis, métodos, propriedades**: Sempre em inglês
+2. **Constantes e Enums**: Sempre em inglês
+3. **Chaves de JSON/Firestore**: Sempre em inglês
+4. **Valores salvos no banco**: Sempre em inglês
+5. **Comentários**: Podem ser em português (preferência por inglês)
+6. **Strings visíveis ao usuário**: Em português (UI labels, mensagens)
+
+**Exemplos práticos:**
+
+```dart
+// ✅ Modelo correto
+class Order extends BaseAuditCompany {
+  String? status; // 'pending', 'approved', 'completed'
+  DateTime? scheduledDate;
+  CustomerAggr? customer;
+  List<OrderService>? services;
+}
+
+// ✅ Enum correto
+enum UserRole {
+  owner,
+  admin,
+  technician,
+  viewer
+}
+
+// ✅ UI em português, lógica em inglês
+Text(order.status == 'pending' ? 'Pendente' : 'Concluído')
+
+// ❌ Evitar mistura
+String statusDaOS = 'pendente'; // ERRADO
+```
+
+**Campos no Firestore:**
+```json
+{
+  "status": "pending",
+  "scheduledDate": "2025-01-09T10:00:00Z",
+  "customer": {...},
+  "paymentMethod": "creditCard"
+}
+```
+
 ### Modelos (Full + Aggregate)
 
 Cada entidade tem DUAS classes:
@@ -211,12 +282,13 @@ bundle exec fastlane release_store      # App Store
 
 ## Regras Importantes
 
-1. **Multi-Tenancy é Prioridade**: Sempre verificar estrutura de company/roles
-2. **Build Runner**: Executar após alterar Stores/Models
-3. **AuthService**: Usar para criar novos usuários (não gravar direto no banco)
-4. **CollaboratorStore**: Usar para gerenciar membros da equipe (não usar CompanyStore)
-5. **Cupertino-first**: App deve parecer nativo iOS
-6. **Dark Mode**: Sempre usar `.resolveFrom(context)` para cores dinâmicas
+1. **Inglês no Código**: SEMPRE usar inglês para classes, variáveis, constantes, enums, chaves JSON e valores no banco
+2. **Multi-Tenancy é Prioridade**: Sempre verificar estrutura de company/roles
+3. **Build Runner**: Executar após alterar Stores/Models
+4. **AuthService**: Usar para criar novos usuários (não gravar direto no banco)
+5. **CollaboratorStore**: Usar para gerenciar membros da equipe (não usar CompanyStore)
+6. **Cupertino-first**: App deve parecer nativo iOS
+7. **Dark Mode**: Sempre usar `.resolveFrom(context)` para cores dinâmicas
 
 ## Documentação Adicional
 

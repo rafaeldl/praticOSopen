@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/invite_store.dart';
 import 'package:praticos/models/invite.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 
 /// Tela de convites pendentes.
@@ -34,14 +35,8 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
 
   String _getRoleLabel(RolesType? role) {
     if (role == null) return 'Membro';
-    switch (role) {
-      case RolesType.admin:
-        return 'Administrador';
-      case RolesType.manager:
-        return 'Gerente';
-      case RolesType.user:
-        return 'Membro';
-    }
+    // Use RolePermissions helper instead of manual switch
+    return RolePermissions.getRoleLabel(role);
   }
 
   Future<void> _acceptInvite(Invite invite) async {

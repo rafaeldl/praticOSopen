@@ -67,7 +67,7 @@ abstract class _InviteStore with Store {
     try {
       final userId = Global.currentUser!.uid;
       final companyId = invite.company?.id;
-      final role = invite.role ?? RolesType.user;
+      final role = invite.role ?? RolesType.technician;
 
       if (companyId == null) {
         throw Exception('Convite inválido: empresa não encontrada.');

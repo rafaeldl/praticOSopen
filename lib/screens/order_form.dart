@@ -15,9 +15,11 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/services/authorization_service.dart';
 
 // Formulários Dinâmicos
 import 'package:praticos/models/order_form.dart' as of_model; // Alias para evitar conflito com esta classe OrderForm
@@ -36,6 +38,7 @@ class OrderForm extends StatefulWidget {
 class _OrderFormState extends State<OrderForm> {
   late OrderStore _store;
   final FormsService _formsService = FormsService();
+  final AuthorizationService _authService = AuthorizationService.instance;
 
   @override
   void initState() {
@@ -146,6 +149,9 @@ class _OrderFormState extends State<OrderForm> {
         final hasPartialPayment = paidAmount > 0 && !isPaid;
         final hasCreatedDate = _store.order?.id != null;
 
+        // Verificar se o usuário pode visualizar valores financeiros
+        final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+
         return _buildGroupedSection(
           header: "RESUMO",
           children: [
@@ -175,8 +181,12 @@ class _OrderFormState extends State<OrderForm> {
               placeholder: "Definir",
               onTap: _selectDueDate,
               showChevron: true,
+              enabled: _store.order != null
+                  ? _authService.canEditOrderMainFields(_store.order!)
+                  : true,
             ),
-            if (discount > 0)
+            // Apenas mostrar desconto se usuário pode ver preços
+            if (canViewPrices && discount > 0)
               _buildListTile(
                 context: context,
                 icon: CupertinoIcons.tag_fill,
@@ -186,16 +196,18 @@ class _OrderFormState extends State<OrderForm> {
                 showChevron: true,
                 valueColor: CupertinoColors.systemOrange,
               ),
-            _buildListTile(
-              context: context,
-              icon: CupertinoIcons.money_dollar_circle_fill,
-              title: config.label(LabelKeys.total),
-              value: _convertToCurrency(total),
-              onTap: () => _showPaymentOptions(config),
-              showChevron: true,
-              isBold: true,
-            ),
-            if (hasPartialPayment)
+            // Apenas mostrar total se usuário pode ver preços
+            if (canViewPrices)
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.money_dollar_circle_fill,
+                title: config.label(LabelKeys.total),
+                value: _convertToCurrency(total),
+                onTap: () => _showPaymentOptions(config),
+                showChevron: true,
+                isBold: true,
+              ),
+            if (canViewPrices && hasPartialPayment)
               _buildListTile(
                 context: context,
                 icon: CupertinoIcons.checkmark_circle,
@@ -205,7 +217,7 @@ class _OrderFormState extends State<OrderForm> {
                 showChevron: true,
                 valueColor: CupertinoColors.systemGreen,
               ),
-            if (hasPartialPayment)
+            if (canViewPrices && hasPartialPayment)
               _buildListTile(
                 context: context,
                 icon: CupertinoIcons.hourglass,
@@ -215,20 +227,22 @@ class _OrderFormState extends State<OrderForm> {
                 showChevron: true,
                 valueColor: CupertinoColors.systemOrange,
               ),
-            _buildListTile(
-              context: context,
-              icon: isPaid
-                  ? CupertinoIcons.checkmark_circle_fill
-                  : (isPartial ? CupertinoIcons.circle_lefthalf_fill : CupertinoIcons.clock_fill),
-              title: "Pagamento",
-              value: isPaid ? "Pago" : (isPartial ? "Parcial" : "A Receber"),
-              onTap: () => _showPaymentOptions(config),
-              showChevron: true,
-              valueColor: isPaid
-                  ? CupertinoColors.systemGreen
-                  : (isPartial ? CupertinoColors.systemBlue : CupertinoColors.systemOrange),
-              isLast: true,
-            ),
+            // Apenas mostrar pagamento se usuário pode ver preços
+            if (canViewPrices)
+              _buildListTile(
+                context: context,
+                icon: isPaid
+                    ? CupertinoIcons.checkmark_circle_fill
+                    : (isPartial ? CupertinoIcons.circle_lefthalf_fill : CupertinoIcons.clock_fill),
+                title: "Pagamento",
+                value: isPaid ? "Pago" : (isPartial ? "Parcial" : "A Receber"),
+                onTap: () => _showPaymentOptions(config),
+                showChevron: true,
+                valueColor: isPaid
+                    ? CupertinoColors.systemGreen
+                    : (isPartial ? CupertinoColors.systemBlue : CupertinoColors.systemOrange),
+                isLast: true,
+              ),
           ],
         );
       },
@@ -238,6 +252,10 @@ class _OrderFormState extends State<OrderForm> {
   Widget _buildClientDeviceSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
+        final canEditFields = _store.order != null
+            ? _authService.canEditOrderMainFields(_store.order!)
+            : true;
+
         return _buildGroupedSection(
           header: "${config.customer.toUpperCase()} E ${config.device.toUpperCase()}",
           children: [
@@ -249,6 +267,7 @@ class _OrderFormState extends State<OrderForm> {
               placeholder: "Selecionar ${config.customer}",
               onTap: _selectCustomer,
               showChevron: true,
+              enabled: canEditFields,
             ),
             _buildListTile(
               context: context,
@@ -259,6 +278,7 @@ class _OrderFormState extends State<OrderForm> {
               onTap: _selectDevice,
               showChevron: true,
               isLast: true,
+              enabled: canEditFields,
             ),
           ],
         );
@@ -269,6 +289,10 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final hasOrder = _store.order?.id != null && _store.companyId != null;
+        // Usar canManageOrderForms para procedimentos (Supervisor pode gerenciar em OS ativa)
+        final canManageForms = _store.order != null
+            ? _authService.canManageOrderForms(_store.order!)
+            : true;
 
         return StreamBuilder<List<of_model.OrderForm>>(
           stream: _store.formsStream,
@@ -279,7 +303,7 @@ class _OrderFormState extends State<OrderForm> {
 
             return _buildGroupedSection(
               header: "PROCEDIMENTOS",
-              trailing: forms.isNotEmpty ? _buildAddButton(onTap: () => _addForm(config)) : null,
+              trailing: forms.isNotEmpty && canManageForms ? _buildAddButton(onTap: () => _addForm(config)) : null,
               children: [
                 if (isLoading)
                   const Padding(
@@ -292,16 +316,23 @@ class _OrderFormState extends State<OrderForm> {
                     icon: CupertinoIcons.plus_circle,
                     title: "Adicionar Procedimento",
                     value: "",
-                    onTap: () => _addForm(config),
-                    showChevron: true,
+                    onTap: () {
+                      if (canManageForms) {
+                        _addForm(config);
+                      }
+                    },
+                    showChevron: canManageForms,
                     isLast: true,
-                    textColor: CupertinoTheme.of(context).primaryColor,
+                    textColor: canManageForms
+                        ? CupertinoTheme.of(context).primaryColor
+                        : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                    enabled: canManageForms,
                   )
                 else
                   ...forms.asMap().entries.map((entry) {
                     final index = entry.key;
                     final form = entry.value;
-                    return _buildFormRow(context, form, index == forms.length - 1);
+                    return _buildFormRow(context, form, index == forms.length - 1, canManageForms);
                   }),
               ],
             );
@@ -311,7 +342,7 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildFormRow(BuildContext context, of_model.OrderForm form, bool isLast) {
+  Widget _buildFormRow(BuildContext context, of_model.OrderForm form, bool isLast, bool canDelete) {
     final total = form.items.length;
     final answered = form.responses.length;
     final progress = total > 0 ? (answered / total) : 0.0;
@@ -322,6 +353,7 @@ class _OrderFormState extends State<OrderForm> {
       context: context,
       index: form.id.hashCode,
       onDelete: () => _confirmDeleteForm(form),
+      canDelete: canDelete,
       child: GestureDetector(
         onTap: () {
           Navigator.push(
@@ -482,10 +514,15 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final services = _store.services ?? [];
+        final canEditFields = _store.order != null
+            ? _authService.canEditOrderMainFields(_store.order!)
+            : true;
 
         return _buildGroupedSection(
           header: "SERVIÇOS",
-          trailing: services.isNotEmpty ? _buildAddButton(onTap: _addService) : null,
+          trailing: services.isNotEmpty && canEditFields
+              ? _buildAddButton(onTap: _addService)
+              : null,
           children: [
             if (services.isEmpty)
               _buildListTile(
@@ -497,6 +534,7 @@ class _OrderFormState extends State<OrderForm> {
                 showChevron: true,
                 isLast: true,
                 textColor: CupertinoTheme.of(context).primaryColor,
+                enabled: canEditFields,
               )
             else
               ...services.asMap().entries.map((entry) {
@@ -514,10 +552,15 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final products = _store.products ?? [];
+        final canEditFields = _store.order != null
+            ? _authService.canEditOrderMainFields(_store.order!)
+            : true;
 
         return _buildGroupedSection(
           header: "PEÇAS E PRODUTOS",
-          trailing: products.isNotEmpty ? _buildAddButton(onTap: _addProduct) : null,
+          trailing: products.isNotEmpty && canEditFields
+              ? _buildAddButton(onTap: _addProduct)
+              : null,
           children: [
             if (products.isEmpty)
               _buildListTile(
@@ -529,6 +572,7 @@ class _OrderFormState extends State<OrderForm> {
                 showChevron: true,
                 isLast: true,
                 textColor: CupertinoTheme.of(context).primaryColor,
+                enabled: canEditFields,
               )
             else
               ...products.asMap().entries.map((entry) {
@@ -616,10 +660,11 @@ class _OrderFormState extends State<OrderForm> {
     Color? valueColor,
     Color? textColor,
     bool isBold = false,
+    bool enabled = true,
   }) {
     final hasValue = value != null && value.isNotEmpty;
     return GestureDetector(
-      onTap: onTap,
+      onTap: enabled ? onTap : null,
       child: Container(
         color: Colors.transparent, // Hit test
         child: Column(
@@ -637,7 +682,9 @@ class _OrderFormState extends State<OrderForm> {
                       title,
                       style: TextStyle(
                         fontSize: 17,
-                        color: textColor ?? CupertinoColors.label.resolveFrom(context),
+                        color: enabled
+                            ? (textColor ?? CupertinoColors.label.resolveFrom(context))
+                            : CupertinoColors.tertiaryLabel.resolveFrom(context),
                         fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
@@ -646,12 +693,14 @@ class _OrderFormState extends State<OrderForm> {
                     hasValue ? value : placeholder,
                     style: TextStyle(
                       fontSize: 17,
-                      color: hasValue
-                          ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
-                          : CupertinoColors.placeholderText.resolveFrom(context),
+                      color: enabled
+                          ? (hasValue
+                              ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
+                              : CupertinoColors.placeholderText.resolveFrom(context))
+                          : CupertinoColors.tertiaryLabel.resolveFrom(context),
                     ),
                   ),
-                  if (showChevron) ...[
+                  if (showChevron && enabled) ...[
                     const SizedBox(width: 6),
                     Icon(
                       CupertinoIcons.chevron_right,
@@ -675,15 +724,23 @@ class _OrderFormState extends State<OrderForm> {
   }
   
   Widget _buildServiceRow(BuildContext context, dynamic service, int index, bool isLast, SegmentConfigProvider config) {
+    // Verificar se o usuário pode visualizar valores financeiros
+    final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+    // Verificar se pode editar campos principais (incluindo delete)
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
+
     return _buildDismissibleItem(
       context: context,
       index: index,
       onDelete: () => _confirmDeleteService(index, config),
+      canDelete: canEditFields,
       child: _buildItemRow(
         context: context,
         title: service.service?.name ?? "Serviço",
         subtitle: service.description,
-        trailing: _convertToCurrency(service.value),
+        trailing: canViewPrices ? _convertToCurrency(service.value) : "",
         onTap: () => _editService(index),
         isLast: isLast,
       ),
@@ -691,15 +748,23 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   Widget _buildProductRow(BuildContext context, dynamic product, int index, bool isLast, SegmentConfigProvider config) {
+    // Verificar se o usuário pode visualizar valores financeiros
+    final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+    // Verificar se pode editar campos principais (incluindo delete)
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
+
     return _buildDismissibleItem(
       context: context,
       index: index,
       onDelete: () => _confirmDeleteProduct(index, config),
+      canDelete: canEditFields,
       child: _buildItemRow(
         context: context,
         title: product.product?.name ?? "Produto",
         subtitle: "${product.quantity}x • ${product.description ?? ''}",
-        trailing: _convertToCurrency(product.total),
+        trailing: canViewPrices ? _convertToCurrency(product.total) : "",
         onTap: () => _editProduct(index),
         isLast: isLast,
       ),
@@ -711,7 +776,13 @@ class _OrderFormState extends State<OrderForm> {
     required int index,
     required VoidCallback onDelete,
     required Widget child,
+    bool canDelete = true,
   }) {
+    // Se não pode deletar, retorna apenas o child sem o Dismissible
+    if (!canDelete) {
+      return child;
+    }
+
     return Dismissible(
       key: ValueKey('item_$index'),
       direction: DismissDirection.endToStart,
@@ -812,18 +883,32 @@ class _OrderFormState extends State<OrderForm> {
   // --- Actions ---
 
   void _showActionSheet(BuildContext context, SegmentConfigProvider config) {
+    // Verificar se o usuário pode visualizar valores (necessário para gerar PDF completo)
+    final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+    
+    // Verificar permissão de exclusão
+    bool canDelete = false;
+    if (_authService.isAdmin) {
+      canDelete = true;
+    } else if (_authService.isManager || _authService.isSupervisor) {
+      // Gerente e Supervisor só podem excluir em status 'Orçamento'
+      canDelete = _store.status == 'quote';
+    }
+
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text('Opções da ${config.serviceOrder}'),
         actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: const Text('Compartilhar PDF'),
-            onPressed: () {
-              Navigator.pop(context);
-              _onShare(context, _store.order, config);
-            },
-          ),
+          // Apenas exibir opção de PDF para usuários com acesso a valores
+          if (canViewPrices)
+            CupertinoActionSheetAction(
+              child: const Text('Compartilhar PDF'),
+              onPressed: () {
+                Navigator.pop(context);
+                _onShare(context, _store.order, config);
+              },
+            ),
           CupertinoActionSheetAction(
             child: Text(config.label(LabelKeys.addPhoto)),
             onPressed: () {
@@ -833,11 +918,13 @@ class _OrderFormState extends State<OrderForm> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          isDestructiveAction: true,
-          child: Text('Excluir ${config.serviceOrder}'),
+          isDestructiveAction: canDelete,
+          child: Text(canDelete ? 'Excluir ${config.serviceOrder}' : config.label(LabelKeys.cancel)),
           onPressed: () {
             Navigator.pop(context);
-            _showDeleteConfirmation(config);
+            if (canDelete) {
+              _showDeleteConfirmation(config);
+            }
           },
         ),
       ),
@@ -894,13 +981,35 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   void _selectStatus(SegmentConfigProvider config) {
-     final statusKeys = ['quote', 'approved', 'progress', 'done', 'canceled'];
+     // Obter apenas os status disponíveis para o perfil do usuário
+     final order = _store.order;
+     if (order == null) return;
+
+     final availableStatuses = _authService.getAvailableStatuses(order);
+
+     // Se não há status disponíveis, mostrar alerta
+     if (availableStatuses.isEmpty) {
+       showCupertinoDialog(
+         context: context,
+         builder: (context) => CupertinoAlertDialog(
+           title: const Text('Sem Permissão'),
+           content: const Text('Não é possível alterar o status desta OS com seu perfil atual.'),
+           actions: [
+             CupertinoDialogAction(
+               child: const Text('OK'),
+               onPressed: () => Navigator.pop(context),
+             ),
+           ],
+         ),
+       );
+       return;
+     }
 
      showCupertinoModalPopup(
        context: context,
        builder: (context) => CupertinoActionSheet(
          title: const Text("Alterar Status"),
-         actions: statusKeys.map((key) {
+         actions: availableStatuses.map((key) {
            return CupertinoActionSheetAction(
              child: Text(config.getStatus(key)),
              onPressed: () {
@@ -920,8 +1029,29 @@ class _OrderFormState extends State<OrderForm> {
      );
   }
 
-  /// Tenta alterar o status, verificando se há formulários pendentes
+  /// Tenta alterar o status, verificando permissões e formulários pendentes
   void _trySetStatus(String newStatus, SegmentConfigProvider config) {
+    final order = _store.order;
+    if (order == null) return;
+
+    // Verificar se o usuário tem permissão para fazer esta mudança de status
+    if (!_authService.canChangeOrderStatus(order, newStatus)) {
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Sem Permissão'),
+          content: const Text('Você não tem permissão para alterar para este status.'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     // Se não for "done", permite alterar diretamente
     if (newStatus != 'done') {
       _store.setStatus(newStatus);

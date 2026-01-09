@@ -153,6 +153,91 @@ Arquitetura para checklists, vistorias e perguntas personalizadas. Detalhes em `
 
 ## Padrões de Código
 
+### 0. Convenções de Nomenclatura (CRÍTICO)
+
+**OBRIGATÓRIO: Código, tipos e dados SEMPRE em inglês**
+
+```dart
+// ✅ CORRETO
+class OrderStatus {
+  static const pending = 'pending';
+  static const approved = 'approved';
+  static const completed = 'completed';
+  static const cancelled = 'cancelled';
+}
+
+enum PaymentMethod { cash, creditCard, debitCard, pix, bankTransfer }
+enum UserRole { owner, admin, technician, viewer }
+
+// ❌ ERRADO - NÃO usar português
+class StatusOS {
+  static const pendente = 'pendente';
+  static const aprovado = 'aprovado';
+}
+```
+
+**O que DEVE ser em inglês:**
+- ✅ Classes: `Order`, `Customer`, `PaymentMethod`
+- ✅ Propriedades: `scheduledDate`, `paymentMethod`, `totalAmount`
+- ✅ Métodos: `calculateTotal()`, `validateStatus()`, `processPayment()`
+- ✅ Constantes: `pending`, `approved`, `completed`
+- ✅ Enums: `PaymentMethod.creditCard`, `UserRole.admin`
+- ✅ Chaves JSON: `{"status": "pending", "scheduledDate": "..."}`
+- ✅ Valores no Firestore: `status: "approved"`, `role: "technician"`
+
+**O que PODE ser em português:**
+- ✅ Strings de UI: `Text('Pendente')`, `'Total a Pagar'`
+- ✅ Mensagens de erro: `'CPF inválido'`, `'Campos obrigatórios'`
+- ⚠️ Comentários: Preferência por inglês, mas português é aceitável
+
+**Exemplos práticos:**
+
+```dart
+// ✅ Correto - Modelo com lógica em inglês, UI em português
+class Order extends BaseAuditCompany {
+  String? status; // 'pending', 'approved', 'completed'
+  DateTime? scheduledDate;
+  double? totalAmount;
+
+  String getStatusLabel() {
+    switch (status) {
+      case 'pending': return 'Pendente';
+      case 'approved': return 'Aprovado';
+      case 'completed': return 'Concluído';
+      default: return 'Desconhecido';
+    }
+  }
+}
+
+// ✅ Correto - Repository em inglês
+class OrderRepository extends TenantRepository<Order> {
+  Future<List<Order>> findByStatus(String status) async {
+    return await findAll(args: [QueryArgs('status', status)]);
+  }
+}
+
+// ❌ ERRADO - Mistura de idiomas
+class Order {
+  String? statusDaOS; // ERRADO
+  DateTime? dataAgendamento; // ERRADO
+  double? valorTotal; // ERRADO
+}
+```
+
+**Firestore Document Structure (SEMPRE inglês):**
+```json
+{
+  "status": "pending",
+  "scheduledDate": "2025-01-09T10:00:00Z",
+  "totalAmount": 150.00,
+  "paymentMethod": "creditCard",
+  "customer": {
+    "id": "abc123",
+    "name": "João Silva"
+  }
+}
+```
+
 ### 1. Modelos (Models)
 
 **Hierarquia de herança:**
@@ -256,10 +341,11 @@ intl: ^0.20.2
 
 ## Dicas para Agentes de IA
 
-1. **Multi-Tenancy é Prioridade:** Verifique sempre se está usando a estrutura correta de company/roles.
-2. **UX/UI Guidelines:**
+1. **🚨 INGLÊS NO CÓDIGO (CRÍTICO):** TODO código, tipos, constantes, enums, propriedades, métodos, chaves JSON e valores no banco DEVEM ser em inglês. Português apenas para UI strings visíveis ao usuário.
+2. **Multi-Tenancy é Prioridade:** Verifique sempre se está usando a estrutura correta de company/roles.
+3. **UX/UI Guidelines:**
     - **App:** Cupertino/iOS-first. Siga `@docs/UX_GUIDELINES.md`.
     - **Web:** Dark Premium Theme. Siga `@docs/WEB_UX_GUIDELINES.md`.
-3. **Build Runner:** `fvm flutter pub run build_runner build --delete-conflicting-outputs` é obrigatório após mudar Stores/Models.
-4. **AuthService:** Use `AuthService` para criar novos usuários, não grave direto no banco.
-5. **CollaboratorStore:** Use este store para gerenciar membros da equipe, não use `CompanyStore` para isso.
+4. **Build Runner:** `fvm flutter pub run build_runner build --delete-conflicting-outputs` é obrigatório após mudar Stores/Models.
+5. **AuthService:** Use `AuthService` para criar novos usuários, não grave direto no banco.
+6. **CollaboratorStore:** Use este store para gerenciar membros da equipe, não use `CompanyStore` para isso.

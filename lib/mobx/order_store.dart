@@ -7,6 +7,8 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/models/permission.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
@@ -22,6 +24,7 @@ abstract class _OrderStore with Store {
   final OrderRepositoryV2 repository = OrderRepositoryV2();
   final PhotoService photoService = PhotoService();
   final FormsService formsService = FormsService();
+  final AuthorizationService _authService = AuthorizationService.instance;
 
   Order? order;
 
@@ -154,6 +157,33 @@ abstract class _OrderStore with Store {
 
   @observable
   ObservableList<Order?> orders = ObservableList<Order?>();
+
+  /// Retorna a lista de OS filtrada com base nas permissões do usuário.
+  ///
+  /// - Admin/Gerente/Supervisor: todas as OS
+  /// - Consultor: apenas OS que criou
+  /// - Técnico: apenas OS atribuídas
+  @computed
+  List<Order?> get filteredOrders {
+    final ordersList = orders.toList();
+    return _authService.filterOrdersByPermission(
+      ordersList.whereType<Order>().toList(),
+    ).cast<Order?>();
+  }
+
+  /// Verifica se o usuário pode visualizar valores financeiros.
+  @computed
+  bool get canViewPrices => _authService.canViewPrices;
+
+  /// Verifica se o usuário pode criar novas OS.
+  @computed
+  bool get canCreateOrder => _authService.hasPermission(
+    PermissionType.createOrder,
+  );
+
+  /// Verifica se o usuário pode visualizar o dashboard financeiro.
+  @computed
+  bool get canViewFinancialDashboard => _authService.canViewFinancialReports;
 
   @observable
   bool isLoading = false;

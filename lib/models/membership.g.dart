@@ -23,6 +23,8 @@ Map<String, dynamic> _$MembershipToJson(Membership instance) =>
 
 const _$RolesTypeEnumMap = {
   RolesType.admin: 'admin',
+  RolesType.supervisor: 'supervisor',
   RolesType.manager: 'manager',
-  RolesType.user: 'user',
+  RolesType.consultant: 'consultant',
+  RolesType.technician: 'technician',
 };

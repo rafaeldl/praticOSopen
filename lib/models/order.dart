@@ -33,6 +33,9 @@ class Order extends BaseAuditCompany {
   /// Lista de transações de pagamento e desconto
   List<PaymentTransaction>? transactions;
 
+  /// Técnico atribuído à OS (para controle de acesso RBAC)
+  UserAggr? assignedTo;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 
