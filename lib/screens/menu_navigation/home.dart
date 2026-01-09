@@ -150,51 +150,54 @@ class _HomeState extends State<Home> {
         identifier: 'home_title',
         child: Text(config.serviceOrderPlural),
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Semantics(
-            identifier: 'filter_button',
-            button: true,
-            label: config.label(LabelKeys.filter),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Icon(
-                currentSelected == 0
-                    ? CupertinoIcons.line_horizontal_3_decrease_circle
-                    : CupertinoIcons.line_horizontal_3_decrease_circle_fill,
+      trailing: Observer(
+        builder: (_) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Semantics(
+              identifier: 'filter_button',
+              button: true,
+              label: config.label(LabelKeys.filter),
+              child: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Icon(
+                  currentSelected == 0
+                      ? CupertinoIcons.line_horizontal_3_decrease_circle
+                      : CupertinoIcons.line_horizontal_3_decrease_circle_fill,
+                ),
+                onPressed: () => _showFilterOptions(context, config),
               ),
-              onPressed: () => _showFilterOptions(context, config),
             ),
-          ),
-          Semantics(
-            identifier: 'dashboard_button',
-            button: true,
-            label: 'Painel Financeiro',
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.chart_bar_alt_fill),
-              onPressed: () => Navigator.of(context, rootNavigator: true)
-                  .pushNamed('/financial_dashboard_simple'),
+            if (_authService.hasPermission(PermissionType.viewFinancialReports))
+              Semantics(
+                identifier: 'dashboard_button',
+                button: true,
+                label: 'Painel Financeiro',
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: const Icon(CupertinoIcons.chart_bar_alt_fill),
+                  onPressed: () => Navigator.of(context, rootNavigator: true)
+                      .pushNamed('/financial_dashboard_simple'),
+                ),
+              ),
+            Semantics(
+              identifier: 'add_order_button',
+              button: true,
+              label: config.label(LabelKeys.createServiceOrder),
+              child: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: const Icon(CupertinoIcons.add),
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  Navigator.of(context, rootNavigator: true).pushNamed('/order').then((_) {
+                    final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
+                    _loadOrders(_getFilters(configInner));
+                  });
+                },
+              ),
             ),
-          ),
-          Semantics(
-            identifier: 'add_order_button',
-            button: true,
-            label: config.label(LabelKeys.createServiceOrder),
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.add),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                Navigator.of(context, rootNavigator: true).pushNamed('/order').then((_) {
-                  final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
-                  _loadOrders(_getFilters(configInner));
-                });
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

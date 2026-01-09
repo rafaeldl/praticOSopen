@@ -268,6 +268,7 @@ class RolePermissions {
     PermissionType.viewCustomers,
     PermissionType.viewProducts,
     PermissionType.viewServices,
+    PermissionType.manageDevices,
     PermissionType.viewDevices,
     // Fotos
     PermissionType.viewPhotos,

@@ -39,10 +39,10 @@ service cloud.firestore {
         && request.auth.token.roles[companyId] == 'admin';
     }
 
-    // Verifica se o usuário pode gerenciar dispositivos (admin ou supervisor)
+    // Verifica se o usuário pode gerenciar dispositivos (admin, manager ou supervisor)
     function canManageDevices(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'supervisor'];
+        && request.auth.token.roles[companyId] in ['admin', 'manager', 'supervisor'];
     }
 
     // Verifica se o usuário pode visualizar dados financeiros (admin ou manager)
