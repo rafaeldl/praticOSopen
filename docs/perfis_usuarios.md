@@ -64,11 +64,12 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 ### Permissões
 
 #### Ordens de Serviço
-- ✅ Visualizar todas as OS (somente leitura)
+- ✅ Visualizar todas as OS
 - ❌ Criar novas OS
 - ✅ Editar OS (Permite ajustes fiscais/financeiros e correções)
 - ❌ Atribuir técnicos
 - ❌ Executar serviços
+- ✅ Deletar OS (apenas quando status = 'Orçamento')
 
 #### Dados Financeiros
 - ✅ Visualizar valores e preços
@@ -186,12 +187,12 @@ O PraticOS utiliza um sistema de controle de acesso baseado em perfis (RBAC - Ro
 
 ## 👷 Técnico
 
-**Descrição:** Responsável pela execução dos serviços em campo. Acesso limitado apenas às OS que lhe foram atribuídas.
+**Descrição:** Responsável pela execução dos serviços em campo. Acesso às Ordens de Serviço da empresa para execução e reporte.
 
 ### Permissões
 
 #### Ordens de Serviço
-- ✅ Visualizar apenas OS atribuídas (sem valores financeiros)
+- ✅ Visualizar todas as OS da empresa (assignedTo ainda não implementado restritivamente)
 - ✅ Criar novas OS (Inicia em 'Orçamento' para precificação posterior)
 - ✅ Editar OS **apenas quando status = 'Orçamento'**
   - ✅ Adicionar/editar/remover serviços e produtos
@@ -377,7 +378,7 @@ Orçamento (quote) → Aprovado (approved) → Em Andamento (progress) → Concl
 
 #### 👨‍💼 Administrador
 - ✅ Pode alterar para **qualquer status** a qualquer momento
-- ✅ **Único perfil** que pode alterar status de OS **concluída** (done)
+- ✅ Pode alterar status de OS **concluída** (done)
 
 #### 💰 Gerente (Financeiro)
 - ✅ Pode alterar para **qualquer status** a qualquer momento
@@ -392,19 +393,21 @@ Transições permitidas:
 
 #### 🧑‍🔧 Supervisor
 Transições permitidas:
+- ✅ `Orçamento` → `Aprovado`/`Em Andamento` (**apenas se for o criador da OS**)
 - ✅ `Aprovado` → `Em Andamento`
 - ✅ `Aprovado` → `Concluído` (conclusão direta)
 - ✅ `Em Andamento` → `Concluído`
-- ❌ Não pode criar ou aprovar orçamentos
+- ❌ Não pode aprovar orçamentos de terceiros
 - ❌ Não pode reverter status
 - ❌ Não pode alterar status concluído
 
 #### 👷 Técnico
-Transições permitidas (idêntico ao Supervisor):
+Transições permitidas:
+- ✅ `Orçamento` → `Aprovado`/`Em Andamento` (**apenas se for o criador da OS**)
 - ✅ `Aprovado` → `Em Andamento`
 - ✅ `Aprovado` → `Concluído` (conclusão direta)
 - ✅ `Em Andamento` → `Concluído`
-- ❌ Não pode criar ou aprovar orçamentos
+- ❌ Não pode aprovar orçamentos de terceiros
 - ❌ Não pode reverter status
 - ❌ Não pode alterar status concluído
 
@@ -492,7 +495,9 @@ Mensagem: "Não é possível alterar o status desta OS com seu perfil atual."
 | Editar OS | ✅ | ✅ | ✅ | ✅* | ❌ |
 | Atribuir técnicos | ✅ | ❌ | ✅ | ❌ | ❌ |
 | Executar OS | ✅ | ❌ | ✅ | ❌ | ✅ |
-| Deletar OS | ✅ | ❌ | ✅ | ❌ | ❌ |
+| Deletar OS | ✅ | ✅* | ✅* | ❌ | ❌ |
+
+*Gerente e Supervisor podem deletar apenas se status for 'Orçamento'
 
 *Consultor pode editar apenas suas próprias OS
 
@@ -701,13 +706,16 @@ R: Sim. A proteção é feita em múltiplas camadas: UI (widgets), lógica (filt
 R: Apenas as observações/descrições dos serviços e produtos. Não pode alterar valores, quantidades, cliente, dispositivo ou data de entrega.
 
 **P: Por que Supervisor e Técnico têm as mesmas restrições?**
-R: Ambos são perfis operacionais sem acesso financeiro. A diferença é que Supervisor pode ver todas as OSs e atribuir técnicos, enquanto Técnico vê apenas suas OSs atribuídas.
+R: Ambos são perfis operacionais sem acesso financeiro. A diferença é que Supervisor pode gerenciar todos os dispositivos e reabrir formulários, enquanto o Técnico tem foco na execução. Atualmente ambos veem todas as OS da empresa até que o sistema de atribuição restritiva seja ativado.
+
+**P: Um Técnico pode aprovar sua própria OS?**
+R: Sim. Se o Técnico (ou Supervisor) criar uma OS, ele pode avançar o status de "Orçamento" para "Aprovado" ou "Em Andamento" diretamente, permitindo autonomia para iniciar serviços urgentes cadastrados em campo.
 
 **P: Um Consultor pode aprovar sua própria OS?**
 R: Sim. Consultores podem alterar o status de suas próprias OSs de "Orçamento" para "Aprovado".
 
 **P: Por que uma OS concluída não pode ter o status alterado?**
-R: Para garantir integridade do histórico e evitar alterações retroativas em OSs finalizadas. Isso protege dados financeiros e operacionais.
+R: Para garantir integridade do histórico e evitar alterações retroativas em OSs finalizadas. Isso protege dados financeiros e operacionais. Apenas **Admin e Gerente** podem reverter este status se necessário.
 
 **P: Um Técnico pode marcar uma OS como concluída diretamente?**
 R: Sim, se a OS estiver no status "Aprovado", o Técnico pode marcá-la como "Concluída" diretamente, sem passar por "Em Andamento".

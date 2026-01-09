@@ -151,9 +151,8 @@ class AuthorizationService {
         return order.createdBy?.id == currentUserId;
 
       case RolesType.technician:
-        // Apenas OS atribuídas (assignedTo) ou que criou
-        return _isOrderAssignedToUser(order, currentUserId) ||
-            order.createdBy?.id == currentUserId;
+        // Acesso a todas as OS (assignedTo ainda não implementado restritivamente)
+        return true;
     }
   }
 
@@ -283,6 +282,13 @@ class AuthorizationService {
       case RolesType.technician:
         // Não pode alterar status 'done'
         if (currentStatus == 'done') return false;
+
+        // Se for o criador da OS, permite sair de 'quote' para 'approved' ou 'progress' (auto-aprovação)
+        final isCreator = Global.currentUser?.uid != null && order.createdBy?.id == Global.currentUser!.uid;
+        if (currentStatus == 'quote' && isCreator && (newStatus == 'approved' || newStatus == 'progress')) {
+           return true;
+        }
+
         // De 'approved' para 'progress' ou 'done'
         if (currentStatus == 'approved' &&
             (newStatus == 'progress' || newStatus == 'done')) {
@@ -335,6 +341,12 @@ class AuthorizationService {
       case RolesType.technician:
         // Se já está concluído, não pode alterar
         if (currentStatus == 'done') return [];
+
+        // Se for o criador da OS e está em orçamento, pode aprovar ou iniciar
+        final isCreator = Global.currentUser?.uid != null && order.createdBy?.id == Global.currentUser!.uid;
+        if (currentStatus == 'quote' && isCreator) {
+          availableStatuses.addAll(['approved', 'progress']);
+        }
 
         if (currentStatus == 'approved') {
           // Podem iniciar ou concluir direto
@@ -437,12 +449,8 @@ class AuthorizationService {
         return orders.where((o) => o.createdBy?.id == currentUserId).toList();
 
       case RolesType.technician:
-        // Apenas OS atribuídas ou que criou
-        return orders
-            .where((o) =>
-                _isOrderAssignedToUser(o, currentUserId) ||
-                o.createdBy?.id == currentUserId)
-            .toList();
+        // Retorna todas as OS (assignedTo ainda não implementado restritivamente)
+        return orders;
     }
   }
 }
