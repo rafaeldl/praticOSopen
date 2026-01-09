@@ -27,8 +27,15 @@ class AuthorizationService {
   static final AuthorizationService _instance = AuthorizationService._internal();
   static AuthorizationService get instance => _instance;
 
-  AuthorizationService._internal();
+  AuthorizationService._internal() {
+    // Inicializar UserStore interno e carregar dados do usuário
+    _internalUserStore = UserStore();
+    _internalUserStore?.findCurrentUser();
+  }
   factory AuthorizationService() => _instance;
+
+  // Internal UserStore instance
+  UserStore? _internalUserStore;
 
   // Shared UserStore instance - set this from screens that have loaded user data
   static UserStore? _sharedUserStore;
@@ -38,6 +45,9 @@ class AuthorizationService {
   static void setUserStore(UserStore userStore) {
     _sharedUserStore = userStore;
   }
+
+  /// Get the active UserStore (shared or internal)
+  UserStore? get _activeUserStore => _sharedUserStore ?? _internalUserStore;
 
   // ═══════════════════════════════════════════════════════════════════
   // ROLE MANAGEMENT
@@ -49,8 +59,8 @@ class AuthorizationService {
       return null;
     }
 
-    // Get role from shared UserStore (user.companies[].role)
-    final user = _sharedUserStore?.user?.value;
+    // Get role from active UserStore (shared or internal fallback)
+    final user = _activeUserStore?.user?.value;
     if (user?.companies == null) {
       return null;
     }
@@ -201,6 +211,109 @@ class AuthorizationService {
     }
 
     return false;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // ORDER STATUS FLOW CONTROL
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Verifica se o usuário pode alterar o status de uma OS para um novo status.
+  ///
+  /// Regras por perfil:
+  /// - Admin/Manager: pode alterar para qualquer status, inclusive de 'done'
+  /// - Consultant: de 'quote' para 'approved' ou 'canceled' (não pode alterar 'done')
+  /// - Supervisor/Technician: de 'approved' para 'progress' ou 'done', e de 'progress' para 'done' (não pode alterar 'done')
+  /// - Apenas Admin e Manager podem alterar status após 'done'
+  bool canChangeOrderStatus(Order order, String newStatus) {
+    final role = normalizedRole;
+    if (role == null) return false;
+    if (!canAccessOrder(order)) return false;
+
+    final currentStatus = order.status;
+
+    // Não pode "alterar" para o mesmo status
+    if (currentStatus == newStatus) return false;
+
+    switch (role) {
+      case RolesType.admin:
+      case RolesType.manager:
+        return true;
+
+      case RolesType.consultant:
+        // Não pode alterar status 'done'
+        if (currentStatus == 'done') return false;
+        // De 'quote' para 'approved' ou 'canceled'
+        return currentStatus == 'quote' &&
+               (newStatus == 'approved' || newStatus == 'canceled');
+
+      case RolesType.supervisor:
+      case RolesType.technician:
+        // Não pode alterar status 'done'
+        if (currentStatus == 'done') return false;
+        // De 'approved' para 'progress' ou 'done'
+        if (currentStatus == 'approved' &&
+            (newStatus == 'progress' || newStatus == 'done')) {
+          return true;
+        }
+        // De 'progress' para 'done'
+        if (currentStatus == 'progress' && newStatus == 'done') {
+          return true;
+        }
+        return false;
+    }
+  }
+
+  /// Retorna a lista de status disponíveis que o usuário pode selecionar
+  /// para uma determinada OS, baseado no status atual e no perfil do usuário.
+  ///
+  /// Retorna apenas os status válidos de acordo com o fluxo de permissões.
+  List<String> getAvailableStatuses(Order order) {
+    final role = normalizedRole;
+    if (role == null) return [];
+    if (!canAccessOrder(order)) return [];
+
+    final currentStatus = order.status;
+    final availableStatuses = <String>[];
+
+    switch (role) {
+      case RolesType.admin:
+      case RolesType.manager:
+        // Podem selecionar qualquer status exceto o atual (inclusive alterar de 'done')
+        availableStatuses.addAll([
+          'quote',
+          'approved',
+          'progress',
+          'done',
+          'canceled',
+        ]);
+        availableStatuses.remove(currentStatus);
+        break;
+
+      case RolesType.consultant:
+        // Se já está concluído, não pode alterar
+        if (currentStatus == 'done') return [];
+        // Pode aprovar ou cancelar orçamentos
+        if (currentStatus == 'quote') {
+          availableStatuses.addAll(['approved', 'canceled']);
+        }
+        break;
+
+      case RolesType.supervisor:
+      case RolesType.technician:
+        // Se já está concluído, não pode alterar
+        if (currentStatus == 'done') return [];
+
+        if (currentStatus == 'approved') {
+          // Podem iniciar ou concluir direto
+          availableStatuses.addAll(['progress', 'done']);
+        } else if (currentStatus == 'progress') {
+          // Podem apenas concluir
+          availableStatuses.add('done');
+        }
+        break;
+    }
+
+    return availableStatuses;
   }
 
   // ═══════════════════════════════════════════════════════════════════

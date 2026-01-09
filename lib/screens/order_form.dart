@@ -260,6 +260,9 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final hasOrder = _store.order?.id != null && _store.companyId != null;
+        final canEditFields = _store.order != null
+            ? _authService.canEditOrderMainFields(_store.order!)
+            : true;
 
         return StreamBuilder<List<of_model.OrderForm>>(
           stream: _store.formsStream,
@@ -270,7 +273,7 @@ class _OrderFormState extends State<OrderForm> {
 
             return _buildGroupedSection(
               header: "PROCEDIMENTOS",
-              trailing: forms.isNotEmpty ? _buildAddButton(onTap: () => _addForm(config)) : null,
+              trailing: forms.isNotEmpty && canEditFields ? _buildAddButton(onTap: () => _addForm(config)) : null,
               children: [
                 if (isLoading)
                   const Padding(
@@ -283,16 +286,23 @@ class _OrderFormState extends State<OrderForm> {
                     icon: CupertinoIcons.plus_circle,
                     title: "Adicionar Procedimento",
                     value: "",
-                    onTap: () => _addForm(config),
-                    showChevron: true,
+                    onTap: () {
+                      if (canEditFields) {
+                        _addForm(config);
+                      }
+                    },
+                    showChevron: canEditFields,
                     isLast: true,
-                    textColor: CupertinoTheme.of(context).primaryColor,
+                    textColor: canEditFields
+                        ? CupertinoTheme.of(context).primaryColor
+                        : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                    enabled: canEditFields,
                   )
                 else
                   ...forms.asMap().entries.map((entry) {
                     final index = entry.key;
                     final form = entry.value;
-                    return _buildFormRow(context, form, index == forms.length - 1);
+                    return _buildFormRow(context, form, index == forms.length - 1, canEditFields);
                   }),
               ],
             );
@@ -302,7 +312,7 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildFormRow(BuildContext context, of_model.OrderForm form, bool isLast) {
+  Widget _buildFormRow(BuildContext context, of_model.OrderForm form, bool isLast, bool canDelete) {
     final total = form.items.length;
     final answered = form.responses.length;
     final progress = total > 0 ? (answered / total) : 0.0;
@@ -313,6 +323,7 @@ class _OrderFormState extends State<OrderForm> {
       context: context,
       index: form.id.hashCode,
       onDelete: () => _confirmDeleteForm(form),
+      canDelete: canDelete,
       child: GestureDetector(
         onTap: () {
           Navigator.push(
@@ -929,13 +940,35 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   void _selectStatus(SegmentConfigProvider config) {
-     final statusKeys = ['quote', 'approved', 'progress', 'done', 'canceled'];
+     // Obter apenas os status disponíveis para o perfil do usuário
+     final order = _store.order;
+     if (order == null) return;
+
+     final availableStatuses = _authService.getAvailableStatuses(order);
+
+     // Se não há status disponíveis, mostrar alerta
+     if (availableStatuses.isEmpty) {
+       showCupertinoDialog(
+         context: context,
+         builder: (context) => CupertinoAlertDialog(
+           title: const Text('Sem Permissão'),
+           content: const Text('Não é possível alterar o status desta OS com seu perfil atual.'),
+           actions: [
+             CupertinoDialogAction(
+               child: const Text('OK'),
+               onPressed: () => Navigator.pop(context),
+             ),
+           ],
+         ),
+       );
+       return;
+     }
 
      showCupertinoModalPopup(
        context: context,
        builder: (context) => CupertinoActionSheet(
          title: const Text("Alterar Status"),
-         actions: statusKeys.map((key) {
+         actions: availableStatuses.map((key) {
            return CupertinoActionSheetAction(
              child: Text(config.getStatus(key)),
              onPressed: () {
@@ -955,8 +988,29 @@ class _OrderFormState extends State<OrderForm> {
      );
   }
 
-  /// Tenta alterar o status, verificando se há formulários pendentes
+  /// Tenta alterar o status, verificando permissões e formulários pendentes
   void _trySetStatus(String newStatus, SegmentConfigProvider config) {
+    final order = _store.order;
+    if (order == null) return;
+
+    // Verificar se o usuário tem permissão para fazer esta mudança de status
+    if (!_authService.canChangeOrderStatus(order, newStatus)) {
+      showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('Sem Permissão'),
+          content: const Text('Você não tem permissão para alterar para este status.'),
+          actions: [
+            CupertinoDialogAction(
+              child: const Text('OK'),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     // Se não for "done", permite alterar diretamente
     if (newStatus != 'done') {
       _store.setStatus(newStatus);
