@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
 
@@ -26,6 +27,7 @@ class FormFillScreen extends StatefulWidget {
 class _FormFillScreenState extends State<FormFillScreen> {
   final FormsService _formsService = FormsService();
   final PhotoService _photoService = PhotoService();
+  final AuthorizationService _authService = AuthorizationService.instance;
   late OrderForm _currentForm;
   bool _isUploading = false;
   bool _isSaving = false;
@@ -352,7 +354,31 @@ class _FormFillScreenState extends State<FormFillScreen> {
     }
   }
 
+  /// Verifica se o usuário atual pode reabrir procedimentos concluídos
+  bool _canReopenForm() {
+    return _authService.canReopenCompletedForms;
+  }
+
   Future<void> _reopenForm() async {
+    // Verifica se usuário tem permissão (apenas Admin, Manager e Supervisor)
+    if (!_authService.canReopenCompletedForms) {
+      HapticFeedback.heavyImpact();
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: const Text('Sem Permissão'),
+          content: const Text('Apenas Administradores, Gerentes e Supervisores podem reabrir procedimentos concluídos.'),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSaving = true);
 
     try {
@@ -399,11 +425,13 @@ class _FormFillScreenState extends State<FormFillScreen> {
         builder: (context) => _PhotoGalleryScreen(
           photos: photos,
           initialIndex: photoIndex,
-          onDelete: (index) async {
-            final url = photos[index];
-            await _deletePhoto(itemId, url);
-            return true;
-          },
+          onDelete: _currentForm.status == FormStatus.completed
+              ? null
+              : (index) async {
+                  final url = photos[index];
+                  await _deletePhoto(itemId, url);
+                  return true;
+                },
         ),
         fullscreenDialog: true,
       ),
@@ -496,16 +524,25 @@ class _FormFillScreenState extends State<FormFillScreen> {
             ),
             trailing: _isSaving
                 ? const CupertinoActivityIndicator()
-                : CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: _currentForm.status == FormStatus.completed
-                        ? _reopenForm
-                        : _finishForm,
-                    child: Text(
-                      _currentForm.status == FormStatus.completed ? 'Reabrir' : 'Concluir',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
+                : _currentForm.status == FormStatus.completed
+                    ? _canReopenForm()
+                        ? CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: _reopenForm,
+                            child: const Text(
+                              'Reabrir',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                          )
+                        : null
+                    : CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: _finishForm,
+                        child: const Text(
+                          'Concluir',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
           ),
           SliverSafeArea(
             top: false,
@@ -580,7 +617,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
             ),
           ),
         ),
-        if (item.allowPhotos || item.type == FormItemType.photoOnly)
+        if ((item.allowPhotos || item.type == FormItemType.photoOnly) && _currentForm.status != FormStatus.completed)
           isUploading
               ? const Padding(
                   padding: EdgeInsets.only(left: 8),
@@ -616,6 +653,8 @@ class _FormFillScreenState extends State<FormFillScreen> {
   }
 
   Widget _buildInputTile(FormItemDefinition item, FormResponse? response) {
+    final isCompleted = _currentForm.status == FormStatus.completed;
+
     switch (item.type) {
       case FormItemType.text:
       case FormItemType.number:
@@ -623,6 +662,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           item: item,
           response: response,
           onChanged: (val) => _saveItemResponse(item.id, val),
+          isReadOnly: isCompleted,
         );
 
       case FormItemType.boolean:
@@ -630,6 +670,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
           item: item,
           response: response,
           onChanged: (val) => _saveItemResponse(item.id, val),
+          isReadOnly: isCompleted,
         );
 
       case FormItemType.checklist:
@@ -637,7 +678,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
         return _SelectInputTile(
           item: item,
           response: response,
-          onTap: () => _showOptionsPicker(item),
+          onTap: isCompleted ? null : () => _showOptionsPicker(item),
         );
 
       case FormItemType.photoOnly:
@@ -645,7 +686,9 @@ class _FormFillScreenState extends State<FormFillScreen> {
         if (photos.isEmpty) {
           return CupertinoListTile(
             title: Text(
-              'Toque no ícone da câmera para adicionar',
+              isCompleted
+                ? 'Nenhuma foto adicionada'
+                : 'Toque no ícone da câmera para adicionar',
               style: TextStyle(
                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
                 fontSize: 15,
@@ -709,11 +752,13 @@ class _TextInputTile extends StatefulWidget {
   final FormItemDefinition item;
   final FormResponse? response;
   final Function(String) onChanged;
+  final bool isReadOnly;
 
   const _TextInputTile({
     required this.item,
     required this.response,
     required this.onChanged,
+    this.isReadOnly = false,
   });
 
   @override
@@ -739,8 +784,9 @@ class _TextInputTileState extends State<_TextInputTile> {
   Widget build(BuildContext context) {
     return CupertinoTextFormFieldRow(
       controller: _controller,
-      placeholder: 'Digitar',
+      placeholder: widget.isReadOnly ? '' : 'Digitar',
       textAlign: TextAlign.right,
+      enabled: !widget.isReadOnly,
       style: CupertinoTheme.of(context).textTheme.textStyle,
       placeholderStyle: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
         color: CupertinoColors.placeholderText.resolveFrom(context),
@@ -749,7 +795,7 @@ class _TextInputTileState extends State<_TextInputTile> {
           ? const TextInputType.numberWithOptions(decimal: true)
           : TextInputType.text,
       textInputAction: TextInputAction.next,
-      onChanged: widget.onChanged,
+      onChanged: widget.isReadOnly ? null : widget.onChanged,
     );
   }
 }
@@ -759,11 +805,13 @@ class _BooleanInputTile extends StatelessWidget {
   final FormItemDefinition item;
   final FormResponse? response;
   final Function(bool) onChanged;
+  final bool isReadOnly;
 
   const _BooleanInputTile({
     required this.item,
     required this.response,
     required this.onChanged,
+    this.isReadOnly = false,
   });
 
   @override
@@ -772,27 +820,33 @@ class _BooleanInputTile extends StatelessWidget {
 
     return CupertinoListTile(
       title: const SizedBox.shrink(),
-      trailing: CupertinoSlidingSegmentedControl<bool>(
-        groupValue: boolValue,
-        children: {
-          true: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            child: Text(
-              'Sim',
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
-            ),
+      trailing: AbsorbPointer(
+        absorbing: isReadOnly,
+        child: Opacity(
+          opacity: isReadOnly ? 0.5 : 1.0,
+          child: CupertinoSlidingSegmentedControl<bool>(
+            groupValue: boolValue,
+            children: {
+              true: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: Text(
+                  'Sim',
+                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
+                ),
+              ),
+              false: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: Text(
+                  'Não',
+                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
+                ),
+              ),
+            },
+            onValueChanged: (newValue) {
+              if (newValue != null && !isReadOnly) onChanged(newValue);
+            },
           ),
-          false: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            child: Text(
-              'Não',
-              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
-            ),
-          ),
-        },
-        onValueChanged: (newValue) {
-          if (newValue != null) onChanged(newValue);
-        },
+        ),
       ),
     );
   }
@@ -802,7 +856,7 @@ class _BooleanInputTile extends StatelessWidget {
 class _SelectInputTile extends StatelessWidget {
   final FormItemDefinition item;
   final FormResponse? response;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const _SelectInputTile({
     required this.item,
@@ -851,13 +905,15 @@ class _SelectInputTile extends StatelessWidget {
           Icon(
             CupertinoIcons.chevron_right,
             size: 16,
-            color: CupertinoColors.systemGrey2.resolveFrom(context),
+            color: onTap == null
+                ? CupertinoColors.systemGrey4.resolveFrom(context)
+                : CupertinoColors.systemGrey2.resolveFrom(context),
           ),
         ],
       ),
-      onTap: () {
+      onTap: onTap == null ? null : () {
         HapticFeedback.selectionClick();
-        onTap();
+        onTap!();
       },
     );
   }
@@ -948,12 +1004,12 @@ class _ChecklistSelectionScreenState extends State<_ChecklistSelectionScreen> {
 class _PhotoGalleryScreen extends StatefulWidget {
   final List<String> photos;
   final int initialIndex;
-  final Future<bool> Function(int index) onDelete;
+  final Future<bool> Function(int index)? onDelete;
 
   const _PhotoGalleryScreen({
     required this.photos,
     required this.initialIndex,
-    required this.onDelete,
+    this.onDelete,
   });
 
   @override
@@ -995,11 +1051,13 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
           '${_currentIndex + 1} de ${_photos.length}',
           style: const TextStyle(color: CupertinoColors.white),
         ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _confirmDelete,
-          child: const Icon(CupertinoIcons.trash, color: CupertinoColors.white),
-        ),
+        trailing: widget.onDelete != null
+            ? CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: _confirmDelete,
+                child: const Icon(CupertinoIcons.trash, color: CupertinoColors.white),
+              )
+            : null,
       ),
       child: SafeArea(
         child: PageView.builder(
@@ -1071,21 +1129,23 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
               isDestructiveAction: true,
               onPressed: () async {
                 Navigator.pop(dialogContext);
-                final success = await widget.onDelete(_currentIndex);
+                if (widget.onDelete != null) {
+                  final success = await widget.onDelete!(_currentIndex);
 
-                if (mounted && success) {
-                  setState(() {
-                    _photos.removeAt(_currentIndex);
+                  if (mounted && success) {
+                    setState(() {
+                      _photos.removeAt(_currentIndex);
 
-                    if (_photos.isEmpty) {
-                      Navigator.pop(context);
-                    } else {
-                      if (_currentIndex >= _photos.length) {
-                        _currentIndex = _photos.length - 1;
-                        _pageController.jumpToPage(_currentIndex);
+                      if (_photos.isEmpty) {
+                        Navigator.pop(context);
+                      } else {
+                        if (_currentIndex >= _photos.length) {
+                          _currentIndex = _photos.length - 1;
+                          _pageController.jumpToPage(_currentIndex);
+                        }
                       }
-                    }
-                  });
+                    });
+                  }
                 }
               },
               child: const Text('Remover'),

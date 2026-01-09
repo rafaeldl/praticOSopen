@@ -316,6 +316,16 @@ class AuthorizationService {
     return availableStatuses;
   }
 
+  /// Verifica se o usuário pode reabrir procedimentos (forms) concluídos.
+  ///
+  /// Apenas Admin, Manager e Supervisor podem reabrir procedimentos concluídos.
+  bool get canReopenCompletedForms {
+    final role = normalizedRole;
+    return role == RolesType.admin ||
+           role == RolesType.manager ||
+           role == RolesType.supervisor;
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // DATA VISIBILITY
   // ═══════════════════════════════════════════════════════════════════
