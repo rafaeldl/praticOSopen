@@ -214,13 +214,20 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              _getRoleLabel(invite.role),
+                              '${RolePermissions.getRoleIcon(invite.role ?? RolesType.tecnico)} ${_getRoleLabel(invite.role)}',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
                               ),
                             ),
                           ],
+                        ),
+                        Text(
+                          _getRoleDescription(invite.role ?? RolesType.tecnico),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                          ),
                         ),
                       ],
                     ),
@@ -356,10 +363,17 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          _getRoleLabel(membership.role),
+                          '${RolePermissions.getRoleIcon(membership.role ?? RolesType.tecnico)} ${_getRoleLabel(membership.role)}',
                           style: TextStyle(
                             fontSize: 14,
                             color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                          ),
+                        ),
+                        Text(
+                          _getRoleDescription(membership.role ?? RolesType.tecnico),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
                           ),
                         ),
                       ],

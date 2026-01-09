@@ -204,12 +204,19 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
                       },
                     ),
                     CupertinoListTile(
-                      title: const Text('Permissão'),
+                      title: const Text('Perfil'),
+                      subtitle: Text(
+                        RolePermissions.getRoleDescription(_selectedRole),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                        ),
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            _getRoleLabel(_selectedRole),
+                            '${RolePermissions.getRoleIcon(_selectedRole)} ${_getRoleLabel(_selectedRole)}',
                             style: const TextStyle(color: CupertinoColors.secondaryLabel),
                           ),
                           const SizedBox(width: 6),
