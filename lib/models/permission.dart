@@ -272,7 +272,7 @@ class RolePermissions {
     PermissionType.viewPhotos,
   };
 
-  /// 🧑‍🔧 Supervisor - Gestão operacional
+  /// 🧑‍🔧 Supervisor - Gestão operacional (SEM acesso financeiro)
   static final Set<PermissionType> _supervisorPermissions = {
     // Ordens de Serviço (gestão total, sem valores)
     PermissionType.viewAllOrders,
@@ -282,16 +282,9 @@ class RolePermissions {
     PermissionType.editOrder,
     PermissionType.assignOrder,
     PermissionType.executeOrder,
-    // Relatórios operacionais (sem financeiros)
-    PermissionType.viewOperationalReports,
-    PermissionType.viewDashboard,
-    // Cadastros
+    // Cadastros (clientes e equipamentos apenas)
     PermissionType.manageCustomers,
     PermissionType.viewCustomers,
-    PermissionType.manageProducts,
-    PermissionType.viewProducts,
-    PermissionType.manageServices,
-    PermissionType.viewServices,
     PermissionType.manageDevices,
     PermissionType.viewDevices,
     // Fotos

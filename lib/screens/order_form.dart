@@ -15,9 +15,11 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/services/authorization_service.dart';
 
 // Formulários Dinâmicos
 import 'package:praticos/models/order_form.dart' as of_model; // Alias para evitar conflito com esta classe OrderForm
@@ -35,6 +37,7 @@ class OrderForm extends StatefulWidget {
 class _OrderFormState extends State<OrderForm> {
   late OrderStore _store;
   final FormsService _formsService = FormsService();
+  final AuthorizationService _authService = AuthorizationService.instance;
 
   @override
   void initState() {
@@ -141,6 +144,9 @@ class _OrderFormState extends State<OrderForm> {
         final isPaid = payment == 'Pago' || payment == 'paid';
         final hasCreatedDate = _store.order?.id != null;
 
+        // Verificar se o usuário pode visualizar valores financeiros
+        final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
+
         return _buildGroupedSection(
           header: "RESUMO",
           children: [
@@ -171,7 +177,8 @@ class _OrderFormState extends State<OrderForm> {
               onTap: _selectDueDate,
               showChevron: true,
             ),
-            if (discount > 0)
+            // Apenas mostrar desconto se usuário pode ver preços
+            if (canViewPrices && discount > 0)
               _buildListTile(
                 context: context,
                 icon: CupertinoIcons.tag_fill,
@@ -181,25 +188,29 @@ class _OrderFormState extends State<OrderForm> {
                 showChevron: false,
                 valueColor: CupertinoColors.systemRed,
               ),
-            _buildListTile(
-              context: context,
-              icon: CupertinoIcons.money_dollar_circle_fill,
-              title: config.label(LabelKeys.total),
-              value: _convertToCurrency(total),
-              onTap: () => _showPaymentOptions(config),
-              showChevron: true,
-              isBold: true,
-            ),
-            _buildListTile(
-              context: context,
-              icon: isPaid ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.clock_fill,
-              title: "Pagamento",
-              value: isPaid ? "Pago" : "A Receber",
-              onTap: () => _showPaymentOptions(config),
-              showChevron: true,
-              valueColor: isPaid ? CupertinoColors.systemGreen : CupertinoColors.systemOrange,
-              isLast: true,
-            ),
+            // Apenas mostrar total se usuário pode ver preços
+            if (canViewPrices)
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.money_dollar_circle_fill,
+                title: config.label(LabelKeys.total),
+                value: _convertToCurrency(total),
+                onTap: () => _showPaymentOptions(config),
+                showChevron: true,
+                isBold: true,
+              ),
+            // Apenas mostrar pagamento se usuário pode ver preços
+            if (canViewPrices)
+              _buildListTile(
+                context: context,
+                icon: isPaid ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.clock_fill,
+                title: "Pagamento",
+                value: isPaid ? "Pago" : "A Receber",
+                onTap: () => _showPaymentOptions(config),
+                showChevron: true,
+                valueColor: isPaid ? CupertinoColors.systemGreen : CupertinoColors.systemOrange,
+                isLast: true,
+              ),
           ],
         );
       },

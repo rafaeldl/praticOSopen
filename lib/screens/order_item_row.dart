@@ -11,6 +11,7 @@ class OrderItemRow extends StatelessWidget {
   final IconData? fallbackIcon;
   final VoidCallback? onTap;
   final VoidCallback? onDelete;
+  final bool showPrices; // Controla se exibe valores financeiros
 
   const OrderItemRow({
     super.key,
@@ -22,6 +23,7 @@ class OrderItemRow extends StatelessWidget {
     this.fallbackIcon,
     this.onTap,
     this.onDelete,
+    this.showPrices = true, // Por padrão mostra (compatibilidade)
   });
 
   @override
@@ -94,28 +96,29 @@ class OrderItemRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                // Value section
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    if (quantity != null) ...[
+                // Value section - apenas se showPrices
+                if (showPrices)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (quantity != null) ...[
+                        Text(
+                          '$quantity x ${_convertToCurrency(value)}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                      ],
                       Text(
-                        '$quantity x ${_convertToCurrency(value)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                        _convertToCurrency(_calculateTotal()),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
                         ),
                       ),
-                      const SizedBox(height: 2),
                     ],
-                    Text(
-                      _convertToCurrency(_calculateTotal()),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
                 const SizedBox(width: 4),
                 Icon(
                   Icons.chevron_right,

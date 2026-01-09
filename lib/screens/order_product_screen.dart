@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/product.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/services/authorization_service.dart';
 
 class OrderProductScreen extends StatefulWidget {
   const OrderProductScreen({super.key});
@@ -24,6 +26,7 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _initialized = false;
+  final AuthorizationService _authService = AuthorizationService.instance;
 
   final TextEditingController _quantityController = TextEditingController();
   final TextEditingController _valueController = TextEditingController();
@@ -160,8 +163,11 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
                 children: [
                   _buildProductNameField(context),
                   _buildQuantityField(context, config),
-                  _buildValueField(context, config),
-                  _buildTotalField(context, config),
+                  // Apenas mostrar campos de valores se usuário pode ver preços
+                  if (_authService.hasPermission(PermissionType.viewPrices)) ...[
+                    _buildValueField(context, config),
+                    _buildTotalField(context, config),
+                  ],
                 ],
               ),
 
