@@ -101,17 +101,17 @@ service cloud.firestore {
     }
 
     // Invites - convites para colaboradores
-    // Qualquer membro admin/manager de uma empresa pode criar convites
+    // Apenas admin pode criar/gerenciar convites (conforme RBAC: PermissionType.manageUsers)
     // O convidado pode ler convites direcionados ao seu email
     // O convidado pode atualizar status (aceitar/rejeitar)
     match /invites/{inviteId} {
-      // Permite criar se autenticado e é admin/manager da empresa do convite
+      // Permite criar se autenticado e é admin da empresa do convite
       allow create: if request.auth != null
         && request.resource.data.company != null
         && request.resource.data.company.id != null
-        && canManage(request.resource.data.company.id);
+        && canManageUsers(request.resource.data.company.id);
 
-      // Permite ler se é o dono do convite (email) ou admin/manager da empresa
+      // Permite ler se é o dono do convite (email) ou admin da empresa
       // Nota: novos usuários podem não ter claims ainda, então verificamos email diretamente
       allow read: if request.auth != null
         && (
@@ -119,8 +119,7 @@ service cloud.firestore {
           || (
             resource.data.company != null
             && resource.data.company.id != null
-            && request.auth.token.roles != null
-            && request.auth.token.roles[resource.data.company.id] in ['admin', 'manager']
+            && canManageUsers(resource.data.company.id)
           )
         );
 
@@ -129,12 +128,11 @@ service cloud.firestore {
         && request.auth.token.email == resource.data.email
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
 
-      // Permite deletar se é admin/manager da empresa
+      // Permite deletar se é admin da empresa
       allow delete: if request.auth != null
         && resource.data.company != null
         && resource.data.company.id != null
-        && request.auth.token.roles != null
-        && request.auth.token.roles[resource.data.company.id] in ['admin', 'manager'];
+        && canManageUsers(resource.data.company.id);
     }
 
     // Segments - global collection (read-only para usuários autenticados)
@@ -215,7 +213,7 @@ service cloud.firestore {
       // Acesso baseado em perfil:
       // - Admin/Manager/Supervisor: todas as OS
       // - Consultant: apenas OS que criou
-      // - Technician: apenas OS atribuídas
+      // - Technician: qualquer OS da empresa (assignedTo ainda não está funcional)
       // ──────────────────────────────────────────────────────────────────────
       match /orders/{orderId} {
         // Leitura: todos os membros podem ler (filtro feito no app)
@@ -234,16 +232,27 @@ service cloud.firestore {
           || hasRole(companyId, 'supervisor')
           // Manager pode apenas visualizar (sem write)
           // Consultant pode editar suas próprias OS
-          || (hasRole(companyId, 'consultant') && resource.data.createdBy == request.auth.uid)
-          // Technician pode atualizar OS atribuídas (status, formulários, fotos)
-          || (hasRole(companyId, 'technician') && (
-            resource.data.assignedTo.id == request.auth.uid
-            || resource.data.createdBy == request.auth.uid
-          ))
+          || (hasRole(companyId, 'consultant') && resource.data.createdBy.id == request.auth.uid)
+          // Technician pode atualizar qualquer OS da empresa (assignedTo ainda não está funcional)
+          || hasRole(companyId, 'technician')
         );
 
-        // Deleção: apenas admin e supervisor
-        allow delete: if canAssignOrders(companyId);
+        // Deleção:
+        // - Admin e Supervisor podem deletar (via canAssignOrders)
+        // - Consultant e Technician podem deletar apenas OS que criaram, em status 'quote'
+        allow delete: if belongsToCompany(companyId) && (
+          canAssignOrders(companyId)
+          || (
+            // Permite deletar se é o criador e status é 'quote'
+            resource.data.createdBy != null
+            && resource.data.createdBy.id == request.auth.uid
+            && resource.data.status == 'quote'
+            && (
+              hasRole(companyId, 'consultant')
+              || hasRole(companyId, 'technician')
+            )
+          )
+        );
 
         // Subcollection de fotos dentro de orders
         match /photos/{photoId} {
