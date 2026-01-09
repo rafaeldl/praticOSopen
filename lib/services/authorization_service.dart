@@ -213,6 +213,39 @@ class AuthorizationService {
     return false;
   }
 
+  /// Verifica se o usuário pode adicionar/remover procedimentos (forms) em uma OS.
+  ///
+  /// Regras:
+  /// - Admin, Manager, Consultant: podem gerenciar procedimentos em qualquer status
+  /// - Supervisor: pode gerenciar procedimentos enquanto OS estiver ativa (não concluída/cancelada)
+  /// - Técnico: só pode gerenciar procedimentos quando status = 'quote'
+  bool canManageOrderForms(Order order) {
+    if (!canAccessOrder(order)) return false;
+
+    final role = normalizedRole;
+    if (role == null) return false;
+
+    // Admin, Manager e Consultant podem gerenciar sempre
+    if (role == RolesType.admin ||
+        role == RolesType.manager ||
+        role == RolesType.consultant) {
+      return hasPermission(PermissionType.editOrder);
+    }
+
+    // Supervisor pode gerenciar enquanto OS estiver ativa (não concluída/cancelada)
+    if (role == RolesType.supervisor) {
+      final status = order.status;
+      return status != 'done' && status != 'canceled' && hasPermission(PermissionType.editOrder);
+    }
+
+    // Técnico só pode gerenciar quando status for 'quote'
+    if (role == RolesType.technician) {
+      return order.status == 'quote' && hasPermission(PermissionType.editOrder);
+    }
+
+    return false;
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // ORDER STATUS FLOW CONTROL
   // ═══════════════════════════════════════════════════════════════════

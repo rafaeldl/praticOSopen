@@ -253,25 +253,42 @@ Quando uma OS está em status **'Orçamento'**, os perfis **Supervisor** e **Té
 - ✅ Adicionar fotos
 - ❌ **Valores financeiros permanecem ocultos** (sem permissão viewPrices)
 
-### Status Após Aprovação (approved, progress, done, canceled)
+### Status Após Aprovação (approved, progress)
 
-Após a OS sair do status **'Orçamento'**, as restrições se aplicam:
+Após a OS sair do status **'Orçamento'**, as restrições se aplicam de forma diferente para cada perfil:
 
-#### Supervisor e Técnico PODEM:
+#### 🧑‍🔧 Supervisor PODE:
+- ✅ Visualizar a OS (sem valores)
+- ✅ Tocar em serviço/produto para editar **apenas a descrição/observações**
+- ✅ **Adicionar novos procedimentos** (enquanto OS estiver ativa)
+- ✅ **Remover procedimentos** (enquanto OS estiver ativa)
+- ✅ Preencher procedimentos existentes
+- ✅ Adicionar fotos
+- ✅ Atribuir/reatribuir técnicos
+
+#### 🧑‍🔧 Supervisor NÃO PODE:
+- ❌ Adicionar novos serviços ou produtos
+- ❌ Remover serviços ou produtos
+- ❌ Editar valores ou quantidades
+- ❌ Alterar cliente ou dispositivo
+- ❌ Alterar data de entrega
+- ❌ Gerar PDF da OS
+
+#### 👷 Técnico PODE:
 - ✅ Visualizar a OS (sem valores)
 - ✅ Tocar em serviço/produto para editar **apenas a descrição/observações**
 - ✅ Preencher procedimentos existentes
 - ✅ Adicionar fotos
-- ✅ Atribuir técnicos (apenas Supervisor)
 
-#### Supervisor e Técnico NÃO PODEM:
+#### 👷 Técnico NÃO PODE:
 - ❌ Adicionar novos serviços ou produtos
 - ❌ Remover serviços ou produtos
-- ❌ Adicionar novos procedimentos
-- ❌ Remover procedimentos
+- ❌ **Adicionar novos procedimentos** (apenas em status 'quote')
+- ❌ **Remover procedimentos** (apenas em status 'quote')
 - ❌ Editar valores ou quantidades
 - ❌ Alterar cliente ou dispositivo
 - ❌ Alterar data de entrega
+- ❌ Atribuir técnicos
 - ❌ Gerar PDF da OS
 
 ### Comportamento Visual
@@ -282,12 +299,13 @@ Após a OS sair do status **'Orçamento'**, as restrições se aplicam:
 - Não respondem a toques
 
 **Botões ocultos:**
-- Botão "Adicionar" de serviços/produtos/procedimentos desaparece
+- Botão "Adicionar" de serviços/produtos desaparece para Supervisor e Técnico
+- Botão "Adicionar" de procedimentos desaparece apenas para Técnico (Supervisor pode adicionar)
 - Opção "Compartilhar PDF" removida do menu
 
 **Swipe to delete:**
-- Ação de deslizar para deletar não funciona em serviços, produtos e procedimentos
-- Itens permanecem fixos na lista
+- Ação de deslizar para deletar não funciona em serviços e produtos
+- Ação de deslizar para deletar em procedimentos: funciona para Supervisor, não funciona para Técnico
 
 ### Exceções
 
@@ -711,6 +729,21 @@ R: Não. Após conclusão, o procedimento entra em modo somente leitura. Para ad
 ## Changelog - Implementações Recentes
 
 ### Janeiro 2026
+
+#### Supervisor pode gerenciar procedimentos em OS ativa (09/01/2026)
+- **Implementado:** Permissão diferenciada para Supervisor gerenciar procedimentos
+- **Afeta:** Supervisor
+- **Commit:** (aguardando)
+
+**Mudanças:**
+- Novo método `canManageOrderForms()` em AuthorizationService
+- **Supervisor** pode adicionar/remover procedimentos enquanto OS estiver ativa (não concluída/cancelada)
+- **Técnico** continua restrito: só pode gerenciar procedimentos em status 'quote'
+- Admin, Manager, Consultant podem gerenciar em qualquer status
+
+**Arquivos modificados:**
+- `lib/services/authorization_service.dart` - Novo método `canManageOrderForms()`
+- `lib/screens/order_form.dart` - Usa `canManageOrderForms` para seção de procedimentos
 
 #### Modo Somente Leitura para Procedimentos Concluídos (09/01/2026)
 - **Implementado:** Controle de edição e reabertura de procedimentos baseado em RBAC

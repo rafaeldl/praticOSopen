@@ -260,8 +260,9 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final hasOrder = _store.order?.id != null && _store.companyId != null;
-        final canEditFields = _store.order != null
-            ? _authService.canEditOrderMainFields(_store.order!)
+        // Usar canManageOrderForms para procedimentos (Supervisor pode gerenciar em OS ativa)
+        final canManageForms = _store.order != null
+            ? _authService.canManageOrderForms(_store.order!)
             : true;
 
         return StreamBuilder<List<of_model.OrderForm>>(
@@ -273,7 +274,7 @@ class _OrderFormState extends State<OrderForm> {
 
             return _buildGroupedSection(
               header: "PROCEDIMENTOS",
-              trailing: forms.isNotEmpty && canEditFields ? _buildAddButton(onTap: () => _addForm(config)) : null,
+              trailing: forms.isNotEmpty && canManageForms ? _buildAddButton(onTap: () => _addForm(config)) : null,
               children: [
                 if (isLoading)
                   const Padding(
@@ -287,22 +288,22 @@ class _OrderFormState extends State<OrderForm> {
                     title: "Adicionar Procedimento",
                     value: "",
                     onTap: () {
-                      if (canEditFields) {
+                      if (canManageForms) {
                         _addForm(config);
                       }
                     },
-                    showChevron: canEditFields,
+                    showChevron: canManageForms,
                     isLast: true,
-                    textColor: canEditFields
+                    textColor: canManageForms
                         ? CupertinoTheme.of(context).primaryColor
                         : CupertinoColors.tertiaryLabel.resolveFrom(context),
-                    enabled: canEditFields,
+                    enabled: canManageForms,
                   )
                 else
                   ...forms.asMap().entries.map((entry) {
                     final index = entry.key;
                     final form = entry.value;
-                    return _buildFormRow(context, form, index == forms.length - 1, canEditFields);
+                    return _buildFormRow(context, form, index == forms.length - 1, canManageForms);
                   }),
               ],
             );
