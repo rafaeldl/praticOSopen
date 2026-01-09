@@ -170,50 +170,48 @@ abstract class _CollaboratorStore with Store {
         return await _createInvite(normalizedEmail, roleType);
       }
 
-      // 2. Verifica se já está em ambos os lugares
-      final isMemberInMemberships = await _membershipRepo.isMember(companyId, user.id!);
-      final alreadyInCompanies = user.companies?.any(
+      // 2. Verifica se o usuário já está na empresa
+      final existingCompanyIndex = user.companies?.indexWhere(
         (c) => c.company?.id == companyId
-      ) ?? false;
+      ) ?? -1;
+      final alreadyInCompanies = existingCompanyIndex >= 0;
 
-      // Se está em ambos os lugares, já é colaborador
-      if (isMemberInMemberships && alreadyInCompanies) {
-        throw Exception('Usuário já é colaborador desta empresa.');
-      }
-
-      // 3. Se há inconsistência ou não é membro, corrige e adiciona
-      // Usa batch para garantir atomicidade
+      // 3. Usa batch para garantir atomicidade
       final batch = _db.batch();
 
-      // 3a. Atualiza user.companies se não existir (source of truth)
-      if (!alreadyInCompanies) {
-        final userRef = _db.collection('users').doc(user.id);
+      // 3a. Atualiza user.companies (source of truth)
+      final userRef = _db.collection('users').doc(user.id);
+
+      if (alreadyInCompanies) {
+        // Já existe - apenas atualiza o role
+        user.companies![existingCompanyIndex].role = roleType;
+      } else {
+        // Não existe - adiciona nova entrada
         final newCompanyRole = CompanyRoleAggr()
           ..company = Global.companyAggr
           ..role = roleType;
-
         user.companies ??= [];
         user.companies!.add(newCompanyRole);
-        batch.update(userRef, {'companies': user.companies!.map((c) => c.toJson()).toList()});
       }
+      batch.update(userRef, {'companies': user.companies!.map((c) => c.toJson()).toList()});
 
-      // 3b. Cria membership (índice reverso) se não existir
-      if (!isMemberInMemberships) {
-        final membershipRef = _db
-            .collection('companies')
-            .doc(companyId)
-            .collection('memberships')
-            .doc(user.id);
+      // 3b. Atualiza ou cria membership (índice reverso)
+      final membershipRef = _db
+          .collection('companies')
+          .doc(companyId)
+          .collection('memberships')
+          .doc(user.id);
 
-        final membership = Membership(
-          userId: user.id!,
-          user: user.toAggr(),
-          role: roleType,
-        );
-        batch.set(membershipRef, membership.toFirestore());
-      }
+      final membership = Membership(
+        userId: user.id!,
+        user: user.toAggr(),
+        role: roleType,
+      );
 
-      // 4. Commit atômico (mesmo que ambos já existam, não faz mal)
+      // Usa set com merge para atualizar se existir ou criar se não existir
+      batch.set(membershipRef, membership.toFirestore(), SetOptions(merge: true));
+
+      // 4. Commit atômico
       await batch.commit();
 
       return true; // Adicionado diretamente

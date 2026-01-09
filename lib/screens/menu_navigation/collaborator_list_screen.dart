@@ -91,7 +91,8 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
         ? _collaboratorStore.collaborators.toList()
         : _collaboratorStore.collaborators.where((membership) {
             final name = membership.user?.name?.toLowerCase() ?? '';
-            return name.contains(_searchQuery);
+            final email = membership.user?.email?.toLowerCase() ?? '';
+            return name.contains(_searchQuery) || email.contains(_searchQuery);
           }).toList();
 
     final filteredInvites = _searchQuery.isEmpty
@@ -214,7 +215,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              '${RolePermissions.getRoleIcon(invite.role ?? RolesType.tecnico)} ${_getRoleLabel(invite.role)}',
+                              '${RolePermissions.getRoleIcon(invite.role ?? RolesType.technician)} ${_getRoleLabel(invite.role)}',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -223,7 +224,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                           ],
                         ),
                         Text(
-                          _getRoleDescription(invite.role ?? RolesType.tecnico),
+                          _getRoleDescription(invite.role ?? RolesType.technician),
                           style: TextStyle(
                             fontSize: 12,
                             color: CupertinoColors.tertiaryLabel.resolveFrom(context),
@@ -361,19 +362,22 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                             color: CupertinoColors.label.resolveFrom(context),
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${RolePermissions.getRoleIcon(membership.role ?? RolesType.tecnico)} ${_getRoleLabel(membership.role)}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                        if (membership.user?.email != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            membership.user!.email!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                            ),
                           ),
-                        ),
+                        ],
+                        const SizedBox(height: 4),
                         Text(
-                          _getRoleDescription(membership.role ?? RolesType.tecnico),
+                          '${RolePermissions.getRoleIcon(membership.role ?? RolesType.technician)} ${_getRoleLabel(membership.role)}',
                           style: TextStyle(
-                            fontSize: 12,
-                            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                            fontSize: 13,
+                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
                           ),
                         ),
                       ],

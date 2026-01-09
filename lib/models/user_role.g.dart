@@ -41,8 +41,10 @@ Map<String, dynamic> _$UserRoleToJson(UserRole instance) => <String, dynamic>{
 
 const _$RolesTypeEnumMap = {
   RolesType.admin: 'admin',
+  RolesType.supervisor: 'supervisor',
   RolesType.manager: 'manager',
-  RolesType.user: 'user',
+  RolesType.consultant: 'consultant',
+  RolesType.technician: 'technician',
 };
 
 UserRoleAggr _$UserRoleAggrFromJson(Map<String, dynamic> json) => UserRoleAggr()

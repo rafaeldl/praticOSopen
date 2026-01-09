@@ -126,24 +126,19 @@ enum PermissionType {
 ///
 /// Define quais permissões cada perfil possui no sistema.
 class RolePermissions {
-  /// Retorna o conjunto de permissões para um determinado perfil.
+  /// Returns the set of permissions for a given role.
   static Set<PermissionType> getPermissions(RolesType role) {
-    // Normaliza roles legados
-    final normalizedRole = _normalizeRole(role);
-
-    switch (normalizedRole) {
+    switch (role) {
       case RolesType.admin:
         return _adminPermissions;
-      case RolesType.gerente:
-        return _gerentePermissions;
+      case RolesType.manager:
+        return _managerPermissions;
       case RolesType.supervisor:
         return _supervisorPermissions;
-      case RolesType.consultor:
-        return _consultorPermissions;
-      case RolesType.tecnico:
-        return _tecnicoPermissions;
-      default:
-        return _tecnicoPermissions; // Fallback para menor privilégio
+      case RolesType.consultant:
+        return _consultantPermissions;
+      case RolesType.technician:
+        return _technicianPermissions;
     }
   }
 
@@ -152,84 +147,62 @@ class RolePermissions {
     return getPermissions(role).contains(permission);
   }
 
-  /// Normaliza roles legados para os novos perfis.
-  static RolesType _normalizeRole(RolesType role) {
-    switch (role) {
-      // ignore: deprecated_member_use_from_same_package
-      case RolesType.manager:
-        return RolesType.supervisor;
-      // ignore: deprecated_member_use_from_same_package
-      case RolesType.user:
-        return RolesType.tecnico;
-      default:
-        return role;
-    }
-  }
-
-  /// Retorna o label amigável para exibição do perfil.
+  /// Returns the friendly label for role display.
   static String getRoleLabel(RolesType role) {
-    final normalizedRole = _normalizeRole(role);
-    switch (normalizedRole) {
+    switch (role) {
       case RolesType.admin:
         return 'Administrador';
-      case RolesType.gerente:
-        return 'Gerente';
       case RolesType.supervisor:
         return 'Supervisor';
-      case RolesType.consultor:
+      case RolesType.manager:
+        return 'Gerente';
+      case RolesType.consultant:
         return 'Consultor';
-      case RolesType.tecnico:
-        return 'Técnico';
-      default:
+      case RolesType.technician:
         return 'Técnico';
     }
   }
 
-  /// Retorna a descrição do perfil.
+  /// Returns the role description.
   static String getRoleDescription(RolesType role) {
-    final normalizedRole = _normalizeRole(role);
-    switch (normalizedRole) {
+    switch (role) {
       case RolesType.admin:
         return 'Acesso total ao sistema';
-      case RolesType.gerente:
-        return 'Gestão financeira e relatórios';
       case RolesType.supervisor:
         return 'Gestão operacional dos técnicos';
-      case RolesType.consultor:
+      case RolesType.manager:
+        return 'Gestão financeira e relatórios';
+      case RolesType.consultant:
         return 'Vendas e acompanhamento comercial';
-      case RolesType.tecnico:
-        return 'Execução de serviços';
-      default:
+      case RolesType.technician:
         return 'Execução de serviços';
     }
   }
 
-  /// Retorna o ícone associado ao perfil.
+  /// Returns the icon associated with the role.
   static String getRoleIcon(RolesType role) {
-    final normalizedRole = _normalizeRole(role);
-    switch (normalizedRole) {
+    switch (role) {
       case RolesType.admin:
         return '👨‍💼';
-      case RolesType.gerente:
-        return '💰';
       case RolesType.supervisor:
         return '🧑‍🔧';
-      case RolesType.consultor:
+      case RolesType.manager:
+        return '💰';
+      case RolesType.consultant:
         return '🧑‍💼';
-      case RolesType.tecnico:
-        return '👷';
-      default:
+      case RolesType.technician:
         return '👷';
     }
   }
 
-  /// Lista de perfis disponíveis para seleção (exclui legados).
+  /// List of available roles for selection (excludes legacy).
+  /// Ordered by hierarchy: Admin > Supervisor > Manager > Consultant > Technician
   static List<RolesType> get availableRoles => [
         RolesType.admin,
-        RolesType.gerente,
         RolesType.supervisor,
-        RolesType.consultor,
-        RolesType.tecnico,
+        RolesType.manager,
+        RolesType.consultant,
+        RolesType.technician,
       ];
 
   // ═══════════════════════════════════════════════════════════════════
@@ -276,8 +249,8 @@ class RolePermissions {
     PermissionType.manageSettings,
   };
 
-  /// 💰 Gerente (Financeiro) - Gestão financeira
-  static final Set<PermissionType> _gerentePermissions = {
+  /// 💰 Manager (Financial) - Financial management
+  static final Set<PermissionType> _managerPermissions = {
     // Ordens de Serviço (visualização total, sem execução)
     PermissionType.viewAllOrders,
     PermissionType.viewAssignedOrders,
@@ -329,8 +302,8 @@ class RolePermissions {
     PermissionType.manageForms,
   };
 
-  /// 🧑‍💼 Consultor (Vendedor) - Perfil comercial
-  static final Set<PermissionType> _consultorPermissions = {
+  /// 🧑‍💼 Consultant (Sales) - Commercial profile
+  static final Set<PermissionType> _consultantPermissions = {
     // Ordens de Serviço (apenas próprias)
     PermissionType.viewOwnOrders,
     PermissionType.createOrder,
@@ -350,8 +323,8 @@ class RolePermissions {
     PermissionType.fillForms,
   };
 
-  /// 👷 Técnico - Execução de serviços
-  static final Set<PermissionType> _tecnicoPermissions = {
+  /// 👷 Technician - Service execution
+  static final Set<PermissionType> _technicianPermissions = {
     // Ordens de Serviço (apenas atribuídas)
     PermissionType.viewAssignedOrders,
     PermissionType.executeOrder,

@@ -39,9 +39,11 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
 
 UserAggr _$UserAggrFromJson(Map<String, dynamic> json) => UserAggr()
   ..id = json['id'] as String?
-  ..name = json['name'] as String?;
+  ..name = json['name'] as String?
+  ..email = json['email'] as String?;
 
 Map<String, dynamic> _$UserAggrToJson(UserAggr instance) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
+  'email': instance.email,
 };

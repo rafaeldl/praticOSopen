@@ -2,33 +2,15 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
 /**
- * Perfis de usuário no PraticOS (RBAC)
+ * User roles in PraticOS (RBAC)
  *
- * Hierarquia de perfis:
- * - admin: Administrador - Acesso total ao sistema
- * - gerente: Gerente (Financeiro) - Gestão financeira
- * - supervisor: Supervisor - Gestão operacional
- * - consultor: Consultor (Vendedor) - Perfil comercial
- * - tecnico: Técnico - Execução de serviços
- *
- * Roles legados (mapeados automaticamente):
- * - manager -> supervisor
- * - user -> tecnico
+ * Available roles:
+ * - admin: Administrator - Full system access
+ * - manager: Manager - Financial management
+ * - supervisor: Operational management
+ * - consultant: Sales profile
+ * - technician: Service execution
  */
-const ROLE_MAPPINGS = {
-  'manager': 'supervisor',
-  'user': 'tecnico'
-};
-
-/**
- * Normaliza roles legados para os novos perfis.
- * @param {string} role - O role a ser normalizado
- * @returns {string} O role normalizado
- */
-function normalizeRole(role) {
-  const lowerRole = String(role).toLowerCase();
-  return ROLE_MAPPINGS[lowerRole] || lowerRole;
-}
 
 /**
  * Atualiza Custom Claims quando um usuário é criado ou modificado.
@@ -37,15 +19,15 @@ function normalizeRole(role) {
  * {
  *   roles: {
  *     'companyId1': 'admin',
- *     'companyId2': 'tecnico',
+ *     'companyId2': 'technician',
  *     ...
  *   }
  * }
  *
- * Uso nas Security Rules:
- * - Verificar acesso: request.auth.token.roles[companyId] != null
- * - Verificar role: request.auth.token.roles[companyId] == 'admin'
- * - Verificar múltiplos roles: request.auth.token.roles[companyId] in ['admin', 'gerente']
+ * Usage in Security Rules:
+ * - Check access: request.auth.token.roles[companyId] != null
+ * - Check role: request.auth.token.roles[companyId] == 'admin'
+ * - Check multiple roles: request.auth.token.roles[companyId] in ['admin', 'manager']
  */
 exports.updateUserClaims = functions.region('southamerica-east1').firestore
   .document('users/{userId}')
@@ -77,8 +59,8 @@ exports.updateUserClaims = functions.region('southamerica-east1').firestore
           }
 
           seenCompanies.add(companyId);
-          // Normaliza e converte role para lowercase para consistência nas rules
-          roles[companyId] = normalizeRole(item.role);
+          // Convert to lowercase for consistency in rules
+          roles[companyId] = String(item.role).toLowerCase();
         }
       });
     }

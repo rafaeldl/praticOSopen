@@ -38,6 +38,36 @@ mixin _$OrderStore on _OrderStore, Store {
         () => super.customerInitials,
         name: '_OrderStore.customerInitials',
       )).value;
+  Computed<List<Order?>>? _$filteredOrdersComputed;
+
+  @override
+  List<Order?> get filteredOrders =>
+      (_$filteredOrdersComputed ??= Computed<List<Order?>>(
+        () => super.filteredOrders,
+        name: '_OrderStore.filteredOrders',
+      )).value;
+  Computed<bool>? _$canViewPricesComputed;
+
+  @override
+  bool get canViewPrices => (_$canViewPricesComputed ??= Computed<bool>(
+    () => super.canViewPrices,
+    name: '_OrderStore.canViewPrices',
+  )).value;
+  Computed<bool>? _$canCreateOrderComputed;
+
+  @override
+  bool get canCreateOrder => (_$canCreateOrderComputed ??= Computed<bool>(
+    () => super.canCreateOrder,
+    name: '_OrderStore.canCreateOrder',
+  )).value;
+  Computed<bool>? _$canViewFinancialDashboardComputed;
+
+  @override
+  bool get canViewFinancialDashboard =>
+      (_$canViewFinancialDashboardComputed ??= Computed<bool>(
+        () => super.canViewFinancialDashboard,
+        name: '_OrderStore.canViewFinancialDashboard',
+      )).value;
   Computed<String>? _$formattedCreatedDateComputed;
 
   @override
@@ -1115,6 +1145,10 @@ customerName: ${customerName},
 deviceName: ${deviceName},
 devicePhoto: ${devicePhoto},
 customerInitials: ${customerInitials},
+filteredOrders: ${filteredOrders},
+canViewPrices: ${canViewPrices},
+canCreateOrder: ${canCreateOrder},
+canViewFinancialDashboard: ${canViewFinancialDashboard},
 formattedCreatedDate: ${formattedCreatedDate}
     ''';
   }

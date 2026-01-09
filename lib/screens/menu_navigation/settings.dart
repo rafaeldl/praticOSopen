@@ -25,6 +25,8 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     _userStore.findCurrentUser();
+    // Set the UserStore instance for AuthorizationService to use
+    AuthorizationService.setUserStore(_userStore);
     final themeStore = Provider.of<ThemeStore>(context);
     final config = context.watch<SegmentConfigProvider>();
 
@@ -43,46 +45,58 @@ class _SettingsState extends State<Settings> {
                           delegate: SliverChildListDelegate([
                             // Profile Section
                             CupertinoListSection.insetGrouped(                children: [
-                  CupertinoListTile(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    leadingSize: 60,
-                    leading: ClipOval(
-                      child: Global.currentUser?.photoURL != null
-                          ? CachedImage(
-                              imageUrl: Global.currentUser!.photoURL!,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.cover,
-                            )
-                          : Container(
-                              width: 60,
-                              height: 60,
-                              color: CupertinoColors.systemGrey5,
-                              child: const Icon(CupertinoIcons.person_solid, color: CupertinoColors.systemGrey),
-                            ),
-                    ),
-                    title: Text(
-                      Global.currentUser?.displayName ?? 'Usuário',
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(Global.currentUser?.email ?? ''),
-                        if (_authStore.companyAggr?.name != null)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Text(
-                              _authStore.companyAggr!.name!,
-                              style: const TextStyle(
-                                color: CupertinoColors.activeBlue,
-                                fontWeight: FontWeight.w500,
+                  Observer(builder: (_) {
+                    final user = _userStore.user?.value;
+                    final userName = user?.name ?? Global.currentUser?.displayName ?? 'Usuário';
+
+                    return CupertinoListTile(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      leadingSize: 60,
+                      leading: ClipOval(
+                        child: Global.currentUser?.photoURL != null
+                            ? CachedImage(
+                                imageUrl: Global.currentUser!.photoURL!,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                width: 60,
+                                height: 60,
+                                color: CupertinoColors.systemGrey5,
+                                child: const Icon(CupertinoIcons.person_solid, color: CupertinoColors.systemGrey),
                               ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                      ),
+                      title: Text(
+                        userName,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+                      ),
+                      subtitle: _authStore.companyAggr?.name != null
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _authStore.companyAggr!.name!,
+                                  style: const TextStyle(
+                                    color: CupertinoColors.activeBlue,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2.0),
+                                  child: Text(
+                                    _authService.currentRoleLabel,
+                                    style: TextStyle(
+                                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : null,
+                    );
+                  }),
                 ],
               ),
 
@@ -123,89 +137,62 @@ class _SettingsState extends State<Settings> {
                 final canViewServices = _authService.hasPermission(PermissionType.viewServices);
                 final canViewProducts = _authService.hasPermission(PermissionType.viewProducts);
 
-                // Mostra o perfil atual do usuário
-                final roleLabel = _authService.currentRoleLabel;
-                final roleDescription = _authService.currentRoleDescription;
-
-                return Column(
+                return CupertinoListSection.insetGrouped(
+                  header: const Text('GERENCIAMENTO'),
                   children: [
-                    // Mostra o perfil do usuário atual
-                    CupertinoListSection.insetGrouped(
-                      header: const Text('SEU PERFIL'),
-                      children: [
-                        CupertinoListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: CupertinoColors.activeBlue,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Icon(CupertinoIcons.person_badge_plus_fill, color: CupertinoColors.white, size: 20),
-                          ),
-                          title: Text(roleLabel),
-                          subtitle: Text(roleDescription),
-                        ),
-                      ],
-                    ),
+                    // Dados da Empresa - apenas Admin
+                    if (canManageCompany)
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.briefcase_fill,
+                        color: CupertinoColors.systemOrange,
+                        title: 'Dados da Empresa',
+                        onTap: () => Navigator.pushNamed(context, '/company_form'),
+                      ),
 
-                    CupertinoListSection.insetGrouped(
-                      header: const Text('GERENCIAMENTO'),
-                      children: [
-                        // Dados da Empresa - apenas Admin
-                        if (canManageCompany)
-                          _buildSettingsTile(
-                            icon: CupertinoIcons.briefcase_fill,
-                            color: CupertinoColors.systemOrange,
-                            title: 'Dados da Empresa',
-                            onTap: () => Navigator.pushNamed(context, '/company_form'),
-                          ),
+                    // Colaboradores - apenas Admin
+                    if (canManageUsers)
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.person_3_fill,
+                        color: CupertinoColors.systemBlue,
+                        title: 'Colaboradores',
+                        onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
+                      ),
 
-                        // Colaboradores - apenas Admin
-                        if (canManageUsers)
-                          _buildSettingsTile(
-                            icon: CupertinoIcons.person_3_fill,
-                            color: CupertinoColors.systemBlue,
-                            title: 'Colaboradores',
-                            onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
-                          ),
+                    // Dispositivos - Admin/Supervisor podem gerenciar, outros podem visualizar
+                    if (canViewDevices)
+                      _buildSettingsTile(
+                        icon: config.deviceIcon,
+                        color: CupertinoColors.systemGreen,
+                        title: config.devicePlural,
+                        onTap: () => Navigator.pushNamed(context, '/device_list'),
+                      ),
 
-                        // Dispositivos - Admin/Supervisor podem gerenciar, outros podem visualizar
-                        if (canViewDevices)
-                          _buildSettingsTile(
-                            icon: config.deviceIcon,
-                            color: CupertinoColors.systemGreen,
-                            title: config.devicePlural,
-                            onTap: () => Navigator.pushNamed(context, '/device_list'),
-                          ),
+                    // Serviços - Admin/Supervisor podem gerenciar
+                    if (canViewServices)
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.wrench_fill,
+                        color: CupertinoColors.systemIndigo,
+                        title: 'Serviços',
+                        onTap: () => Navigator.pushNamed(context, '/service_list'),
+                      ),
 
-                        // Serviços - Admin/Supervisor podem gerenciar
-                        if (canViewServices)
-                          _buildSettingsTile(
-                            icon: CupertinoIcons.wrench_fill,
-                            color: CupertinoColors.systemIndigo,
-                            title: 'Serviços',
-                            onTap: () => Navigator.pushNamed(context, '/service_list'),
-                          ),
+                    // Produtos - Admin/Supervisor podem gerenciar
+                    if (canViewProducts)
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.cube_box_fill,
+                        color: CupertinoColors.systemPink,
+                        title: 'Produtos',
+                        onTap: () => Navigator.pushNamed(context, '/product_list'),
+                      ),
 
-                        // Produtos - Admin/Supervisor podem gerenciar
-                        if (canViewProducts)
-                          _buildSettingsTile(
-                            icon: CupertinoIcons.cube_box_fill,
-                            color: CupertinoColors.systemPink,
-                            title: 'Produtos',
-                            onTap: () => Navigator.pushNamed(context, '/product_list'),
-                          ),
-
-                        // Formulários - Admin/Supervisor podem gerenciar
-                        if (canManageForms)
-                          _buildSettingsTile(
-                            icon: CupertinoIcons.doc_text_fill,
-                            color: CupertinoColors.systemTeal,
-                            title: 'Procedimentos',
-                            onTap: () => Navigator.pushNamed(context, '/form_template_list'),
-                          ),
-                      ],
-                    ),
+                    // Formulários - Admin/Supervisor podem gerenciar
+                    if (canManageForms)
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.doc_text_fill,
+                        color: CupertinoColors.systemTeal,
+                        title: 'Procedimentos',
+                        onTap: () => Navigator.pushNamed(context, '/form_template_list'),
+                      ),
                   ],
                 );
               }),

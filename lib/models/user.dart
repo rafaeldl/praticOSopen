@@ -22,6 +22,7 @@ class User extends BaseAudit {
 @JsonSerializable(explicitToJson: true)
 class UserAggr extends Base {
   String? name;
+  String? email;
 
   UserAggr();
   factory UserAggr.fromJson(Map<String, dynamic> json) =>

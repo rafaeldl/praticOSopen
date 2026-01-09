@@ -14,7 +14,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
   final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  RolesType _selectedRole = RolesType.tecnico; // Default para técnico
+  RolesType _selectedRole = RolesType.technician; // Default para técnico
   bool _isLoading = false;
 
   Future<void> _submit() async {

@@ -33,8 +33,10 @@ Map<String, dynamic> _$InviteToJson(Invite instance) => <String, dynamic>{
 
 const _$RolesTypeEnumMap = {
   RolesType.admin: 'admin',
+  RolesType.supervisor: 'supervisor',
   RolesType.manager: 'manager',
-  RolesType.user: 'user',
+  RolesType.consultant: 'consultant',
+  RolesType.technician: 'technician',
 };
 
 const _$InviteStatusEnumMap = {

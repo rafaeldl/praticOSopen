@@ -7,16 +7,12 @@ service cloud.firestore {
     // HELPER FUNCTIONS - RBAC (Role-Based Access Control)
     // ════════════════════════════════════════════════════════════════════════
     //
-    // Perfis de usuário no PraticOS:
-    // - admin: Administrador - Acesso total ao sistema
-    // - gerente: Gerente (Financeiro) - Gestão financeira
-    // - supervisor: Supervisor - Gestão operacional
-    // - consultor: Consultor (Vendedor) - Perfil comercial
-    // - tecnico: Técnico - Execução de serviços
-    //
-    // Roles legados (normalizados na Cloud Function):
-    // - manager -> supervisor
-    // - user -> tecnico
+    // User roles in PraticOS:
+    // - admin: Administrator - Full system access
+    // - manager: Manager (Financial) - Financial management
+    // - supervisor: Supervisor - Operational management
+    // - consultant: Consultant (Sales) - Commercial profile
+    // - technician: Technician - Service execution
     // ════════════════════════════════════════════════════════════════════════
 
     // Verifica se o usuário pertence à empresa usando custom claims
@@ -43,10 +39,10 @@ service cloud.firestore {
         && request.auth.token.roles[companyId] in ['admin', 'supervisor'];
     }
 
-    // Verifica se o usuário pode visualizar dados financeiros (admin ou gerente)
+    // Verifica se o usuário pode visualizar dados financeiros (admin ou manager)
     function canViewFinancial(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'gerente'];
+        && request.auth.token.roles[companyId] in ['admin', 'manager'];
     }
 
     // Verifica se o usuário pode gerenciar usuários (apenas admin)
@@ -54,10 +50,10 @@ service cloud.firestore {
       return isCompanyAdmin(companyId);
     }
 
-    // Verifica se o usuário pode criar/editar OS (admin, supervisor, consultor)
+    // Verifica se o usuário pode criar/editar OS (admin, supervisor, consultant)
     function canManageOrders(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'supervisor', 'consultor'];
+        && request.auth.token.roles[companyId] in ['admin', 'supervisor', 'consultant'];
     }
 
     // Verifica se o usuário pode executar OS (todos os perfis)
@@ -211,15 +207,15 @@ service cloud.firestore {
       // ──────────────────────────────────────────────────────────────────────
       // ORDENS DE SERVIÇO
       // Acesso baseado em perfil:
-      // - Admin/Gerente/Supervisor: todas as OS
-      // - Consultor: apenas OS que criou
-      // - Técnico: apenas OS atribuídas
+      // - Admin/Manager/Supervisor: todas as OS
+      // - Consultant: apenas OS que criou
+      // - Technician: apenas OS atribuídas
       // ──────────────────────────────────────────────────────────────────────
       match /orders/{orderId} {
         // Leitura: todos os membros podem ler (filtro feito no app)
         allow read: if belongsToCompany(companyId);
 
-        // Criação: admin, supervisor, consultor
+        // Criação: admin, supervisor, consultant
         allow create: if canManageOrders(companyId);
 
         // Atualização: depende do perfil e do tipo de alteração
@@ -228,11 +224,11 @@ service cloud.firestore {
           isCompanyAdmin(companyId)
           // Supervisor pode gerenciar todas as OS
           || hasRole(companyId, 'supervisor')
-          // Gerente pode apenas visualizar (sem write)
-          // Consultor pode editar suas próprias OS
-          || (hasRole(companyId, 'consultor') && resource.data.createdBy == request.auth.uid)
-          // Técnico pode atualizar OS atribuídas (status, formulários, fotos)
-          || (hasRole(companyId, 'tecnico') && (
+          // Manager pode apenas visualizar (sem write)
+          // Consultant pode editar suas próprias OS
+          || (hasRole(companyId, 'consultant') && resource.data.createdBy == request.auth.uid)
+          // Technician pode atualizar OS atribuídas (status, formulários, fotos)
+          || (hasRole(companyId, 'technician') && (
             resource.data.assignedTo.id == request.auth.uid
             || resource.data.createdBy == request.auth.uid
           ))
@@ -256,7 +252,7 @@ service cloud.firestore {
 
       // ──────────────────────────────────────────────────────────────────────
       // CLIENTES
-      // Todos podem visualizar, apenas admin/supervisor/consultor podem editar
+      // Todos podem visualizar, apenas admin/supervisor/consultant podem editar
       // ──────────────────────────────────────────────────────────────────────
       match /customers/{customerId} {
         allow read: if belongsToCompany(companyId);

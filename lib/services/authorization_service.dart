@@ -1,6 +1,5 @@
 import 'package:praticos/global.dart';
-import 'package:praticos/mobx/collaborator_store.dart';
-import 'package:praticos/models/membership.dart';
+import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
@@ -31,7 +30,14 @@ class AuthorizationService {
   AuthorizationService._internal();
   factory AuthorizationService() => _instance;
 
-  final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
+  // Shared UserStore instance - set this from screens that have loaded user data
+  static UserStore? _sharedUserStore;
+
+  /// Set the shared UserStore instance to be used by AuthorizationService.
+  /// Call this from screens that load user data (e.g., Settings screen).
+  static void setUserStore(UserStore userStore) {
+    _sharedUserStore = userStore;
+  }
 
   // ═══════════════════════════════════════════════════════════════════
   // ROLE MANAGEMENT
@@ -43,47 +49,38 @@ class AuthorizationService {
       return null;
     }
 
-    final currentUserId = Global.currentUser!.uid;
-    final membership = _collaboratorStore.collaborators.firstWhere(
-      (m) => m.userId == currentUserId || m.user?.id == currentUserId,
-      orElse: () => Membership(),
+    // Get role from shared UserStore (user.companies[].role)
+    final user = _sharedUserStore?.user?.value;
+    if (user?.companies == null) {
+      return null;
+    }
+
+    // Find the CompanyRoleAggr for current company
+    final companyRole = user!.companies!.firstWhere(
+      (cr) => cr.company?.id == Global.companyAggr!.id,
+      orElse: () => CompanyRoleAggr(),
     );
 
-    return membership.role;
+    return companyRole.role;
   }
 
-  /// Retorna o perfil normalizado (converte roles legados).
-  RolesType? get normalizedRole {
-    final role = currentUserRole;
-    if (role == null) return null;
-
-    // Normaliza roles legados
-    switch (role) {
-      // ignore: deprecated_member_use_from_same_package
-      case RolesType.manager:
-        return RolesType.supervisor;
-      // ignore: deprecated_member_use_from_same_package
-      case RolesType.user:
-        return RolesType.tecnico;
-      default:
-        return role;
-    }
-  }
+  /// Returns the current user role.
+  RolesType? get normalizedRole => currentUserRole;
 
   /// Verifica se o usuário atual é administrador.
   bool get isAdmin => normalizedRole == RolesType.admin;
 
   /// Verifica se o usuário atual é gerente.
-  bool get isGerente => normalizedRole == RolesType.gerente;
+  bool get isManager => normalizedRole == RolesType.manager;
 
   /// Verifica se o usuário atual é supervisor.
   bool get isSupervisor => normalizedRole == RolesType.supervisor;
 
   /// Verifica se o usuário atual é consultor.
-  bool get isConsultor => normalizedRole == RolesType.consultor;
+  bool get isConsultant => normalizedRole == RolesType.consultant;
 
   /// Verifica se o usuário atual é técnico.
-  bool get isTecnico => normalizedRole == RolesType.tecnico;
+  bool get isTechnician => normalizedRole == RolesType.technician;
 
   // ═══════════════════════════════════════════════════════════════════
   // PERMISSION CHECKS
@@ -122,9 +119,9 @@ class AuthorizationService {
   /// Verifica se o usuário atual pode visualizar uma OS específica.
   ///
   /// Regras:
-  /// - Admin/Gerente/Supervisor: todas as OS
-  /// - Consultor: apenas OS que criou
-  /// - Técnico: apenas OS atribuídas
+  /// - Admin/Manager/Supervisor: todas as OS
+  /// - Consultant: apenas OS que criou
+  /// - Technician: apenas OS atribuídas
   bool canAccessOrder(Order order) {
     final role = normalizedRole;
     if (role == null) return false;
@@ -134,22 +131,19 @@ class AuthorizationService {
 
     switch (role) {
       case RolesType.admin:
-      case RolesType.gerente:
+      case RolesType.manager:
       case RolesType.supervisor:
         // Acesso a todas as OS
         return true;
 
-      case RolesType.consultor:
+      case RolesType.consultant:
         // Apenas OS que criou
         return order.createdBy?.id == currentUserId;
 
-      case RolesType.tecnico:
+      case RolesType.technician:
         // Apenas OS atribuídas (assignedTo) ou que criou
         return _isOrderAssignedToUser(order, currentUserId) ||
             order.createdBy?.id == currentUserId;
-
-      default:
-        return false;
     }
   }
 
@@ -249,25 +243,22 @@ class AuthorizationService {
 
     switch (role) {
       case RolesType.admin:
-      case RolesType.gerente:
+      case RolesType.manager:
       case RolesType.supervisor:
         // Retorna todas as OS
         return orders;
 
-      case RolesType.consultor:
+      case RolesType.consultant:
         // Apenas OS que criou
         return orders.where((o) => o.createdBy?.id == currentUserId).toList();
 
-      case RolesType.tecnico:
+      case RolesType.technician:
         // Apenas OS atribuídas ou que criou
         return orders
             .where((o) =>
                 _isOrderAssignedToUser(o, currentUserId) ||
                 o.createdBy?.id == currentUserId)
             .toList();
-
-      default:
-        return [];
     }
   }
 }
