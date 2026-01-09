@@ -4,6 +4,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
@@ -17,6 +18,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   DeviceStore store = DeviceStore();
   Map<String, dynamic>? args;
   final TextEditingController _searchController = TextEditingController();
+  final AuthorizationService _authService = AuthorizationService.instance;
   String _searchQuery = '';
 
   @override
@@ -218,6 +220,24 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           return false;
         } else {
           // Swipe Left -> Delete
+          // Verify permission (Only Admin or Manager can delete)
+          if (!_authService.isAdmin && !_authService.isManager) {
+             await showCupertinoDialog(
+              context: context,
+              builder: (context) => CupertinoAlertDialog(
+                title: const Text('Sem Permissão'),
+                content: const Text('Apenas administradores e gerentes podem remover dispositivos.'),
+                actions: [
+                  CupertinoDialogAction(
+                    child: const Text('OK'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            );
+            return false;
+          }
+
           return await showCupertinoDialog<bool>(
             context: context,
             builder: (context) => CupertinoAlertDialog(

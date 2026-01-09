@@ -2,20 +2,32 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
 /**
+ * User roles in PraticOS (RBAC)
+ *
+ * Available roles:
+ * - admin: Administrator - Full system access
+ * - manager: Manager - Financial management
+ * - supervisor: Operational management
+ * - consultant: Sales profile
+ * - technician: Service execution
+ */
+
+/**
  * Atualiza Custom Claims quando um usuário é criado ou modificado.
  *
  * Claims structure:
  * {
  *   roles: {
  *     'companyId1': 'admin',
- *     'companyId2': 'user',
+ *     'companyId2': 'technician',
  *     ...
  *   }
  * }
  *
- * Uso nas Security Rules:
- * - Verificar acesso: request.auth.token.roles[companyId] != null
- * - Verificar role: request.auth.token.roles[companyId] == 'admin'
+ * Usage in Security Rules:
+ * - Check access: request.auth.token.roles[companyId] != null
+ * - Check role: request.auth.token.roles[companyId] == 'admin'
+ * - Check multiple roles: request.auth.token.roles[companyId] in ['admin', 'manager']
  */
 exports.updateUserClaims = functions.region('southamerica-east1').firestore
   .document('users/{userId}')
@@ -47,7 +59,7 @@ exports.updateUserClaims = functions.region('southamerica-east1').firestore
           }
 
           seenCompanies.add(companyId);
-          // Converte role para lowercase para consistência nas rules
+          // Convert to lowercase for consistency in rules
           roles[companyId] = String(item.role).toLowerCase();
         }
       });

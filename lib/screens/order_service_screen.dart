@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/service.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/services/authorization_service.dart';
 
 class OrderServiceScreen extends StatefulWidget {
   const OrderServiceScreen({super.key});
@@ -24,6 +26,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _initialized = false;
+  final AuthorizationService _authService = AuthorizationService.instance;
 
   final NumberFormat numberFormat = NumberFormat.currency(
     locale: 'pt-BR',
@@ -46,6 +49,8 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
         if (args.containsKey('service')) {
           _service = args['service'];
           _orderService.service = _service!.toAggr();
+          // Initialize value from service to ensure it's not null if field is hidden
+          _orderService.value ??= _service!.value;
         }
 
         if (args.containsKey('orderServiceIndex')) {
@@ -81,6 +86,12 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
 
+    // Verifica se pode editar campos principais (valor, serviço)
+    // Sempre permite editar descrição/observações
+    final canEditMainFields = _orderStore?.order != null
+        ? _authService.canEditOrderMainFields(_orderStore!.order!)
+        : true;
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
@@ -113,7 +124,9 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   _buildServiceNameField(context),
-                  _buildValueField(context, config),
+                  // Apenas mostrar campo de valor se usuário pode ver/editar preços E pode editar campos principais
+                  if (_authService.hasPermission(PermissionType.viewPrices) && canEditMainFields)
+                    _buildValueField(context, config),
                 ],
               ),
 

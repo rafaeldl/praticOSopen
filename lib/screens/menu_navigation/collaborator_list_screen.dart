@@ -4,6 +4,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/membership.dart';
+import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
@@ -90,7 +91,8 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
         ? _collaboratorStore.collaborators.toList()
         : _collaboratorStore.collaborators.where((membership) {
             final name = membership.user?.name?.toLowerCase() ?? '';
-            return name.contains(_searchQuery);
+            final email = membership.user?.email?.toLowerCase() ?? '';
+            return name.contains(_searchQuery) || email.contains(_searchQuery);
           }).toList();
 
     final filteredInvites = _searchQuery.isEmpty
@@ -213,13 +215,20 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              _getRoleLabel(invite.role),
+                              '${RolePermissions.getRoleIcon(invite.role ?? RolesType.technician)} ${_getRoleLabel(invite.role)}',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
                               ),
                             ),
                           ],
+                        ),
+                        Text(
+                          _getRoleDescription(invite.role ?? RolesType.technician),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                          ),
                         ),
                       ],
                     ),
@@ -353,11 +362,21 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                             color: CupertinoColors.label.resolveFrom(context),
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        if (membership.user?.email != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            membership.user!.email!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 4),
                         Text(
-                          _getRoleLabel(membership.role),
+                          '${RolePermissions.getRoleIcon(membership.role ?? RolesType.technician)} ${_getRoleLabel(membership.role)}',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             color: CupertinoColors.secondaryLabel.resolveFrom(context),
                           ),
                         ),
@@ -411,15 +430,12 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   }
 
   String _getRoleLabel(RolesType? role) {
-    if (role == null) return 'Usuário';
-    switch (role) {
-      case RolesType.admin:
-        return 'Administrador';
-      case RolesType.manager:
-        return 'Gerente';
-      case RolesType.user:
-        return 'Usuário';
-    }
+    if (role == null) return 'Técnico';
+    return RolePermissions.getRoleLabel(role);
+  }
+
+  String _getRoleDescription(RolesType role) {
+    return RolePermissions.getRoleDescription(role);
   }
 
   void _showActionSheet(Membership membership) {
@@ -456,17 +472,48 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: const Text('Selecionar Nova Permissão'),
-        actions: RolesType.values.map((role) {
+        title: const Text('Selecionar Perfil'),
+        message: const Text('Escolha o perfil de acesso do colaborador'),
+        actions: RolePermissions.availableRoles.map((role) {
+          final isSelected = membership.role == role;
           return CupertinoActionSheetAction(
-            child: Text(_getRoleLabel(role)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${RolePermissions.getRoleIcon(role)} ${_getRoleLabel(role)}',
+                      style: TextStyle(
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                    if (isSelected) ...[
+                      const SizedBox(width: 8),
+                      const Icon(CupertinoIcons.checkmark, size: 16),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _getRoleDescription(role),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+              ],
+            ),
             onPressed: () async {
               Navigator.pop(context);
-              try {
-                await _collaboratorStore.updateCollaboratorRole(
-                    membership.userId!, role);
-              } catch (e) {
-                _showError(e.toString());
+              if (role != membership.role) {
+                try {
+                  await _collaboratorStore.updateCollaboratorRole(
+                      membership.userId!, role);
+                } catch (e) {
+                  _showError(e.toString());
+                }
               }
             },
           );

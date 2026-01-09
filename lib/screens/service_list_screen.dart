@@ -4,6 +4,8 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/mobx/service_store.dart';
 import 'package:praticos/models/service.dart';
+import 'package:praticos/models/permission.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 
 class ServiceListScreen extends StatefulWidget {
@@ -13,6 +15,7 @@ class ServiceListScreen extends StatefulWidget {
 
 class _ServiceListScreenState extends State<ServiceListScreen> {
   ServiceStore serviceStore = ServiceStore();
+  final AuthorizationService _authService = AuthorizationService.instance;
   Map<String, dynamic>? args;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -261,15 +264,18 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                               color: CupertinoColors.label.resolveFrom(context),
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _convertToCurrency(service.value),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: CupertinoColors.activeBlue.resolveFrom(context),
-                              fontWeight: FontWeight.w500,
+                          // Apenas mostrar valor se usuário tem permissão
+                          if (_authService.hasPermission(PermissionType.viewPrices)) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              _convertToCurrency(service.value),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: CupertinoColors.activeBlue.resolveFrom(context),
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     ),
