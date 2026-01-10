@@ -35,6 +35,12 @@ abstract class _OrderStore with Store {
   ObservableStream<Order?>? orderStream;
 
   @observable
+  int streamLimit = 20; // Initial limit for reactive stream
+
+  @observable
+  String? currentStreamStatus; // Track current filter for stream
+
+  @observable
   ObservableStream<List<of_model.OrderForm>>? formsStream;
 
   @observable
@@ -185,6 +191,14 @@ abstract class _OrderStore with Store {
     return _authService.filterOrdersByPermission(
       ordersList.whereType<Order>().toList(),
     ).cast<Order?>();
+  }
+
+  /// Verifica se há mais OS para carregar no stream reativo.
+  /// Se a lista atual tem exatamente streamLimit items, provavelmente há mais.
+  @computed
+  bool get hasMoreOrdersInStream {
+    if (orderList == null || orderList!.data == null) return false;
+    return orderList!.data!.length >= streamLimit;
   }
 
   /// Verifica se o usuário pode visualizar valores financeiros.
@@ -403,11 +417,16 @@ abstract class _OrderStore with Store {
   loadOrders(String? status) async {
     if (companyId == null) return;
 
+    // Reset limit when changing filter
+    streamLimit = 20;
+    currentStreamStatus = status;
+
     orderList = repository
         .streamOrders(
           companyId!,
           status: status,
           customerId: customerFilter?.id,
+          limit: streamLimit,
         )
         .asObservable();
 
@@ -416,6 +435,24 @@ abstract class _OrderStore with Store {
     }
 
     print(orderList);
+  }
+
+  @action
+  loadMoreOrders() {
+    if (companyId == null) return;
+
+    // Increase limit by 20
+    streamLimit += 20;
+
+    // Recreate stream with new limit
+    orderList = repository
+        .streamOrders(
+          companyId!,
+          status: currentStreamStatus,
+          customerId: customerFilter?.id,
+          limit: streamLimit,
+        )
+        .asObservable();
   }
 
   @action

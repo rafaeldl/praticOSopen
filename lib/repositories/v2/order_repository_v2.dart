@@ -50,18 +50,20 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     return await _tenant.getOrdersByDateRange(companyId, startDate, endDate);
   }
 
-  /// Stream de orders com filtros opcionais.
+  /// Stream de orders com filtros opcionais e paginação.
   Stream<List<Order?>> streamOrders(
     String companyId, {
     String? status,
     String? payment,
     String? customerId,
+    int? limit,
   }) {
     return _tenant.streamOrders(
       companyId,
       status: status,
       payment: payment,
       customerId: customerId,
+      limit: limit,
     );
   }
 

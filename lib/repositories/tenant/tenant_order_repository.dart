@@ -119,12 +119,13 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     }
   }
 
-  /// Stream de orders com filtros opcionais.
+  /// Stream de orders com filtros opcionais e paginação.
   Stream<List<Order?>> streamOrders(
     String companyId, {
     String? status,
     String? payment,
     String? customerId,
+    int? limit,
   }) {
     List<QueryArgs> filterList = [];
     List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
@@ -150,6 +151,11 @@ class TenantOrderRepository extends TenantRepository<Order?> {
       filterList.add(QueryArgs('customer.id', customerId));
     }
 
-    return streamQueryList(companyId, orderBy: orderBy, args: filterList);
+    return streamQueryList(
+      companyId,
+      orderBy: orderBy,
+      args: filterList,
+      limit: limit,
+    );
   }
 }

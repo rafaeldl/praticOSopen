@@ -55,7 +55,19 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    // Reactive stream - no scroll listener needed
+    _scrollController.addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    if (_scrollController.hasClients) {
+      final offset = _scrollController.offset;
+      final maxScroll = _scrollController.position.maxScrollExtent;
+
+      // Load more when user is 200px from bottom
+      if (offset >= maxScroll - 200 && orderStore.hasMoreOrdersInStream) {
+        orderStore.loadMoreOrders();
+      }
+    }
   }
 
   @override
@@ -74,7 +86,7 @@ class _HomeState extends State<Home> {
   }
 
   void _loadOrders(List<Map<String, dynamic>> filters) {
-    // Use reactive stream instead of pagination
+    // Use reactive stream with dynamic pagination
     orderStore.loadOrders(filters[currentSelected]['field']);
   }
 
@@ -99,8 +111,22 @@ class _HomeState extends State<Home> {
             _buildNavigationBar(context, config),
             _buildActiveFilterHeader(config),
             _buildOrdersList(config),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100), // Bottom padding to clear TabBar
+            SliverToBoxAdapter(
+              child: Observer(
+                builder: (_) {
+                  // Show loading indicator if there are more orders to load
+                  if (orderStore.hasMoreOrdersInStream &&
+                      orderStore.filteredOrderList.isNotEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      child: Center(
+                        child: CupertinoActivityIndicator(),
+                      ),
+                    );
+                  }
+                  return const SizedBox(height: 100); // Bottom padding to clear TabBar
+                },
+              ),
             ),
           ],
         ),
