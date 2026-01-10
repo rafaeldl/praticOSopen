@@ -652,7 +652,7 @@ class _HomeState extends State<Home> {
       child: Container(
         width: size,
         height: size,
-        color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
+        color: CupertinoColors.secondarySystemFill.resolveFrom(context),
         child: url != null && url.isNotEmpty
             ? CachedImage.thumbnail(
                 imageUrl: url,
