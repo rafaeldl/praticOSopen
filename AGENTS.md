@@ -349,3 +349,117 @@ intl: ^0.20.2
 4. **Build Runner:** `fvm flutter pub run build_runner build --delete-conflicting-outputs` é obrigatório após mudar Stores/Models.
 5. **AuthService:** Use `AuthService` para criar novos usuários, não grave direto no banco.
 6. **CollaboratorStore:** Use este store para gerenciar membros da equipe, não use `CompanyStore` para isso.
+7. **📝 DOCUMENTAÇÃO OBRIGATÓRIA:** Ao finalizar uma nova feature, SEMPRE documentar (ver seção abaixo).
+
+---
+
+## Documentação de Novas Funcionalidades (OBRIGATÓRIO)
+
+**REGRA:** Toda nova funcionalidade desenvolvida DEVE ser documentada antes de ser considerada completa.
+
+### Estrutura de Documentação
+
+```
+docs/                              # Documentação técnica (desenvolvedores)
+├── FEATURE_NAME.md               # Arquitetura, fluxos, regras de negócio
+
+firebase/hosting/public/docs/      # Documentação pública (usuários finais)
+├── feature.html                  # Português (principal)
+├── feature-en.html               # Inglês
+├── feature-es.html               # Espanhol
+└── docs.css                      # Estilos compartilhados
+```
+
+### 1. Documentação Técnica (`docs/`)
+
+Criar arquivo `docs/FEATURE_NAME.md` contendo:
+
+| Seção | Conteúdo |
+|-------|----------|
+| Visão Geral | Descrição breve da funcionalidade |
+| Arquitetura | Models, Stores, Repositories envolvidos |
+| Estrutura Firestore | Collections, documentos, subcollections |
+| Fluxo de Dados | Diagrama ou descrição do fluxo |
+| Regras de Negócio | Lista de regras implementadas |
+| Permissões | Roles que têm acesso à feature |
+| Exemplos de Uso | Código de exemplo (quando aplicável) |
+
+### 2. Documentação Pública (`firebase/hosting/public/docs/`)
+
+Para features visíveis ao usuário final, criar documentação HTML:
+
+**Arquivos obrigatórios:**
+- `feature.html` - Português (idioma principal)
+- `feature-en.html` - Inglês
+- `feature-es.html` - Espanhol
+
+**Template base:**
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nome da Feature - PraticOS</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <header>
+    <h1>Nome da Feature</h1>
+    <nav class="lang-switcher">
+      <a href="feature.html" class="active">PT</a>
+      <a href="feature-en.html">EN</a>
+      <a href="feature-es.html">ES</a>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>Como Funciona</h2>
+      <!-- Explicação para usuário final -->
+    </section>
+    <section>
+      <h2>Passo a Passo</h2>
+      <!-- Tutorial com screenshots se necessário -->
+    </section>
+  </main>
+  <footer>
+    <a href="index.html">← Voltar para Documentação</a>
+  </footer>
+</body>
+</html>
+```
+
+### Checklist de Documentação
+
+Antes de considerar uma feature **COMPLETA**, verificar:
+
+```
+□ docs/FEATURE_NAME.md criado com arquitetura completa
+□ firebase/hosting/public/docs/feature.html criado (PT)
+□ firebase/hosting/public/docs/feature-en.html criado (EN)
+□ firebase/hosting/public/docs/feature-es.html criado (ES)
+□ index.html atualizado com link para nova feature (se aplicável)
+□ docs.css atualizado (se novos estilos forem necessários)
+```
+
+### Matriz de Documentação
+
+| Tipo de Mudança | docs/ (técnica) | public/docs/ (usuário) |
+|-----------------|-----------------|------------------------|
+| Nova feature completa | ✅ Criar | ✅ Criar (3 idiomas) |
+| Mudança em feature existente | ✅ Atualizar | ✅ Atualizar |
+| Bug fix | ❌ Não | ❌ Não |
+| Refatoração interna | ✅ Se mudar arquitetura | ❌ Não |
+| Nova API/integração | ✅ Criar | ❌ Geralmente não |
+
+### Exemplos de Documentação Existente
+
+**Técnica (`docs/`):**
+- `docs/FINANCEIRO.md` - Sistema financeiro
+- `docs/MULTI_TENANCY.md` - Arquitetura multi-tenant
+- `docs/formularios_dinamicos.md` - Formulários dinâmicos
+- `docs/perfis_usuarios.md` - Perfis de usuários
+
+**Pública (`firebase/hosting/public/docs/`):**
+- `financeiro.html` / `financeiro-en.html` / `financeiro-es.html`
+- `perfis.html` / `perfis-en.html` / `perfis-es.html`
