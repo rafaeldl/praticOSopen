@@ -174,7 +174,7 @@ class _HomeState extends State<Home> {
                                  Icon(
                                    CupertinoIcons.arrow_down_circle,
                                    size: 20,
-                                   color: CupertinoColors.activeBlue.resolveFrom(context),
+                                   color: CupertinoColors.activeBlue,
                                  ),
                                  const SizedBox(width: 8),
                                  const Text('Carregar mais'),
@@ -308,7 +308,7 @@ class _HomeState extends State<Home> {
         return SliverToBoxAdapter(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: CupertinoColors.systemGroupedBackground,
+            color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
@@ -317,7 +317,7 @@ class _HomeState extends State<Home> {
               ),
               child: Row(
                 children: [
-                  Icon(CupertinoIcons.person_fill, size: 14, color: CupertinoColors.activeBlue.resolveFrom(context)),
+                  Icon(CupertinoIcons.person_fill, size: 14, color: CupertinoColors.activeBlue),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -325,7 +325,7 @@ class _HomeState extends State<Home> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: CupertinoColors.activeBlue.resolveFrom(context),
+                        color: CupertinoColors.activeBlue,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -478,7 +478,7 @@ class _HomeState extends State<Home> {
                                 Icon(
                                   CupertinoIcons.arrow_down_circle,
                                   size: 20,
-                                  color: CupertinoColors.activeBlue.resolveFrom(context),
+                                  color: CupertinoColors.activeBlue,
                                 ),
                                 const SizedBox(width: 8),
                                 const Text('Carregar mais'),
@@ -492,9 +492,15 @@ class _HomeState extends State<Home> {
           }
 
           // Se não há mais dados para carregar
-          return const SliverFillRemaining(
+          return SliverFillRemaining(
             child: Center(
-              child: Text('Nenhum resultado encontrado'),
+              child: Text(
+                'Nenhum resultado encontrado',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+              ),
             ),
           );
         }
@@ -644,7 +650,7 @@ class _HomeState extends State<Home> {
                 Divider(
                   height: 1,
                   indent: 76, // Adjusted indent for thumbnail (52 size + padding)
-                  color: CupertinoColors.separator, 
+                  color: CupertinoColors.separator.resolveFrom(context),
                 ),
             ],
           ),
@@ -662,7 +668,7 @@ class _HomeState extends State<Home> {
       child: Container(
         width: size,
         height: size,
-        color: CupertinoColors.systemGroupedBackground,
+        color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
         child: url != null && url.isNotEmpty
             ? CachedImage.thumbnail(
                 imageUrl: url,
