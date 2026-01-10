@@ -24,6 +24,22 @@ mixin _$UserStore on _UserStore, Store {
     });
   }
 
+  late final _$isUploadingAtom =
+      Atom(name: '_UserStore.isUploading', context: context);
+
+  @override
+  bool get isUploading {
+    _$isUploadingAtom.reportRead();
+    return super.isUploading;
+  }
+
+  @override
+  set isUploading(bool value) {
+    _$isUploadingAtom.reportWrite(value, super.isUploading, () {
+      super.isUploading = value;
+    });
+  }
+
   late final _$findCurrentUserAsyncAction = AsyncAction(
     '_UserStore.findCurrentUser',
     context: context,
@@ -44,10 +60,33 @@ mixin _$UserStore on _UserStore, Store {
     return _$findUserByIdAsyncAction.run(() => super.findUserById(userId));
   }
 
+  late final _$updateUserProfileAsyncAction = AsyncAction(
+    '_UserStore.updateUserProfile',
+    context: context,
+  );
+
+  @override
+  Future<void> updateUserProfile(User user) {
+    return _$updateUserProfileAsyncAction
+        .run(() => super.updateUserProfile(user));
+  }
+
+  late final _$uploadUserPhotoAsyncAction = AsyncAction(
+    '_UserStore.uploadUserPhoto',
+    context: context,
+  );
+
+  @override
+  Future<String?> uploadUserPhoto(File file, User user) {
+    return _$uploadUserPhotoAsyncAction
+        .run(() => super.uploadUserPhoto(file, user));
+  }
+
   @override
   String toString() {
     return '''
-user: ${user}
+user: ${user},
+isUploading: ${isUploading}
     ''';
   }
 }

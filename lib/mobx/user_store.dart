@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
@@ -5,6 +7,7 @@ import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/user_repository.dart';
 import 'package:praticos/services/auth_service.dart';
+import 'package:praticos/services/photo_service.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:mobx/mobx.dart';
 
@@ -18,10 +21,16 @@ abstract class _UserStore with Store {
   final CompanyStore companyStore = CompanyStore();
   final UserRepository repository = UserRepository();
   final AuthService authService = AuthService();
+  final PhotoService photoService = PhotoService();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @observable
   ObservableStream<User>? user;
+
+  @observable
+  bool isUploading = false;
+
+  String? get companyId => Global.companyAggr?.id;
 
   @action
   findCurrentUser() async {
@@ -95,5 +104,38 @@ abstract class _UserStore with Store {
     newUser.updatedAt = newUser.createdAt;
     newUser.updatedBy = newUser.toAggr();
     return newUser;
+  }
+
+  /// Updates user profile data
+  @action
+  Future<void> updateUserProfile(User user) async {
+    user.updatedAt = DateTime.now();
+    user.updatedBy = user.toAggr();
+    await repository.updateItem(user);
+
+    // Update global userAggr if it's the current user
+    if (Global.currentUser?.uid == user.id) {
+      Global.userAggr = user.toAggr();
+    }
+  }
+
+  /// Uploads user profile photo and updates the user document
+  @action
+  Future<String?> uploadUserPhoto(File file, User user) async {
+    if (companyId == null) return null;
+
+    isUploading = true;
+    try {
+      final String storagePath = 'tenants/$companyId/users/${user.id}/photo.jpg';
+      final String? url = await photoService.uploadImage(file: file, storagePath: storagePath);
+
+      if (url != null) {
+        user.photo = url;
+        await updateUserProfile(user);
+      }
+      return url;
+    } finally {
+      isUploading = false;
+    }
   }
 }
