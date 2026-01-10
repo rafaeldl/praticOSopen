@@ -363,7 +363,16 @@ abstract class _OrderStore with Store {
   void updatePayment() {
     if (order == null) return;
 
-    if (['quote', 'canceled'].contains(order!.status)) {
+    // Only block payment display for canceled orders
+    // Quote orders can now have payments (they auto-approve on first payment)
+    if (order!.status == 'canceled') {
+      order!.payment = null;
+      payment = '';
+      return;
+    }
+
+    // For quote status, only show payment if there are transactions
+    if (order!.status == 'quote' && (order!.paidAmount ?? 0.0) == 0) {
       order!.payment = null;
       payment = '';
       return;
@@ -604,6 +613,12 @@ abstract class _OrderStore with Store {
   void addPayment(double amount, {String? description}) {
     if (order == null || amount <= 0) return;
 
+    // Auto-approve quote when payment is added
+    if (order!.status == 'quote') {
+      order!.status = 'approved';
+      status = 'approved';
+    }
+
     final transaction = PaymentTransaction.payment(
       amount: amount,
       description: description,
@@ -632,6 +647,12 @@ abstract class _OrderStore with Store {
   @action
   void addDiscountTransaction(double amount, {String? description}) {
     if (order == null || amount <= 0) return;
+
+    // Auto-approve quote when discount is added
+    if (order!.status == 'quote') {
+      order!.status = 'approved';
+      status = 'approved';
+    }
 
     final transaction = PaymentTransaction.discount(
       amount: amount,
@@ -665,8 +686,15 @@ abstract class _OrderStore with Store {
   void markAsFullyPaid({String? description}) {
     if (order == null) return;
 
+    // Auto-approve quote when marking as paid
+    if (order!.status == 'quote') {
+      order!.status = 'approved';
+      status = 'approved';
+    }
+
     final remaining = remainingBalance;
     if (remaining > 0) {
+      // addPayment já faz a aprovação automática, mas garantimos aqui também
       addPayment(remaining, description: description ?? 'Pagamento total');
     }
 

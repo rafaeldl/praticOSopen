@@ -211,9 +211,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         final status = _store?.status;
         final isFullyPaid = _store?.isFullyPaid ?? false;
 
-        // Pagamentos só são permitidos a partir de 'approved'
-        // Não permitir em 'quote' ou 'canceled'
-        if (status == 'quote' || status == 'canceled') {
+        // Pagamentos não são permitidos em 'canceled'
+        if (status == 'canceled') {
           return _buildPaymentNotAllowedSection(status);
         }
 
@@ -227,7 +226,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   }
 
   Widget _buildPaymentNotAllowedSection(String? status) {
-    final isQuote = status == 'quote';
     return _buildGroupedSection(
       header: '',
       children: [
@@ -236,15 +234,13 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           child: Column(
             children: [
               Icon(
-                isQuote ? CupertinoIcons.doc_text : CupertinoIcons.xmark_circle,
+                CupertinoIcons.xmark_circle,
                 color: CupertinoColors.systemGrey,
                 size: 32,
               ),
               const SizedBox(height: 12),
               Text(
-                isQuote
-                    ? 'Pagamentos não disponíveis'
-                    : 'OS cancelada',
+                'OS cancelada',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
@@ -253,9 +249,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               ),
               const SizedBox(height: 4),
               Text(
-                isQuote
-                    ? 'Aprove o orçamento para registrar pagamentos'
-                    : 'Não é possível registrar pagamentos',
+                'Não é possível registrar pagamentos',
                 style: TextStyle(
                   fontSize: 15,
                   color: CupertinoColors.tertiaryLabel.resolveFrom(context),
@@ -318,10 +312,45 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   Widget _buildFormSection() {
     final remaining = _store?.remainingBalance ?? 0.0;
     final isPayment = _selectedType == 0;
+    final status = _store?.status;
+    final isQuote = status == 'quote';
 
     return _buildGroupedSection(
       header: 'REGISTRAR',
       children: [
+        // Info banner for quote status
+        if (isQuote)
+          Container(
+            margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: CupertinoColors.systemBlue.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  CupertinoIcons.info_circle_fill,
+                  color: CupertinoColors.systemBlue,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Ao registrar um pagamento, esta OS será automaticamente aprovada',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.label.resolveFrom(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         // Segmented Control
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
