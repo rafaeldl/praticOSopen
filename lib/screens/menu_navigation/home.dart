@@ -25,6 +25,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int currentSelected = 0;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
   final AuthorizationService _authService = AuthorizationService.instance;
   late OrderStore orderStore;
 
@@ -93,6 +95,7 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -126,6 +129,7 @@ class _HomeState extends State<Home> {
           slivers: [
             _buildNavigationBar(context, config),
             _buildActiveFilterHeader(config),
+            _buildSearchField(config),
             _buildOrdersList(config),
             SliverToBoxAdapter(
                child: Observer(builder: (_) {
@@ -300,6 +304,21 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget _buildSearchField(SegmentConfigProvider config) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        child: CupertinoSearchTextField(
+          controller: _searchController,
+          placeholder: 'Buscar ${config.serviceOrderPlural}',
+          onChanged: (value) {
+            setState(() => _searchQuery = value.toLowerCase());
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _buildOrdersList(SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
@@ -310,6 +329,21 @@ class _HomeState extends State<Home> {
             ),
           );
         }
+
+        // Apply search filter
+        final filteredList = _searchQuery.isEmpty
+            ? orderStore.orders
+            : orderStore.orders.where((order) {
+                if (order == null) return false;
+                final orderNumber = order.number?.toString().toLowerCase() ?? '';
+                final customerName = order.customer?.name?.toLowerCase() ?? '';
+                final deviceName = order.device?.name?.toLowerCase() ?? '';
+                final deviceSerial = order.device?.serial?.toLowerCase() ?? '';
+                return orderNumber.contains(_searchQuery) ||
+                    customerName.contains(_searchQuery) ||
+                    deviceName.contains(_searchQuery) ||
+                    deviceSerial.contains(_searchQuery);
+              }).toList();
 
         if (orderStore.orders.isEmpty) {
           return SliverFillRemaining(
@@ -345,15 +379,23 @@ class _HomeState extends State<Home> {
           );
         }
 
+        if (filteredList.isEmpty) {
+          return const SliverFillRemaining(
+            child: Center(
+              child: Text('Nenhum resultado encontrado'),
+            ),
+          );
+        }
+
         return SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
-              if (index >= orderStore.orders.length) return null;
-              final order = orderStore.orders[index];
+              if (index >= filteredList.length) return null;
+              final order = filteredList[index];
               if (order == null) return null;
-              return _buildOrderItem(order, index, index == orderStore.orders.length - 1, config);
+              return _buildOrderItem(order, index, index == filteredList.length - 1, config);
             },
-            childCount: orderStore.orders.length,
+            childCount: filteredList.length,
           ),
         );
       },
