@@ -106,7 +106,11 @@ class _OrderFormState extends State<OrderForm> {
       largeTitle: Observer(
         builder: (_) {
           Order? os = _store.orderStream?.value;
-          return Text(os?.number != null ? "OS #${os!.number}" : config.label(LabelKeys.createServiceOrder));
+          return Text(
+            os?.number != null ? "OS #${os!.number}" : config.label(LabelKeys.createServiceOrder),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          );
         },
       ),
       trailing: Row(
@@ -656,17 +660,27 @@ class _OrderFormState extends State<OrderForm> {
                             : CupertinoColors.tertiaryLabel.resolveFrom(context),
                         fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Text(
-                    hasValue ? value : placeholder,
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: enabled
-                          ? (hasValue
-                              ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
-                              : CupertinoColors.placeholderText.resolveFrom(context))
-                          : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        hasValue ? value : placeholder,
+                        style: TextStyle(
+                          fontSize: 17,
+                          color: enabled
+                              ? (hasValue
+                                  ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
+                                  : CupertinoColors.placeholderText.resolveFrom(context))
+                              : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                   if (showChevron && enabled) ...[
@@ -820,12 +834,19 @@ class _OrderFormState extends State<OrderForm> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    trailing,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: CupertinoColors.label.resolveFrom(context),
-                      fontWeight: FontWeight.w500,
+                  Flexible(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        trailing,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: CupertinoColors.label.resolveFrom(context),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 6),
