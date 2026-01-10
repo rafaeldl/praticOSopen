@@ -251,15 +251,15 @@ class _HomeState extends State<Home> {
     return Observer(
       builder: (_) {
         if (orderStore.customerFilter == null) return const SliverToBoxAdapter(child: SizedBox.shrink());
-        
+
         return SliverToBoxAdapter(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            color: CupertinoColors.systemGroupedBackground,
+            color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: CupertinoColors.activeBlue.withValues(alpha: 0.1),
+                color: CupertinoColors.activeBlue.resolveFrom(context).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
