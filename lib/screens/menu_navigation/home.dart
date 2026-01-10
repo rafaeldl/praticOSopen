@@ -55,7 +55,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
+    // Reactive stream - no scroll listener needed
   }
 
   @override
@@ -74,42 +74,14 @@ class _HomeState extends State<Home> {
   }
 
   void _loadOrders(List<Map<String, dynamic>> filters) {
-    final currentOffset = _scrollController.hasClients ? _scrollController.offset : 0.0;
-    orderStore.loadOrdersInfinite(filters[currentSelected]['field']).then((_) {
-      if (_scrollController.hasClients) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollController.hasClients) {
-            if (_scrollController.position.maxScrollExtent >= currentOffset && currentOffset > 0) {
-              _scrollController.jumpTo(currentOffset);
-            } else {
-              _scrollController.jumpTo(0);
-            }
-          }
-        });
-      }
-    });
+    // Use reactive stream instead of pagination
+    orderStore.loadOrders(filters[currentSelected]['field']);
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _scrollListener() {
-    final config = Provider.of<SegmentConfigProvider>(context, listen: false);
-    final filters = _getFilters(config);
-    final offset = _scrollController.offset;
-    // Simple logic to just load more
-    if (offset >= _scrollController.position.maxScrollExtent - 100) {
-      _loadMoreOrders(filters);
-    }
-  }
-
-  void _loadMoreOrders(List<Map<String, dynamic>> filters) {
-    if (!orderStore.isLoading && orderStore.hasMoreOrders) {
-      orderStore.loadMoreOrdersInfinite(filters[currentSelected]['field']);
-    }
   }
 
   @override
@@ -127,16 +99,8 @@ class _HomeState extends State<Home> {
             _buildNavigationBar(context, config),
             _buildActiveFilterHeader(config),
             _buildOrdersList(config),
-            SliverToBoxAdapter(
-               child: Observer(builder: (_) {
-                 if (orderStore.isLoading && orderStore.orders.isNotEmpty) {
-                   return const Padding(
-                     padding: EdgeInsets.all(16.0),
-                     child: Center(child: CupertinoActivityIndicator()),
-                   );
-                 }
-                 return const SizedBox(height: 100); // Bottom padding to clear TabBar
-               }),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 100), // Bottom padding to clear TabBar
             ),
           ],
         ),
@@ -234,7 +198,7 @@ class _HomeState extends State<Home> {
               if (currentSelected != index) {
                 HapticFeedback.selectionClick();
                 setState(() => currentSelected = index);
-                orderStore.loadOrdersInfinite(filters[index]['field']);
+                orderStore.loadOrders(filters[index]['field']);
               }
             },
           );
@@ -303,7 +267,8 @@ class _HomeState extends State<Home> {
   Widget _buildOrdersList(SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
-        if (orderStore.isLoading && orderStore.orders.isEmpty) {
+        // Check if stream is loading (no data yet)
+        if (orderStore.orderList == null || orderStore.orderList!.data == null) {
           return const SliverFillRemaining(
             child: Center(
               child: CupertinoActivityIndicator(),
@@ -311,7 +276,10 @@ class _HomeState extends State<Home> {
           );
         }
 
-        if (orderStore.orders.isEmpty) {
+        // Get filtered list based on permissions
+        final filteredOrders = orderStore.filteredOrderList;
+
+        if (filteredOrders.isEmpty) {
           return SliverFillRemaining(
             child: Center(
               child: Column(
@@ -348,12 +316,12 @@ class _HomeState extends State<Home> {
         return SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
-              if (index >= orderStore.orders.length) return null;
-              final order = orderStore.orders[index];
+              if (index >= filteredOrders.length) return null;
+              final order = filteredOrders[index];
               if (order == null) return null;
-              return _buildOrderItem(order, index, index == orderStore.orders.length - 1, config);
+              return _buildOrderItem(order, index, index == filteredOrders.length - 1, config);
             },
-            childCount: orderStore.orders.length,
+            childCount: filteredOrders.length,
           ),
         );
       },

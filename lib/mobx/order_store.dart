@@ -171,6 +171,22 @@ abstract class _OrderStore with Store {
     ).cast<Order?>();
   }
 
+  /// Retorna a lista de OS reativa (stream) filtrada com base nas permissões do usuário.
+  ///
+  /// - Admin/Gerente/Supervisor: todas as OS
+  /// - Consultor: apenas OS que criou
+  /// - Técnico: apenas OS atribuídas
+  @computed
+  List<Order?> get filteredOrderList {
+    if (orderList == null || orderList!.data == null) {
+      return [];
+    }
+    final ordersList = orderList!.data!.toList();
+    return _authService.filterOrdersByPermission(
+      ordersList.whereType<Order>().toList(),
+    ).cast<Order?>();
+  }
+
   /// Verifica se o usuário pode visualizar valores financeiros.
   @computed
   bool get canViewPrices => _authService.canViewPrices;
