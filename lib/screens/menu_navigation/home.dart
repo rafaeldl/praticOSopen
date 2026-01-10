@@ -147,22 +147,6 @@ class _HomeState extends State<Home> {
                      child: Center(
                        child: Column(
                          children: [
-                           if (_searchQuery.isNotEmpty) ...[
-                             Icon(
-                               CupertinoIcons.arrow_down_circle,
-                               size: 24,
-                               color: CupertinoColors.systemGrey.resolveFrom(context),
-                             ),
-                             const SizedBox(height: 8),
-                             Text(
-                               'Role para baixo ou toque no botão',
-                               style: TextStyle(
-                                 fontSize: 13,
-                                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                               ),
-                             ),
-                             const SizedBox(height: 16),
-                           ],
                            CupertinoButton(
                              onPressed: () {
                                final filters = _getFilters(config);
