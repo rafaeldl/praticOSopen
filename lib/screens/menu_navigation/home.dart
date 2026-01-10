@@ -506,18 +506,6 @@ class _HomeState extends State<Home> {
 
   Widget _buildOrderItem(Order order, int index, bool isLast, SegmentConfigProvider config) {
     final statusColor = _getCupertinoStatusColor(order.status);
-    
-    // Date Formatting (Mail style: "Yesterday", "Friday", or "dd/MM/yy")
-    if (order.createdAt != null) {
-      final now = DateTime.now();
-      final diff = now.difference(order.createdAt!);
-      if (diff.inDays == 0) {
-      } else if (diff.inDays == 1) {
-      } else if (diff.inDays < 7) {
-// Day name
-      } else {
-      }
-    }
 
     String subtitle = '#${order.number ?? '-'}';
     if (order.device != null) {
@@ -614,15 +602,41 @@ class _HomeState extends State<Home> {
                           ),
                           const SizedBox(height: 3),
                           
-                          // Line 2: #OS • Vehicle • Plate
-                          Text(
-                            subtitle,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          // Line 2: #OS • Vehicle • Plate (Left) --- Due Date (Right)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  subtitle,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (order.dueDate != null)
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      CupertinoIcons.calendar,
+                                      size: 14,
+                                      color: _getDueDateColor(order.dueDate),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      DateFormat('dd/MM').format(order.dueDate!),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: _getDueDateColor(order.dueDate),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -685,6 +699,21 @@ class _HomeState extends State<Home> {
       default:
         return CupertinoColors.systemGrey;
     }
+  }
+
+  Color _getDueDateColor(DateTime? date) {
+    if (date == null) return CupertinoColors.secondaryLabel.resolveFrom(context);
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDay = DateTime(date.year, date.month, date.day);
+
+    // Se a data é anterior a hoje, é atrasada (vermelho)
+    if (dueDay.isBefore(today)) {
+      return CupertinoColors.systemRed;
+    }
+
+    return CupertinoColors.secondaryLabel.resolveFrom(context);
   }
 
   String _formatCurrency(double? value) {
