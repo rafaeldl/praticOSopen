@@ -140,24 +140,45 @@ class _HomeState extends State<Home> {
                    );
                  }
 
-                 // Mostrar dica quando está buscando e há mais dados para carregar
-                 if (_searchQuery.isNotEmpty && orderStore.hasMoreOrders && orderStore.orders.isNotEmpty) {
+                 // Mostrar botão "Carregar mais" quando há mais dados disponíveis
+                 if (orderStore.hasMoreOrders && orderStore.orders.isNotEmpty) {
                    return Padding(
                      padding: const EdgeInsets.all(16.0),
                      child: Center(
                        child: Column(
                          children: [
-                           Icon(
-                             CupertinoIcons.arrow_down_circle,
-                             size: 24,
-                             color: CupertinoColors.systemGrey.resolveFrom(context),
-                           ),
-                           const SizedBox(height: 8),
-                           Text(
-                             'Role para baixo para buscar mais',
-                             style: TextStyle(
-                               fontSize: 13,
-                               color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                           if (_searchQuery.isNotEmpty) ...[
+                             Icon(
+                               CupertinoIcons.arrow_down_circle,
+                               size: 24,
+                               color: CupertinoColors.systemGrey.resolveFrom(context),
+                             ),
+                             const SizedBox(height: 8),
+                             Text(
+                               'Role para baixo ou toque no botão',
+                               style: TextStyle(
+                                 fontSize: 13,
+                                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                               ),
+                             ),
+                             const SizedBox(height: 16),
+                           ],
+                           CupertinoButton(
+                             onPressed: () {
+                               final filters = _getFilters(config);
+                               _loadMoreOrders(filters);
+                             },
+                             child: Row(
+                               mainAxisSize: MainAxisSize.min,
+                               children: [
+                                 Icon(
+                                   CupertinoIcons.arrow_down_circle,
+                                   size: 20,
+                                   color: CupertinoColors.activeBlue.resolveFrom(context),
+                                 ),
+                                 const SizedBox(width: 8),
+                                 const Text('Carregar mais'),
+                               ],
                              ),
                            ),
                            const SizedBox(height: 80), // Extra padding for TabBar
