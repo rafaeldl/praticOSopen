@@ -3,7 +3,7 @@ name: Release iOS
 on:
   push:
     tags:
-      - 'rc-v*'
+      - 'v*-rc'
   workflow_dispatch:
 
 jobs:
