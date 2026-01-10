@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/widgets/cached_image.dart';
-import 'package:praticos/global.dart';
 
 class UserProfileEditScreen extends StatefulWidget {
   const UserProfileEditScreen({super.key});
@@ -149,7 +148,7 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
                         Positioned.fill(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: CupertinoColors.black.withOpacity(0.5),
+                              color: CupertinoColors.black.withValues(alpha: 0.5),
                               shape: BoxShape.circle,
                             ),
                             child: const Center(
@@ -184,6 +183,7 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    decoration: TextDecoration.none,
                   ),
                 ),
               ),
