@@ -139,6 +139,34 @@ class _HomeState extends State<Home> {
                      child: Center(child: CupertinoActivityIndicator()),
                    );
                  }
+
+                 // Mostrar dica quando está buscando e há mais dados para carregar
+                 if (_searchQuery.isNotEmpty && orderStore.hasMoreOrders && orderStore.orders.isNotEmpty) {
+                   return Padding(
+                     padding: const EdgeInsets.all(16.0),
+                     child: Center(
+                       child: Column(
+                         children: [
+                           Icon(
+                             CupertinoIcons.arrow_down_circle,
+                             size: 24,
+                             color: CupertinoColors.systemGrey.resolveFrom(context),
+                           ),
+                           const SizedBox(height: 8),
+                           Text(
+                             'Role para baixo para buscar mais',
+                             style: TextStyle(
+                               fontSize: 13,
+                               color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                             ),
+                           ),
+                           const SizedBox(height: 80), // Extra padding for TabBar
+                         ],
+                       ),
+                     ),
+                   );
+                 }
+
                  return const SizedBox(height: 100); // Bottom padding to clear TabBar
                }),
             ),
@@ -380,6 +408,58 @@ class _HomeState extends State<Home> {
         }
 
         if (filteredList.isEmpty) {
+          // Se não encontrou resultados mas há mais ordens para carregar
+          if (orderStore.hasMoreOrders && _searchQuery.isNotEmpty) {
+            return SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      CupertinoIcons.search,
+                      size: 48,
+                      color: CupertinoColors.systemGrey.resolveFrom(context),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Nenhum resultado encontrado',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: CupertinoColors.label.resolveFrom(context),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'Há mais ordens para carregar. Role para baixo ou toque no botão para buscar nas próximas páginas.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    CupertinoButton.filled(
+                      child: orderStore.isLoading
+                          ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                          : const Text('Carregar mais'),
+                      onPressed: orderStore.isLoading
+                          ? null
+                          : () {
+                              final filters = _getFilters(config);
+                              _loadMoreOrders(filters);
+                            },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // Se não há mais dados para carregar
           return const SliverFillRemaining(
             child: Center(
               child: Text('Nenhum resultado encontrado'),
