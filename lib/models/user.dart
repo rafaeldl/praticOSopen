@@ -10,6 +10,7 @@ part 'user.g.dart';
 class User extends BaseAudit {
   String? name;
   String? email;
+  String? photo;
   List<CompanyRoleAggr>? companies;
 
   User();
@@ -23,6 +24,7 @@ class User extends BaseAudit {
 class UserAggr extends Base {
   String? name;
   String? email;
+  String? photo;
 
   UserAggr();
   factory UserAggr.fromJson(Map<String, dynamic> json) =>

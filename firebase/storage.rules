@@ -75,6 +75,14 @@ service firebase.storage {
       allow delete: if isAuthenticated();
     }
 
+    // Regras para fotos de perfil de usuários
+    match /tenants/{companyId}/users/{userId}/{photoId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidImage();
+      allow update: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+
     // Bloqueia acesso a qualquer outro caminho não especificado
     match /{allPaths=**} {
       allow read, write: if false;
