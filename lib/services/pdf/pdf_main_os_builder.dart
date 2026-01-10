@@ -645,7 +645,10 @@ class PdfMainOsBuilder {
     final subtotal = totalServices + totalProducts;
     final discount = order.discount ?? 0.0;
     final total = order.total ?? 0.0;
+    final paidAmount = order.paidAmount ?? 0.0;
+    final remaining = total - paidAmount;
     final isPaid = order.payment == 'paid';
+    final hasPartialPayment = paidAmount > 0 && !isPaid;
 
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.end,
@@ -668,14 +671,24 @@ class PdfMainOsBuilder {
                     pw.Divider(color: PdfStyles.borderColor, height: 16),
                     _buildSummaryRow('Subtotal', subtotal),
                     if (discount > 0) _buildSummaryRow('Desconto', -discount, color: PdfColors.red600),
+                    _buildSummaryRow('Total', total, isBold: true),
+                    // Mostrar pagamentos parciais
+                    if (hasPartialPayment) ...[
+                      pw.SizedBox(height: 4),
+                      pw.Divider(color: PdfStyles.borderColor, height: 8),
+                      pw.SizedBox(height: 4),
+                      _buildSummaryRow('Ja pago', paidAmount, color: PdfColors.green700),
+                    ],
                   ],
                 ),
               ),
-              // Total
+              // Footer com status de pagamento
               pw.Container(
                 padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                 decoration: pw.BoxDecoration(
-                  color: isPaid ? PdfColors.green700 : PdfStyles.primaryDark,
+                  color: isPaid
+                      ? PdfColors.green700
+                      : (hasPartialPayment ? PdfColors.orange700 : PdfStyles.primaryDark),
                   borderRadius: const pw.BorderRadius.only(
                     bottomLeft: pw.Radius.circular(5),
                     bottomRight: pw.Radius.circular(5),
@@ -685,7 +698,9 @@ class PdfMainOsBuilder {
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Text(
-                      isPaid ? 'TOTAL PAGO' : 'TOTAL A PAGAR',
+                      isPaid
+                          ? 'TOTAL PAGO'
+                          : (hasPartialPayment ? 'SALDO RESTANTE' : 'TOTAL A PAGAR'),
                       style: pw.TextStyle(
                         font: boldFont,
                         color: PdfColors.white,
@@ -693,7 +708,7 @@ class PdfMainOsBuilder {
                       ),
                     ),
                     pw.Text(
-                      _formatCurrency(total),
+                      _formatCurrency(isPaid ? total : remaining),
                       style: pw.TextStyle(
                         font: boldFont,
                         color: PdfColors.white,

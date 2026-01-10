@@ -856,14 +856,23 @@ abstract class _OrderStore with Store {
       totalRevenue =
           filteredOrders.fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
 
-      // Calcular valores pagos e a receber
-      totalPaidAmount = filteredOrders
-          .where((order) => order?.payment == 'paid')
-          .fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
+      // Calcular valores pagos e a receber (considerando pagamentos parciais)
+      // Retrocompatibilidade: OSs antigas com payment='paid' mas sem paidAmount
+      totalPaidAmount = filteredOrders.fold(0.0, (sum, order) {
+        if (order?.payment == 'paid') {
+          // Se está pago, usar paidAmount ou total (retrocompatibilidade)
+          return sum + (order?.paidAmount ?? order?.total ?? 0.0);
+        }
+        return sum + (order?.paidAmount ?? 0.0);
+      });
 
       totalUnpaidAmount = filteredOrders
-          .where((order) => order?.payment == 'unpaid')
-          .fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
+          .where((order) => order?.payment != 'paid')
+          .fold(0.0, (sum, order) {
+            final total = order?.total ?? 0.0;
+            final paid = order?.paidAmount ?? 0.0;
+            return sum + (total - paid);
+          });
 
       // Atualizar paymentStatusCounts para o gráfico
       paymentStatusCounts.clear();
@@ -879,19 +888,23 @@ abstract class _OrderStore with Store {
 
       for (var order in filteredOrders) {
         if (order?.total != null) {
-          if (order?.customer?.id != null) {
-            String customerId = order!.customer!.id!;
-            double currentTotal = customerOrderTotals[customerId] ?? 0.0;
-            customerOrderTotals[customerId] = currentTotal + order.total!;
+          final orderTotal = order!.total!;
+          final orderPaid = order.paidAmount ?? 0.0;
+          final orderUnpaid = order.payment != 'paid' ? (orderTotal - orderPaid) : 0.0;
 
-            if (order.payment == 'unpaid') {
+          if (order.customer?.id != null) {
+            String customerId = order.customer!.id!;
+            double currentTotal = customerOrderTotals[customerId] ?? 0.0;
+            customerOrderTotals[customerId] = currentTotal + orderTotal;
+
+            if (orderUnpaid > 0) {
               double currentUnpaid = customerUnpaidTotals[customerId] ?? 0.0;
-              customerUnpaidTotals[customerId] = currentUnpaid + order.total!;
+              customerUnpaidTotals[customerId] = currentUnpaid + orderUnpaid;
             }
           } else {
-            semClienteTotal += order!.total!;
-            if (order.payment == 'unpaid') {
-              semClienteUnpaid += order.total!;
+            semClienteTotal += orderTotal;
+            if (orderUnpaid > 0) {
+              semClienteUnpaid += orderUnpaid;
             }
           }
         }
@@ -989,14 +1002,23 @@ abstract class _OrderStore with Store {
       totalRevenue =
           filteredOrders.fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
 
-      // Calcular valores pagos e a receber
-      totalPaidAmount = filteredOrders
-          .where((order) => order?.payment == 'paid')
-          .fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
+      // Calcular valores pagos e a receber (considerando pagamentos parciais)
+      // Retrocompatibilidade: OSs antigas com payment='paid' mas sem paidAmount
+      totalPaidAmount = filteredOrders.fold(0.0, (sum, order) {
+        if (order?.payment == 'paid') {
+          // Se está pago, usar paidAmount ou total (retrocompatibilidade)
+          return sum + (order?.paidAmount ?? order?.total ?? 0.0);
+        }
+        return sum + (order?.paidAmount ?? 0.0);
+      });
 
       totalUnpaidAmount = filteredOrders
-          .where((order) => order?.payment == 'unpaid')
-          .fold(0.0, (sum, order) => sum + (order?.total ?? 0.0));
+          .where((order) => order?.payment != 'paid')
+          .fold(0.0, (sum, order) {
+            final total = order?.total ?? 0.0;
+            final paid = order?.paidAmount ?? 0.0;
+            return sum + (total - paid);
+          });
 
       // Atualizar paymentStatusCounts para o gráfico
       paymentStatusCounts.clear();
@@ -1013,19 +1035,23 @@ abstract class _OrderStore with Store {
 
       for (var order in filteredOrders) {
         if (order?.total != null) {
-          if (order?.customer?.id != null) {
-            String customerId = order!.customer!.id!;
-            double currentTotal = customerOrderTotals[customerId] ?? 0.0;
-            customerOrderTotals[customerId] = currentTotal + order.total!;
+          final orderTotal = order!.total!;
+          final orderPaid = order.paidAmount ?? 0.0;
+          final orderUnpaid = order.payment != 'paid' ? (orderTotal - orderPaid) : 0.0;
 
-            if (order.payment == 'unpaid') {
+          if (order.customer?.id != null) {
+            String customerId = order.customer!.id!;
+            double currentTotal = customerOrderTotals[customerId] ?? 0.0;
+            customerOrderTotals[customerId] = currentTotal + orderTotal;
+
+            if (orderUnpaid > 0) {
               double currentUnpaid = customerUnpaidTotals[customerId] ?? 0.0;
-              customerUnpaidTotals[customerId] = currentUnpaid + order.total!;
+              customerUnpaidTotals[customerId] = currentUnpaid + orderUnpaid;
             }
           } else {
-            semClienteTotal += order!.total!;
-            if (order.payment == 'unpaid') {
-              semClienteUnpaid += order.total!;
+            semClienteTotal += orderTotal;
+            if (orderUnpaid > 0) {
+              semClienteUnpaid += orderUnpaid;
             }
           }
         }
