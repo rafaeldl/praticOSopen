@@ -25,6 +25,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int currentSelected = 0;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
   final AuthorizationService _authService = AuthorizationService.instance;
   late OrderStore orderStore;
 
@@ -93,6 +95,7 @@ class _HomeState extends State<Home> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -126,6 +129,7 @@ class _HomeState extends State<Home> {
           slivers: [
             _buildNavigationBar(context, config),
             _buildActiveFilterHeader(config),
+            _buildSearchField(config),
             _buildOrdersList(config),
             SliverToBoxAdapter(
                child: Observer(builder: (_) {
@@ -135,6 +139,39 @@ class _HomeState extends State<Home> {
                      child: Center(child: CupertinoActivityIndicator()),
                    );
                  }
+
+                 // Mostrar botão "Carregar mais" quando há mais dados disponíveis
+                 if (orderStore.hasMoreOrders && orderStore.orders.isNotEmpty) {
+                   return Padding(
+                     padding: const EdgeInsets.all(16.0),
+                     child: Center(
+                       child: Column(
+                         children: [
+                           CupertinoButton(
+                             onPressed: () {
+                               final filters = _getFilters(config);
+                               _loadMoreOrders(filters);
+                             },
+                             child: Row(
+                               mainAxisSize: MainAxisSize.min,
+                               children: [
+                                 Icon(
+                                   CupertinoIcons.arrow_down_circle,
+                                   size: 20,
+                                   color: CupertinoColors.activeBlue,
+                                 ),
+                                 const SizedBox(width: 8),
+                                 const Text('Carregar mais'),
+                               ],
+                             ),
+                           ),
+                           const SizedBox(height: 80), // Extra padding for TabBar
+                         ],
+                       ),
+                     ),
+                   );
+                 }
+
                  return const SizedBox(height: 100); // Bottom padding to clear TabBar
                }),
             ),
@@ -264,7 +301,7 @@ class _HomeState extends State<Home> {
               ),
               child: Row(
                 children: [
-                  Icon(CupertinoIcons.person_fill, size: 14, color: CupertinoColors.activeBlue.resolveFrom(context)),
+                  Icon(CupertinoIcons.person_fill, size: 14, color: CupertinoColors.activeBlue),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -272,7 +309,7 @@ class _HomeState extends State<Home> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: CupertinoColors.activeBlue.resolveFrom(context),
+                        color: CupertinoColors.activeBlue,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -300,6 +337,21 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget _buildSearchField(SegmentConfigProvider config) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        child: CupertinoSearchTextField(
+          controller: _searchController,
+          placeholder: 'Buscar ${config.serviceOrderPlural}',
+          onChanged: (value) {
+            setState(() => _searchQuery = value.toLowerCase());
+          },
+        ),
+      ),
+    );
+  }
+
   Widget _buildOrdersList(SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
@@ -310,6 +362,21 @@ class _HomeState extends State<Home> {
             ),
           );
         }
+
+        // Apply search filter
+        final filteredList = _searchQuery.isEmpty
+            ? orderStore.orders
+            : orderStore.orders.where((order) {
+                if (order == null) return false;
+                final orderNumber = order.number?.toString().toLowerCase() ?? '';
+                final customerName = order.customer?.name?.toLowerCase() ?? '';
+                final deviceName = order.device?.name?.toLowerCase() ?? '';
+                final deviceSerial = order.device?.serial?.toLowerCase() ?? '';
+                return orderNumber.contains(_searchQuery) ||
+                    customerName.contains(_searchQuery) ||
+                    deviceName.contains(_searchQuery) ||
+                    deviceSerial.contains(_searchQuery);
+              }).toList();
 
         if (orderStore.orders.isEmpty) {
           return SliverFillRemaining(
@@ -345,15 +412,92 @@ class _HomeState extends State<Home> {
           );
         }
 
+        if (filteredList.isEmpty) {
+          // Se não encontrou resultados mas há mais ordens para carregar
+          if (orderStore.hasMoreOrders && _searchQuery.isNotEmpty) {
+            return SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      CupertinoIcons.search,
+                      size: 48,
+                      color: CupertinoColors.systemGrey.resolveFrom(context),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Nenhum resultado encontrado',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: CupertinoColors.label.resolveFrom(context),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: Text(
+                        'Há mais ordens para carregar. Role para baixo ou toque no botão para buscar nas próximas páginas.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    CupertinoButton(
+                      onPressed: orderStore.isLoading
+                          ? null
+                          : () {
+                              final filters = _getFilters(config);
+                              _loadMoreOrders(filters);
+                            },
+                      child: orderStore.isLoading
+                          ? const CupertinoActivityIndicator()
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.arrow_down_circle,
+                                  size: 20,
+                                  color: CupertinoColors.activeBlue,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('Carregar mais'),
+                              ],
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // Se não há mais dados para carregar
+          return SliverFillRemaining(
+            child: Center(
+              child: Text(
+                'Nenhum resultado encontrado',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+              ),
+            ),
+          );
+        }
+
         return SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
-              if (index >= orderStore.orders.length) return null;
-              final order = orderStore.orders[index];
+              if (index >= filteredList.length) return null;
+              final order = filteredList[index];
               if (order == null) return null;
-              return _buildOrderItem(order, index, index == orderStore.orders.length - 1, config);
+              return _buildOrderItem(order, index, index == filteredList.length - 1, config);
             },
-            childCount: orderStore.orders.length,
+            childCount: filteredList.length,
           ),
         );
       },
@@ -362,18 +506,6 @@ class _HomeState extends State<Home> {
 
   Widget _buildOrderItem(Order order, int index, bool isLast, SegmentConfigProvider config) {
     final statusColor = _getCupertinoStatusColor(order.status);
-    
-    // Date Formatting (Mail style: "Yesterday", "Friday", or "dd/MM/yy")
-    if (order.createdAt != null) {
-      final now = DateTime.now();
-      final diff = now.difference(order.createdAt!);
-      if (diff.inDays == 0) {
-      } else if (diff.inDays == 1) {
-      } else if (diff.inDays < 7) {
-// Day name
-      } else {
-      }
-    }
 
     String subtitle = '#${order.number ?? '-'}';
     if (order.device != null) {
@@ -437,14 +569,19 @@ class _HomeState extends State<Home> {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  // Apenas mostrar valor se usuário tem permissão
-                                  if (_authService.hasPermission(PermissionType.viewPrices)) ...[
+                                  // Data de entrega na linha 1
+                                  if (order.dueDate != null) ...[
+                                    Icon(
+                                      CupertinoIcons.calendar,
+                                      size: 14,
+                                      color: _getDueDateColor(order.dueDate, order.status),
+                                    ),
+                                    const SizedBox(width: 4),
                                     Text(
-                                      _formatCurrency(order.total),
+                                      DateFormat('dd/MM').format(order.dueDate!),
                                       style: TextStyle(
-                                        fontSize: 15,
-                                        color: order.payment == 'paid' ? CupertinoColors.label.resolveFrom(context) : CupertinoColors.secondaryLabel.resolveFrom(context),
-                                        fontWeight: order.payment == 'paid' ? FontWeight.bold : FontWeight.w400,
+                                        fontSize: 14,
+                                        color: _getDueDateColor(order.dueDate, order.status),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -470,15 +607,32 @@ class _HomeState extends State<Home> {
                           ),
                           const SizedBox(height: 3),
                           
-                          // Line 2: #OS • Vehicle • Plate
-                          Text(
-                            subtitle,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          // Line 2: #OS • Vehicle • Plate (Left) --- Value (Right)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  subtitle,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              // Valor na linha 2 (se usuário tem permissão)
+                              if (_authService.hasPermission(PermissionType.viewPrices))
+                                Text(
+                                  _formatCurrency(order.total),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: order.payment == 'paid' ? CupertinoColors.label.resolveFrom(context) : CupertinoColors.secondaryLabel.resolveFrom(context),
+                                    fontWeight: order.payment == 'paid' ? FontWeight.w600 : FontWeight.w400,
+                                  ),
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -490,7 +644,7 @@ class _HomeState extends State<Home> {
                 Divider(
                   height: 1,
                   indent: 76, // Adjusted indent for thumbnail (52 size + padding)
-                  color: CupertinoColors.separator, 
+                  color: CupertinoColors.separator.resolveFrom(context),
                 ),
             ],
           ),
@@ -508,7 +662,7 @@ class _HomeState extends State<Home> {
       child: Container(
         width: size,
         height: size,
-        color: CupertinoColors.systemGroupedBackground,
+        color: CupertinoColors.secondarySystemFill.resolveFrom(context),
         child: url != null && url.isNotEmpty
             ? CachedImage.thumbnail(
                 imageUrl: url,
@@ -543,7 +697,27 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Color _getDueDateColor(DateTime? date, String? status) {
+    if (date == null) return CupertinoColors.secondaryLabel.resolveFrom(context);
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDay = DateTime(date.year, date.month, date.day);
+
+    // Se a OS está concluída ou cancelada, não mostrar como atrasada
+    if (status == 'done' || status == 'canceled') {
+      return CupertinoColors.secondaryLabel.resolveFrom(context);
+    }
+
+    // Se a data é anterior a hoje e a OS está em aberto, é atrasada (vermelho)
+    if (dueDay.isBefore(today)) {
+      return CupertinoColors.systemRed;
+    }
+
+    return CupertinoColors.secondaryLabel.resolveFrom(context);
+  }
+
   String _formatCurrency(double? value) {
-    return NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$').format(value ?? 0);
+    return NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$', decimalDigits: 2).format(value ?? 0);
   }
 }
