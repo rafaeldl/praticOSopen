@@ -855,13 +855,10 @@ class _OrderFormState extends State<OrderForm> {
     // Verificar se o usuário pode visualizar valores (necessário para gerar PDF completo)
     final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
     
-    // Verificar permissão de exclusão
+    // Verificar permissão de exclusão usando RBAC
     bool canDelete = false;
-    if (_authService.isAdmin) {
-      canDelete = true;
-    } else if (_authService.isManager || _authService.isSupervisor) {
-      // Gerente e Supervisor só podem excluir em status 'Orçamento'
-      canDelete = _store.status == 'quote';
+    if (_store.order != null) {
+      canDelete = _authService.canDeleteOrder(_store.order!);
     }
 
     showCupertinoModalPopup<void>(

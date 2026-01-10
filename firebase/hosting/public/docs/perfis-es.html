@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfiles de Usuarios - PráticOS Documentación</title>
+    <meta name="description" content="Documentación completa sobre los perfiles de usuarios y permisos del sistema PráticOS.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+    <nav class="navbar scrolled">
+        <div class="nav-container">
+            <a href="../index-es.html" class="nav-logo">
+                <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
+                <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="../index-es.html">Inicio</a>
+                <a href="../index-es.html#features">Funcionalidades</a>
+                <a href="index-es.html" class="active">Documentación</a>
+                <a href="../faq-es.html">FAQ</a>
+                <a href="../support-es.html">Soporte</a>
+            </div>
+            <div class="nav-actions">
+                <div class="lang-switch">
+                    <a href="perfis.html">PT</a>
+                    <a href="perfis-en.html">EN</a>
+                    <a href="perfis-es.html" class="active">ES</a>
+                </div>
+                <a href="../index-es.html#download" class="btn btn-primary">Descargar App</a>
+            </div>
+            <button class="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <section class="docs-hero compact">
+        <div class="hero-bg"><div class="gradient-orb orb-1"></div><div class="gradient-orb orb-2"></div></div>
+        <div class="container">
+            <div class="docs-breadcrumb">
+                <a href="index-es.html">Documentación</a><span>/</span><span>Perfiles de Usuarios</span>
+            </div>
+            <div class="docs-hero-content">
+                <h1>Perfiles de <span class="gradient-text">Usuarios</span></h1>
+                <p class="hero-subtitle">Conoce los diferentes perfiles disponibles en PráticOS y sus permisos específicos para cada función en tu empresa.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="docs-content">
+        <div class="container docs-container">
+            <aside class="docs-sidebar">
+                <div class="sidebar-sticky">
+                    <h4>En esta página</h4>
+                    <nav class="docs-nav">
+                        <a href="#overview" class="active">Visión General</a>
+                        <a href="#profiles">Perfiles Disponibles</a>
+                        <a href="#admin">Administrador</a>
+                        <a href="#manager">Gerente</a>
+                        <a href="#supervisor">Supervisor</a>
+                        <a href="#consultant">Consultor</a>
+                        <a href="#technician">Técnico</a>
+                        <a href="#matrix">Matriz de Permisos</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <main class="docs-main">
+                <section id="overview" class="docs-section">
+                    <h2>Visión General del Sistema RBAC</h2>
+                    <p>PráticOS utiliza un sistema de control de acceso basado en perfiles (<strong>RBAC - Role-Based Access Control</strong>) para gestionar los permisos de los colaboradores de cada empresa.</p>
+                    <div class="info-card">
+                        <div class="info-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                        <div class="info-content">
+                            <h4>Multi-Tenancy</h4>
+                            <p>Un usuario puede tener perfiles diferentes en empresas diferentes. Por ejemplo, ser Administrador en una empresa y Técnico en otra.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="profiles" class="docs-section">
+                    <h2>Perfiles Disponibles</h2>
+                    <p>El sistema cuenta con 5 perfiles distintos, cada uno diseñado para atender diferentes funciones dentro de la organización:</p>
+                    <div class="profiles-grid">
+                        <a href="#admin" class="profile-card profile-admin">
+                            <div class="profile-icon"><span class="profile-emoji">&#128104;&#8205;&#128188;</span></div>
+                            <h3>Administrador</h3>
+                            <p>Acceso total al sistema</p>
+                            <span class="profile-tag">Gestión Completa</span>
+                        </a>
+                        <a href="#manager" class="profile-card profile-manager">
+                            <div class="profile-icon"><span class="profile-emoji">&#128176;</span></div>
+                            <h3>Gerente</h3>
+                            <p>Gestión financiera e informes</p>
+                            <span class="profile-tag">Financiero</span>
+                        </a>
+                        <a href="#supervisor" class="profile-card profile-supervisor">
+                            <div class="profile-icon"><span class="profile-emoji">&#129489;&#8205;&#128295;</span></div>
+                            <h3>Supervisor</h3>
+                            <p>Gestión operacional de técnicos</p>
+                            <span class="profile-tag">Operacional</span>
+                        </a>
+                        <a href="#consultant" class="profile-card profile-consultant">
+                            <div class="profile-icon"><span class="profile-emoji">&#129489;&#8205;&#128188;</span></div>
+                            <h3>Consultor</h3>
+                            <p>Ventas y seguimiento comercial</p>
+                            <span class="profile-tag">Comercial</span>
+                        </a>
+                        <a href="#technician" class="profile-card profile-technician">
+                            <div class="profile-icon"><span class="profile-emoji">&#128119;</span></div>
+                            <h3>Técnico</h3>
+                            <p>Ejecución de servicios en campo</p>
+                            <span class="profile-tag">Ejecución</span>
+                        </a>
+                    </div>
+                </section>
+
+                <section id="admin" class="docs-section">
+                    <div class="section-header-inline">
+                        <span class="profile-badge admin">&#128104;&#8205;&#128188;</span>
+                        <div><h2>Administrador</h2><p class="section-subtitle">Acceso total al sistema. Responsable de la configuración de la empresa y gestión de todos los recursos.</p></div>
+                    </div>
+                    <div class="permissions-grid">
+                        <div class="permission-category">
+                            <h4><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg> Órdenes de Servicio</h4>
+                            <ul class="permission-list">
+                                <li class="allowed"><span class="icon">&#10003;</span> Ver todas las OS de la empresa</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Crear nuevas OS</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Editar cualquier OS</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Asignar/reasignar técnicos</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Ejecutar servicios</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Eliminar OS</li>
+                            </ul>
+                        </div>
+                        <div class="permission-category">
+                            <h4><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Datos Financieros</h4>
+                            <ul class="permission-list">
+                                <li class="allowed"><span class="icon">&#10003;</span> Ver valores y precios</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Ver facturación</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Acceder a informes financieros</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Editar valores y precios</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="manager" class="docs-section">
+                    <div class="section-header-inline">
+                        <span class="profile-badge manager">&#128176;</span>
+                        <div><h2>Gerente (Financiero)</h2><p class="section-subtitle">Responsable de la gestión financiera de la empresa. Acceso completo a datos financieros e informes, pero sin interferir en la operación técnica.</p></div>
+                    </div>
+                </section>
+
+                <section id="supervisor" class="docs-section">
+                    <div class="section-header-inline">
+                        <span class="profile-badge supervisor">&#129489;&#8205;&#128295;</span>
+                        <div><h2>Supervisor</h2><p class="section-subtitle">Responsable de la gestión operacional del equipo técnico. Coordina la distribución de trabajo y acompaña la ejecución de los servicios.</p></div>
+                    </div>
+                    <div class="warning-card">
+                        <div class="warning-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                        <div class="warning-content"><h4>Sin Acceso Financiero</h4><p>Este perfil no visualiza valores, precios, facturación ni informes financieros. Ideal para colaboradores enfocados en la operación.</p></div>
+                    </div>
+                </section>
+
+                <section id="consultant" class="docs-section">
+                    <div class="section-header-inline">
+                        <span class="profile-badge consultant">&#129489;&#8205;&#128188;</span>
+                        <div><h2>Consultor (Vendedor)</h2><p class="section-subtitle">Perfil comercial enfocado en ventas y creación de presupuestos. Acceso limitado a sus propias OS y datos de clientes.</p></div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                        <div class="info-content"><h4>Visibilidad Limitada</h4><p>El Consultor solo visualiza las OS que él mismo creó. En caso de vacaciones o ausencia, el Administrador puede reasignar OS a otro consultor.</p></div>
+                    </div>
+                </section>
+
+                <section id="technician" class="docs-section">
+                    <div class="section-header-inline">
+                        <span class="profile-badge technician">&#128119;</span>
+                        <div><h2>Técnico</h2><p class="section-subtitle">Responsable de la ejecución de los servicios en campo. Acceso a las Órdenes de Servicio de la empresa para ejecución y reporte.</p></div>
+                    </div>
+                    <div class="warning-card">
+                        <div class="warning-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
+                        <div class="warning-content"><h4>Perfil Operacional</h4><p>Enfoque en la ejecución. No visualiza valores financieros y tiene edición limitada en OS después de la aprobación.</p></div>
+                    </div>
+                </section>
+
+                <section id="matrix" class="docs-section">
+                    <h2>Matriz de Permisos</h2>
+                    <p>Visión consolidada de todos los permisos por perfil:</p>
+                    <div class="table-wrapper">
+                        <h4>Órdenes de Servicio</h4>
+                        <table class="permissions-table">
+                            <thead><tr><th>Permiso</th><th>Admin</th><th>Gerente</th><th>Supervisor</th><th>Consultor</th><th>Técnico</th></tr></thead>
+                            <tbody>
+                                <tr><td>Ver todas las OS</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="yes">&#10003;</td></tr>
+                                <tr><td>Crear OS</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td></tr>
+                                <tr><td>Asignar técnicos</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="no">&#10007;</td></tr>
+                                <tr><td>Ejecutar OS</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="yes">&#10003;</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-wrapper">
+                        <h4>Datos Financieros</h4>
+                        <table class="permissions-table">
+                            <thead><tr><th>Permiso</th><th>Admin</th><th>Gerente</th><th>Supervisor</th><th>Consultor</th><th>Técnico</th></tr></thead>
+                            <tbody>
+                                <tr><td>Ver precios</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td></tr>
+                                <tr><td>Ver facturación</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="no">&#10007;</td><td class="no">&#10007;</td></tr>
+                                <tr><td>Informes financieros</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="no">&#10007;</td><td class="no">&#10007;</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <div class="docs-navigation">
+                    <a href="index-es.html" class="nav-link prev"><span class="nav-direction">&#8592; Volver</span><span class="nav-title">Documentación</span></a>
+                    <a href="../support-es.html" class="nav-link next"><span class="nav-direction">Siguiente &#8594;</span><span class="nav-title">Soporte</span></a>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 PráticOS. Todos los derechos reservados.</p>
+                <p>Desarrollado por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="mobile-menu">
+        <div class="mobile-menu-content">
+            <a href="../index-es.html">Inicio</a>
+            <a href="index-es.html">Documentación</a>
+            <a href="../faq-es.html">FAQ</a>
+            <a href="../support-es.html">Soporte</a>
+            <div class="mobile-lang"><a href="perfis.html">PT</a><a href="perfis-en.html">EN</a><a href="perfis-es.html" class="active">ES</a></div>
+            <a href="../index-es.html#download" class="btn btn-primary">Descargar App</a>
+        </div>
+    </div>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const body = document.body;
+        navToggle.addEventListener('click', () => { navToggle.classList.toggle('active'); mobileMenu.classList.toggle('active'); body.classList.toggle('menu-open'); });
+        mobileMenu.querySelectorAll('a').forEach(link => { link.addEventListener('click', () => { navToggle.classList.remove('active'); mobileMenu.classList.remove('active'); body.classList.remove('menu-open'); }); });
+
+        const sections = document.querySelectorAll('.docs-section');
+        const navLinks = document.querySelectorAll('.docs-nav a');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    const activeLink = document.querySelector(`.docs-nav a[href="#${entry.target.id}"]`);
+                    if (activeLink) activeLink.classList.add('active');
+                }
+            });
+        }, { rootMargin: '-100px 0px -70% 0px', threshold: 0 });
+        sections.forEach(section => observer.observe(section));
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) { window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 100, behavior: 'smooth' }); }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -71,7 +71,8 @@ abstract class _CollaboratorStore with Store {
     return myMembership?.role == RolesType.admin;
   }
 
-  /// Verifica se o usuário atual pode gerenciar colaboradores (admin ou manager).
+  /// Verifica se o usuário atual pode gerenciar colaboradores (apenas admin).
+  /// Conforme RBAC: apenas admin possui PermissionType.manageUsers.
   bool canManageCollaborators() {
     if (Global.currentUser == null || Global.companyAggr?.id == null) {
       return false;
@@ -82,12 +83,7 @@ abstract class _CollaboratorStore with Store {
       orElse: () => null,
     );
 
-    if (myMembership != null) {
-      return myMembership.role == RolesType.admin ||
-          myMembership.role == RolesType.supervisor;
-    }
-
-    return false;
+    return myMembership?.role == RolesType.admin;
   }
 
   // ═══════════════════════════════════════════════════════════════════
