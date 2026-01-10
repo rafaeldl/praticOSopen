@@ -442,16 +442,27 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    CupertinoButton.filled(
-                      child: orderStore.isLoading
-                          ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                          : const Text('Carregar mais'),
+                    CupertinoButton(
                       onPressed: orderStore.isLoading
                           ? null
                           : () {
                               final filters = _getFilters(config);
                               _loadMoreOrders(filters);
                             },
+                      child: orderStore.isLoading
+                          ? const CupertinoActivityIndicator()
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  CupertinoIcons.arrow_down_circle,
+                                  size: 20,
+                                  color: CupertinoColors.activeBlue.resolveFrom(context),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text('Carregar mais'),
+                              ],
+                            ),
                     ),
                   ],
                 ),
