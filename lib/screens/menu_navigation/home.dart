@@ -569,14 +569,19 @@ class _HomeState extends State<Home> {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  // Apenas mostrar valor se usuário tem permissão
-                                  if (_authService.hasPermission(PermissionType.viewPrices)) ...[
+                                  // Data de entrega na linha 1
+                                  if (order.dueDate != null) ...[
+                                    Icon(
+                                      CupertinoIcons.calendar,
+                                      size: 14,
+                                      color: _getDueDateColor(order.dueDate, order.status),
+                                    ),
+                                    const SizedBox(width: 4),
                                     Text(
-                                      _formatCurrency(order.total),
+                                      DateFormat('dd/MM').format(order.dueDate!),
                                       style: TextStyle(
-                                        fontSize: 15,
-                                        color: order.payment == 'paid' ? CupertinoColors.label.resolveFrom(context) : CupertinoColors.secondaryLabel.resolveFrom(context),
-                                        fontWeight: order.payment == 'paid' ? FontWeight.bold : FontWeight.w400,
+                                        fontSize: 14,
+                                        color: _getDueDateColor(order.dueDate, order.status),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
@@ -602,7 +607,7 @@ class _HomeState extends State<Home> {
                           ),
                           const SizedBox(height: 3),
                           
-                          // Line 2: #OS • Vehicle • Plate (Left) --- Due Date (Right)
+                          // Line 2: #OS • Vehicle • Plate (Left) --- Value (Right)
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -617,24 +622,15 @@ class _HomeState extends State<Home> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (order.dueDate != null)
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      CupertinoIcons.calendar,
-                                      size: 14,
-                                      color: _getDueDateColor(order.dueDate),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      DateFormat('dd/MM').format(order.dueDate!),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: _getDueDateColor(order.dueDate),
-                                      ),
-                                    ),
-                                  ],
+                              // Valor na linha 2 (se usuário tem permissão)
+                              if (_authService.hasPermission(PermissionType.viewPrices))
+                                Text(
+                                  _formatCurrency(order.total),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: order.payment == 'paid' ? CupertinoColors.label.resolveFrom(context) : CupertinoColors.secondaryLabel.resolveFrom(context),
+                                    fontWeight: order.payment == 'paid' ? FontWeight.w600 : FontWeight.w400,
+                                  ),
                                 ),
                             ],
                           ),
@@ -701,14 +697,19 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Color _getDueDateColor(DateTime? date) {
+  Color _getDueDateColor(DateTime? date, String? status) {
     if (date == null) return CupertinoColors.secondaryLabel.resolveFrom(context);
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final dueDay = DateTime(date.year, date.month, date.day);
 
-    // Se a data é anterior a hoje, é atrasada (vermelho)
+    // Se a OS está concluída ou cancelada, não mostrar como atrasada
+    if (status == 'done' || status == 'canceled') {
+      return CupertinoColors.secondaryLabel.resolveFrom(context);
+    }
+
+    // Se a data é anterior a hoje e a OS está em aberto, é atrasada (vermelho)
     if (dueDay.isBefore(today)) {
       return CupertinoColors.systemRed;
     }
@@ -717,6 +718,6 @@ class _HomeState extends State<Home> {
   }
 
   String _formatCurrency(double? value) {
-    return NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$').format(value ?? 0);
+    return NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$', decimalDigits: 2).format(value ?? 0);
   }
 }
