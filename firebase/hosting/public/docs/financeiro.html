@@ -272,44 +272,50 @@
                                 <tr>
                                     <th>Status da OS</th>
                                     <th>Pode Registrar Pagamento?</th>
+                                    <th>Auto-Aprovação</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>Orçamento</td>
-                                    <td class="no">&#10007; Não</td>
+                                    <td class="yes">&#10003; Sim</td>
+                                    <td class="yes">&#10003; Transita para Aprovado</td>
                                 </tr>
                                 <tr>
                                     <td>Aprovado</td>
                                     <td class="yes">&#10003; Sim</td>
+                                    <td class="no">&#10007; Não</td>
                                 </tr>
                                 <tr>
                                     <td>Em Andamento</td>
                                     <td class="yes">&#10003; Sim</td>
+                                    <td class="no">&#10007; Não</td>
                                 </tr>
                                 <tr>
                                     <td>Concluído</td>
                                     <td class="yes">&#10003; Sim</td>
+                                    <td class="no">&#10007; Não</td>
                                 </tr>
                                 <tr>
                                     <td>Cancelado</td>
+                                    <td class="no">&#10007; Não</td>
                                     <td class="no">&#10007; Não</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="warning-card">
-                        <div class="warning-icon">
+                    <div class="info-card">
+                        <div class="info-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
                             </svg>
                         </div>
-                        <div class="warning-content">
-                            <h4>Orçamentos não Aceitam Pagamentos</h4>
-                            <p>Pagamentos só são permitidos a partir do status <strong>Aprovado</strong>. Primeiro aprove o orçamento para liberar o registro de pagamentos.</p>
+                        <div class="info-content">
+                            <h4>Auto-Aprovação de Orçamentos</h4>
+                            <p>Ao registrar um pagamento ou desconto em uma OS com status <strong>Orçamento</strong>, ela é automaticamente aprovada e transita para o status <strong>Aprovado</strong>. Isso elimina a necessidade de aprovação manual antes de registrar o primeiro pagamento.</p>
                         </div>
                     </div>
 
@@ -317,7 +323,7 @@
                     <ul class="validation-list">
                         <li><strong>Valor mínimo:</strong> O valor do pagamento ou desconto deve ser maior que zero</li>
                         <li><strong>Valor máximo:</strong> O valor não pode exceder o saldo restante da OS</li>
-                        <li><strong>Status válido:</strong> A OS deve estar aprovada, em andamento ou concluída</li>
+                        <li><strong>Status válido:</strong> A OS não pode estar cancelada (orçamentos são permitidos e auto-aprovados)</li>
                     </ul>
                 </section>
 

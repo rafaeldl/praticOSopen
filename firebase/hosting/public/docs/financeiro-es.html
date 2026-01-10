@@ -272,44 +272,50 @@
                                 <tr>
                                     <th>Estado de la OS</th>
                                     <th>¿Puede Registrar Pago?</th>
+                                    <th>Auto-Aprobación</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>Presupuesto</td>
-                                    <td class="no">&#10007; No</td>
+                                    <td class="yes">&#10003; Sí</td>
+                                    <td class="yes">&#10003; Transita a Aprobado</td>
                                 </tr>
                                 <tr>
                                     <td>Aprobado</td>
                                     <td class="yes">&#10003; Sí</td>
+                                    <td class="no">&#10007; No</td>
                                 </tr>
                                 <tr>
                                     <td>En Progreso</td>
                                     <td class="yes">&#10003; Sí</td>
+                                    <td class="no">&#10007; No</td>
                                 </tr>
                                 <tr>
                                     <td>Completado</td>
                                     <td class="yes">&#10003; Sí</td>
+                                    <td class="no">&#10007; No</td>
                                 </tr>
                                 <tr>
                                     <td>Cancelado</td>
+                                    <td class="no">&#10007; No</td>
                                     <td class="no">&#10007; No</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="warning-card">
-                        <div class="warning-icon">
+                    <div class="info-card">
+                        <div class="info-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
                             </svg>
                         </div>
-                        <div class="warning-content">
-                            <h4>Los Presupuestos no Aceptan Pagos</h4>
-                            <p>Los pagos solo están permitidos a partir del estado <strong>Aprobado</strong>. Primero aprueba el presupuesto para habilitar el registro de pagos.</p>
+                        <div class="info-content">
+                            <h4>Auto-Aprobación de Presupuestos</h4>
+                            <p>Al registrar un pago o descuento en una OS con estado <strong>Presupuesto</strong>, se aprueba automáticamente y transita al estado <strong>Aprobado</strong>. Esto elimina la necesidad de aprobación manual antes de registrar el primer pago.</p>
                         </div>
                     </div>
 
@@ -317,7 +323,7 @@
                     <ul class="validation-list">
                         <li><strong>Valor mínimo:</strong> El valor del pago o descuento debe ser mayor que cero</li>
                         <li><strong>Valor máximo:</strong> El valor no puede exceder el saldo restante de la OS</li>
-                        <li><strong>Estado válido:</strong> La OS debe estar aprobada, en progreso o completada</li>
+                        <li><strong>Estado válido:</strong> La OS no puede estar cancelada (presupuestos están permitidos y se auto-aprueban)</li>
                     </ul>
                 </section>
 

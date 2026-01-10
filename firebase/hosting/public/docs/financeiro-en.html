@@ -272,44 +272,50 @@
                                 <tr>
                                     <th>WO Status</th>
                                     <th>Can Record Payment?</th>
+                                    <th>Auto-Approval</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>Quote</td>
-                                    <td class="no">&#10007; No</td>
+                                    <td class="yes">&#10003; Yes</td>
+                                    <td class="yes">&#10003; Transitions to Approved</td>
                                 </tr>
                                 <tr>
                                     <td>Approved</td>
                                     <td class="yes">&#10003; Yes</td>
+                                    <td class="no">&#10007; No</td>
                                 </tr>
                                 <tr>
                                     <td>In Progress</td>
                                     <td class="yes">&#10003; Yes</td>
+                                    <td class="no">&#10007; No</td>
                                 </tr>
                                 <tr>
                                     <td>Completed</td>
                                     <td class="yes">&#10003; Yes</td>
+                                    <td class="no">&#10007; No</td>
                                 </tr>
                                 <tr>
                                     <td>Cancelled</td>
+                                    <td class="no">&#10007; No</td>
                                     <td class="no">&#10007; No</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="warning-card">
-                        <div class="warning-icon">
+                    <div class="info-card">
+                        <div class="info-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
                             </svg>
                         </div>
-                        <div class="warning-content">
-                            <h4>Quotes Don't Accept Payments</h4>
-                            <p>Payments are only allowed from <strong>Approved</strong> status. First approve the quote to enable payment recording.</p>
+                        <div class="info-content">
+                            <h4>Quote Auto-Approval</h4>
+                            <p>When recording a payment or discount on a WO with <strong>Quote</strong> status, it is automatically approved and transitions to <strong>Approved</strong> status. This eliminates the need for manual approval before recording the first payment.</p>
                         </div>
                     </div>
 
@@ -317,7 +323,7 @@
                     <ul class="validation-list">
                         <li><strong>Minimum value:</strong> Payment or discount value must be greater than zero</li>
                         <li><strong>Maximum value:</strong> Value cannot exceed the WO remaining balance</li>
-                        <li><strong>Valid status:</strong> WO must be approved, in progress or completed</li>
+                        <li><strong>Valid status:</strong> WO cannot be cancelled (quotes are allowed and auto-approved)</li>
                     </ul>
                 </section>
 

@@ -75,15 +75,19 @@ A tela unificada permite:
 
 ### Pagamentos por Status da OS
 
-| Status da OS | Pode Registrar Pagamento? |
-|--------------|---------------------------|
-| Orçamento | Não |
-| Aprovado | Sim |
-| Em Andamento | Sim |
-| Concluído | Sim |
-| Cancelado | Não |
+| Status da OS | Pode Registrar Pagamento? | Auto-Aprovação? |
+|--------------|---------------------------|-----------------|
+| Orçamento | Sim | Sim (transita para Aprovado) |
+| Aprovado | Sim | Não |
+| Em Andamento | Sim | Não |
+| Concluído | Sim | Não |
+| Cancelado | Não | Não |
 
-**Regra:** Pagamentos só são permitidos a partir do status **Aprovado**. Orçamentos e OS canceladas não aceitam pagamentos.
+**Regra Atual:** Pagamentos podem ser registrados em qualquer status, exceto **Cancelado**.
+
+**Auto-Aprovação:** Quando um pagamento ou desconto é registrado em uma OS com status **Orçamento**, ela é automaticamente aprovada e transita para o status **Aprovado**. Isso elimina a necessidade de aprovação manual antes de registrar o primeiro pagamento.
+
+**Interface:** Ao visualizar a tela de pagamentos em uma OS em orçamento, um banner informativo azul é exibido explicando que a OS será automaticamente aprovada ao registrar o pagamento.
 
 ### Validações
 
@@ -305,6 +309,26 @@ void _updatePaymentStatus()
 ## Changelog
 
 ### Janeiro 2026
+
+#### Auto-Aprovação de Orçamentos ao Registrar Pagamento (10/01/2026)
+
+**Mudanças:**
+- Pagamentos agora podem ser registrados em OS com status **Orçamento**
+- Auto-transição de 'quote' → 'approved' ao registrar pagamento/desconto
+- Banner informativo na UI explicando o comportamento de auto-aprovação
+- Bloqueio de pagamentos apenas para status **Cancelado**
+- Métodos atualizados: `addPayment()`, `addDiscountTransaction()`, `markAsFullyPaid()`
+- Lógica de `updatePayment()` ajustada para permitir exibir pagamentos em orçamentos
+
+**Motivação:**
+Simplificar o fluxo de trabalho eliminando a necessidade de aprovar manualmente um orçamento antes de registrar o pagamento. Agora o ato de registrar o pagamento já implica na aprovação do orçamento.
+
+**Arquivos modificados:**
+- `lib/screens/payment_management_screen.dart` - Removido bloqueio para 'quote'
+- `lib/mobx/order_store.dart` - Adicionada lógica de auto-aprovação
+
+**Commits:**
+- `eac385b` - feat: auto-approve orders when payment is registered on quote status
 
 #### Simplificação do Sistema de Pagamentos (09/01/2026)
 
