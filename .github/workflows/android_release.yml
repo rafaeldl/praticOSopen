@@ -3,7 +3,7 @@ name: Release Android
 on:
   push:
     tags:
-      - 'v*-rc'
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -40,6 +40,18 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      # 🔍 Check for Metadata/Screenshot changes (only for production releases)
+      - name: Check for metadata changes
+        if: "!endsWith(github.ref, '-rc')"
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            screenshots:
+              - 'android/fastlane/metadata/android/*/images/**'
+            metadata:
+              - 'android/fastlane/metadata/**'
+
       # 🔐 Restore Secrets
       
       - name: Make gradlew executable
@@ -60,10 +72,25 @@ jobs:
         run: |
           echo "${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
 
-      # 🚀 Build + Upload to Internal Track (release candidate)
+      # 🚀 Build + Upload to Internal Track (apenas release candidate com -rc)
       - name: Fastlane Internal (Google Play)
+        if: endsWith(github.ref, '-rc')
         working-directory: android
         env:
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
         run: bundle exec fastlane internal
+
+      # 🚀 Build + Upload to Production (apenas tags v* sem -rc)
+      - name: Fastlane Release (Production)
+        if: "!endsWith(github.ref, '-rc')"
+        working-directory: android
+        env:
+          FASTLANE_SKIP_UPDATE_CHECK: "true"
+          CI: "true"
+        run: |
+          bundle exec fastlane deploy_with_metadata \
+            track:production \
+            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }} \
+            skip_images:${{ steps.filter.outputs.screenshots == 'false' }} \
+            skip_metadata:${{ steps.filter.outputs.metadata == 'false' }}

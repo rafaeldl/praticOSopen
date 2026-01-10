@@ -3,7 +3,7 @@ name: Release iOS
 on:
   push:
     tags:
-      - 'v*-rc'
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -57,6 +57,18 @@ jobs:
         with:
           ruby-version: '3.2'
           bundler-cache: true
+
+      # 🔍 Check for Metadata/Screenshot changes (only for production releases)
+      - name: Check for metadata changes
+        if: "!endsWith(github.ref, '-rc')"
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            screenshots:
+              - 'ios/fastlane/screenshots/**'
+            metadata:
+              - 'ios/fastlane/metadata/**'
 
       # 🔐 Importa o certificado .p12 no keychain
       - name: Import distribution cert
@@ -114,8 +126,9 @@ jobs:
           /usr/bin/plutil -lint GoogleService-Info.plist
           echo "GoogleService-Info.plist criado em ios/"
 
-      # 🚀 Build + upload para TestFlight (release candidate)
+      # 🚀 Build + upload para TestFlight (apenas release candidate com -rc)
       - name: Fastlane Beta (TestFlight)
+        if: endsWith(github.ref, '-rc')
         working-directory: ios
         env:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
@@ -128,6 +141,25 @@ jobs:
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
         run: bundle exec fastlane beta
+
+      # 🚀 Build + upload para App Store (apenas tags v* sem -rc)
+      - name: Fastlane Release (App Store)
+        if: "!endsWith(github.ref, '-rc')"
+        working-directory: ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_PRIVATE_KEY }}
+          BUNDLE_ID: ${{ env.BUNDLE_ID }}
+          DEVELOPMENT_TEAM: ${{ env.DEVELOPMENT_TEAM }}
+          PROFILE_UUID: ${{ env.PROFILE_UUID }}
+          PROFILE_NAME: ${{ env.PROFILE_NAME }}
+          FASTLANE_SKIP_UPDATE_CHECK: "true"
+          CI: "true"
+        run: |
+          bundle exec fastlane release_store \
+            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }} \
+            skip_metadata:${{ steps.filter.outputs.metadata == 'false' }}
 
       - name: Upload fastlane logs (on failure)
         if: failure()
