@@ -139,10 +139,14 @@ class _OrderFormState extends State<OrderForm> {
     return Observer(
       builder: (_) {
         final total = _store.total ?? 0.0;
-        final discount = _store.discount ?? 0.0;
         final payment = _store.payment ?? '';
         final isPaid = payment == 'Pago' || payment == 'paid';
+        final isPartial = payment == 'Parcial' || payment == 'partial';
         final hasCreatedDate = _store.order?.id != null;
+        final status = _store.status;
+
+        // Pagamentos só disponíveis a partir de 'approved'
+        final canManagePayments = !['quote', 'canceled'].contains(status);
 
         // Verificar se o usuário pode visualizar valores financeiros
         final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
@@ -180,17 +184,6 @@ class _OrderFormState extends State<OrderForm> {
                   ? _authService.canEditOrderMainFields(_store.order!)
                   : true,
             ),
-            // Apenas mostrar desconto se usuário pode ver preços
-            if (canViewPrices && discount > 0)
-              _buildListTile(
-                context: context,
-                icon: CupertinoIcons.tag_fill,
-                title: "Desconto",
-                value: "- ${_convertToCurrency(discount)}",
-                onTap: () {},
-                showChevron: false,
-                valueColor: CupertinoColors.systemRed,
-              ),
             // Apenas mostrar total se usuário pode ver preços
             if (canViewPrices)
               _buildListTile(
@@ -198,20 +191,25 @@ class _OrderFormState extends State<OrderForm> {
                 icon: CupertinoIcons.money_dollar_circle_fill,
                 title: config.label(LabelKeys.total),
                 value: _convertToCurrency(total),
-                onTap: () => _showPaymentOptions(config),
-                showChevron: true,
+                onTap: canManagePayments ? _openPaymentManagement : () {},
+                showChevron: canManagePayments,
                 isBold: true,
+                isLast: !canManagePayments, // Último item se não mostra status de pagamento
               ),
-            // Apenas mostrar pagamento se usuário pode ver preços
-            if (canViewPrices)
+            // Mostrar status de pagamento apenas se pode gerenciar pagamentos
+            if (canViewPrices && canManagePayments)
               _buildListTile(
                 context: context,
-                icon: isPaid ? CupertinoIcons.checkmark_circle_fill : CupertinoIcons.clock_fill,
+                icon: isPaid
+                    ? CupertinoIcons.checkmark_circle_fill
+                    : (isPartial ? CupertinoIcons.circle_lefthalf_fill : CupertinoIcons.clock_fill),
                 title: "Pagamento",
-                value: isPaid ? "Pago" : "A Receber",
-                onTap: () => _showPaymentOptions(config),
+                value: isPaid ? "Pago" : (isPartial ? "Parcial" : "A Receber"),
+                onTap: _openPaymentManagement,
                 showChevron: true,
-                valueColor: isPaid ? CupertinoColors.systemGreen : CupertinoColors.systemOrange,
+                valueColor: isPaid
+                    ? CupertinoColors.systemGreen
+                    : (isPartial ? CupertinoColors.systemBlue : CupertinoColors.systemOrange),
                 isLast: true,
               ),
           ],
@@ -1058,47 +1056,11 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _showPaymentOptions(SegmentConfigProvider config) {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => CupertinoActionSheet(
-        title: const Text("Pagamento"),
-        actions: [
-          CupertinoActionSheetAction(
-            child: const Text("Marcar como Pago"),
-            onPressed: () {
-              _store.order!.payment = 'paid';
-              _store.updateOrder();
-              Navigator.pop(context);
-            },
-          ),
-          CupertinoActionSheetAction(
-            child: const Text("Marcar como A Receber"),
-            onPressed: () {
-              _store.order!.payment = 'unpaid';
-              _store.updateOrder();
-              Navigator.pop(context);
-            },
-          ),
-          CupertinoActionSheetAction(
-            child: const Text("Conceder Desconto"),
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(
-                context,
-                '/payment_form_screen',
-                arguments: {'orderStore': _store},
-              ).then((value) {
-                if (value != null) _store.setDiscount(value as double);
-              });
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(config.label(LabelKeys.cancel)),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+  void _openPaymentManagement() {
+    Navigator.pushNamed(
+      context,
+      '/payment_management',
+      arguments: {'orderStore': _store},
     );
   }
 

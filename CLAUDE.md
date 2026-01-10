@@ -289,6 +289,99 @@ bundle exec fastlane release_store      # App Store
 5. **CollaboratorStore**: Usar para gerenciar membros da equipe (não usar CompanyStore)
 6. **Cupertino-first**: App deve parecer nativo iOS
 7. **Dark Mode**: Sempre usar `.resolveFrom(context)` para cores dinâmicas
+8. **Documentação Obrigatória**: Documentar toda nova funcionalidade (ver seção abaixo)
+
+---
+
+## Documentação de Novas Funcionalidades (OBRIGATÓRIO)
+
+Ao desenvolver uma nova funcionalidade, **SEMPRE** criar/atualizar a documentação correspondente:
+
+### 1. Documentação Técnica (`docs/`)
+
+Criar arquivo Markdown em `docs/` com:
+
+```markdown
+# NOME_DA_FEATURE.md
+
+## Visão Geral
+Breve descrição da funcionalidade.
+
+## Arquitetura
+- Models envolvidos
+- Stores/Repositories
+- Estrutura Firestore
+
+## Fluxo de Dados
+Diagrama ou descrição do fluxo.
+
+## Regras de Negócio
+Lista de regras implementadas.
+
+## Exemplos de Uso
+Código de exemplo quando aplicável.
+```
+
+**Nomenclatura:** `FEATURE_NAME.md` (em inglês, UPPER_SNAKE_CASE)
+
+### 2. Documentação Pública (`firebase/hosting/public/docs/`)
+
+Atualizar/criar documentação para usuários finais:
+
+**Estrutura de arquivos:**
+```
+firebase/hosting/public/docs/
+├── feature.html         # Português (principal)
+├── feature-en.html      # Inglês
+├── feature-es.html      # Espanhol
+└── docs.css             # Estilos compartilhados
+```
+
+**Template HTML:**
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Nome da Feature - PraticOS</title>
+  <link rel="stylesheet" href="docs.css">
+</head>
+<body>
+  <header>
+    <h1>Nome da Feature</h1>
+    <nav>
+      <a href="feature.html" class="active">PT</a>
+      <a href="feature-en.html">EN</a>
+      <a href="feature-es.html">ES</a>
+    </nav>
+  </header>
+  <main>
+    <!-- Conteúdo da documentação -->
+  </main>
+</body>
+</html>
+```
+
+### Checklist de Documentação
+
+Antes de finalizar uma feature, verificar:
+
+- [ ] Arquivo `docs/FEATURE_NAME.md` criado/atualizado
+- [ ] Documentação técnica completa (arquitetura, fluxos, regras)
+- [ ] Arquivo `firebase/hosting/public/docs/feature.html` criado (PT)
+- [ ] Versões em inglês (`-en.html`) e espanhol (`-es.html`) criadas
+- [ ] Links no `index.html` atualizados (se aplicável)
+- [ ] CSS compartilhado (`docs.css`) atualizado se necessário
+
+### Quando Documentar
+
+| Tipo de Mudança | docs/ | public/docs/ |
+|-----------------|-------|--------------|
+| Nova feature completa | ✅ Obrigatório | ✅ Obrigatório |
+| Mudança significativa em feature existente | ✅ Atualizar | ✅ Atualizar |
+| Bug fix | ❌ Não necessário | ❌ Não necessário |
+| Refatoração interna | ✅ Se mudar arquitetura | ❌ Não necessário |
+| Nova API/Endpoint | ✅ Obrigatório | ❌ Geralmente não |
 
 ## Documentação Adicional
 

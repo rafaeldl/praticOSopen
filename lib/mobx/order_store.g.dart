@@ -77,6 +77,32 @@ mixin _$OrderStore on _OrderStore, Store {
         name: '_OrderStore.formattedCreatedDate',
       )).value;
 
+  Computed<double>? _$remainingBalanceComputed;
+
+  @override
+  double get remainingBalance =>
+      (_$remainingBalanceComputed ??= Computed<double>(
+        () => super.remainingBalance,
+        name: '_OrderStore.remainingBalance',
+      )).value;
+
+  Computed<bool>? _$isFullyPaidComputed;
+
+  @override
+  bool get isFullyPaid => (_$isFullyPaidComputed ??= Computed<bool>(
+    () => super.isFullyPaid,
+    name: '_OrderStore.isFullyPaid',
+  )).value;
+
+  Computed<bool>? _$hasPartialPaymentComputed;
+
+  @override
+  bool get hasPartialPayment =>
+      (_$hasPartialPaymentComputed ??= Computed<bool>(
+        () => super.hasPartialPayment,
+        name: '_OrderStore.hasPartialPayment',
+      )).value;
+
   late final _$orderListAtom = Atom(
     name: '_OrderStore.orderList',
     context: context,
@@ -350,6 +376,42 @@ mixin _$OrderStore on _OrderStore, Store {
   set isUploadingPhoto(bool value) {
     _$isUploadingPhotoAtom.reportWrite(value, super.isUploadingPhoto, () {
       super.isUploadingPhoto = value;
+    });
+  }
+
+  late final _$paidAmountAtom = Atom(
+    name: '_OrderStore.paidAmount',
+    context: context,
+  );
+
+  @override
+  double? get paidAmount {
+    _$paidAmountAtom.reportRead();
+    return super.paidAmount;
+  }
+
+  @override
+  set paidAmount(double? value) {
+    _$paidAmountAtom.reportWrite(value, super.paidAmount, () {
+      super.paidAmount = value;
+    });
+  }
+
+  late final _$transactionsAtom = Atom(
+    name: '_OrderStore.transactions',
+    context: context,
+  );
+
+  @override
+  ObservableList<PaymentTransaction> get transactions {
+    _$transactionsAtom.reportRead();
+    return super.transactions;
+  }
+
+  @override
+  set transactions(ObservableList<PaymentTransaction> value) {
+    _$transactionsAtom.reportWrite(value, super.transactions, () {
+      super.transactions = value;
     });
   }
 
@@ -994,6 +1056,54 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void addPayment(double amount, {String? description}) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.addPayment',
+    );
+    try {
+      return super.addPayment(amount, description: description);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void addDiscountTransaction(double amount, {String? description}) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.addDiscountTransaction',
+    );
+    try {
+      return super.addDiscountTransaction(amount, description: description);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void markAsFullyPaid({String? description}) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.markAsFullyPaid',
+    );
+    try {
+      return super.markAsFullyPaid(description: description);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void removeTransaction(int index) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.removeTransaction',
+    );
+    try {
+      return super.removeTransaction(index);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic setCustomerFilter(Customer? customerFilter) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setCustomerFilter',
@@ -1113,6 +1223,8 @@ createdAt: ${createdAt},
 total: ${total},
 discount: ${discount},
 payment: ${payment},
+paidAmount: ${paidAmount},
+transactions: ${transactions},
 customer: ${customer},
 device: ${device},
 customerFilter: ${customerFilter},
@@ -1149,7 +1261,10 @@ filteredOrders: ${filteredOrders},
 canViewPrices: ${canViewPrices},
 canCreateOrder: ${canCreateOrder},
 canViewFinancialDashboard: ${canViewFinancialDashboard},
-formattedCreatedDate: ${formattedCreatedDate}
+formattedCreatedDate: ${formattedCreatedDate},
+remainingBalance: ${remainingBalance},
+isFullyPaid: ${isFullyPaid},
+hasPartialPayment: ${hasPartialPayment}
     ''';
   }
 }
