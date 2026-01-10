@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial System - PráticOS Documentation</title>
+    <meta name="description" content="Complete documentation about the PráticOS financial system. Partial payments, discounts, transaction history and dashboard.">
+    <meta name="keywords" content="praticos, documentation, financial, payments, discounts, billing, dashboard">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Financial System - PráticOS">
+    <meta property="og:description" content="Complete documentation about the PráticOS financial system.">
+    <meta property="og:image" content="../assets/images/logo.png">
+    <meta property="og:type" content="article">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar scrolled">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">
+                <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
+                <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="../index.html#features">Features</a>
+                <a href="../faq.html">FAQ</a>
+                <a href="../support.html">Support</a>
+            </div>
+            <div class="nav-actions">
+                <div class="lang-switch">
+                    <a href="financeiro.html">PT</a>
+                    <a href="financeiro-en.html" class="active">EN</a>
+                    <a href="financeiro-es.html">ES</a>
+                </div>
+                <a href="../index.html#download" class="btn btn-primary">Download App</a>
+            </div>
+            <button class="nav-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="docs-hero compact">
+        <div class="hero-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+        </div>
+        <div class="container">
+            <div class="docs-breadcrumb">
+                <a href="index-en.html">Documentation</a>
+                <span>/</span>
+                <span>Financial System</span>
+            </div>
+            <div class="docs-hero-content">
+                <h1><span class="gradient-text">Financial</span> System</h1>
+                <p class="hero-subtitle">Manage payments, discounts and track your company's billing with full control over every transaction.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Docs Content -->
+    <section class="docs-content">
+        <div class="container docs-container">
+            <!-- Sidebar Navigation -->
+            <aside class="docs-sidebar">
+                <div class="sidebar-sticky">
+                    <h4>On this page</h4>
+                    <nav class="docs-nav">
+                        <a href="#overview" class="active">Overview</a>
+                        <a href="#status">Payment Status</a>
+                        <a href="#payments">Payment Management</a>
+                        <a href="#rules">Business Rules</a>
+                        <a href="#dashboard">Financial Dashboard</a>
+                        <a href="#pdf">Print (PDF)</a>
+                        <a href="#permissions">Permissions</a>
+                        <a href="#faq">FAQ</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="docs-main">
+                <!-- Overview -->
+                <section id="overview" class="docs-section">
+                    <h2>Financial System Overview</h2>
+                    <p>PráticOS offers a complete and integrated financial system for payment control, discounts and billing tracking. All transactions are recorded with detailed history and linked to Work Orders.</p>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>RBAC Integration</h4>
+                            <p>Access to financial data is controlled by role. Technicians and Supervisors cannot view values, ensuring information security.</p>
+                        </div>
+                    </div>
+
+                    <div class="features-highlight">
+                        <div class="feature-item">
+                            <div class="feature-icon green">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                            <h4>Partial Payments</h4>
+                            <p>Record multiple payments with complete transaction history</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon orange">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                </svg>
+                            </div>
+                            <h4>Discounts</h4>
+                            <p>Apply discounts with description and full traceability</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon blue">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="20" x2="12" y2="10"></line>
+                                    <line x1="18" y1="20" x2="18" y2="4"></line>
+                                    <line x1="6" y1="20" x2="6" y2="16"></line>
+                                </svg>
+                            </div>
+                            <h4>Dashboard</h4>
+                            <p>Track billing and receivables in real-time</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Payment Status -->
+                <section id="status" class="docs-section">
+                    <h2>Payment Status</h2>
+                    <p>The system uses three statuses to indicate the financial situation of each Work Order:</p>
+
+                    <div class="status-cards">
+                        <div class="status-card-item">
+                            <div class="status-indicator orange"></div>
+                            <div class="status-info">
+                                <h4>Pending</h4>
+                                <p>No payment recorded. The total WO value is pending.</p>
+                            </div>
+                        </div>
+                        <div class="status-card-item">
+                            <div class="status-indicator blue"></div>
+                            <div class="status-info">
+                                <h4>Partial</h4>
+                                <p>Partial payment recorded. There is still a balance to receive from the customer.</p>
+                            </div>
+                        </div>
+                        <div class="status-card-item">
+                            <div class="status-indicator green"></div>
+                            <div class="status-info">
+                                <h4>Paid</h4>
+                                <p>Fully paid. No pending balance for this WO.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>Technical Note</h4>
+                            <p>The "Partial" status is automatically calculated based on the paid amount. In the database, only "Paid" and "Pending" are stored to maintain compatibility with existing filters.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Payment Management -->
+                <section id="payments" class="docs-section">
+                    <h2>Payment Management</h2>
+                    <p>The payments screen centralizes all financial operations of a WO, allowing you to record payments, apply discounts and view the complete history.</p>
+
+                    <h3>How to Access</h3>
+                    <ol class="step-list">
+                        <li>Open an existing Work Order</li>
+                        <li>In the <strong>Summary</strong> section, click on <strong>Total</strong> or the <strong>Payment</strong> status</li>
+                        <li>The payment management screen will open automatically</li>
+                    </ol>
+
+                    <h3>Available Features</h3>
+
+                    <div class="feature-blocks">
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                                </svg>
+                                Financial Summary
+                            </h4>
+                            <ul>
+                                <li>WO Total</li>
+                                <li>Applied discounts</li>
+                                <li>Amount already paid</li>
+                                <li>Remaining balance</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                                Record Transaction
+                            </h4>
+                            <ul>
+                                <li>Toggle between Payment and Discount</li>
+                                <li>Value pre-filled with balance</li>
+                                <li>Optional note field</li>
+                                <li>Quick "Pay total" action</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                                History
+                            </h4>
+                            <ul>
+                                <li>List of payments and discounts</li>
+                                <li>Sorted by date</li>
+                                <li>Swipe to remove</li>
+                                <li>Description and responsible</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Business Rules -->
+                <section id="rules" class="docs-section">
+                    <h2>Business Rules</h2>
+                    <p>The system applies validations to ensure financial data integrity and correct payment flow.</p>
+
+                    <h3>Payments by WO Status</h3>
+                    <p>The ability to record payments depends on the current Work Order status:</p>
+
+                    <div class="table-wrapper">
+                        <table class="permissions-table">
+                            <thead>
+                                <tr>
+                                    <th>WO Status</th>
+                                    <th>Can Record Payment?</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Quote</td>
+                                    <td class="no">&#10007; No</td>
+                                </tr>
+                                <tr>
+                                    <td>Approved</td>
+                                    <td class="yes">&#10003; Yes</td>
+                                </tr>
+                                <tr>
+                                    <td>In Progress</td>
+                                    <td class="yes">&#10003; Yes</td>
+                                </tr>
+                                <tr>
+                                    <td>Completed</td>
+                                    <td class="yes">&#10003; Yes</td>
+                                </tr>
+                                <tr>
+                                    <td>Cancelled</td>
+                                    <td class="no">&#10007; No</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="warning-card">
+                        <div class="warning-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="warning-content">
+                            <h4>Quotes Don't Accept Payments</h4>
+                            <p>Payments are only allowed from <strong>Approved</strong> status. First approve the quote to enable payment recording.</p>
+                        </div>
+                    </div>
+
+                    <h3>Applied Validations</h3>
+                    <ul class="validation-list">
+                        <li><strong>Minimum value:</strong> Payment or discount value must be greater than zero</li>
+                        <li><strong>Maximum value:</strong> Value cannot exceed the WO remaining balance</li>
+                        <li><strong>Valid status:</strong> WO must be approved, in progress or completed</li>
+                    </ul>
+                </section>
+
+                <!-- Financial Dashboard -->
+                <section id="dashboard" class="docs-section">
+                    <h2>Financial Dashboard</h2>
+                    <p>The dashboard provides a consolidated view of company billing, with real-time indicators and customer ranking.</p>
+
+                    <h3>How to Access</h3>
+                    <p>Access through <strong>Side menu &#8594; Dashboard</strong>. Requires <code>viewFinancialReports</code> permission (available for Admin and Manager).</p>
+
+                    <h3>Available Indicators</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon blue">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                            <div class="metric-info">
+                                <h4>Total Billing</h4>
+                                <p>Sum of total values of all WOs in the selected period</p>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon green">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                            <div class="metric-info">
+                                <h4>Amount Received</h4>
+                                <p>Sum of all recorded payments, including partial ones</p>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon orange">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="metric-info">
+                                <h4>Receivables</h4>
+                                <p>Pending balance from WOs not fully paid</p>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-icon purple">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                            </div>
+                            <div class="metric-info">
+                                <h4>Paid WOs</h4>
+                                <p>Number of WOs with complete payment</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Customer Ranking</h3>
+                    <p>The dashboard displays customers sorted by value, allowing identification of:</p>
+                    <ul class="validation-list">
+                        <li><strong>Top customers:</strong> Sorted by total WO value</li>
+                        <li><strong>Top debtors:</strong> Sorted by pending receivable amount</li>
+                    </ul>
+                </section>
+
+                <!-- PDF -->
+                <section id="pdf" class="docs-section">
+                    <h2>Print (PDF)</h2>
+                    <p>The Work Order PDF includes the complete financial summary, automatically adapting to the payment status.</p>
+
+                    <h3>PDF Information</h3>
+                    <div class="pdf-preview">
+                        <div class="pdf-section">
+                            <h4>Totals Summary</h4>
+                            <ul>
+                                <li>Services (when applicable)</li>
+                                <li>Products (when applicable)</li>
+                                <li>Subtotal</li>
+                                <li>Discount (when applied)</li>
+                                <li><strong>Total</strong></li>
+                                <li><strong>Already paid</strong> (in partial payments)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3>Summary Footer</h3>
+                    <p>The footer displays the financial status with differentiated colors:</p>
+
+                    <div class="table-wrapper">
+                        <table class="permissions-table">
+                            <thead>
+                                <tr>
+                                    <th>Situation</th>
+                                    <th>Displayed Text</th>
+                                    <th>Color</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Fully paid</td>
+                                    <td>TOTAL PAID</td>
+                                    <td><span class="color-badge green">Green</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Partial payment</td>
+                                    <td>REMAINING BALANCE</td>
+                                    <td><span class="color-badge orange">Orange</span></td>
+                                </tr>
+                                <tr>
+                                    <td>No payment</td>
+                                    <td>TOTAL DUE</td>
+                                    <td><span class="color-badge blue">Blue</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Permissions -->
+                <section id="permissions" class="docs-section">
+                    <h2>Permissions by Role</h2>
+                    <p>Access to financial features is controlled by the role system (RBAC). Each role has specific permissions:</p>
+
+                    <div class="table-wrapper">
+                        <table class="permissions-table">
+                            <thead>
+                                <tr>
+                                    <th>Role</th>
+                                    <th>View Prices</th>
+                                    <th>View Dashboard</th>
+                                    <th>Record Payments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Administrator</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                                <tr>
+                                    <td>Manager</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                                <tr>
+                                    <td>Supervisor</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="no">&#10007;</td>
+                                </tr>
+                                <tr>
+                                    <td>Consultant</td>
+                                    <td class="partial">*</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="no">&#10007;</td>
+                                </tr>
+                                <tr>
+                                    <td>Technician</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="no">&#10007;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="table-note">* Consultant can view prices only for WOs they created</p>
+                    </div>
+
+                    <div class="warning-card">
+                        <div class="warning-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="warning-content">
+                            <h4>Financial Data Protection</h4>
+                            <p>For users without <code>viewPrices</code> permission, the following elements are hidden: WO values, payment status, service/product prices, PDF generation and payment filters.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FAQ -->
+                <section id="faq" class="docs-section">
+                    <h2>Frequently Asked Questions</h2>
+
+                    <div class="faq-grid">
+                        <div class="faq-item">
+                            <h4>Can I record payment on a quote?</h4>
+                            <p>No. Payments are only enabled from "Approved" status. First approve the quote, then record the payment.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>How do I apply a discount?</h4>
+                            <p>On the payments screen, switch to "Discount" in the top selector, enter the amount and add a description (e.g., "Loyalty discount").</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Can I remove a recorded payment?</h4>
+                            <p>Yes. In the transaction history, swipe the item left and confirm removal. The action is recorded in the history.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>What does "Partial" status mean?</h4>
+                            <p>It indicates that payments have been recorded, but the total amount has not yet been settled. The remaining balance is shown in the summary.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>How do I mark a WO as fully paid?</h4>
+                            <p>Use the "Pay total" quick action on the payments screen, or record a payment with the exact remaining balance amount.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Do partial payments appear in the PDF?</h4>
+                            <p>Yes. The PDF shows "Already paid" with the received amount and "REMAINING BALANCE" highlighted in orange in the footer.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Can technicians see financial values?</h4>
+                            <p>No. Technicians and Supervisors don't have access to financial data. Only Admin, Manager and Consultant (own WOs) can view values.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Does the dashboard consider partial payments?</h4>
+                            <p>Yes. The "Amount Received" indicator sums all recorded payments, and "Receivables" shows only the pending balance.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Navigation -->
+                <div class="docs-navigation">
+                    <a href="perfis-en.html" class="nav-link prev">
+                        <span class="nav-direction">&#8592; Previous</span>
+                        <span class="nav-title">User Roles</span>
+                    </a>
+                    <a href="index-en.html" class="nav-link next">
+                        <span class="nav-direction">Next &#8594;</span>
+                        <span class="nav-title">Documentation</span>
+                    </a>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="../index.html" class="nav-logo">
+                        <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
+                        <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                    </a>
+                    <p>Complete system for work order management. Simplify your business.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <a href="../index.html#features">Features</a>
+                    <a href="../index.html#pricing">Plans</a>
+                    <a href="../index.html#download">Download</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentation</h4>
+                    <a href="perfis-en.html">User Roles</a>
+                    <a href="financeiro-en.html">Financial System</a>
+                    <a href="../faq.html">FAQ</a>
+                    <a href="../support.html">Support</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="../privacy.html">Privacy</a>
+                    <a href="../terms.html">Terms of Use</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 PráticOS. All rights reserved.</p>
+                <p>Developed by <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-content">
+            <a href="../index.html">Home</a>
+            <a href="../index.html#features">Features</a>
+            <a href="index-en.html">Documentation</a>
+            <a href="../faq.html">FAQ</a>
+            <a href="../support.html">Support</a>
+            <div class="mobile-lang">
+                <a href="financeiro.html">PT</a>
+                <a href="financeiro-en.html" class="active">EN</a>
+                <a href="financeiro-es.html">ES</a>
+            </div>
+            <a href="../index.html#download" class="btn btn-primary">Download App</a>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const body = document.body;
+
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            body.classList.toggle('menu-open');
+        });
+
+        // Close mobile menu on link click
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navToggle.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                body.classList.remove('menu-open');
+            });
+        });
+
+        // Sidebar navigation active state
+        const sections = document.querySelectorAll('.docs-section');
+        const navLinks = document.querySelectorAll('.docs-nav a');
+
+        const observerOptions = {
+            rootMargin: '-100px 0px -70% 0px',
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    const activeLink = document.querySelector(`.docs-nav a[href="#${entry.target.id}"]`);
+                    if (activeLink) activeLink.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => observer.observe(section));
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 100;
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

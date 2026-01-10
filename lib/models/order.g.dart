@@ -48,6 +48,10 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..payment = json['payment'] as String?
   ..status = json['status'] as String?
   ..number = (json['number'] as num?)?.toInt()
+  ..paidAmount = (json['paidAmount'] as num?)?.toDouble()
+  ..transactions = (json['transactions'] as List<dynamic>?)
+      ?.map((e) => PaymentTransaction.fromJson(e as Map<String, dynamic>))
+      .toList()
   ..assignedTo = json['assignedTo'] == null
       ? null
       : UserAggr.fromJson(json['assignedTo'] as Map<String, dynamic>);
@@ -72,6 +76,8 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'payment': instance.payment,
   'status': instance.status,
   'number': instance.number,
+  'paidAmount': instance.paidAmount,
+  'transactions': instance.transactions?.map((e) => e.toJson()).toList(),
   'assignedTo': instance.assignedTo?.toJson(),
 };
 
