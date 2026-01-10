@@ -43,19 +43,21 @@ class _SettingsState extends State<Settings> {
                         top: false,
                         sliver: SliverList(
                           delegate: SliverChildListDelegate([
-                            // Profile Section
+                              // Profile Section
                             CupertinoListSection.insetGrouped(                children: [
                   Observer(builder: (_) {
                     final user = _userStore.user?.value;
                     final userName = user?.name ?? Global.currentUser?.displayName ?? 'Usuário';
+                    // Prefer photo from Firestore user, fallback to Firebase Auth
+                    final userPhoto = user?.photo ?? Global.currentUser?.photoURL;
 
                     return CupertinoListTile(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       leadingSize: 60,
                       leading: ClipOval(
-                        child: Global.currentUser?.photoURL != null
+                        child: userPhoto != null
                             ? CachedImage(
-                                imageUrl: Global.currentUser!.photoURL!,
+                                imageUrl: userPhoto,
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.cover,
@@ -95,6 +97,8 @@ class _SettingsState extends State<Settings> {
                               ],
                             )
                           : null,
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => Navigator.pushNamed(context, '/user_profile_edit'),
                     );
                   }),
                 ],
