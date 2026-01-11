@@ -1,19 +1,15 @@
-Novidades nesta versão:
+Novidades:
 
-• Sistema de Perfis de Usuário: Controle completo de permissões por função (Proprietário, Administrador, Gerente, Supervisor, Técnico e Visualizador). Cada perfil tem acesso específico a recursos do app.
+• Perfis de Usuário: Controle de permissões por função (Proprietário, Admin, Gerente, Técnico, etc.)
 
-• Pagamentos Parciais: Registre e acompanhe múltiplos pagamentos para uma mesma OS, com histórico completo de transações no PDF.
+• Pagamentos Parciais: Múltiplos pagamentos por OS com histórico no PDF
 
-• Busca Aprimorada: Nova busca com scroll infinito, filtros em chips e indicador de data de vencimento com destaque visual para OS atrasadas.
+• Busca Aprimorada: Scroll infinito, filtros e destaque para OS atrasadas
 
-• Formulários Dinâmicos: Crie checklists e procedimentos personalizados, com seleção múltipla de fotos e navegação por swipe na galeria.
+• Formulários Dinâmicos: Checklists personalizados com fotos
 
-• Edição de Perfil: Atualize seus dados e foto de perfil diretamente no app.
+• Convites: Adicione colaboradores por e-mail
 
-• Sistema de Convites: Convide colaboradores por e-mail para sua empresa.
-
-• Melhorias na Interface: Redesign da lista de OS seguindo padrões iOS, modo escuro totalmente funcional e diversas correções visuais.
-
-• PDF Aprimorado: Layout otimizado com links para as lojas e destaque para valores pagos.
+• Interface: Redesign iOS, modo escuro e correções visuais
 
 Obrigado por usar o PraticOS!
