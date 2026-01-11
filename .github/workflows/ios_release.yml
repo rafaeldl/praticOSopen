@@ -20,6 +20,10 @@ concurrency:
 jobs:
   ios:
     runs-on: macos-14
+
+    permissions:
+      contents: write
+
     env:
       BUNDLE_ID: br.com.rafsoft.praticos
 

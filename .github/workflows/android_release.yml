@@ -21,6 +21,9 @@ jobs:
   android:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     outputs:
       version_name: ${{ steps.version.outputs.version_name }}
       version_code: ${{ steps.version.outputs.version_code }}
