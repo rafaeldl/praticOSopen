@@ -105,19 +105,6 @@ jobs:
           echo "📸 Screenshots changed: ${{ steps.filter.outputs.screenshots }}"
           echo "📝 Metadata changed: ${{ steps.filter.outputs.metadata }}"
 
-      # Download AAB from RC release
-      - name: Download AAB from RC release
-        run: |
-          mkdir -p artifacts
-          gh release download "${{ needs.validate.outputs.rc_tag }}" \
-            --pattern "*.aab" \
-            --dir ./artifacts
-
-          echo "📦 Downloaded artifacts:"
-          ls -la artifacts/
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       # Setup Ruby + Bundler
       - name: Ruby (bundler cache)
         uses: ruby/setup-ruby@v1
@@ -132,20 +119,16 @@ jobs:
         run: |
           echo "${{ secrets.ANDROID_PLAY_STORE_CREDENTIALS_BASE64 }}" | base64 --decode > android/fastlane/play_store_credentials.json
 
-      # Upload to Production (no rebuild!)
-      - name: Upload to Production
+      # Promote Internal to Production (no rebuild, no re-upload!)
+      - name: Promote to Production
         working-directory: android
         env:
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
         run: |
-          bundle exec fastlane supply \
-            --aab ../artifacts/app-release.aab \
-            --track production \
-            --skip_upload_apk true \
-            --skip_upload_metadata ${{ steps.filter.outputs.metadata == 'false' }} \
-            --skip_upload_images ${{ steps.filter.outputs.screenshots == 'false' }} \
-            --skip_upload_screenshots ${{ steps.filter.outputs.screenshots == 'false' }}
+          bundle exec fastlane promote_to_production \
+            skip_metadata:${{ steps.filter.outputs.metadata == 'false' }} \
+            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }}
 
       - name: Summary
         run: |
@@ -182,24 +165,6 @@ jobs:
           echo "📸 Screenshots changed: ${{ steps.filter.outputs.screenshots }}"
           echo "📝 Metadata changed: ${{ steps.filter.outputs.metadata }}"
 
-      # Download IPA from RC release
-      - name: Download IPA from RC release
-        id: download
-        run: |
-          mkdir -p artifacts
-          gh release download "${{ needs.validate.outputs.rc_tag }}" \
-            --pattern "*.ipa" \
-            --dir ./artifacts
-
-          echo "📦 Downloaded artifacts:"
-          ls -la artifacts/
-
-          # Find the IPA file
-          IPA_PATH=$(find artifacts -name "*.ipa" -type f | head -1)
-          echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       # Setup Ruby + Bundler
       - name: Ruby (bundler cache)
         uses: ruby/setup-ruby@v1
@@ -209,8 +174,8 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      # Upload to App Store (no rebuild!)
-      - name: Upload to App Store
+      # Promote TestFlight build to App Store (no rebuild, no re-upload!)
+      - name: Promote to App Store
         working-directory: ios
         env:
           APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
@@ -219,14 +184,9 @@ jobs:
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
         run: |
-          IPA_PATH="${{ steps.download.outputs.ipa_path }}"
-          bundle exec fastlane deliver \
-            --ipa "../$IPA_PATH" \
-            --skip_screenshots ${{ steps.filter.outputs.screenshots == 'false' }} \
-            --skip_metadata ${{ steps.filter.outputs.metadata == 'false' }} \
-            --force true \
-            --submit_for_review false \
-            --run_precheck_before_submit false
+          bundle exec fastlane promote \
+            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }} \
+            skip_metadata:${{ steps.filter.outputs.metadata == 'false' }}
 
       - name: Summary
         run: |
