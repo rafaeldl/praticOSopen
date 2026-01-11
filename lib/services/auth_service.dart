@@ -53,11 +53,16 @@ class AuthService {
   }
 
   /// Deletes all user data from Firestore before deleting the account.
+  ///
+  /// Business Logic:
+  /// - If user is OWNER and has NO OTHER MEMBERS: delete entire company
+  /// - If user is OWNER and HAS OTHER MEMBERS: throw error (cannot delete, must transfer ownership first)
+  /// - If user is COLLABORATOR: remove membership only
+  ///
   /// This includes:
-  /// 1. User document (`/users/{userId}`)
-  /// 2. User memberships in all companies
-  /// 3. If user is the owner of a company, deletes the company and all its data (including subcollections)
-  /// 4. Deletes company files from Cloud Storage
+  /// 1. User memberships in all companies
+  /// 2. User document (`/users/{userId}`)
+  /// 3. If user is sole owner, deletes the company and all its data
   Future<void> deleteUserData(String userId) async {
     // 1. Get user document to find all companies
     var userDoc = await _db.collection('users').doc(userId).get();
@@ -79,9 +84,29 @@ class AuthService {
             var companyData = companyDoc.data();
             var ownerId = companyData?['ownerId'];
 
-            // If user is the owner, delete the company and all its data
+            // If user is the owner
             if (ownerId == userId) {
-              // Delete entire company structure (all subcollections and files)
+              // Check if there are other members in the company
+              var memberships = await _db
+                  .collection('companies')
+                  .doc(companyId)
+                  .collection('memberships')
+                  .get();
+
+              // Count members excluding the owner (who is leaving)
+              var otherMembersCount = memberships.docs
+                  .where((doc) => doc.id != userId)
+                  .length;
+
+              if (otherMembersCount > 0) {
+                // Company has other members - cannot delete
+                throw Exception(
+                  'Você é o proprietário de uma empresa com outros membros. '
+                  'Transfira a propriedade ou remova os membros antes de excluir sua conta.'
+                );
+              }
+
+              // User is sole owner - can delete entire company
               await _deleteCompanyAndData(companyId);
             } else {
               // If user is not the owner, only delete their membership

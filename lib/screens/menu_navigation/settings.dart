@@ -484,8 +484,14 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  /// Format Firebase error messages to be user-friendly
+  /// Format error messages to be user-friendly
   String _formatErrorMessage(String error) {
+    // Check for business logic errors
+    if (error.contains('proprietário de uma empresa com outros membros')) {
+      return error.replaceAll('Exception: ', '');
+    }
+
+    // Check for Firebase Auth errors
     if (error.contains('requires-recent-login')) {
       return 'Por segurança, você precisa fazer login novamente antes de deletar sua conta. '
           'Por favor, faça logout e login novamente.';
@@ -493,6 +499,11 @@ class _SettingsState extends State<Settings> {
     if (error.contains('permission-denied')) {
       return 'Você não tem permissão para deletar sua conta. Tente novamente mais tarde.';
     }
-    return 'Erro: ${error.replaceAll('[firebase_auth/', '').replaceAll(']', '')}';
+    if (error.contains('network')) {
+      return 'Erro de conexão. Verifique sua internet e tente novamente.';
+    }
+
+    // Generic error
+    return 'Erro: ${error.replaceAll('[firebase_auth/', '').replaceAll('Exception: ', '').replaceAll(']', '')}';
   }
 }
