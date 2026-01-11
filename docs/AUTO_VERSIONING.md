@@ -11,17 +11,18 @@ Automatic versioning system based on Conventional Commits that manages version b
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         auto-version.yml                         │
-│  Trigger: push to master                                         │
+│  Trigger: push to master (only app/metadata changes)             │
 │  Actions: Analyze commits → Bump version → Update pubspec.yaml   │
-│           → Create v*-rc tag                                     │
+│           → Create v*-rc tag → Trigger releases                  │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │            android_release.yml + ios_release.yml                 │
-│  Trigger: v*-rc tag                                              │
-│  Actions: Build → Upload to Internal/TestFlight                  │
+│  Trigger: workflow_dispatch from auto-version                    │
+│  Actions: Build → Upload to Internal/TestFlight (binary only)    │
 │           → Save artifacts to GitHub Release                     │
+│  Concurrency: Cancels previous release of same platform          │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -29,7 +30,7 @@ Automatic versioning system based on Conventional Commits that manages version b
 │                      promote-release.yml                         │
 │  Trigger: workflow_dispatch (manual)                             │
 │  Actions: Download artifacts → Upload to Production              │
-│           → Create production tag                                │
+│           → Upload metadata/changelogs → Create production tag   │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -41,6 +42,63 @@ Automatic versioning system based on Conventional Commits that manages version b
 | `.github/workflows/android_release.yml` | Builds Android, uploads to Internal, saves AAB |
 | `.github/workflows/ios_release.yml` | Builds iOS, uploads to TestFlight, saves IPA |
 | `.github/workflows/promote-release.yml` | Promotes RC to production using saved artifacts |
+| `.github/workflows/android_build_check.yml` | PR build check for Android |
+| `.github/workflows/ios_build_check.yml` | PR build check for iOS |
+
+## Path Filters
+
+The auto-version workflow only triggers when relevant files change:
+
+| Path | Description |
+|------|-------------|
+| `lib/**` | Flutter app code |
+| `pubspec.yaml` / `pubspec.lock` | Dependencies |
+| `android/**` | Android native code + metadata |
+| `ios/**` | iOS native code + metadata |
+| `assets/**` | App assets |
+| `test/**` / `integration_test/**` | Tests |
+
+**Ignored paths** (no version bump):
+- `.github/**` - Workflow changes
+- `docs/**` - Documentation
+- `*.md` - Markdown files
+- `firebase/**` - Hosting/Functions
+
+## Concurrency
+
+### Release Workflows
+
+Only one release per platform runs at a time. New releases cancel previous ones:
+
+```yaml
+concurrency:
+  group: android-release  # or ios-release
+  cancel-in-progress: true
+```
+
+### Build Check Workflows
+
+Each PR has its own queue. New pushes cancel previous builds for the same PR:
+
+```yaml
+concurrency:
+  group: android-build-${{ github.head_ref }}
+  cancel-in-progress: true
+```
+
+## RC vs Production: What Gets Uploaded
+
+| Content | RC (Internal/TestFlight) | Production (Promote) |
+|---------|--------------------------|----------------------|
+| Binary (AAB/IPA) | ✅ | ✅ (reused from RC) |
+| Metadata | ❌ | ✅ (if changed) |
+| Screenshots | ❌ | ✅ (if changed) |
+| Changelogs | ❌ | ✅ |
+
+This ensures:
+- Fast RC builds (binary only)
+- No validation errors during RC phase
+- Metadata/screenshots only uploaded when promoting to production
 
 ## Conventional Commits
 
@@ -114,6 +172,7 @@ Common scopes for PraticOS:
 - `ui` - User interface
 - `storage` - Firebase Storage
 - `db` - Firestore database
+- `ci` - CI/CD workflows
 
 ### Complete Examples
 
@@ -196,9 +255,11 @@ Developer creates PR
 PR merged to master
          │
          ▼
-auto-version.yml triggers
+auto-version.yml triggers (if paths match)
          │
-         ├─► Analyzes commits since last tag
+         ├─► Finds latest RC tag (v1.0.0-rc)
+         │
+         ├─► Analyzes commits since that tag
          │
          ├─► Determines bump type (major/minor/patch)
          │
@@ -206,24 +267,28 @@ auto-version.yml triggers
          │
          ├─► Commits: "chore(release): bump version to X.Y.Z [skip ci]"
          │
-         └─► Creates and pushes tag: vX.Y.Z-rc
+         ├─► Creates and pushes tag: vX.Y.Z-rc
+         │
+         └─► Triggers release workflows from master
 ```
 
 ### 2. Build Phase
 
 ```
-v*-rc tag pushed
+Release workflows triggered
          │
-         ├─► android_release.yml
+         ├─► android_release.yml (from master, checkout tag)
          │        │
+         │        ├─► Cancels any previous Android release
          │        ├─► Builds AAB
-         │        ├─► Uploads to Google Play Internal
+         │        ├─► Uploads to Google Play Internal (binary only)
          │        └─► Saves AAB to GitHub Release
          │
-         └─► ios_release.yml
+         └─► ios_release.yml (from master, checkout tag)
                   │
+                  ├─► Cancels any previous iOS release
                   ├─► Builds IPA
-                  ├─► Uploads to TestFlight
+                  ├─► Uploads to TestFlight (binary only)
                   └─► Saves IPA to GitHub Release
 ```
 
@@ -251,15 +316,17 @@ promote-release.yml
 ```
 Developer triggers promote-release.yml
          │
-         ├─► Input: v1.0.3-rc
+         ├─► Input: v1.0.3-rc (or auto-detect latest)
          │
          ├─► Downloads AAB from GitHub Release
          │
          ├─► Downloads IPA from GitHub Release
          │
          ├─► Uploads AAB to Google Play Production
+         │        └─► Includes metadata/changelogs if changed
          │
          ├─► Uploads IPA to App Store
+         │        └─► Includes metadata/screenshots if changed
          │
          ├─► Creates production tag: v1.0.3
          │
@@ -274,6 +341,8 @@ Developer triggers promote-release.yml
 4. **Production Tags**: Only created via manual promotion
 5. **Same Binary**: Production uses the exact same binary that was tested
 6. **No Rebuild**: Promotion downloads pre-built artifacts, never rebuilds
+7. **Concurrency**: New releases cancel previous ones (same platform)
+8. **Path Filtering**: Only app/metadata changes trigger version bumps
 
 ## Version Format
 
@@ -317,11 +386,11 @@ git push origin feature/dark-mode
 
 # Create PR, get reviews, merge to master
 # → auto-version.yml creates v1.1.0-rc
-# → Builds go to TestFlight/Internal
+# → Builds go to TestFlight/Internal (binary only)
 
 # After testing, promote via GitHub Actions UI
-# → promote-release.yml with input "v1.1.0-rc"
-# → Same binaries go to production
+# → promote-release.yml (leave tag empty for latest RC)
+# → Same binaries go to production with metadata
 ```
 
 ### Bug Fix Flow
@@ -345,13 +414,24 @@ BREAKING CHANGE: removed password-only login"
 # → auto-version.yml creates v2.0.0-rc (major bump)
 ```
 
+### CI-Only Changes (No Version Bump)
+
+```bash
+git commit -m "ci: add build caching"
+git commit -m "fix(ci): improve workflow concurrency"
+
+# → auto-version.yml does NOT trigger (path filter)
+# → No new version created
+```
+
 ## Troubleshooting
 
 ### Version not bumping correctly
 
 1. Check commit message format (must follow Conventional Commits)
-2. Verify commits are since the last tag
+2. Verify commits are since the last RC tag
 3. Check workflow logs for commit analysis output
+4. Ensure changes are in paths that trigger auto-version
 
 ### Promotion fails
 
@@ -365,3 +445,25 @@ BREAKING CHANGE: removed password-only login"
 The Fastlane scripts automatically fetch the latest build number from stores and increment. If conflicts occur:
 1. Check both Internal and Production tracks
 2. Manually increment if needed via `--build-number` flag
+
+### Release not cancelled
+
+If a new release doesn't cancel the previous one:
+1. Ensure both releases are using the latest workflow (from master)
+2. Check that concurrency group is the same
+3. Verify `cancel-in-progress: true` is set
+
+### Metadata validation errors
+
+Release notes must be ≤500 characters for Google Play. If you get validation errors:
+1. Check `android/fastlane/metadata/android/*/changelogs/default.txt`
+2. Reduce content to fit the limit
+3. RC phase skips changelogs, so errors only appear on promotion
+
+## Workflow Run Names
+
+Release workflows show the tag in the GitHub Actions UI:
+- "Release Android v1.3.1-rc"
+- "Release iOS v1.3.1-rc"
+
+This makes it easy to identify which version is building/running.
