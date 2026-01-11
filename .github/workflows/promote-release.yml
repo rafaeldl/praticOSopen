@@ -185,8 +185,7 @@ jobs:
           CI: "true"
         run: |
           bundle exec fastlane promote \
-            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }} \
-            skip_metadata:${{ steps.filter.outputs.metadata == 'false' }}
+            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }}
 
       - name: Summary
         run: |
