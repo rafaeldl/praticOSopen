@@ -261,35 +261,96 @@ Sistema de checklists e vistorias personalizados.
 
 ## Deploy
 
-### Android (Play Store)
+### Versionamento Automático (Conventional Commits)
+
+O projeto usa versionamento automático baseado em Conventional Commits.
+
+**Formato:** `<type>(<scope>): <description>`
+
+| Tipo | Descrição | Versão |
+|------|-----------|--------|
+| `feat` | Nova funcionalidade | Minor (1.0.0 → 1.1.0) |
+| `feat!` | Feature com breaking change | Major (1.0.0 → 2.0.0) |
+| `fix` | Correção de bug | Patch (1.0.0 → 1.0.1) |
+| `perf` | Melhoria de performance | Patch |
+| `refactor` | Refatoração de código | Patch |
+| `docs` | Documentação | Patch |
+| `style` | Formatação de código | Patch |
+| `test` | Testes | Patch |
+| `chore` | Manutenção | Patch |
+| `ci` | CI/CD | Patch |
+| `build` | Build system | Patch |
+
+**Exemplos:**
 ```bash
-cd android
-bundle exec fastlane internal           # Internal track
-bundle exec fastlane deploy_with_metadata  # Com metadados
-bundle exec fastlane promote_to_production
+# Feature (Minor)
+git commit -m "feat: add dark mode toggle"
+git commit -m "feat(orders): add bulk status update"
+
+# Fix (Patch)
+git commit -m "fix: resolve crash on login"
+git commit -m "fix(auth): handle expired token"
+
+# Breaking change (Major) - usar ! ou BREAKING CHANGE
+git commit -m "feat!: new authentication flow"
+git commit -m "feat: new API
+
+BREAKING CHANGE: removed v1 endpoints"
+
+# Outros (Patch)
+git commit -m "refactor(ui): reorganize widgets"
+git commit -m "perf: optimize image loading"
+git commit -m "chore: update dependencies"
 ```
 
-### iOS (App Store)
+**Scopes comuns:** `auth`, `orders`, `customers`, `ui`, `storage`, `db`
+
+Ver `docs/AUTO_VERSIONING.md` para detalhes completos.
+
+### Fluxo de Release
+
+```
+PR mergeado na master
+        ↓
+auto-version.yml → cria tag v*-rc
+        ↓
+Build + Upload para TestFlight/Internal
+        ↓
+Artefatos salvos no GitHub Releases
+        ↓
+[Após testes] Workflow "Promote Release"
+        ↓
+Mesmo binário vai para produção
+```
+
+### Comandos Locais (quando necessário)
+
 ```bash
+# Android
+cd android
+bundle exec fastlane internal           # Internal track (manual)
+
+# iOS
 cd ios
-bundle exec fastlane beta               # TestFlight
-bundle exec fastlane release_store      # App Store
+bundle exec fastlane beta               # TestFlight (manual)
 ```
 
 ### CI/CD
-- **Push master**: Deploy para trilhas internas (Internal/TestFlight)
-- **Tag `v*`**: Deploy para produção
+- **Push master**: Cria tag `-rc` automaticamente, deploy para teste
+- **Promote Release**: Workflow manual para promover RC para produção
+- **Artefatos**: Salvos no GitHub Releases (AAB + IPA)
 
 ## Regras Importantes
 
 1. **Inglês no Código**: SEMPRE usar inglês para classes, variáveis, constantes, enums, chaves JSON e valores no banco
-2. **Multi-Tenancy é Prioridade**: Sempre verificar estrutura de company/roles
-3. **Build Runner**: Executar após alterar Stores/Models
-4. **AuthService**: Usar para criar novos usuários (não gravar direto no banco)
-5. **CollaboratorStore**: Usar para gerenciar membros da equipe (não usar CompanyStore)
-6. **Cupertino-first**: App deve parecer nativo iOS
-7. **Dark Mode**: Sempre usar `.resolveFrom(context)` para cores dinâmicas
-8. **Documentação Obrigatória**: Documentar toda nova funcionalidade (ver seção abaixo)
+2. **Conventional Commits**: Usar formato `tipo: descrição` para commits (feat, fix, refactor, etc.)
+3. **Multi-Tenancy é Prioridade**: Sempre verificar estrutura de company/roles
+4. **Build Runner**: Executar após alterar Stores/Models
+5. **AuthService**: Usar para criar novos usuários (não gravar direto no banco)
+6. **CollaboratorStore**: Usar para gerenciar membros da equipe (não usar CompanyStore)
+7. **Cupertino-first**: App deve parecer nativo iOS
+8. **Dark Mode**: Sempre usar `.resolveFrom(context)` para cores dinâmicas
+9. **Documentação Obrigatória**: Documentar toda nova funcionalidade (ver seção abaixo)
 
 ---
 
@@ -385,6 +446,7 @@ Antes de finalizar uma feature, verificar:
 
 ## Documentação Adicional
 
+- `docs/AUTO_VERSIONING.md` - Versionamento automático e Conventional Commits
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
 - `docs/MULTI_TENANCY.md` - Detalhes da arquitetura multi-tenant
