@@ -11,6 +11,15 @@ class InviteRepository {
   static const String collectionName = 'invites';
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  /// Valid role values that can be stored in Firestore.
+  static const Set<String> _validRoles = {
+    'admin',
+    'supervisor',
+    'manager',
+    'consultant',
+    'technician',
+  };
+
   CollectionReference<Map<String, dynamic>> get _collection {
     return _db.collection(collectionName);
   }
@@ -99,7 +108,18 @@ class InviteRepository {
 
   Invite _fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
-    final invite = Invite.fromJson(data);
+
+    // Normalize invalid role values to 'technician'
+    final role = data['role'];
+    final normalizedData = (role == null || !_validRoles.contains(role))
+        ? {...data, 'role': 'technician'}
+        : data;
+
+    if (role != null && !_validRoles.contains(role)) {
+      print('[InviteRepository] Invalid role "$role" found, falling back to technician');
+    }
+
+    final invite = Invite.fromJson(normalizedData);
     invite.id = doc.id;
 
     // Handle Firestore Timestamp

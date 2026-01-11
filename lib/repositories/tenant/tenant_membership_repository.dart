@@ -12,6 +12,29 @@ class TenantMembershipRepository {
   static const String collectionName = 'memberships';
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  /// Valid role values that can be stored in Firestore.
+  static const Set<String> _validRoles = {
+    'admin',
+    'supervisor',
+    'manager',
+    'consultant',
+    'technician',
+  };
+
+  /// Normalizes role data from Firestore, applying fallback for invalid values.
+  /// Returns the original data with role normalized to 'technician' if invalid.
+  Map<String, dynamic> _normalizeRoleData(Map<String, dynamic> data) {
+    final role = data['role'];
+    if (role == null || !_validRoles.contains(role)) {
+      // Log para rastrear dados inválidos
+      if (role != null) {
+        print('[TenantMembershipRepository] Invalid role "$role" found, falling back to technician');
+      }
+      return {...data, 'role': 'technician'};
+    }
+    return data;
+  }
+
   /// Retorna a referência da collection de memberships para uma empresa.
   CollectionReference<Map<String, dynamic>> _getCollection(String companyId) {
     return _db.collection('companies').doc(companyId).collection(collectionName);
@@ -25,14 +48,14 @@ class TenantMembershipRepository {
   Future<Membership?> getMembership(String companyId, String userId) async {
     final doc = await _getCollection(companyId).doc(userId).get();
     if (!doc.exists) return null;
-    return Membership.fromFirestore(doc.id, doc.data()!);
+    return Membership.fromFirestore(doc.id, _normalizeRoleData(doc.data()!));
   }
 
   /// Stream de membership de um usuário específico.
   Stream<Membership?> streamMembership(String companyId, String userId) {
     return _getCollection(companyId).doc(userId).snapshots().map((doc) {
       if (!doc.exists) return null;
-      return Membership.fromFirestore(doc.id, doc.data()!);
+      return Membership.fromFirestore(doc.id, _normalizeRoleData(doc.data()!));
     });
   }
 
@@ -40,7 +63,7 @@ class TenantMembershipRepository {
   Future<List<Membership>> listMemberships(String companyId) async {
     final snapshot = await _getCollection(companyId).get();
     return snapshot.docs
-        .map((doc) => Membership.fromFirestore(doc.id, doc.data()))
+        .map((doc) => Membership.fromFirestore(doc.id, _normalizeRoleData(doc.data())))
         .toList();
   }
 
@@ -48,7 +71,7 @@ class TenantMembershipRepository {
   Stream<List<Membership>> streamMemberships(String companyId) {
     return _getCollection(companyId).snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => Membership.fromFirestore(doc.id, doc.data()))
+          .map((doc) => Membership.fromFirestore(doc.id, _normalizeRoleData(doc.data())))
           .toList();
     });
   }
@@ -59,7 +82,7 @@ class TenantMembershipRepository {
         .where('role', isEqualTo: role.name)
         .get();
     return snapshot.docs
-        .map((doc) => Membership.fromFirestore(doc.id, doc.data()))
+        .map((doc) => Membership.fromFirestore(doc.id, _normalizeRoleData(doc.data())))
         .toList();
   }
 
