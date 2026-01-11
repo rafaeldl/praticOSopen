@@ -86,6 +86,48 @@ abstract class _CollaboratorStore with Store {
     return myMembership?.role == RolesType.admin;
   }
 
+  /// Conta quantos administradores existem na empresa.
+  int getAdminCount() {
+    return collaborators.where((m) => m.role == RolesType.admin).length;
+  }
+
+  /// Verifica se um usuário é o único admin da empresa.
+  bool isOnlyAdmin(String userId) {
+    final membership = collaborators.cast<Membership?>().firstWhere(
+      (m) => m?.userId == userId,
+      orElse: () => null,
+    );
+
+    if (membership?.role != RolesType.admin) return false;
+    return getAdminCount() == 1;
+  }
+
+  /// Verifica se a operação deixaria a empresa sem admin.
+  /// Retorna mensagem de erro ou null se a operação é permitida.
+  String? validateAdminRequirement(String userId, {RolesType? newRole, bool isRemoval = false}) {
+    final membership = collaborators.cast<Membership?>().firstWhere(
+      (m) => m?.userId == userId,
+      orElse: () => null,
+    );
+
+    // Se não é admin, não há problema
+    if (membership?.role != RolesType.admin) return null;
+
+    // Se é o único admin
+    if (getAdminCount() == 1) {
+      if (isRemoval) {
+        return 'Não é possível remover o único administrador da empresa. '
+            'Promova outro colaborador a administrador antes de remover este.';
+      }
+      if (newRole != null && newRole != RolesType.admin) {
+        return 'Não é possível alterar o perfil do único administrador. '
+            'Promova outro colaborador a administrador antes de alterar este.';
+      }
+    }
+
+    return null;
+  }
+
   // ═══════════════════════════════════════════════════════════════════
   // Load Operations
   // ═══════════════════════════════════════════════════════════════════
@@ -268,9 +310,16 @@ abstract class _CollaboratorStore with Store {
   /// Atualiza a role de um colaborador.
   ///
   /// Atualiza em ambos os lugares atomicamente.
+  /// Não permite alterar o perfil do único administrador para outro perfil.
   @action
   Future<void> updateCollaboratorRole(String userId, RolesType newRoleType) async {
     if (Global.companyAggr?.id == null) return;
+
+    // Valida se a operação deixaria a empresa sem admin
+    final validationError = validateAdminRequirement(userId, newRole: newRoleType);
+    if (validationError != null) {
+      throw Exception(validationError);
+    }
 
     isLoading = true;
     try {
@@ -327,6 +376,7 @@ abstract class _CollaboratorStore with Store {
   /// Remove um colaborador da empresa.
   ///
   /// Remove de ambos os lugares atomicamente.
+  /// Não permite remover o único administrador da empresa.
   @action
   Future<void> removeCollaborator(String userId) async {
     if (Global.companyAggr?.id == null) return;
@@ -334,6 +384,12 @@ abstract class _CollaboratorStore with Store {
     // Não permite remover a si mesmo
     if (userId == Global.currentUser?.uid) {
       throw Exception('Você não pode remover a si mesmo da empresa.');
+    }
+
+    // Valida se a operação deixaria a empresa sem admin
+    final validationError = validateAdminRequirement(userId, isRemoval: true);
+    if (validationError != null) {
+      throw Exception(validationError);
     }
 
     isLoading = true;
