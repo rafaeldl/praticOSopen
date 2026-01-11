@@ -1,9 +1,19 @@
 Novidades nesta versão:
 
-• Exclusão de conta: Agora você pode excluir sua conta e todos os dados diretamente no app (Ajustes > Conta > Excluir Conta).
-• Central de Suporte: Nova página de suporte funcional no site para ajudá-lo com dúvidas e assistência.
-• Adaptação dinâmica para diferentes segmentos (Automotivo, Climatização, Informática, etc).
-• Ícones e termos personalizados conforme o ramo da sua empresa.
-• Melhorias na interface e correções de bugs.
+• Sistema de Perfis de Usuário: Controle completo de permissões por função (Proprietário, Administrador, Gerente, Supervisor, Técnico e Visualizador). Cada perfil tem acesso específico a recursos do app.
+
+• Pagamentos Parciais: Registre e acompanhe múltiplos pagamentos para uma mesma OS, com histórico completo de transações no PDF.
+
+• Busca Aprimorada: Nova busca com scroll infinito, filtros em chips e indicador de data de vencimento com destaque visual para OS atrasadas.
+
+• Formulários Dinâmicos: Crie checklists e procedimentos personalizados, com seleção múltipla de fotos e navegação por swipe na galeria.
+
+• Edição de Perfil: Atualize seus dados e foto de perfil diretamente no app.
+
+• Sistema de Convites: Convide colaboradores por e-mail para sua empresa.
+
+• Melhorias na Interface: Redesign da lista de OS seguindo padrões Apple HIG, modo escuro totalmente funcional e diversas correções visuais.
+
+• PDF Aprimorado: Layout otimizado com links para as lojas e destaque para valores pagos.
 
 Obrigado por usar o PraticOS!
