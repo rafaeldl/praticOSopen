@@ -125,23 +125,41 @@ class AuthService {
     await _db.collection('companies').doc(companyId).delete();
   }
 
-  /// Recursively deletes all documents in a collection and its subcollections
+  /// Recursively deletes all documents in known company subcollections
   Future<void> _deleteCollectionRecursively(
     DocumentReference documentRef,
   ) async {
-    // Get all subcollections of the document
-    final collections = await documentRef.listCollections().toList();
+    // Known company subcollections to delete
+    const subcollections = [
+      'services',
+      'products',
+      'devices',
+      'customers',
+      'orders',
+      'service_orders',
+      'memberships',
+      'metadata',
+      'forms',
+      'roles',
+      'collaborators',
+      'photos',
+    ];
 
-    for (final collection in collections) {
-      // Get all documents in the subcollection
-      final docs = await collection.get();
+    for (final collectionName in subcollections) {
+      try {
+        final collection = documentRef.collection(collectionName);
+        final docs = await collection.get();
 
-      for (final doc in docs.docs) {
-        // Recursively delete subcollections of each document
-        await _deleteCollectionRecursively(doc.reference);
+        for (final doc in docs.docs) {
+          // Recursively delete subcollections of each document
+          await _deleteCollectionRecursively(doc.reference);
 
-        // Delete the document itself
-        await doc.reference.delete();
+          // Delete the document itself
+          await doc.reference.delete();
+        }
+      } catch (e) {
+        print('Warning: Error deleting $collectionName: $e');
+        // Continue with next collection if one fails
       }
     }
   }
