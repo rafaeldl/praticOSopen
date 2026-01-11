@@ -25,13 +25,27 @@ jobs:
       version_code: ${{ steps.version.outputs.version_code }}
 
     steps:
+      # Determine which tag to use (input takes priority over ref)
+      - name: Determine tag
+        id: get_tag
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "📌 Using tag: $TAG"
+
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.get_tag.outputs.tag }}
 
       # Extract version from tag
       - name: Extract version from tag
         id: version
         run: |
-          TAG="${{ github.ref_name }}"
+          TAG="${{ steps.get_tag.outputs.tag }}"
           # Remove 'v' prefix and '-rc' suffix
           VERSION="${TAG#v}"
           VERSION="${VERSION%-rc}"
@@ -100,7 +114,7 @@ jobs:
       - name: Upload AAB to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ steps.get_tag.outputs.tag }}
           name: "Release ${{ steps.version.outputs.version_name }} (RC)"
           draft: false
           prerelease: true
@@ -110,7 +124,7 @@ jobs:
             ## Android Release Candidate
 
             **Version:** ${{ steps.version.outputs.version_name }}
-            **Tag:** ${{ github.ref_name }}
+            **Tag:** ${{ steps.get_tag.outputs.tag }}
 
             This is a release candidate deployed to Google Play Internal Track.
 
