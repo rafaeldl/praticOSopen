@@ -255,7 +255,7 @@ color: CupertinoColors.label
 
 Sistema de checklists e vistorias personalizados.
 
-**Templates:** `/companies/{companyId}/form_templates/{formId}`
+**Templates:** `/companies/{companyId}/forms/{formId}`
 **Instâncias:** `/companies/{companyId}/orders/{orderId}/forms/{instanceId}`
 **Fotos:** `tenants/{companyId}/orders/{orderId}/forms/{instanceId}/items/{itemId}/`
 

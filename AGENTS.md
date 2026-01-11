@@ -138,8 +138,8 @@ Arquitetura para checklists, vistorias e perguntas personalizadas. Detalhes em `
 
 ### Estrutura
 - **Templates:** Definições do formulário (`FormTemplate`).
-    - Escopo Empresa: `/companies/{companyId}/form_templates/{formId}`
-    - Escopo Segmento (Global): `/segments/{segmentId}/form_templates/{formId}`
+    - Escopo Empresa: `/companies/{companyId}/forms/{formId}`
+    - Escopo Segmento (Global): `/segments/{segmentId}/forms/{formId}`
 - **Instâncias:** Dados preenchidos vinculados à OS (`FormInstance`).
     - Path: `/companies/{companyId}/orders/{orderId}/forms/{instanceId}`
 - **Fotos:** Armazenadas por item do formulário em `tenants/{companyId}/orders/{orderId}/forms/{instanceId}/items/{itemId}/`
