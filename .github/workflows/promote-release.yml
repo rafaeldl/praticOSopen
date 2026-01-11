@@ -226,22 +226,32 @@ jobs:
 
           echo "🏷️ Created production tag: $PROD_TAG"
 
-      - name: Update GitHub Release
+      - name: Create or Update GitHub Release
         run: |
           PROD_TAG="${{ needs.validate.outputs.prod_tag }}"
           RC_TAG="${{ needs.validate.outputs.rc_tag }}"
           VERSION="${{ needs.validate.outputs.version }}"
 
-          # Update the RC release to be the production release
-          gh release edit "$RC_TAG" \
-            --title "Release $VERSION" \
-            --prerelease=false \
-            --notes "## Production Release
+          RELEASE_NOTES="## Production Release
 
           **Version:** $VERSION
           **Promoted from:** $RC_TAG
 
           This release has been promoted to production on both Google Play and App Store."
+
+          # Check if release exists, create or edit accordingly
+          if gh release view "$RC_TAG" &>/dev/null; then
+            echo "📝 Updating existing release $RC_TAG..."
+            gh release edit "$RC_TAG" \
+              --title "Release $VERSION" \
+              --prerelease=false \
+              --notes "$RELEASE_NOTES"
+          else
+            echo "📦 Creating new release for $RC_TAG..."
+            gh release create "$RC_TAG" \
+              --title "Release $VERSION" \
+              --notes "$RELEASE_NOTES"
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
