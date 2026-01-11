@@ -177,6 +177,30 @@ platform :ios do
     )
   end
 
+  desc "Promote TestFlight build to App Store (no re-upload)"
+  lane :promote do |options|
+    skip_screenshots = options[:skip_screenshots] || true
+    skip_metadata = options[:skip_metadata] || true
+
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
+    )
+
+    # Use existing TestFlight build - no binary upload needed
+    upload_to_app_store(
+      skip_binary_upload: true,  # Use build already in TestFlight
+      force: true,
+      skip_screenshots: skip_screenshots,
+      skip_metadata: skip_metadata,
+      submit_for_review: false,
+      run_precheck_before_submit: false
+    )
+
+    UI.success("✅ TestFlight build promoted to App Store!")
+  end
+
   desc "Gera screenshots automaticamente usando Flutter integration tests"
   lane :screenshots do |options|
     device = options[:device] || "iPhone 16e"
