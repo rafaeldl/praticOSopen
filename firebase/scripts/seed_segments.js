@@ -16,9 +16,15 @@ const SEGMENTS = [
   // ═══════════════════════════════════════════════════════════
   {
     id: 'automotive',
-    name: 'Oficina Mecânica',
+    name: 'Automotivo',
     icon: '🚗',
     active: true,
+    subspecialties: [
+      { id: 'mechanical', name: 'Oficina Mecânica', icon: '🔧', description: 'Manutenção e reparo mecânico de veículos' },
+      { id: 'carwash', name: 'Lava Car', icon: '🚿', description: 'Lavagem e limpeza de veículos' },
+      { id: 'painting', name: 'Funilaria e Pintura', icon: '🎨', description: 'Pintura, polimento e reparos estéticos' },
+      { id: 'bodywork', name: 'Lanternagem / Reparos', icon: '🛠️', description: 'Reparos de lataria e martelinho de ouro' },
+    ],
     customFields: [
       // Labels customizados (type: "label")
       {
@@ -112,6 +118,11 @@ const SEGMENTS = [
     name: 'Ar Condicionado / Refrigeração',
     icon: '❄️',
     active: true,
+    subspecialties: [
+      { id: 'residential', name: 'Residencial', icon: '🏠', description: 'Split, janela, residências' },
+      { id: 'commercial', name: 'Comercial/Industrial', icon: '🏢', description: 'VRF, chiller, câmaras frias' },
+      { id: 'automotive_ac', name: 'Ar Automotivo', icon: '🚗', description: 'Ar condicionado veicular' },
+    ],
     customFields: [
       // Labels customizados
       {
@@ -276,6 +287,12 @@ const SEGMENTS = [
     name: 'Informática',
     icon: '💻',
     active: true,
+    subspecialties: [
+      { id: 'desktop', name: 'Desktop/PC', icon: '🖥️', description: 'Montagem, upgrade, formatação' },
+      { id: 'notebook', name: 'Notebooks', icon: '💻', description: 'Reparo de tela, teclado, bateria' },
+      { id: 'networks', name: 'Redes', icon: '🌐', description: 'Cabeamento, switches, Wi-Fi' },
+      { id: 'servers', name: 'Servidores', icon: '🖧', description: 'RAID, backup, virtualização' },
+    ],
     customFields: [
       // Labels customizados
       {
@@ -471,9 +488,15 @@ const SEGMENTS = [
   // ═══════════════════════════════════════════════════════════
   {
     id: 'security',
-    name: 'Segurança Eletrônica (CFTV/Alarmes)',
+    name: 'Segurança Eletrônica',
     icon: '📹',
     active: true,
+    subspecialties: [
+      { id: 'cctv', name: 'CFTV', icon: '📹', description: 'Câmeras, DVR/NVR, monitoramento' },
+      { id: 'alarms', name: 'Alarmes', icon: '🚨', description: 'Sensores, centrais, monitoramento 24h' },
+      { id: 'access', name: 'Controle de Acesso', icon: '🔐', description: 'Biometria, catracas, RFID' },
+      { id: 'fence', name: 'Cerca Elétrica', icon: '⚡', description: 'Central de choque, hastes' },
+    ],
     customFields: [
       // Labels customizados
       {

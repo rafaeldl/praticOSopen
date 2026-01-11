@@ -1,0 +1,366 @@
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:praticos/models/company.dart';
+import 'package:praticos/mobx/user_store.dart';
+import 'package:praticos/mobx/company_store.dart';
+import 'package:praticos/services/bootstrap_service.dart';
+
+class ConfirmBootstrapScreen extends StatefulWidget {
+  final String? companyId;
+  final String companyName;
+  final String address;
+  final String phone;
+  final String email;
+  final String? site;
+  final XFile? logoFile;
+  final String segmentId;
+  final List<String> subspecialties;
+
+  const ConfirmBootstrapScreen({
+    super.key,
+    this.companyId,
+    required this.companyName,
+    required this.address,
+    required this.phone,
+    required this.email,
+    this.site,
+    this.logoFile,
+    required this.segmentId,
+    required this.subspecialties,
+  });
+
+  @override
+  State<ConfirmBootstrapScreen> createState() => _ConfirmBootstrapScreenState();
+}
+
+class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
+  bool _isCreating = false;
+  String _statusMessage = '';
+
+  Future<String?> _uploadLogo(String companyId) async {
+    if (widget.logoFile == null) return null;
+    try {
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child('companies')
+          .child(companyId)
+          .child('logo.jpg');
+
+      await ref.putFile(File(widget.logoFile!.path));
+      return await ref.getDownloadURL();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> _saveCompany({required bool runBootstrap}) async {
+    if (_isCreating) return;
+
+    setState(() {
+      _isCreating = true;
+      _statusMessage = 'Preparando...';
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('Usuário não autenticado');
+
+      final db = FirebaseFirestore.instance;
+      final String targetCompanyId =
+          widget.companyId ?? db.collection('companies').doc().id;
+
+      // Upload da logo
+      setState(() => _statusMessage = 'Enviando logo...');
+      String? logoUrl;
+      if (widget.logoFile != null) {
+        logoUrl = await _uploadLogo(targetCompanyId);
+      }
+
+      setState(() => _statusMessage = 'Criando empresa...');
+
+      if (widget.companyId != null) {
+        // ATUALIZAR empresa existente
+        final companyStore = CompanyStore();
+        final userStore = UserStore();
+
+        final existingCompany =
+            await companyStore.retrieveCompany(widget.companyId);
+        final dbUser = await userStore.findUserById(user.uid);
+
+        if (dbUser == null) {
+          throw Exception('Usuário não encontrado no Firestore');
+        }
+
+        existingCompany.name = widget.companyName;
+        existingCompany.phone = widget.phone;
+        existingCompany.address = widget.address;
+        existingCompany.email = widget.email;
+        existingCompany.site = widget.site;
+        existingCompany.segment = widget.segmentId;
+        existingCompany.subspecialties =
+            widget.subspecialties.isEmpty ? null : widget.subspecialties;
+        existingCompany.updatedAt = DateTime.now();
+        existingCompany.updatedBy = dbUser.toAggr();
+        if (logoUrl != null) {
+          existingCompany.logo = logoUrl;
+        }
+
+        await companyStore.updateCompany(existingCompany);
+
+        // Bootstrap se solicitado
+        if (runBootstrap) {
+          setState(() => _statusMessage = 'Criando dados de exemplo...');
+          final bootstrapService = BootstrapService();
+          await bootstrapService.executeBootstrap(
+            companyId: targetCompanyId,
+            segmentId: widget.segmentId,
+            subspecialties: widget.subspecialties,
+            userAggr: dbUser.toAggr(),
+          );
+        }
+      } else {
+        // CRIAR nova empresa
+        final userStore = UserStore();
+        final dbUser = await userStore.findUserById(user.uid);
+
+        if (dbUser == null) {
+          throw Exception('Usuário não encontrado no Firestore');
+        }
+
+        final userAggr = dbUser.toAggr();
+
+        final company = Company()
+          ..id = targetCompanyId
+          ..name = widget.companyName
+          ..phone = widget.phone
+          ..address = widget.address
+          ..email = widget.email
+          ..site = widget.site
+          ..segment = widget.segmentId
+          ..subspecialties =
+              widget.subspecialties.isEmpty ? null : widget.subspecialties
+          ..logo = logoUrl
+          ..owner = userAggr
+          ..createdAt = DateTime.now()
+          ..createdBy = userAggr
+          ..updatedAt = DateTime.now()
+          ..updatedBy = userAggr;
+
+        await userStore.createCompanyForUser(company);
+
+        // Bootstrap se solicitado
+        if (runBootstrap) {
+          setState(() => _statusMessage = 'Criando dados de exemplo...');
+          final bootstrapService = BootstrapService();
+          await bootstrapService.executeBootstrap(
+            companyId: targetCompanyId,
+            segmentId: widget.segmentId,
+            subspecialties: widget.subspecialties,
+            userAggr: userAggr,
+          );
+        }
+      }
+
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+      }
+    } catch (e, stack) {
+      debugPrint('❌ Error in _saveCompany: $e');
+      debugPrint(stack.toString());
+      if (mounted) setState(() => _isCreating = false);
+
+      if (mounted) {
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Erro'),
+            content: Text(e.toString()),
+            actions: [
+              CupertinoDialogAction(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Quase lá!'),
+      ),
+      child: SafeArea(
+        child: DefaultTextStyle(
+          style: CupertinoTheme.of(context).textTheme.textStyle,
+          child: _isCreating
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CupertinoActivityIndicator(radius: 16),
+                      const SizedBox(height: 16),
+                      Text(
+                        _statusMessage,
+                        style: const TextStyle(
+                            color: CupertinoColors.secondaryLabel),
+                      ),
+                    ],
+                  ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      // Ícone e título
+                      const Icon(
+                        CupertinoIcons.sparkles,
+                        size: 64,
+                        color: CupertinoColors.systemYellow,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Deseja criar dados de exemplo?',
+                        style: CupertinoTheme.of(context)
+                            .textTheme
+                            .navLargeTitleTextStyle
+                            .copyWith(fontSize: 24),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Podemos criar alguns dados de exemplo para você começar a usar o sistema imediatamente:',
+                        textAlign: TextAlign.center,
+                        style: CupertinoTheme.of(context)
+                            .textTheme
+                            .textStyle
+                            .copyWith(
+                              color: CupertinoColors.secondaryLabel
+                                  .resolveFrom(context),
+                              fontSize: 16,
+                            ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Lista de benefícios
+                      Container(
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemBackground
+                              .resolveFrom(context),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            _buildBenefitRow(
+                              context,
+                              CupertinoIcons.wrench,
+                              'Serviços comuns do seu segmento',
+                            ),
+                            const SizedBox(height: 12),
+                            _buildBenefitRow(
+                              context,
+                              CupertinoIcons.cube_box,
+                              'Produtos e peças mais utilizados',
+                            ),
+                            const SizedBox(height: 12),
+                            _buildBenefitRow(
+                              context,
+                              CupertinoIcons.device_phone_portrait,
+                              'Equipamentos de exemplo',
+                            ),
+                            const SizedBox(height: 12),
+                            _buildBenefitRow(
+                              context,
+                              CupertinoIcons.person,
+                              'Cliente de demonstração',
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      Text(
+                        'Você poderá editar ou excluir esses dados a qualquer momento.',
+                        textAlign: TextAlign.center,
+                        style: CupertinoTheme.of(context)
+                            .textTheme
+                            .textStyle
+                            .copyWith(
+                              color: CupertinoColors.secondaryLabel
+                                  .resolveFrom(context),
+                              fontSize: 14,
+                            ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Botão principal - Criar com exemplos
+                      SizedBox(
+                        width: double.infinity,
+                        child: CupertinoButton.filled(
+                          onPressed: () => _saveCompany(runBootstrap: true),
+                          child: const Text('Sim, criar dados de exemplo'),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Botão secundário - Começar do zero
+                      SizedBox(
+                        width: double.infinity,
+                        child: CupertinoButton(
+                          onPressed: () => _saveCompany(runBootstrap: false),
+                          child: Text(
+                            'Não, começar do zero',
+                            style: TextStyle(
+                              color: CupertinoColors.secondaryLabel
+                                  .resolveFrom(context),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBenefitRow(BuildContext context, IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: CupertinoColors.activeBlue,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                  fontSize: 15,
+                ),
+          ),
+        ),
+        const Icon(
+          CupertinoIcons.checkmark,
+          size: 18,
+          color: CupertinoColors.systemGreen,
+        ),
+      ],
+    );
+  }
+}
