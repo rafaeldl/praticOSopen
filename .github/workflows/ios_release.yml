@@ -1,4 +1,5 @@
 name: Release iOS
+run-name: "Release iOS ${{ inputs.tag || github.ref_name }}"
 
 on:
   push:
