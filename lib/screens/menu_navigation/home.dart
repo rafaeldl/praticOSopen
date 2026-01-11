@@ -1,6 +1,6 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Material, MaterialType, Divider, InkWell;
+import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 // Keeping Material for specific color references if needed, but UI tree will be Cupertino.
 
 import 'package:flutter/services.dart';
@@ -507,178 +507,224 @@ class _HomeState extends State<Home> {
   Widget _buildOrderItem(Order order, int index, bool isLast, SegmentConfigProvider config) {
     final statusColor = _getCupertinoStatusColor(order.status);
 
-    String subtitle = '#${order.number ?? '-'}';
-    if (order.device != null) {
-      final name = order.device?.name ?? '';
-      final serial = order.device?.serial ?? '';
-      
-      if (name.isNotEmpty) {
-        subtitle += ' • $name';
-      }
-      // Assuming serial serves as the license plate/identifier
-      if (serial.isNotEmpty) {
-        subtitle += ' • $serial';
+    // Build services line: First service (+N more)
+    String servicesText = '';
+    final services = order.services ?? [];
+    if (services.isNotEmpty) {
+      final firstService = services.first.service?.name ?? services.first.description ?? '';
+      if (firstService.isNotEmpty) {
+        servicesText = firstService;
+        if (services.length > 1) {
+          servicesText += ' +${services.length - 1}';
+        }
       }
     }
 
-    return Container(
-      color: CupertinoColors.systemBackground.resolveFrom(context),
-      child: Material(
-        type: MaterialType.transparency,
-                            child: InkWell(
-                            onTap: () {
-                               Navigator.of(context, rootNavigator: true).pushNamed('/order', arguments: {'order': order})
-                                   .then((_) {
-                                     final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
-                                     _loadOrders(_getFilters(configInner));
-                                   });
-                            },                  child: Column(            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Compact padding
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Thumbnail (Left side again)
-                    _buildThumbnail(order),
-                    const SizedBox(width: 12),
-                    
-                    // Main Content
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Line 1: Customer (Left) --- Value & Dot (Right)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  order.customer?.name ?? config.customer,
-                                  style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w600,
-                                    color: CupertinoColors.label.resolveFrom(context),
-                                    letterSpacing: -0.4,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+    // Build device line: Device name • Serial (only if device has data)
+    String? deviceText;
+    if (order.device != null) {
+      final name = order.device?.name ?? '';
+      final serial = order.device?.serial ?? '';
+      if (name.isNotEmpty || serial.isNotEmpty) {
+        final parts = <String>[];
+        if (name.isNotEmpty) parts.add(name);
+        if (serial.isNotEmpty) parts.add(serial);
+        deviceText = parts.join(' • ');
+      }
+    }
+
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: () {
+        Navigator.of(context, rootNavigator: true)
+            .pushNamed('/order', arguments: {'order': order})
+            .then((_) {
+          final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
+          _loadOrders(_getFilters(configInner));
+        });
+      },
+      child: Container(
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Thumbnail with status dot overlay
+                  _buildThumbnail(order, statusColor, config),
+                  const SizedBox(width: 12),
+
+                  // Main content (3 lines)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Line 1: Customer name + Due date
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                order.customer?.name ?? config.customer,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600,
+                                  color: CupertinoColors.label.resolveFrom(context),
+                                  letterSpacing: -0.4,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
+                            ),
+                            if (order.dueDate != null) ...[
                               const SizedBox(width: 8),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  // Data de entrega na linha 1
-                                  if (order.dueDate != null) ...[
-                                    Icon(
-                                      CupertinoIcons.calendar,
-                                      size: 14,
-                                      color: _getDueDateColor(order.dueDate, order.status),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      DateFormat('dd/MM').format(order.dueDate!),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: _getDueDateColor(order.dueDate, order.status),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  // Status Dot (Now on the right)
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: statusColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                CupertinoIcons.chevron_right,
-                                size: 12,
-                                color: CupertinoColors.tertiaryLabel.resolveFrom(context)
+                              Text(
+                                DateFormat('dd/MM').format(order.dueDate!),
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                ),
                               ),
                             ],
-                          ),
-                          const SizedBox(height: 3),
-                          
-                          // Line 2: #OS • Vehicle • Plate (Left) --- Value (Right)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+
+                        // Line 2: Services + Price
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                servicesText.isNotEmpty ? servicesText : '-',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (_authService.hasPermission(PermissionType.viewPrices)) ...[
+                              const SizedBox(width: 8),
+                              Text(
+                                _formatCurrency(order.total),
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+
+                        // Line 3: Device info + Indicators (overdue, paid)
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            if (config.showDeviceInOrderList && deviceText != null)
                               Expanded(
                                 child: Text(
-                                  subtitle,
+                                  deviceText,
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                    fontSize: 13,
+                                    color: CupertinoColors.tertiaryLabel.resolveFrom(context),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
+                              )
+                            else
+                              const Spacer(),
+                            // Indicators at the end
+                            if (_isOverdue(order)) ...[
+                              const SizedBox(width: 6),
+                              Icon(
+                                CupertinoIcons.clock_fill,
+                                size: 14,
+                                color: CupertinoColors.systemRed,
                               ),
-                              // Valor na linha 2 (se usuário tem permissão)
-                              if (_authService.hasPermission(PermissionType.viewPrices))
-                                Text(
-                                  _formatCurrency(order.total),
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: order.payment == 'paid' ? CupertinoColors.label.resolveFrom(context) : CupertinoColors.secondaryLabel.resolveFrom(context),
-                                    fontWeight: order.payment == 'paid' ? FontWeight.w600 : FontWeight.w400,
-                                  ),
-                                ),
                             ],
-                          ),
-                        ],
-                      ),
+                            if (_authService.hasPermission(PermissionType.viewPrices) && order.payment == 'paid') ...[
+                              const SizedBox(width: 6),
+                              Icon(
+                                CupertinoIcons.money_dollar_circle_fill,
+                                size: 14,
+                                color: CupertinoColors.systemGreen,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              if (!isLast)
-                Divider(
-                  height: 1,
-                  indent: 76, // Adjusted indent for thumbnail (52 size + padding)
-                  color: CupertinoColors.separator.resolveFrom(context),
-                ),
-            ],
-          ),
+            ),
+            if (!isLast)
+              Divider(
+                height: 1,
+                indent: 76, // 16 padding + 48 thumbnail + 12 spacing
+                color: CupertinoColors.separator.resolveFrom(context),
+              ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildThumbnail(Order order) {
-    final url = order.coverPhotoUrl;
-    const double size = 52.0; // Slightly larger for iOS feel
+  Widget _buildThumbnail(Order order, Color statusColor, SegmentConfigProvider config) {
+    const double size = 48;
+    const double dotSize = 14;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12), // Smoother corners
-      child: Container(
-        width: size,
-        height: size,
-        color: CupertinoColors.secondarySystemFill.resolveFrom(context),
-        child: url != null && url.isNotEmpty
-            ? CachedImage.thumbnail(
-                imageUrl: url,
-                size: size,
-              )
-            : Center(
-                child: Icon(
-                  CupertinoIcons.wrench,
-                  size: 24,
-                  color: CupertinoColors.systemGrey.resolveFrom(context),
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Thumbnail image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: order.coverPhotoUrl != null
+                ? CachedImage(
+                    imageUrl: order.coverPhotoUrl!,
+                    width: size,
+                    height: size,
+                    fit: BoxFit.cover,
+                  )
+                : Container(
+                    width: size,
+                    height: size,
+                    color: CupertinoColors.systemGrey5.resolveFrom(context),
+                    child: Icon(
+                      config.deviceIcon,
+                      size: 24,
+                      color: CupertinoColors.systemGrey.resolveFrom(context),
+                    ),
+                  ),
+          ),
+          // Status dot at bottom-right corner
+          Positioned(
+            right: -3,
+            bottom: -3,
+            child: Container(
+              width: dotSize,
+              height: dotSize,
+              decoration: BoxDecoration(
+                color: statusColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: CupertinoColors.systemBackground.resolveFrom(context),
+                  width: 2,
                 ),
               ),
+            ),
+          ),
+        ],
       ),
     );
   }
-
 
   Color _getCupertinoStatusColor(String? status) {
     switch (status) {
@@ -697,24 +743,15 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Color _getDueDateColor(DateTime? date, String? status) {
-    if (date == null) return CupertinoColors.secondaryLabel.resolveFrom(context);
+  bool _isOverdue(Order order) {
+    if (order.dueDate == null) return false;
+    if (order.status == 'done' || order.status == 'canceled') return false;
 
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final dueDay = DateTime(date.year, date.month, date.day);
+    final dueDay = DateTime(order.dueDate!.year, order.dueDate!.month, order.dueDate!.day);
 
-    // Se a OS está concluída ou cancelada, não mostrar como atrasada
-    if (status == 'done' || status == 'canceled') {
-      return CupertinoColors.secondaryLabel.resolveFrom(context);
-    }
-
-    // Se a data é anterior a hoje e a OS está em aberto, é atrasada (vermelho)
-    if (dueDay.isBefore(today)) {
-      return CupertinoColors.systemRed;
-    }
-
-    return CupertinoColors.secondaryLabel.resolveFrom(context);
+    return dueDay.isBefore(today);
   }
 
   String _formatCurrency(double? value) {

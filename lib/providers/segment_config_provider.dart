@@ -25,6 +25,15 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Idioma atual
   String get locale => _service.currentLocale;
 
+  /// Define se o device deve ser exibido na listagem de OS
+  /// Por enquanto, true para todos os segmentos
+  bool get showDeviceInOrderList {
+    // TODO: Configurar por segmento quando necessário
+    // Segmentos onde device é importante: automotive, hvac, smartphones, computers, appliances, printers
+    // Segmentos onde device é menos relevante: electrical, plumbing, security, solar, other
+    return true;
+  }
+
   /// Obtém o ícone do dispositivo baseado no segmento
   IconData get deviceIcon {
     switch (segmentId) {
