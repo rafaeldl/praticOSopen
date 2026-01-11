@@ -37,6 +37,28 @@ class _SelectSubspecialtiesScreenState
     extends State<SelectSubspecialtiesScreen> {
   final Set<String> _selectedIds = {};
 
+  /// Extrai string localizada de um valor que pode ser String ou Map
+  String _localized(dynamic value, String locale) {
+    if (value == null) return '';
+    if (value is String) return value;
+    if (value is Map) {
+      return value[locale] as String? ??
+          value['pt-BR'] as String? ??
+          (value.values.isNotEmpty ? value.values.first.toString() : '');
+    }
+    return value.toString();
+  }
+
+  /// Obtém o locale atual do dispositivo
+  String get _currentLocale {
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    final languageTag = '${locale.languageCode}-${locale.countryCode ?? ''}';
+    // Mapeia para os locales suportados
+    if (languageTag.startsWith('pt')) return 'pt-BR';
+    if (languageTag.startsWith('es')) return 'es-ES';
+    return 'en-US';
+  }
+
   void _toggleSelection(String id) {
     setState(() {
       if (_selectedIds.contains(id)) {
@@ -138,11 +160,12 @@ class _SelectSubspecialtiesScreenState
                     margin:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     children: widget.subspecialties.map((subspecialty) {
+                      final locale = _currentLocale;
                       final id = subspecialty['id'] as String;
-                      final name = subspecialty['name'] as String? ?? 'Sem nome';
+                      final name = _localized(subspecialty['name'], locale);
                       final icon = subspecialty['icon'] as String? ?? '🔧';
                       final description =
-                          subspecialty['description'] as String? ?? '';
+                          _localized(subspecialty['description'], locale);
                       final isSelected = _selectedIds.contains(id);
 
                       return CupertinoListTile.notched(
@@ -158,7 +181,7 @@ class _SelectSubspecialtiesScreenState
                               .copyWith(fontSize: 24),
                         ),
                         title: Text(
-                          name,
+                          name.isEmpty ? 'Sem nome' : name,
                           style: CupertinoTheme.of(context)
                               .textTheme
                               .textStyle

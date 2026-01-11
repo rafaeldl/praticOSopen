@@ -20,10 +20,30 @@ const SEGMENTS = [
     icon: '🚗',
     active: true,
     subspecialties: [
-      { id: 'mechanical', name: 'Oficina Mecânica', icon: '🔧', description: 'Manutenção e reparo mecânico de veículos' },
-      { id: 'carwash', name: 'Lava Car', icon: '🚿', description: 'Lavagem e limpeza de veículos' },
-      { id: 'painting', name: 'Funilaria e Pintura', icon: '🎨', description: 'Pintura, polimento e reparos estéticos' },
-      { id: 'bodywork', name: 'Lanternagem / Reparos', icon: '🛠️', description: 'Reparos de lataria e martelinho de ouro' },
+      {
+        id: 'mechanical',
+        icon: '🔧',
+        name: { 'pt-BR': 'Oficina Mecânica', 'en-US': 'Auto Repair Shop', 'es-ES': 'Taller Mecánico' },
+        description: { 'pt-BR': 'Manutenção e reparo mecânico de veículos', 'en-US': 'Vehicle maintenance and mechanical repair', 'es-ES': 'Mantenimiento y reparación mecánica de vehículos' },
+      },
+      {
+        id: 'carwash',
+        icon: '🚿',
+        name: { 'pt-BR': 'Lava Car', 'en-US': 'Car Wash', 'es-ES': 'Lavado de Autos' },
+        description: { 'pt-BR': 'Lavagem e limpeza de veículos', 'en-US': 'Vehicle washing and cleaning', 'es-ES': 'Lavado y limpieza de vehículos' },
+      },
+      {
+        id: 'painting',
+        icon: '🎨',
+        name: { 'pt-BR': 'Funilaria e Pintura', 'en-US': 'Body & Paint Shop', 'es-ES': 'Carrocería y Pintura' },
+        description: { 'pt-BR': 'Pintura, polimento e reparos estéticos', 'en-US': 'Painting, polishing and aesthetic repairs', 'es-ES': 'Pintura, pulido y reparaciones estéticas' },
+      },
+      {
+        id: 'bodywork',
+        icon: '🛠️',
+        name: { 'pt-BR': 'Lanternagem / Reparos', 'en-US': 'Dent Repair', 'es-ES': 'Reparación de Abolladuras' },
+        description: { 'pt-BR': 'Reparos de lataria e martelinho de ouro', 'en-US': 'Body panel repair and paintless dent removal', 'es-ES': 'Reparación de paneles y desabollado sin pintura' },
+      },
     ],
     customFields: [
       // Labels customizados (type: "label")
@@ -119,9 +139,24 @@ const SEGMENTS = [
     icon: '❄️',
     active: true,
     subspecialties: [
-      { id: 'residential', name: 'Residencial', icon: '🏠', description: 'Split, janela, residências' },
-      { id: 'commercial', name: 'Comercial/Industrial', icon: '🏢', description: 'VRF, chiller, câmaras frias' },
-      { id: 'automotive_ac', name: 'Ar Automotivo', icon: '🚗', description: 'Ar condicionado veicular' },
+      {
+        id: 'residential',
+        icon: '🏠',
+        name: { 'pt-BR': 'Residencial', 'en-US': 'Residential', 'es-ES': 'Residencial' },
+        description: { 'pt-BR': 'Split, janela, residências', 'en-US': 'Split, window units, residential', 'es-ES': 'Split, ventana, residencial' },
+      },
+      {
+        id: 'commercial',
+        icon: '🏢',
+        name: { 'pt-BR': 'Comercial/Industrial', 'en-US': 'Commercial/Industrial', 'es-ES': 'Comercial/Industrial' },
+        description: { 'pt-BR': 'VRF, chiller, câmaras frias', 'en-US': 'VRF, chiller, cold rooms', 'es-ES': 'VRF, chiller, cámaras frigoríficas' },
+      },
+      {
+        id: 'automotive_ac',
+        icon: '🚗',
+        name: { 'pt-BR': 'Ar Automotivo', 'en-US': 'Automotive AC', 'es-ES': 'AC Automotriz' },
+        description: { 'pt-BR': 'Ar condicionado veicular', 'en-US': 'Vehicle air conditioning', 'es-ES': 'Aire acondicionado vehicular' },
+      },
     ],
     customFields: [
       // Labels customizados
@@ -288,10 +323,30 @@ const SEGMENTS = [
     icon: '💻',
     active: true,
     subspecialties: [
-      { id: 'desktop', name: 'Desktop/PC', icon: '🖥️', description: 'Montagem, upgrade, formatação' },
-      { id: 'notebook', name: 'Notebooks', icon: '💻', description: 'Reparo de tela, teclado, bateria' },
-      { id: 'networks', name: 'Redes', icon: '🌐', description: 'Cabeamento, switches, Wi-Fi' },
-      { id: 'servers', name: 'Servidores', icon: '🖧', description: 'RAID, backup, virtualização' },
+      {
+        id: 'desktop',
+        icon: '🖥️',
+        name: { 'pt-BR': 'Desktop/PC', 'en-US': 'Desktop/PC', 'es-ES': 'Desktop/PC' },
+        description: { 'pt-BR': 'Montagem, upgrade, formatação', 'en-US': 'Assembly, upgrade, formatting', 'es-ES': 'Ensamblaje, actualización, formateo' },
+      },
+      {
+        id: 'notebook',
+        icon: '💻',
+        name: { 'pt-BR': 'Notebooks', 'en-US': 'Laptops', 'es-ES': 'Portátiles' },
+        description: { 'pt-BR': 'Reparo de tela, teclado, bateria', 'en-US': 'Screen, keyboard, battery repair', 'es-ES': 'Reparación de pantalla, teclado, batería' },
+      },
+      {
+        id: 'networks',
+        icon: '🌐',
+        name: { 'pt-BR': 'Redes', 'en-US': 'Networks', 'es-ES': 'Redes' },
+        description: { 'pt-BR': 'Cabeamento, switches, Wi-Fi', 'en-US': 'Cabling, switches, Wi-Fi', 'es-ES': 'Cableado, switches, Wi-Fi' },
+      },
+      {
+        id: 'servers',
+        icon: '🖧',
+        name: { 'pt-BR': 'Servidores', 'en-US': 'Servers', 'es-ES': 'Servidores' },
+        description: { 'pt-BR': 'RAID, backup, virtualização', 'en-US': 'RAID, backup, virtualization', 'es-ES': 'RAID, backup, virtualización' },
+      },
     ],
     customFields: [
       // Labels customizados
@@ -492,10 +547,30 @@ const SEGMENTS = [
     icon: '📹',
     active: true,
     subspecialties: [
-      { id: 'cctv', name: 'CFTV', icon: '📹', description: 'Câmeras, DVR/NVR, monitoramento' },
-      { id: 'alarms', name: 'Alarmes', icon: '🚨', description: 'Sensores, centrais, monitoramento 24h' },
-      { id: 'access', name: 'Controle de Acesso', icon: '🔐', description: 'Biometria, catracas, RFID' },
-      { id: 'fence', name: 'Cerca Elétrica', icon: '⚡', description: 'Central de choque, hastes' },
+      {
+        id: 'cctv',
+        icon: '📹',
+        name: { 'pt-BR': 'CFTV', 'en-US': 'CCTV', 'es-ES': 'CCTV' },
+        description: { 'pt-BR': 'Câmeras, DVR/NVR, monitoramento', 'en-US': 'Cameras, DVR/NVR, monitoring', 'es-ES': 'Cámaras, DVR/NVR, monitoreo' },
+      },
+      {
+        id: 'alarms',
+        icon: '🚨',
+        name: { 'pt-BR': 'Alarmes', 'en-US': 'Alarms', 'es-ES': 'Alarmas' },
+        description: { 'pt-BR': 'Sensores, centrais, monitoramento 24h', 'en-US': 'Sensors, panels, 24h monitoring', 'es-ES': 'Sensores, centrales, monitoreo 24h' },
+      },
+      {
+        id: 'access',
+        icon: '🔐',
+        name: { 'pt-BR': 'Controle de Acesso', 'en-US': 'Access Control', 'es-ES': 'Control de Acceso' },
+        description: { 'pt-BR': 'Biometria, catracas, RFID', 'en-US': 'Biometrics, turnstiles, RFID', 'es-ES': 'Biometría, torniquetes, RFID' },
+      },
+      {
+        id: 'fence',
+        icon: '⚡',
+        name: { 'pt-BR': 'Cerca Elétrica', 'en-US': 'Electric Fence', 'es-ES': 'Cerca Eléctrica' },
+        description: { 'pt-BR': 'Central de choque, hastes', 'en-US': 'Energizers, rods', 'es-ES': 'Energizadores, varillas' },
+      },
     ],
     customFields: [
       // Labels customizados

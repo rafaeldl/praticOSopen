@@ -41,6 +41,16 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
   bool _isCreating = false;
   String _statusMessage = '';
 
+  /// Obtém o locale atual do dispositivo
+  String get _currentLocale {
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    final languageTag = '${locale.languageCode}-${locale.countryCode ?? ''}';
+    // Mapeia para os locales suportados
+    if (languageTag.startsWith('pt')) return 'pt-BR';
+    if (languageTag.startsWith('es')) return 'es-ES';
+    return 'en-US';
+  }
+
   Future<String?> _uploadLogo(String companyId) async {
     if (widget.logoFile == null) return null;
     try {
@@ -120,6 +130,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
             segmentId: widget.segmentId,
             subspecialties: widget.subspecialties,
             userAggr: dbUser.toAggr(),
+            locale: _currentLocale,
           );
         }
       } else {
@@ -161,6 +172,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
             segmentId: widget.segmentId,
             subspecialties: widget.subspecialties,
             userAggr: userAggr,
+            locale: _currentLocale,
           );
         }
       }

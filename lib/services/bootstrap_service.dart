@@ -65,6 +65,21 @@ class BootstrapService {
   final DeviceRepositoryV2 _deviceRepo = DeviceRepositoryV2();
   final CustomerRepositoryV2 _customerRepo = CustomerRepositoryV2();
 
+  /// Extrai string localizada de um valor que pode ser:
+  /// - String simples: retorna diretamente
+  /// - Map com traduções: { 'pt-BR': '...', 'en-US': '...' } → extrai locale
+  String? _localizedString(dynamic value, String locale) {
+    if (value == null) return null;
+    if (value is String) return value;
+    if (value is Map) {
+      // Tenta locale exato, depois fallback para pt-BR, depois primeiro disponível
+      return value[locale] as String? ??
+          value['pt-BR'] as String? ??
+          (value.values.isNotEmpty ? value.values.first as String? : null);
+    }
+    return value.toString();
+  }
+
   /// Busca dados de bootstrap do Firestore
   Future<Map<String, dynamic>?> getBootstrapData(
     String segmentId,
@@ -167,6 +182,7 @@ class BootstrapService {
     required String segmentId,
     required List<String> subspecialties,
     required UserAggr userAggr,
+    String locale = 'pt-BR',
   }) async {
     // Resultado
     final List<String> createdServices = [];
@@ -190,7 +206,7 @@ class BootstrapService {
     // 3. Criar serviços
     final services = (mergedData['services'] as List?) ?? [];
     for (final serviceData in services) {
-      final name = serviceData['name'] as String?;
+      final name = _localizedString(serviceData['name'], locale);
       if (name == null) continue;
 
       if (existingServices.contains(name)) {
@@ -214,7 +230,7 @@ class BootstrapService {
     // 4. Criar produtos
     final products = (mergedData['products'] as List?) ?? [];
     for (final productData in products) {
-      final name = productData['name'] as String?;
+      final name = _localizedString(productData['name'], locale);
       if (name == null) continue;
 
       if (existingProducts.contains(name)) {
@@ -238,7 +254,7 @@ class BootstrapService {
     // 5. Criar equipamentos
     final devices = (mergedData['devices'] as List?) ?? [];
     for (final deviceData in devices) {
-      final name = deviceData['name'] as String?;
+      final name = _localizedString(deviceData['name'], locale);
       if (name == null) continue;
 
       if (existingDevices.contains(name)) {
@@ -248,8 +264,8 @@ class BootstrapService {
 
       final device = Device()
         ..name = name
-        ..manufacturer = deviceData['manufacturer'] as String?
-        ..category = deviceData['category'] as String?
+        ..manufacturer = _localizedString(deviceData['manufacturer'], locale)
+        ..category = _localizedString(deviceData['category'], locale)
         ..company = Global.companyAggr
         ..createdAt = DateTime.now()
         ..createdBy = userAggr
@@ -263,11 +279,14 @@ class BootstrapService {
     // 6. Criar cliente de exemplo
     final customerData = mergedData['customer'] as Map<String, dynamic>?;
     if (customerData != null) {
-      final customerName = customerData['name'] as String?;
+      final customerName = _localizedString(customerData['name'], locale);
       if (customerName != null) {
-        // Verifica se já existe cliente com "(Exemplo)" no nome
-        final hasExampleCustomer =
-            existingCustomers.any((name) => name.contains('(Exemplo)'));
+        // Verifica se já existe cliente de exemplo
+        // Checa por "(Exemplo)", "(Example)", "(Ejemplo)"
+        final hasExampleCustomer = existingCustomers.any((name) =>
+            name.contains('(Exemplo)') ||
+            name.contains('(Example)') ||
+            name.contains('(Ejemplo)'));
 
         if (hasExampleCustomer) {
           skippedCustomers.add(customerName);
@@ -276,7 +295,7 @@ class BootstrapService {
             ..name = customerName
             ..phone = customerData['phone'] as String?
             ..email = customerData['email'] as String?
-            ..address = customerData['address'] as String?
+            ..address = _localizedString(customerData['address'], locale)
             ..company = Global.companyAggr
             ..createdAt = DateTime.now()
             ..createdBy = userAggr
