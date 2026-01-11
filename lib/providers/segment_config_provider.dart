@@ -28,7 +28,7 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Define se o device deve ser exibido na listagem de OS
   /// Por enquanto, true para todos os segmentos
   bool get showDeviceInOrderList {
-    // TODO: Configurar por segmento quando necessário
+    // Configurar por segmento quando necessário
     // Segmentos onde device é importante: automotive, hvac, smartphones, computers, appliances, printers
     // Segmentos onde device é menos relevante: electrical, plumbing, security, solar, other
     return true;

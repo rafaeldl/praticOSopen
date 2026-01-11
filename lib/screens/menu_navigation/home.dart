@@ -29,6 +29,7 @@ class _HomeState extends State<Home> {
   String _searchQuery = '';
   final AuthorizationService _authService = AuthorizationService.instance;
   late OrderStore orderStore;
+  bool _showFilterChips = false;
 
   List<Map<String, dynamic>> _getFilters(SegmentConfigProvider config) {
     final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
@@ -124,13 +125,30 @@ class _HomeState extends State<Home> {
       backgroundColor: CupertinoColors.systemGroupedBackground,
       child: Material(
         type: MaterialType.transparency,
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            _buildNavigationBar(context, config),
-            _buildActiveFilterHeader(config),
-            _buildSearchField(config),
-            _buildOrdersList(config),
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            // Show filter chips when user overscrolls at top (pulls down)
+            if (notification is OverscrollNotification) {
+              if (notification.overscroll < 0 && !_showFilterChips) {
+                setState(() => _showFilterChips = true);
+              }
+            }
+            // Also show when scrolled to top
+            if (notification is ScrollUpdateNotification) {
+              if (notification.metrics.pixels <= 0 && !_showFilterChips) {
+                setState(() => _showFilterChips = true);
+              }
+            }
+            return false;
+          },
+          child: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              _buildNavigationBar(context, config),
+              _buildActiveFilterHeader(config),
+              _buildSearchField(config),
+              _buildFilterChips(config),
+              _buildOrdersList(config),
             SliverToBoxAdapter(
                child: Observer(builder: (_) {
                  if (orderStore.isLoading && orderStore.orders.isNotEmpty) {
@@ -174,8 +192,9 @@ class _HomeState extends State<Home> {
 
                  return const SizedBox(height: 100); // Bottom padding to clear TabBar
                }),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -191,20 +210,6 @@ class _HomeState extends State<Home> {
         builder: (_) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Semantics(
-              identifier: 'filter_button',
-              button: true,
-              label: config.label(LabelKeys.filter),
-              child: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: Icon(
-                  currentSelected == 0
-                      ? CupertinoIcons.line_horizontal_3_decrease_circle
-                      : CupertinoIcons.line_horizontal_3_decrease_circle_fill,
-                ),
-                onPressed: () => _showFilterOptions(context, config),
-              ),
-            ),
             if (_authService.hasPermission(PermissionType.viewFinancialReports))
               Semantics(
                 identifier: 'dashboard_button',
@@ -234,51 +239,6 @@ class _HomeState extends State<Home> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  void _showFilterOptions(BuildContext context, SegmentConfigProvider config) {
-    final filters = _getFilters(config);
-    showCupertinoModalPopup(
-      context: context,
-      builder: (context) => CupertinoActionSheet(
-        title: Text('${config.label(LabelKeys.filter)} por Status'),
-        actions: filters.asMap().entries.map((entry) {
-          final index = entry.key;
-          final filter = entry.value;
-          final isSelected = currentSelected == index;
-          
-          return CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isSelected) ...[
-                  const Icon(CupertinoIcons.checkmark, size: 16),
-                  const SizedBox(width: 8),
-                ],
-                Text(
-                  filter['status'] as String,
-                  style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
-              ],
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              if (currentSelected != index) {
-                HapticFeedback.selectionClick();
-                setState(() => currentSelected = index);
-                orderStore.loadOrdersInfinite(filters[index]['field']);
-              }
-            },
-          );
-        }).toList(),
-        cancelButton: CupertinoActionSheetAction(
-          child: Text(config.label(LabelKeys.cancel)),
-          onPressed: () => Navigator.pop(context),
         ),
       ),
     );
@@ -340,7 +300,7 @@ class _HomeState extends State<Home> {
   Widget _buildSearchField(SegmentConfigProvider config) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         child: CupertinoSearchTextField(
           controller: _searchController,
           placeholder: 'Buscar ${config.serviceOrderPlural}',
@@ -350,6 +310,115 @@ class _HomeState extends State<Home> {
         ),
       ),
     );
+  }
+
+  Widget _buildFilterChips(SegmentConfigProvider config) {
+    final filters = _getFilters(config);
+
+    return SliverToBoxAdapter(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+        height: _showFilterChips ? 36 : 0,
+        clipBehavior: Clip.hardEdge,
+        decoration: const BoxDecoration(),
+        margin: EdgeInsets.only(
+          top: _showFilterChips ? 12 : 0,
+          bottom: 8,
+        ),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          opacity: _showFilterChips ? 1.0 : 0.0,
+          child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: filters.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final filter = filters[index];
+            final isSelected = currentSelected == index;
+            final chipColor = _getFilterChipColor(filter['field']);
+
+            return GestureDetector(
+              onTap: () {
+                if (currentSelected != index) {
+                  HapticFeedback.selectionClick();
+                  setState(() => currentSelected = index);
+                  orderStore.loadOrdersInfinite(filter['field']);
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isSelected ? 14 : 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? chipColor
+                      : CupertinoColors.systemGrey5.resolveFrom(context),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      filter['icon'] as IconData,
+                      size: 16,
+                      color: isSelected
+                          ? CupertinoColors.white
+                          : CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      child: isSelected
+                          ? Padding(
+                              padding: const EdgeInsets.only(left: 6),
+                              child: Text(
+                                filter['status'] as String,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: CupertinoColors.white,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color _getFilterChipColor(String? field) {
+    switch (field) {
+      case 'approved':
+        return CupertinoColors.systemBlue;
+      case 'progress':
+        return CupertinoColors.systemPurple;
+      case 'quote':
+        return CupertinoColors.systemOrange;
+      case 'done':
+        return CupertinoColors.systemGreen;
+      case 'canceled':
+        return CupertinoColors.systemRed;
+      case 'due_date':
+        return CupertinoColors.systemTeal;
+      case 'unpaid':
+        return CupertinoColors.systemOrange;
+      case 'paid':
+        return CupertinoColors.systemGreen;
+      default:
+        return CupertinoColors.activeBlue;
+    }
   }
 
   Widget _buildOrdersList(SegmentConfigProvider config) {
