@@ -64,28 +64,37 @@ class AuthService {
   /// 2. User document (`/users/{userId}`)
   /// 3. If user is sole owner, deletes the company and all its data
   Future<void> deleteUserData(String userId) async {
+    print('🗑️  Starting deleteUserData for userId: $userId');
+
     // 1. Get user document to find all companies
     var userDoc = await _db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
+      print('⚠️  User document does not exist');
       return; // User doesn't exist in Firestore
     }
 
     var userData = userDoc.data();
     List<dynamic>? companies = userData?['companies'];
+    print('📋 User has ${companies?.length ?? 0} company associations');
 
     if (companies != null) {
       for (var companyRole in companies) {
         var companyId = companyRole['company']?['id'];
         if (companyId != null) {
+          print('🏢 Processing company: $companyId');
+
           // Check if user is the owner of the company
           var companyDoc = await _db.collection('companies').doc(companyId).get();
 
           if (companyDoc.exists) {
             var companyData = companyDoc.data();
             var ownerId = companyData?['ownerId'];
+            print('👤 Company owner: $ownerId, Current user: $userId');
 
             // If user is the owner
             if (ownerId == userId) {
+              print('✓ User is owner of company $companyId');
+
               // Check if there are other members in the company
               var memberships = await _db
                   .collection('companies')
@@ -93,13 +102,18 @@ class AuthService {
                   .collection('memberships')
                   .get();
 
+              print('👥 Total memberships: ${memberships.docs.length}');
+
               // Count members excluding the owner (who is leaving)
               var otherMembersCount = memberships.docs
                   .where((doc) => doc.id != userId)
                   .length;
 
+              print('👥 Other members count: $otherMembersCount');
+
               if (otherMembersCount > 0) {
                 // Company has other members - cannot delete
+                print('❌ Cannot delete: company has other members');
                 throw Exception(
                   'Você é o proprietário de uma empresa com outros membros. '
                   'Transfira a propriedade ou remova os membros antes de excluir sua conta.'
@@ -107,24 +121,33 @@ class AuthService {
               }
 
               // User is sole owner - can delete entire company
+              print('🗑️  Deleting entire company $companyId (sole owner)');
               await _deleteCompanyAndData(companyId);
+              print('✅ Company $companyId deleted successfully');
             } else {
               // If user is not the owner, only delete their membership
+              print('🗑️  User is collaborator, removing membership only');
               var membershipRef = _db
                   .collection('companies')
                   .doc(companyId)
                   .collection('memberships')
                   .doc(userId);
               await membershipRef.delete();
+              print('✅ Membership removed for company $companyId');
             }
+          } else {
+            print('⚠️  Company document $companyId does not exist');
           }
         }
       }
     }
 
     // 2. Delete user document
+    print('🗑️  Deleting user document');
     var userRef = _db.collection('users').doc(userId);
     await userRef.delete();
+    print('✅ User document deleted');
+    print('✅ deleteUserData completed successfully');
   }
 
   /// Deletes a company and all its data recursively
@@ -132,22 +155,31 @@ class AuthService {
   /// - All nested documents within those subcollections
   /// - All files in Cloud Storage under tenants/{companyId}/
   Future<void> _deleteCompanyAndData(String companyId) async {
+    print('🗑️  _deleteCompanyAndData started for company: $companyId');
+
     // 1. Delete all files from Cloud Storage
+    print('📦 Deleting Cloud Storage files...');
     try {
       final storageRef = FirebaseStorage.instance.ref('tenants/$companyId');
       await _deleteStorageFolder(storageRef);
+      print('✅ Cloud Storage files deleted');
     } catch (e) {
-      print('Warning: Error deleting company storage: $e');
+      print('⚠️  Warning: Error deleting company storage: $e');
       // Continue with Firestore deletion even if storage deletion fails
     }
 
     // 2. Delete all Firestore subcollections recursively
+    print('📄 Deleting Firestore subcollections...');
     await _deleteCollectionRecursively(
       _db.collection('companies').doc(companyId),
     );
+    print('✅ Firestore subcollections deleted');
 
     // 3. Delete the company document itself
+    print('📄 Deleting company document...');
     await _db.collection('companies').doc(companyId).delete();
+    print('✅ Company document deleted');
+    print('✅ _deleteCompanyAndData completed for company: $companyId');
   }
 
   /// Recursively deletes all documents in known company subcollections
@@ -175,6 +207,10 @@ class AuthService {
         final collection = documentRef.collection(collectionName);
         final docs = await collection.get();
 
+        if (docs.docs.isNotEmpty) {
+          print('  🗑️  Deleting $collectionName: ${docs.docs.length} documents');
+        }
+
         for (final doc in docs.docs) {
           // Recursively delete subcollections of each document
           await _deleteCollectionRecursively(doc.reference);
@@ -182,8 +218,12 @@ class AuthService {
           // Delete the document itself
           await doc.reference.delete();
         }
+
+        if (docs.docs.isNotEmpty) {
+          print('  ✅ Deleted $collectionName');
+        }
       } catch (e) {
-        print('Warning: Error deleting $collectionName: $e');
+        print('  ⚠️  Warning: Error deleting $collectionName: $e');
         // Continue with next collection if one fails
       }
     }
@@ -195,6 +235,9 @@ class AuthService {
       final ListResult listResult = await folderRef.listAll();
 
       // Delete all files
+      if (listResult.items.isNotEmpty) {
+        print('  📦 Deleting ${listResult.items.length} files from ${folderRef.fullPath}');
+      }
       for (final Reference file in listResult.items) {
         await file.delete();
       }
@@ -203,8 +246,12 @@ class AuthService {
       for (final Reference folder in listResult.prefixes) {
         await _deleteStorageFolder(folder);
       }
+
+      if (listResult.items.isNotEmpty || listResult.prefixes.isNotEmpty) {
+        print('  ✅ Deleted storage folder: ${folderRef.fullPath}');
+      }
     } catch (e) {
-      print('Warning: Error listing/deleting storage folder: $e');
+      print('  ⚠️  Warning: Error listing/deleting storage folder: $e');
     }
   }
 }
