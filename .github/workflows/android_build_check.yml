@@ -8,6 +8,11 @@ on:
       - 'pubspec.yaml'
       - 'pubspec.lock'
 
+# Cancel previous runs for the same PR
+concurrency:
+  group: android-build-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   build-check:
     runs-on: ubuntu-latest

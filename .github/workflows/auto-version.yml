@@ -184,12 +184,12 @@ jobs:
 
           echo "🚀 Triggering release workflows for $NEW_TAG..."
 
-          # Trigger Android release
-          gh workflow run android_release.yml --ref "$NEW_TAG"
+          # Trigger from master (for latest workflow config) with tag as input
+          # This ensures concurrency settings are always up-to-date
+          gh workflow run android_release.yml --ref master -f tag="$NEW_TAG"
           echo "✅ Android release triggered"
 
-          # Trigger iOS release
-          gh workflow run ios_release.yml --ref "$NEW_TAG"
+          gh workflow run ios_release.yml --ref master -f tag="$NEW_TAG"
           echo "✅ iOS release triggered"
 
       - name: Summary
