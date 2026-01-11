@@ -149,11 +149,27 @@ jobs:
 
           git tag -a "$NEW_TAG" -m "Release $NEW_TAG"
 
-          # Push tag using PAT to trigger other workflows
+          # Push tag using PAT
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
           git push origin "$NEW_TAG"
 
           echo "🏷️ Created and pushed tag: $NEW_TAG"
+
+      - name: Trigger release workflows
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          NEW_TAG="${{ steps.version.outputs.new_tag }}"
+
+          echo "🚀 Triggering release workflows for $NEW_TAG..."
+
+          # Trigger Android release
+          gh workflow run android_release.yml --ref "$NEW_TAG"
+          echo "✅ Android release triggered"
+
+          # Trigger iOS release
+          gh workflow run ios_release.yml --ref "$NEW_TAG"
+          echo "✅ iOS release triggered"
 
       - name: Summary
         run: |
