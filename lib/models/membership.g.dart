@@ -10,7 +10,11 @@ Membership _$MembershipFromJson(Map<String, dynamic> json) => Membership(
   user: json['user'] == null
       ? null
       : UserAggr.fromJson(json['user'] as Map<String, dynamic>),
-  role: $enumDecodeNullable(_$RolesTypeEnumMap, json['role']),
+  role: $enumDecodeNullable(
+    _$RolesTypeEnumMap,
+    json['role'],
+    unknownValue: RolesType.technician,
+  ),
   joinedAt: const TimestampConverter().fromJson(json['joinedAt']),
 );
 

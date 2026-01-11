@@ -34,13 +34,3 @@ const _$PaymentTransactionTypeEnumMap = {
   PaymentTransactionType.payment: 'payment',
   PaymentTransactionType.discount: 'discount',
 };
-
-T $enumDecode<T>(Map<T, dynamic> enumValues, Object? source) {
-  for (final entry in enumValues.entries) {
-    if (entry.value == source) {
-      return entry.key;
-    }
-  }
-  throw ArgumentError('`$source` is not one of the supported values: '
-      '${enumValues.values.join(', ')}');
-}

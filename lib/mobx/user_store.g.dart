@@ -24,8 +24,10 @@ mixin _$UserStore on _UserStore, Store {
     });
   }
 
-  late final _$isUploadingAtom =
-      Atom(name: '_UserStore.isUploading', context: context);
+  late final _$isUploadingAtom = Atom(
+    name: '_UserStore.isUploading',
+    context: context,
+  );
 
   @override
   bool get isUploading {
@@ -67,8 +69,9 @@ mixin _$UserStore on _UserStore, Store {
 
   @override
   Future<void> updateUserProfile(User user) {
-    return _$updateUserProfileAsyncAction
-        .run(() => super.updateUserProfile(user));
+    return _$updateUserProfileAsyncAction.run(
+      () => super.updateUserProfile(user),
+    );
   }
 
   late final _$uploadUserPhotoAsyncAction = AsyncAction(
@@ -78,8 +81,9 @@ mixin _$UserStore on _UserStore, Store {
 
   @override
   Future<String?> uploadUserPhoto(File file, User user) {
-    return _$uploadUserPhotoAsyncAction
-        .run(() => super.uploadUserPhoto(file, user));
+    return _$uploadUserPhotoAsyncAction.run(
+      () => super.uploadUserPhoto(file, user),
+    );
   }
 
   @override

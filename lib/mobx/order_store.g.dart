@@ -38,6 +38,28 @@ mixin _$OrderStore on _OrderStore, Store {
         () => super.customerInitials,
         name: '_OrderStore.customerInitials',
       )).value;
+  Computed<double>? _$remainingBalanceComputed;
+
+  @override
+  double get remainingBalance =>
+      (_$remainingBalanceComputed ??= Computed<double>(
+        () => super.remainingBalance,
+        name: '_OrderStore.remainingBalance',
+      )).value;
+  Computed<bool>? _$isFullyPaidComputed;
+
+  @override
+  bool get isFullyPaid => (_$isFullyPaidComputed ??= Computed<bool>(
+    () => super.isFullyPaid,
+    name: '_OrderStore.isFullyPaid',
+  )).value;
+  Computed<bool>? _$hasPartialPaymentComputed;
+
+  @override
+  bool get hasPartialPayment => (_$hasPartialPaymentComputed ??= Computed<bool>(
+    () => super.hasPartialPayment,
+    name: '_OrderStore.hasPartialPayment',
+  )).value;
   Computed<List<Order?>>? _$filteredOrdersComputed;
 
   @override
@@ -75,32 +97,6 @@ mixin _$OrderStore on _OrderStore, Store {
       (_$formattedCreatedDateComputed ??= Computed<String>(
         () => super.formattedCreatedDate,
         name: '_OrderStore.formattedCreatedDate',
-      )).value;
-
-  Computed<double>? _$remainingBalanceComputed;
-
-  @override
-  double get remainingBalance =>
-      (_$remainingBalanceComputed ??= Computed<double>(
-        () => super.remainingBalance,
-        name: '_OrderStore.remainingBalance',
-      )).value;
-
-  Computed<bool>? _$isFullyPaidComputed;
-
-  @override
-  bool get isFullyPaid => (_$isFullyPaidComputed ??= Computed<bool>(
-    () => super.isFullyPaid,
-    name: '_OrderStore.isFullyPaid',
-  )).value;
-
-  Computed<bool>? _$hasPartialPaymentComputed;
-
-  @override
-  bool get hasPartialPayment =>
-      (_$hasPartialPaymentComputed ??= Computed<bool>(
-        () => super.hasPartialPayment,
-        name: '_OrderStore.hasPartialPayment',
       )).value;
 
   late final _$orderListAtom = Atom(
@@ -1223,8 +1219,6 @@ createdAt: ${createdAt},
 total: ${total},
 discount: ${discount},
 payment: ${payment},
-paidAmount: ${paidAmount},
-transactions: ${transactions},
 customer: ${customer},
 device: ${device},
 customerFilter: ${customerFilter},
@@ -1232,6 +1226,8 @@ services: ${services},
 products: ${products},
 photos: ${photos},
 isUploadingPhoto: ${isUploadingPhoto},
+paidAmount: ${paidAmount},
+transactions: ${transactions},
 totalPaidAmount: ${totalPaidAmount},
 totalUnpaidAmount: ${totalUnpaidAmount},
 totalRevenue: ${totalRevenue},
@@ -1257,14 +1253,14 @@ customerName: ${customerName},
 deviceName: ${deviceName},
 devicePhoto: ${devicePhoto},
 customerInitials: ${customerInitials},
+remainingBalance: ${remainingBalance},
+isFullyPaid: ${isFullyPaid},
+hasPartialPayment: ${hasPartialPayment},
 filteredOrders: ${filteredOrders},
 canViewPrices: ${canViewPrices},
 canCreateOrder: ${canCreateOrder},
 canViewFinancialDashboard: ${canViewFinancialDashboard},
-formattedCreatedDate: ${formattedCreatedDate},
-remainingBalance: ${remainingBalance},
-isFullyPaid: ${isFullyPaid},
-hasPartialPayment: ${hasPartialPayment}
+formattedCreatedDate: ${formattedCreatedDate}
     ''';
   }
 }
