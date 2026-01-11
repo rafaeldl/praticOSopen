@@ -107,7 +107,6 @@ platform :android do
   end
   desc "Promote Internal to Production"
   lane :promote_to_production do |options|
-    skip_metadata = options[:skip_metadata] || false
     skip_screenshots = options[:skip_screenshots] || false
 
     upload_to_play_store(
@@ -115,8 +114,8 @@ platform :android do
       track_promote_to: 'production',
       skip_upload_apk: true,
       skip_upload_aab: true,
-      skip_upload_metadata: skip_metadata,
-      skip_upload_changelogs: true,
+      skip_upload_metadata: false,      # Always upload metadata
+      skip_upload_changelogs: false,    # Always upload changelogs
       skip_upload_images: skip_screenshots,
       skip_upload_screenshots: skip_screenshots
     )
