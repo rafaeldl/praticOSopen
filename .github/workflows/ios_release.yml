@@ -11,10 +11,10 @@ on:
         required: false
         type: string
 
-# Only one iOS release at a time - new runs wait in queue
+# Only one iOS release at a time - cancel previous if new one starts
 concurrency:
   group: ios-release
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   ios:

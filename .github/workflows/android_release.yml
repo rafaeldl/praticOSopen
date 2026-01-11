@@ -11,10 +11,10 @@ on:
         required: false
         type: string
 
-# Only one Android release at a time - new runs wait in queue
+# Only one Android release at a time - cancel previous if new one starts
 concurrency:
   group: android-release
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   android:
