@@ -202,14 +202,16 @@ jobs:
 
     permissions:
       contents: write
-      workflows: write
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Create production tag
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           RC_TAG="${{ needs.validate.outputs.rc_tag }}"
           PROD_TAG="${{ needs.validate.outputs.prod_tag }}"
@@ -220,6 +222,9 @@ jobs:
           # Configure git
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Configure remote with PAT
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git
 
           # Create production tag pointing to the same commit
           git tag -a "$PROD_TAG" "$COMMIT" -m "Production release $PROD_TAG (promoted from $RC_TAG)"
@@ -254,7 +259,7 @@ jobs:
               --notes "$RELEASE_NOTES"
           fi
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: Summary
         run: |
