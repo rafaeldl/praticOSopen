@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       rc_tag:
-        description: 'RC tag to promote (e.g., v1.0.3-rc)'
-        required: true
+        description: 'RC tag to promote (leave empty for latest -rc)'
+        required: false
         type: string
+        default: ''
       skip_android:
         description: 'Skip Android promotion'
         required: false
@@ -35,6 +36,19 @@ jobs:
         id: validate
         run: |
           RC_TAG="${{ inputs.rc_tag }}"
+
+          # If no tag provided, get the latest -rc tag
+          if [ -z "$RC_TAG" ]; then
+            echo "📌 No tag provided, fetching latest -rc tag..."
+            RC_TAG=$(git tag -l 'v*-rc' | sort -V | tail -1)
+
+            if [ -z "$RC_TAG" ]; then
+              echo "❌ No -rc tags found"
+              exit 1
+            fi
+
+            echo "📌 Found latest RC tag: $RC_TAG"
+          fi
 
           # Validate format
           if [[ ! "$RC_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc$ ]]; then
