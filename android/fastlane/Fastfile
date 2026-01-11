@@ -116,6 +116,7 @@ platform :android do
       skip_upload_apk: true,
       skip_upload_aab: true,
       skip_upload_metadata: skip_metadata,
+      skip_upload_changelogs: true,
       skip_upload_images: skip_screenshots,
       skip_upload_screenshots: skip_screenshots
     )
