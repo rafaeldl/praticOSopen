@@ -13,6 +13,9 @@ part 'user_role.g.dart';
 /// - [manager]: Financial management
 /// - [consultant]: Commercial profile
 /// - [technician]: Service execution
+///
+/// Note: Fields using this enum should have @JsonKey(unknownEnumValue: RolesType.technician)
+/// to prevent errors when legacy or invalid role data exists in Firestore.
 enum RolesType {
   /// 👨‍💼 Admin - Full system access
   /// Can: manage users, roles, permissions, access all areas,
@@ -43,6 +46,7 @@ enum RolesType {
 @JsonSerializable(explicitToJson: true)
 class UserRole extends BaseAuditCompany {
   UserAggr? user;
+  @JsonKey(unknownEnumValue: RolesType.technician)
   RolesType? role;
 
   UserRole();
@@ -58,6 +62,7 @@ class UserRole extends BaseAuditCompany {
 @JsonSerializable(explicitToJson: true)
 class UserRoleAggr {
   UserAggr? user;
+  @JsonKey(unknownEnumValue: RolesType.technician)
   RolesType? role;
 
   UserRoleAggr();
@@ -69,6 +74,7 @@ class UserRoleAggr {
 @JsonSerializable(explicitToJson: true)
 class CompanyRoleAggr {
   CompanyAggr? company;
+  @JsonKey(unknownEnumValue: RolesType.technician)
   RolesType? role;
 
   CompanyRoleAggr();

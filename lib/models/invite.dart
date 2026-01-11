@@ -16,6 +16,7 @@ class Invite {
   String? id;
   String? email;
   CompanyAggr? company;
+  @JsonKey(unknownEnumValue: RolesType.technician)
   RolesType? role;
   UserAggr? invitedBy;
   DateTime? createdAt;

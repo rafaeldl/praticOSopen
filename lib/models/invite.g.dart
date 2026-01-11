@@ -12,7 +12,11 @@ Invite _$InviteFromJson(Map<String, dynamic> json) => Invite()
   ..company = json['company'] == null
       ? null
       : CompanyAggr.fromJson(json['company'] as Map<String, dynamic>)
-  ..role = $enumDecodeNullable(_$RolesTypeEnumMap, json['role'])
+  ..role = $enumDecodeNullable(
+    _$RolesTypeEnumMap,
+    json['role'],
+    unknownValue: RolesType.technician,
+  )
   ..invitedBy = json['invitedBy'] == null
       ? null
       : UserAggr.fromJson(json['invitedBy'] as Map<String, dynamic>)
