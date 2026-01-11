@@ -11,6 +11,11 @@ on:
         required: false
         type: string
 
+# Only one iOS release at a time - new runs wait in queue
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+
 jobs:
   ios:
     runs-on: macos-14
