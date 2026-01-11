@@ -122,7 +122,7 @@ class BootstrapService {
       // Merge services (evita duplicatas por nome)
       final services = (data['services'] as List?) ?? [];
       for (final service in services) {
-        final name = service['name'] as String?;
+        final name = _localizedString(service['name'], 'pt-BR');
         if (name != null && !seenServiceNames.contains(name)) {
           seenServiceNames.add(name);
           servicesSet.add(Map<String, dynamic>.from(service));
@@ -132,7 +132,7 @@ class BootstrapService {
       // Merge products (evita duplicatas por nome)
       final products = (data['products'] as List?) ?? [];
       for (final product in products) {
-        final name = product['name'] as String?;
+        final name = _localizedString(product['name'], 'pt-BR');
         if (name != null && !seenProductNames.contains(name)) {
           seenProductNames.add(name);
           productsSet.add(Map<String, dynamic>.from(product));
