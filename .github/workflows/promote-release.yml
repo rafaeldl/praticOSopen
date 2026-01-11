@@ -1,0 +1,284 @@
+name: Promote Release to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      rc_tag:
+        description: 'RC tag to promote (e.g., v1.0.3-rc)'
+        required: true
+        type: string
+      skip_android:
+        description: 'Skip Android promotion'
+        required: false
+        type: boolean
+        default: false
+      skip_ios:
+        description: 'Skip iOS promotion'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      rc_tag: ${{ steps.validate.outputs.rc_tag }}
+      prod_tag: ${{ steps.validate.outputs.prod_tag }}
+      version: ${{ steps.validate.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate RC tag
+        id: validate
+        run: |
+          RC_TAG="${{ inputs.rc_tag }}"
+
+          # Validate format
+          if [[ ! "$RC_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc$ ]]; then
+            echo "❌ Invalid tag format. Must be like v1.0.3-rc"
+            exit 1
+          fi
+
+          # Check if RC tag exists
+          if ! git rev-parse "$RC_TAG" >/dev/null 2>&1; then
+            echo "❌ Tag $RC_TAG not found"
+            exit 1
+          fi
+
+          # Calculate production tag
+          PROD_TAG="${RC_TAG%-rc}"
+          VERSION="${PROD_TAG#v}"
+
+          # Check if production tag already exists
+          if git rev-parse "$PROD_TAG" >/dev/null 2>&1; then
+            echo "❌ Production tag $PROD_TAG already exists"
+            exit 1
+          fi
+
+          echo "rc_tag=$RC_TAG" >> $GITHUB_OUTPUT
+          echo "prod_tag=$PROD_TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          echo "✅ Promoting $RC_TAG → $PROD_TAG"
+
+  promote-android:
+    needs: validate
+    if: ${{ !inputs.skip_android }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Check for Metadata/Screenshot changes since RC tag
+      - name: Check for metadata changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          base: ${{ needs.validate.outputs.rc_tag }}
+          filters: |
+            screenshots:
+              - 'android/fastlane/metadata/android/*/images/**'
+            metadata:
+              - 'android/fastlane/metadata/**'
+
+      - name: Log metadata status
+        run: |
+          echo "📸 Screenshots changed: ${{ steps.filter.outputs.screenshots }}"
+          echo "📝 Metadata changed: ${{ steps.filter.outputs.metadata }}"
+
+      # Download AAB from RC release
+      - name: Download AAB from RC release
+        run: |
+          mkdir -p artifacts
+          gh release download "${{ needs.validate.outputs.rc_tag }}" \
+            --pattern "*.aab" \
+            --dir ./artifacts
+
+          echo "📦 Downloaded artifacts:"
+          ls -la artifacts/
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Setup Ruby + Bundler
+      - name: Ruby (bundler cache)
+        uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GEMFILE: android/Gemfile
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      # Decode Play Store Credentials
+      - name: Decode Play Store Credentials
+        run: |
+          echo "${{ secrets.ANDROID_PLAY_STORE_CREDENTIALS_BASE64 }}" | base64 --decode > android/fastlane/play_store_credentials.json
+
+      # Upload to Production (no rebuild!)
+      - name: Upload to Production
+        working-directory: android
+        env:
+          FASTLANE_SKIP_UPDATE_CHECK: "true"
+          CI: "true"
+        run: |
+          bundle exec fastlane supply \
+            --aab ../artifacts/app-release.aab \
+            --track production \
+            --skip_upload_apk true \
+            --skip_upload_metadata ${{ steps.filter.outputs.metadata == 'false' }} \
+            --skip_upload_images ${{ steps.filter.outputs.screenshots == 'false' }} \
+            --skip_upload_screenshots ${{ steps.filter.outputs.screenshots == 'false' }}
+
+      - name: Summary
+        run: |
+          echo "✅ Android promoted to production!"
+          echo "   - Metadata uploaded: ${{ steps.filter.outputs.metadata }}"
+          echo "   - Screenshots uploaded: ${{ steps.filter.outputs.screenshots }}"
+
+  promote-ios:
+    needs: validate
+    if: ${{ !inputs.skip_ios }}
+    runs-on: macos-14
+    env:
+      BUNDLE_ID: br.com.rafsoft.praticos
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Check for Metadata/Screenshot changes since RC tag
+      - name: Check for metadata changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          base: ${{ needs.validate.outputs.rc_tag }}
+          filters: |
+            screenshots:
+              - 'ios/fastlane/screenshots/**'
+            metadata:
+              - 'ios/fastlane/metadata/**'
+
+      - name: Log metadata status
+        run: |
+          echo "📸 Screenshots changed: ${{ steps.filter.outputs.screenshots }}"
+          echo "📝 Metadata changed: ${{ steps.filter.outputs.metadata }}"
+
+      # Download IPA from RC release
+      - name: Download IPA from RC release
+        id: download
+        run: |
+          mkdir -p artifacts
+          gh release download "${{ needs.validate.outputs.rc_tag }}" \
+            --pattern "*.ipa" \
+            --dir ./artifacts
+
+          echo "📦 Downloaded artifacts:"
+          ls -la artifacts/
+
+          # Find the IPA file
+          IPA_PATH=$(find artifacts -name "*.ipa" -type f | head -1)
+          echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Setup Ruby + Bundler
+      - name: Ruby (bundler cache)
+        uses: ruby/setup-ruby@v1
+        env:
+          BUNDLE_GEMFILE: ios/Gemfile
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+
+      # Upload to App Store (no rebuild!)
+      - name: Upload to App Store
+        working-directory: ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_PRIVATE_KEY }}
+          FASTLANE_SKIP_UPDATE_CHECK: "true"
+          CI: "true"
+        run: |
+          IPA_PATH="${{ steps.download.outputs.ipa_path }}"
+          bundle exec fastlane deliver \
+            --ipa "../$IPA_PATH" \
+            --skip_screenshots ${{ steps.filter.outputs.screenshots == 'false' }} \
+            --skip_metadata ${{ steps.filter.outputs.metadata == 'false' }} \
+            --force true \
+            --submit_for_review false \
+            --run_precheck_before_submit false
+
+      - name: Summary
+        run: |
+          echo "✅ iOS promoted to App Store!"
+          echo "   - Metadata uploaded: ${{ steps.filter.outputs.metadata }}"
+          echo "   - Screenshots uploaded: ${{ steps.filter.outputs.screenshots }}"
+
+  create-production-tag:
+    needs: [validate, promote-android, promote-ios]
+    # Run even if one platform was skipped
+    if: always() && needs.validate.result == 'success' && (needs.promote-android.result == 'success' || needs.promote-android.result == 'skipped') && (needs.promote-ios.result == 'success' || needs.promote-ios.result == 'skipped')
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create production tag
+        run: |
+          RC_TAG="${{ needs.validate.outputs.rc_tag }}"
+          PROD_TAG="${{ needs.validate.outputs.prod_tag }}"
+
+          # Get the commit from RC tag
+          COMMIT=$(git rev-list -n 1 "$RC_TAG")
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create production tag pointing to the same commit
+          git tag -a "$PROD_TAG" "$COMMIT" -m "Production release $PROD_TAG (promoted from $RC_TAG)"
+          git push origin "$PROD_TAG"
+
+          echo "🏷️ Created production tag: $PROD_TAG"
+
+      - name: Update GitHub Release
+        run: |
+          PROD_TAG="${{ needs.validate.outputs.prod_tag }}"
+          RC_TAG="${{ needs.validate.outputs.rc_tag }}"
+          VERSION="${{ needs.validate.outputs.version }}"
+
+          # Update the RC release to be the production release
+          gh release edit "$RC_TAG" \
+            --title "Release $VERSION" \
+            --prerelease=false \
+            --notes "## Production Release
+
+          **Version:** $VERSION
+          **Promoted from:** $RC_TAG
+
+          This release has been promoted to production on both Google Play and App Store."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## 🚀 Promotion Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| RC Tag | ${{ needs.validate.outputs.rc_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Production Tag | ${{ needs.validate.outputs.prod_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ needs.validate.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The same binaries that were tested in RC are now in production!" >> $GITHUB_STEP_SUMMARY

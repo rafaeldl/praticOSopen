@@ -3,15 +3,37 @@ name: Release Android
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*-rc'  # Only trigger on RC tags
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build (e.g., v1.0.0-rc)'
+        required: false
+        type: string
 
 jobs:
   android:
     runs-on: ubuntu-latest
 
+    outputs:
+      version_name: ${{ steps.version.outputs.version_name }}
+      version_code: ${{ steps.version.outputs.version_code }}
+
     steps:
       - uses: actions/checkout@v4
+
+      # Extract version from tag
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${{ github.ref_name }}"
+          # Remove 'v' prefix and '-rc' suffix
+          VERSION="${TAG#v}"
+          VERSION="${VERSION%-rc}"
+
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version_name=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Building version: $VERSION from tag: $TAG"
 
       # Setup Java
       - name: Setup Java
@@ -40,18 +62,6 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      # 🔍 Check for Metadata/Screenshot changes (only for production releases)
-      - name: Check for metadata changes
-        if: "!endsWith(github.ref, '-rc')"
-        uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            screenshots:
-              - 'android/fastlane/metadata/android/*/images/**'
-            metadata:
-              - 'android/fastlane/metadata/**'
-
       # 🔐 Restore Secrets
       
       - name: Make gradlew executable
@@ -72,25 +82,33 @@ jobs:
         run: |
           echo "${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 --decode > android/app/google-services.json
 
-      # 🚀 Build + Upload to Internal Track (apenas release candidate com -rc)
+      # 🚀 Build + Upload to Internal Track
       - name: Fastlane Internal (Google Play)
-        if: endsWith(github.ref, '-rc')
+        id: fastlane
         working-directory: android
         env:
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
         run: bundle exec fastlane internal
 
-      # 🚀 Build + Upload to Production (apenas tags v* sem -rc)
-      - name: Fastlane Release (Production)
-        if: "!endsWith(github.ref, '-rc')"
-        working-directory: android
+      # 📦 Upload AAB to GitHub Release
+      - name: Upload AAB to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "Release ${{ steps.version.outputs.version_name }} (RC)"
+          draft: false
+          prerelease: true
+          files: |
+            build/app/outputs/bundle/release/app-release.aab
+          body: |
+            ## Android Release Candidate
+
+            **Version:** ${{ steps.version.outputs.version_name }}
+            **Tag:** ${{ github.ref_name }}
+
+            This is a release candidate deployed to Google Play Internal Track.
+
+            To promote to production, use the "Promote Release" workflow.
         env:
-          FASTLANE_SKIP_UPDATE_CHECK: "true"
-          CI: "true"
-        run: |
-          bundle exec fastlane deploy_with_metadata \
-            track:production \
-            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }} \
-            skip_images:${{ steps.filter.outputs.screenshots == 'false' }} \
-            skip_metadata:${{ steps.filter.outputs.metadata == 'false' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

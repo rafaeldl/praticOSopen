@@ -342,14 +342,95 @@ intl: ^0.20.2
 ## Dicas para Agentes de IA
 
 1. **🚨 INGLÊS NO CÓDIGO (CRÍTICO):** TODO código, tipos, constantes, enums, propriedades, métodos, chaves JSON e valores no banco DEVEM ser em inglês. Português apenas para UI strings visíveis ao usuário.
-2. **Multi-Tenancy é Prioridade:** Verifique sempre se está usando a estrutura correta de company/roles.
-3. **UX/UI Guidelines:**
+2. **🏷️ CONVENTIONAL COMMITS (OBRIGATÓRIO):** Usar formato padronizado para commits. Ver seção abaixo.
+3. **Multi-Tenancy é Prioridade:** Verifique sempre se está usando a estrutura correta de company/roles.
+4. **UX/UI Guidelines:**
     - **App:** Cupertino/iOS-first. Siga `@docs/UX_GUIDELINES.md`.
     - **Web:** Dark Premium Theme. Siga `@docs/WEB_UX_GUIDELINES.md`.
-4. **Build Runner:** `fvm flutter pub run build_runner build --delete-conflicting-outputs` é obrigatório após mudar Stores/Models.
-5. **AuthService:** Use `AuthService` para criar novos usuários, não grave direto no banco.
-6. **CollaboratorStore:** Use este store para gerenciar membros da equipe, não use `CompanyStore` para isso.
-7. **📝 DOCUMENTAÇÃO OBRIGATÓRIA:** Ao finalizar uma nova feature, SEMPRE documentar (ver seção abaixo).
+5. **Build Runner:** `fvm flutter pub run build_runner build --delete-conflicting-outputs` é obrigatório após mudar Stores/Models.
+6. **AuthService:** Use `AuthService` para criar novos usuários, não grave direto no banco.
+7. **CollaboratorStore:** Use este store para gerenciar membros da equipe, não use `CompanyStore` para isso.
+8. **📝 DOCUMENTAÇÃO OBRIGATÓRIA:** Ao finalizar uma nova feature, SEMPRE documentar (ver seção abaixo).
+
+---
+
+## Conventional Commits (Versionamento Automático)
+
+O projeto usa versionamento automático baseado em Conventional Commits. **Todo commit deve seguir o formato:**
+
+```
+<type>(<scope>): <description>
+```
+
+### Tipos de Commit e Versão Gerada
+
+| Tipo | Descrição | Versão |
+|------|-----------|--------|
+| `feat` | Nova funcionalidade | **Minor** (1.0.0 → 1.1.0) |
+| `feat!` | Feature com breaking change | **Major** (1.0.0 → 2.0.0) |
+| `fix` | Correção de bug | **Patch** (1.0.0 → 1.0.1) |
+| `perf` | Melhoria de performance | Patch |
+| `refactor` | Refatoração de código | Patch |
+| `docs` | Documentação | Patch |
+| `style` | Formatação de código | Patch |
+| `test` | Testes | Patch |
+| `chore` | Manutenção | Patch |
+| `ci` | CI/CD | Patch |
+| `build` | Build system | Patch |
+
+### Scopes Comuns
+
+- `auth` - Autenticação
+- `orders` - Ordens de serviço
+- `customers` - Clientes
+- `ui` - Interface do usuário
+- `storage` - Firebase Storage
+- `db` - Firestore
+
+### Exemplos
+
+```bash
+# ✅ CORRETO
+
+# Feature (gera Minor bump)
+git commit -m "feat: add dark mode toggle"
+git commit -m "feat(orders): add bulk status update"
+
+# Fix (gera Patch bump)
+git commit -m "fix: resolve crash on login"
+git commit -m "fix(auth): handle expired token gracefully"
+
+# Breaking change (gera Major bump)
+git commit -m "feat!: new authentication system"
+git commit -m "feat: new order flow
+
+BREAKING CHANGE: removed 'pending_payment' status"
+
+# Outros (geram Patch bump)
+git commit -m "refactor(ui): reorganize widget structure"
+git commit -m "perf: lazy load order images"
+git commit -m "chore: update dependencies"
+git commit -m "docs: update API documentation"
+git commit -m "test: add unit tests for Order"
+
+# ❌ ERRADO
+
+git commit -m "add dark mode"           # Falta tipo
+git commit -m "FEAT: add dark mode"     # Maiúsculo
+git commit -m "feat - add dark mode"    # Formato errado
+git commit -m "feat: added dark mode"   # Tempo verbal errado (usar imperativo)
+git commit -m "feature: add dark mode"  # Tipo não reconhecido
+```
+
+### Regras de Prioridade
+
+Quando múltiplos commits são analisados, o bump de maior prioridade vence:
+
+1. **Major** - Qualquer commit com `!` ou `BREAKING CHANGE`
+2. **Minor** - Qualquer commit `feat`
+3. **Patch** - Todos os outros tipos reconhecidos
+
+Ver `docs/AUTO_VERSIONING.md` para documentação completa.
 
 ---
 
