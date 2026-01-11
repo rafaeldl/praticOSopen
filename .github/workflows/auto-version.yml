@@ -4,9 +4,19 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - '**.md'
-      - '.github/workflows/auto-version.yml'
+    paths:
+      # App code
+      - 'lib/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      # Native code
+      - 'android/**'
+      - 'ios/**'
+      # Assets
+      - 'assets/**'
+      # Tests
+      - 'test/**'
+      - 'integration_test/**'
   workflow_dispatch:
 
 jobs:
@@ -32,34 +42,48 @@ jobs:
       - name: Get latest tag
         id: latest_tag
         run: |
-          # Get the latest version tag (ignore -rc suffix for base version)
-          LATEST_TAG=$(git tag -l 'v*' | grep -v '\-rc$' | sort -V | tail -1)
+          # Only consider RC tags - production tags are always <= RC tags
+          # because every version goes through RC first before promotion
 
-          if [ -z "$LATEST_TAG" ]; then
-            # If no production tag, check for RC tags
-            LATEST_TAG=$(git tag -l 'v*-rc' | sed 's/-rc$//' | sort -V | tail -1)
-            if [ -z "$LATEST_TAG" ]; then
-              LATEST_TAG="v0.0.0"
-            fi
+          RC_TAG=$(git tag -l 'v*-rc' | sort -V | tail -1)
+
+          if [ -z "$RC_TAG" ]; then
+            # No RC tags yet, start from v0.0.0
+            LATEST_VERSION="0.0.0"
+            COMMIT_REF=""
+            echo "📌 No RC tags found, starting from v0.0.0"
+          else
+            # Extract version from RC tag (v1.1.0-rc -> 1.1.0)
+            LATEST_VERSION="${RC_TAG#v}"
+            LATEST_VERSION="${LATEST_VERSION%-rc}"
+            COMMIT_REF="$RC_TAG"
+            echo "📌 Latest RC tag: $RC_TAG (version: $LATEST_VERSION)"
           fi
 
-          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
-          echo "📌 Latest tag: $LATEST_TAG"
+          echo "latest_version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "commit_ref=$COMMIT_REF" >> $GITHUB_OUTPUT
 
       - name: Analyze commits (Conventional Commits)
         id: analyze
         run: |
-          LATEST_TAG="${{ steps.latest_tag.outputs.latest_tag }}"
+          COMMIT_REF="${{ steps.latest_tag.outputs.commit_ref }}"
 
-          # Get commits since last tag
-          if git rev-parse "$LATEST_TAG" >/dev/null 2>&1; then
-            COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"%s" 2>/dev/null || echo "")
+          # Get commits since last RC tag
+          if [ -n "$COMMIT_REF" ] && git rev-parse "$COMMIT_REF" >/dev/null 2>&1; then
+            COMMITS=$(git log "$COMMIT_REF"..HEAD --pretty=format:"%s" 2>/dev/null || echo "")
           else
             COMMITS=$(git log --pretty=format:"%s" -20)
           fi
 
-          echo "📝 Commits since $LATEST_TAG:"
+          echo "📝 Commits since $COMMIT_REF:"
           echo "$COMMITS"
+
+          # If no commits since last tag, skip
+          if [ -z "$COMMITS" ]; then
+            echo "⚠️ No new commits since last release"
+            echo "bump_type=none" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
           # Analyze commit messages
           BUMP_TYPE="patch"
@@ -78,14 +102,11 @@ jobs:
       - name: Calculate new version
         id: version
         run: |
-          LATEST_TAG="${{ steps.latest_tag.outputs.latest_tag }}"
+          LATEST_VERSION="${{ steps.latest_tag.outputs.latest_version }}"
           BUMP_TYPE="${{ steps.analyze.outputs.bump_type }}"
 
-          # Remove 'v' prefix for parsing
-          VERSION="${LATEST_TAG#v}"
-
           # Parse version components
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
           MAJOR=${MAJOR:-0}
           MINOR=${MINOR:-0}
           PATCH=${PATCH:-0}
@@ -177,7 +198,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Previous Tag | ${{ steps.latest_tag.outputs.latest_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Previous Version | ${{ steps.latest_tag.outputs.latest_version }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Bump Type | ${{ steps.analyze.outputs.bump_type }} |" >> $GITHUB_STEP_SUMMARY
           echo "| New Version | ${{ steps.version.outputs.version }} |" >> $GITHUB_STEP_SUMMARY
           echo "| New Tag | ${{ steps.version.outputs.new_tag }} |" >> $GITHUB_STEP_SUMMARY
