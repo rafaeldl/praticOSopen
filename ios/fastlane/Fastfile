@@ -194,11 +194,11 @@ platform :ios do
       force: true,
       skip_screenshots: skip_screenshots,
       skip_metadata: skip_metadata,
-      submit_for_review: false,
+      submit_for_review: true,
       run_precheck_before_submit: false
     )
 
-    UI.success("✅ TestFlight build promoted to App Store!")
+    UI.success("✅ TestFlight build submitted for App Store review!")
   end
 
   desc "Gera screenshots automaticamente usando Flutter integration tests"
