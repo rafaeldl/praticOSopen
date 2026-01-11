@@ -133,39 +133,6 @@ class AuthRepository {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
-  /// Reauthenticates the current user with Google (required for sensitive operations).
-  /// This is necessary before deleting an account due to Firebase security requirements.
-  Future<void> reauthenticateWithGoogle() async {
-    final User? user = _auth.currentUser;
-    if (user == null) {
-      throw Exception('No authenticated user to reauthenticate');
-    }
-
-    // Disconnect previous session to allow choosing another account
-    try {
-      await _googleSignIn.disconnect();
-    } catch (_) {
-      // Ignore error if no previous session
-    }
-
-    final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
-
-    if (googleSignInAccount == null) {
-      throw Exception('Reauthentication cancelled by user');
-    }
-
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
-    );
-
-    // Reauthenticate the current user
-    await user.reauthenticateWithCredential(credential);
-    print('User reauthenticated successfully');
-  }
-
   /// Deletes the current user's account from Firebase Auth.
   /// Note: Firestore data cleanup should be handled separately via Cloud Functions
   /// or before calling this method, as this only deletes the authentication account.

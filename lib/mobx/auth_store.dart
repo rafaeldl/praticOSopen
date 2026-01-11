@@ -201,22 +201,11 @@ abstract class _AuthStore with Store {
     }
 
     try {
-      // 1. Delete all Firestore data first (doesn't require reauthentication)
+      // 1. Delete all Firestore data (company, user document, everything)
       await _authService.deleteUserData(user.uid);
 
-      // 2. Try to delete Firebase Auth account
-      try {
-        await _auth.deleteAccount();
-      } on FirebaseAuthException catch (e) {
-        // If it requires recent login, reauthenticate and try again
-        if (e.code == 'requires-recent-login') {
-          print('Recent login required, reauthenticating...');
-          await _auth.reauthenticateWithGoogle();
-          await _auth.deleteAccount();
-        } else {
-          rethrow;
-        }
-      }
+      // 2. Delete Firebase Auth account
+      await _auth.deleteAccount();
 
       // 3. Clear local preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
