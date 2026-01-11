@@ -438,9 +438,11 @@ class _SettingsState extends State<Settings> {
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
+              if (!mounted) return;
               Navigator.pop(context);
 
               // Show loading indicator
+              if (!mounted) return;
               showCupertinoDialog(
                 context: context,
                 barrierDismissible: false,
@@ -453,15 +455,17 @@ class _SettingsState extends State<Settings> {
                 await _authStore.deleteAccount();
                 // The auth state change will automatically redirect to login
               } catch (e) {
+                if (!mounted) return;
                 Navigator.pop(context); // Close loading
+
+                if (!mounted) return;
                 showCupertinoDialog(
                   context: context,
                   builder: (context) => CupertinoAlertDialog(
-                    title: const Text('Erro'),
+                    title: const Text('Erro ao Excluir Conta'),
                     content: Text(
-                      'Não foi possível excluir sua conta. '
-                      'Por favor, tente novamente ou entre em contato com o suporte.\n\n'
-                      'Erro: ${e.toString()}',
+                      'Não foi possível excluir sua conta.\n\n'
+                      '${_formatErrorMessage(e.toString())}',
                     ),
                     actions: [
                       CupertinoDialogAction(
@@ -478,5 +482,17 @@ class _SettingsState extends State<Settings> {
         ],
       ),
     );
+  }
+
+  /// Format Firebase error messages to be user-friendly
+  String _formatErrorMessage(String error) {
+    if (error.contains('requires-recent-login')) {
+      return 'Por segurança, você precisa fazer login novamente antes de deletar sua conta. '
+          'Por favor, faça logout e login novamente.';
+    }
+    if (error.contains('permission-denied')) {
+      return 'Você não tem permissão para deletar sua conta. Tente novamente mais tarde.';
+    }
+    return 'Erro: ${error.replaceAll('[firebase_auth/', '').replaceAll(']', '')}';
   }
 }
