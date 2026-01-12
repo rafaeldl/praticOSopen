@@ -106,13 +106,9 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Troca o idioma e recarrega os labels (se um segmento estiver carregado)
   Future<void> setLocale(String locale) async {
     _service.setLocale(locale);
-
-    // Only reload if a segment is already loaded
-    if (_service.currentSegmentId != null) {
-      _service.clear();
-      await _service.load(_service.currentSegmentId!);
-      notifyListeners();
-    }
+    // setLocale() já recarrega o cache automaticamente
+    // Apenas notifica listeners do provider
+    notifyListeners();
   }
 
   // ════════════════════════════════════════════════════════════

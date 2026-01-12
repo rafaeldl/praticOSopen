@@ -35,9 +35,17 @@ class SegmentConfigService {
     _l10n = l10n;
   }
 
-  /// Define o idioma atual
+  /// Define o idioma atual e recarrega cache com novas traduções
   void setLocale(String locale) {
+    if (_locale == locale) return; // Sem mudança, não precisa fazer nada
+
     _locale = locale;
+
+    // Recarrega customFields com nova locale
+    if (_segmentId != null) {
+      _labelCache.clear();
+      load(_segmentId!).ignore();
+    }
   }
 
   /// Carrega a configuração de um segmento do Firestore
