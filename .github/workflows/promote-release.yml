@@ -184,6 +184,7 @@ jobs:
           CI: "true"
         run: |
           bundle exec fastlane promote \
+            app_version:${{ needs.validate.outputs.version }} \
             skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }}
 
       - name: Summary

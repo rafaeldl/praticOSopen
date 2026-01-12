@@ -180,6 +180,7 @@ platform :ios do
   desc "Promote TestFlight build to App Store (no re-upload)"
   lane :promote do |options|
     skip_screenshots = options[:skip_screenshots] || true
+    app_version = options[:app_version]
 
     app_store_connect_api_key(
       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
@@ -190,6 +191,7 @@ platform :ios do
     # Use existing TestFlight build - no binary upload needed
     # Always upload metadata when promoting to App Store
     upload_to_app_store(
+      app_version: app_version,  # Version to create/use in App Store
       skip_binary_upload: true,  # Use build already in TestFlight
       force: true,
       skip_screenshots: skip_screenshots,
