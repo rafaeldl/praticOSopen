@@ -108,6 +108,19 @@
   "exampleLoyaltyDiscount": "Ex: Loyalty discount",
   "noTransactionsRecorded": "No transactions recorded",
   "confirmRemoveTransaction": "Do you want to remove this {type} of {amount}?",
+  "@confirmRemoveTransaction": {
+    "description": "Confirmation message to remove transaction",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "payment"
+      },
+      "amount": {
+        "type": "String",
+        "example": "$100.00"
+      }
+    }
+  },
 
   "requiredField": "Required field",
   "invalidEmail": "Invalid email",

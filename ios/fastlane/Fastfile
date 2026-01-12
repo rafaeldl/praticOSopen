@@ -190,6 +190,7 @@ platform :ios do
 
     # Use existing TestFlight build - no binary upload needed
     # Always upload metadata when promoting to App Store
+    # reject_if_possible: cancels any pending "Waiting for Review" submission
     upload_to_app_store(
       app_version: app_version,  # Version to create/use in App Store
       skip_binary_upload: true,  # Use build already in TestFlight
@@ -197,6 +198,7 @@ platform :ios do
       skip_screenshots: skip_screenshots,
       skip_metadata: false,  # Always upload metadata
       submit_for_review: true,
+      reject_if_possible: true,  # Cancel pending review before submitting new one
       run_precheck_before_submit: false
     )
 
