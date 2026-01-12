@@ -630,5 +630,18 @@
     }
   },
   "ok": "OK",
-  "emailNotProvided": "Email não informado"
+  "emailNotProvided": "Email não informado",
+
+  "newCollaborator": "Novo Colaborador",
+  "userInformation": "Informações do Usuário",
+  "userWillReceiveInviteByEmail": "O usuário receberá um convite por email.",
+  "emailPlaceholder": "email@exemplo.com",
+  "profile": "Perfil",
+  "collaboratorAdded": "Colaborador Adicionado",
+  "collaboratorAddedSuccess": "O colaborador foi adicionado à empresa com sucesso.",
+  "inviteSent": "Convite Enviado",
+  "inviteCreatedMessage": "O usuário ainda não está cadastrado no sistema. Um convite foi criado e aparecerá quando ele se cadastrar.",
+  "required": "Obrigatório",
+  "invalidEmail": "Email inválido",
+  "no": "Não"
 }

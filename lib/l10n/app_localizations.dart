@@ -373,7 +373,7 @@ abstract class AppLocalizations {
   /// No description provided for @no.
   ///
   /// In pt, this message translates to:
-  /// **'Nenhum'**
+  /// **'Não'**
   String get no;
 
   /// No description provided for @more.
@@ -625,7 +625,7 @@ abstract class AppLocalizations {
   /// No description provided for @invalidEmail.
   ///
   /// In pt, this message translates to:
-  /// **'E-mail inválido'**
+  /// **'Email inválido'**
   String get invalidEmail;
 
   /// No description provided for @invalidPhone.
@@ -3453,6 +3453,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Email não informado'**
   String get emailNotProvided;
+
+  /// No description provided for @newCollaborator.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo Colaborador'**
+  String get newCollaborator;
+
+  /// No description provided for @userInformation.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações do Usuário'**
+  String get userInformation;
+
+  /// No description provided for @userWillReceiveInviteByEmail.
+  ///
+  /// In pt, this message translates to:
+  /// **'O usuário receberá um convite por email.'**
+  String get userWillReceiveInviteByEmail;
+
+  /// No description provided for @emailPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'email@exemplo.com'**
+  String get emailPlaceholder;
+
+  /// No description provided for @collaboratorAdded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Colaborador Adicionado'**
+  String get collaboratorAdded;
+
+  /// No description provided for @collaboratorAddedSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'O colaborador foi adicionado à empresa com sucesso.'**
+  String get collaboratorAddedSuccess;
+
+  /// No description provided for @inviteSent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite Enviado'**
+  String get inviteSent;
+
+  /// No description provided for @inviteCreatedMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'O usuário ainda não está cadastrado no sistema. Um convite foi criado e aparecerá quando ele se cadastrar.'**
+  String get inviteCreatedMessage;
 }
 
 class _AppLocalizationsDelegate

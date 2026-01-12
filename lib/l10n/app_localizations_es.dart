@@ -144,7 +144,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get yes => 'Sí';
 
   @override
-  String get no => 'Ningún';
+  String get no => 'No';
 
   @override
   String get more => 'Más';
@@ -270,7 +270,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get requiredField => 'Campo obligatorio';
 
   @override
-  String get invalidEmail => 'Correo inválido';
+  String get invalidEmail => 'Correo electrónico inválido';
 
   @override
   String get invalidPhone => 'Teléfono inválido';
@@ -1713,4 +1713,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get emailNotProvided => 'Correo electrónico no proporcionado';
+
+  @override
+  String get newCollaborator => 'Nuevo Colaborador';
+
+  @override
+  String get userInformation => 'Información del Usuario';
+
+  @override
+  String get userWillReceiveInviteByEmail =>
+      'El usuario recibirá una invitación por correo electrónico.';
+
+  @override
+  String get emailPlaceholder => 'correo@ejemplo.com';
+
+  @override
+  String get collaboratorAdded => 'Colaborador Agregado';
+
+  @override
+  String get collaboratorAddedSuccess =>
+      'El colaborador ha sido agregado exitosamente a la empresa.';
+
+  @override
+  String get inviteSent => 'Invitación Enviada';
+
+  @override
+  String get inviteCreatedMessage =>
+      'El usuario aún no está registrado en el sistema. Se ha creado una invitación y aparecerá cuando se registre.';
 }

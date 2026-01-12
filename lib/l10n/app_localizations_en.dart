@@ -1709,4 +1709,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get emailNotProvided => 'Email not provided';
+
+  @override
+  String get newCollaborator => 'New Collaborator';
+
+  @override
+  String get userInformation => 'User Information';
+
+  @override
+  String get userWillReceiveInviteByEmail =>
+      'The user will receive an invite by email.';
+
+  @override
+  String get emailPlaceholder => 'email@example.com';
+
+  @override
+  String get collaboratorAdded => 'Collaborator Added';
+
+  @override
+  String get collaboratorAddedSuccess =>
+      'The collaborator has been successfully added to the company.';
+
+  @override
+  String get inviteSent => 'Invite Sent';
+
+  @override
+  String get inviteCreatedMessage =>
+      'The user is not yet registered in the system. An invite has been created and will appear when they sign up.';
 }

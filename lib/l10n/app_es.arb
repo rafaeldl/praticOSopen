@@ -591,5 +591,18 @@
   "removeCollaborator": "Eliminar Colaborador",
   "confirmRemoveFromOrganization": "¿Está seguro de que desea eliminar {name} de la organización?",
   "ok": "OK",
-  "emailNotProvided": "Correo electrónico no proporcionado"
+  "emailNotProvided": "Correo electrónico no proporcionado",
+
+  "newCollaborator": "Nuevo Colaborador",
+  "userInformation": "Información del Usuario",
+  "userWillReceiveInviteByEmail": "El usuario recibirá una invitación por correo electrónico.",
+  "emailPlaceholder": "correo@ejemplo.com",
+  "profile": "Perfil",
+  "collaboratorAdded": "Colaborador Agregado",
+  "collaboratorAddedSuccess": "El colaborador ha sido agregado exitosamente a la empresa.",
+  "inviteSent": "Invitación Enviada",
+  "inviteCreatedMessage": "El usuario aún no está registrado en el sistema. Se ha creado una invitación y aparecerá cuando se registre.",
+  "required": "Obligatorio",
+  "invalidEmail": "Correo electrónico inválido",
+  "no": "No"
 }

@@ -591,5 +591,18 @@
   "removeCollaborator": "Remove Collaborator",
   "confirmRemoveFromOrganization": "Are you sure you want to remove {name} from the organization?",
   "ok": "OK",
-  "emailNotProvided": "Email not provided"
+  "emailNotProvided": "Email not provided",
+
+  "newCollaborator": "New Collaborator",
+  "userInformation": "User Information",
+  "userWillReceiveInviteByEmail": "The user will receive an invite by email.",
+  "emailPlaceholder": "email@example.com",
+  "profile": "Profile",
+  "collaboratorAdded": "Collaborator Added",
+  "collaboratorAddedSuccess": "The collaborator has been successfully added to the company.",
+  "inviteSent": "Invite Sent",
+  "inviteCreatedMessage": "The user is not yet registered in the system. An invite has been created and will appear when they sign up.",
+  "required": "Required",
+  "invalidEmail": "Invalid email",
+  "no": "No"
 }
