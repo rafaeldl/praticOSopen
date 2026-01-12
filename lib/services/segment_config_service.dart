@@ -82,7 +82,7 @@ class SegmentConfigService {
             for (final json in globalCustomFields) {
               final field = CustomField.fromJson(json as Map<String, dynamic>);
               if (field.isLabel) {
-                _labelCache[field.key] = field.getLabel(_normalizeLocale(_locale));
+                _labelCache[field.key] = field.getLabel(_locale);
               }
             }
           }
@@ -109,7 +109,7 @@ class SegmentConfigService {
 
         if (field.isLabel) {
           // É um label override - armazena no cache (sobrescreve global se houver)
-          _labelCache[field.key] = field.getLabel(_normalizeLocale(_locale));
+          _labelCache[field.key] = field.getLabel(_locale);
         } else {
           // É um campo customizado real
           _customFields.add(field);
@@ -127,11 +127,6 @@ class SegmentConfigService {
     } catch (e) {
       throw Exception('Erro ao carregar configuração do segmento: $e');
     }
-  }
-
-  /// Normaliza locale para buscar no cache (pt-BR → pt_BR)
-  String _normalizeLocale(String locale) {
-    return locale.replaceAll('-', '_');
   }
 
   /// Tenta obter label dos ARB files (AppLocalizations)
