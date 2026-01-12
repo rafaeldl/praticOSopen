@@ -43,6 +43,22 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
   bool _isCreating = false;
   String _statusMessage = '';
 
+  /// Find AuthStore from the root context
+  /// This will work after navigation to '/' where Provider exists
+  Future<void> _reloadAuthStoreAfterNavigation() async {
+    // Wait for navigation to complete
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    if (!mounted) return;
+
+    try {
+      final authStore = context.read<AuthStore>();
+      await authStore.reloadUserAndCompany();
+    } catch (e) {
+      debugPrint('⚠️  Could not reload AuthStore: $e');
+    }
+  }
+
   /// Obtém o locale atual do dispositivo
   String get _currentLocale {
     final locale = WidgetsBinding.instance.platformDispatcher.locale;
@@ -179,14 +195,13 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
         }
       }
 
-      // Reload authStore to update companyAggr
       if (mounted) {
-        final authStore = Provider.of<AuthStore>(context, listen: false);
-        await authStore.reloadUserAndCompany();
-      }
-
-      if (mounted) {
+        // Navigate to home
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+
+        // Reload authStore after navigation completes
+        // At this point we're in the home route which has Provider<AuthStore>
+        _reloadAuthStoreAfterNavigation();
       }
     } catch (e, stack) {
       debugPrint('❌ Error in _saveCompany: $e');
