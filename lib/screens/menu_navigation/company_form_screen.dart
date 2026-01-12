@@ -8,6 +8,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/widgets/phone_field.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
@@ -366,13 +367,9 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     textAlign: TextAlign.right,
                     onSaved: (val) => _company?.email = val,
                   ),
-                  CupertinoTextFormFieldRow(
-                    prefix: Text(context.l10n.phone),
+                  PhoneField(
+                    fieldKey: 'company.phone',
                     initialValue: _company?.phone,
-                    placeholder: context.l10n.phonePlaceholder,
-                    keyboardType: TextInputType.phone,
-                    textAlign: TextAlign.right,
-                    inputFormatters: [TextInputMask(mask: ['(99) 9999-9999', '(99) 99999-9999'])],
                     onSaved: (val) => _company?.phone = val,
                   ),
                   CupertinoTextFormFieldRow(

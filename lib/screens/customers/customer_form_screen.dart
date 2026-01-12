@@ -1,7 +1,10 @@
 import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
+import 'package:praticos/widgets/phone_field.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
 class CustomerFormScreen extends StatefulWidget {
@@ -104,15 +107,10 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                         ? context.l10n.requiredField
                         : null,
                   ),
-                  CupertinoTextFormFieldRow(
-                    prefix: Text(context.l10n.phone,
-                        style: const TextStyle(fontSize: 16)),
+                  PhoneField(
+                    fieldKey: 'customer.phone',
                     initialValue: _customer?.phone,
-                    placeholder: "(00) 00000-0000",
-                    keyboardType: TextInputType.phone,
-                    textAlign: TextAlign.right,
-                    inputFormatters: [TextInputMask(mask: '(99) 99999-9999')],
-                    onSaved: (val) => _customer?.phone = val?.replaceAll(RegExp(r'\D'), ''),
+                    onSaved: (val) => _customer?.phone = val,
                   ),
                   CupertinoTextFormFieldRow(
                     prefix: Text(context.l10n.email,

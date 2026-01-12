@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/widgets/dynamic_text_field.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -261,14 +262,11 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                   ),
 
                   // Serial Number Field
-                  _buildCupertinoFormField(
-                    label: config.label(LabelKeys.deviceSerialNumber),
+                  DynamicTextField(
+                    fieldKey: 'device.serial',
                     initialValue: _device?.serial,
-                    placeholder: "ABC1D23",
-                    textCapitalization: TextCapitalization.characters,
-                    inputFormatters: [TextInputMask(mask: 'AAA9N99')],
                     onSaved: (val) => _device?.serial = val?.toUpperCase(),
-                    validator: (val) => val == null || val.isEmpty ? config.label(LabelKeys.required) : null,
+                    required: true,
                   ),
                 ],
               ),
