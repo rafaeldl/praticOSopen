@@ -34,6 +34,9 @@ class _FormFillScreenState extends State<FormFillScreen> {
   bool _isSaving = false;
   String? _uploadingItemId;
 
+  /// Gets the current locale code for i18n (e.g., 'pt', 'en', 'es')
+  String? get _localeCode => context.l10n.localeName;
+
   @override
   void initState() {
     super.initState();
@@ -260,7 +263,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
           title: Text(context.l10n.requiredFields),
-          content: Text('${context.l10n.pleaseFill}\n${missingRequired.map((e) => "• ${e.label}").join("\n")}'),
+          content: Text('${context.l10n.pleaseFill}\n${missingRequired.map((e) => "• ${e.getLocalizedLabel(_localeCode)}").join("\n")}'),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.pop(ctx),
@@ -469,16 +472,19 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
   void _showOptionsPicker(FormItemDefinition item) {
     final bool isChecklist = item.type == FormItemType.checklist;
-    final options = item.options ?? [];
+    final options = item.getLocalizedOptions(_localeCode) ?? [];
+    final originalOptions = item.options ?? [];
     final currentResponse = _currentForm.getResponse(item.id);
+    final localizedLabel = item.getLocalizedLabel(_localeCode);
 
     if (isChecklist) {
       Navigator.push(
         context,
         CupertinoPageRoute(
           builder: (context) => _ChecklistSelectionScreen(
-            title: item.label,
+            title: localizedLabel,
             options: options,
+            originalOptions: originalOptions,
             initialSelected: List<String>.from(currentResponse?.value ?? []),
           ),
         ),
@@ -491,19 +497,22 @@ class _FormFillScreenState extends State<FormFillScreen> {
       showCupertinoModalPopup(
         context: context,
         builder: (ctx) => CupertinoActionSheet(
-          title: Text(item.label),
-          actions: options.map((opt) {
+          title: Text(localizedLabel),
+          actions: List.generate(options.length, (index) {
+            final localizedOpt = options[index];
+            final originalOpt = index < originalOptions.length ? originalOptions[index] : localizedOpt;
             return CupertinoActionSheetAction(
               onPressed: () {
-                _saveItemResponse(item.id, opt);
+                // Save the original value for consistency
+                _saveItemResponse(item.id, originalOpt);
                 Navigator.pop(ctx);
               },
-              child: Text(opt),
+              child: Text(localizedOpt),
             );
-          }).toList(),
+          }),
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
           ),
         ),
       );
@@ -517,7 +526,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
       child: CustomScrollView(
         slivers: [
           CupertinoSliverNavigationBar(
-            largeTitle: Text(_currentForm.title),
+            largeTitle: Text(_currentForm.getLocalizedTitle(_localeCode)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: _handleClose,
@@ -607,7 +616,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
         Expanded(
           child: Text.rich(
             TextSpan(
-              text: item.label,
+              text: item.getLocalizedLabel(_localeCode),
               children: [
                 if (item.required)
                   const TextSpan(
@@ -923,12 +932,14 @@ class _SelectInputTile extends StatelessWidget {
 /// Tela de seleção múltipla (Checklist)
 class _ChecklistSelectionScreen extends StatefulWidget {
   final String title;
-  final List<String> options;
+  final List<String> options; // Localized options for display
+  final List<String> originalOptions; // Original options for saving
   final List<String> initialSelected;
 
   const _ChecklistSelectionScreen({
     required this.title,
     required this.options,
+    required this.originalOptions,
     required this.initialSelected,
   });
 
@@ -937,7 +948,7 @@ class _ChecklistSelectionScreen extends StatefulWidget {
 }
 
 class _ChecklistSelectionScreenState extends State<_ChecklistSelectionScreen> {
-  late List<String> _selected;
+  late List<String> _selected; // Stores original values
 
   @override
   void initState() {
@@ -969,11 +980,15 @@ class _ChecklistSelectionScreenState extends State<_ChecklistSelectionScreen> {
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 CupertinoListSection.insetGrouped(
-                  children: widget.options.map((opt) {
-                    final bool isSelected = _selected.contains(opt);
+                  children: List.generate(widget.options.length, (index) {
+                    final localizedOpt = widget.options[index];
+                    final originalOpt = index < widget.originalOptions.length
+                        ? widget.originalOptions[index]
+                        : localizedOpt;
+                    final bool isSelected = _selected.contains(originalOpt);
                     return CupertinoListTile(
                       title: Text(
-                        opt,
+                        localizedOpt,
                         style: CupertinoTheme.of(context).textTheme.textStyle,
                       ),
                       trailing: isSelected
@@ -983,14 +998,14 @@ class _ChecklistSelectionScreenState extends State<_ChecklistSelectionScreen> {
                         HapticFeedback.selectionClick();
                         setState(() {
                           if (isSelected) {
-                            _selected.remove(opt);
+                            _selected.remove(originalOpt);
                           } else {
-                            _selected.add(opt);
+                            _selected.add(originalOpt);
                           }
                         });
                       },
                     );
-                  }).toList(),
+                  }),
                 ),
               ]),
             ),

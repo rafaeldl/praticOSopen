@@ -73,11 +73,17 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
     }
   }
 
+  /// Gets the current locale code for i18n (e.g., 'pt', 'en', 'es')
+  String? _getLocaleCode() {
+    return context.l10n.localeName;
+  }
+
   List<FormDefinition> _filterTemplates(List<FormDefinition> templates) {
     if (_searchQuery.isEmpty) return templates;
+    final localeCode = _getLocaleCode();
     return templates.where((template) {
-      final title = template.title.toLowerCase();
-      final description = template.description?.toLowerCase() ?? '';
+      final title = template.getLocalizedTitle(localeCode).toLowerCase();
+      final description = template.getLocalizedDescription(localeCode)?.toLowerCase() ?? '';
       return title.contains(_searchQuery) || description.contains(_searchQuery);
     }).toList();
   }
@@ -223,6 +229,10 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
   }
 
   Widget _buildTemplateItem(FormDefinition template, bool isLast, {bool isGlobal = false}) {
+    final localeCode = _getLocaleCode();
+    final localizedTitle = template.getLocalizedTitle(localeCode);
+    final localizedDescription = template.getLocalizedDescription(localeCode);
+
     return Container(
       color: CupertinoColors.systemBackground.resolveFrom(context),
       child: InkWell(
@@ -243,18 +253,18 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          template.title,
+                          localizedTitle,
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
                             color: CupertinoColors.label.resolveFrom(context),
                           ),
                         ),
-                        if (template.description != null &&
-                            template.description!.isNotEmpty) ...[
+                        if (localizedDescription != null &&
+                            localizedDescription.isNotEmpty) ...[
                           const SizedBox(height: 2),
                           Text(
-                            template.description!,
+                            localizedDescription,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
