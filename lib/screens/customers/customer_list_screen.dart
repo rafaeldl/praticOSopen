@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell; 
+import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class CustomerListScreen extends StatefulWidget {
   @override
@@ -57,7 +58,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar ${config.customer.toLowerCase()}',
+                  placeholder: '${context.l10n.search} ${config.customer.toLowerCase()}',
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -93,7 +94,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
             children: [
               const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
               const SizedBox(height: 16),
-              Text('Erro ao carregar ${config.customerPlural.toLowerCase()}'),
+              Text('${context.l10n.errorLoading} ${config.customerPlural.toLowerCase()}'),
               const SizedBox(height: 16),
               CupertinoButton(
                 child: Text(config.label(LabelKeys.retryAgain)),
@@ -127,7 +128,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                 Icon(CupertinoIcons.person_2, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
                 const SizedBox(height: 16),
                 Text(
-                  'Nenhum ${config.customer.toLowerCase()} cadastrado',
+                  '${context.l10n.no} ${config.customer.toLowerCase()} ${context.l10n.registered}',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -136,7 +137,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Toque em + para adicionar seu primeiro ${config.customer.toLowerCase()}.',
+                  '${context.l10n.tapPlusToAddYourFirst} ${config.customer.toLowerCase()}.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -223,7 +224,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: Text(config.label(LabelKeys.confirmDeletion)),
-              content: Text('Deseja remover o ${config.customer.toLowerCase()} "${customer.name}"?'),
+              content: Text('${context.l10n.doYouWantToRemoveThe} ${config.customer.toLowerCase()} "${customer.name}"?'),
               actions: [
                 CupertinoDialogAction(
                   child: Text(config.label(LabelKeys.cancel)),

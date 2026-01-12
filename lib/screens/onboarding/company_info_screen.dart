@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'company_contact_screen.dart';
@@ -50,10 +51,10 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Logo da Empresa'),
+        title: Text(context.l10n.companyLogo),
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
-            child: const Text('Tirar Foto'),
+            child: Text(context.l10n.takePhoto),
             onPressed: () async {
               Navigator.pop(context);
               final file = await _picker.pickImage(source: ImageSource.camera);
@@ -61,7 +62,7 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
             },
           ),
           CupertinoActionSheetAction(
-            child: const Text('Escolher da Galeria'),
+            child: Text(context.l10n.chooseFromGallery),
             onPressed: () async {
               Navigator.pop(context);
               final file = await _picker.pickImage(source: ImageSource.gallery);
@@ -70,7 +71,7 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
+          child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -182,25 +183,25 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
 
               // Formulário
               CupertinoListSection.insetGrouped(
-                header: const Text('INFORMAÇÕES'),
+                header: Text(context.l10n.information),
                 children: [
                   CupertinoTextFormFieldRow(
                     controller: _nameController,
-                    prefix: const Text('Nome'),
-                    placeholder: 'Nome da Empresa',
+                    prefix: Text(context.l10n.name),
+                    placeholder: context.l10n.companyName,
                     textCapitalization: TextCapitalization.words,
                     textAlign: TextAlign.right,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Obrigatório';
+                        return context.l10n.required;
                       }
                       return null;
                     },
                   ),
                   CupertinoTextFormFieldRow(
                     controller: _addressController,
-                    prefix: const Text('Endereço'),
-                    placeholder: 'Opcional',
+                    prefix: Text(context.l10n.address),
+                    placeholder: context.l10n.optional,
                     textCapitalization: TextCapitalization.sentences,
                     textAlign: TextAlign.right,
                     maxLines: 2,
@@ -216,7 +217,7 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
                   width: double.infinity,
                   child: CupertinoButton.filled(
                     onPressed: _next,
-                    child: const Text('Próximo'),
+                    child: Text(context.l10n.next),
                   ),
                 ),
               ),

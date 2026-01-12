@@ -148,34 +148,68 @@ class RolePermissions {
   }
 
   /// Returns the friendly label for role display.
-  static String getRoleLabel(RolesType role) {
+  /// Requires [l10n] for internationalization support.
+  static String getRoleLabel(RolesType role, dynamic l10n) {
+    if (l10n == null) {
+      // Fallback to Portuguese if l10n not available
+      switch (role) {
+        case RolesType.admin:
+          return 'Administrador';
+        case RolesType.supervisor:
+          return 'Supervisor';
+        case RolesType.manager:
+          return 'Gerente';
+        case RolesType.consultant:
+          return 'Consultor';
+        case RolesType.technician:
+          return 'Técnico';
+      }
+    }
+
     switch (role) {
       case RolesType.admin:
-        return 'Administrador';
+        return l10n.roleAdmin;
       case RolesType.supervisor:
-        return 'Supervisor';
+        return l10n.roleSupervisor;
       case RolesType.manager:
-        return 'Gerente';
+        return l10n.roleManager;
       case RolesType.consultant:
-        return 'Consultor';
+        return l10n.roleConsultant;
       case RolesType.technician:
-        return 'Técnico';
+        return l10n.roleTechnician;
     }
   }
 
   /// Returns the role description.
-  static String getRoleDescription(RolesType role) {
+  /// Requires [l10n] for internationalization support.
+  static String getRoleDescription(RolesType role, dynamic l10n) {
+    if (l10n == null) {
+      // Fallback to Portuguese if l10n not available
+      switch (role) {
+        case RolesType.admin:
+          return 'Acesso total ao sistema';
+        case RolesType.supervisor:
+          return 'Gestão operacional dos técnicos';
+        case RolesType.manager:
+          return 'Gestão financeira e relatórios';
+        case RolesType.consultant:
+          return 'Vendas e acompanhamento comercial';
+        case RolesType.technician:
+          return 'Execução de serviços';
+      }
+    }
+
     switch (role) {
       case RolesType.admin:
-        return 'Acesso total ao sistema';
+        return l10n.roleDescAdmin;
       case RolesType.supervisor:
-        return 'Gestão operacional dos técnicos';
+        return l10n.roleDescSupervisor;
       case RolesType.manager:
-        return 'Gestão financeira e relatórios';
+        return l10n.roleDescManager;
       case RolesType.consultant:
-        return 'Vendas e acompanhamento comercial';
+        return l10n.roleDescConsultant;
       case RolesType.technician:
-        return 'Execução de serviços';
+        return l10n.roleDescTechnician;
     }
   }
 

@@ -7,6 +7,7 @@ import 'package:praticos/models/product.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class ProductListScreen extends StatefulWidget {
   @override
@@ -44,7 +45,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Produtos'),
+              largeTitle: Text(context.l10n.products),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
@@ -58,7 +59,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar produto',
+                  placeholder: context.l10n.searchProduct,
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -94,10 +95,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
             children: [
               const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
               const SizedBox(height: 16),
-              const Text('Erro ao carregar produtos'),
+              Text(context.l10n.errorLoadingData),
               const SizedBox(height: 16),
               CupertinoButton(
-                child: const Text('Tentar novamente'),
+                child: Text(context.l10n.tryAgain),
                 onPressed: () => productStore.retrieveProducts(),
               )
             ],
@@ -125,7 +126,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 Icon(CupertinoIcons.cube_box, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
                 const SizedBox(height: 16),
                 Text(
-                  'Nenhum produto cadastrado',
+                  context.l10n.noProducts,
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -134,7 +135,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Toque em + para adicionar seu primeiro produto.',
+                  context.l10n.tapToAddFirst,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -157,9 +158,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
           }).toList();
 
     if (filteredList.isEmpty) {
-      return const SliverFillRemaining(
+      return SliverFillRemaining(
         child: Center(
-          child: Text('Nenhum resultado encontrado'),
+          child: Text(context.l10n.noResults),
         ),
       );
     }
@@ -205,18 +206,18 @@ class _ProductListScreenState extends State<ProductListScreen> {
           // Swipe Left -> Delete
           return await showCupertinoDialog<bool>(
             context: context,
-            builder: (context) => CupertinoAlertDialog(
-              title: const Text('Confirmar exclusão'),
-              content: Text('Deseja remover o produto "${product.name}"?'),
+            builder: (dialogContext) => CupertinoAlertDialog(
+              title: Text(context.l10n.confirmDelete),
+              content: Text('${context.l10n.confirmRemove} "${product.name}"?'),
               actions: [
                 CupertinoDialogAction(
-                  child: const Text('Cancelar'),
-                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(context.l10n.cancel),
+                  onPressed: () => Navigator.pop(dialogContext, false),
                 ),
                 CupertinoDialogAction(
                   isDestructiveAction: true,
-                  child: const Text('Remover'),
-                  onPressed: () => Navigator.pop(context, true),
+                  child: Text(context.l10n.remove),
+                  onPressed: () => Navigator.pop(dialogContext, true),
                 ),
               ],
             ),

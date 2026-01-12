@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Divider, Colors, ReorderableListView, Material, MaterialType;
 import 'package:flutter/services.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/form_template_store.dart';
 import 'package:praticos/models/form_definition.dart';
 
@@ -52,8 +53,8 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
     if (_items.isEmpty) {
       HapticFeedback.heavyImpact();
       _showAlert(
-        'Adicione itens',
-        'Por favor, adicione pelo menos um item ao procedimento.',
+        context.l10n.addItems,
+        context.l10n.pleaseAddAtLeastOneItem,
       );
       return;
     }
@@ -79,7 +80,7 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
       if (mounted) {
         HapticFeedback.heavyImpact();
         setState(() => _isLoading = false);
-        _showAlert('Erro', 'Não foi possível salvar o procedimento.');
+        _showAlert(context.l10n.error, context.l10n.couldNotSaveForm);
       }
     }
   }
@@ -138,18 +139,18 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: Text(_isEditing ? 'Editar Procedimento' : 'Novo Procedimento'),
+        middle: Text(_isEditing ? context.l10n.editOrder : context.l10n.newOrder),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancelar'),
+          child: Text(context.l10n.cancel),
         ),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isLoading ? null : _saveTemplate,
           child: _isLoading
               ? const CupertinoActivityIndicator()
-              : const Text('Salvar', style: TextStyle(fontWeight: FontWeight.bold)),
+              : Text(context.l10n.save, style: const TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
       child: SafeArea(
@@ -179,22 +180,22 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
 
               // Basic Info Section
               CupertinoListSection.insetGrouped(
-                header: const Text('INFORMAÇÕES'),
+                header: Text(context.l10n.formInformation),
                 children: [
                   CupertinoTextFormFieldRow(
-                    prefix: const Text('Título', style: TextStyle(fontSize: 16)),
+                    prefix: Text(context.l10n.title, style: const TextStyle(fontSize: 16)),
                     initialValue: _template?.title,
-                    placeholder: 'Nome do procedimento',
+                    placeholder: context.l10n.companyName,
                     textCapitalization: TextCapitalization.sentences,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _template?.title = val ?? '',
                     validator: (val) =>
-                        val == null || val.trim().isEmpty ? 'Obrigatório' : null,
+                        val == null || val.trim().isEmpty ? context.l10n.required : null,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text('Descrição', style: TextStyle(fontSize: 16)),
+                    prefix: Text(context.l10n.description, style: const TextStyle(fontSize: 16)),
                     initialValue: _template?.description,
-                    placeholder: 'Opcional',
+                    placeholder: context.l10n.optional,
                     textCapitalization: TextCapitalization.sentences,
                     textAlign: TextAlign.right,
                     maxLines: 2,
@@ -206,10 +207,10 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
 
               // Status Section
               CupertinoListSection.insetGrouped(
-                header: const Text('CONFIGURAÇÕES'),
+                header: Text(context.l10n.formConfiguration),
                 children: [
                   CupertinoListTile(
-                    title: const Text('Ativo'),
+                    title: Text(context.l10n.active),
                     trailing: CupertinoSwitch(
                       value: _isActive,
                       onChanged: (value) {
@@ -406,17 +407,17 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
         return await showCupertinoDialog<bool>(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Remover item'),
-            content: Text('Deseja remover "${item.label}"?'),
+            title: Text(context.l10n.removeItem),
+            content: Text('${context.l10n.discard} "${item.label}"?'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Cancelar'),
+                child: Text(context.l10n.cancel),
               ),
               CupertinoDialogAction(
                 isDestructiveAction: true,
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Remover'),
+                child: Text(context.l10n.delete),
               ),
             ],
           ),
@@ -617,12 +618,12 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Mínimo de opções'),
-            content: const Text('Informe pelo menos 2 opções.'),
+            title: Text(context.l10n.minOptions),
+            content: Text(context.l10n.pleaseEnterAtLeast2Options),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),
@@ -711,20 +712,20 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
                 children: [
                   // Label and Type
                   CupertinoListSection.insetGrouped(
-                    header: const Text('CONFIGURAÇÃO DO ITEM'),
+                    header: Text(context.l10n.itemConfiguration),
                     children: [
                       CupertinoTextFormFieldRow(
-                        prefix: const Text('Label', style: TextStyle(fontSize: 16)),
+                        prefix: Text(context.l10n.label, style: const TextStyle(fontSize: 16)),
                         initialValue: _label,
-                        placeholder: 'Ex: Estado da pintura',
+                        placeholder: context.l10n.itemType,
                         textCapitalization: TextCapitalization.sentences,
                         textAlign: TextAlign.right,
                         onSaved: (val) => _label = val ?? '',
                         validator: (val) =>
-                            val == null || val.trim().isEmpty ? 'Obrigatório' : null,
+                            val == null || val.trim().isEmpty ? context.l10n.required : null,
                       ),
                       CupertinoListTile(
-                        title: const Text('Tipo'),
+                        title: Text(context.l10n.itemType),
                         additionalInfo: Text(_getTypeLabel(_type)),
                         trailing: const CupertinoListTileChevron(),
                         onTap: _showTypePicker,
@@ -735,8 +736,8 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
                   // Options (conditional)
                   if (_needsOptions)
                     CupertinoListSection.insetGrouped(
-                      header: const Text('OPÇÕES'),
-                      footer: const Text('Digite uma opção por linha'),
+                      header: Text(context.l10n.optionsHeader),
+                      footer: Text(context.l10n.typeOneOptionPerLine),
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(12),
@@ -757,11 +758,11 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
 
                   // Settings
                   CupertinoListSection.insetGrouped(
-                    header: const Text('OPÇÕES'),
+                    header: Text(context.l10n.optionsHeader),
                     children: [
                       if (_type != FormItemType.photoOnly)
                         CupertinoListTile(
-                          title: const Text('Obrigatório'),
+                          title: Text(context.l10n.required),
                           trailing: CupertinoSwitch(
                             value: _required,
                             onChanged: (val) {
@@ -771,8 +772,8 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
                           ),
                         ),
                       CupertinoListTile(
-                        title: const Text('Permitir fotos'),
-                        subtitle: const Text('Usuário pode anexar fotos a este item'),
+                        title: Text(context.l10n.allowPhotos),
+                        subtitle: Text(context.l10n.userCanAttachPhotos),
                         trailing: CupertinoSwitch(
                           value: _allowPhotos,
                           onChanged: (val) {
@@ -799,8 +800,8 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
     showCupertinoModalPopup(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: const Text('Tipo do Item'),
-        message: const Text('Selecione o tipo de resposta esperada'),
+        title: Text(context.l10n.selectItemType),
+        message: Text(context.l10n.selectResponseType),
         actions: FormItemType.values.map((type) {
           final isSelected = type == _type;
           return CupertinoActionSheetAction(

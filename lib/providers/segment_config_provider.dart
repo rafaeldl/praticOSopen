@@ -5,7 +5,18 @@ import '../services/segment_config_service.dart';
 /// Provider que gerencia labels dinâmicos e campos customizados
 /// baseado no segmento da empresa
 class SegmentConfigProvider extends ChangeNotifier {
+  /// Singleton instance for global access (used by LocaleStore)
+  static SegmentConfigProvider? _instance;
+  static SegmentConfigProvider get instance {
+    _instance ??= SegmentConfigProvider();
+    return _instance!;
+  }
+
   final _service = SegmentConfigService();
+
+  SegmentConfigProvider() {
+    _instance = this;
+  }
 
   bool _isLoading = false;
   String? _error;
@@ -85,16 +96,23 @@ class SegmentConfigProvider extends ChangeNotifier {
     }
   }
 
-  /// Troca o idioma e recarrega os labels
-  Future<void> setLocale(String locale) async {
-    if (_service.currentSegmentId == null) {
-      throw Exception('Nenhum segmento carregado');
+  /// Injeta o AppLocalizations para usar traduções dos ARB files
+  void injectL10n(dynamic l10n) {
+    if (l10n != null) {
+      _service.setL10n(l10n);
     }
+  }
 
+  /// Troca o idioma e recarrega os labels (se um segmento estiver carregado)
+  Future<void> setLocale(String locale) async {
     _service.setLocale(locale);
-    _service.clear();
-    await _service.load(_service.currentSegmentId!);
-    notifyListeners();
+
+    // Only reload if a segment is already loaded
+    if (_service.currentSegmentId != null) {
+      _service.clear();
+      await _service.load(_service.currentSegmentId!);
+      notifyListeners();
+    }
   }
 
   // ════════════════════════════════════════════════════════════

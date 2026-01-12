@@ -9,6 +9,7 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class DeviceListScreen extends StatefulWidget {
   @override
@@ -65,7 +66,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar ${config.device.toLowerCase()}',
+                  placeholder: '${context.l10n.search} ${config.device.toLowerCase()}',
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -103,7 +104,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             children: [
               const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
               const SizedBox(height: 16),
-              Text('Erro ao carregar ${config.devicePlural.toLowerCase()}'),
+              Text('${context.l10n.errorLoading} ${config.devicePlural.toLowerCase()}'),
               const SizedBox(height: 16),
               CupertinoButton(
                 child: Text(config.label(LabelKeys.retryAgain)),
@@ -137,7 +138,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 Icon(config.deviceIcon, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
                 const SizedBox(height: 16),
                 Text(
-                  'Nenhum ${config.device.toLowerCase()} cadastrado',
+                  '${context.l10n.no} ${config.device.toLowerCase()} ${context.l10n.registered}',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -146,7 +147,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Toque em + para adicionar seu primeiro ${config.device.toLowerCase()}.',
+                  '${context.l10n.tapPlusToAddYourFirst} ${config.device.toLowerCase()}.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -225,13 +226,13 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           if (!_authService.hasPermission(PermissionType.manageDevices)) {
              await showCupertinoDialog(
               context: context,
-              builder: (context) => CupertinoAlertDialog(
-                title: const Text('Sem Permissão'),
-                content: const Text('Você não tem permissão para remover dispositivos.'),
+              builder: (dialogContext) => CupertinoAlertDialog(
+                title: Text(context.l10n.noPermission),
+                content: Text(context.l10n.noPermissionToRemove),
                 actions: [
                   CupertinoDialogAction(
-                    child: const Text('OK'),
-                    onPressed: () => Navigator.pop(context),
+                    child: Text(context.l10n.ok),
+                    onPressed: () => Navigator.pop(dialogContext),
                   ),
                 ],
               ),
@@ -243,7 +244,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: Text(config.label(LabelKeys.confirmDeletion)),
-              content: Text('Deseja remover o ${config.device.toLowerCase()} "${device.name}"?'),
+              content: Text('${context.l10n.doYouWantToRemoveThe} ${config.device.toLowerCase()} "${device.name}"?'),
               actions: [
                 CupertinoDialogAction(
                   child: Text(config.label(LabelKeys.cancel)),

@@ -1,0 +1,15 @@
+Novedades:
+
+• Perfiles de Usuario: Control de permisos por rol (Propietario, Admin, Gerente, Técnico, etc.)
+
+• Pagos Parciales: Múltiples pagos por orden con historial en PDF
+
+• Búsqueda Mejorada: Scroll infinito, filtros y destacado para órdenes atrasadas
+
+• Formularios Dinámicos: Checklists personalizados con fotos
+
+• Invitaciones: Agregue colaboradores por correo electrónico
+
+• Interfaz: Rediseño iOS, modo oscuro y correcciones visuales
+
+¡Gracias por usar PraticOS!

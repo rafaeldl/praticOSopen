@@ -1,6 +1,7 @@
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/email_login_screen.dart';
 import 'package:praticos/theme/app_theme.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
 
         // Título
         Text(
-          'Bem-vindo ao PraticOS',
+          context.l10n.welcomeToApp,
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -109,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
 
         // Subtítulo
         Text(
-          'Gerencie suas ordens de serviço\nde forma simples e eficiente',
+          context.l10n.appSubtitle,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 17,
@@ -143,7 +144,7 @@ class _LoginPageState extends State<LoginPage> {
             padding: EdgeInsets.zero,
             onPressed: () => _navigateToEmailLogin(context),
             child: Text(
-              'Entrar com email',
+              context.l10n.signInWithEmail,
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w500,
@@ -190,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Continuar com Apple',
+              context.l10n.continueWithApple,
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -230,7 +231,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Continuar com Google',
+              context.l10n.continueWithGoogle,
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
@@ -256,9 +257,9 @@ class _LoginPageState extends State<LoginPage> {
           height: 1.4,
         ),
         children: [
-          const TextSpan(text: 'Ao continuar, você concorda com nossa\n'),
+          TextSpan(text: '${context.l10n.byContinuingYouAgree}\n'),
           TextSpan(
-            text: 'Política de Privacidade',
+            text: context.l10n.privacyPolicy,
             style: TextStyle(
               color: linkColor,
               decoration: TextDecoration.underline,
@@ -287,7 +288,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao entrar com Apple: $e'),
+            content: Text('${context.l10n.errorSignInApple}: $e'),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -310,7 +311,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao entrar com Google: $e'),
+            content: Text('${context.l10n.errorSignInGoogle}: $e'),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),

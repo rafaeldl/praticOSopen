@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/custom_field.dart';
+import '../l10n/app_localizations.dart';
 
 /// Serviço que carrega e gerencia a configuração de um segmento
 /// (labels customizados e campos extras)
@@ -14,85 +15,11 @@ class SegmentConfigService {
   // Estado
   String _locale = 'pt-BR';
   String? _segmentId;
+  AppLocalizations? _l10n;
 
   // Cache
   final Map<String, String> _labelCache = {};
   final List<CustomField> _customFields = [];
-
-  // Labels padrão do sistema (fallback quando não há override)
-  static const Map<String, String> _systemDefaults = {
-    // Entidades
-    'device._entity': 'Dispositivo',
-    'device._entity_plural': 'Dispositivos',
-    'customer._entity': 'Cliente',
-    'customer._entity_plural': 'Clientes',
-    'service_order._entity': 'Ordem de Serviço',
-    'service_order._entity_plural': 'Ordens de Serviço',
-
-    // Campos padrão de device
-    'device.brand': 'Marca',
-    'device.model': 'Modelo',
-    'device.serialNumber': 'Número de Série',
-    'device.description': 'Descrição',
-    'device.notes': 'Observações',
-
-    // Campos padrão de customer
-    'customer.name': 'Nome',
-    'customer.phone': 'Telefone',
-    'customer.email': 'E-mail',
-    'customer.address': 'Endereço',
-
-    // Ações
-    'actions.create_device': 'Adicionar Dispositivo',
-    'actions.edit_device': 'Editar Dispositivo',
-    'actions.delete_device': 'Excluir Dispositivo',
-    'actions.create_customer': 'Adicionar Cliente',
-    'actions.edit_customer': 'Editar Cliente',
-    'actions.create_service_order': 'Nova OS',
-    'actions.edit_service_order': 'Editar OS',
-    'actions.create_service': 'Novo Serviço',
-    'actions.edit_service': 'Editar Serviço',
-    'actions.create_product': 'Novo Produto',
-    'actions.edit_product': 'Editar Produto',
-    'actions.remove': 'Remover',
-    'actions.confirm_deletion': 'Confirmar exclusão',
-    'actions.retry_again': 'Tentar novamente',
-
-    // Status
-    'status.pending': 'Pendente',
-    'status.in_progress': 'Em Andamento',
-    'status.completed': 'Concluído',
-    'status.cancelled': 'Cancelado',
-
-    // Messages
-    'messages.no_results_found': 'Nenhum resultado encontrado',
-    'messages.required': 'Obrigatório',
-
-    // Photos
-    'photos.change': 'Alterar Foto',
-    'photos.add': 'Adicionar Foto',
-    'photos.delete': 'Excluir Foto',
-    'photos.set_as_cover': 'Definir como Capa',
-
-    // Products
-    'product.quantity': 'Quantidade',
-    'product.unit_value': 'Valor unitário',
-    'product.total': 'Total',
-
-    // Comum
-    'common.save': 'Salvar',
-    'common.cancel': 'Cancelar',
-    'common.confirm': 'Confirmar',
-    'common.delete': 'Excluir',
-    'common.edit': 'Editar',
-    'common.search': 'Buscar',
-    'common.filter': 'Filtrar',
-    'common.sort': 'Ordenar',
-    'common.export': 'Exportar',
-    'common.import': 'Importar',
-    'common.print': 'Imprimir',
-    'common.notes': 'Observações',
-  };
 
   // Mapeamento de chaves técnicas de status para label keys
   static const Map<String, String> _statusKeyMapping = {
@@ -103,11 +30,10 @@ class SegmentConfigService {
     'canceled': 'status.cancelled',
   };
 
-  // Labels padrão para status (compatibilidade com Order.statusMap)
-  static const Map<String, String> _statusDefaults = {
-    'status.quote': 'Orçamento',
-    'status.approved': 'Aprovado',
-  };
+  /// Injeta o AppLocalizations para usar traduções dos ARB files
+  void setL10n(AppLocalizations l10n) {
+    _l10n = l10n;
+  }
 
   /// Define o idioma atual
   void setLocale(String locale) {
@@ -160,9 +86,160 @@ class SegmentConfigService {
     }
   }
 
-  /// Obtém um label (com fallback: segment → system → key)
+  /// Tenta obter label dos ARB files (AppLocalizations)
+  String? _getFromArb(String key) {
+    if (_l10n == null) return null;
+
+    // Mapeamento de label keys → ARB keys
+    switch (key) {
+      // Entidades
+      case 'customer._entity':
+        return _l10n!.customer;
+      case 'customer._entity_plural':
+        return _l10n!.customers;
+      case 'device._entity':
+        return _l10n!.device;
+      case 'device._entity_plural':
+        return _l10n!.devices;
+      case 'service_order._entity':
+        return _l10n!.order;
+      case 'service_order._entity_plural':
+        return _l10n!.orders;
+
+      // Campos de customer
+      case 'customer.name':
+        return _l10n!.name;
+      case 'customer.phone':
+        return _l10n!.phone;
+      case 'customer.email':
+        return _l10n!.email;
+      case 'customer.address':
+        return _l10n!.address;
+
+      // Campos de device
+      case 'device.brand':
+        return _l10n!.brand;
+      case 'device.model':
+        return _l10n!.model;
+      case 'device.serialNumber':
+        return _l10n!.serialNumber;
+      case 'device.description':
+        return _l10n!.description;
+      case 'device.notes':
+        return _l10n!.notes;
+
+      // Actions
+      case 'actions.create_device':
+        return _l10n!.addDevice;
+      case 'actions.edit_device':
+        return '${_l10n!.edit} ${_l10n!.device}';
+      case 'actions.delete_device':
+        return '${_l10n!.delete} ${_l10n!.device}';
+      case 'actions.create_customer':
+        return _l10n!.addCustomer;
+      case 'actions.edit_customer':
+        return '${_l10n!.edit} ${_l10n!.customer}';
+      case 'actions.create_service_order':
+        return _l10n!.addOrder;
+      case 'actions.edit_service_order':
+        return '${_l10n!.edit} ${_l10n!.order}';
+      case 'actions.create_service':
+        return _l10n!.addService;
+      case 'actions.edit_service':
+        return '${_l10n!.edit} ${_l10n!.service}';
+      case 'actions.create_product':
+        return _l10n!.addProduct;
+      case 'actions.edit_product':
+        return '${_l10n!.edit} ${_l10n!.product}';
+      case 'actions.remove':
+        return _l10n!.remove;
+      case 'actions.confirm_deletion':
+        return _l10n!.confirmDelete;
+      case 'actions.retry_again':
+        return _l10n!.retryAgain;
+
+      // Status
+      case 'status.pending':
+        return _l10n!.statusPending;
+      case 'status.in_progress':
+        return _l10n!.statusInProgress;
+      case 'status.completed':
+        return _l10n!.statusCompleted;
+      case 'status.cancelled':
+        return _l10n!.statusCancelled;
+      case 'status.quote':
+        return _l10n!.statusQuote;
+      case 'status.approved':
+        return _l10n!.statusApproved;
+
+      // Messages
+      case 'messages.no_results_found':
+        return _l10n!.noResultsFound;
+      case 'messages.required':
+        return _l10n!.required;
+
+      // Photos
+      case 'photos.change':
+        return _l10n!.changePhoto;
+      case 'photos.add':
+        return _l10n!.addPhoto;
+      case 'photos.delete':
+        return '${_l10n!.delete} ${_l10n!.photo}';
+      case 'photos.set_as_cover':
+        return _l10n!.setAsCover;
+
+      // Products
+      case 'product.quantity':
+        return _l10n!.quantity;
+      case 'product.unit_value':
+        return _l10n!.unitValue;
+      case 'product.total':
+        return _l10n!.total;
+
+      // Common
+      case 'common.save':
+        return _l10n!.save;
+      case 'common.cancel':
+        return _l10n!.cancel;
+      case 'common.confirm':
+        return _l10n!.confirm;
+      case 'common.delete':
+        return _l10n!.delete;
+      case 'common.edit':
+        return _l10n!.edit;
+      case 'common.search':
+        return _l10n!.search;
+      case 'common.filter':
+        return _l10n!.filter;
+      case 'common.sort':
+        return _l10n!.sort;
+      case 'common.export':
+        return _l10n!.export;
+      case 'common.import':
+        return _l10n!.import;
+      case 'common.print':
+        return _l10n!.print;
+      case 'common.notes':
+        return _l10n!.notes;
+
+      default:
+        return null;
+    }
+  }
+
+  /// Obtém um label (com fallback: segment → ARB → key)
   String label(String key) {
-    return _labelCache[key] ?? _systemDefaults[key] ?? key;
+    // 1. Firestore custom (por segmento)
+    if (_labelCache.containsKey(key)) {
+      return _labelCache[key]!;
+    }
+
+    // 2. AppLocalizations (ARB files)
+    final arbValue = _getFromArb(key);
+    if (arbValue != null) return arbValue;
+
+    // 3. Key herself (fallback final)
+    return key;
   }
 
   /// Atalhos para labels comuns de entidades
@@ -178,30 +255,18 @@ class SegmentConfigService {
   /// Mapeia chaves técnicas para labels (com fallback)
   /// Ex: 'quote' → 'Orçamento' (ou customizado por segmento)
   String getStatus(String? statusKey) {
-    if (statusKey == null) return 'Pendente';
+    if (statusKey == null) {
+      return _l10n?.statusPending ?? 'Pendente';
+    }
+
     // Primeiro tenta mapear a chave técnica para label key
     final labelKey = _statusKeyMapping[statusKey];
     if (labelKey == null) {
       return statusKey; // Chave desconhecida, retorna ela mesma
     }
 
-    // Busca nos overrides do segmento
-    if (_labelCache.containsKey(labelKey)) {
-      return _labelCache[labelKey]!;
-    }
-
-    // Busca nos status defaults
-    if (_statusDefaults.containsKey(labelKey)) {
-      return _statusDefaults[labelKey]!;
-    }
-
-    // Busca nos system defaults (pending, in_progress, completed, cancelled)
-    if (_systemDefaults.containsKey(labelKey)) {
-      return _systemDefaults[labelKey]!;
-    }
-
-    // Fallback final
-    return statusKey;
+    // Usa o método label() que já tem o fluxo: segment → ARB → key
+    return label(labelKey);
   }
 
   /// Obtém todos os campos customizados de um namespace

@@ -5,6 +5,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 /// Unified payment management screen that combines:
 /// - Financial summary
@@ -73,8 +74,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         type: MaterialType.transparency,
         child: CustomScrollView(
           slivers: [
-            const CupertinoSliverNavigationBar(
-              largeTitle: Text('Pagamentos'),
+            CupertinoSliverNavigationBar(
+              largeTitle: Text(context.l10n.payments),
             ),
             SliverSafeArea(
               top: false,
@@ -109,12 +110,12 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         final isFullyPaid = _store?.isFullyPaid ?? false;
 
         return _buildGroupedSection(
-          header: 'RESUMO',
+          header: context.l10n.overview.toUpperCase(),
           children: [
             _buildSummaryRow(
               icon: CupertinoIcons.money_dollar_circle_fill,
               iconColor: CupertinoColors.systemBlue,
-              label: 'Total da OS',
+              label: context.l10n.total,
               value: _currencyFormat.format(total),
               valueColor: CupertinoColors.label.resolveFrom(context),
             ),
@@ -122,14 +123,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               _buildSummaryRow(
                 icon: CupertinoIcons.tag_fill,
                 iconColor: CupertinoColors.systemOrange,
-                label: 'Descontos',
+                label: context.l10n.discount,
                 value: '- ${_currencyFormat.format(discount)}',
                 valueColor: CupertinoColors.systemOrange,
               ),
             _buildSummaryRow(
               icon: CupertinoIcons.checkmark_circle_fill,
               iconColor: CupertinoColors.systemGreen,
-              label: 'Já pago',
+              label: context.l10n.totalPaid,
               value: _currencyFormat.format(paid),
               valueColor: CupertinoColors.systemGreen,
             ),
@@ -140,7 +141,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               iconColor: isFullyPaid
                   ? CupertinoColors.systemGreen
                   : CupertinoColors.systemOrange,
-              label: 'Saldo restante',
+              label: context.l10n.remaining,
               value: _currencyFormat.format(remaining),
               valueColor: isFullyPaid
                   ? CupertinoColors.systemGreen
@@ -243,8 +244,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               const SizedBox(height: 12),
               Text(
                 isQuote
-                    ? 'Pagamentos não disponíveis'
-                    : 'OS cancelada',
+                    ? context.l10n.payments
+                    : context.l10n.statusCancelled,
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
@@ -254,8 +255,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               const SizedBox(height: 4),
               Text(
                 isQuote
-                    ? 'Aprove o orçamento para registrar pagamentos'
-                    : 'Não é possível registrar pagamentos',
+                    ? context.l10n.statusQuote
+                    : context.l10n.statusCancelled,
                 style: TextStyle(
                   fontSize: 15,
                   color: CupertinoColors.tertiaryLabel.resolveFrom(context),
@@ -287,7 +288,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Totalmente pago',
+                    context.l10n.paid,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -301,7 +302,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                 padding: EdgeInsets.zero,
                 onPressed: _confirmResetPayment,
                 child: Text(
-                  'Marcar como A Receber',
+                  context.l10n.toReceive,
                   style: TextStyle(
                     fontSize: 15,
                     color: CupertinoColors.systemRed,
@@ -356,7 +357,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Pagamento',
+                        context.l10n.payment,
                         style: TextStyle(
                           color: _selectedType == 0
                               ? CupertinoColors.label.resolveFrom(context)
@@ -383,7 +384,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Desconto',
+                        context.l10n.discount,
                         style: TextStyle(
                           color: _selectedType == 1
                               ? CupertinoColors.label.resolveFrom(context)
@@ -809,13 +810,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Marcar como A Receber'),
-        content: const Text(
-          'Isso irá remover todos os pagamentos e descontos registrados. Deseja continuar?',
-        ),
+        title: Text(context.l10n.markAsToReceive),
+        content: Text(context.l10n.thisWillRemoveAllPayments),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -824,7 +823,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               Navigator.pop(context);
               _resetPayment();
             },
-            child: const Text('Confirmar'),
+            child: Text(context.l10n.confirm),
           ),
         ],
       ),
@@ -874,11 +873,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Atenção'),
+        title: Text(context.l10n.attention),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),
         ],
