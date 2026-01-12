@@ -1657,4 +1657,60 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get doYouWantToRemoveTheFeminine => '¿Desea eliminar la';
+
+  @override
+  String get searchCollaborator => 'Buscar colaborador';
+
+  @override
+  String get noCollaboratorFound => 'Ningún colaborador encontrado';
+
+  @override
+  String get pending => 'Pendiente';
+
+  @override
+  String get inviteTo => 'Invitación para';
+
+  @override
+  String get invitePendingMessage =>
+      'Esta invitación está pendiente. El usuario verá la invitación cuando se registre.';
+
+  @override
+  String get cancelInvite => 'Cancelar Invitación';
+
+  @override
+  String get confirmCancelInvite =>
+      '¿Está seguro de que desea cancelar la invitación para';
+
+  @override
+  String get yesCancel => 'Sí, Cancelar';
+
+  @override
+  String get userWithoutName => 'Usuario sin nombre';
+
+  @override
+  String get actionsFor => 'Acciones para';
+
+  @override
+  String get editPermission => 'Editar Permiso';
+
+  @override
+  String get removeFromCompany => 'Eliminar de la Empresa';
+
+  @override
+  String get selectProfile => 'Seleccionar Perfil';
+
+  @override
+  String get chooseCollaboratorRole =>
+      'Elija el perfil de acceso del colaborador';
+
+  @override
+  String get removeCollaborator => 'Eliminar Colaborador';
+
+  @override
+  String confirmRemoveFromOrganization(String name) {
+    return '¿Está seguro de que desea eliminar $name de la organización?';
+  }
+
+  @override
+  String get emailNotProvided => 'Correo electrónico no proporcionado';
 }

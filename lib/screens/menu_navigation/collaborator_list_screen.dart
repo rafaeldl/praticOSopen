@@ -41,7 +41,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
           child: CustomScrollView(
             slivers: [
               CupertinoSliverNavigationBar(
-                largeTitle: const Text('Colaboradores'),
+                largeTitle: Text(context.l10n.collaborators),
                 trailing: canManage
                     ? CupertinoButton(
                         padding: EdgeInsets.zero,
@@ -61,7 +61,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: CupertinoSearchTextField(
                     controller: _searchController,
-                    placeholder: 'Buscar colaborador',
+                    placeholder: context.l10n.searchCollaborator,
                     onChanged: (value) {
                       setState(() => _searchQuery = value.toLowerCase());
                     },
@@ -104,8 +104,8 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
           }).toList();
 
     if (filteredList.isEmpty && filteredInvites.isEmpty) {
-      return const SliverFillRemaining(
-        child: Center(child: Text('Nenhum colaborador encontrado')),
+      return SliverFillRemaining(
+        child: Center(child: Text(context.l10n.noCollaboratorFound)),
       );
     }
 
@@ -115,7 +115,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
           // Primeiro mostramos os convites pendentes
           if (filteredInvites.isNotEmpty) {
             if (index == 0) {
-              return _buildSectionHeader('CONVITES PENDENTES');
+              return _buildSectionHeader(context.l10n.pendingInvitations.toUpperCase());
             }
             if (index <= filteredInvites.length) {
               final invite = filteredInvites[index - 1];
@@ -123,7 +123,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
             }
             // Depois os colaboradores ativos
             if (index == filteredInvites.length + 1) {
-              return _buildSectionHeader('COLABORADORES');
+              return _buildSectionHeader(context.l10n.collaborators.toUpperCase());
             }
             final membershipIndex = index - filteredInvites.length - 2;
             if (membershipIndex < filteredList.length) {
@@ -189,7 +189,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          invite.email ?? 'Email não informado',
+                          invite.email ?? context.l10n.emailNotProvided,
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
@@ -205,9 +205,9 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                                 color: CupertinoColors.systemOrange.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Text(
-                                'Pendente',
-                                style: TextStyle(
+                              child: Text(
+                                context.l10n.pending,
+                                style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
                                   color: CupertinoColors.systemOrange,
@@ -273,12 +273,12 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: Text('Convite para ${invite.email}'),
-        message: const Text('Este convite está pendente. O usuário verá o convite quando se cadastrar no sistema.'),
+        title: Text('${context.l10n.inviteTo} ${invite.email}'),
+        message: Text(context.l10n.invitePendingMessage),
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
-            child: const Text('Cancelar Convite'),
+            child: Text(context.l10n.cancelInvite),
             onPressed: () {
               Navigator.pop(context);
               _showCancelInviteConfirmation(invite);
@@ -286,7 +286,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Fechar'),
+          child: Text(context.l10n.close),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -297,12 +297,12 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Cancelar Convite'),
+        title: Text(context.l10n.cancelInvite),
         content: Text(
-            'Tem certeza que deseja cancelar o convite para ${invite.email}?'),
+            '${context.l10n.confirmCancelInvite} ${invite.email}?'),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Não'),
+            child: Text(context.l10n.no),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -315,7 +315,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                 _showError(e.toString());
               }
             },
-            child: const Text('Sim, Cancelar'),
+            child: Text(context.l10n.yesCancel),
           ),
         ],
       ),
@@ -356,7 +356,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          membership.user?.name ?? 'Usuário sem nome',
+                          membership.user?.name ?? context.l10n.userWithoutName,
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
@@ -443,10 +443,10 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: Text('Ações para ${membership.user?.name}'),
+        title: Text('${context.l10n.actionsFor} ${membership.user?.name}'),
         actions: [
           CupertinoActionSheetAction(
-            child: const Text('Editar Permissão'),
+            child: Text(context.l10n.editPermission),
             onPressed: () {
               Navigator.pop(context);
               _showEditRoleDialog(membership);
@@ -454,7 +454,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
           ),
           CupertinoActionSheetAction(
             isDestructiveAction: true,
-            child: const Text('Remover da Empresa'),
+            child: Text(context.l10n.removeFromCompany),
             onPressed: () {
               Navigator.pop(context);
               _showRemoveConfirmation(membership);
@@ -462,7 +462,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
+          child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -473,8 +473,8 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: const Text('Selecionar Perfil'),
-        message: const Text('Escolha o perfil de acesso do colaborador'),
+        title: Text(context.l10n.selectProfile),
+        message: Text(context.l10n.chooseCollaboratorRole),
         actions: RolePermissions.availableRoles.map((role) {
           final isSelected = membership.role == role;
           return CupertinoActionSheetAction(
@@ -520,7 +520,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
           );
         }).toList(),
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
+          child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -531,12 +531,12 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Remover Colaborador'),
+        title: Text(context.l10n.removeCollaborator),
         content: Text(
-            'Tem certeza que deseja remover ${membership.user?.name} da organização?'),
+            context.l10n.confirmRemoveFromOrganization(membership.user?.name ?? '')),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -549,7 +549,7 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                 _showError(e.toString());
               }
             },
-            child: const Text('Remover'),
+            child: Text(context.l10n.remove),
           ),
         ],
       ),
@@ -560,11 +560,11 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Erro'),
+        title: Text(context.l10n.error),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),
         ],

@@ -3351,6 +3351,108 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Deseja remover a'**
   String get doYouWantToRemoveTheFeminine;
+
+  /// No description provided for @searchCollaborator.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar colaborador'**
+  String get searchCollaborator;
+
+  /// No description provided for @noCollaboratorFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum colaborador encontrado'**
+  String get noCollaboratorFound;
+
+  /// No description provided for @pending.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendente'**
+  String get pending;
+
+  /// No description provided for @inviteTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite para'**
+  String get inviteTo;
+
+  /// No description provided for @invitePendingMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este convite está pendente. O usuário verá o convite quando se cadastrar no sistema.'**
+  String get invitePendingMessage;
+
+  /// No description provided for @cancelInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar Convite'**
+  String get cancelInvite;
+
+  /// No description provided for @confirmCancelInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja cancelar o convite para'**
+  String get confirmCancelInvite;
+
+  /// No description provided for @yesCancel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, Cancelar'**
+  String get yesCancel;
+
+  /// No description provided for @userWithoutName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usuário sem nome'**
+  String get userWithoutName;
+
+  /// No description provided for @actionsFor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ações para'**
+  String get actionsFor;
+
+  /// No description provided for @editPermission.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar Permissão'**
+  String get editPermission;
+
+  /// No description provided for @removeFromCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover da Empresa'**
+  String get removeFromCompany;
+
+  /// No description provided for @selectProfile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecionar Perfil'**
+  String get selectProfile;
+
+  /// No description provided for @chooseCollaboratorRole.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o perfil de acesso do colaborador'**
+  String get chooseCollaboratorRole;
+
+  /// No description provided for @removeCollaborator.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover Colaborador'**
+  String get removeCollaborator;
+
+  /// No description provided for @confirmRemoveFromOrganization.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja remover {name} da organização?'**
+  String confirmRemoveFromOrganization(String name);
+
+  /// No description provided for @emailNotProvided.
+  ///
+  /// In pt, this message translates to:
+  /// **'Email não informado'**
+  String get emailNotProvided;
 }
 
 class _AppLocalizationsDelegate

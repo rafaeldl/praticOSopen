@@ -1656,4 +1656,60 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get doYouWantToRemoveTheFeminine => 'Deseja remover a';
+
+  @override
+  String get searchCollaborator => 'Buscar colaborador';
+
+  @override
+  String get noCollaboratorFound => 'Nenhum colaborador encontrado';
+
+  @override
+  String get pending => 'Pendente';
+
+  @override
+  String get inviteTo => 'Convite para';
+
+  @override
+  String get invitePendingMessage =>
+      'Este convite está pendente. O usuário verá o convite quando se cadastrar no sistema.';
+
+  @override
+  String get cancelInvite => 'Cancelar Convite';
+
+  @override
+  String get confirmCancelInvite =>
+      'Tem certeza que deseja cancelar o convite para';
+
+  @override
+  String get yesCancel => 'Sim, Cancelar';
+
+  @override
+  String get userWithoutName => 'Usuário sem nome';
+
+  @override
+  String get actionsFor => 'Ações para';
+
+  @override
+  String get editPermission => 'Editar Permissão';
+
+  @override
+  String get removeFromCompany => 'Remover da Empresa';
+
+  @override
+  String get selectProfile => 'Selecionar Perfil';
+
+  @override
+  String get chooseCollaboratorRole =>
+      'Escolha o perfil de acesso do colaborador';
+
+  @override
+  String get removeCollaborator => 'Remover Colaborador';
+
+  @override
+  String confirmRemoveFromOrganization(String name) {
+    return 'Tem certeza que deseja remover $name da organização?';
+  }
+
+  @override
+  String get emailNotProvided => 'Email não informado';
 }

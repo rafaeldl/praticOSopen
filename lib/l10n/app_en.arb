@@ -572,5 +572,24 @@
   "tapPlusToAddYourFirst": "Tap + to add your first",
   "tapPlusToAddYourFirstFeminine": "Tap + to add your first",
   "doYouWantToRemoveThe": "Do you want to remove the",
-  "doYouWantToRemoveTheFeminine": "Do you want to remove the"
+  "doYouWantToRemoveTheFeminine": "Do you want to remove the",
+
+  "searchCollaborator": "Search collaborator",
+  "noCollaboratorFound": "No collaborator found",
+  "pending": "Pending",
+  "inviteTo": "Invite to",
+  "invitePendingMessage": "This invite is pending. The user will see the invite when they sign up.",
+  "cancelInvite": "Cancel Invite",
+  "confirmCancelInvite": "Are you sure you want to cancel the invite to",
+  "yesCancel": "Yes, Cancel",
+  "userWithoutName": "User without name",
+  "actionsFor": "Actions for",
+  "editPermission": "Edit Permission",
+  "removeFromCompany": "Remove from Company",
+  "selectProfile": "Select Profile",
+  "chooseCollaboratorRole": "Choose the collaborator's access profile",
+  "removeCollaborator": "Remove Collaborator",
+  "confirmRemoveFromOrganization": "Are you sure you want to remove {name} from the organization?",
+  "ok": "OK",
+  "emailNotProvided": "Email not provided"
 }

@@ -604,5 +604,31 @@
   "tapPlusToAddYourFirst": "Toque em + para adicionar seu primeiro",
   "tapPlusToAddYourFirstFeminine": "Toque em + para adicionar sua primeira",
   "doYouWantToRemoveThe": "Deseja remover o",
-  "doYouWantToRemoveTheFeminine": "Deseja remover a"
+  "doYouWantToRemoveTheFeminine": "Deseja remover a",
+
+  "searchCollaborator": "Buscar colaborador",
+  "noCollaboratorFound": "Nenhum colaborador encontrado",
+  "pending": "Pendente",
+  "inviteTo": "Convite para",
+  "invitePendingMessage": "Este convite está pendente. O usuário verá o convite quando se cadastrar no sistema.",
+  "cancelInvite": "Cancelar Convite",
+  "confirmCancelInvite": "Tem certeza que deseja cancelar o convite para",
+  "yesCancel": "Sim, Cancelar",
+  "userWithoutName": "Usuário sem nome",
+  "actionsFor": "Ações para",
+  "editPermission": "Editar Permissão",
+  "removeFromCompany": "Remover da Empresa",
+  "selectProfile": "Selecionar Perfil",
+  "chooseCollaboratorRole": "Escolha o perfil de acesso do colaborador",
+  "removeCollaborator": "Remover Colaborador",
+  "confirmRemoveFromOrganization": "Tem certeza que deseja remover {name} da organização?",
+  "@confirmRemoveFromOrganization": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "ok": "OK",
+  "emailNotProvided": "Email não informado"
 }

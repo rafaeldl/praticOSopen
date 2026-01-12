@@ -572,5 +572,24 @@
   "tapPlusToAddYourFirst": "Toque + para agregar su primer",
   "tapPlusToAddYourFirstFeminine": "Toque + para agregar su primera",
   "doYouWantToRemoveThe": "¿Desea eliminar el",
-  "doYouWantToRemoveTheFeminine": "¿Desea eliminar la"
+  "doYouWantToRemoveTheFeminine": "¿Desea eliminar la",
+
+  "searchCollaborator": "Buscar colaborador",
+  "noCollaboratorFound": "Ningún colaborador encontrado",
+  "pending": "Pendiente",
+  "inviteTo": "Invitación para",
+  "invitePendingMessage": "Esta invitación está pendiente. El usuario verá la invitación cuando se registre.",
+  "cancelInvite": "Cancelar Invitación",
+  "confirmCancelInvite": "¿Está seguro de que desea cancelar la invitación para",
+  "yesCancel": "Sí, Cancelar",
+  "userWithoutName": "Usuario sin nombre",
+  "actionsFor": "Acciones para",
+  "editPermission": "Editar Permiso",
+  "removeFromCompany": "Eliminar de la Empresa",
+  "selectProfile": "Seleccionar Perfil",
+  "chooseCollaboratorRole": "Elija el perfil de acceso del colaborador",
+  "removeCollaborator": "Eliminar Colaborador",
+  "confirmRemoveFromOrganization": "¿Está seguro de que desea eliminar {name} de la organización?",
+  "ok": "OK",
+  "emailNotProvided": "Correo electrónico no proporcionado"
 }
