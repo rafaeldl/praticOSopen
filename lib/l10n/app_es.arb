@@ -530,5 +530,22 @@
   "confirmRemove": "¿Desea eliminar",
   "remove": "Eliminar",
   "noPermission": "Sin Permiso",
-  "noPermissionToRemove": "No tiene permiso para eliminar este elemento."
+  "noPermissionToRemove": "No tiene permiso para eliminar este elemento.",
+
+  "professionalizeYourBusiness": "Profesionalice su negocio",
+  "configureCompanyProfile": "Configure el perfil de su empresa para emitir órdenes de servicio profesionales ahora mismo.",
+  "professionalOrders": "Órdenes Profesionales",
+  "createDigitalOrders": "Cree órdenes de servicio digitales personalizadas.",
+  "customerManagement": "Gestión de Clientes",
+  "keepHistoryOrganized": "Mantenga el historial y contactos organizados.",
+  "configureMyBusiness": "Configurar Mi Negocio",
+  "configureLater": "Configurar Después",
+  "errorCreatingCompany": "Error al crear empresa predeterminada",
+  "chooseSegment": "Elija el Ramo",
+  "selectSegmentPrompt": "Seleccione su ramo de actuación para personalizar el sistema para usted.",
+  "availableSegments": "Segmentos Disponibles",
+  "noSegmentsAvailable": "Ningún segmento disponible",
+  "errorLoadingSegments": "Error al cargar segmentos",
+  "specialties": "especialidades",
+  "myCompany": "Mi Empresa"
 }

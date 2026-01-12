@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/onboarding/select_subspecialties_screen.dart';
 import 'package:praticos/screens/onboarding/confirm_bootstrap_screen.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class SelectSegmentScreen extends StatefulWidget {
   final AuthStore authStore;
@@ -84,8 +85,8 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Escolha o Ramo'),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(context.l10n.chooseSegment),
       ),
       child: SafeArea(
         child: DefaultTextStyle(
@@ -102,7 +103,7 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: Text(
-                      'Erro ao carregar segmentos: ${snapshot.error}',
+                      '${context.l10n.errorLoadingSegments}: ${snapshot.error}',
                       textAlign: TextAlign.center,
                       style: const TextStyle(color: CupertinoColors.systemRed),
                     ),
@@ -117,8 +118,8 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
               final segments = snapshot.data?.docs ?? [];
 
               if (segments.isEmpty) {
-                return const Center(
-                  child: Text('Nenhum segmento disponível'),
+                return Center(
+                  child: Text(context.l10n.noSegmentsAvailable),
                 );
               }
 
@@ -144,7 +145,7 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Selecione o ramo de atuação para personalizar o sistema para você.',
+                          context.l10n.selectSegmentPrompt,
                           textAlign: TextAlign.center,
                           style: CupertinoTheme.of(context)
                               .textTheme
@@ -163,7 +164,7 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
                   Expanded(
                     child: SingleChildScrollView(
                       child: CupertinoListSection.insetGrouped(
-                        header: const Text('SEGMENTOS DISPONÍVEIS'),
+                        header: Text(context.l10n.availableSegments.toUpperCase()),
                         margin: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
                         children: segments.map((doc) {
@@ -195,7 +196,7 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
                             ),
                             subtitle: hasSubspecialties
                                 ? Text(
-                                    '${subspecialties.length} especialidades',
+                                    '${subspecialties.length} ${context.l10n.specialties}',
                                     style: CupertinoTheme.of(context)
                                         .textTheme
                                         .textStyle

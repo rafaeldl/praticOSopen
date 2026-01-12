@@ -6,6 +6,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/global.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'company_info_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -143,12 +144,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content: Text('Erro ao criar empresa padrão: $e'),
+            title: Text(context.l10n.error),
+            content: Text('${context.l10n.errorCreatingCompany}: $e'),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),
@@ -196,13 +197,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                'Profissionalize seu negócio',
+                context.l10n.professionalizeYourBusiness,
                 style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
-                'Configure o perfil da sua empresa para emitir ordens de serviço profissionais agora mesmo.',
+                context.l10n.configureCompanyProfile,
                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                   fontSize: 17,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -210,21 +211,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 48),
-              
+
               _buildFeatureItem(
                 context,
                 icon: CupertinoIcons.doc_text_fill,
-                title: 'Ordens Profissionais',
-                description: 'Crie OS digitais personalizadas.',
+                title: context.l10n.professionalOrders,
+                description: context.l10n.createDigitalOrders,
               ),
               const SizedBox(height: 24),
               _buildFeatureItem(
                 context,
                 icon: CupertinoIcons.person_2_fill,
-                title: 'Gestão de Clientes',
-                description: 'Mantenha histórico e contatos organizados.',
+                title: context.l10n.customerManagement,
+                description: context.l10n.keepHistoryOrganized,
               ),
-              
+
               const Spacer(),
 
               // Botão principal - Configurar
@@ -232,7 +233,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 width: double.infinity,
                 child: CupertinoButton.filled(
                   onPressed: _isCreatingDefaultCompany ? null : () => _startSetup(context),
-                  child: const Text('Configurar Meu Negócio'),
+                  child: Text(context.l10n.configureMyBusiness),
                 ),
               ),
               const SizedBox(height: 12),
@@ -245,7 +246,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   child: _isCreatingDefaultCompany
                       ? const CupertinoActivityIndicator()
                       : Text(
-                          'Configurar Depois',
+                          context.l10n.configureLater,
                           style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                             color: CupertinoColors.secondaryLabel.resolveFrom(context),
                           ),

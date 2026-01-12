@@ -530,5 +530,22 @@
   "confirmRemove": "Do you want to remove",
   "remove": "Remove",
   "noPermission": "No Permission",
-  "noPermissionToRemove": "You don't have permission to remove this item."
+  "noPermissionToRemove": "You don't have permission to remove this item.",
+
+  "professionalizeYourBusiness": "Professionalize your business",
+  "configureCompanyProfile": "Set up your company profile to issue professional service orders right now.",
+  "professionalOrders": "Professional Orders",
+  "createDigitalOrders": "Create customized digital service orders.",
+  "customerManagement": "Customer Management",
+  "keepHistoryOrganized": "Keep history and contacts organized.",
+  "configureMyBusiness": "Configure My Business",
+  "configureLater": "Configure Later",
+  "errorCreatingCompany": "Error creating default company",
+  "chooseSegment": "Choose Segment",
+  "selectSegmentPrompt": "Select your business segment to customize the system for you.",
+  "availableSegments": "Available Segments",
+  "noSegmentsAvailable": "No segments available",
+  "errorLoadingSegments": "Error loading segments",
+  "specialties": "specialties",
+  "myCompany": "My Company"
 }
