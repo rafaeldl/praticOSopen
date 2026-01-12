@@ -21,13 +21,12 @@ The Accumulated Field System stores and suggests previously entered values per c
 ```
 companies/{companyId}/accumulatedFields/{fieldType}/values/{valueId}
 {
-  value: "Samsung",              // Display value
-  searchKey: "samsung",          // Lowercase for search
+  value: "Galaxy S21",           // Display value
+  searchKey: "galaxy s21",       // Lowercase for search
   usageCount: 12,                // Frequency (for sorting)
-  groupId: "abc123",             // Optional: parent value ID
-  groupValue: "Electronics",     // Optional: parent display value
-  createdAt: timestamp,
-  updatedAt: timestamp
+  group: "smartphone-samsung",   // Optional: normalized parent value(s) for filtering
+  createdAt: "2025-01-09T10:00:00.000Z",  // ISO8601 string
+  updatedAt: "2025-01-09T10:00:00.000Z"   // ISO8601 string
 }
 ```
 
@@ -37,33 +36,35 @@ companies/{companyId}/accumulatedFields/{fieldType}/values/{valueId}
 AccumulatedValue (Model)
 ├── id: String?
 ├── value: String
-├── searchKey: String
+├── searchKey: String (lowercase for search)
 ├── usageCount: int
-├── groupId: String?
-├── groupValue: String?
+├── group: String? (normalized lowercase for hierarchical filtering)
 ├── createdAt: DateTime?
 └── updatedAt: DateTime?
 
 AccumulatedValueRepository
-├── search()
-├── getAll()
-├── streamAll()
-├── use()              // Simplified: addOrIncrement
-├── getById()
-├── remove()
-├── removeByGroup()
-└── updateValue()
+├── getAll(companyId, fieldType, {group?})
+├── streamAll(companyId, fieldType, {group?})
+├── use(companyId, fieldType, value, {group?})  // Create or increment
+├── remove(companyId, fieldType, valueId)
+└── Client-side sorting by usageCount (no Firestore indexes needed)
 
 AccumulatedValueListScreen (Screen)
 ├── Uses: companyId from Global.companyAggr?.id (automatic)
 ├── Receives (arguments):
 │   ├── fieldType: String (required - e.g., 'deviceBrand')
 │   ├── title: String (optional - defaults to context.l10n.select)
-│   ├── currentValue: String? (optional - for highlighting)
-│   ├── groupId: String? (optional - for hierarchical filtering)
-│   └── groupValue: String? (optional - for storing parent reference)
-├── Shows: Searchable list + "Add new" option
-└── Returns: String value via Navigator.pop()
+│   ├── multiSelect: bool (optional - default: false)
+│   ├── currentValue: String? (optional - for single-select highlighting)
+│   ├── currentValues: List<String>? (optional - for multi-select initial values)
+│   └── group: String? or List? (optional - parent value(s) for filtering)
+│       - String: used as-is (normalized to lowercase)
+│       - List: non-null values joined with '-' (e.g., ['smartphone', 'samsung'] → 'smartphone-samsung')
+├── Shows: Searchable list + "Add new" option + Swipe-to-delete
+├── Returns:
+│   - Single-select: String value via Navigator.pop()
+│   - Multi-select: List<String> values via Navigator.pop()
+└── Multi-select: Shows "Done" button in navigation bar
 ```
 
 ## Data Flow
@@ -131,10 +132,36 @@ CupertinoListTile(
 )
 ```
 
-### Example 2: Hierarchical Fields (Parent-Child)
+### Example 2: Hierarchical Fields (Multi-Level)
 
 ```dart
-// Parent field (Brand)
+// Level 1: Category
+CupertinoListTile(
+  title: Text('Categoria'),
+  additionalInfo: Text(device.category ?? 'Selecionar'),
+  trailing: Icon(CupertinoIcons.chevron_right),
+  onTap: () async {
+    final value = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        'fieldType': 'deviceCategory',
+        'title': 'Categoria',
+        'currentValue': device.category,
+      },
+    );
+
+    if (value != null && value is String) {
+      setState(() {
+        device.category = value;
+        device.manufacturer = null;  // Clear children when parent changes
+        device.model = null;
+      });
+    }
+  },
+)
+
+// Level 2: Brand
 CupertinoListTile(
   title: Text('Marca'),
   additionalInfo: Text(device.manufacturer ?? 'Selecionar'),
@@ -144,7 +171,6 @@ CupertinoListTile(
       context,
       '/accumulated_value_list',
       arguments: {
-        
         'fieldType': 'deviceBrand',
         'title': 'Marca',
         'currentValue': device.manufacturer,
@@ -160,7 +186,8 @@ CupertinoListTile(
   },
 )
 
-// Child field (Model) - filtered by brand
+// Level 3: Model - filtered by category AND brand
+// Just pass an array - the screen handles the rest!
 CupertinoListTile(
   title: Text('Modelo'),
   additionalInfo: Text(device.model ?? 'Selecionar'),
@@ -170,12 +197,10 @@ CupertinoListTile(
       context,
       '/accumulated_value_list',
       arguments: {
-        
         'fieldType': 'deviceModel',
         'title': 'Modelo',
         'currentValue': device.model,
-        'groupId': device.manufacturer,      // Filter by parent
-        'groupValue': device.manufacturer,   // Store parent reference
+        'group': [device.category, device.manufacturer],  // Pass array, nulls filtered automatically
       },
     );
 
@@ -188,7 +213,66 @@ CupertinoListTile(
 )
 ```
 
-### Example 3: Custom Button
+**Why combined group?**
+Separates models by device type + brand. For example:
+- `['smartphone', 'samsung']` → filtered by `smartphone-samsung`
+- `['tablet', 'samsung']` → filtered by `tablet-samsung`
+- `['smartphone', 'apple']` → filtered by `smartphone-apple`
+- `['tablet', 'apple']` → filtered by `tablet-apple`
+
+Results:
+- "Galaxy S21" under `smartphone-samsung`
+- "Galaxy Tab S7" under `tablet-samsung`
+- "iPhone 13" under `smartphone-apple`
+- "iPad Pro" under `tablet-apple`
+
+### Example 3: Multi-Select
+
+```dart
+// Model with multiple tags/categories
+class Product extends BaseAuditCompany {
+  String? name;
+  List<String>? tags;  // Multiple tags
+  // ...
+}
+
+// Field with multi-select
+CupertinoListTile(
+  title: Text('Tags'),
+  additionalInfo: Text(
+    product.tags != null && product.tags!.isNotEmpty
+        ? product.tags!.join(', ')
+        : context.l10n.select,
+  ),
+  trailing: Icon(CupertinoIcons.chevron_right),
+  onTap: () async {
+    final values = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        'fieldType': 'productTag',
+        'title': 'Tags',
+        'multiSelect': true,              // Enable multi-select
+        'currentValues': product.tags,    // Pass current list
+      },
+    );
+
+    if (values != null && values is List) {
+      setState(() {
+        product.tags = values.cast<String>();
+      });
+    }
+  },
+)
+```
+
+**Multi-select behavior:**
+- Tap items to toggle selection (checkmarks appear)
+- "Done" button in navigation bar to confirm
+- Returns `List<String>` with all selected values
+- Can add new values while selecting
+
+### Example 4: Custom Button
 
 ```dart
 CupertinoButton(
@@ -242,42 +326,68 @@ GestureDetector(
 
 ## Field Types Reference
 
-| fieldType | Description | Group By |
-|-----------|-------------|----------|
-| `deviceCategory` | Device categories | - |
-| `deviceBrand` | Device brands | - |
-| `deviceModel` | Device models | `deviceBrand` |
-| `serviceCategory` | Service categories | - |
-| `productCategory` | Product categories | - |
-| `productBrand` | Product brands | `productCategory` |
-| `paymentCondition` | Payment conditions | - |
+| fieldType | Description | Group Format | Multi-Select |
+|-----------|-------------|--------------|--------------|
+| `deviceCategory` | Device categories (smartphone, tablet, laptop) | - | No |
+| `deviceBrand` | Device brands (Samsung, Apple, Dell) | - | No |
+| `deviceModel` | Device models (Galaxy S21, iPad Pro) | `category-brand` | No |
+| `serviceCategory` | Service categories | - | No |
+| `productCategory` | Product categories | - | No |
+| `productBrand` | Product brands | `category` | No |
+| `productTag` | Product tags (new, promotion, featured) | - | **Yes** |
+| `paymentMethod` | Payment methods (cash, pix, card) | - | Possible |
+| `paymentCondition` | Payment conditions | - | No |
 
 ## Repository API
 
-### search(companyId, fieldType, query, {groupId, limit})
+### getAll(companyId, fieldType, {group})
 
-Searches values by query string with optional group filtering.
+Gets all values for a field type with optional group filtering.
 
 ```dart
-final values = await repo.search(
+// Get all brands
+final brands = await repo.getAll(companyId, 'deviceBrand');
+
+// Get models for specific category-brand combination
+final models = await repo.getAll(
   companyId,
-  'deviceBrand',
-  'sam',  // Finds "Samsung", "Samson", etc.
-  limit: 10,
+  'deviceModel',
+  group: 'smartphone-samsung',
 );
 ```
 
-### use(companyId, fieldType, value, {groupId, groupValue})
+Results are automatically sorted by `usageCount` (most used first) on the client side.
+
+### streamAll(companyId, fieldType, {group})
+
+Same as `getAll()` but returns a `Stream<List<AccumulatedValue>>` for real-time updates.
+
+```dart
+final stream = repo.streamAll(
+  companyId,
+  'deviceModel',
+  group: 'smartphone-samsung',
+);
+```
+
+### use(companyId, fieldType, value, {group})
 
 Records usage of a value (creates new or increments count if exists).
 
 ```dart
-final valueId = await repo.use(
+// Simple field without group
+final categoryId = await repo.use(
+  companyId,
+  'deviceCategory',
+  'Smartphone',
+);
+
+// Hierarchical field with group
+final modelId = await repo.use(
   companyId,
   'deviceModel',
-  'Galaxy S24',
-  groupId: 'Samsung',
-  groupValue: 'Samsung',
+  'Galaxy S21',
+  group: 'smartphone-samsung',  // Automatically normalized to lowercase
 );
 ```
 
@@ -291,39 +401,61 @@ Removes a specific value.
 await repo.remove(companyId, 'deviceBrand', valueId);
 ```
 
-### removeByGroup(companyId, fieldType, groupId)
-
-Removes all values belonging to a group (cascade delete).
-
-```dart
-// Remove brand and all its models
-await repo.remove(companyId, 'deviceBrand', brandId);
-await repo.removeByGroup(companyId, 'deviceModel', brandId);
-```
-
 ## Migration from Device Catalog
 
-The Accumulated Field can replace the existing Device Catalog implementation:
+The Accumulated Field system replaced the existing Device Catalog implementation:
 
-| Device Catalog | Accumulated Field |
-|----------------|-------------------|
+| Old Device Catalog | New Accumulated Field |
+|-------------------|----------------------|
 | `brands` collection | `fieldType: 'deviceBrand'` |
 | `deviceCatalog` collection | `fieldType: 'deviceModel'` |
-| `brandId` reference | `groupId` |
-| `brand` denormalized | `groupValue` |
+| `brandId` reference | `group: 'category-brand'` |
+| `brand` denormalized | Removed (simplified) |
+| `DeviceAutocompleteField` widget | `AccumulatedValueListScreen` navigation |
+| `DeviceCatalogRepository` | `AccumulatedValueRepository` |
 
-To migrate:
-1. Update screens to use `AccumulatedField` widget
-2. Migrate existing data from `brands/` to `accumulatedFields/deviceBrand/values/`
-3. Migrate existing data from `deviceCatalog/` to `accumulatedFields/deviceModel/values/`
-4. Remove old `DeviceCatalogRepository` and `DeviceAutocompleteField`
+## When to Use Multi-Select vs Single-Select
+
+### Single-Select (default)
+Use when the entity should have **only one value** for the field:
+- Device category (one category per device)
+- Device brand (one brand per device)
+- Device model (one model per device)
+- Customer type (residential, commercial, or industrial - not multiple)
+- Payment condition (one payment term)
+
+**Returns**: `String`
+
+### Multi-Select
+Use when the entity can have **multiple values** for the field:
+- Product tags (promotional, featured, new arrival, etc.)
+- Service categories (a service can fit multiple categories)
+- Payment methods accepted (cash, pix, credit card, debit card)
+- Customer segments (a customer can be in multiple segments)
+- Order problems (multiple issues can occur simultaneously)
+
+**Returns**: `List<String>`
+
+**Example use cases:**
+```dart
+// Product with multiple tags
+product.tags = ['promotion', 'featured', 'new']
+
+// Service applicable to multiple categories
+service.categories = ['maintenance', 'preventive', 'residential']
+
+// Payment methods accepted
+company.acceptedPayments = ['cash', 'pix', 'credit', 'debit']
+```
 
 ## Performance Considerations
 
-1. **Caching**: Widget caches all values on init for fast client-side search
-2. **No Indexes**: Uses `orderBy('usageCount')` only - no composite indexes needed
-3. **Lazy Loading**: Suggestions load on focus, not on widget creation
-4. **Debouncing**: Consider adding debounce for very large value sets (future enhancement)
+1. **Client-side Sorting**: No Firestore composite indexes needed - sorting by `usageCount` happens in memory after fetching
+2. **Client-side Search**: Filtering by `searchKey` happens in memory using `.contains()`
+3. **Normalized Groups**: All group values are automatically normalized to lowercase for efficient querying
+4. **Swipe-to-Delete**: Native iOS gesture for item removal
+5. **Automatic Reload**: List refreshes when returning from navigation to always show latest values
+6. **Multi-Select State**: Managed in memory - no performance impact for large selections
 
 ## Security Rules
 

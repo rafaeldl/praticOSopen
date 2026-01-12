@@ -293,6 +293,8 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     if (value != null && value is String) {
       setState(() {
         _device?.category = value;
+        // Clear model when category changes (group will be different)
+        _device?.name = null;
       });
     }
   }
@@ -325,7 +327,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         'fieldType': 'deviceModel',
         'title': config.label(LabelKeys.deviceModel),
         'currentValue': _device?.name,
-        'group': _device?.manufacturer,
+        'group': [_device?.category, _device?.manufacturer],
       },
     );
 

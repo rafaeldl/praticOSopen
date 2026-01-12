@@ -29,7 +29,10 @@ class _AccumulatedValueListScreenState
   String? _fieldType;
   String? _title;
   String? _currentValue;
+  List<String>? _currentValues; // For multi-select
   String? _group;
+  bool _multiSelect = false;
+  Set<String> _selectedValues = {}; // Track selected values in multi-select mode
   bool _argumentsLoaded = false;
 
   @override
@@ -52,13 +55,38 @@ class _AccumulatedValueListScreenState
       if (args != null) {
         _fieldType = args['fieldType'];
         _title = args['title'] ?? context.l10n.select;
-        _currentValue = args['currentValue'];
-        _group = args['group'];
+        _multiSelect = args['multiSelect'] ?? false;
+
+        // Handle current value(s) for single or multi-select
+        if (_multiSelect) {
+          final currentValuesArg = args['currentValues'];
+          if (currentValuesArg is List) {
+            _currentValues = currentValuesArg.whereType<String>().toList();
+            _selectedValues = Set.from(_currentValues ?? []);
+          } else {
+            _currentValues = [];
+            _selectedValues = {};
+          }
+        } else {
+          _currentValue = args['currentValue'];
+        }
+
+        // Handle group as String or List
+        final groupArg = args['group'];
+        if (groupArg is List) {
+          // Filter out null values and join with '-'
+          final nonNullValues = groupArg.whereType<String>().where((s) => s.isNotEmpty).toList();
+          _group = nonNullValues.isNotEmpty ? nonNullValues.join('-') : null;
+        } else if (groupArg is String) {
+          _group = groupArg;
+        } else {
+          _group = null;
+        }
 
         // Get companyId from Global automatically
         _companyId = Global.companyAggr?.id;
 
-        debugPrint('AccumulatedValueListScreen: Arguments loaded - companyId=$_companyId, fieldType=$_fieldType, group=$_group, currentValue=$_currentValue');
+        debugPrint('AccumulatedValueListScreen: Arguments loaded - companyId=$_companyId, fieldType=$_fieldType, group=$_group, multiSelect=$_multiSelect, currentValue=$_currentValue, selectedValues=$_selectedValues');
 
         _argumentsLoaded = true;
       }
@@ -122,8 +150,26 @@ class _AccumulatedValueListScreenState
 
     debugPrint('AccumulatedValueListScreen: Value saved with ID: $valueId');
 
+    if (_multiSelect) {
+      // Multi-select: toggle selection and update UI
+      setState(() {
+        if (_selectedValues.contains(value)) {
+          _selectedValues.remove(value);
+        } else {
+          _selectedValues.add(value);
+        }
+      });
+    } else {
+      // Single select: close immediately
+      if (mounted) {
+        Navigator.pop(context, value);
+      }
+    }
+  }
+
+  void _confirmSelection() {
     if (mounted) {
-      Navigator.pop(context, value);
+      Navigator.pop(context, _selectedValues.toList());
     }
   }
 
@@ -133,6 +179,16 @@ class _AccumulatedValueListScreenState
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
         middle: Text(_title ?? context.l10n.select),
+        trailing: _multiSelect
+            ? CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: _confirmSelection,
+                child: Text(
+                  context.l10n.done,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              )
+            : null,
       ),
       child: SafeArea(
         child: Column(
@@ -347,7 +403,9 @@ class _AccumulatedValueListScreenState
         }
 
         final value = _filteredValues[index];
-        final isSelected = value.value == _currentValue;
+        final isSelected = _multiSelect
+            ? _selectedValues.contains(value.value)
+            : value.value == _currentValue;
 
         return Dismissible(
           key: Key(value.id ?? value.value),
