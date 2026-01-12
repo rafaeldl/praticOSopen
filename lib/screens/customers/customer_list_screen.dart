@@ -6,7 +6,6 @@ import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
-import 'package:praticos/extensions/context_extensions.dart';
 
 class CustomerListScreen extends StatefulWidget {
   @override

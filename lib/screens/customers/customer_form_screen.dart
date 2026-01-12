@@ -1,10 +1,7 @@
 import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
-import 'package:praticos/providers/segment_config_provider.dart';
-import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
 class CustomerFormScreen extends StatefulWidget {
@@ -52,8 +49,6 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final config = context.watch<SegmentConfigProvider>();
-
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
