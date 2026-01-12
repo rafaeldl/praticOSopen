@@ -109,9 +109,16 @@ platform :android do
   lane :promote_to_production do |options|
     skip_screenshots = options[:skip_screenshots] || false
 
+    # Get the version code from internal track
+    version_codes = google_play_track_version_codes(track: 'internal')
+    version_code = version_codes.max
+
+    UI.message("Promoting version code #{version_code} from internal to production")
+
     upload_to_play_store(
       track: 'internal',
       track_promote_to: 'production',
+      version_code: version_code,       # Specify version code for changelogs
       skip_upload_apk: true,
       skip_upload_aab: true,
       skip_upload_metadata: false,      # Always upload metadata
