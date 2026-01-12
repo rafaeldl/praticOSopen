@@ -267,6 +267,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentDate => 'Payment Date';
 
   @override
+  String get payTotalAmount => 'Pay total amount';
+
+  @override
+  String get registerPayment => 'Register Payment';
+
+  @override
+  String get applyDiscount => 'Apply Discount';
+
+  @override
+  String get paymentAmount => 'Payment amount';
+
+  @override
+  String get discountAmount => 'Discount amount';
+
+  @override
+  String get fillValue => 'Fill in the value';
+
+  @override
+  String get paymentCannotExceedBalance => 'Payment cannot exceed balance';
+
+  @override
+  String get discountCannotExceedBalance => 'Discount cannot exceed balance';
+
+  @override
+  String get paymentRegistered => 'Payment registered';
+
+  @override
+  String get discountApplied => 'Discount applied';
+
+  @override
+  String get noTransactionsRecorded => 'No transactions recorded';
+
+  @override
+  String confirmRemoveTransaction(String type, String amount) {
+    return 'Do you want to remove this $type of $amount?';
+  }
+
+  @override
   String get requiredField => 'Required field';
 
   @override

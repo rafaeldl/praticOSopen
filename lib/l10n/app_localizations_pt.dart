@@ -267,6 +267,46 @@ class AppLocalizationsPt extends AppLocalizations {
   String get paymentDate => 'Data do Pagamento';
 
   @override
+  String get payTotalAmount => 'Pagar valor total';
+
+  @override
+  String get registerPayment => 'Registrar Pagamento';
+
+  @override
+  String get applyDiscount => 'Aplicar Desconto';
+
+  @override
+  String get paymentAmount => 'Valor do pagamento';
+
+  @override
+  String get discountAmount => 'Valor do desconto';
+
+  @override
+  String get fillValue => 'Preencha o valor';
+
+  @override
+  String get paymentCannotExceedBalance =>
+      'Pagamento não pode ser maior que o saldo';
+
+  @override
+  String get discountCannotExceedBalance =>
+      'Desconto não pode ser maior que o saldo';
+
+  @override
+  String get paymentRegistered => 'Pagamento registrado';
+
+  @override
+  String get discountApplied => 'Desconto aplicado';
+
+  @override
+  String get noTransactionsRecorded => 'Nenhuma transação registrada';
+
+  @override
+  String confirmRemoveTransaction(String type, String amount) {
+    return 'Deseja remover este $type de $amount?';
+  }
+
+  @override
   String get requiredField => 'Campo obrigatório';
 
   @override

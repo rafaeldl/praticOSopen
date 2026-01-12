@@ -94,6 +94,31 @@
   "installment": "Parcela",
   "dueDate": "Vencimento",
   "paymentDate": "Data do Pagamento",
+  "payTotalAmount": "Pagar valor total",
+  "registerPayment": "Registrar Pagamento",
+  "applyDiscount": "Aplicar Desconto",
+  "paymentAmount": "Valor do pagamento",
+  "discountAmount": "Valor do desconto",
+  "fillValue": "Preencha o valor",
+  "paymentCannotExceedBalance": "Pagamento não pode ser maior que o saldo",
+  "discountCannotExceedBalance": "Desconto não pode ser maior que o saldo",
+  "paymentRegistered": "Pagamento registrado",
+  "discountApplied": "Desconto aplicado",
+  "noTransactionsRecorded": "Nenhuma transação registrada",
+  "confirmRemoveTransaction": "Deseja remover este {type} de {amount}?",
+  "@confirmRemoveTransaction": {
+    "description": "Mensagem de confirmação para remover transação",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "pagamento"
+      },
+      "amount": {
+        "type": "String",
+        "example": "R$ 100,00"
+      }
+    }
+  },
 
   "requiredField": "Campo obrigatório",
   "invalidEmail": "E-mail inválido",

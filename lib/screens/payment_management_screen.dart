@@ -400,7 +400,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isPayment ? 'Valor do pagamento' : 'Valor do desconto',
+                isPayment ? context.l10n.paymentAmount : context.l10n.discountAmount,
                 style: TextStyle(
                   fontSize: 13,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -485,7 +485,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
             width: double.infinity,
             child: CupertinoButton.filled(
               onPressed: _registerTransaction,
-              child: Text(isPayment ? 'Registrar Pagamento' : 'Aplicar Desconto'),
+              child: Text(isPayment ? context.l10n.registerPayment : context.l10n.applyDiscount),
             ),
           ),
         ),
@@ -507,7 +507,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Pagar valor total: ${FormatService().formatCurrency(remaining)}',
+                    '${context.l10n.payTotalAmount}: ${FormatService().formatCurrency(remaining)}',
                     style: TextStyle(
                       fontSize: 15,
                       color: CupertinoTheme.of(context).primaryColor,
@@ -546,7 +546,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Nenhuma transação registrada',
+                        context.l10n.noTransactionsRecorded,
                         style: TextStyle(
                           fontSize: 15,
                           color: CupertinoColors.secondaryLabel
@@ -747,7 +747,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
   String? _validateValue(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Preencha o valor';
+      return context.l10n.fillValue;
     }
 
     final valueDouble = _parseValue(value);
@@ -757,8 +757,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
     if (_store != null && valueDouble > _store!.remainingBalance) {
       return _selectedType == 0
-          ? 'Pagamento não pode ser maior que o saldo'
-          : 'Desconto não pode ser maior que o saldo';
+          ? context.l10n.paymentCannotExceedBalance
+          : context.l10n.discountCannotExceedBalance;
     }
 
     return null;
@@ -788,8 +788,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
     // Show feedback
     _showSuccess(_selectedType == 0
-        ? 'Pagamento registrado'
-        : 'Desconto aplicado');
+        ? context.l10n.paymentRegistered
+        : context.l10n.discountApplied);
   }
 
   void _fillRemainingBalance() {
@@ -839,13 +839,16 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: Text('Remover ${transaction.typeLabel}'),
+        title: Text('${context.l10n.remove} ${transaction.typeLabel}'),
         content: Text(
-          'Deseja remover este ${transaction.typeLabel.toLowerCase()} de ${FormatService().formatCurrency(transaction.amount)}?',
+          context.l10n.confirmRemoveTransaction(
+            transaction.typeLabel.toLowerCase(),
+            FormatService().formatCurrency(transaction.amount),
+          ),
         ),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -855,7 +858,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               _store?.removeTransaction(index);
               _prefillValue();
             },
-            child: const Text('Remover'),
+            child: Text(context.l10n.remove),
           ),
         ],
       ),

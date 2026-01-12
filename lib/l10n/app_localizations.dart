@@ -616,6 +616,78 @@ abstract class AppLocalizations {
   /// **'Data do Pagamento'**
   String get paymentDate;
 
+  /// No description provided for @payTotalAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagar valor total'**
+  String get payTotalAmount;
+
+  /// No description provided for @registerPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar Pagamento'**
+  String get registerPayment;
+
+  /// No description provided for @applyDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aplicar Desconto'**
+  String get applyDiscount;
+
+  /// No description provided for @paymentAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor do pagamento'**
+  String get paymentAmount;
+
+  /// No description provided for @discountAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor do desconto'**
+  String get discountAmount;
+
+  /// No description provided for @fillValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha o valor'**
+  String get fillValue;
+
+  /// No description provided for @paymentCannotExceedBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento não pode ser maior que o saldo'**
+  String get paymentCannotExceedBalance;
+
+  /// No description provided for @discountCannotExceedBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto não pode ser maior que o saldo'**
+  String get discountCannotExceedBalance;
+
+  /// No description provided for @paymentRegistered.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento registrado'**
+  String get paymentRegistered;
+
+  /// No description provided for @discountApplied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto aplicado'**
+  String get discountApplied;
+
+  /// No description provided for @noTransactionsRecorded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma transação registrada'**
+  String get noTransactionsRecorded;
+
+  /// Mensagem de confirmação para remover transação
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja remover este {type} de {amount}?'**
+  String confirmRemoveTransaction(String type, String amount);
+
   /// No description provided for @requiredField.
   ///
   /// In pt, this message translates to:
