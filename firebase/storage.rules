@@ -19,6 +19,19 @@ service firebase.storage {
     // Por enquanto, a validação de tenant é feita client-side no PhotoService
     // TODO: Implementar Custom Claims com companyId no Firebase Auth token
 
+    // Regra para permitir listar e deletar toda a pasta de um tenant (para delete account)
+    match /tenants/{companyId}/{allPaths=**} {
+      allow read, list: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
+
+    // Regra para logo da empresa (usado no onboarding e delete account)
+    match /companies/{companyId}/{allPaths=**} {
+      allow read, list: if isAuthenticated();
+      allow create, update: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+
     // Regras para fotos de ordens de serviço organizadas por tenant
     match /tenants/{companyId}/orders/{orderId}/photos/{photoId} {
       allow read: if isAuthenticated();
