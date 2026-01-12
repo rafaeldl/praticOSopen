@@ -53,7 +53,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar procedimento',
+                  placeholder: context.l10n.searchProcedure,
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -136,7 +136,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
             return Padding(
               padding: const EdgeInsets.fromLTRB(32, 16, 16, 8),
               child: Text(
-                'MEUS PROCEDIMENTOS',
+                context.l10n.myProcedures.toUpperCase(),
                 style: TextStyle(
                   fontSize: 13,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -159,8 +159,8 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                     const SizedBox(height: 12),
                     Text(
                       _searchQuery.isEmpty
-                          ? 'Nenhum procedimento cadastrado'
-                          : 'Nenhum resultado encontrado',
+                          ? context.l10n.noProceduresRegistered
+                          : context.l10n.noResultsFound,
                       style: TextStyle(
                           color:
                               CupertinoColors.secondaryLabel.resolveFrom(context)),
@@ -223,7 +223,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'PROCEDIMENTOS GLOBAIS',
+                      context.l10n.globalProcedures.toUpperCase(),
                       style: TextStyle(
                         fontSize: 13,
                         color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -352,7 +352,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    'Inativo',
+                                    context.l10n.inactive,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: CupertinoColors.secondaryLabel
@@ -378,7 +378,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                           ],
                           const SizedBox(height: 4),
                           Text(
-                            '${template.items.length} ${template.items.length == 1 ? 'item' : 'itens'}',
+                            context.l10n.itemCount(template.items.length),
                             style: TextStyle(
                               fontSize: 13,
                               color: CupertinoColors.systemGrey
@@ -462,7 +462,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                         ],
                         const SizedBox(height: 4),
                         Text(
-                          '${template.items.length} ${template.items.length == 1 ? 'item' : 'itens'}',
+                          context.l10n.itemCount(template.items.length),
                           style: TextStyle(
                             fontSize: 13,
                             color:
@@ -482,9 +482,9 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                         color: CupertinoColors.activeBlue,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text(
-                        'Importar',
-                        style: TextStyle(
+                      child: Text(
+                        context.l10n.import,
+                        style: const TextStyle(
                           color: CupertinoColors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -525,7 +525,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
             ],
             const SizedBox(height: 12),
             Text(
-              'Itens: ${template.items.length}',
+              context.l10n.itemCount(template.items.length),
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
@@ -561,7 +561,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
       builder: (ctx) => CupertinoAlertDialog(
         title: Text(context.l10n.importProcedure),
         content: Text(
-            'Deseja importar o procedimento "${template.title}" para sua empresa?\n\nVocê poderá editá-lo após a importação.'),
+            context.l10n.importConfirmationMessage(template.title)),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, false),

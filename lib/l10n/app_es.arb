@@ -518,7 +518,6 @@
   "switchBetweenOrganizations": "Alternar entre organizaciones",
   "management": "Gestión",
   "companyData": "Datos de la Empresa",
-  "procedures": "Procedimientos",
   "interface_": "Interfaz",
   "nightMode": "Modo Nocturno",
   "account": "Cuenta",
@@ -715,6 +714,34 @@
   "newOrder": "Nueva Orden",
 
   "procedures": "Procedimientos",
+  "searchProcedure": "Buscar procedimiento",
+  "myProcedures": "Mis Procedimientos",
+  "globalProcedures": "Procedimientos Globales",
+  "noProceduresRegistered": "No hay procedimientos registrados",
+  "noProceduresAvailable": "No hay procedimientos disponibles",
+  "tapPlusToCreateFirst": "Toque + para crear su primer procedimiento.",
+  "fromCompany": "De la Empresa",
+  "global": "Globales",
+  "itemCount": "{count} {count, plural, =1{elemento} other{elementos}}",
+  "@itemCount": {
+    "description": "Recuento de elementos con plural correcto",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "importConfirmationMessage": "¿Desea importar el procedimiento \"{title}\" a su empresa?\n\nPodrá editarlo después de la importación.",
+  "@importConfirmationMessage": {
+    "description": "Mensaje de confirmación de importación de procedimiento",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Inspección de Vehículo"
+      }
+    }
+  },
   "errorLoadingProcedures": "Error al cargar procedimientos",
   "tryAgain": "Intente de nuevo",
   "importProcedure": "Importar Procedimiento",

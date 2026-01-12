@@ -1499,9 +1499,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get companyData => 'Company Data';
 
   @override
-  String get procedures => 'Procedures';
-
-  @override
   String get interface_ => 'Interface';
 
   @override
@@ -2000,6 +1997,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userCanAttachPhotos => 'User can attach photos to this item';
+
+  @override
+  String get procedures => 'Procedures';
+
+  @override
+  String get searchProcedure => 'Search procedure';
+
+  @override
+  String get myProcedures => 'My Procedures';
+
+  @override
+  String get globalProcedures => 'Global Procedures';
+
+  @override
+  String get noProceduresRegistered => 'No procedures registered';
+
+  @override
+  String get noProceduresAvailable => 'No procedures available';
+
+  @override
+  String get tapPlusToCreateFirst => 'Tap + to create your first procedure.';
+
+  @override
+  String get fromCompany => 'From Company';
+
+  @override
+  String get global => 'Global';
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String importConfirmationMessage(String title) {
+    return 'Do you want to import the procedure \"$title\" to your company?\n\nYou will be able to edit it after import.';
+  }
 
   @override
   String get errorLoadingProcedures => 'Error loading procedures';

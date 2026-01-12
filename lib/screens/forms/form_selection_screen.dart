@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Divider, InkWell;
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/repositories/segment/segment_form_template_repository.dart';
@@ -90,7 +91,7 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Procedimentos'),
+              largeTitle: Text(context.l10n.procedures),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
@@ -106,7 +107,7 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar procedimento',
+                  placeholder: context.l10n.searchProcedure,
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -154,8 +155,8 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                 const SizedBox(height: 16),
                 Text(
                   _searchQuery.isEmpty
-                      ? 'Nenhum procedimento disponível'
-                      : 'Nenhum resultado encontrado',
+                      ? context.l10n.noProceduresAvailable
+                      : context.l10n.noResultsFound,
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -165,7 +166,7 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                 if (_searchQuery.isEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
-                    'Toque em + para criar seu primeiro procedimento.',
+                    context.l10n.tapPlusToCreateFirst,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -184,13 +185,13 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
       delegate: SliverChildListDelegate([
         // Seção: Templates da Empresa
         if (hasCompanyTemplates) ...[
-          _buildSectionHeader('Da Empresa'),
+          _buildSectionHeader(context.l10n.fromCompany),
           ..._buildTemplateList(filteredCompanyTemplates),
         ],
 
         // Seção: Templates Globais
         if (hasGlobalTemplates) ...[
-          _buildSectionHeader('Globais'),
+          _buildSectionHeader(context.l10n.global),
           ..._buildTemplateList(filteredGlobalTemplates, isGlobal: true),
         ],
       ]),
@@ -264,7 +265,7 @@ class _FormSelectionScreenState extends State<FormSelectionScreen> {
                         ],
                         const SizedBox(height: 2),
                         Text(
-                          '${template.items.length} ${template.items.length == 1 ? 'item' : 'itens'}',
+                          context.l10n.itemCount(template.items.length),
                           style: TextStyle(
                             fontSize: 13,
                             color: CupertinoColors.systemGrey.resolveFrom(context),

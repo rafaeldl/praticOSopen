@@ -518,7 +518,6 @@
   "switchBetweenOrganizations": "Switch between organizations",
   "management": "Management",
   "companyData": "Company Data",
-  "procedures": "Procedures",
   "interface_": "Interface",
   "nightMode": "Night Mode",
   "account": "Account",
@@ -715,6 +714,34 @@
   "newOrder": "New Order",
 
   "procedures": "Procedures",
+  "searchProcedure": "Search procedure",
+  "myProcedures": "My Procedures",
+  "globalProcedures": "Global Procedures",
+  "noProceduresRegistered": "No procedures registered",
+  "noProceduresAvailable": "No procedures available",
+  "tapPlusToCreateFirst": "Tap + to create your first procedure.",
+  "fromCompany": "From Company",
+  "global": "Global",
+  "itemCount": "{count} {count, plural, =1{item} other{items}}",
+  "@itemCount": {
+    "description": "Item count with correct plural",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "importConfirmationMessage": "Do you want to import the procedure \"{title}\" to your company?\n\nYou will be able to edit it after import.",
+  "@importConfirmationMessage": {
+    "description": "Procedure import confirmation message",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Vehicle Inspection"
+      }
+    }
+  },
   "errorLoadingProcedures": "Error loading procedures",
   "tryAgain": "Try again",
   "importProcedure": "Import Procedure",

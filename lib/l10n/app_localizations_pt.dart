@@ -1501,9 +1501,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get companyData => 'Dados da Empresa';
 
   @override
-  String get procedures => 'Procedimentos';
-
-  @override
   String get interface_ => 'Interface';
 
   @override
@@ -2007,6 +2004,50 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get userCanAttachPhotos => 'Usuário pode anexar fotos a este item';
+
+  @override
+  String get procedures => 'Procedimentos';
+
+  @override
+  String get searchProcedure => 'Buscar procedimento';
+
+  @override
+  String get myProcedures => 'Meus Procedimentos';
+
+  @override
+  String get globalProcedures => 'Procedimentos Globais';
+
+  @override
+  String get noProceduresRegistered => 'Nenhum procedimento cadastrado';
+
+  @override
+  String get noProceduresAvailable => 'Nenhum procedimento disponível';
+
+  @override
+  String get tapPlusToCreateFirst =>
+      'Toque em + para criar seu primeiro procedimento.';
+
+  @override
+  String get fromCompany => 'Da Empresa';
+
+  @override
+  String get global => 'Globais';
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'itens',
+      one: 'item',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String importConfirmationMessage(String title) {
+    return 'Deseja importar o procedimento \"$title\" para sua empresa?\n\nVocê poderá editá-lo após a importação.';
+  }
 
   @override
   String get errorLoadingProcedures => 'Erro ao carregar procedimentos';

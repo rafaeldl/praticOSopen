@@ -3052,12 +3052,6 @@ abstract class AppLocalizations {
   /// **'Dados da Empresa'**
   String get companyData;
 
-  /// No description provided for @procedures.
-  ///
-  /// In pt, this message translates to:
-  /// **'Procedimentos'**
-  String get procedures;
-
   /// No description provided for @interface_.
   ///
   /// In pt, this message translates to:
@@ -4011,6 +4005,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Usuário pode anexar fotos a este item'**
   String get userCanAttachPhotos;
+
+  /// No description provided for @procedures.
+  ///
+  /// In pt, this message translates to:
+  /// **'Procedimentos'**
+  String get procedures;
+
+  /// No description provided for @searchProcedure.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar procedimento'**
+  String get searchProcedure;
+
+  /// No description provided for @myProcedures.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meus Procedimentos'**
+  String get myProcedures;
+
+  /// No description provided for @globalProcedures.
+  ///
+  /// In pt, this message translates to:
+  /// **'Procedimentos Globais'**
+  String get globalProcedures;
+
+  /// No description provided for @noProceduresRegistered.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum procedimento cadastrado'**
+  String get noProceduresRegistered;
+
+  /// No description provided for @noProceduresAvailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum procedimento disponível'**
+  String get noProceduresAvailable;
+
+  /// No description provided for @tapPlusToCreateFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque em + para criar seu primeiro procedimento.'**
+  String get tapPlusToCreateFirst;
+
+  /// No description provided for @fromCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Da Empresa'**
+  String get fromCompany;
+
+  /// No description provided for @global.
+  ///
+  /// In pt, this message translates to:
+  /// **'Globais'**
+  String get global;
+
+  /// Contagem de itens com plural correto
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} {count, plural, =1{item} other{itens}}'**
+  String itemCount(int count);
+
+  /// Mensagem de confirmação de importação de procedimento
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja importar o procedimento \"{title}\" para sua empresa?\n\nVocê poderá editá-lo após a importação.'**
+  String importConfirmationMessage(String title);
 
   /// No description provided for @errorLoadingProcedures.
   ///

@@ -563,7 +563,6 @@
   "switchBetweenOrganizations": "Alternar entre organizações",
   "management": "Gerenciamento",
   "companyData": "Dados da Empresa",
-  "procedures": "Procedimentos",
   "interface_": "Interface",
   "nightMode": "Modo Noturno",
   "account": "Conta",
@@ -774,6 +773,34 @@
   "newOrder": "Nova OS",
 
   "procedures": "Procedimentos",
+  "searchProcedure": "Buscar procedimento",
+  "myProcedures": "Meus Procedimentos",
+  "globalProcedures": "Procedimentos Globais",
+  "noProceduresRegistered": "Nenhum procedimento cadastrado",
+  "noProceduresAvailable": "Nenhum procedimento disponível",
+  "tapPlusToCreateFirst": "Toque em + para criar seu primeiro procedimento.",
+  "fromCompany": "Da Empresa",
+  "global": "Globais",
+  "itemCount": "{count} {count, plural, =1{item} other{itens}}",
+  "@itemCount": {
+    "description": "Contagem de itens com plural correto",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "importConfirmationMessage": "Deseja importar o procedimento \"{title}\" para sua empresa?\n\nVocê poderá editá-lo após a importação.",
+  "@importConfirmationMessage": {
+    "description": "Mensagem de confirmação de importação de procedimento",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Vistoria de Veículo"
+      }
+    }
+  },
   "errorLoadingProcedures": "Erro ao carregar procedimentos",
   "tryAgain": "Tentar novamente",
   "importProcedure": "Importar Procedimento",
