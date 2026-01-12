@@ -2,9 +2,9 @@ import 'package:currency_text_input_formatter/currency_text_input_formatter.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
 /// Unified payment management screen that combines:
@@ -27,13 +27,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   int _selectedType = 0; // 0 = payment, 1 = discount
   final TextEditingController _valueController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-
-  final NumberFormat _currencyFormat = NumberFormat.currency(
-    locale: 'pt-BR',
-    symbol: 'R\$',
-  );
-
-  final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
   @override
   void didChangeDependencies() {
@@ -60,7 +53,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     if (_store != null && _selectedType == 0) {
       final remaining = _store!.remainingBalance;
       if (remaining > 0) {
-        _valueController.text = _currencyFormat.format(remaining);
+        _valueController.text = FormatService().formatCurrency(remaining);
       }
     }
   }
@@ -116,7 +109,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               icon: CupertinoIcons.money_dollar_circle_fill,
               iconColor: CupertinoColors.systemBlue,
               label: context.l10n.total,
-              value: _currencyFormat.format(total),
+              value: FormatService().formatCurrency(total),
               valueColor: CupertinoColors.label.resolveFrom(context),
             ),
             if (discount > 0)
@@ -124,14 +117,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                 icon: CupertinoIcons.tag_fill,
                 iconColor: CupertinoColors.systemOrange,
                 label: context.l10n.discount,
-                value: '- ${_currencyFormat.format(discount)}',
+                value: '- ${FormatService().formatCurrency(discount)}',
                 valueColor: CupertinoColors.systemOrange,
               ),
             _buildSummaryRow(
               icon: CupertinoIcons.checkmark_circle_fill,
               iconColor: CupertinoColors.systemGreen,
               label: context.l10n.totalPaid,
-              value: _currencyFormat.format(paid),
+              value: FormatService().formatCurrency(paid),
               valueColor: CupertinoColors.systemGreen,
             ),
             _buildSummaryRow(
@@ -142,7 +135,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   ? CupertinoColors.systemGreen
                   : CupertinoColors.systemOrange,
               label: context.l10n.remaining,
-              value: _currencyFormat.format(remaining),
+              value: FormatService().formatCurrency(remaining),
               valueColor: isFullyPaid
                   ? CupertinoColors.systemGreen
                   : CupertinoColors.systemOrange,
@@ -514,7 +507,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Pagar valor total: ${_currencyFormat.format(remaining)}',
+                    'Pagar valor total: ${FormatService().formatCurrency(remaining)}',
                     style: TextStyle(
                       fontSize: 15,
                       color: CupertinoTheme.of(context).primaryColor,
@@ -651,7 +644,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                         const SizedBox(height: 2),
                         Text(
                           transaction.description ??
-                              _dateFormat.format(transaction.createdAt),
+                              FormatService().formatDateTime(transaction.createdAt),
                           style: TextStyle(
                             fontSize: 13,
                             color: CupertinoColors.secondaryLabel
@@ -662,7 +655,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                         ),
                         if (transaction.description != null)
                           Text(
-                            _dateFormat.format(transaction.createdAt),
+                            FormatService().formatDateTime(transaction.createdAt),
                             style: TextStyle(
                               fontSize: 12,
                               color: CupertinoColors.tertiaryLabel
@@ -675,8 +668,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   // Amount
                   Text(
                     isPayment
-                        ? '+ ${_currencyFormat.format(transaction.amount)}'
-                        : '- ${_currencyFormat.format(transaction.amount)}',
+                        ? '+ ${FormatService().formatCurrency(transaction.amount)}'
+                        : '- ${FormatService().formatCurrency(transaction.amount)}',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -802,7 +795,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   void _fillRemainingBalance() {
     final remaining = _store?.remainingBalance ?? 0.0;
     if (remaining > 0) {
-      _valueController.text = _currencyFormat.format(remaining);
+      _valueController.text = FormatService().formatCurrency(remaining);
     }
   }
 
@@ -848,7 +841,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       builder: (context) => CupertinoAlertDialog(
         title: Text('Remover ${transaction.typeLabel}'),
         content: Text(
-          'Deseja remover este ${transaction.typeLabel.toLowerCase()} de ${_currencyFormat.format(transaction.amount)}?',
+          'Deseja remover este ${transaction.typeLabel.toLowerCase()} de ${FormatService().formatCurrency(transaction.amount)}?',
         ),
         actions: [
           CupertinoDialogAction(

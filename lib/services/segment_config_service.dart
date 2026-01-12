@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/custom_field.dart';
 import '../l10n/app_localizations.dart';
+import 'format_service.dart';
 
 /// Serviço que carrega e gerencia a configuração de um segmento
 /// (labels customizados e campos extras)
@@ -42,6 +43,9 @@ class SegmentConfigService {
 
     _locale = locale;
 
+    // Sincroniza FormatService com novo locale
+    FormatService().setLocale(locale);
+
     // Recarrega customFields com nova locale
     if (_segmentId != null) {
       _labelCache.clear();
@@ -61,6 +65,9 @@ class SegmentConfigService {
     // Se locale mudou, atualiza e recarrega cache
     if (_locale != newLocale) {
       _locale = newLocale;
+
+      // Sincroniza FormatService com novo locale
+      FormatService().setLocale(newLocale);
 
       // Reconstruir cache se segmento está carregado
       if (_segmentId != null) {

@@ -1,6 +1,6 @@
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/mobx/product_store.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -231,10 +231,6 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
   String _convertToCurrency(double? total) {
     if (total == null || total == 0) return '';
-    NumberFormat numberFormat = NumberFormat.currency(
-      locale: 'pt-BR',
-      symbol: 'R\$',
-    );
-    return numberFormat.format(total);
+    return FormatService().formatCurrency(total);
   }
 }

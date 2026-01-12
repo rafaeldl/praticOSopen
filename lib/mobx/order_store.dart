@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:intl/intl.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
@@ -334,8 +334,7 @@ abstract class _OrderStore with Store {
 
   String dateToString(DateTime? date) {
     if (date == null) return 'Não definida';
-    DateFormat dateFormat = DateFormat('dd/MM/yyyy');
-    return dateFormat.format(date);
+    return FormatService().formatDate(date);
   }
 
   @computed

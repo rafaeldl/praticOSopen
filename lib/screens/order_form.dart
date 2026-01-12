@@ -6,8 +6,8 @@ import 'package:flutter/material.dart' show Colors, ScaffoldMessenger, SnackBar,
 // I will try to rely purely on Cupertino for the visual tree.
 
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -1257,12 +1257,7 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   String _convertToCurrency(double? total) {
-    total ??= 0.0;
-    NumberFormat numberFormat = NumberFormat.currency(
-      locale: 'pt-BR',
-      symbol: 'R\$',
-    );
-    return numberFormat.format(total);
+    return FormatService().formatCurrency(total ?? 0.0);
   }
   
   // PDF Generation Logic - Usando novo PdfService

@@ -1,5 +1,5 @@
-import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
@@ -26,9 +26,7 @@ class PdfMainOsBuilder {
   // ============================================
 
   String _formatCurrency(double? value) {
-    if (value == null) return 'R\$ 0,00';
-    final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-    return formatter.format(value);
+    return FormatService().formatCurrency(value ?? 0.0);
   }
 
   // ============================================
@@ -159,7 +157,7 @@ class PdfMainOsBuilder {
                   pw.SizedBox(height: 3),
                   if (order.createdAt != null)
                     pw.Text(
-                      DateFormat('dd/MM/yyyy').format(order.createdAt!),
+                      FormatService().formatDate(order.createdAt!),
                       style: pw.TextStyle(
                         font: baseFont,
                         fontSize: 8.0,

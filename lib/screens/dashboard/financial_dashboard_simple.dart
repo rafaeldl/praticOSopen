@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
@@ -45,7 +45,6 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   @override
   void initState() {
     super.initState();
-    initializeDateFormatting('pt_BR', null);
   }
 
   @override
@@ -62,8 +61,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     if (selectedPeriod == 'custom' &&
         _customStartDate != null &&
         _customEndDate != null) {
-      final DateFormat dateFormat = DateFormat('dd/MM/yy', 'pt_BR');
-      return '${dateFormat.format(_customStartDate!)} - ${dateFormat.format(_customEndDate!)}';
+      return '${FormatService().formatDate(_customStartDate)} - ${FormatService().formatDate(_customEndDate)}';
     }
 
     DateTime now = DateTime.now();
@@ -402,11 +400,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     groupValue: isSelectingStart,
                     children: {
                       true: Text(
-                        '${context.l10n.start}: ${DateFormat('dd/MM/yy').format(tempStartDate)}',
+                        '${context.l10n.start}: ${FormatService().formatDate(tempStartDate)}',
                         style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context)),
                       ),
                       false: Text(
-                        '${context.l10n.end}: ${DateFormat('dd/MM/yy').format(tempEndDate)}',
+                        '${context.l10n.end}: ${FormatService().formatDate(tempEndDate)}',
                         style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context)),
                       ),
                     },
@@ -1595,10 +1593,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   }
 
   String _convertToCurrency(double? total) {
-    total ??= 0.0;
-    NumberFormat numberFormat =
-        NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$');
-    return numberFormat.format(total);
+    return FormatService().formatCurrency(total ?? 0.0);
   }
 
   // ============================================================
@@ -1884,7 +1879,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     ),
                     pw.SizedBox(height: 2),
                     pw.Text(
-                      'Gerado em ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                      'Gerado em ${FormatService().formatDateTime(DateTime.now())}',
                       style: pw.TextStyle(
                         font: baseFont,
                         fontSize: 8,
@@ -2624,7 +2619,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       (index) {
         final order = orders[index];
         final dateStr = order?.createdAt != null
-            ? DateFormat('dd/MM/yyyy').format(order!.createdAt!)
+            ? FormatService().formatDate(order!.createdAt!)
             : '';
         final isPaid = order?.payment == 'paid';
         String vehicleInfo = _getVehicleInfo(order);

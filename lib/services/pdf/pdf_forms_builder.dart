@@ -1,5 +1,5 @@
-import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/form_definition.dart';
@@ -126,7 +126,7 @@ class PdfFormsBuilder {
                   ),
                   pw.SizedBox(height: 3),
                   pw.Text(
-                    DateFormat('dd/MM/yyyy').format(formDate),
+                    FormatService().formatDate(formDate),
                     style: pw.TextStyle(
                       font: baseFont,
                       fontSize: 8.0,

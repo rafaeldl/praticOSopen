@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell;
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/mobx/product_store.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/permission.dart';
@@ -324,8 +324,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   String _convertToCurrency(double? total) {
     if (total == null) return '';
-    NumberFormat numberFormat =
-        NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$');
-    return numberFormat.format(total);
+    return FormatService().formatCurrency(total);
   }
 }

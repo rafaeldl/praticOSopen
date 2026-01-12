@@ -5,11 +5,11 @@ import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
@@ -654,7 +654,7 @@ class _HomeState extends State<Home> {
                             if (order.dueDate != null) ...[
                               const SizedBox(width: 8),
                               Text(
-                                DateFormat('dd/MM').format(order.dueDate!),
+                                FormatService().formatDayMonth(order.dueDate),
                                 style: TextStyle(
                                   fontSize: 15,
                                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -829,7 +829,7 @@ class _HomeState extends State<Home> {
   }
 
   String _formatCurrency(double? value) {
-    return NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$', decimalDigits: 2).format(value ?? 0);
+    return FormatService().formatCurrency(value ?? 0, decimalDigits: 2);
   }
 }
 
