@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/custom_field.dart';
 import '../l10n/app_localizations.dart';
@@ -61,21 +62,43 @@ class SegmentConfigService {
   }
 
   /// Carrega a configuração de um segmento do Firestore
+  /// Também carrega labels globais e permite override por segmento
   Future<void> load(String segmentId) async {
     if (_segmentId == segmentId) {
       return; // Já carregado
     }
 
     try {
+      // Limpa cache anterior
+      _labelCache.clear();
+      _customFields.clear();
+
+      // 1. Carrega labels globais (se segmentId != 'global')
+      if (segmentId != 'global') {
+        try {
+          final globalDoc = await _db.collection('segments').doc('global').get();
+          if (globalDoc.exists) {
+            final globalCustomFields = globalDoc.data()!['customFields'] as List? ?? [];
+            for (final json in globalCustomFields) {
+              final field = CustomField.fromJson(json as Map<String, dynamic>);
+              if (field.isLabel) {
+                _labelCache[field.key] = field.getLabel(_locale);
+              }
+            }
+          }
+        } catch (e) {
+          // Global segment não existe ou erro ao carregar
+          // Continua sem errar, labels específicas do segmento serão usadas
+          debugPrint('⚠️  Aviso ao carregar global segment: $e');
+        }
+      }
+
+      // 2. Carrega segmento específico (pode sobrescrever labels globais)
       final doc = await _db.collection('segments').doc(segmentId).get();
 
       if (!doc.exists) {
         throw Exception('Segmento não encontrado: $segmentId');
       }
-
-      // Limpa cache anterior
-      _labelCache.clear();
-      _customFields.clear();
 
       final data = doc.data()!;
       final customFieldsJson = data['customFields'] as List? ?? [];
@@ -85,7 +108,7 @@ class SegmentConfigService {
         final field = CustomField.fromJson(json as Map<String, dynamic>);
 
         if (field.isLabel) {
-          // É um label override - armazena no cache
+          // É um label override - armazena no cache (sobrescreve global se houver)
           _labelCache[field.key] = field.getLabel(_locale);
         } else {
           // É um campo customizado real
