@@ -1589,6 +1589,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get myCompany => 'My Company';
 
   @override
+  String get retryAgain => 'Try again';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get unitValue => 'Unit value';
+
+  @override
+  String get setAsCover => 'Set as cover';
+
+  @override
   String get noFeminine => 'No';
 
   @override

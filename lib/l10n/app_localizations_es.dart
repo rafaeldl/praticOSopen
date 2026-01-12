@@ -1593,6 +1593,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get myCompany => 'Mi Empresa';
 
   @override
+  String get retryAgain => 'Intentar de nuevo';
+
+  @override
+  String get noResultsFound => 'No se encontraron resultados';
+
+  @override
+  String get unitValue => 'Valor unitario';
+
+  @override
+  String get setAsCover => 'Establecer como portada';
+
+  @override
   String get noFeminine => 'Ninguna';
 
   @override

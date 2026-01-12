@@ -1591,6 +1591,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get myCompany => 'Minha Empresa';
 
   @override
+  String get retryAgain => 'Tentar novamente';
+
+  @override
+  String get noResultsFound => 'Nenhum resultado encontrado';
+
+  @override
+  String get unitValue => 'Valor unitário';
+
+  @override
+  String get setAsCover => 'Definir como capa';
+
+  @override
   String get noFeminine => 'Nenhuma';
 
   @override

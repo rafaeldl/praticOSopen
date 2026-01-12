@@ -548,6 +548,10 @@
   "errorLoadingSegments": "Error al cargar segmentos",
   "specialties": "especialidades",
   "myCompany": "Mi Empresa",
+  "retryAgain": "Intentar de nuevo",
+  "noResultsFound": "No se encontraron resultados",
+  "unitValue": "Valor unitario",
+  "setAsCover": "Establecer como portada",
 
   "no": "Ningún",
   "noFeminine": "Ninguna",

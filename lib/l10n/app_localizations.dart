@@ -3220,6 +3220,30 @@ abstract class AppLocalizations {
   /// **'Minha Empresa'**
   String get myCompany;
 
+  /// No description provided for @retryAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tentar novamente'**
+  String get retryAgain;
+
+  /// No description provided for @noResultsFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum resultado encontrado'**
+  String get noResultsFound;
+
+  /// No description provided for @unitValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor unitário'**
+  String get unitValue;
+
+  /// No description provided for @setAsCover.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir como capa'**
+  String get setAsCover;
+
   /// No description provided for @noFeminine.
   ///
   /// In pt, this message translates to:

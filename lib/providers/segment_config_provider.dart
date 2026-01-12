@@ -96,6 +96,13 @@ class SegmentConfigProvider extends ChangeNotifier {
     }
   }
 
+  /// Injeta o AppLocalizations para usar traduções dos ARB files
+  void injectL10n(dynamic l10n) {
+    if (l10n != null) {
+      _service.setL10n(l10n);
+    }
+  }
+
   /// Troca o idioma e recarrega os labels (se um segmento estiver carregado)
   Future<void> setLocale(String locale) async {
     _service.setLocale(locale);

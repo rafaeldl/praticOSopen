@@ -97,6 +97,11 @@ class MyApp extends StatelessWidget {
           ],
           navigatorObservers: <NavigatorObserver>[observer],
           builder: (context, child) {
+            // Inject l10n into SegmentConfigProvider
+            final segmentConfig = Provider.of<SegmentConfigProvider>(context, listen: false);
+            final l10n = AppLocalizations.of(context);
+            segmentConfig.injectL10n(l10n);
+
             // Wrap with CupertinoTheme to support dynamic Cupertino colors
             final brightness = Theme.of(context).brightness;
             return CupertinoTheme(

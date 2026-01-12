@@ -548,6 +548,10 @@
   "errorLoadingSegments": "Error loading segments",
   "specialties": "specialties",
   "myCompany": "My Company",
+  "retryAgain": "Try again",
+  "noResultsFound": "No results found",
+  "unitValue": "Unit value",
+  "setAsCover": "Set as cover",
 
   "no": "No",
   "noFeminine": "No",
