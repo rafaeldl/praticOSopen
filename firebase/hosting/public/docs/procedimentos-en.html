@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedures Manual - PráticOS Documentation</title>
+    <meta name="description" content="Complete documentation about Procedures in PráticOS. Create checklists, forms and custom terms to standardize your company's services.">
+    <meta name="keywords" content="praticos, documentation, procedures, checklists, forms, terms, inspection">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Procedures Manual - PráticOS">
+    <meta property="og:description" content="Complete documentation about Procedures in PráticOS.">
+    <meta property="og:image" content="../assets/images/logo.png">
+    <meta property="og:type" content="article">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar scrolled">
+        <div class="nav-container">
+            <a href="../index-en.html" class="nav-logo">
+                <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
+                <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="../index-en.html">Home</a>
+                <a href="../index-en.html#features">Features</a>
+                <a href="../faq-en.html">FAQ</a>
+                <a href="../support-en.html">Support</a>
+            </div>
+            <div class="nav-actions">
+                <div class="lang-switch">
+                    <a href="procedimentos.html">PT</a>
+                    <a href="procedimentos-en.html" class="active">EN</a>
+                    <a href="procedimentos-es.html">ES</a>
+                </div>
+                <a href="../index-en.html#download" class="btn btn-primary">Download App</a>
+            </div>
+            <button class="nav-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="docs-hero compact">
+        <div class="hero-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+        </div>
+        <div class="container">
+            <div class="docs-breadcrumb">
+                <a href="index-en.html">Documentation</a>
+                <span>/</span>
+                <span>Procedures</span>
+            </div>
+            <div class="docs-hero-content">
+                <h1><span class="gradient-text">Procedures</span> Manual</h1>
+                <p class="hero-subtitle">Create checklists, forms and custom terms to standardize your company's services and ensure quality in every service call.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Docs Content -->
+    <section class="docs-content">
+        <div class="container docs-container">
+            <!-- Sidebar Navigation -->
+            <aside class="docs-sidebar">
+                <div class="sidebar-sticky">
+                    <h4>On this page</h4>
+                    <nav class="docs-nav">
+                        <a href="#overview" class="active">Overview</a>
+                        <a href="#types">Types of Procedures</a>
+                        <a href="#create">Creating Procedures</a>
+                        <a href="#fields">Field Types</a>
+                        <a href="#import">Importing Global</a>
+                        <a href="#use">Using in Work Orders</a>
+                        <a href="#photos">Photos & Evidence</a>
+                        <a href="#permissions">Permissions</a>
+                        <a href="#faq">FAQ</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="docs-main">
+                <!-- Overview -->
+                <section id="overview" class="docs-section">
+                    <h2>Procedures Overview</h2>
+                    <p>Procedures are dynamic forms that allow you to standardize and document each step of your service. They can be safety checklists, authorization terms, technical inspections, satisfaction surveys and much more.</p>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>Benefits of Procedures</h4>
+                            <p>Procedures help reduce errors, ensure quality, create photographic evidence of services and standardize service delivery across your entire team.</p>
+                        </div>
+                    </div>
+
+                    <div class="features-highlight">
+                        <div class="feature-item">
+                            <div class="feature-icon green">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                            </div>
+                            <h4>Checklists</h4>
+                            <p>Ensure all important steps are verified</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon orange">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                            </div>
+                            <h4>Terms & Authorizations</h4>
+                            <p>Document customer acceptances and authorizations</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon blue">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                            </div>
+                            <h4>Photos per Item</h4>
+                            <p>Capture photographic evidence linked to each verification</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Types of Procedures -->
+                <section id="types" class="docs-section">
+                    <h2>Types of Procedures</h2>
+                    <p>PráticOS offers two types of procedures to meet your company's needs:</p>
+
+                    <div class="status-cards">
+                        <div class="status-card-item">
+                            <div class="status-indicator blue"></div>
+                            <div class="status-info">
+                                <h4>My Procedures</h4>
+                                <p>Procedures created by your company. Fully customizable and exclusive to your business. You can create, edit and delete as needed.</p>
+                            </div>
+                        </div>
+                        <div class="status-card-item">
+                            <div class="status-indicator green"></div>
+                            <div class="status-info">
+                                <h4>Global Procedures</h4>
+                                <p>Ready-made templates based on industry standards for each segment. Can be imported and customized for your company. Includes safety checklists, authorization terms and more.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>Global Procedures by Segment</h4>
+                            <p>Global templates are specific to each segment (automotive, HVAC, smartphones, etc.) and follow industry best practices to increase quality and reduce returns.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Creating Procedures -->
+                <section id="create" class="docs-section">
+                    <h2>Creating Procedures</h2>
+                    <p>Create custom procedures to standardize your company's processes.</p>
+
+                    <h3>How to Access</h3>
+                    <ol class="step-list">
+                        <li>Go to <strong>Settings</strong> in the bottom menu</li>
+                        <li>Tap <strong>Procedures</strong> in the Management section</li>
+                        <li>Tap the <strong>+</strong> button in the top right corner</li>
+                    </ol>
+
+                    <h3>Configuring the Procedure</h3>
+                    <div class="feature-blocks">
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Basic Information
+                            </h4>
+                            <ul>
+                                <li><strong>Title:</strong> Procedure name (e.g., "Delivery Checklist")</li>
+                                <li><strong>Description:</strong> Explanation of when to use (optional)</li>
+                                <li><strong>Active:</strong> Defines if it appears for selection in work orders</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                </svg>
+                                Procedure Items
+                            </h4>
+                            <ul>
+                                <li><strong>Label:</strong> Question or verification text</li>
+                                <li><strong>Type:</strong> Response format (text, yes/no, etc.)</li>
+                                <li><strong>Required:</strong> If it must be filled</li>
+                                <li><strong>Allow Photos:</strong> If photos can be attached to the item</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3>Managing Procedures</h3>
+                    <ul class="validation-list">
+                        <li><strong>Edit:</strong> Swipe the procedure right or tap on it</li>
+                        <li><strong>Delete:</strong> Swipe left and confirm deletion</li>
+                        <li><strong>Deactivate:</strong> Edit and uncheck the "Active" option to temporarily hide</li>
+                    </ul>
+                </section>
+
+                <!-- Field Types -->
+                <section id="fields" class="docs-section">
+                    <h2>Field Types</h2>
+                    <p>Each procedure item can have different response types, adapting to the needs of each verification:</p>
+
+                    <div class="table-wrapper">
+                        <table class="permissions-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Usage Example</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Text</strong></td>
+                                    <td>Free text field for descriptive answers</td>
+                                    <td>Notes, defect description</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Number</strong></td>
+                                    <td>Numeric field for measurements and quantities</td>
+                                    <td>Temperature, voltage, mileage</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Yes/No</strong></td>
+                                    <td>Toggle for simple confirmations</td>
+                                    <td>Equipment working? Customer present?</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Selection</strong></td>
+                                    <td>List of predefined options</td>
+                                    <td>Condition: Good/Fair/Poor</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Checklist</strong></td>
+                                    <td>Multiple selectable options</td>
+                                    <td>Items checked, parts replaced</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Photo Only</strong></td>
+                                    <td>Item that requires only photographic record</td>
+                                    <td>Equipment photo, license plate photo</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Importing Global -->
+                <section id="import" class="docs-section">
+                    <h2>Importing Global Procedures</h2>
+                    <p>PráticOS offers ready-made templates based on industry standards that you can import and customize.</p>
+
+                    <h3>How to Import</h3>
+                    <ol class="step-list">
+                        <li>Go to <strong>Settings &#8594; Procedures</strong></li>
+                        <li>Scroll to the <strong>Global Procedures</strong> section</li>
+                        <li>View templates available for your segment</li>
+                        <li>Tap <strong>Import</strong> on the desired template</li>
+                        <li>Confirm the import</li>
+                    </ol>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>Customize After Import</h4>
+                            <p>After importing, the procedure becomes "yours" and can be freely edited. Add, remove or modify items according to your company's needs.</p>
+                        </div>
+                    </div>
+
+                    <h3>Global Template Examples</h3>
+                    <div class="feature-blocks">
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
+                                    <circle cx="7" cy="17" r="2"></circle>
+                                    <circle cx="17" cy="17" r="2"></circle>
+                                </svg>
+                                Automotive
+                            </h4>
+                            <ul>
+                                <li>Authorization Term</li>
+                                <li>Final Safety Checklist</li>
+                                <li>Entry Inspection</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                                    <rect x="9" y="9" width="6" height="6"></rect>
+                                    <line x1="9" y1="1" x2="9" y2="4"></line>
+                                    <line x1="15" y1="1" x2="15" y2="4"></line>
+                                    <line x1="9" y1="20" x2="9" y2="23"></line>
+                                    <line x1="15" y1="20" x2="15" y2="23"></line>
+                                </svg>
+                                HVAC / Air Conditioning
+                            </h4>
+                            <ul>
+                                <li>Safety Checklist</li>
+                                <li>Post-Service Commissioning</li>
+                                <li>Preventive Maintenance</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                </svg>
+                                Smartphones
+                            </h4>
+                            <ul>
+                                <li>Authorization Term</li>
+                                <li>Post-Repair Test</li>
+                                <li>Delivery Checklist</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Using in Work Orders -->
+                <section id="use" class="docs-section">
+                    <h2>Using Procedures in Work Orders</h2>
+                    <p>Procedures are attached to Work Orders to document each step of the service.</p>
+
+                    <h3>Attaching a Procedure</h3>
+                    <ol class="step-list">
+                        <li>Open a Work Order</li>
+                        <li>In the <strong>Forms</strong> section, tap <strong>Add</strong></li>
+                        <li>Select the desired procedure from the list</li>
+                        <li>The procedure will be attached with "Pending" status</li>
+                    </ol>
+
+                    <h3>Procedure Status</h3>
+                    <div class="status-cards">
+                        <div class="status-card-item">
+                            <div class="status-indicator orange"></div>
+                            <div class="status-info">
+                                <h4>Pending</h4>
+                                <p>Procedure attached but without any filling.</p>
+                            </div>
+                        </div>
+                        <div class="status-card-item">
+                            <div class="status-indicator blue"></div>
+                            <div class="status-info">
+                                <h4>In Progress</h4>
+                                <p>Filling started but still incomplete.</p>
+                            </div>
+                        </div>
+                        <div class="status-card-item">
+                            <div class="status-indicator green"></div>
+                            <div class="status-info">
+                                <h4>Completed</h4>
+                                <p>All required items have been filled.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Filling the Procedure</h3>
+                    <ol class="step-list">
+                        <li>Tap on the procedure in the work order list</li>
+                        <li>Fill each item according to its type</li>
+                        <li>Add photos when needed (camera or gallery)</li>
+                        <li>Status updates automatically upon completion</li>
+                    </ol>
+                </section>
+
+                <!-- Photos & Evidence -->
+                <section id="photos" class="docs-section">
+                    <h2>Photos & Evidence</h2>
+                    <p>Capture photos directly in procedure items to create complete service evidence.</p>
+
+                    <div class="feature-blocks">
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                    <circle cx="12" cy="13" r="4"></circle>
+                                </svg>
+                                Photo Capture
+                            </h4>
+                            <ul>
+                                <li>Take photos directly from the app</li>
+                                <li>Select from device gallery</li>
+                                <li>Multiple photos per item</li>
+                                <li>Preview before saving</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                Storage
+                            </h4>
+                            <ul>
+                                <li>Automatic cloud upload</li>
+                                <li>Linked to the work order and specific item</li>
+                                <li>Organized by procedure</li>
+                                <li>Accessible from any device</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="warning-card" style="margin-top: 24px;">
+                        <div class="warning-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="warning-content">
+                            <h4>Items with Required Photo</h4>
+                            <p>If an item is marked as "required" and "allows photos", at least one photo must be added for the procedure to be considered complete.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Permissions -->
+                <section id="permissions" class="docs-section">
+                    <h2>Permissions by Role</h2>
+                    <p>Access to procedure features is controlled by the role system (RBAC):</p>
+
+                    <div class="table-wrapper">
+                        <table class="permissions-table">
+                            <thead>
+                                <tr>
+                                    <th>Role</th>
+                                    <th>Create/Edit</th>
+                                    <th>Delete</th>
+                                    <th>Fill in WO</th>
+                                    <th>Reopen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Administrator</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                                <tr>
+                                    <td>Manager</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                                <tr>
+                                    <td>Supervisor</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                                <tr>
+                                    <td>Consultant</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="no">&#10007;</td>
+                                </tr>
+                                <tr>
+                                    <td>Technician</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="no">&#10007;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>Universal Filling</h4>
+                            <p>All roles can fill procedures in work orders, ensuring that field technicians can properly document their services.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FAQ -->
+                <section id="faq" class="docs-section">
+                    <h2>Frequently Asked Questions</h2>
+
+                    <div class="faq-grid">
+                        <div class="faq-item">
+                            <h4>Can I use the same procedure in multiple work orders?</h4>
+                            <p>Yes! The procedure is a template. Each time you attach it to a work order, a new instance is created for independent filling.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>What happens if I edit a procedure?</h4>
+                            <p>Edits only affect new work orders. Already attached procedures keep the original version (snapshot) to preserve history.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Can I remove a procedure from a work order?</h4>
+                            <p>Yes, swipe the procedure left in the work order forms list and confirm removal.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Are global procedures automatically updated?</h4>
+                            <p>No. When you import, you create a copy that becomes independent. Future updates to globals don't affect your version.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Can I have inactive procedures?</h4>
+                            <p>Yes. Inactive procedures don't appear for selection in new work orders, but remain accessible in work orders where they were already attached.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Is there a limit of items per procedure?</h4>
+                            <p>There's no technical limit, but we recommend keeping procedures objective and focused to facilitate field filling.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Do procedure photos appear in the work order gallery?</h4>
+                            <p>Photos are linked to the specific procedure item, organized separately from the work order's general photos.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Can I create procedures specific to service types?</h4>
+                            <p>Yes! Create specific procedures and manually attach them to work orders according to service type. Automatic linking by service is under development.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Navigation -->
+                <div class="docs-navigation">
+                    <a href="financeiro-en.html" class="nav-link prev">
+                        <span class="nav-direction">&#8592; Previous</span>
+                        <span class="nav-title">Financial System</span>
+                    </a>
+                    <a href="perfis-en.html" class="nav-link next">
+                        <span class="nav-direction">Next &#8594;</span>
+                        <span class="nav-title">User Profiles</span>
+                    </a>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="../index-en.html" class="nav-logo">
+                        <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
+                        <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                    </a>
+                    <p>Complete system for work order management. Simplify your business.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Product</h4>
+                    <a href="../index-en.html#features">Features</a>
+                    <a href="../index-en.html#pricing">Plans</a>
+                    <a href="../index-en.html#download">Download</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentation</h4>
+                    <a href="perfis-en.html">User Profiles</a>
+                    <a href="financeiro-en.html">Financial System</a>
+                    <a href="procedimentos-en.html">Procedures</a>
+                    <a href="../faq-en.html">FAQ</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="../privacy-en.html">Privacy</a>
+                    <a href="../terms-en.html">Terms of Use</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 PráticOS. All rights reserved.</p>
+                <p>Developed by <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-content">
+            <a href="../index-en.html">Home</a>
+            <a href="../index-en.html#features">Features</a>
+            <a href="index-en.html">Documentation</a>
+            <a href="../faq-en.html">FAQ</a>
+            <a href="../support-en.html">Support</a>
+            <div class="mobile-lang">
+                <a href="procedimentos.html">PT</a>
+                <a href="procedimentos-en.html" class="active">EN</a>
+                <a href="procedimentos-es.html">ES</a>
+            </div>
+            <a href="../index-en.html#download" class="btn btn-primary">Download App</a>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const body = document.body;
+
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            body.classList.toggle('menu-open');
+        });
+
+        // Close mobile menu on link click
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navToggle.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                body.classList.remove('menu-open');
+            });
+        });
+
+        // Sidebar navigation active state
+        const sections = document.querySelectorAll('.docs-section');
+        const navLinks = document.querySelectorAll('.docs-nav a');
+
+        const observerOptions = {
+            rootMargin: '-100px 0px -70% 0px',
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    const activeLink = document.querySelector(`.docs-nav a[href="#${entry.target.id}"]`);
+                    if (activeLink) activeLink.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => observer.observe(section));
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 100;
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
