@@ -1970,4 +1970,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get closeDialog => 'Close';
+
+  @override
+  String get companyLogo => 'Company Logo';
+
+  @override
+  String get information => 'INFORMATION';
+
+  @override
+  String get pendingInvites => 'Pending Invites';
+
+  @override
+  String get youHaveBeenInvited =>
+      'You have been invited to join companies on PraticOS!';
+
+  @override
+  String get noPendingInvites => 'No pending invites';
+
+  @override
+  String get acceptInvite => 'Accept';
+
+  @override
+  String get rejectInvite => 'Reject Invite';
+
+  @override
+  String get inviteAccepted => 'Invite Accepted';
+
+  @override
+  String youAreNowPartOf(String company) {
+    return 'You are now part of $company!';
+  }
+
+  @override
+  String areYouSureReject(String company) {
+    return 'Are you sure you want to reject the invite from $company?';
+  }
 }

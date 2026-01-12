@@ -705,5 +705,32 @@
   "importForMyCompany": "Importar a Mi Empresa",
   "couldNotImportProcedure": "No se pudo importar el procedimiento. Intente de nuevo.",
   "procedureImportedSuccessfully": "¡Procedimiento importado con éxito!",
-  "closeDialog": "Cerrar"
+  "closeDialog": "Cerrar",
+
+  "companyLogo": "Logo de la Empresa",
+  "information": "INFORMACIÓN",
+  "address": "Dirección",
+
+  "pendingInvites": "Invitaciones Pendientes",
+  "youHaveBeenInvited": "¡Ha sido invitado a unirse a empresas en PraticOS!",
+  "noPendingInvites": "Sin invitaciones pendientes",
+  "acceptInvite": "Aceptar",
+  "rejectInvite": "Rechazar Invitación",
+  "inviteAccepted": "Invitación Aceptada",
+  "youAreNowPartOf": "¡Ahora es parte de {company}!",
+  "@youAreNowPartOf": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  },
+  "areYouSureReject": "¿Está seguro de que desea rechazar la invitación de {company}?",
+  "@areYouSureReject": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
+  }
 }

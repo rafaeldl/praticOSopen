@@ -1975,4 +1975,39 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get closeDialog => 'Fechar';
+
+  @override
+  String get companyLogo => 'Logo da Empresa';
+
+  @override
+  String get information => 'INFORMAÇÕES';
+
+  @override
+  String get pendingInvites => 'Convites Pendentes';
+
+  @override
+  String get youHaveBeenInvited =>
+      'Você foi convidado para fazer parte de empresas no PraticOS!';
+
+  @override
+  String get noPendingInvites => 'Nenhum convite pendente';
+
+  @override
+  String get acceptInvite => 'Aceitar';
+
+  @override
+  String get rejectInvite => 'Recusar Convite';
+
+  @override
+  String get inviteAccepted => 'Convite Aceito';
+
+  @override
+  String youAreNowPartOf(String company) {
+    return 'Agora você faz parte de $company!';
+  }
+
+  @override
+  String areYouSureReject(String company) {
+    return 'Tem certeza que deseja recusar o convite de $company?';
+  }
 }

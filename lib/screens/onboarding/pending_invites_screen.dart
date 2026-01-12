@@ -45,8 +45,8 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
       await _inviteStore.acceptInvite(invite);
       if (mounted) {
         _showSuccessDialog(
-          'Convite Aceito',
-          'Agora voce faz parte de ${invite.company?.name ?? "a empresa"}!',
+          context.l10n.inviteAccepted,
+          context.l10n.youAreNowPartOf(invite.company?.name ?? "a empresa"),
         );
       }
     } catch (e) {
@@ -74,7 +74,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () {
               Navigator.pop(context);
               widget.onInviteAccepted?.call();
@@ -89,11 +89,11 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Erro'),
+        title: Text(context.l10n.error),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -105,13 +105,13 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Recusar Convite'),
+        title: Text(context.l10n.rejectInvite),
         content: Text(
-          'Tem certeza que deseja recusar o convite de ${invite.company?.name ?? "a empresa"}?',
+          context.l10n.areYouSureReject(invite.company?.name ?? "a empresa"),
         ),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -120,7 +120,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
               Navigator.pop(context);
               _rejectInvite(invite);
             },
-            child: const Text('Recusar'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -163,7 +163,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            'Convites Pendentes',
+                            context.l10n.pendingInvites,
                             style: CupertinoTheme.of(context)
                                 .textTheme
                                 .navLargeTitleTextStyle,
@@ -171,7 +171,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Voce foi convidado para fazer parte de empresas no praticOS!',
+                            context.l10n.youHaveBeenInvited,
                             style: CupertinoTheme.of(context)
                                 .textTheme
                                 .textStyle
@@ -187,9 +187,9 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                     ),
                   ),
                   if (_inviteStore.pendingInvites.isEmpty)
-                    const SliverFillRemaining(
+                    SliverFillRemaining(
                       child: Center(
-                        child: Text('Nenhum convite pendente'),
+                        child: Text(context.l10n.noPendingInvites),
                       ),
                     )
                   else

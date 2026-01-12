@@ -3951,6 +3951,66 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Fechar'**
   String get closeDialog;
+
+  /// No description provided for @companyLogo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Logo da Empresa'**
+  String get companyLogo;
+
+  /// No description provided for @information.
+  ///
+  /// In pt, this message translates to:
+  /// **'INFORMAÇÕES'**
+  String get information;
+
+  /// No description provided for @pendingInvites.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convites Pendentes'**
+  String get pendingInvites;
+
+  /// No description provided for @youHaveBeenInvited.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você foi convidado para fazer parte de empresas no PraticOS!'**
+  String get youHaveBeenInvited;
+
+  /// No description provided for @noPendingInvites.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum convite pendente'**
+  String get noPendingInvites;
+
+  /// No description provided for @acceptInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aceitar'**
+  String get acceptInvite;
+
+  /// No description provided for @rejectInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recusar Convite'**
+  String get rejectInvite;
+
+  /// No description provided for @inviteAccepted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite Aceito'**
+  String get inviteAccepted;
+
+  /// No description provided for @youAreNowPartOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora você faz parte de {company}!'**
+  String youAreNowPartOf(String company);
+
+  /// No description provided for @areYouSureReject.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja recusar o convite de {company}?'**
+  String areYouSureReject(String company);
 }
 
 class _AppLocalizationsDelegate
