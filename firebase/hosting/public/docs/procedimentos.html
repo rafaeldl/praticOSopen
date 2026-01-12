@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Procedimentos - PráticOS Documentação</title>
+    <meta name="description" content="Documentação completa sobre Procedimentos no PráticOS. Crie checklists, formulários e termos personalizados para padronizar os serviços da sua empresa.">
+    <meta name="keywords" content="praticos, documentação, procedimentos, checklists, formulários, termos, vistoria">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Manual de Procedimentos - PráticOS">
+    <meta property="og:description" content="Documentação completa sobre Procedimentos no PráticOS.">
+    <meta property="og:image" content="../assets/images/logo.png">
+    <meta property="og:type" content="article">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="docs.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar scrolled">
+        <div class="nav-container">
+            <a href="../index.html" class="nav-logo">
+                <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
+                <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="../index.html">Início</a>
+                <a href="../index.html#features">Funcionalidades</a>
+                <a href="../faq.html">FAQ</a>
+                <a href="../support.html">Suporte</a>
+            </div>
+            <div class="nav-actions">
+                <div class="lang-switch">
+                    <a href="procedimentos.html" class="active">PT</a>
+                    <a href="procedimentos-en.html">EN</a>
+                    <a href="procedimentos-es.html">ES</a>
+                </div>
+                <a href="../index.html#download" class="btn btn-primary">Baixar App</a>
+            </div>
+            <button class="nav-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <section class="docs-hero compact">
+        <div class="hero-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+        </div>
+        <div class="container">
+            <div class="docs-breadcrumb">
+                <a href="index.html">Documentação</a>
+                <span>/</span>
+                <span>Procedimentos</span>
+            </div>
+            <div class="docs-hero-content">
+                <h1>Manual de <span class="gradient-text">Procedimentos</span></h1>
+                <p class="hero-subtitle">Crie checklists, formulários e termos personalizados para padronizar os serviços da sua empresa e garantir qualidade em cada atendimento.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Docs Content -->
+    <section class="docs-content">
+        <div class="container docs-container">
+            <!-- Sidebar Navigation -->
+            <aside class="docs-sidebar">
+                <div class="sidebar-sticky">
+                    <h4>Nesta página</h4>
+                    <nav class="docs-nav">
+                        <a href="#visao-geral" class="active">Visão Geral</a>
+                        <a href="#tipos">Tipos de Procedimentos</a>
+                        <a href="#criar">Criando Procedimentos</a>
+                        <a href="#campos">Tipos de Campos</a>
+                        <a href="#importar">Importando Globais</a>
+                        <a href="#usar">Usando nas OS</a>
+                        <a href="#fotos">Fotos e Evidências</a>
+                        <a href="#permissoes">Permissões</a>
+                        <a href="#faq">Perguntas Frequentes</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="docs-main">
+                <!-- Visão Geral -->
+                <section id="visao-geral" class="docs-section">
+                    <h2>Visão Geral dos Procedimentos</h2>
+                    <p>Procedimentos são formulários dinâmicos que permitem padronizar e documentar cada etapa do seu serviço. Eles podem ser checklists de segurança, termos de autorização, vistorias técnicas, pesquisas de satisfação e muito mais.</p>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>Benefícios dos Procedimentos</h4>
+                            <p>Procedimentos ajudam a reduzir erros, garantir qualidade, criar evidências fotográficas dos serviços e padronizar o atendimento de toda a equipe.</p>
+                        </div>
+                    </div>
+
+                    <div class="features-highlight">
+                        <div class="feature-item">
+                            <div class="feature-icon green">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                            </div>
+                            <h4>Checklists</h4>
+                            <p>Garanta que todas as etapas importantes sejam verificadas</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon orange">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                            </div>
+                            <h4>Termos e Autorizações</h4>
+                            <p>Documente aceites e autorizações do cliente</p>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon blue">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                            </div>
+                            <h4>Fotos por Item</h4>
+                            <p>Capture evidências fotográficas vinculadas a cada verificação</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tipos de Procedimentos -->
+                <section id="tipos" class="docs-section">
+                    <h2>Tipos de Procedimentos</h2>
+                    <p>O PráticOS oferece dois tipos de procedimentos para atender às necessidades da sua empresa:</p>
+
+                    <div class="status-cards">
+                        <div class="status-card-item">
+                            <div class="status-indicator blue"></div>
+                            <div class="status-info">
+                                <h4>Meus Procedimentos</h4>
+                                <p>Procedimentos criados pela sua empresa. Totalmente personalizáveis e exclusivos para seu negócio. Você pode criar, editar e excluir conforme sua necessidade.</p>
+                            </div>
+                        </div>
+                        <div class="status-card-item">
+                            <div class="status-indicator green"></div>
+                            <div class="status-info">
+                                <h4>Procedimentos Globais</h4>
+                                <p>Templates prontos baseados em padrões de mercado para cada segmento. Podem ser importados e personalizados para sua empresa. Incluem checklists de segurança, termos de autorização e mais.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>Procedimentos Globais por Segmento</h4>
+                            <p>Os templates globais são específicos para cada segmento (automotivo, HVAC, smartphones, etc.) e seguem as melhores práticas do mercado para aumentar qualidade e reduzir retornos.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Criando Procedimentos -->
+                <section id="criar" class="docs-section">
+                    <h2>Criando Procedimentos</h2>
+                    <p>Crie procedimentos personalizados para padronizar os processos da sua empresa.</p>
+
+                    <h3>Como Acessar</h3>
+                    <ol class="step-list">
+                        <li>Acesse <strong>Ajustes</strong> no menu inferior</li>
+                        <li>Toque em <strong>Procedimentos</strong> na seção Gerenciamento</li>
+                        <li>Toque no botão <strong>+</strong> no canto superior direito</li>
+                    </ol>
+
+                    <h3>Configurando o Procedimento</h3>
+                    <div class="feature-blocks">
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                                Informações Básicas
+                            </h4>
+                            <ul>
+                                <li><strong>Título:</strong> Nome do procedimento (ex: "Checklist de Entrega")</li>
+                                <li><strong>Descrição:</strong> Explicação sobre quando usar (opcional)</li>
+                                <li><strong>Ativo:</strong> Define se aparece para seleção nas OS</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                                </svg>
+                                Itens do Procedimento
+                            </h4>
+                            <ul>
+                                <li><strong>Label:</strong> Texto da pergunta ou verificação</li>
+                                <li><strong>Tipo:</strong> Formato de resposta (texto, sim/não, etc.)</li>
+                                <li><strong>Obrigatório:</strong> Se deve ser preenchido</li>
+                                <li><strong>Permite Fotos:</strong> Se pode anexar fotos ao item</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3>Gerenciando Procedimentos</h3>
+                    <ul class="validation-list">
+                        <li><strong>Editar:</strong> Deslize o procedimento para a direita ou toque nele</li>
+                        <li><strong>Excluir:</strong> Deslize para a esquerda e confirme a exclusão</li>
+                        <li><strong>Desativar:</strong> Edite e desmarque a opção "Ativo" para ocultar temporariamente</li>
+                    </ul>
+                </section>
+
+                <!-- Tipos de Campos -->
+                <section id="campos" class="docs-section">
+                    <h2>Tipos de Campos</h2>
+                    <p>Cada item do procedimento pode ter diferentes tipos de resposta, adaptando-se à necessidade de cada verificação:</p>
+
+                    <div class="table-wrapper">
+                        <table class="permissions-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Exemplo de Uso</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Texto</strong></td>
+                                    <td>Campo de texto livre para respostas descritivas</td>
+                                    <td>Observações, descrição de defeitos</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Número</strong></td>
+                                    <td>Campo numérico para medições e quantidades</td>
+                                    <td>Temperatura, tensão, quilometragem</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Sim/Não</strong></td>
+                                    <td>Toggle para confirmações simples</td>
+                                    <td>Equipamento funcionando? Cliente presente?</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Seleção</strong></td>
+                                    <td>Lista de opções predefinidas</td>
+                                    <td>Estado de conservação: Bom/Regular/Ruim</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Checklist</strong></td>
+                                    <td>Múltiplas opções selecionáveis</td>
+                                    <td>Itens verificados, peças substituídas</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Apenas Foto</strong></td>
+                                    <td>Item que requer apenas registro fotográfico</td>
+                                    <td>Foto do equipamento, foto da placa</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Importando Globais -->
+                <section id="importar" class="docs-section">
+                    <h2>Importando Procedimentos Globais</h2>
+                    <p>O PráticOS oferece templates prontos baseados em padrões de mercado que você pode importar e personalizar.</p>
+
+                    <h3>Como Importar</h3>
+                    <ol class="step-list">
+                        <li>Acesse <strong>Ajustes &#8594; Procedimentos</strong></li>
+                        <li>Role até a seção <strong>Procedimentos Globais</strong></li>
+                        <li>Visualize os templates disponíveis para seu segmento</li>
+                        <li>Toque em <strong>Importar</strong> no template desejado</li>
+                        <li>Confirme a importação</li>
+                    </ol>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>Personalize após Importar</h4>
+                            <p>Após importar, o procedimento se torna "seu" e pode ser editado livremente. Adicione, remova ou modifique itens conforme a necessidade da sua empresa.</p>
+                        </div>
+                    </div>
+
+                    <h3>Exemplos de Templates Globais</h3>
+                    <div class="feature-blocks">
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"></path>
+                                    <circle cx="7" cy="17" r="2"></circle>
+                                    <circle cx="17" cy="17" r="2"></circle>
+                                </svg>
+                                Automotivo
+                            </h4>
+                            <ul>
+                                <li>Termo de Autorização</li>
+                                <li>Checklist de Segurança Final</li>
+                                <li>Vistoria de Entrada</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                                    <rect x="9" y="9" width="6" height="6"></rect>
+                                    <line x1="9" y1="1" x2="9" y2="4"></line>
+                                    <line x1="15" y1="1" x2="15" y2="4"></line>
+                                    <line x1="9" y1="20" x2="9" y2="23"></line>
+                                    <line x1="15" y1="20" x2="15" y2="23"></line>
+                                </svg>
+                                HVAC / Ar Condicionado
+                            </h4>
+                            <ul>
+                                <li>Checklist de Segurança</li>
+                                <li>Comissionamento Pós-Serviço</li>
+                                <li>Manutenção Preventiva</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                </svg>
+                                Smartphones
+                            </h4>
+                            <ul>
+                                <li>Termo de Autorização</li>
+                                <li>Teste Pós-Reparo</li>
+                                <li>Checklist de Entrega</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Usando nas OS -->
+                <section id="usar" class="docs-section">
+                    <h2>Usando Procedimentos nas OS</h2>
+                    <p>Procedimentos são anexados às Ordens de Serviço para documentar cada etapa do atendimento.</p>
+
+                    <h3>Anexando um Procedimento</h3>
+                    <ol class="step-list">
+                        <li>Abra uma Ordem de Serviço</li>
+                        <li>Na seção <strong>Formulários</strong>, toque em <strong>Adicionar</strong></li>
+                        <li>Selecione o procedimento desejado da lista</li>
+                        <li>O procedimento será anexado com status "Pendente"</li>
+                    </ol>
+
+                    <h3>Status do Procedimento</h3>
+                    <div class="status-cards">
+                        <div class="status-card-item">
+                            <div class="status-indicator orange"></div>
+                            <div class="status-info">
+                                <h4>Pendente</h4>
+                                <p>Procedimento anexado mas sem nenhum preenchimento.</p>
+                            </div>
+                        </div>
+                        <div class="status-card-item">
+                            <div class="status-indicator blue"></div>
+                            <div class="status-info">
+                                <h4>Em Andamento</h4>
+                                <p>Preenchimento iniciado mas ainda incompleto.</p>
+                            </div>
+                        </div>
+                        <div class="status-card-item">
+                            <div class="status-indicator green"></div>
+                            <div class="status-info">
+                                <h4>Concluído</h4>
+                                <p>Todos os itens obrigatórios foram preenchidos.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Preenchendo o Procedimento</h3>
+                    <ol class="step-list">
+                        <li>Toque no procedimento na lista da OS</li>
+                        <li>Preencha cada item conforme seu tipo</li>
+                        <li>Adicione fotos quando necessário (câmera ou galeria)</li>
+                        <li>O status atualiza automaticamente ao completar</li>
+                    </ol>
+                </section>
+
+                <!-- Fotos e Evidências -->
+                <section id="fotos" class="docs-section">
+                    <h2>Fotos e Evidências</h2>
+                    <p>Capture fotos diretamente nos itens do procedimento para criar evidências completas do serviço.</p>
+
+                    <div class="feature-blocks">
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                                    <circle cx="12" cy="13" r="4"></circle>
+                                </svg>
+                                Captura de Fotos
+                            </h4>
+                            <ul>
+                                <li>Tire fotos diretamente do app</li>
+                                <li>Selecione da galeria do dispositivo</li>
+                                <li>Múltiplas fotos por item</li>
+                                <li>Pré-visualização antes de salvar</li>
+                            </ul>
+                        </div>
+
+                        <div class="feature-block">
+                            <h4>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                Armazenamento
+                            </h4>
+                            <ul>
+                                <li>Upload automático para a nuvem</li>
+                                <li>Vinculadas à OS e ao item específico</li>
+                                <li>Organizadas por procedimento</li>
+                                <li>Acessíveis de qualquer dispositivo</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="warning-card">
+                        <div class="warning-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div class="warning-content">
+                            <h4>Itens com Foto Obrigatória</h4>
+                            <p>Se um item estiver marcado como "obrigatório" e "permite fotos", é necessário adicionar pelo menos uma foto para que o procedimento seja considerado completo.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Permissões -->
+                <section id="permissoes" class="docs-section">
+                    <h2>Permissões por Perfil</h2>
+                    <p>O acesso às funcionalidades de procedimentos é controlado pelo sistema de perfis (RBAC):</p>
+
+                    <div class="table-wrapper">
+                        <table class="permissions-table">
+                            <thead>
+                                <tr>
+                                    <th>Perfil</th>
+                                    <th>Criar/Editar</th>
+                                    <th>Excluir</th>
+                                    <th>Preencher na OS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Administrador</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                                <tr>
+                                    <td>Gerente</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                                <tr>
+                                    <td>Supervisor</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                                <tr>
+                                    <td>Consultor</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                                <tr>
+                                    <td>Técnico</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="no">&#10007;</td>
+                                    <td class="yes">&#10003;</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </div>
+                        <div class="info-content">
+                            <h4>Preenchimento Universal</h4>
+                            <p>Todos os perfis podem preencher procedimentos nas OS, garantindo que técnicos em campo consigam documentar seus serviços adequadamente.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- FAQ -->
+                <section id="faq" class="docs-section">
+                    <h2>Perguntas Frequentes</h2>
+
+                    <div class="faq-grid">
+                        <div class="faq-item">
+                            <h4>Posso usar o mesmo procedimento em várias OS?</h4>
+                            <p>Sim! O procedimento é um template. Cada vez que você anexa a uma OS, uma nova instância é criada para preenchimento independente.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>O que acontece se eu editar um procedimento?</h4>
+                            <p>As edições afetam apenas novas OS. Procedimentos já anexados mantêm a versão original (snapshot) para preservar o histórico.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Posso remover um procedimento de uma OS?</h4>
+                            <p>Sim, deslize o procedimento para a esquerda na lista de formulários da OS e confirme a remoção.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Os procedimentos globais são atualizados automaticamente?</h4>
+                            <p>Não. Ao importar, você cria uma cópia que fica independente. Futuras atualizações nos globais não afetam sua versão.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Posso ter procedimentos inativos?</h4>
+                            <p>Sim. Procedimentos inativos não aparecem para seleção em novas OS, mas continuam acessíveis em OS onde já foram anexados.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Existe limite de itens por procedimento?</h4>
+                            <p>Não há limite técnico, mas recomendamos manter procedimentos objetivos e focados para facilitar o preenchimento em campo.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>As fotos dos procedimentos aparecem na galeria da OS?</h4>
+                            <p>As fotos ficam vinculadas ao item específico do procedimento, organizadas separadamente das fotos gerais da OS.</p>
+                        </div>
+
+                        <div class="faq-item">
+                            <h4>Posso criar procedimentos específicos por tipo de serviço?</h4>
+                            <p>Sim! Crie procedimentos específicos e anexe manualmente às OS conforme o tipo de serviço. A vinculação automática por serviço está em desenvolvimento.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Navigation -->
+                <div class="docs-navigation">
+                    <a href="financeiro.html" class="nav-link prev">
+                        <span class="nav-direction">&#8592; Anterior</span>
+                        <span class="nav-title">Sistema Financeiro</span>
+                    </a>
+                    <a href="perfis.html" class="nav-link next">
+                        <span class="nav-direction">Próximo &#8594;</span>
+                        <span class="nav-title">Perfis de Usuários</span>
+                    </a>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="../index.html" class="nav-logo">
+                        <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
+                        <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                    </a>
+                    <p>Sistema completo para gestão de ordens de serviço. Simplifique seu negócio.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Produto</h4>
+                    <a href="../index.html#features">Funcionalidades</a>
+                    <a href="../index.html#pricing">Planos</a>
+                    <a href="../index.html#download">Download</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Documentação</h4>
+                    <a href="perfis.html">Perfis de Usuários</a>
+                    <a href="financeiro.html">Sistema Financeiro</a>
+                    <a href="procedimentos.html">Procedimentos</a>
+                    <a href="../faq.html">FAQ</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="../privacy.html">Privacidade</a>
+                    <a href="../terms.html">Termos de Uso</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 PráticOS. Todos os direitos reservados.</p>
+                <p>Desenvolvido por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu">
+        <div class="mobile-menu-content">
+            <a href="../index.html">Início</a>
+            <a href="../index.html#features">Funcionalidades</a>
+            <a href="index.html">Documentação</a>
+            <a href="../faq.html">FAQ</a>
+            <a href="../support.html">Suporte</a>
+            <div class="mobile-lang">
+                <a href="procedimentos.html" class="active">PT</a>
+                <a href="procedimentos-en.html">EN</a>
+                <a href="procedimentos-es.html">ES</a>
+            </div>
+            <a href="../index.html#download" class="btn btn-primary">Baixar App</a>
+        </div>
+    </div>
+
+    <script>
+        // Mobile menu toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const mobileMenu = document.querySelector('.mobile-menu');
+        const body = document.body;
+
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            body.classList.toggle('menu-open');
+        });
+
+        // Close mobile menu on link click
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navToggle.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                body.classList.remove('menu-open');
+            });
+        });
+
+        // Sidebar navigation active state
+        const sections = document.querySelectorAll('.docs-section');
+        const navLinks = document.querySelectorAll('.docs-nav a');
+
+        const observerOptions = {
+            rootMargin: '-100px 0px -70% 0px',
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navLinks.forEach(link => link.classList.remove('active'));
+                    const activeLink = document.querySelector(`.docs-nav a[href="#${entry.target.id}"]`);
+                    if (activeLink) activeLink.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => observer.observe(section));
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 100;
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
