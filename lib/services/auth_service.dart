@@ -88,7 +88,8 @@ class AuthService {
 
           if (companyDoc.exists) {
             var companyData = companyDoc.data();
-            var ownerId = companyData?['ownerId'];
+            var ownerData = companyData?['owner'];
+            var ownerId = ownerData != null ? ownerData['id'] as String? : null;
             print('👤 Company owner: $ownerId, Current user: $userId');
 
             // If user is the owner
