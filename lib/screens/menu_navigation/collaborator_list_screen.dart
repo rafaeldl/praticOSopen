@@ -6,6 +6,7 @@ import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
   @override
@@ -430,12 +431,12 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   }
 
   String _getRoleLabel(RolesType? role) {
-    if (role == null) return 'Técnico';
-    return RolePermissions.getRoleLabel(role);
+    if (role == null) return context.l10n.roleTechnician;
+    return RolePermissions.getRoleLabel(role, context.l10n);
   }
 
   String _getRoleDescription(RolesType role) {
-    return RolePermissions.getRoleDescription(role);
+    return RolePermissions.getRoleDescription(role, context.l10n);
   }
 
   void _showActionSheet(Membership membership) {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class CollaboratorFormScreen extends StatefulWidget {
   @override
@@ -103,7 +104,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '${RolePermissions.getRoleIcon(role)} ${RolePermissions.getRoleLabel(role)}',
+                      '${RolePermissions.getRoleIcon(role)} ${RolePermissions.getRoleLabel(role, context.l10n)}',
                       style: TextStyle(
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
@@ -116,7 +117,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  RolePermissions.getRoleDescription(role),
+                  RolePermissions.getRoleDescription(role, context.l10n),
                   style: TextStyle(
                     fontSize: 12,
                     color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -139,7 +140,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
   }
 
   String _getRoleLabel(RolesType role) {
-    return RolePermissions.getRoleLabel(role);
+    return RolePermissions.getRoleLabel(role, context.l10n);
   }
 
   @override
@@ -206,7 +207,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
                     CupertinoListTile(
                       title: const Text('Perfil'),
                       subtitle: Text(
-                        RolePermissions.getRoleDescription(_selectedRole),
+                        RolePermissions.getRoleDescription(_selectedRole, context.l10n),
                         style: TextStyle(
                           fontSize: 13,
                           color: CupertinoColors.secondaryLabel.resolveFrom(context),

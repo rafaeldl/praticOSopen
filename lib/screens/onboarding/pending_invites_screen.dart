@@ -5,6 +5,7 @@ import 'package:praticos/mobx/invite_store.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 /// Tela de convites pendentes.
 ///
@@ -34,9 +35,9 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
   }
 
   String _getRoleLabel(RolesType? role) {
-    if (role == null) return 'Membro';
+    if (role == null) return context.l10n.roleTechnician;
     // Use RolePermissions helper instead of manual switch
-    return RolePermissions.getRoleLabel(role);
+    return RolePermissions.getRoleLabel(role, context.l10n);
   }
 
   Future<void> _acceptInvite(Invite invite) async {
