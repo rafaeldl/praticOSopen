@@ -107,7 +107,6 @@ class SegmentConfigProvider extends ChangeNotifier {
       if (isDifferent) {
         // Locale mudou, recarrega cache com nova AppLocalizations
         _service.updateL10n(l10n);
-        notifyListeners();
       } else {
         // Primeira injeção ou mesma locale, apenas armazena
         _service.setL10n(l10n);
