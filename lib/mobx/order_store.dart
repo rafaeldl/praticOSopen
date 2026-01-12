@@ -74,7 +74,14 @@ abstract class _OrderStore with Store {
   @computed
   String? get deviceName {
     if (device == null) return null;
-    return "${device?.name} - ${device?.serial}";
+    final name = device?.name ?? '';
+    final serial = device?.serial;
+
+    // Only show serial if it's not null or empty
+    if (serial != null && serial.trim().isNotEmpty) {
+      return "$name - $serial";
+    }
+    return name;
   }
 
   @computed
