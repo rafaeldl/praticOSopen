@@ -21,8 +21,8 @@ const GLOBAL_FORMS = {
   automotive: [
     {
       id: 'checklist_entrada_auto',
-      title: 'Vistoria de Entrada (Veículo)',
-      description: 'Checklist visual do estado do veículo na recepção.',
+      title: 'Entrada do Veículo',
+      description: 'Registre fotos e o estado inicial do veículo ao receber.',
       subspecialties: ['mechanical', 'carwash', 'painting', 'bodywork'],
       isActive: true,
       items: [
@@ -67,8 +67,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'revisao_basica',
-      title: 'Checklist de Revisão Básica',
-      description: 'Itens obrigatórios na troca de óleo e filtros.',
+      title: 'Revisão Básica',
+      description: 'Confirma troca de óleo, filtros e níveis de fluidos.',
       subspecialties: ['mechanical'],
       isActive: true,
       items: [
@@ -112,8 +112,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'inspecao_freios',
-      title: 'Inspeção do Sistema de Freios',
-      description: 'Checklist completo do sistema de frenagem.',
+      title: 'Inspeção de Freios',
+      description: 'Avalie pastilhas, discos e fluido para indicar trocas.',
       subspecialties: ['mechanical'],
       isActive: true,
       items: [
@@ -168,7 +168,7 @@ const GLOBAL_FORMS = {
     {
       id: 'teste_rodagem',
       title: 'Teste de Rodagem',
-      description: 'Checklist pós-serviço para validação em rodagem.',
+      description: 'Valide o veículo após o serviço em curto trajeto.',
       subspecialties: ['mechanical'],
       isActive: true,
       items: [
@@ -220,7 +220,7 @@ const GLOBAL_FORMS = {
     {
       id: 'entrega_veiculo',
       title: 'Entrega do Veículo',
-      description: 'Checklist de conferência na entrega ao cliente.',
+      description: 'Confirme limpeza, itens devolvidos e serviços com o cliente.',
       subspecialties: ['mechanical', 'carwash', 'painting', 'bodywork'],
       isActive: true,
       items: [
@@ -253,19 +253,12 @@ const GLOBAL_FORMS = {
           required: true,
           allowPhotos: true,
         },
-        {
-          id: 'assinatura_cliente',
-          label: 'Assinatura do Cliente',
-          type: 'photo_only',
-          required: true,
-          allowPhotos: true,
-        },
       ],
     },
     {
       id: 'termo_autorizacao_automotive',
-      title: 'Termo de Autorização e Privacidade',
-      description: 'Consentimento do cliente para testes, movimentação do veículo e registro fotográfico.',
+      title: 'Autorização do Cliente (Veículo)',
+      description: 'Registra consentimento para testes, movimentação e fotos.',
       subspecialties: ['mechanical', 'carwash', 'painting', 'bodywork'],
       isActive: true,
       items: [
@@ -305,19 +298,12 @@ const GLOBAL_FORMS = {
           required: false,
           allowPhotos: false,
         },
-        {
-          id: 'assinatura_cliente',
-          label: 'Assinatura do Cliente',
-          type: 'photo_only',
-          required: true,
-          allowPhotos: true,
-        },
       ],
     },
     {
       id: 'checklist_seguranca_final_auto',
-      title: 'Checklist de Segurança Final (Liberação)',
-      description: 'Itens críticos para reduzir retrabalho e aumentar segurança na entrega.',
+      title: 'Segurança Final do Veículo',
+      description: 'Revisão final de itens críticos antes da liberação.',
       subspecialties: ['mechanical', 'painting', 'bodywork'],
       isActive: true,
       items: [
@@ -384,8 +370,8 @@ const GLOBAL_FORMS = {
   hvac: [
     {
       id: 'laudo_instalacao',
-      title: 'Laudo de Instalação',
-      description: 'Registro fotográfico e técnico da instalação.',
+      title: 'Registro da Instalação',
+      description: 'Fotos e medições básicas para comprovar a instalação.',
       subspecialties: ['residential', 'commercial', 'automotive_ac'],
       isActive: true,
       items: [
@@ -436,7 +422,7 @@ const GLOBAL_FORMS = {
     {
       id: 'manutencao_preventiva',
       title: 'Manutenção Preventiva',
-      description: 'Checklist de limpeza e verificação periódica.',
+      description: 'Checklist de limpeza e verificação periódica do equipamento.',
       subspecialties: ['residential', 'commercial', 'automotive_ac'],
       isActive: true,
       items: [
@@ -494,8 +480,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'diagnostico_tecnico',
-      title: 'Diagnóstico Técnico',
-      description: 'Análise detalhada de problemas no equipamento.',
+      title: 'Diagnóstico do Equipamento',
+      description: 'Registre sintomas e testes para identificar o problema.',
       subspecialties: ['residential', 'commercial', 'automotive_ac'],
       isActive: true,
       items: [
@@ -555,7 +541,7 @@ const GLOBAL_FORMS = {
     {
       id: 'recarga_gas',
       title: 'Recarga de Gás',
-      description: 'Registro de recarga de gás refrigerante.',
+      description: 'Anote tipo e quantidade de gás e medições antes/depois.',
       subspecialties: ['residential', 'commercial', 'automotive_ac'],
       isActive: true,
       items: [
@@ -606,8 +592,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'checklist_seguranca_hvac',
-      title: 'Checklist de Segurança (NR10/NR35)',
-      description: 'Segurança da equipe e do local antes de iniciar o serviço.',
+      title: 'Segurança do Técnico (NR10/NR35)',
+      description: 'Confere EPIs e segurança do local antes de iniciar.',
       subspecialties: ['residential', 'commercial'],
       isActive: true,
       items: [
@@ -660,7 +646,7 @@ const GLOBAL_FORMS = {
     {
       id: 'comissionamento_pos_servico_hvac',
       title: 'Comissionamento Pós-Serviço',
-      description: 'Medições e evidências para validar desempenho e reduzir retorno.',
+      description: 'Medições finais para validar desempenho e reduzir retorno.',
       subspecialties: ['residential', 'commercial', 'automotive_ac'],
       isActive: true,
       items: [
@@ -724,8 +710,8 @@ const GLOBAL_FORMS = {
   smartphones: [
     {
       id: 'checklist_entrada_cel',
-      title: 'Checklist de Entrada (Celular)',
-      description: 'Verificação inicial do estado do aparelho.',
+      title: 'Entrada do Celular',
+      description: 'Registra o estado inicial e os acessórios recebidos.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -792,8 +778,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'diagnostico_cel',
-      title: 'Diagnóstico Completo',
-      description: 'Teste de todas as funcionalidades do aparelho.',
+      title: 'Diagnóstico Completo do Celular',
+      description: 'Testa funções principais para identificar falhas.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -881,7 +867,7 @@ const GLOBAL_FORMS = {
     {
       id: 'troca_tela',
       title: 'Troca de Tela',
-      description: 'Checklist para serviço de troca de display.',
+      description: 'Confere peça instalada e testes após a troca do display.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -935,7 +921,7 @@ const GLOBAL_FORMS = {
     {
       id: 'troca_bateria',
       title: 'Troca de Bateria',
-      description: 'Checklist para substituição de bateria.',
+      description: 'Registra a bateria instalada e testes de funcionamento.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -979,8 +965,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'termo_autorizacao_smartphones',
-      title: 'Termo de Autorização e Privacidade',
-      description: 'Consentimento sobre acesso, backup e registro fotográfico do reparo.',
+      title: 'Autorização e Privacidade (Celular)',
+      description: 'Consentimento para acesso, backup e registro do reparo.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1015,19 +1001,12 @@ const GLOBAL_FORMS = {
           required: false,
           allowPhotos: false,
         },
-        {
-          id: 'assinatura_cliente',
-          label: 'Assinatura do Cliente',
-          type: 'photo_only',
-          required: true,
-          allowPhotos: true,
-        },
       ],
     },
     {
       id: 'teste_pos_reparo_cel',
-      title: 'Teste Pós-Reparo (Checklist)',
-      description: 'Verificação final para reduzir retorno e garantir qualidade.',
+      title: 'Teste Final do Celular',
+      description: 'Checklist final para garantir que tudo funciona.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1095,8 +1074,8 @@ const GLOBAL_FORMS = {
   computers: [
     {
       id: 'checklist_entrada_pc',
-      title: 'Checklist de Entrada (PC)',
-      description: 'Verificação inicial do estado do computador.',
+      title: 'Entrada do Computador',
+      description: 'Registra o estado inicial e os acessórios recebidos.',
       subspecialties: ['desktop', 'notebook', 'servers'],
       isActive: true,
       items: [
@@ -1158,7 +1137,7 @@ const GLOBAL_FORMS = {
     {
       id: 'diagnostico_hardware',
       title: 'Diagnóstico de Hardware',
-      description: 'Teste completo de componentes de hardware.',
+      description: 'Testa componentes para identificar o defeito.',
       subspecialties: ['desktop', 'notebook', 'servers'],
       isActive: true,
       items: [
@@ -1227,8 +1206,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'formatacao',
-      title: 'Formatação e Instalação de SO',
-      description: 'Checklist de formatação e configuração.',
+      title: 'Formatação e Instalação do Sistema',
+      description: 'Registra backup, instalação e configurações básicas.',
       subspecialties: ['desktop', 'notebook', 'servers'],
       isActive: true,
       items: [
@@ -1291,7 +1270,7 @@ const GLOBAL_FORMS = {
     {
       id: 'limpeza_interna',
       title: 'Limpeza Interna',
-      description: 'Checklist de limpeza e manutenção preventiva.',
+      description: 'Checklist de limpeza e troca de pasta térmica.',
       subspecialties: ['desktop', 'notebook', 'servers'],
       isActive: true,
       items: [
@@ -1356,7 +1335,7 @@ const GLOBAL_FORMS = {
     {
       id: 'upgrade_hardware',
       title: 'Upgrade de Hardware',
-      description: 'Registro de upgrades realizados.',
+      description: 'Registra componentes trocados e testes realizados.',
       subspecialties: ['desktop', 'notebook', 'servers'],
       isActive: true,
       items: [
@@ -1400,8 +1379,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'termo_privacidade_pc',
-      title: 'Termo de Privacidade e Backup',
-      description: 'Alinha expectativas sobre acesso, dados e autorização de testes.',
+      title: 'Privacidade e Backup (Computador)',
+      description: 'Autoriza acesso a dados e testes quando necessário.',
       subspecialties: ['desktop', 'notebook', 'servers'],
       isActive: true,
       items: [
@@ -1434,19 +1413,12 @@ const GLOBAL_FORMS = {
           required: false,
           allowPhotos: false,
         },
-        {
-          id: 'assinatura_cliente',
-          label: 'Assinatura do Cliente',
-          type: 'photo_only',
-          required: true,
-          allowPhotos: true,
-        },
       ],
     },
     {
       id: 'checklist_qualidade_pos_servico_pc',
-      title: 'Checklist de Qualidade (Pós-Serviço)',
-      description: 'Padrão de entrega para reduzir retorno e aumentar confiabilidade.',
+      title: 'Qualidade na Entrega (Computador)',
+      description: 'Verificações finais antes de entregar o equipamento.',
       subspecialties: ['desktop', 'notebook', 'servers'],
       isActive: true,
       items: [
@@ -1505,8 +1477,8 @@ const GLOBAL_FORMS = {
   appliances: [
     {
       id: 'checklist_entrada_eletro',
-      title: 'Checklist de Entrada (Eletrodoméstico)',
-      description: 'Verificação inicial do estado do equipamento.',
+      title: 'Entrada do Eletrodoméstico',
+      description: 'Registra o estado inicial e o defeito relatado.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1552,7 +1524,7 @@ const GLOBAL_FORMS = {
     {
       id: 'diagnostico_geladeira',
       title: 'Diagnóstico de Geladeira/Freezer',
-      description: 'Checklist de diagnóstico para refrigeradores.',
+      description: 'Testa refrigeração e componentes principais.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1615,7 +1587,7 @@ const GLOBAL_FORMS = {
     {
       id: 'diagnostico_maquina_lavar',
       title: 'Diagnóstico de Máquina de Lavar',
-      description: 'Checklist de diagnóstico para lavadoras.',
+      description: 'Testa enchimento, drenagem e componentes.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1684,7 +1656,7 @@ const GLOBAL_FORMS = {
     {
       id: 'diagnostico_microondas',
       title: 'Diagnóstico de Micro-ondas',
-      description: 'Checklist de diagnóstico para fornos micro-ondas.',
+      description: 'Testa painel, aquecimento e segurança.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1745,7 +1717,7 @@ const GLOBAL_FORMS = {
     {
       id: 'entrega_eletro',
       title: 'Entrega do Eletrodoméstico',
-      description: 'Checklist de conferência na entrega.',
+      description: 'Confere serviço executado e orientações ao cliente.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1796,8 +1768,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'checklist_seguranca_appliances',
-      title: 'Checklist de Segurança (Elétrica/Gás)',
-      description: 'Pontos críticos para evitar incidentes e garantir conformidade.',
+      title: 'Segurança do Equipamento',
+      description: 'Confere riscos elétricos/gás antes e após o serviço.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1843,8 +1815,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'teste_pos_reparo_appliances',
-      title: 'Teste Funcional Pós-Reparo',
-      description: 'Registro de validação final para reduzir retorno.',
+      title: 'Teste Final do Equipamento',
+      description: 'Valida funcionamento após o reparo.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1896,8 +1868,8 @@ const GLOBAL_FORMS = {
   electrical: [
     {
       id: 'checklist_seguranca_eletrica',
-      title: 'Checklist de Segurança (NR10)',
-      description: 'Segurança do local e bloqueio/etiquetagem antes de iniciar.',
+      title: 'Segurança do Serviço Elétrico (NR10)',
+      description: 'Checklist antes de iniciar para evitar acidentes.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -1948,8 +1920,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'laudo_servico_eletrico',
-      title: 'Laudo do Serviço Elétrico',
-      description: 'Evidências, medições e itens críticos do serviço executado.',
+      title: 'Registro do Serviço Elétrico',
+      description: 'Resumo do serviço e medições realizadas.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2001,8 +1973,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'checklist_qualidade_eletrica',
-      title: 'Checklist de Qualidade (Entrega)',
-      description: 'Verificações finais para evitar retorno e incidentes.',
+      title: 'Qualidade na Entrega (Elétrica)',
+      description: 'Verificações finais de segurança e organização.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2053,8 +2025,8 @@ const GLOBAL_FORMS = {
   plumbing: [
     {
       id: 'checklist_seguranca_hidraulica',
-      title: 'Checklist de Segurança (Hidráulica)',
-      description: 'Preparação do local para evitar danos e acidentes.',
+      title: 'Segurança do Serviço Hidráulico',
+      description: 'Prepara o local para evitar danos e acidentes.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2092,7 +2064,7 @@ const GLOBAL_FORMS = {
     {
       id: 'teste_estanqueidade',
       title: 'Teste de Estanqueidade',
-      description: 'Validação pós-serviço para garantir ausência de vazamentos.',
+      description: 'Confirma ausência de vazamentos após o serviço.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2137,8 +2109,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'entrega_hidraulica',
-      title: 'Entrega (Hidráulica)',
-      description: 'Checklist final e orientações para o cliente.',
+      title: 'Entrega do Serviço Hidráulico',
+      description: 'Checklist final e orientações ao cliente.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2180,8 +2152,8 @@ const GLOBAL_FORMS = {
   security: [
     {
       id: 'vistoria_pre_instalacao_seguranca',
-      title: 'Vistoria Pré-Instalação (CFTV/Alarme)',
-      description: 'Levantamento do local, infraestrutura e pontos de instalação.',
+      title: 'Vistoria Pré-Instalação',
+      description: 'Avalia local, energia e pontos de instalação.',
       subspecialties: ['cctv', 'alarms', 'access', 'fence'],
       isActive: true,
       items: [
@@ -2227,8 +2199,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'comissionamento_seguranca',
-      title: 'Comissionamento (CFTV/Alarme)',
-      description: 'Testes de funcionamento, acesso remoto e evidências de entrega.',
+      title: 'Comissionamento do Sistema',
+      description: 'Testes finais e acesso remoto configurado.',
       subspecialties: ['cctv', 'alarms', 'access', 'fence'],
       isActive: true,
       items: [
@@ -2274,8 +2246,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'termo_privacidade_seguranca',
-      title: 'Termo de Privacidade e Acesso (CFTV/Alarme)',
-      description: 'Aceite sobre credenciais, acesso remoto e responsabilidade do cliente.',
+      title: 'Autorização e Privacidade (Segurança)',
+      description: 'Registra credenciais, acesso remoto e responsabilidades.',
       subspecialties: ['cctv', 'alarms', 'access', 'fence'],
       isActive: true,
       items: [
@@ -2300,13 +2272,6 @@ const GLOBAL_FORMS = {
           required: true,
           allowPhotos: false,
         },
-        {
-          id: 'assinatura',
-          label: 'Assinatura do Cliente',
-          type: 'photo_only',
-          required: true,
-          allowPhotos: true,
-        },
       ],
     },
   ],
@@ -2317,8 +2282,8 @@ const GLOBAL_FORMS = {
   solar: [
     {
       id: 'checklist_seguranca_solar',
-      title: 'Checklist de Segurança (NR10/NR35)',
-      description: 'Segurança em altura e elétrica antes de iniciar.',
+      title: 'Segurança do Técnico (NR10/NR35)',
+      description: 'Checklist de segurança em altura e elétrica.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2358,7 +2323,7 @@ const GLOBAL_FORMS = {
     {
       id: 'comissionamento_solar',
       title: 'Comissionamento do Sistema Solar',
-      description: 'Medições e evidências para validar geração e monitoramento.',
+      description: 'Medições finais e validação do monitoramento.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2403,7 +2368,7 @@ const GLOBAL_FORMS = {
     {
       id: 'entrega_solar',
       title: 'Entrega e Orientações (Solar)',
-      description: 'Aceite do cliente e orientações de uso/monitoramento.',
+      description: 'Confirma orientações e acesso do cliente.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2430,13 +2395,6 @@ const GLOBAL_FORMS = {
           required: true,
           allowPhotos: false,
         },
-        {
-          id: 'assinatura',
-          label: 'Assinatura do Cliente',
-          type: 'photo_only',
-          required: true,
-          allowPhotos: true,
-        },
       ],
     },
   ],
@@ -2447,8 +2405,8 @@ const GLOBAL_FORMS = {
   printers: [
     {
       id: 'checklist_entrada_printers',
-      title: 'Checklist de Entrada (Impressora)',
-      description: 'Registro do estado, contador e defeito relatado.',
+      title: 'Entrada da Impressora',
+      description: 'Registra estado, contador e defeito relatado.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2493,8 +2451,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'manutencao_preventiva_printers',
-      title: 'Manutenção Preventiva (Impressoras)',
-      description: 'Limpeza, ajustes e itens comuns para reduzir retorno.',
+      title: 'Manutenção Preventiva',
+      description: 'Limpeza e ajustes para reduzir retorno.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2534,8 +2492,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'teste_pos_servico_printers',
-      title: 'Teste Pós-Serviço (Impressoras)',
-      description: 'Testes finais para garantir entrega.',
+      title: 'Teste Final da Impressora',
+      description: 'Testes finais para garantir a entrega.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2587,8 +2545,8 @@ const GLOBAL_FORMS = {
   other: [
     {
       id: 'checklist_entrada_generico',
-      title: 'Checklist de Entrada (Genérico)',
-      description: 'Verificação inicial padrão.',
+      title: 'Entrada do Item',
+      description: 'Registra condição inicial e defeito relatado.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2638,8 +2596,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'diagnostico_generico',
-      title: 'Diagnóstico Técnico',
-      description: 'Análise técnica geral.',
+      title: 'Diagnóstico do Item',
+      description: 'Análise técnica para identificar o problema.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2675,8 +2633,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'laudo_servico',
-      title: 'Laudo de Serviço',
-      description: 'Registro do serviço executado.',
+      title: 'Registro do Serviço',
+      description: 'Resumo do que foi feito e evidências.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2720,7 +2678,7 @@ const GLOBAL_FORMS = {
     {
       id: 'entrega_generico',
       title: 'Entrega ao Cliente',
-      description: 'Checklist de entrega padrão.',
+      description: 'Confirma entrega, funcionamento e garantia.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2764,8 +2722,8 @@ const GLOBAL_FORMS = {
     },
     {
       id: 'termo_autorizacao_generico',
-      title: 'Termo de Autorização e Privacidade',
-      description: 'Alinha expectativas e registra o consentimento do cliente.',
+      title: 'Autorização e Privacidade',
+      description: 'Consentimento para execução e registro do serviço.',
       subspecialties: [],
       isActive: true,
       items: [
@@ -2790,19 +2748,12 @@ const GLOBAL_FORMS = {
           required: true,
           allowPhotos: false,
         },
-        {
-          id: 'assinatura_cliente',
-          label: 'Assinatura do Cliente',
-          type: 'photo_only',
-          required: true,
-          allowPhotos: true,
-        },
       ],
     },
     {
       id: 'pesquisa_satisfacao_nps',
-      title: 'Pesquisa de Satisfação (NPS)',
-      description: 'Métrica simples para acompanhar qualidade e reduzir churn.',
+      title: 'Pesquisa de Satisfação',
+      description: 'Avalia a experiência do cliente após o serviço.',
       subspecialties: [],
       isActive: true,
       items: [
