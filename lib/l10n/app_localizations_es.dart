@@ -72,6 +72,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get search => 'Buscar';
 
   @override
+  String get searchOrAddNew => 'Buscar o añadir nuevo';
+
+  @override
   String get filter => 'Filtrar';
 
   @override
@@ -133,6 +136,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reset => 'Restablecer';
+
+  @override
+  String get basicInfo => 'Información Básica';
 
   @override
   String get apply => 'Aplicar';
@@ -707,6 +713,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get device => 'Equipo';
+
+  @override
+  String get deviceCategory => 'Categoría';
 
   @override
   String get newDevice => 'Nuevo Equipo';

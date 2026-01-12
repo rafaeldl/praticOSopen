@@ -226,6 +226,12 @@ abstract class AppLocalizations {
   /// **'Buscar'**
   String get search;
 
+  /// No description provided for @searchOrAddNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar ou adicionar novo'**
+  String get searchOrAddNew;
+
   /// No description provided for @filter.
   ///
   /// In pt, this message translates to:
@@ -351,6 +357,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Redefinir'**
   String get reset;
+
+  /// No description provided for @basicInfo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações Básicas'**
+  String get basicInfo;
 
   /// No description provided for @apply.
   ///
@@ -1479,6 +1491,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Equipamento'**
   String get device;
+
+  /// No description provided for @deviceCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categoria'**
+  String get deviceCategory;
 
   /// No description provided for @newDevice.
   ///

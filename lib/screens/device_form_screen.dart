@@ -180,23 +180,87 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
 
               // Form Fields
               CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.basicInfo.toUpperCase()),
                 children: [
-                  _buildCupertinoFormField(
-                    label: config.label(LabelKeys.deviceBrand),
-                    initialValue: _device?.manufacturer,
-                    placeholder: "Ex: Fiat, VW",
-                    textCapitalization: TextCapitalization.words,
-                    onSaved: (val) => _device?.manufacturer = val,
-                    validator: (val) => val == null || val.isEmpty ? config.label(LabelKeys.required) : null,
+                  // Category Field
+                  CupertinoListTile(
+                    title: SizedBox(
+                      width: 100,
+                      child: Text(
+                        context.l10n.deviceCategory,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    additionalInfo: Text(
+                      _device?.category ?? context.l10n.select,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: _device?.category != null
+                            ? CupertinoColors.label.resolveFrom(context)
+                            : CupertinoColors.placeholderText.resolveFrom(context),
+                      ),
+                    ),
+                    trailing: Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 20,
+                      color: CupertinoColors.systemGrey.resolveFrom(context),
+                    ),
+                    onTap: () => _selectCategory(context),
                   ),
-                  _buildCupertinoFormField(
-                    label: config.label(LabelKeys.deviceModel),
-                    initialValue: _device?.name,
-                    placeholder: "Ex: Uno, Gol",
-                    textCapitalization: TextCapitalization.words,
-                    onSaved: (val) => _device?.name = val,
-                    validator: (val) => val == null || val.isEmpty ? config.label(LabelKeys.required) : null,
+
+                  // Brand/Manufacturer Field
+                  CupertinoListTile(
+                    title: SizedBox(
+                      width: 100,
+                      child: Text(
+                        config.label(LabelKeys.deviceBrand),
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    additionalInfo: Text(
+                      _device?.manufacturer ?? context.l10n.select,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: _device?.manufacturer != null
+                            ? CupertinoColors.label.resolveFrom(context)
+                            : CupertinoColors.placeholderText.resolveFrom(context),
+                      ),
+                    ),
+                    trailing: Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 20,
+                      color: CupertinoColors.systemGrey.resolveFrom(context),
+                    ),
+                    onTap: () => _selectBrand(context, config),
                   ),
+
+                  // Model Field
+                  CupertinoListTile(
+                    title: SizedBox(
+                      width: 100,
+                      child: Text(
+                        config.label(LabelKeys.deviceModel),
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    additionalInfo: Text(
+                      _device?.name ?? context.l10n.select,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: _device?.name != null
+                            ? CupertinoColors.label.resolveFrom(context)
+                            : CupertinoColors.placeholderText.resolveFrom(context),
+                      ),
+                    ),
+                    trailing: Icon(
+                      CupertinoIcons.chevron_right,
+                      size: 20,
+                      color: CupertinoColors.systemGrey.resolveFrom(context),
+                    ),
+                    onTap: () => _selectModel(context, config),
+                  ),
+
+                  // Serial Number Field
                   _buildCupertinoFormField(
                     label: config.label(LabelKeys.deviceSerialNumber),
                     initialValue: _device?.serial,
@@ -213,6 +277,65 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _selectCategory(BuildContext context) async {
+    final value = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        'fieldType': 'deviceCategory',
+        'title': context.l10n.deviceCategory,
+        'currentValue': _device?.category,
+      },
+    );
+
+    if (value != null && value is String) {
+      setState(() {
+        _device?.category = value;
+        // Clear model when category changes (group will be different)
+        _device?.name = null;
+      });
+    }
+  }
+
+  Future<void> _selectBrand(BuildContext context, SegmentConfigProvider config) async {
+    final value = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        'fieldType': 'deviceBrand',
+        'title': config.label(LabelKeys.deviceBrand),
+        'currentValue': _device?.manufacturer,
+      },
+    );
+
+    if (value != null && value is String) {
+      setState(() {
+        _device?.manufacturer = value;
+        // Clear model when brand changes
+        _device?.name = null;
+      });
+    }
+  }
+
+  Future<void> _selectModel(BuildContext context, SegmentConfigProvider config) async {
+    final value = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        'fieldType': 'deviceModel',
+        'title': config.label(LabelKeys.deviceModel),
+        'currentValue': _device?.name,
+        'group': [_device?.category, _device?.manufacturer],
+      },
+    );
+
+    if (value != null && value is String) {
+      setState(() {
+        _device?.name = value;
+      });
+    }
   }
 
   Widget _buildCupertinoFormField({
