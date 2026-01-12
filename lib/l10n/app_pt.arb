@@ -27,6 +27,7 @@
   "create": "Criar",
   "update": "Atualizar",
   "search": "Buscar",
+  "searchOrAddNew": "Buscar ou adicionar novo",
   "filter": "Filtrar",
   "sort": "Ordenar",
   "refresh": "Atualizar",
@@ -48,6 +49,7 @@
   "selectAll": "Selecionar Tudo",
   "clear": "Limpar",
   "reset": "Redefinir",
+  "basicInfo": "Informações Básicas",
   "apply": "Aplicar",
   "ok": "OK",
   "yes": "Sim",
@@ -280,6 +282,7 @@
   "priorityUrgent": "Urgente",
 
   "device": "Equipamento",
+  "deviceCategory": "Categoria",
   "newDevice": "Novo Equipamento",
   "editDevice": "Editar Equipamento",
   "deviceDetails": "Detalhes do Equipamento",

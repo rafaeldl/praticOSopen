@@ -1,16 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'accumulated_value.g.dart';
 
 /// Represents a value that accumulates over time for reuse in forms.
 ///
 /// Used for fields like device categories, brands, service categories, etc.
 /// Supports hierarchical grouping (e.g., models grouped by brand).
+@JsonSerializable(explicitToJson: true)
 class AccumulatedValue {
   String? id;
   String value;
   String searchKey;
   int usageCount;
-  String? groupId; // Parent value ID for hierarchical filtering
-  String? groupValue; // Parent value (denormalized for display)
+  String? group; // Parent value for hierarchical filtering (e.g., brand for models)
   DateTime? createdAt;
   DateTime? updatedAt;
 
@@ -19,37 +21,15 @@ class AccumulatedValue {
     required this.value,
     String? searchKey,
     this.usageCount = 0,
-    this.groupId,
-    this.groupValue,
+    this.group,
     this.createdAt,
     this.updatedAt,
   }) : searchKey = searchKey ?? value.toLowerCase();
 
-  factory AccumulatedValue.fromJson(Map<String, dynamic> json) {
-    return AccumulatedValue(
-      id: json['id'],
-      value: json['value'] ?? '',
-      searchKey: json['searchKey'] ?? '',
-      usageCount: json['usageCount'] ?? 0,
-      groupId: json['groupId'],
-      groupValue: json['groupValue'],
-      createdAt: json['createdAt']?.toDate(),
-      updatedAt: json['updatedAt']?.toDate(),
-    );
-  }
+  factory AccumulatedValue.fromJson(Map<String, dynamic> json) =>
+      _$AccumulatedValueFromJson(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      if (id != null) 'id': id,
-      'value': value,
-      'searchKey': searchKey,
-      'usageCount': usageCount,
-      if (groupId != null) 'groupId': groupId,
-      if (groupValue != null) 'groupValue': groupValue,
-      'createdAt': createdAt ?? FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
-    };
-  }
+  Map<String, dynamic> toJson() => _$AccumulatedValueToJson(this);
 
   /// Creates a copy with updated fields
   AccumulatedValue copyWith({
@@ -57,8 +37,7 @@ class AccumulatedValue {
     String? value,
     String? searchKey,
     int? usageCount,
-    String? groupId,
-    String? groupValue,
+    String? group,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -67,8 +46,7 @@ class AccumulatedValue {
       value: value ?? this.value,
       searchKey: searchKey ?? this.searchKey,
       usageCount: usageCount ?? this.usageCount,
-      groupId: groupId ?? this.groupId,
-      groupValue: groupValue ?? this.groupValue,
+      group: group ?? this.group,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

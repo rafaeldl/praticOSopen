@@ -1,8 +1,10 @@
-# Accumulated Field Component
+# Accumulated Field System
 
 ## Overview
 
-The Accumulated Field is a reusable form component that stores and suggests previously entered values per company. It automatically learns from user input, making data entry faster by suggesting commonly used values.
+The Accumulated Field System stores and suggests previously entered values per company. It automatically learns from user input, making data entry faster by suggesting commonly used values.
+
+**Architecture Philosophy**: Provide a selection screen, let developers choose their own input UI (ListTile, TextField, Button, etc).
 
 ## Architecture
 
@@ -12,7 +14,7 @@ The Accumulated Field is a reusable form component that stores and suggests prev
 |------|---------|
 | `lib/models/accumulated_value.dart` | Data model for stored values |
 | `lib/repositories/accumulated_value_repository.dart` | Firestore CRUD operations |
-| `lib/widgets/accumulated_field.dart` | Reusable UI widget |
+| `lib/screens/accumulated_value_list_screen.dart` | Selection/creation screen |
 
 ### Firestore Structure
 
@@ -46,40 +48,42 @@ AccumulatedValueRepository
 ├── search()
 ├── getAll()
 ├── streamAll()
-├── addOrIncrement()
+├── use()              // Simplified: addOrIncrement
 ├── getById()
 ├── remove()
 ├── removeByGroup()
 └── updateValue()
 
-AccumulatedField (Widget)
-├── companyId: String
-├── fieldType: String
-├── label: String
-├── groupId: String?
-├── groupValue: String?
-├── onSelected: Function(value, valueId)
-└── allowRemove: bool
+AccumulatedValueListScreen (Screen)
+├── Uses: companyId from Global.companyAggr?.id (automatic)
+├── Receives (arguments):
+│   ├── fieldType: String (required - e.g., 'deviceBrand')
+│   ├── title: String (optional - defaults to context.l10n.select)
+│   ├── currentValue: String? (optional - for highlighting)
+│   ├── groupId: String? (optional - for hierarchical filtering)
+│   └── groupValue: String? (optional - for storing parent reference)
+├── Shows: Searchable list + "Add new" option
+└── Returns: String value via Navigator.pop()
 ```
 
 ## Data Flow
 
 ```
-User types in field
+User taps field (ListTile/Button/TextField/etc)
         ↓
-Widget searches cached values (client-side)
+Navigate to AccumulatedValueListScreen
         ↓
-Dropdown shows matching suggestions
+User searches or browses list (sorted by usageCount)
         ↓
-User selects or submits new value
+User selects existing OR adds new value
         ↓
-Repository: addOrIncrement()
+Repository: use(value)
 ├── If exists: increment usageCount
 └── If new: create with usageCount = 1
         ↓
-Callback: onSelected(value, valueId)
+Navigator.pop(context, value)
         ↓
-Parent widget receives value + ID
+Parent receives String value and updates state
 ```
 
 ## Business Rules
@@ -93,61 +97,146 @@ Parent widget receives value + ID
 
 ## Usage Examples
 
-### Independent Field (No Grouping)
+### Example 1: CupertinoListTile (Recommended - iOS native)
 
 ```dart
-AccumulatedField(
-  companyId: Global.companyAggr!.id!,
-  fieldType: 'deviceCategory',
-  label: 'Categoria',
-  initialValue: device.category,
-  onSelected: (value, valueId) {
-    device.category = value;
+CupertinoListTile(
+  title: Text('Marca'),
+  additionalInfo: Text(
+    device.manufacturer ?? 'Selecionar',
+    style: TextStyle(
+      color: device.manufacturer != null
+          ? CupertinoColors.label.resolveFrom(context)
+          : CupertinoColors.placeholderText.resolveFrom(context),
+    ),
+  ),
+  trailing: Icon(CupertinoIcons.chevron_right),
+  onTap: () async {
+    final value = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        'fieldType': 'deviceBrand',
+        'title': 'Marca',
+        'currentValue': device.manufacturer,
+      },
+    );
+
+    if (value != null && value is String) {
+      setState(() {
+        device.manufacturer = value;
+      });
+    }
   },
 )
 ```
 
-### Hierarchical Fields (Parent-Child)
+### Example 2: Hierarchical Fields (Parent-Child)
 
 ```dart
 // Parent field (Brand)
-AccumulatedField(
-  companyId: companyId,
-  fieldType: 'deviceBrand',
-  label: 'Marca',
-  initialValue: device.brand,
-  onSelected: (value, valueId) {
-    setState(() {
-      device.brand = value;
-      device.brandId = valueId;
-      device.model = null;  // Clear child when parent changes
-    });
+CupertinoListTile(
+  title: Text('Marca'),
+  additionalInfo: Text(device.manufacturer ?? 'Selecionar'),
+  trailing: Icon(CupertinoIcons.chevron_right),
+  onTap: () async {
+    final value = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        
+        'fieldType': 'deviceBrand',
+        'title': 'Marca',
+        'currentValue': device.manufacturer,
+      },
+    );
+
+    if (value != null && value is String) {
+      setState(() {
+        device.manufacturer = value;
+        device.model = null;  // Clear child when parent changes
+      });
+    }
   },
 )
 
 // Child field (Model) - filtered by brand
-AccumulatedField(
-  companyId: companyId,
-  fieldType: 'deviceModel',
-  label: 'Modelo',
-  initialValue: device.model,
-  groupId: device.brandId,      // Filter by parent
-  groupValue: device.brand,     // Store parent reference
-  onSelected: (value, valueId) {
-    device.model = value;
+CupertinoListTile(
+  title: Text('Modelo'),
+  additionalInfo: Text(device.model ?? 'Selecionar'),
+  trailing: Icon(CupertinoIcons.chevron_right),
+  onTap: () async {
+    final value = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        
+        'fieldType': 'deviceModel',
+        'title': 'Modelo',
+        'currentValue': device.model,
+        'groupId': device.manufacturer,      // Filter by parent
+        'groupValue': device.manufacturer,   // Store parent reference
+      },
+    );
+
+    if (value != null && value is String) {
+      setState(() {
+        device.model = value;
+      });
+    }
   },
 )
 ```
 
-### Disabling Remove Button
+### Example 3: Custom Button
 
 ```dart
-AccumulatedField(
-  companyId: companyId,
-  fieldType: 'paymentCondition',
-  label: 'Condição de Pagamento',
-  allowRemove: false,  // Hide remove button
-  onSelected: (value, valueId) => ...,
+CupertinoButton(
+  child: Text(device.category ?? '+ Adicionar Categoria'),
+  onPressed: () async {
+    final value = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        
+        'fieldType': 'deviceCategory',
+        'title': 'Categoria',
+        'currentValue': device.category,
+      },
+    );
+
+    if (value != null && value is String) {
+      setState(() => device.category = value);
+    }
+  },
+)
+```
+
+### Example 4: Read-only TextField
+
+```dart
+GestureDetector(
+  onTap: () async {
+    final value = await Navigator.pushNamed(
+      context,
+      '/accumulated_value_list',
+      arguments: {
+        
+        'fieldType': 'deviceBrand',
+        'title': 'Marca',
+        'currentValue': device.manufacturer,
+      },
+    );
+
+    if (value != null) {
+      setState(() => device.manufacturer = value);
+    }
+  },
+  child: CupertinoTextField(
+    controller: TextEditingController(text: device.manufacturer),
+    enabled: false,
+    suffix: Icon(CupertinoIcons.chevron_right),
+  ),
 )
 ```
 
@@ -178,19 +267,21 @@ final values = await repo.search(
 );
 ```
 
-### addOrIncrement(companyId, fieldType, value, {groupId, groupValue})
+### use(companyId, fieldType, value, {groupId, groupValue})
 
-Adds a new value or increments usage count if exists.
+Records usage of a value (creates new or increments count if exists).
 
 ```dart
-final valueId = await repo.addOrIncrement(
+final valueId = await repo.use(
   companyId,
   'deviceModel',
   'Galaxy S24',
-  groupId: brandId,
+  groupId: 'Samsung',
   groupValue: 'Samsung',
 );
 ```
+
+**Note**: `companyId` is automatically retrieved from `Global.companyAggr` in the screen.
 
 ### remove(companyId, fieldType, valueId)
 

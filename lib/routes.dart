@@ -19,6 +19,7 @@ import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
 import 'package:praticos/screens/forms/form_template_list_screen.dart';
 import 'package:praticos/screens/forms/form_template_form_screen.dart';
 import 'package:praticos/screens/user_profile_edit_screen.dart';
+import 'package:praticos/screens/accumulated_value_list_screen.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   // '/onboarding': removed - onboarding now handled by AuthWrapper with authStore
@@ -30,6 +31,7 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/customer_list': (context) => CustomerListScreen(),
   '/device_form': (context) => DeviceFormScreen(),
   '/device_list': (context) => DeviceListScreen(),
+  '/accumulated_value_list': (context) => AccumulatedValueListScreen(),
   '/info_form': (context) => InfoFormScreen(),
   '/order': (context) => OrderForm(),
   '/order_service': (context) => OrderServiceScreen(),

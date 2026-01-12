@@ -25,97 +25,114 @@ class AccumulatedValueRepository {
   }
 
   /// Searches values by query string.
-  /// If [groupId] is provided, filters by that group.
+  /// If [group] is provided, filters by that group.
   /// Returns up to [limit] results ordered by usage count.
   Future<List<AccumulatedValue>> search(
     String companyId,
     String fieldType,
     String query, {
-    String? groupId,
+    String? group,
     int limit = 20,
   }) async {
     final q = query.toLowerCase().trim();
+    final normalizedGroup = group?.toLowerCase().trim();
 
-    Query<Map<String, dynamic>> ref = _valuesCollection(companyId, fieldType)
-        .orderBy('usageCount', descending: true);
+    Query<Map<String, dynamic>> ref = _valuesCollection(companyId, fieldType);
 
-    if (groupId != null) {
-      ref = ref.where('groupId', isEqualTo: groupId);
+    if (normalizedGroup != null) {
+      ref = ref.where('group', isEqualTo: normalizedGroup);
     }
 
     final snap = await ref.get();
 
-    // Client-side filtering (no index needed for text search)
+    // Client-side filtering and sorting (no composite index needed)
     var results = snap.docs
         .map((d) => AccumulatedValue.fromJson({...d.data(), 'id': d.id}))
         .where((v) => q.isEmpty || v.searchKey.contains(q))
-        .take(limit)
         .toList();
+
+    // Sort by usage count on client side
+    results.sort((a, b) => b.usageCount.compareTo(a.usageCount));
+
+    return results.take(limit).toList();
+  }
+
+  /// Gets all values for a field type.
+  /// If [group] is provided, filters by that group.
+  Future<List<AccumulatedValue>> getAll(
+    String companyId,
+    String fieldType, {
+    String? group,
+  }) async {
+    final normalizedGroup = group?.toLowerCase().trim();
+    Query<Map<String, dynamic>> ref = _valuesCollection(companyId, fieldType);
+
+    if (normalizedGroup != null) {
+      ref = ref.where('group', isEqualTo: normalizedGroup);
+    }
+
+    final snap = await ref.get();
+
+    var results = snap.docs
+        .map((d) => AccumulatedValue.fromJson({...d.data(), 'id': d.id}))
+        .toList();
+
+    // Sort by usage count on client side (no composite index needed)
+    results.sort((a, b) => b.usageCount.compareTo(a.usageCount));
 
     return results;
   }
 
-  /// Gets all values for a field type.
-  /// If [groupId] is provided, filters by that group.
-  Future<List<AccumulatedValue>> getAll(
-    String companyId,
-    String fieldType, {
-    String? groupId,
-  }) async {
-    Query<Map<String, dynamic>> ref = _valuesCollection(companyId, fieldType)
-        .orderBy('usageCount', descending: true);
-
-    if (groupId != null) {
-      ref = ref.where('groupId', isEqualTo: groupId);
-    }
-
-    final snap = await ref.get();
-
-    return snap.docs
-        .map((d) => AccumulatedValue.fromJson({...d.data(), 'id': d.id}))
-        .toList();
-  }
-
   /// Streams all values for a field type.
-  /// If [groupId] is provided, filters by that group.
+  /// If [group] is provided, filters by that group.
   Stream<List<AccumulatedValue>> streamAll(
     String companyId,
     String fieldType, {
-    String? groupId,
+    String? group,
   }) {
-    Query<Map<String, dynamic>> ref = _valuesCollection(companyId, fieldType)
-        .orderBy('usageCount', descending: true);
+    final normalizedGroup = group?.toLowerCase().trim();
+    Query<Map<String, dynamic>> ref = _valuesCollection(companyId, fieldType);
 
-    if (groupId != null) {
-      ref = ref.where('groupId', isEqualTo: groupId);
+    if (normalizedGroup != null) {
+      ref = ref.where('group', isEqualTo: normalizedGroup);
     }
 
-    return ref.snapshots().map((snap) => snap.docs
-        .map((d) => AccumulatedValue.fromJson({...d.data(), 'id': d.id}))
-        .toList());
+    return ref.snapshots().map((snap) {
+      var results = snap.docs
+          .map((d) => AccumulatedValue.fromJson({...d.data(), 'id': d.id}))
+          .toList();
+
+      // Sort by usage count on client side (no composite index needed)
+      results.sort((a, b) => b.usageCount.compareTo(a.usageCount));
+
+      return results;
+    });
   }
 
-  /// Adds a new value or increments usage count if it already exists.
+  /// Records usage of a value (adds new or increments count if exists).
   /// Returns the value ID.
   ///
-  /// If [groupId] and [groupValue] are provided, associates the value with that group.
-  Future<String> addOrIncrement(
+  /// Call this when a user selects or enters a value. It will:
+  /// - Create the value if it doesn't exist (with usageCount = 1)
+  /// - Increment usageCount if it already exists
+  /// - Associate with [group] if provided (for hierarchies)
+  Future<String> use(
     String companyId,
     String fieldType,
     String value, {
-    String? groupId,
-    String? groupValue,
+    String? group,
   }) async {
     final searchKey = value.toLowerCase().trim();
+    final normalizedGroup = group?.toLowerCase().trim();
     final collection = _valuesCollection(companyId, fieldType);
 
     // Build query to check if exists
     Query<Map<String, dynamic>> query =
         collection.where('searchKey', isEqualTo: searchKey);
 
-    // If groupId is provided, also match by group
-    if (groupId != null) {
-      query = query.where('groupId', isEqualTo: groupId);
+    // If group is provided, also match by normalized group
+    if (normalizedGroup != null) {
+      query = query.where('group', isEqualTo: normalizedGroup);
     }
 
     final existing = await query.limit(1).get();
@@ -125,18 +142,20 @@ class AccumulatedValueRepository {
       final docRef = existing.docs.first.reference;
       await docRef.update({
         'usageCount': FieldValue.increment(1),
-        'updatedAt': FieldValue.serverTimestamp(),
+        'updatedAt': DateTime.now().toIso8601String(),
       });
       return docRef.id;
     }
 
     // Create new value
+    final now = DateTime.now();
     final newValue = AccumulatedValue(
       value: value.trim(),
       searchKey: searchKey,
       usageCount: 1,
-      groupId: groupId,
-      groupValue: groupValue,
+      group: normalizedGroup,
+      createdAt: now,
+      updatedAt: now,
     );
 
     final docRef = await collection.add(newValue.toJson());
@@ -171,10 +190,11 @@ class AccumulatedValueRepository {
   Future<void> removeByGroup(
     String companyId,
     String fieldType,
-    String groupId,
+    String group,
   ) async {
+    final normalizedGroup = group.toLowerCase().trim();
     final values = await _valuesCollection(companyId, fieldType)
-        .where('groupId', isEqualTo: groupId)
+        .where('group', isEqualTo: normalizedGroup)
         .get();
 
     final batch = _db.batch();
@@ -194,7 +214,7 @@ class AccumulatedValueRepository {
     await _valuesCollection(companyId, fieldType).doc(valueId).update({
       'value': newValue.trim(),
       'searchKey': newValue.toLowerCase().trim(),
-      'updatedAt': FieldValue.serverTimestamp(),
+      'updatedAt': DateTime.now().toIso8601String(),
     });
   }
 }

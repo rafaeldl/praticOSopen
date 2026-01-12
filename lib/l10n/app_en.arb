@@ -24,6 +24,7 @@
   "create": "Create",
   "update": "Update",
   "search": "Search",
+  "searchOrAddNew": "Search or add new",
   "filter": "Filter",
   "sort": "Sort",
   "refresh": "Refresh",
@@ -45,6 +46,7 @@
   "selectAll": "Select All",
   "clear": "Clear",
   "reset": "Reset",
+  "basicInfo": "Basic Information",
   "apply": "Apply",
   "ok": "OK",
   "yes": "Yes",
@@ -256,6 +258,7 @@
   "priorityUrgent": "Urgent",
 
   "device": "Device",
+  "deviceCategory": "Category",
   "newDevice": "New Device",
   "editDevice": "Edit Device",
   "deviceDetails": "Device Details",
