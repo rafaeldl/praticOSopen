@@ -1281,7 +1281,7 @@ class _OrderFormState extends State<OrderForm> {
             children: [
               const CupertinoActivityIndicator(),
               const SizedBox(height: 10),
-              Text('${context.l10n.loading}'),
+              Text('${context.l10n.loading}...'),
             ],
           ),
         );
