@@ -584,6 +584,13 @@
   "requiresRecentLogin": "Por segurança, o Firebase exige login recente antes de deletar a conta.\n\nPor favor:\n1. Faça logout da sua conta\n2. Faça login novamente\n3. Tente deletar a conta imediatamente após o login",
   "noPermissionDelete": "Você não tem permissão para deletar sua conta. Tente novamente mais tarde.",
   "networkError": "Erro de conexão. Verifique sua internet e tente novamente.",
+  "reauthenticationRequired": "Re-autenticação Necessária",
+  "pleaseSignInAgainToDelete": "Por motivos de segurança, você precisa fazer login novamente antes de deletar sua conta.",
+  "signInAgain": "Entrar Novamente",
+  "authenticated": "Autenticado",
+  "nowDeletingAccount": "Agora você pode prosseguir com a exclusão da conta.",
+  "reauthenticationFailed": "Falha na Re-autenticação",
+  "couldNotReauthenticate": "Não foi possível autenticar novamente.",
 
   "errorLoadingData": "Erro ao carregar dados",
   "tapToAddFirst": "Toque em + para adicionar",

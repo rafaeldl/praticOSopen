@@ -1570,6 +1570,29 @@ class AppLocalizationsPt extends AppLocalizations {
       'Erro de conexão. Verifique sua internet e tente novamente.';
 
   @override
+  String get reauthenticationRequired => 'Re-autenticação Necessária';
+
+  @override
+  String get pleaseSignInAgainToDelete =>
+      'Por motivos de segurança, você precisa fazer login novamente antes de deletar sua conta.';
+
+  @override
+  String get signInAgain => 'Entrar Novamente';
+
+  @override
+  String get authenticated => 'Autenticado';
+
+  @override
+  String get nowDeletingAccount =>
+      'Agora você pode prosseguir com a exclusão da conta.';
+
+  @override
+  String get reauthenticationFailed => 'Falha na Re-autenticação';
+
+  @override
+  String get couldNotReauthenticate => 'Não foi possível autenticar novamente.';
+
+  @override
   String get errorLoadingData => 'Erro ao carregar dados';
 
   @override

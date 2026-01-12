@@ -539,6 +539,13 @@
   "requiresRecentLogin": "For security, Firebase requires a recent login before deleting the account.\n\nPlease:\n1. Log out of your account\n2. Log in again\n3. Try to delete the account immediately after logging in",
   "noPermissionDelete": "You don't have permission to delete your account. Please try again later.",
   "networkError": "Connection error. Check your internet and try again.",
+  "reauthenticationRequired": "Re-authentication Required",
+  "pleaseSignInAgainToDelete": "For security reasons, you need to sign in again before deleting your account.",
+  "signInAgain": "Sign In Again",
+  "authenticated": "Authenticated",
+  "nowDeletingAccount": "You can now proceed with account deletion.",
+  "reauthenticationFailed": "Re-authentication Failed",
+  "couldNotReauthenticate": "Could not re-authenticate.",
 
   "errorLoadingData": "Error loading data",
   "tapToAddFirst": "Tap + to add",

@@ -1567,6 +1567,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'Connection error. Check your internet and try again.';
 
   @override
+  String get reauthenticationRequired => 'Re-authentication Required';
+
+  @override
+  String get pleaseSignInAgainToDelete =>
+      'For security reasons, you need to sign in again before deleting your account.';
+
+  @override
+  String get signInAgain => 'Sign In Again';
+
+  @override
+  String get authenticated => 'Authenticated';
+
+  @override
+  String get nowDeletingAccount => 'You can now proceed with account deletion.';
+
+  @override
+  String get reauthenticationFailed => 'Re-authentication Failed';
+
+  @override
+  String get couldNotReauthenticate => 'Could not re-authenticate.';
+
+  @override
   String get errorLoadingData => 'Error loading data';
 
   @override

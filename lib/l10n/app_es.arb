@@ -539,6 +539,13 @@
   "requiresRecentLogin": "Por seguridad, Firebase requiere un inicio de sesión reciente antes de eliminar la cuenta.\n\nPor favor:\n1. Cierre sesión de su cuenta\n2. Inicie sesión nuevamente\n3. Intente eliminar la cuenta inmediatamente después de iniciar sesión",
   "noPermissionDelete": "No tiene permiso para eliminar su cuenta. Intente de nuevo más tarde.",
   "networkError": "Error de conexión. Verifique su internet e intente de nuevo.",
+  "reauthenticationRequired": "Re-autenticación Requerida",
+  "pleaseSignInAgainToDelete": "Por razones de seguridad, necesita iniciar sesión nuevamente antes de eliminar su cuenta.",
+  "signInAgain": "Iniciar Sesión Nuevamente",
+  "authenticated": "Autenticado",
+  "nowDeletingAccount": "Ahora puede proceder con la eliminación de la cuenta.",
+  "reauthenticationFailed": "Falló la Re-autenticación",
+  "couldNotReauthenticate": "No se pudo autenticar nuevamente.",
 
   "errorLoadingData": "Error al cargar datos",
   "tapToAddFirst": "Toque + para agregar",

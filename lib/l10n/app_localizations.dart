@@ -3178,6 +3178,48 @@ abstract class AppLocalizations {
   /// **'Erro de conexão. Verifique sua internet e tente novamente.'**
   String get networkError;
 
+  /// No description provided for @reauthenticationRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Re-autenticação Necessária'**
+  String get reauthenticationRequired;
+
+  /// No description provided for @pleaseSignInAgainToDelete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por motivos de segurança, você precisa fazer login novamente antes de deletar sua conta.'**
+  String get pleaseSignInAgainToDelete;
+
+  /// No description provided for @signInAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar Novamente'**
+  String get signInAgain;
+
+  /// No description provided for @authenticated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Autenticado'**
+  String get authenticated;
+
+  /// No description provided for @nowDeletingAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora você pode prosseguir com a exclusão da conta.'**
+  String get nowDeletingAccount;
+
+  /// No description provided for @reauthenticationFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha na Re-autenticação'**
+  String get reauthenticationFailed;
+
+  /// No description provided for @couldNotReauthenticate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível autenticar novamente.'**
+  String get couldNotReauthenticate;
+
   /// No description provided for @errorLoadingData.
   ///
   /// In pt, this message translates to:
