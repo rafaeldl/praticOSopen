@@ -11,7 +11,27 @@ class FormatService {
 
   /// Define o locale atual
   void setLocale(String locale) {
-    _locale = locale;
+    _locale = _normalizeLocale(locale);
+  }
+
+  /// Normaliza locale para formato completo (en → en-US, pt → pt-BR, es → es-ES)
+  String _normalizeLocale(String locale) {
+    // Se já está no formato completo, retorna
+    if (locale.contains('-') || locale.contains('_')) {
+      return locale.replaceAll('_', '-');
+    }
+
+    // Fallback inteligente por código de idioma
+    switch (locale) {
+      case 'pt':
+        return 'pt-BR';
+      case 'en':
+        return 'en-US';
+      case 'es':
+        return 'es-ES';
+      default:
+        return locale;
+    }
   }
 
   /// Obtém locale no formato usado pelo intl (pt_BR, en_US, es_ES)
