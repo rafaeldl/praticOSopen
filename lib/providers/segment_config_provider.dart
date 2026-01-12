@@ -96,10 +96,22 @@ class SegmentConfigProvider extends ChangeNotifier {
     }
   }
 
-  /// Injeta o AppLocalizations para usar traduções dos ARB files
+  /// Injeta ou atualiza o AppLocalizations para usar traduções dos ARB files
+  /// Chamado no MaterialApp builder, então é executado a cada rebuild
+  /// Detecta mudanças de locale e recarrega cache automaticamente
   void injectL10n(dynamic l10n) {
     if (l10n != null) {
-      _service.setL10n(l10n);
+      final currentL10nInstance = _service.currentL10n;
+      final isDifferent = currentL10nInstance != l10n;
+
+      if (isDifferent) {
+        // Locale mudou, recarrega cache com nova AppLocalizations
+        _service.updateL10n(l10n);
+        notifyListeners();
+      } else {
+        // Primeira injeção ou mesma locale, apenas armazena
+        _service.setL10n(l10n);
+      }
     }
   }
 

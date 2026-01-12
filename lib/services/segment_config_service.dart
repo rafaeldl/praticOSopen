@@ -48,6 +48,18 @@ class SegmentConfigService {
     }
   }
 
+  /// Atualiza AppLocalizations quando o idioma muda
+  /// Chamado sempre que a locale muda no app
+  void updateL10n(AppLocalizations l10n) {
+    _l10n = l10n;
+
+    // Reconstruir cache se segmento está carregado
+    if (_segmentId != null) {
+      _labelCache.clear();
+      load(_segmentId!).ignore();
+    }
+  }
+
   /// Carrega a configuração de um segmento do Firestore
   Future<void> load(String segmentId) async {
     if (_segmentId == segmentId) {
@@ -306,4 +318,5 @@ class SegmentConfigService {
   bool get isLoaded => _segmentId != null;
   String? get currentSegmentId => _segmentId;
   String get currentLocale => _locale;
+  AppLocalizations? get currentL10n => _l10n;
 }
