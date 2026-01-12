@@ -1,0 +1,1 @@
+Manage service orders, customers, and finances in one app. Modern interface, dark mode, and offline support.

@@ -1,9 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
+import 'package:praticos/mobx/locale_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/models/company.dart';
@@ -22,6 +25,7 @@ import 'package:praticos/routes.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 
 AuthStore _authStore = AuthStore();
+LocaleStore _localeStore = LocaleStore();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +34,7 @@ Future<void> main() async {
   await Firebase.initializeApp();
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   FirebaseCrashlytics.instance.log("iniciando a aplicação");
+  await _localeStore.load();
 
   runApp(
     MultiProvider(
@@ -42,6 +47,7 @@ Future<void> main() async {
         ChangeNotifierProvider<SegmentConfigProvider>(
           create: (_) => SegmentConfigProvider(),
         ),
+        Provider<LocaleStore>(create: (_) => _localeStore),
       ],
       child: MyApp(),
     ),
@@ -67,6 +73,7 @@ class MyApp extends StatelessWidget {
     });
 
     final themeStore = Provider.of<ThemeStore>(context);
+    final localeStore = Provider.of<LocaleStore>(context);
 
     return Observer(
       builder: (_) {
@@ -76,6 +83,18 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeStore.themeMode,
+          locale: localeStore.currentLocale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('pt', 'BR'),
+            Locale('en', 'US'),
+            Locale('es', 'ES'),
+          ],
           navigatorObservers: <NavigatorObserver>[observer],
           builder: (context, child) {
             // Wrap with CupertinoTheme to support dynamic Cupertino colors

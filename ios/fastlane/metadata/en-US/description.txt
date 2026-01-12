@@ -1,0 +1,28 @@
+Simplify your business management with PraticOS, the complete app for managing service orders, customers, and finances in one place.
+
+SERVICE ORDER MANAGEMENT
+• Create and track service orders with ease
+• Control status: quote, approved, in progress, completed
+• Add services, products, and notes
+• View complete history of each order
+
+CUSTOMER REGISTRATION
+• Keep your customer base organized
+• Quickly access contact information
+• View service history per customer
+• Fast and intuitive search
+
+FINANCIAL DASHBOARD
+• Track your results in real time
+• View revenue and important metrics
+• Have total control over your billing
+
+MODERN INTERFACE
+• Clean and intuitive design following Apple guidelines
+• Dark mode available
+• Simple and fast navigation
+• Works offline
+
+Ideal for service providers, repair shops, technical assistance, freelancers, and small businesses looking for organization and practicality in their daily operations.
+
+Download now and transform your business management!

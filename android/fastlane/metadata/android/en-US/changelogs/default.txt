@@ -1,0 +1,15 @@
+What's New:
+
+• User Profiles: Permission control by role (Owner, Admin, Manager, Technician, etc.)
+
+• Partial Payments: Multiple payments per order with history in PDF
+
+• Improved Search: Infinite scroll, filters, and highlight for overdue orders
+
+• Dynamic Forms: Custom checklists with photos
+
+• Invitations: Add collaborators by email
+
+• Interface: iOS redesign, dark mode, and visual fixes
+
+Thank you for using PraticOS!

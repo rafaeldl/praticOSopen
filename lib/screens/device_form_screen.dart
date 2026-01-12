@@ -7,6 +7,7 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class DeviceFormScreen extends StatefulWidget {
   const DeviceFormScreen({super.key});
@@ -59,7 +60,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         title: Text(config.label(LabelKeys.changePhoto)),
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
-            child: const Text('Tirar Foto'),
+            child: Text(context.l10n.takePhoto),
             onPressed: () async {
               Navigator.pop(context);
               final file = await _deviceStore.photoService.takePhoto();
@@ -70,7 +71,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
             },
           ),
           CupertinoActionSheetAction(
-            child: const Text('Escolher da Galeria'),
+            child: Text(context.l10n.chooseFromGallery),
             onPressed: () async {
               Navigator.pop(context);
               final file = await _deviceStore.photoService.pickImageFromGallery();

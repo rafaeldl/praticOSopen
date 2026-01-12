@@ -1,0 +1,1 @@
+Administre órdenes de servicio, clientes y finanzas en una sola app. Interfaz moderna, modo oscuro y soporte offline.

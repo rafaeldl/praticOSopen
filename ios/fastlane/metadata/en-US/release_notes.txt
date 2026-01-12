@@ -1,0 +1,4 @@
+This update includes:
+• Performance improvements
+• Bug fixes
+• UI/UX enhancements
