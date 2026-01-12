@@ -453,6 +453,11 @@ class _SettingsState extends State<Settings> {
 
               try {
                 await _authStore.deleteAccount();
+
+                // Close loading dialog
+                if (!mounted) return;
+                Navigator.pop(context);
+
                 // The auth state change will automatically redirect to login
               } catch (e) {
                 if (!mounted) return;
