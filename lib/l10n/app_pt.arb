@@ -778,5 +778,15 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "markAsToReceive": "Marcar como A Receber",
+  "thisWillRemoveAllPayments": "Isso irá remover todos os pagamentos e descontos registrados. Deseja continuar?",
+  "attention": "Atenção",
+
+  "almostThere": "Quase lá!",
+  "yesCreateSampleData": "Sim, criar dados de exemplo",
+
+  "availableSpecialties": "ESPECIALIDADES DISPONÍVEIS",
+  "pleaseSelectAtLeastOneSpecialty": "Por favor, selecione pelo menos uma especialidade para continuar."
 }

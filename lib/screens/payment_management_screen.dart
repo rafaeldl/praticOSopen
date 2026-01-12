@@ -810,13 +810,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Marcar como A Receber'),
-        content: const Text(
-          'Isso irá remover todos os pagamentos e descontos registrados. Deseja continuar?',
-        ),
+        title: Text(context.l10n.markAsToReceive),
+        content: Text(context.l10n.thisWillRemoveAllPayments),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -825,7 +823,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               Navigator.pop(context);
               _resetPayment();
             },
-            child: const Text('Confirmar'),
+            child: Text(context.l10n.confirm),
           ),
         ],
       ),
@@ -875,11 +873,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Atenção'),
+        title: Text(context.l10n.attention),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),
         ],

@@ -2010,4 +2010,27 @@ class AppLocalizationsPt extends AppLocalizations {
   String areYouSureReject(String company) {
     return 'Tem certeza que deseja recusar o convite de $company?';
   }
+
+  @override
+  String get markAsToReceive => 'Marcar como A Receber';
+
+  @override
+  String get thisWillRemoveAllPayments =>
+      'Isso irá remover todos os pagamentos e descontos registrados. Deseja continuar?';
+
+  @override
+  String get attention => 'Atenção';
+
+  @override
+  String get almostThere => 'Quase lá!';
+
+  @override
+  String get yesCreateSampleData => 'Sim, criar dados de exemplo';
+
+  @override
+  String get availableSpecialties => 'ESPECIALIDADES DISPONÍVEIS';
+
+  @override
+  String get pleaseSelectAtLeastOneSpecialty =>
+      'Por favor, selecione pelo menos uma especialidade para continuar.';
 }

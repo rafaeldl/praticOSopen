@@ -4011,6 +4011,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tem certeza que deseja recusar o convite de {company}?'**
   String areYouSureReject(String company);
+
+  /// No description provided for @markAsToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como A Receber'**
+  String get markAsToReceive;
+
+  /// No description provided for @thisWillRemoveAllPayments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Isso irá remover todos os pagamentos e descontos registrados. Deseja continuar?'**
+  String get thisWillRemoveAllPayments;
+
+  /// No description provided for @attention.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atenção'**
+  String get attention;
+
+  /// No description provided for @almostThere.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quase lá!'**
+  String get almostThere;
+
+  /// No description provided for @yesCreateSampleData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sim, criar dados de exemplo'**
+  String get yesCreateSampleData;
+
+  /// No description provided for @availableSpecialties.
+  ///
+  /// In pt, this message translates to:
+  /// **'ESPECIALIDADES DISPONÍVEIS'**
+  String get availableSpecialties;
+
+  /// No description provided for @pleaseSelectAtLeastOneSpecialty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, selecione pelo menos uma especialidade para continuar.'**
+  String get pleaseSelectAtLeastOneSpecialty;
 }
 
 class _AppLocalizationsDelegate

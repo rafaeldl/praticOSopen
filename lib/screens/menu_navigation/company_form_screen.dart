@@ -9,6 +9,7 @@ import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class CompanyFormScreen extends StatefulWidget {
   const CompanyFormScreen({super.key});
@@ -24,6 +25,29 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
   bool _isLoading = true;
   Company? _company;
   Map<String, dynamic>? _selectedSegment;
+
+  String _currentLocaleTag(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    if (locale.languageCode == 'pt') return 'pt-BR';
+    if (locale.languageCode == 'es') return 'es-ES';
+    return 'en-US';
+  }
+
+  String _localizedValue(dynamic value, String locale) {
+    if (value == null) return '';
+    if (value is String) return value;
+    if (value is Map) {
+      return value[locale] as String? ??
+          value['pt-BR'] as String? ??
+          (value.values.isNotEmpty ? value.values.first.toString() : '');
+    }
+    return value.toString();
+  }
+
+  String _segmentDisplayName(Map<String, dynamic> segment) {
+    final locale = _currentLocaleTag(context);
+    return _localizedValue(segment['nameI18n'] ?? segment['name'], locale);
+  }
 
   @override
   void initState() {
@@ -115,9 +139,10 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
       showCupertinoModalPopup(
         context: context,
         builder: (BuildContext context) => CupertinoActionSheet(
-          title: const Text('Selecionar Segmento'),
-          message: const Text('Escolha o ramo de atuação da empresa'),
+          title: Text(context.l10n.selectSegment),
+          message: Text(context.l10n.chooseCompanySegment),
           actions: segments.map((segment) {
+            final segmentName = _segmentDisplayName(segment);
             return CupertinoActionSheetAction(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -127,7 +152,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     style: const TextStyle(fontSize: 20),
                   ),
                   const SizedBox(width: 8),
-                  Text(segment['name'] ?? 'Sem nome'),
+                  Text(segmentName.isEmpty ? context.l10n.noName : segmentName),
                 ],
               ),
               onPressed: () {
@@ -140,7 +165,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
             );
           }).toList(),
           cancelButton: CupertinoActionSheetAction(
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -154,10 +179,10 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Alterar Logo'),
+        title: Text(context.l10n.changeLogo),
         actions: <CupertinoActionSheetAction>[
           CupertinoActionSheetAction(
-            child: const Text('Tirar Foto'),
+            child: Text(context.l10n.takePhoto),
             onPressed: () async {
               Navigator.pop(context);
               final file = await _companyStore.photoService.takePhoto();
@@ -168,7 +193,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
             },
           ),
           CupertinoActionSheetAction(
-            child: const Text('Escolher da Galeria'),
+            child: Text(context.l10n.chooseFromGallery),
             onPressed: () async {
               Navigator.pop(context);
               final file = await _companyStore.photoService.pickImageFromGallery();
@@ -180,7 +205,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
+          child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -196,21 +221,21 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     }
 
     if (_company == null) {
-      return const CupertinoPageScaffold(
-        child: Center(child: Text("Empresa não encontrada")),
+      return CupertinoPageScaffold(
+        child: Center(child: Text(context.l10n.companyNotFound)),
       );
     }
 
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: const Text("Dados da Empresa"),
+        middle: Text(context.l10n.companyData),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isLoading ? null : _submit,
           child: _isLoading
               ? const CupertinoActivityIndicator()
-              : const Text("Salvar", style: TextStyle(fontWeight: FontWeight.bold)),
+              : Text(context.l10n.save, style: const TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
       child: SafeArea(
@@ -289,18 +314,18 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Nome"),
+                    prefix: Text(context.l10n.name),
                     initialValue: _company?.name,
-                    placeholder: "Nome da Empresa",
+                    placeholder: context.l10n.companyNamePlaceholder,
                     textCapitalization: TextCapitalization.words,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _company?.name = val,
-                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                    validator: (val) => val == null || val.isEmpty ? context.l10n.required : null,
                   ),
                   GestureDetector(
                     onTap: _pickSegment,
                     child: CupertinoFormRow(
-                      prefix: const Text("Segmento"),
+                      prefix: Text(context.l10n.segment),
                       child: Padding(
                         padding: const EdgeInsets.only(left: 16.0), // Respiro entre label e valor
                         child: Row(
@@ -308,7 +333,11 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                           children: [
                             Expanded(
                               child: Text(
-                                _selectedSegment?['name'] ?? "Selecionar",
+                                _selectedSegment != null
+                                    ? (_segmentDisplayName(_selectedSegment!).isEmpty
+                                        ? context.l10n.select
+                                        : _segmentDisplayName(_selectedSegment!))
+                                    : context.l10n.select,
                                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                                   color: _selectedSegment != null
                                       ? CupertinoColors.label.resolveFrom(context)
@@ -330,35 +359,35 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     ),
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Email"),
+                    prefix: Text(context.l10n.email),
                     initialValue: _company?.email,
-                    placeholder: "contato@empresa.com",
+                    placeholder: context.l10n.companyEmailPlaceholder,
                     keyboardType: TextInputType.emailAddress,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _company?.email = val,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Telefone"),
+                    prefix: Text(context.l10n.phone),
                     initialValue: _company?.phone,
-                    placeholder: "(00) 00000-0000",
+                    placeholder: context.l10n.phonePlaceholder,
                     keyboardType: TextInputType.phone,
                     textAlign: TextAlign.right,
                     inputFormatters: [TextInputMask(mask: ['(99) 9999-9999', '(99) 99999-9999'])],
                     onSaved: (val) => _company?.phone = val,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Endereço"),
+                    prefix: Text(context.l10n.address),
                     initialValue: _company?.address,
-                    placeholder: "Endereço completo",
+                    placeholder: context.l10n.fullAddress,
                     textCapitalization: TextCapitalization.sentences,
                     textAlign: TextAlign.right,
                     maxLines: 2,
                     onSaved: (val) => _company?.address = val,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: const Text("Site"),
+                    prefix: Text(context.l10n.website),
                     initialValue: _company?.site,
-                    placeholder: "www.empresa.com.br",
+                    placeholder: context.l10n.websitePlaceholder,
                     keyboardType: TextInputType.url,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _company?.site = val,

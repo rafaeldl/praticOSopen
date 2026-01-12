@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
@@ -196,12 +197,12 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro'),
+            title: Text(context.l10n.error),
             content: Text(e.toString()),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),
@@ -214,8 +215,8 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Quase lá!'),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(context.l10n.almostThere),
       ),
       child: SafeArea(
         child: DefaultTextStyle(
@@ -329,7 +330,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                         width: double.infinity,
                         child: CupertinoButton.filled(
                           onPressed: () => _saveCompany(runBootstrap: true),
-                          child: const Text('Sim, criar dados de exemplo'),
+                          child: Text(context.l10n.yesCreateSampleData),
                         ),
                       ),
 
