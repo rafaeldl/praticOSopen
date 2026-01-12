@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
@@ -12,6 +11,7 @@ import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/services/bootstrap_service.dart';
 
 class ConfirmBootstrapScreen extends StatefulWidget {
+  final AuthStore authStore;
   final String? companyId;
   final String companyName;
   final String address;
@@ -24,6 +24,7 @@ class ConfirmBootstrapScreen extends StatefulWidget {
 
   const ConfirmBootstrapScreen({
     super.key,
+    required this.authStore,
     this.companyId,
     required this.companyName,
     required this.address,
@@ -42,22 +43,6 @@ class ConfirmBootstrapScreen extends StatefulWidget {
 class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
   bool _isCreating = false;
   String _statusMessage = '';
-
-  /// Find AuthStore from the root context
-  /// This will work after navigation to '/' where Provider exists
-  Future<void> _reloadAuthStoreAfterNavigation() async {
-    // Wait for navigation to complete
-    await Future.delayed(const Duration(milliseconds: 100));
-
-    if (!mounted) return;
-
-    try {
-      final authStore = context.read<AuthStore>();
-      await authStore.reloadUserAndCompany();
-    } catch (e) {
-      debugPrint('⚠️  Could not reload AuthStore: $e');
-    }
-  }
 
   /// Obtém o locale atual do dispositivo
   String get _currentLocale {
@@ -196,12 +181,11 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
       }
 
       if (mounted) {
+        // Reload AuthStore BEFORE navigating to update companyAggr
+        await widget.authStore.reloadUserAndCompany();
+
         // Navigate to home
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-
-        // Reload authStore after navigation completes
-        // At this point we're in the home route which has Provider<AuthStore>
-        _reloadAuthStoreAfterNavigation();
       }
     } catch (e, stack) {
       debugPrint('❌ Error in _saveCompany: $e');

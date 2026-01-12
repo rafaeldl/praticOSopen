@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/onboarding/confirm_bootstrap_screen.dart';
 
 class SelectSubspecialtiesScreen extends StatefulWidget {
+  final AuthStore authStore;
   final String? companyId;
   final String companyName;
   final String address;
@@ -16,6 +18,7 @@ class SelectSubspecialtiesScreen extends StatefulWidget {
 
   const SelectSubspecialtiesScreen({
     super.key,
+    required this.authStore,
     this.companyId,
     required this.companyName,
     required this.address,
@@ -93,6 +96,7 @@ class _SelectSubspecialtiesScreenState
       context,
       CupertinoPageRoute(
         builder: (context) => ConfirmBootstrapScreen(
+          authStore: widget.authStore,
           companyId: widget.companyId,
           companyName: widget.companyName,
           address: widget.address,
