@@ -450,7 +450,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Observação (opcional)',
+                '${context.l10n.observation} (${context.l10n.optional})',
                 style: TextStyle(
                   fontSize: 13,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
