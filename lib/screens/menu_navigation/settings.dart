@@ -441,12 +441,12 @@ class _SettingsState extends State<Settings> {
               // Close confirmation dialog
               Navigator.pop(context);
 
-              // Save context for later use (in case widget gets unmounted)
-              final navigationContext = context;
+              // Save the navigator state before showing dialog
+              final navigatorState = Navigator.of(context);
 
               // Show loading indicator
               showCupertinoDialog(
-                context: navigationContext,
+                context: context,
                 barrierDismissible: false,
                 builder: (context) => const Center(
                   child: CupertinoActivityIndicator(radius: 20),
@@ -456,31 +456,49 @@ class _SettingsState extends State<Settings> {
               try {
                 await _authStore.deleteAccount();
 
-                // Close loading dialog - use Navigator.of with rootNavigator
-                Navigator.of(navigationContext, rootNavigator: true).pop();
+                // Close loading dialog - use try-catch to prevent crash if widget unmounted
+                try {
+                  navigatorState.pop();
+                } catch (e) {
+                  print('⚠️  Could not close loading dialog (widget may be unmounted): $e');
+                }
 
                 // Auth state change will automatically redirect to login
               } catch (e) {
-                // Close loading dialog - use Navigator.of with rootNavigator
-                Navigator.of(navigationContext, rootNavigator: true).pop();
+                // Close loading dialog - use try-catch to prevent crash if widget unmounted
+                try {
+                  navigatorState.pop();
+                } catch (popError) {
+                  print('⚠️  Could not close loading dialog (widget may be unmounted): $popError');
+                }
 
                 // Show error dialog
-                showCupertinoDialog(
-                  context: navigationContext,
-                  builder: (context) => CupertinoAlertDialog(
-                    title: const Text('Erro ao Excluir Conta'),
-                    content: Text(
-                      'Não foi possível excluir sua conta.\n\n'
-                      '${_formatErrorMessage(e.toString())}',
-                    ),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: const Text('OK'),
-                        onPressed: () => Navigator.pop(context),
+                try {
+                  showCupertinoDialog(
+                    context: context,
+                    builder: (context) => CupertinoAlertDialog(
+                      title: const Text('Erro ao Excluir Conta'),
+                      content: Text(
+                        'Não foi possível excluir sua conta.\n\n'
+                        '${_formatErrorMessage(e.toString())}',
                       ),
-                    ],
-                  ),
-                );
+                      actions: [
+                        CupertinoDialogAction(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            try {
+                              Navigator.pop(context);
+                            } catch (e) {
+                              print('⚠️  Could not close error dialog: $e');
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                } catch (dialogError) {
+                  print('⚠️  Could not show error dialog (widget may be unmounted): $dialogError');
+                }
               }
             },
             child: const Text('Excluir Permanentemente'),
