@@ -42,10 +42,23 @@ class CustomField {
 
   /// Cria a partir de JSON do Firestore
   factory CustomField.fromJson(Map<String, dynamic> json) {
+    // Normaliza chaves de labels: 'pt-BR' → 'pt_BR' para melhor compatibilidade
+    final rawLabels = json['labels'] as Map<String, dynamic>? ?? {};
+    final normalizedLabels = <String, String>{};
+
+    for (final entry in rawLabels.entries) {
+      final key = entry.key.toString().replaceAll('-', '_');
+      final value = entry.value.toString();
+      normalizedLabels[key] = value;
+
+      // Mantém original também para fallback
+      normalizedLabels[entry.key] = value;
+    }
+
     return CustomField(
       key: json['key'] ?? '',
       type: json['type'] ?? 'text',
-      labels: Map<String, String>.from(json['labels'] ?? {}),
+      labels: normalizedLabels,
       required: json['required'] ?? false,
       min: json['min'],
       max: json['max'],
@@ -84,9 +97,12 @@ class CustomField {
     };
   }
 
-  /// Obtém label no idioma especificado (com fallback para pt-BR)
+  /// Obtém label no idioma especificado (com fallback para pt_BR ou pt-BR)
   String getLabel(String locale) {
-    return labels[locale] ?? labels['pt-BR'] ?? key;
+    return labels[locale] ??
+           labels['pt_BR'] ??
+           labels['pt-BR'] ??
+           key;
   }
 
   /// Verifica se é apenas um label override
