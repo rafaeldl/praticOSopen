@@ -84,9 +84,42 @@ class CustomField {
     };
   }
 
-  /// Obtém label no idioma especificado (com fallback para pt-BR)
+  /// Obtém label no idioma especificado com fallback inteligente
+  ///
+  /// Tenta encontrar na seguinte ordem:
+  /// 1. Locale exata (pt-BR, en-US, es-ES, etc)
+  /// 2. Fallback por código de idioma (pt_* → pt-BR, en_* → en-US, es_* → es-ES)
+  /// 3. Fallback final para português brasileiro (pt-BR)
   String getLabel(String locale) {
-    return labels[locale] ?? labels['pt-BR'] ?? key;
+    // 1. Tenta locale exata
+    if (labels.containsKey(locale)) {
+      return labels[locale]!;
+    }
+
+    // 2. Fallback inteligente por código de idioma
+    final languageCode = locale.split('-')[0].split('_')[0];
+    String fallbackLocale;
+
+    switch (languageCode) {
+      case 'pt':
+        fallbackLocale = 'pt-BR';
+        break;
+      case 'en':
+        fallbackLocale = 'en-US';
+        break;
+      case 'es':
+        fallbackLocale = 'es-ES';
+        break;
+      default:
+        fallbackLocale = 'pt-BR'; // Fallback final
+    }
+
+    if (fallbackLocale != locale && labels.containsKey(fallbackLocale)) {
+      return labels[fallbackLocale]!;
+    }
+
+    // 3. Fallback final: português brasileiro
+    return labels['pt-BR'] ?? key;
   }
 
   /// Verifica se é apenas um label override
