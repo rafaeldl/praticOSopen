@@ -676,6 +676,36 @@ abstract class AppLocalizations {
   /// **'Desconto aplicado'**
   String get discountApplied;
 
+  /// No description provided for @register.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar'**
+  String get register;
+
+  /// No description provided for @history.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico'**
+  String get history;
+
+  /// No description provided for @valueMustBeGreaterThanZero.
+  ///
+  /// In pt, this message translates to:
+  /// **'O valor deve ser maior que zero'**
+  String get valueMustBeGreaterThanZero;
+
+  /// No description provided for @exampleCashPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Pagamento em dinheiro'**
+  String get exampleCashPayment;
+
+  /// No description provided for @exampleLoyaltyDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Desconto de fidelidade'**
+  String get exampleLoyaltyDiscount;
+
   /// No description provided for @noTransactionsRecorded.
   ///
   /// In pt, this message translates to:
@@ -2001,12 +2031,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Deseja realmente sair?'**
   String get logoutConfirm;
-
-  /// No description provided for @register.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cadastrar'**
-  String get register;
 
   /// No description provided for @signUp.
   ///

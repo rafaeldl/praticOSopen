@@ -298,6 +298,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get discountApplied => 'Descuento aplicado';
 
   @override
+  String get register => 'Registrar';
+
+  @override
+  String get history => 'Historial';
+
+  @override
+  String get valueMustBeGreaterThanZero => 'El valor debe ser mayor que cero';
+
+  @override
+  String get exampleCashPayment => 'Ej: Pago en efectivo';
+
+  @override
+  String get exampleLoyaltyDiscount => 'Ej: Descuento de fidelidad';
+
+  @override
   String get noTransactionsRecorded => 'No hay transacciones registradas';
 
   @override
@@ -968,9 +983,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get logoutConfirm => '¿Realmente desea cerrar sesión?';
-
-  @override
-  String get register => 'Registrarse';
 
   @override
   String get signUp => 'Crear Cuenta';

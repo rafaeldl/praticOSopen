@@ -314,7 +314,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     final isPayment = _selectedType == 0;
 
     return _buildGroupedSection(
-      header: 'REGISTRAR',
+      header: context.l10n.register.toUpperCase(),
       children: [
         // Segmented Control
         Padding(
@@ -409,7 +409,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               const SizedBox(height: 8),
               CupertinoTextField(
                 controller: _valueController,
-                placeholder: 'R\$ 0,00',
+                placeholder: FormatService().formatCurrency(0),
                 prefix: Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: Icon(
@@ -460,8 +460,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               CupertinoTextField(
                 controller: _descriptionController,
                 placeholder: isPayment
-                    ? 'Ex: Pagamento em dinheiro'
-                    : 'Ex: Desconto de fidelidade',
+                    ? context.l10n.exampleCashPayment
+                    : context.l10n.exampleLoyaltyDiscount,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 maxLines: 2,
@@ -532,7 +532,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
         if (transactions.isEmpty) {
           return _buildGroupedSection(
-            header: 'HISTÓRICO',
+            header: context.l10n.history.toUpperCase(),
             children: [
               Padding(
                 padding: const EdgeInsets.all(32),
@@ -566,7 +566,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         sortedTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         return _buildGroupedSection(
-          header: 'HISTÓRICO',
+          header: context.l10n.history.toUpperCase(),
           children: sortedTransactions.asMap().entries.map((entry) {
             final index = transactions.indexOf(entry.value);
             final transaction = entry.value;
@@ -634,7 +634,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          transaction.typeLabel,
+                          transaction.typeLabel(context.l10n),
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w500,
@@ -736,13 +736,29 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   // ============================================================
 
   double _parseValue(String value) {
-    final cleanValue = value
-        .replaceAll(RegExp(r'R\$'), '')
-        .replaceAll(RegExp(r'BRL'), '')
-        .replaceAll(RegExp(r'\.'), '')
-        .replaceAll(RegExp(r','), '.')
-        .trim();
-    return double.tryParse(cleanValue) ?? 0;
+    if (value.isEmpty) return 0;
+
+    try {
+      // Tenta fazer parse usando o formato de moeda do locale atual
+      final formatService = FormatService();
+      final currencyFormat = formatService.currencyFormat;
+
+      // Remove espaços extras
+      final cleanValue = value.trim();
+
+      // Tenta parsear usando o NumberFormat do locale
+      final parsed = currencyFormat.parse(cleanValue);
+      return parsed.toDouble();
+    } catch (e) {
+      // Fallback: tenta remover símbolos comuns e parsear
+      final cleanValue = value
+          .replaceAll(RegExp(r'[R\$€£¥\s]'), '') // Remove símbolos de moeda e espaços
+          .replaceAll(RegExp(r'\.(?=.*,)'), '') // Remove pontos antes de vírgula (pt-BR)
+          .replaceAll(RegExp(r',(?=.*\.)'), '') // Remove vírgulas antes de ponto (en-US)
+          .replaceAll(',', '.') // Normaliza decimal para ponto
+          .trim();
+      return double.tryParse(cleanValue) ?? 0;
+    }
   }
 
   String? _validateValue(String? value) {
@@ -752,7 +768,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
     final valueDouble = _parseValue(value);
     if (valueDouble <= 0) {
-      return 'O valor deve ser maior que zero';
+      return context.l10n.valueMustBeGreaterThanZero;
     }
 
     if (_store != null && valueDouble > _store!.remainingBalance) {
@@ -839,10 +855,10 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: Text('${context.l10n.remove} ${transaction.typeLabel}'),
+        title: Text('${context.l10n.remove} ${transaction.typeLabel(context.l10n)}'),
         content: Text(
           context.l10n.confirmRemoveTransaction(
-            transaction.typeLabel.toLowerCase(),
+            transaction.typeLabel(context.l10n).toLowerCase(),
             FormatService().formatCurrency(transaction.amount),
           ),
         ),
@@ -900,7 +916,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),
         ],

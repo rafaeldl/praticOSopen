@@ -297,6 +297,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discountApplied => 'Discount applied';
 
   @override
+  String get register => 'Register';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get valueMustBeGreaterThanZero => 'Value must be greater than zero';
+
+  @override
+  String get exampleCashPayment => 'Ex: Cash payment';
+
+  @override
+  String get exampleLoyaltyDiscount => 'Ex: Loyalty discount';
+
+  @override
   String get noTransactionsRecorded => 'No transactions recorded';
 
   @override
@@ -967,9 +982,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get logoutConfirm => 'Do you really want to sign out?';
-
-  @override
-  String get register => 'Register';
 
   @override
   String get signUp => 'Sign Up';
