@@ -77,6 +77,16 @@ mixin _$AuthStore on _AuthStore, Store {
     return _$signOutGoogleAsyncAction.run(() => super.signOutGoogle());
   }
 
+  late final _$reauthenticateAsyncAction = AsyncAction(
+    '_AuthStore.reauthenticate',
+    context: context,
+  );
+
+  @override
+  Future<void> reauthenticate() {
+    return _$reauthenticateAsyncAction.run(() => super.reauthenticate());
+  }
+
   late final _$deleteAccountAsyncAction = AsyncAction(
     '_AuthStore.deleteAccount',
     context: context,
