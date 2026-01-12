@@ -74,7 +74,10 @@ class SegmentConfigProvider extends ChangeNotifier {
   }
 
   /// Inicializa com um segmento específico
-  Future<void> initialize(String segmentId, {String locale = 'pt-BR'}) async {
+  ///
+  /// NOTE: Não controla locale aqui - isso é feito automaticamente pelo
+  /// MaterialApp builder via injectL10n() quando AppLocalizations muda
+  Future<void> initialize(String segmentId) async {
     if (_service.currentSegmentId == segmentId && _service.isLoaded) {
       return; // Já carregado
     }
@@ -84,7 +87,8 @@ class SegmentConfigProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _service.setLocale(locale);
+      // Apenas carrega o segmento, não força locale
+      // O locale será configurado automaticamente por injectL10n()
       await _service.load(segmentId);
       _isLoading = false;
       notifyListeners();
@@ -114,13 +118,8 @@ class SegmentConfigProvider extends ChangeNotifier {
     }
   }
 
-  /// Troca o idioma e recarrega os labels (se um segmento estiver carregado)
-  Future<void> setLocale(String locale) async {
-    _service.setLocale(locale);
-    // setLocale() já recarrega o cache automaticamente
-    // Apenas notifica listeners do provider
-    notifyListeners();
-  }
+  // NOTE: setLocale() removido - locale é controlado automaticamente
+  // via injectL10n() quando MaterialApp rebuilds com novo AppLocalizations
 
   // ════════════════════════════════════════════════════════════
   // LABELS

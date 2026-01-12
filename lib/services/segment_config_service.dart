@@ -54,10 +54,19 @@ class SegmentConfigService {
   void updateL10n(AppLocalizations l10n) {
     _l10n = l10n;
 
-    // Reconstruir cache se segmento está carregado
-    if (_segmentId != null) {
-      _labelCache.clear();
-      load(_segmentId!).ignore();
+    // Extrai locale do AppLocalizations (ex: 'en', 'pt', 'es')
+    // O getLabel() já faz fallback para locale completa (en → en-US)
+    final newLocale = l10n.localeName;
+
+    // Se locale mudou, atualiza e recarrega cache
+    if (_locale != newLocale) {
+      _locale = newLocale;
+
+      // Reconstruir cache se segmento está carregado
+      if (_segmentId != null) {
+        _labelCache.clear();
+        load(_segmentId!).ignore();
+      }
     }
   }
 

@@ -88,7 +88,7 @@ class CustomField {
   ///
   /// Tenta encontrar na seguinte ordem:
   /// 1. Locale exata (pt-BR, en-US, es-ES, etc)
-  /// 2. Fallback por código de idioma (pt_* → pt-BR, en_* → en-US, es_* → es-ES)
+  /// 2. Fallback por código de idioma (pt/pt_PT → pt-BR, en/en_GB → en-US, es/es_MX → es-ES)
   /// 3. Fallback final para português brasileiro (pt-BR)
   String getLabel(String locale) {
     // 1. Tenta locale exata
@@ -98,8 +98,8 @@ class CustomField {
 
     // 2. Fallback inteligente por código de idioma
     final languageCode = locale.split('-')[0].split('_')[0];
-    String fallbackLocale;
 
+    String fallbackLocale;
     switch (languageCode) {
       case 'pt':
         fallbackLocale = 'pt-BR';
