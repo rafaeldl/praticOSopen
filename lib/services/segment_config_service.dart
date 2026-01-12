@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/custom_field.dart';
 import '../l10n/app_localizations.dart';
+import 'format_service.dart';
 
 /// Serviço que carrega e gerencia a configuração de um segmento
 /// (labels customizados e campos extras)
@@ -35,27 +37,84 @@ class SegmentConfigService {
     _l10n = l10n;
   }
 
-  /// Define o idioma atual
+  /// Define o idioma atual e recarrega cache com novas traduções
   void setLocale(String locale) {
+    if (_locale == locale) return; // Sem mudança, não precisa fazer nada
+
     _locale = locale;
+
+    // Sincroniza FormatService com novo locale
+    FormatService().setLocale(locale);
+
+    // Recarrega customFields com nova locale
+    if (_segmentId != null) {
+      _labelCache.clear();
+      load(_segmentId!).ignore();
+    }
+  }
+
+  /// Atualiza AppLocalizations quando o idioma muda
+  /// Chamado sempre que a locale muda no app
+  void updateL10n(AppLocalizations l10n) {
+    _l10n = l10n;
+
+    // Extrai locale do AppLocalizations (ex: 'en', 'pt', 'es')
+    // O getLabel() já faz fallback para locale completa (en → en-US)
+    final newLocale = l10n.localeName;
+
+    // Se locale mudou, atualiza e recarrega cache
+    if (_locale != newLocale) {
+      _locale = newLocale;
+
+      // Sincroniza FormatService com novo locale
+      FormatService().setLocale(newLocale);
+
+      // Reconstruir cache se segmento está carregado
+      if (_segmentId != null) {
+        _labelCache.clear();
+        load(_segmentId!).ignore();
+      }
+    }
   }
 
   /// Carrega a configuração de um segmento do Firestore
+  /// Também carrega labels globais e permite override por segmento
   Future<void> load(String segmentId) async {
     if (_segmentId == segmentId) {
       return; // Já carregado
     }
 
     try {
+      // Limpa cache anterior
+      _labelCache.clear();
+      _customFields.clear();
+
+      // 1. Carrega labels globais (se segmentId != 'global')
+      if (segmentId != 'global') {
+        try {
+          final globalDoc = await _db.collection('segments').doc('global').get();
+          if (globalDoc.exists) {
+            final globalCustomFields = globalDoc.data()!['customFields'] as List? ?? [];
+            for (final json in globalCustomFields) {
+              final field = CustomField.fromJson(json as Map<String, dynamic>);
+              if (field.isLabel) {
+                _labelCache[field.key] = field.getLabel(_locale);
+              }
+            }
+          }
+        } catch (e) {
+          // Global segment não existe ou erro ao carregar
+          // Continua sem errar, labels específicas do segmento serão usadas
+          debugPrint('⚠️  Aviso ao carregar global segment: $e');
+        }
+      }
+
+      // 2. Carrega segmento específico (pode sobrescrever labels globais)
       final doc = await _db.collection('segments').doc(segmentId).get();
 
       if (!doc.exists) {
         throw Exception('Segmento não encontrado: $segmentId');
       }
-
-      // Limpa cache anterior
-      _labelCache.clear();
-      _customFields.clear();
 
       final data = doc.data()!;
       final customFieldsJson = data['customFields'] as List? ?? [];
@@ -65,7 +124,7 @@ class SegmentConfigService {
         final field = CustomField.fromJson(json as Map<String, dynamic>);
 
         if (field.isLabel) {
-          // É um label override - armazena no cache
+          // É um label override - armazena no cache (sobrescreve global se houver)
           _labelCache[field.key] = field.getLabel(_locale);
         } else {
           // É um campo customizado real
@@ -298,4 +357,5 @@ class SegmentConfigService {
   bool get isLoaded => _segmentId != null;
   String? get currentSegmentId => _segmentId;
   String get currentLocale => _locale;
+  AppLocalizations? get currentL10n => _l10n;
 }

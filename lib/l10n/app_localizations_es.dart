@@ -267,6 +267,60 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paymentDate => 'Fecha de Pago';
 
   @override
+  String get payTotalAmount => 'Pagar importe total';
+
+  @override
+  String get registerPayment => 'Registrar Pago';
+
+  @override
+  String get applyDiscount => 'Aplicar Descuento';
+
+  @override
+  String get paymentAmount => 'Importe del pago';
+
+  @override
+  String get discountAmount => 'Importe del descuento';
+
+  @override
+  String get fillValue => 'Complete el valor';
+
+  @override
+  String get paymentCannotExceedBalance => 'El pago no puede exceder el saldo';
+
+  @override
+  String get discountCannotExceedBalance =>
+      'El descuento no puede exceder el saldo';
+
+  @override
+  String get paymentRegistered => 'Pago registrado';
+
+  @override
+  String get discountApplied => 'Descuento aplicado';
+
+  @override
+  String get register => 'Registrar';
+
+  @override
+  String get history => 'Historial';
+
+  @override
+  String get valueMustBeGreaterThanZero => 'El valor debe ser mayor que cero';
+
+  @override
+  String get exampleCashPayment => 'Ej: Pago en efectivo';
+
+  @override
+  String get exampleLoyaltyDiscount => 'Ej: Descuento de fidelidad';
+
+  @override
+  String get noTransactionsRecorded => 'No hay transacciones registradas';
+
+  @override
+  String confirmRemoveTransaction(String type, String amount) {
+    return '¿Desea eliminar este $type de $amount?';
+  }
+
+  @override
   String get requiredField => 'Campo obligatorio';
 
   @override
@@ -931,9 +985,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get logoutConfirm => '¿Realmente desea cerrar sesión?';
 
   @override
-  String get register => 'Registrarse';
-
-  @override
   String get signUp => 'Crear Cuenta';
 
   @override
@@ -1450,9 +1501,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get companyData => 'Datos de la Empresa';
 
   @override
-  String get procedures => 'Procedimientos';
-
-  @override
   String get interface_ => 'Interfaz';
 
   @override
@@ -1520,6 +1568,29 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get networkError =>
       'Error de conexión. Verifique su internet e intente de nuevo.';
+
+  @override
+  String get reauthenticationRequired => 'Re-autenticación Requerida';
+
+  @override
+  String get pleaseSignInAgainToDelete =>
+      'Por razones de seguridad, necesita iniciar sesión nuevamente antes de eliminar su cuenta.';
+
+  @override
+  String get signInAgain => 'Iniciar Sesión Nuevamente';
+
+  @override
+  String get authenticated => 'Autenticado';
+
+  @override
+  String get nowDeletingAccount =>
+      'Ahora puede proceder con la eliminación de la cuenta.';
+
+  @override
+  String get reauthenticationFailed => 'Falló la Re-autenticación';
+
+  @override
+  String get couldNotReauthenticate => 'No se pudo autenticar nuevamente.';
 
   @override
   String get errorLoadingData => 'Error al cargar datos';
@@ -1957,6 +2028,50 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get userCanAttachPhotos =>
       'El usuario puede adjuntar fotos a este elemento';
+
+  @override
+  String get procedures => 'Procedimientos';
+
+  @override
+  String get searchProcedure => 'Buscar procedimiento';
+
+  @override
+  String get myProcedures => 'Mis Procedimientos';
+
+  @override
+  String get globalProcedures => 'Procedimientos Globales';
+
+  @override
+  String get noProceduresRegistered => 'No hay procedimientos registrados';
+
+  @override
+  String get noProceduresAvailable => 'No hay procedimientos disponibles';
+
+  @override
+  String get tapPlusToCreateFirst =>
+      'Toque + para crear su primer procedimiento.';
+
+  @override
+  String get fromCompany => 'De la Empresa';
+
+  @override
+  String get global => 'Globales';
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'elementos',
+      one: 'elemento',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String importConfirmationMessage(String title) {
+    return '¿Desea importar el procedimiento \"$title\" a su empresa?\n\nPodrá editarlo después de la importación.';
+  }
 
   @override
   String get errorLoadingProcedures => 'Error al cargar procedimientos';

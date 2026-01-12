@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:praticos/providers/segment_config_provider.dart';
 
 part 'locale_store.g.dart';
 
@@ -43,8 +42,9 @@ abstract class _LocaleStore with Store {
       currentLocale = _detectSystemLocale();
     }
 
-    // Sync with SegmentConfigProvider
-    SegmentConfigProvider.instance.setLocale(currentLocaleCode);
+    // NOTE: Não chamar SegmentConfigProvider.setLocale() aqui
+    // O MaterialApp builder vai chamar injectL10n() automaticamente
+    // quando reconstruir com o novo AppLocalizations
 
     isLoaded = true;
   }
@@ -57,8 +57,9 @@ abstract class _LocaleStore with Store {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_localeKey, localeCode);
 
-      // Sync with SegmentConfigProvider
-      SegmentConfigProvider.instance.setLocale(localeCode);
+      // NOTE: Não chamar SegmentConfigProvider.setLocale() aqui
+      // O MaterialApp vai rebuildar automaticamente com novo Locale,
+      // e injectL10n() será chamado com novo AppLocalizations
     }
   }
 

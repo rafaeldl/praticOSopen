@@ -464,6 +464,13 @@ class _SettingsState extends State<Settings> {
                   print('⚠️  Could not close loading dialog (widget may be unmounted): $popError');
                 }
 
+                // Check if re-authentication is required
+                if (e.toString().contains('REQUIRES_RECENT_LOGIN')) {
+                  print('🔐 Re-authentication required, prompting user...');
+                  _showReauthenticationDialog(context);
+                  return;
+                }
+
                 // Show error dialog
                 try {
                   showCupertinoDialog(
@@ -494,6 +501,86 @@ class _SettingsState extends State<Settings> {
               }
             },
             child: Text(context.l10n.permanentlyDelete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReauthenticationDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.reauthenticationRequired),
+        content: Text(context.l10n.pleaseSignInAgainToDelete),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+
+              // Show loading indicator
+              showCupertinoDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (loadingContext) => const Center(
+                  child: CupertinoActivityIndicator(radius: 20),
+                ),
+              );
+
+              try {
+                // Re-authenticate the user
+                await _authStore.reauthenticate();
+
+                // Close loading dialog
+                Navigator.pop(context);
+
+                // Show success message and retry deletion
+                showCupertinoDialog(
+                  context: context,
+                  builder: (successContext) => CupertinoAlertDialog(
+                    title: Text(context.l10n.authenticated),
+                    content: Text(context.l10n.nowDeletingAccount),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: Text(context.l10n.ok),
+                        onPressed: () async {
+                          Navigator.pop(successContext);
+                          // Retry deletion after re-authentication
+                          _showDeleteAccountFinalConfirmation(context);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              } catch (e) {
+                // Close loading dialog
+                Navigator.pop(context);
+
+                // Show error
+                showCupertinoDialog(
+                  context: context,
+                  builder: (errorContext) => CupertinoAlertDialog(
+                    title: Text(context.l10n.reauthenticationFailed),
+                    content: Text(
+                      '${context.l10n.couldNotReauthenticate}\n\n'
+                      '${_formatErrorMessage(context, e.toString())}',
+                    ),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: Text(context.l10n.ok),
+                        onPressed: () => Navigator.pop(errorContext),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            child: Text(context.l10n.signInAgain),
           ),
         ],
       ),

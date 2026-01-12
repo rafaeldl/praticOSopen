@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:intl/intl.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
@@ -28,10 +28,8 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   bool _initialized = false;
   final AuthorizationService _authService = AuthorizationService.instance;
 
-  final NumberFormat numberFormat = NumberFormat.currency(
-    locale: 'pt-BR',
-    symbol: 'R\$',
-  );
+  final format = FormatService();
+  late final numberFormat = format.currencyFormat;
 
   bool get _isEditing => orderServiceIndex != null;
 
@@ -79,7 +77,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
 
   String _convertToCurrency(double? total) {
     if (total == null) return '';
-    return numberFormat.format(total);
+    return format.formatCurrency(total);
   }
 
   @override

@@ -91,6 +91,36 @@
   "installment": "Installment",
   "dueDate": "Due Date",
   "paymentDate": "Payment Date",
+  "payTotalAmount": "Pay total amount",
+  "registerPayment": "Register Payment",
+  "applyDiscount": "Apply Discount",
+  "paymentAmount": "Payment amount",
+  "discountAmount": "Discount amount",
+  "fillValue": "Fill in the value",
+  "paymentCannotExceedBalance": "Payment cannot exceed balance",
+  "discountCannotExceedBalance": "Discount cannot exceed balance",
+  "paymentRegistered": "Payment registered",
+  "discountApplied": "Discount applied",
+  "register": "Register",
+  "history": "History",
+  "valueMustBeGreaterThanZero": "Value must be greater than zero",
+  "exampleCashPayment": "Ex: Cash payment",
+  "exampleLoyaltyDiscount": "Ex: Loyalty discount",
+  "noTransactionsRecorded": "No transactions recorded",
+  "confirmRemoveTransaction": "Do you want to remove this {type} of {amount}?",
+  "@confirmRemoveTransaction": {
+    "description": "Confirmation message to remove transaction",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "payment"
+      },
+      "amount": {
+        "type": "String",
+        "example": "$100.00"
+      }
+    }
+  },
 
   "requiredField": "Required field",
   "invalidEmail": "Invalid email",
@@ -323,7 +353,6 @@
   "login": "Sign In",
   "logout": "Sign Out",
   "logoutConfirm": "Do you really want to sign out?",
-  "register": "Register",
   "signUp": "Sign Up",
   "signIn": "Sign In",
   "forgotPassword": "Forgot Password",
@@ -502,7 +531,6 @@
   "switchBetweenOrganizations": "Switch between organizations",
   "management": "Management",
   "companyData": "Company Data",
-  "procedures": "Procedures",
   "interface_": "Interface",
   "nightMode": "Night Mode",
   "account": "Account",
@@ -524,6 +552,13 @@
   "requiresRecentLogin": "For security, Firebase requires a recent login before deleting the account.\n\nPlease:\n1. Log out of your account\n2. Log in again\n3. Try to delete the account immediately after logging in",
   "noPermissionDelete": "You don't have permission to delete your account. Please try again later.",
   "networkError": "Connection error. Check your internet and try again.",
+  "reauthenticationRequired": "Re-authentication Required",
+  "pleaseSignInAgainToDelete": "For security reasons, you need to sign in again before deleting your account.",
+  "signInAgain": "Sign In Again",
+  "authenticated": "Authenticated",
+  "nowDeletingAccount": "You can now proceed with account deletion.",
+  "reauthenticationFailed": "Re-authentication Failed",
+  "couldNotReauthenticate": "Could not re-authenticate.",
 
   "errorLoadingData": "Error loading data",
   "tapToAddFirst": "Tap + to add",
@@ -699,6 +734,34 @@
   "newOrder": "New Order",
 
   "procedures": "Procedures",
+  "searchProcedure": "Search procedure",
+  "myProcedures": "My Procedures",
+  "globalProcedures": "Global Procedures",
+  "noProceduresRegistered": "No procedures registered",
+  "noProceduresAvailable": "No procedures available",
+  "tapPlusToCreateFirst": "Tap + to create your first procedure.",
+  "fromCompany": "From Company",
+  "global": "Global",
+  "itemCount": "{count} {count, plural, =1{item} other{items}}",
+  "@itemCount": {
+    "description": "Item count with correct plural",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "importConfirmationMessage": "Do you want to import the procedure \"{title}\" to your company?\n\nYou will be able to edit it after import.",
+  "@importConfirmationMessage": {
+    "description": "Procedure import confirmation message",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Vehicle Inspection"
+      }
+    }
+  },
   "errorLoadingProcedures": "Error loading procedures",
   "tryAgain": "Try again",
   "importProcedure": "Import Procedure",

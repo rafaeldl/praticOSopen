@@ -94,6 +94,36 @@
   "installment": "Parcela",
   "dueDate": "Vencimento",
   "paymentDate": "Data do Pagamento",
+  "payTotalAmount": "Pagar valor total",
+  "registerPayment": "Registrar Pagamento",
+  "applyDiscount": "Aplicar Desconto",
+  "paymentAmount": "Valor do pagamento",
+  "discountAmount": "Valor do desconto",
+  "fillValue": "Preencha o valor",
+  "paymentCannotExceedBalance": "Pagamento não pode ser maior que o saldo",
+  "discountCannotExceedBalance": "Desconto não pode ser maior que o saldo",
+  "paymentRegistered": "Pagamento registrado",
+  "discountApplied": "Desconto aplicado",
+  "register": "Registrar",
+  "history": "Histórico",
+  "valueMustBeGreaterThanZero": "O valor deve ser maior que zero",
+  "exampleCashPayment": "Ex: Pagamento em dinheiro",
+  "exampleLoyaltyDiscount": "Ex: Desconto de fidelidade",
+  "noTransactionsRecorded": "Nenhuma transação registrada",
+  "confirmRemoveTransaction": "Deseja remover este {type} de {amount}?",
+  "@confirmRemoveTransaction": {
+    "description": "Mensagem de confirmação para remover transação",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "pagamento"
+      },
+      "amount": {
+        "type": "String",
+        "example": "R$ 100,00"
+      }
+    }
+  },
 
   "requiredField": "Campo obrigatório",
   "invalidEmail": "E-mail inválido",
@@ -347,7 +377,6 @@
   "login": "Entrar",
   "logout": "Sair",
   "logoutConfirm": "Deseja realmente sair?",
-  "register": "Cadastrar",
   "signUp": "Criar Conta",
   "signIn": "Entrar",
   "forgotPassword": "Esqueci a senha",
@@ -534,7 +563,6 @@
   "switchBetweenOrganizations": "Alternar entre organizações",
   "management": "Gerenciamento",
   "companyData": "Dados da Empresa",
-  "procedures": "Procedimentos",
   "interface_": "Interface",
   "nightMode": "Modo Noturno",
   "account": "Conta",
@@ -556,6 +584,13 @@
   "requiresRecentLogin": "Por segurança, o Firebase exige login recente antes de deletar a conta.\n\nPor favor:\n1. Faça logout da sua conta\n2. Faça login novamente\n3. Tente deletar a conta imediatamente após o login",
   "noPermissionDelete": "Você não tem permissão para deletar sua conta. Tente novamente mais tarde.",
   "networkError": "Erro de conexão. Verifique sua internet e tente novamente.",
+  "reauthenticationRequired": "Re-autenticação Necessária",
+  "pleaseSignInAgainToDelete": "Por motivos de segurança, você precisa fazer login novamente antes de deletar sua conta.",
+  "signInAgain": "Entrar Novamente",
+  "authenticated": "Autenticado",
+  "nowDeletingAccount": "Agora você pode prosseguir com a exclusão da conta.",
+  "reauthenticationFailed": "Falha na Re-autenticação",
+  "couldNotReauthenticate": "Não foi possível autenticar novamente.",
 
   "errorLoadingData": "Erro ao carregar dados",
   "tapToAddFirst": "Toque em + para adicionar",
@@ -745,6 +780,34 @@
   "newOrder": "Nova OS",
 
   "procedures": "Procedimentos",
+  "searchProcedure": "Buscar procedimento",
+  "myProcedures": "Meus Procedimentos",
+  "globalProcedures": "Procedimentos Globais",
+  "noProceduresRegistered": "Nenhum procedimento cadastrado",
+  "noProceduresAvailable": "Nenhum procedimento disponível",
+  "tapPlusToCreateFirst": "Toque em + para criar seu primeiro procedimento.",
+  "fromCompany": "Da Empresa",
+  "global": "Globais",
+  "itemCount": "{count} {count, plural, =1{item} other{itens}}",
+  "@itemCount": {
+    "description": "Contagem de itens com plural correto",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "importConfirmationMessage": "Deseja importar o procedimento \"{title}\" para sua empresa?\n\nVocê poderá editá-lo após a importação.",
+  "@importConfirmationMessage": {
+    "description": "Mensagem de confirmação de importação de procedimento",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Vistoria de Veículo"
+      }
+    }
+  },
   "errorLoadingProcedures": "Erro ao carregar procedimentos",
   "tryAgain": "Tentar novamente",
   "importProcedure": "Importar Procedimento",

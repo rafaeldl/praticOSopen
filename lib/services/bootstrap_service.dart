@@ -99,6 +99,67 @@ class BootstrapService {
     }
   }
 
+  bool _shouldIncludeForm(List<String> formSubspecialties,
+      List<String> selectedSubspecialties) {
+    if (formSubspecialties.isEmpty) {
+      return true;
+    }
+    if (selectedSubspecialties.isEmpty) {
+      return false;
+    }
+    return formSubspecialties
+        .any((subspecialty) => selectedSubspecialties.contains(subspecialty));
+  }
+
+  List<String> _extractStringList(dynamic value) {
+    if (value is List) {
+      return value.whereType<String>().toList();
+    }
+    return [];
+  }
+
+  Future<void> syncCompanyFormsFromSegment({
+    required String companyId,
+    required String segmentId,
+    required List<String> subspecialties,
+    required UserAggr userAggr,
+  }) async {
+    final segmentSnapshot = await _db
+        .collection('segments')
+        .doc(segmentId)
+        .collection('forms')
+        .get();
+
+    if (segmentSnapshot.docs.isEmpty) return;
+
+    final companyFormsRef =
+        _db.collection('companies').doc(companyId).collection('forms');
+    final existingSnapshot = await companyFormsRef.get();
+    final existingIds = existingSnapshot.docs.map((doc) => doc.id).toSet();
+
+    for (final doc in segmentSnapshot.docs) {
+      final data = Map<String, dynamic>.from(doc.data());
+      final isActive = data['isActive'] != false;
+      if (!isActive) continue;
+
+      final formSubspecialties = _extractStringList(data['subspecialties']);
+      if (!_shouldIncludeForm(formSubspecialties, subspecialties)) {
+        continue;
+      }
+
+      final formData = Map<String, dynamic>.from(data)
+        ..['updatedAt'] = FieldValue.serverTimestamp()
+        ..['updatedBy'] = userAggr.toJson();
+
+      if (!existingIds.contains(doc.id)) {
+        formData['createdAt'] = FieldValue.serverTimestamp();
+        formData['createdBy'] = userAggr.toJson();
+      }
+
+      await companyFormsRef.doc(doc.id).set(formData, SetOptions(merge: true));
+    }
+  }
+
   /// Faz merge dos dados de bootstrap de múltiplas subspecialties
   Future<Map<String, dynamic>> _mergeBootstrapData(
     String segmentId,

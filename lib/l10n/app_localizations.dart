@@ -616,6 +616,108 @@ abstract class AppLocalizations {
   /// **'Data do Pagamento'**
   String get paymentDate;
 
+  /// No description provided for @payTotalAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagar valor total'**
+  String get payTotalAmount;
+
+  /// No description provided for @registerPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar Pagamento'**
+  String get registerPayment;
+
+  /// No description provided for @applyDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aplicar Desconto'**
+  String get applyDiscount;
+
+  /// No description provided for @paymentAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor do pagamento'**
+  String get paymentAmount;
+
+  /// No description provided for @discountAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor do desconto'**
+  String get discountAmount;
+
+  /// No description provided for @fillValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencha o valor'**
+  String get fillValue;
+
+  /// No description provided for @paymentCannotExceedBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento não pode ser maior que o saldo'**
+  String get paymentCannotExceedBalance;
+
+  /// No description provided for @discountCannotExceedBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto não pode ser maior que o saldo'**
+  String get discountCannotExceedBalance;
+
+  /// No description provided for @paymentRegistered.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento registrado'**
+  String get paymentRegistered;
+
+  /// No description provided for @discountApplied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto aplicado'**
+  String get discountApplied;
+
+  /// No description provided for @register.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar'**
+  String get register;
+
+  /// No description provided for @history.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico'**
+  String get history;
+
+  /// No description provided for @valueMustBeGreaterThanZero.
+  ///
+  /// In pt, this message translates to:
+  /// **'O valor deve ser maior que zero'**
+  String get valueMustBeGreaterThanZero;
+
+  /// No description provided for @exampleCashPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Pagamento em dinheiro'**
+  String get exampleCashPayment;
+
+  /// No description provided for @exampleLoyaltyDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Desconto de fidelidade'**
+  String get exampleLoyaltyDiscount;
+
+  /// No description provided for @noTransactionsRecorded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma transação registrada'**
+  String get noTransactionsRecorded;
+
+  /// Mensagem de confirmação para remover transação
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja remover este {type} de {amount}?'**
+  String confirmRemoveTransaction(String type, String amount);
+
   /// No description provided for @requiredField.
   ///
   /// In pt, this message translates to:
@@ -1930,12 +2032,6 @@ abstract class AppLocalizations {
   /// **'Deseja realmente sair?'**
   String get logoutConfirm;
 
-  /// No description provided for @register.
-  ///
-  /// In pt, this message translates to:
-  /// **'Cadastrar'**
-  String get register;
-
   /// No description provided for @signUp.
   ///
   /// In pt, this message translates to:
@@ -2956,12 +3052,6 @@ abstract class AppLocalizations {
   /// **'Dados da Empresa'**
   String get companyData;
 
-  /// No description provided for @procedures.
-  ///
-  /// In pt, this message translates to:
-  /// **'Procedimentos'**
-  String get procedures;
-
   /// No description provided for @interface_.
   ///
   /// In pt, this message translates to:
@@ -3087,6 +3177,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Erro de conexão. Verifique sua internet e tente novamente.'**
   String get networkError;
+
+  /// No description provided for @reauthenticationRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Re-autenticação Necessária'**
+  String get reauthenticationRequired;
+
+  /// No description provided for @pleaseSignInAgainToDelete.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por motivos de segurança, você precisa fazer login novamente antes de deletar sua conta.'**
+  String get pleaseSignInAgainToDelete;
+
+  /// No description provided for @signInAgain.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar Novamente'**
+  String get signInAgain;
+
+  /// No description provided for @authenticated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Autenticado'**
+  String get authenticated;
+
+  /// No description provided for @nowDeletingAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora você pode prosseguir com a exclusão da conta.'**
+  String get nowDeletingAccount;
+
+  /// No description provided for @reauthenticationFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Falha na Re-autenticação'**
+  String get reauthenticationFailed;
+
+  /// No description provided for @couldNotReauthenticate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível autenticar novamente.'**
+  String get couldNotReauthenticate;
 
   /// No description provided for @errorLoadingData.
   ///
@@ -3915,6 +4047,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Usuário pode anexar fotos a este item'**
   String get userCanAttachPhotos;
+
+  /// No description provided for @procedures.
+  ///
+  /// In pt, this message translates to:
+  /// **'Procedimentos'**
+  String get procedures;
+
+  /// No description provided for @searchProcedure.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar procedimento'**
+  String get searchProcedure;
+
+  /// No description provided for @myProcedures.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meus Procedimentos'**
+  String get myProcedures;
+
+  /// No description provided for @globalProcedures.
+  ///
+  /// In pt, this message translates to:
+  /// **'Procedimentos Globais'**
+  String get globalProcedures;
+
+  /// No description provided for @noProceduresRegistered.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum procedimento cadastrado'**
+  String get noProceduresRegistered;
+
+  /// No description provided for @noProceduresAvailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum procedimento disponível'**
+  String get noProceduresAvailable;
+
+  /// No description provided for @tapPlusToCreateFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque em + para criar seu primeiro procedimento.'**
+  String get tapPlusToCreateFirst;
+
+  /// No description provided for @fromCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Da Empresa'**
+  String get fromCompany;
+
+  /// No description provided for @global.
+  ///
+  /// In pt, this message translates to:
+  /// **'Globais'**
+  String get global;
+
+  /// Contagem de itens com plural correto
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} {count, plural, =1{item} other{itens}}'**
+  String itemCount(int count);
+
+  /// Mensagem de confirmação de importação de procedimento
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja importar o procedimento \"{title}\" para sua empresa?\n\nVocê poderá editá-lo após a importação.'**
+  String importConfirmationMessage(String title);
 
   /// No description provided for @errorLoadingProcedures.
   ///

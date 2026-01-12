@@ -151,6 +151,150 @@ Arquitetura para checklists, vistorias e perguntas personalizadas. Detalhes em `
 
 ---
 
+## Internacionalização (i18n)
+
+O sistema implementa i18n completo para suportar múltiplos idiomas com detecção automática.
+
+**Idiomas suportados:** Português (pt-BR), Inglês (en-US), Espanhol (es-ES)
+
+### Uso de Strings Localizadas
+
+```dart
+import 'package:praticos/extensions/context_extensions.dart';
+
+// Strings simples
+Text(context.l10n.save)
+Text(context.l10n.cancel)
+
+// Com parâmetros
+Text(context.l10n.welcome('João'))
+
+// Plurais (ICU format)
+Text(context.l10n.itemCount(5))  // "5 itens" (pt), "5 items" (en), "5 elementos" (es)
+```
+
+### FormatService - Formatação Consciente de Locale
+
+```dart
+import 'package:praticos/services/format_service.dart';
+
+final formatService = FormatService();
+
+// Datas (formato adapta ao locale)
+formatService.formatDate(DateTime.now());         // 09/01/2025 (pt), 01/09/2025 (en)
+formatService.formatDateTime(DateTime.now());     // Com hora
+formatService.formatDateLong(DateTime.now());     // 9 de janeiro de 2025
+
+// Moedas (símbolo e formato automáticos)
+formatService.formatCurrency(1234.56);
+// pt-BR → R$ 1.234,56
+// en-US → $1,234.56
+// es-ES → 1.234,56 €
+
+// Números decimais
+formatService.formatDecimal(1234.56);             // Separadores corretos
+
+// Parsing de valores do usuário
+double _parseValue(String value) {
+  final parsed = formatService.currencyFormat.parse(value);
+  return parsed.toDouble();
+}
+```
+
+### Adicionando Novas Traduções
+
+1. Adicionar nos 3 arquivos .arb (pt, en, es)
+2. Executar `fvm flutter gen-l10n`
+3. Usar `context.l10n.newKey` no código
+
+### Regras Críticas
+
+**✅ SEMPRE:**
+- Usar `context.l10n` para texto visível ao usuário
+- Usar `FormatService` para datas, números e moedas
+- Fornecer traduções nos 3 idiomas
+- Testar em todos os locales suportados
+
+**❌ NUNCA:**
+- Hardcoded strings visíveis (`Text('Salvar')` ❌, `Text(context.l10n.save)` ✅)
+- Formatar manualmente (`toStringAsFixed()`, `DateFormat()` direto)
+- Assumir formato brasileiro (`,` como decimal, `R$`)
+- Misturar idiomas no código
+
+**Detalhes:** `@docs/I18N.md`
+
+---
+
+## Campos Customizados por Segmento
+
+Cada segmento de negócio pode ter labels customizados para adaptar terminologia.
+
+### SegmentConfigService
+
+```dart
+import 'package:praticos/services/segment_config_service.dart';
+
+final segmentService = SegmentConfigService();
+
+// Obter label customizado com fallback i18n (OBRIGATÓRIO)
+final deviceLabel = segmentService.getLabel(
+  'device',
+  fallback: context.l10n.device,
+);
+
+Text(deviceLabel)
+// pt-BR + mecânica → "Veículo"
+// en-US + mecânica → "Vehicle"
+// pt-BR + eletrônica → "Aparelho"
+// en-US + eletrônica → "Device"
+// Sem customização → usa context.l10n.device
+```
+
+### Campos Customizáveis
+
+| Chave | Exemplo Mecânica | Exemplo Eletrônica | Padrão |
+|-------|------------------|---------------------|---------|
+| `device` | Veículo | Aparelho | Dispositivo |
+| `devicePlaceholder` | Ex: Fiat Uno 2015 | Ex: iPhone 12 | Ex: ... |
+| `product` | Peça | Componente | Produto |
+| `service` | Serviço | Reparo | Serviço |
+
+### Ordem de Prioridade (CRÍTICA)
+
+```
+1. customLabels[idioma][chave] do segmento
+   ↓
+2. context.l10n.chave (fallback OBRIGATÓRIO)
+   ↓
+3. String padrão em inglês (último recurso)
+```
+
+### Exemplo Correto
+
+```dart
+// ✅ CORRETO - i18n + customização
+final deviceLabel = SegmentConfigService().getLabel(
+  'device',
+  fallback: context.l10n.device,  // SEMPRE fornecer fallback
+);
+
+CupertinoNavigationBar(
+  middle: Text(deviceLabel),
+)
+
+// ❌ ERRADO - Hardcoded, não adapta
+CupertinoNavigationBar(
+  middle: Text('Veículo'),  // Ignora idioma E segmento
+)
+
+// ❌ ERRADO - Sem fallback
+final deviceLabel = SegmentConfigService().getLabel('device');  // E se não tiver customLabel?
+```
+
+**Detalhes:** `@docs/SEGMENT_CUSTOM_FIELDS.md`
+
+---
+
 ## Padrões de Código
 
 ### 0. Convenções de Nomenclatura (CRÍTICO)
@@ -342,15 +486,20 @@ intl: ^0.20.2
 ## Dicas para Agentes de IA
 
 1. **🚨 INGLÊS NO CÓDIGO (CRÍTICO):** TODO código, tipos, constantes, enums, propriedades, métodos, chaves JSON e valores no banco DEVEM ser em inglês. Português apenas para UI strings visíveis ao usuário.
-2. **🏷️ CONVENTIONAL COMMITS (OBRIGATÓRIO):** Usar formato padronizado para commits. Ver seção abaixo.
-3. **Multi-Tenancy é Prioridade:** Verifique sempre se está usando a estrutura correta de company/roles.
-4. **UX/UI Guidelines:**
+2. **🌍 i18n OBRIGATÓRIO:** TODA string visível ao usuário DEVE usar `context.l10n`, NUNCA hardcoded. Traduzir nos 3 idiomas (pt, en, es).
+3. **📅 FORMATSERVICE OBRIGATÓRIO:** SEMPRE usar `FormatService` para datas, números e moedas. NUNCA formatar manualmente ou usar `toStringAsFixed()`, `DateFormat()` direto.
+4. **🎨 SEGMENTO + i18n:** Labels customizáveis DEVEM ter fallback com `context.l10n`. Usar `SegmentConfigService.getLabel(key, fallback: context.l10n.key)`.
+5. **🏷️ CONVENTIONAL COMMITS (OBRIGATÓRIO):** Usar formato padronizado para commits. Ver seção abaixo.
+6. **Multi-Tenancy é Prioridade:** Verifique sempre se está usando a estrutura correta de company/roles.
+7. **UX/UI Guidelines:**
     - **App:** Cupertino/iOS-first. Siga `@docs/UX_GUIDELINES.md`.
     - **Web:** Dark Premium Theme. Siga `@docs/WEB_UX_GUIDELINES.md`.
-5. **Build Runner:** `fvm flutter pub run build_runner build --delete-conflicting-outputs` é obrigatório após mudar Stores/Models.
-6. **AuthService:** Use `AuthService` para criar novos usuários, não grave direto no banco.
-7. **CollaboratorStore:** Use este store para gerenciar membros da equipe, não use `CompanyStore` para isso.
-8. **📝 DOCUMENTAÇÃO OBRIGATÓRIA:** Ao finalizar uma nova feature, SEMPRE documentar (ver seção abaixo).
+8. **Build Runner:**
+    - `fvm flutter pub run build_runner build --delete-conflicting-outputs` após mudar Stores/Models
+    - `fvm flutter gen-l10n` após alterar arquivos .arb
+9. **AuthService:** Use `AuthService` para criar novos usuários, não grave direto no banco.
+10. **CollaboratorStore:** Use este store para gerenciar membros da equipe, não use `CompanyStore` para isso.
+11. **📝 DOCUMENTAÇÃO OBRIGATÓRIA:** Ao finalizar uma nova feature, SEMPRE documentar (ver seção abaixo).
 
 ---
 

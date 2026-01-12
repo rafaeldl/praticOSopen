@@ -12,11 +12,263 @@ const db = admin.firestore();
 // Segmentos iniciais do sistema com labels dinâmicos e campos customizados
 const SEGMENTS = [
   // ═══════════════════════════════════════════════════════════
+  // GLOBAL LABELS (aplicáveis a todos os segmentos)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'global',
+    name: 'Global',
+    nameI18n: { 'pt-BR': 'Global', 'en-US': 'Global', 'es-ES': 'Global' },
+    icon: '🌍',
+    active: true,
+    customFields: [
+      // Entidades globais
+      {
+        key: 'customer._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Cliente', 'en-US': 'Customer', 'es-ES': 'Cliente' }
+      },
+      {
+        key: 'customer._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Clientes', 'en-US': 'Customers', 'es-ES': 'Clientes' }
+      },
+      {
+        key: 'service_order._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Ordem de Serviço', 'en-US': 'Service Order', 'es-ES': 'Orden de Servicio' }
+      },
+      {
+        key: 'service_order._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Ordens de Serviço', 'en-US': 'Service Orders', 'es-ES': 'Órdenes de Servicio' }
+      },
+      // Campos comuns de device
+      {
+        key: 'device.description',
+        type: 'label',
+        labels: { 'pt-BR': 'Descrição', 'en-US': 'Description', 'es-ES': 'Descripción' }
+      },
+      {
+        key: 'device.notes',
+        type: 'label',
+        labels: { 'pt-BR': 'Observações', 'en-US': 'Notes', 'es-ES': 'Notas' }
+      },
+      // Campos comuns de customer
+      {
+        key: 'customer.name',
+        type: 'label',
+        labels: { 'pt-BR': 'Nome', 'en-US': 'Name', 'es-ES': 'Nombre' }
+      },
+      {
+        key: 'customer.phone',
+        type: 'label',
+        labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }
+      },
+      {
+        key: 'customer.email',
+        type: 'label',
+        labels: { 'pt-BR': 'Email', 'en-US': 'Email', 'es-ES': 'Correo' }
+      },
+      {
+        key: 'customer.address',
+        type: 'label',
+        labels: { 'pt-BR': 'Endereço', 'en-US': 'Address', 'es-ES': 'Dirección' }
+      },
+      // Ações globais (device)
+      {
+        key: 'actions.delete_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Excluir Dispositivo', 'en-US': 'Delete Device', 'es-ES': 'Eliminar Dispositivo' }
+      },
+      // Ações globais (customer)
+      {
+        key: 'actions.create_customer',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Cliente', 'en-US': 'Add Customer', 'es-ES': 'Agregar Cliente' }
+      },
+      {
+        key: 'actions.edit_customer',
+        type: 'label',
+        labels: { 'pt-BR': 'Editar Cliente', 'en-US': 'Edit Customer', 'es-ES': 'Editar Cliente' }
+      },
+      // Ações globais (service order)
+      {
+        key: 'actions.create_service_order',
+        type: 'label',
+        labels: { 'pt-BR': 'Nova Ordem de Serviço', 'en-US': 'New Service Order', 'es-ES': 'Nueva Orden de Servicio' }
+      },
+      {
+        key: 'actions.edit_service_order',
+        type: 'label',
+        labels: { 'pt-BR': 'Editar Ordem de Serviço', 'en-US': 'Edit Service Order', 'es-ES': 'Editar Orden de Servicio' }
+      },
+      // Ações globais (serviço)
+      {
+        key: 'actions.create_service',
+        type: 'label',
+        labels: { 'pt-BR': 'Novo Serviço', 'en-US': 'New Service', 'es-ES': 'Nuevo Servicio' }
+      },
+      {
+        key: 'actions.edit_service',
+        type: 'label',
+        labels: { 'pt-BR': 'Editar Serviço', 'en-US': 'Edit Service', 'es-ES': 'Editar Servicio' }
+      },
+      // Ações globais (produto)
+      {
+        key: 'actions.create_product',
+        type: 'label',
+        labels: { 'pt-BR': 'Novo Produto', 'en-US': 'New Product', 'es-ES': 'Nuevo Producto' }
+      },
+      {
+        key: 'actions.edit_product',
+        type: 'label',
+        labels: { 'pt-BR': 'Editar Produto', 'en-US': 'Edit Product', 'es-ES': 'Editar Producto' }
+      },
+      {
+        key: 'actions.remove',
+        type: 'label',
+        labels: { 'pt-BR': 'Remover', 'en-US': 'Remove', 'es-ES': 'Quitar' }
+      },
+      {
+        key: 'actions.confirm_deletion',
+        type: 'label',
+        labels: { 'pt-BR': 'Confirmar exclusão', 'en-US': 'Confirm deletion', 'es-ES': 'Confirmar eliminación' }
+      },
+      {
+        key: 'actions.retry_again',
+        type: 'label',
+        labels: { 'pt-BR': 'Tentar novamente', 'en-US': 'Try again', 'es-ES': 'Intentar de nuevo' }
+      },
+      // Status globais
+      {
+        key: 'status.pending',
+        type: 'label',
+        labels: { 'pt-BR': 'Pendente', 'en-US': 'Pending', 'es-ES': 'Pendiente' }
+      },
+      {
+        key: 'status.cancelled',
+        type: 'label',
+        labels: { 'pt-BR': 'Cancelado', 'en-US': 'Cancelled', 'es-ES': 'Cancelado' }
+      },
+      // Mensagens globais
+      {
+        key: 'messages.no_results_found',
+        type: 'label',
+        labels: { 'pt-BR': 'Nenhum resultado encontrado', 'en-US': 'No results found', 'es-ES': 'No se encontraron resultados' }
+      },
+      {
+        key: 'messages.required',
+        type: 'label',
+        labels: { 'pt-BR': 'Obrigatório', 'en-US': 'Required', 'es-ES': 'Requerido' }
+      },
+      // Fotos
+      {
+        key: 'photos.change',
+        type: 'label',
+        labels: { 'pt-BR': 'Alterar Foto', 'en-US': 'Change Photo', 'es-ES': 'Cambiar Foto' }
+      },
+      {
+        key: 'photos.add',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Foto', 'en-US': 'Add Photo', 'es-ES': 'Agregar Foto' }
+      },
+      {
+        key: 'photos.delete',
+        type: 'label',
+        labels: { 'pt-BR': 'Excluir Foto', 'en-US': 'Delete Photo', 'es-ES': 'Eliminar Foto' }
+      },
+      {
+        key: 'photos.set_as_cover',
+        type: 'label',
+        labels: { 'pt-BR': 'Definir como Capa', 'en-US': 'Set as Cover', 'es-ES': 'Establecer como Portada' }
+      },
+      // Produtos
+      {
+        key: 'product.quantity',
+        type: 'label',
+        labels: { 'pt-BR': 'Quantidade', 'en-US': 'Quantity', 'es-ES': 'Cantidad' }
+      },
+      {
+        key: 'product.unit_value',
+        type: 'label',
+        labels: { 'pt-BR': 'Valor unitário', 'en-US': 'Unit value', 'es-ES': 'Valor unitario' }
+      },
+      {
+        key: 'product.total',
+        type: 'label',
+        labels: { 'pt-BR': 'Total', 'en-US': 'Total', 'es-ES': 'Total' }
+      },
+      // Comum
+      {
+        key: 'common.save',
+        type: 'label',
+        labels: { 'pt-BR': 'Salvar', 'en-US': 'Save', 'es-ES': 'Guardar' }
+      },
+      {
+        key: 'common.cancel',
+        type: 'label',
+        labels: { 'pt-BR': 'Cancelar', 'en-US': 'Cancel', 'es-ES': 'Cancelar' }
+      },
+      {
+        key: 'common.confirm',
+        type: 'label',
+        labels: { 'pt-BR': 'Confirmar', 'en-US': 'Confirm', 'es-ES': 'Confirmar' }
+      },
+      {
+        key: 'common.delete',
+        type: 'label',
+        labels: { 'pt-BR': 'Excluir', 'en-US': 'Delete', 'es-ES': 'Eliminar' }
+      },
+      {
+        key: 'common.edit',
+        type: 'label',
+        labels: { 'pt-BR': 'Editar', 'en-US': 'Edit', 'es-ES': 'Editar' }
+      },
+      {
+        key: 'common.search',
+        type: 'label',
+        labels: { 'pt-BR': 'Buscar', 'en-US': 'Search', 'es-ES': 'Buscar' }
+      },
+      {
+        key: 'common.filter',
+        type: 'label',
+        labels: { 'pt-BR': 'Filtrar', 'en-US': 'Filter', 'es-ES': 'Filtrar' }
+      },
+      {
+        key: 'common.sort',
+        type: 'label',
+        labels: { 'pt-BR': 'Ordenar', 'en-US': 'Sort', 'es-ES': 'Ordenar' }
+      },
+      {
+        key: 'common.export',
+        type: 'label',
+        labels: { 'pt-BR': 'Exportar', 'en-US': 'Export', 'es-ES': 'Exportar' }
+      },
+      {
+        key: 'common.import',
+        type: 'label',
+        labels: { 'pt-BR': 'Importar', 'en-US': 'Import', 'es-ES': 'Importar' }
+      },
+      {
+        key: 'common.print',
+        type: 'label',
+        labels: { 'pt-BR': 'Imprimir', 'en-US': 'Print', 'es-ES': 'Imprimir' }
+      },
+      {
+        key: 'common.notes',
+        type: 'label',
+        labels: { 'pt-BR': 'Observações', 'en-US': 'Notes', 'es-ES': 'Notas' }
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // AUTOMOTIVO
   // ═══════════════════════════════════════════════════════════
   {
     id: 'automotive',
     name: 'Automotivo',
+    nameI18n: { 'pt-BR': 'Automotivo', 'en-US': 'Automotive', 'es-ES': 'Automotriz' },
     icon: '🚗',
     active: true,
     subspecialties: [
@@ -50,81 +302,85 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Veículo', 'en-US': 'Vehicle' }
+        labels: { 'pt-BR': 'Veículo', 'en-US': 'Vehicle', 'es-ES': 'Vehículo' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Veículos', 'en-US': 'Vehicles' }
+        labels: { 'pt-BR': 'Veículos', 'en-US': 'Vehicles', 'es-ES': 'Vehículos' }
       },
       {
         key: 'device.brand',
         type: 'label',
-        labels: { 'pt-BR': 'Montadora', 'en-US': 'Manufacturer' }
+        labels: { 'pt-BR': 'Montadora', 'en-US': 'Manufacturer', 'es-ES': 'Fabricante' }
       },
       {
         key: 'device.model',
         type: 'label',
-        labels: { 'pt-BR': 'Modelo', 'en-US': 'Model' }
+        labels: { 'pt-BR': 'Modelo', 'en-US': 'Model', 'es-ES': 'Modelo' }
       },
       {
         key: 'device.serialNumber',
         type: 'label',
-        labels: { 'pt-BR': 'Placa', 'en-US': 'License Plate' }
+        labels: { 'pt-BR': 'Placa', 'en-US': 'License Plate', 'es-ES': 'Placa' }
       },
       {
         key: 'actions.create_device',
         type: 'label',
-        labels: { 'pt-BR': 'Adicionar Veículo', 'en-US': 'Add Vehicle' }
+        labels: { 'pt-BR': 'Adicionar Veículo', 'en-US': 'Add Vehicle', 'es-ES': 'Agregar Vehículo' }
       },
       {
         key: 'actions.edit_device',
         type: 'label',
-        labels: { 'pt-BR': 'Editar Veículo', 'en-US': 'Edit Vehicle' }
+        labels: { 'pt-BR': 'Editar Veículo', 'en-US': 'Edit Vehicle', 'es-ES': 'Editar Vehículo' }
       },
       {
         key: 'status.in_progress',
         type: 'label',
-        labels: { 'pt-BR': 'Em Conserto', 'en-US': 'Under Repair' }
+        labels: { 'pt-BR': 'Em Conserto', 'en-US': 'Under Repair', 'es-ES': 'En Reparación' }
       },
       {
         key: 'status.completed',
         type: 'label',
-        labels: { 'pt-BR': 'Pronto para Retirada', 'en-US': 'Ready for Pickup' }
+        labels: { 'pt-BR': 'Pronto para Retirada', 'en-US': 'Ready for Pickup', 'es-ES': 'Listo para Retiro' }
       },
 
       // Campos customizados (campos reais do form)
       {
         key: 'device.year',
         type: 'number',
-        labels: { 'pt-BR': 'Ano', 'en-US': 'Year' },
+        labels: { 'pt-BR': 'Ano', 'en-US': 'Year', 'es-ES': 'Año' },
         required: true,
         min: 1900,
         max: 2030,
         section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
         order: 1,
       },
       {
         key: 'device.mileage',
         type: 'number',
-        labels: { 'pt-BR': 'Quilometragem', 'en-US': 'Mileage' },
+        labels: { 'pt-BR': 'Quilometragem', 'en-US': 'Mileage', 'es-ES': 'Kilometraje' },
         suffix: 'km',
         section: 'Estado',
+        sectionI18n: { 'pt-BR': 'Estado', 'en-US': 'Condition', 'es-ES': 'Estado' },
         order: 2,
       },
       {
         key: 'device.color',
         type: 'text',
-        labels: { 'pt-BR': 'Cor', 'en-US': 'Color' },
+        labels: { 'pt-BR': 'Cor', 'en-US': 'Color', 'es-ES': 'Color' },
         section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
         order: 3,
       },
       {
         key: 'device.chassis',
         type: 'text',
-        labels: { 'pt-BR': 'Chassi', 'en-US': 'Chassis' },
+        labels: { 'pt-BR': 'Chassi', 'en-US': 'Chassis', 'es-ES': 'Chasis' },
         maxLength: 17,
         section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
         order: 4,
       },
     ],
@@ -136,6 +392,11 @@ const SEGMENTS = [
   {
     id: 'hvac',
     name: 'Ar Condicionado / Refrigeração',
+    nameI18n: {
+      'pt-BR': 'Ar Condicionado / Refrigeração',
+      'en-US': 'HVAC / Refrigeration',
+      'es-ES': 'Aire Acondicionado / Refrigeración'
+    },
     icon: '❄️',
     active: true,
     subspecialties: [
@@ -163,61 +424,86 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Equipamento', 'en-US': 'Equipment' }
+        labels: { 'pt-BR': 'Equipamento', 'en-US': 'Equipment', 'es-ES': 'Equipo' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Equipamentos', 'en-US': 'Equipment' }
+        labels: { 'pt-BR': 'Equipamentos', 'en-US': 'Equipment', 'es-ES': 'Equipos' }
       },
       {
         key: 'actions.create_device',
         type: 'label',
-        labels: { 'pt-BR': 'Adicionar Equipamento', 'en-US': 'Add Equipment' }
+        labels: { 'pt-BR': 'Adicionar Equipamento', 'en-US': 'Add Equipment', 'es-ES': 'Agregar Equipo' }
       },
       {
         key: 'actions.edit_device',
         type: 'label',
-        labels: { 'pt-BR': 'Editar Equipamento', 'en-US': 'Edit Equipment' }
+        labels: { 'pt-BR': 'Editar Equipamento', 'en-US': 'Edit Equipment', 'es-ES': 'Editar Equipo' }
       },
       {
         key: 'status.in_progress',
         type: 'label',
-        labels: { 'pt-BR': 'Em Manutenção', 'en-US': 'Under Maintenance' }
+        labels: { 'pt-BR': 'Em Manutenção', 'en-US': 'Under Maintenance', 'es-ES': 'En Mantenimiento' }
       },
 
       // Campos customizados
       {
         key: 'device.btus',
         type: 'select',
-        labels: { 'pt-BR': 'BTUs', 'en-US': 'BTUs' },
+        labels: { 'pt-BR': 'BTUs', 'en-US': 'BTUs', 'es-ES': 'BTUs' },
         required: true,
         options: ['7000', '9000', '12000', '18000', '22000', '24000', '30000'],
+        optionsI18n: [
+          { value: '7000', labels: { 'pt-BR': '7000', 'en-US': '7000', 'es-ES': '7000' } },
+          { value: '9000', labels: { 'pt-BR': '9000', 'en-US': '9000', 'es-ES': '9000' } },
+          { value: '12000', labels: { 'pt-BR': '12000', 'en-US': '12000', 'es-ES': '12000' } },
+          { value: '18000', labels: { 'pt-BR': '18000', 'en-US': '18000', 'es-ES': '18000' } },
+          { value: '22000', labels: { 'pt-BR': '22000', 'en-US': '22000', 'es-ES': '22000' } },
+          { value: '24000', labels: { 'pt-BR': '24000', 'en-US': '24000', 'es-ES': '24000' } },
+          { value: '30000', labels: { 'pt-BR': '30000', 'en-US': '30000', 'es-ES': '30000' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 1,
       },
       {
         key: 'device.voltage',
         type: 'select',
-        labels: { 'pt-BR': 'Voltagem', 'en-US': 'Voltage' },
+        labels: { 'pt-BR': 'Voltagem', 'en-US': 'Voltage', 'es-ES': 'Voltaje' },
         required: true,
         options: ['110V', '220V', 'Bifásico'],
+        optionsI18n: [
+          { value: '110V', labels: { 'pt-BR': '110V', 'en-US': '110V', 'es-ES': '110V' } },
+          { value: '220V', labels: { 'pt-BR': '220V', 'en-US': '220V', 'es-ES': '220V' } },
+          { value: 'Bifásico', labels: { 'pt-BR': 'Bifásico', 'en-US': 'Two-phase', 'es-ES': 'Bifásico' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 2,
       },
       {
         key: 'device.gasType',
         type: 'select',
-        labels: { 'pt-BR': 'Tipo de Gás', 'en-US': 'Gas Type' },
+        labels: { 'pt-BR': 'Tipo de Gás', 'en-US': 'Gas Type', 'es-ES': 'Tipo de Gas' },
         options: ['R-22', 'R-410A', 'R-32', 'R-134a', 'R-404A'],
+        optionsI18n: [
+          { value: 'R-22', labels: { 'pt-BR': 'R-22', 'en-US': 'R-22', 'es-ES': 'R-22' } },
+          { value: 'R-410A', labels: { 'pt-BR': 'R-410A', 'en-US': 'R-410A', 'es-ES': 'R-410A' } },
+          { value: 'R-32', labels: { 'pt-BR': 'R-32', 'en-US': 'R-32', 'es-ES': 'R-32' } },
+          { value: 'R-134a', labels: { 'pt-BR': 'R-134a', 'en-US': 'R-134a', 'es-ES': 'R-134a' } },
+          { value: 'R-404A', labels: { 'pt-BR': 'R-404A', 'en-US': 'R-404A', 'es-ES': 'R-404A' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 3,
       },
       {
         key: 'device.installationDate',
         type: 'date',
-        labels: { 'pt-BR': 'Data de Instalação', 'en-US': 'Installation Date' },
+        labels: { 'pt-BR': 'Data de Instalação', 'en-US': 'Installation Date', 'es-ES': 'Fecha de Instalación' },
         section: 'Instalação',
+        sectionI18n: { 'pt-BR': 'Instalação', 'en-US': 'Installation', 'es-ES': 'Instalación' },
         order: 4,
       },
     ],
@@ -229,6 +515,7 @@ const SEGMENTS = [
   {
     id: 'smartphones',
     name: 'Assistência Técnica - Celulares',
+    nameI18n: { 'pt-BR': 'Assistência Técnica - Celulares', 'en-US': 'Phone Repair', 'es-ES': 'Servicio Técnico - Celulares' },
     icon: '📱',
     active: true,
     customFields: [
@@ -236,79 +523,90 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Aparelho', 'en-US': 'Device' }
+        labels: { 'pt-BR': 'Aparelho', 'en-US': 'Device', 'es-ES': 'Dispositivo' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Aparelhos', 'en-US': 'Devices' }
+        labels: { 'pt-BR': 'Aparelhos', 'en-US': 'Devices', 'es-ES': 'Dispositivos' }
       },
       {
         key: 'device.brand',
         type: 'label',
-        labels: { 'pt-BR': 'Fabricante', 'en-US': 'Manufacturer' }
+        labels: { 'pt-BR': 'Fabricante', 'en-US': 'Manufacturer', 'es-ES': 'Fabricante' }
       },
       {
         key: 'device.serialNumber',
         type: 'label',
-        labels: { 'pt-BR': 'IMEI', 'en-US': 'IMEI' }
+        labels: { 'pt-BR': 'IMEI', 'en-US': 'IMEI', 'es-ES': 'IMEI' }
       },
       {
         key: 'actions.create_device',
         type: 'label',
-        labels: { 'pt-BR': 'Adicionar Aparelho', 'en-US': 'Add Device' }
+        labels: { 'pt-BR': 'Adicionar Aparelho', 'en-US': 'Add Device', 'es-ES': 'Agregar Dispositivo' }
       },
       {
         key: 'actions.edit_device',
         type: 'label',
-        labels: { 'pt-BR': 'Editar Aparelho', 'en-US': 'Edit Device' }
+        labels: { 'pt-BR': 'Editar Aparelho', 'en-US': 'Edit Device', 'es-ES': 'Editar Dispositivo' }
       },
       {
         key: 'status.in_progress',
         type: 'label',
-        labels: { 'pt-BR': 'Em Reparo', 'en-US': 'Under Repair' }
+        labels: { 'pt-BR': 'Em Reparo', 'en-US': 'Under Repair', 'es-ES': 'En Reparación' }
       },
       {
         key: 'status.pending',
         type: 'label',
-        labels: { 'pt-BR': 'Aguardando Orçamento', 'en-US': 'Awaiting Quote' }
+        labels: { 'pt-BR': 'Aguardando Orçamento', 'en-US': 'Awaiting Quote', 'es-ES': 'Esperando Presupuesto' }
       },
 
       // Campos customizados
       {
         key: 'device.imei',
         type: 'text',
-        labels: { 'pt-BR': 'IMEI', 'en-US': 'IMEI' },
+        labels: { 'pt-BR': 'IMEI', 'en-US': 'IMEI', 'es-ES': 'IMEI' },
         required: true,
         maxLength: 15,
         pattern: '^[0-9]{15}$',
         placeholder: '123456789012345',
         section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
         order: 1,
       },
       {
         key: 'device.storage',
         type: 'select',
-        labels: { 'pt-BR': 'Armazenamento', 'en-US': 'Storage' },
+        labels: { 'pt-BR': 'Armazenamento', 'en-US': 'Storage', 'es-ES': 'Almacenamiento' },
         options: ['64GB', '128GB', '256GB', '512GB', '1TB'],
+        optionsI18n: [
+          { value: '64GB', labels: { 'pt-BR': '64GB', 'en-US': '64GB', 'es-ES': '64GB' } },
+          { value: '128GB', labels: { 'pt-BR': '128GB', 'en-US': '128GB', 'es-ES': '128GB' } },
+          { value: '256GB', labels: { 'pt-BR': '256GB', 'en-US': '256GB', 'es-ES': '256GB' } },
+          { value: '512GB', labels: { 'pt-BR': '512GB', 'en-US': '512GB', 'es-ES': '512GB' } },
+          { value: '1TB', labels: { 'pt-BR': '1TB', 'en-US': '1TB', 'es-ES': '1TB' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 2,
       },
       {
         key: 'device.color',
         type: 'text',
-        labels: { 'pt-BR': 'Cor', 'en-US': 'Color' },
+        labels: { 'pt-BR': 'Cor', 'en-US': 'Color', 'es-ES': 'Color' },
         section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
         order: 3,
       },
       {
         key: 'device.batteryHealth',
         type: 'number',
-        labels: { 'pt-BR': 'Saúde da Bateria', 'en-US': 'Battery Health' },
+        labels: { 'pt-BR': 'Saúde da Bateria', 'en-US': 'Battery Health', 'es-ES': 'Salud de la Batería' },
         suffix: '%',
         min: 0,
         max: 100,
         section: 'Diagnóstico',
+        sectionI18n: { 'pt-BR': 'Diagnóstico', 'en-US': 'Diagnostics', 'es-ES': 'Diagnóstico' },
         order: 4,
       },
     ],
@@ -320,6 +618,7 @@ const SEGMENTS = [
   {
     id: 'computers',
     name: 'Informática',
+    nameI18n: { 'pt-BR': 'Informática', 'en-US': 'Computers', 'es-ES': 'Informática' },
     icon: '💻',
     active: true,
     subspecialties: [
@@ -353,39 +652,42 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Computador', 'en-US': 'Computer' }
+        labels: { 'pt-BR': 'Computador', 'en-US': 'Computer', 'es-ES': 'Computadora' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Computadores', 'en-US': 'Computers' }
+        labels: { 'pt-BR': 'Computadores', 'en-US': 'Computers', 'es-ES': 'Computadoras' }
       },
       {
         key: 'actions.create_device',
         type: 'label',
-        labels: { 'pt-BR': 'Adicionar Computador', 'en-US': 'Add Computer' }
+        labels: { 'pt-BR': 'Adicionar Computador', 'en-US': 'Add Computer', 'es-ES': 'Agregar Computadora' }
       },
 
       // Campos customizados
       {
         key: 'device.processor',
         type: 'text',
-        labels: { 'pt-BR': 'Processador', 'en-US': 'Processor' },
+        labels: { 'pt-BR': 'Processador', 'en-US': 'Processor', 'es-ES': 'Procesador' },
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 1,
       },
       {
         key: 'device.ram',
         type: 'text',
-        labels: { 'pt-BR': 'Memória RAM', 'en-US': 'RAM Memory' },
+        labels: { 'pt-BR': 'Memória RAM', 'en-US': 'RAM Memory', 'es-ES': 'Memoria RAM' },
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 2,
       },
       {
         key: 'device.storage',
         type: 'text',
-        labels: { 'pt-BR': 'Armazenamento', 'en-US': 'Storage' },
+        labels: { 'pt-BR': 'Armazenamento', 'en-US': 'Storage', 'es-ES': 'Almacenamiento' },
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 3,
       },
     ],
@@ -397,6 +699,7 @@ const SEGMENTS = [
   {
     id: 'appliances',
     name: 'Eletrodomésticos',
+    nameI18n: { 'pt-BR': 'Eletrodomésticos', 'en-US': 'Appliances', 'es-ES': 'Electrodomésticos' },
     icon: '🔌',
     active: true,
     customFields: [
@@ -404,22 +707,28 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Eletrodoméstico', 'en-US': 'Appliance' }
+        labels: { 'pt-BR': 'Eletrodoméstico', 'en-US': 'Appliance', 'es-ES': 'Electrodoméstico' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Eletrodomésticos', 'en-US': 'Appliances' }
+        labels: { 'pt-BR': 'Eletrodomésticos', 'en-US': 'Appliances', 'es-ES': 'Electrodomésticos' }
       },
 
       // Campos customizados
       {
         key: 'device.voltage',
         type: 'select',
-        labels: { 'pt-BR': 'Voltagem', 'en-US': 'Voltage' },
+        labels: { 'pt-BR': 'Voltagem', 'en-US': 'Voltage', 'es-ES': 'Voltaje' },
         required: true,
         options: ['110V', '220V', 'Bivolt'],
+        optionsI18n: [
+          { value: '110V', labels: { 'pt-BR': '110V', 'en-US': '110V', 'es-ES': '110V' } },
+          { value: '220V', labels: { 'pt-BR': '220V', 'en-US': '220V', 'es-ES': '220V' } },
+          { value: 'Bivolt', labels: { 'pt-BR': 'Bivolt', 'en-US': 'Dual Voltage', 'es-ES': 'Doble Voltaje' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 1,
       },
     ],
@@ -431,6 +740,11 @@ const SEGMENTS = [
   {
     id: 'electrical',
     name: 'Elétrica (Residencial/Predial)',
+    nameI18n: {
+      'pt-BR': 'Elétrica (Residencial/Predial)',
+      'en-US': 'Electrical (Residential/Building)',
+      'es-ES': 'Eléctrica (Residencial/Edificios)'
+    },
     icon: '⚡️',
     active: true,
     customFields: [
@@ -438,45 +752,53 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Instalação', 'en-US': 'Installation' }
+        labels: { 'pt-BR': 'Instalação', 'en-US': 'Installation', 'es-ES': 'Instalación' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Instalações', 'en-US': 'Installations' }
+        labels: { 'pt-BR': 'Instalações', 'en-US': 'Installations', 'es-ES': 'Instalaciones' }
       },
       {
         key: 'actions.create_device',
         type: 'label',
-        labels: { 'pt-BR': 'Adicionar Instalação', 'en-US': 'Add Installation' }
+        labels: { 'pt-BR': 'Adicionar Instalação', 'en-US': 'Add Installation', 'es-ES': 'Agregar Instalación' }
       },
       {
         key: 'status.in_progress',
         type: 'label',
-        labels: { 'pt-BR': 'Em Execução', 'en-US': 'In Progress' }
+        labels: { 'pt-BR': 'Em Execução', 'en-US': 'In Progress', 'es-ES': 'En Progreso' }
       },
       {
         key: 'status.completed',
         type: 'label',
-        labels: { 'pt-BR': 'Liberado', 'en-US': 'Released' }
+        labels: { 'pt-BR': 'Liberado', 'en-US': 'Released', 'es-ES': 'Liberado' }
       },
 
       // Campos (para evolução futura de campos dinâmicos)
       {
         key: 'device.voltage',
         type: 'select',
-        labels: { 'pt-BR': 'Tensão do Local', 'en-US': 'Site Voltage' },
+        labels: { 'pt-BR': 'Tensão do Local', 'en-US': 'Site Voltage', 'es-ES': 'Voltaje del Lugar' },
         options: ['110V', '220V', 'Bivolt', 'Trifásico'],
+        optionsI18n: [
+          { value: '110V', labels: { 'pt-BR': '110V', 'en-US': '110V', 'es-ES': '110V' } },
+          { value: '220V', labels: { 'pt-BR': '220V', 'en-US': '220V', 'es-ES': '220V' } },
+          { value: 'Bivolt', labels: { 'pt-BR': 'Bivolt', 'en-US': 'Dual Voltage', 'es-ES': 'Doble Voltaje' } },
+          { value: 'Trifásico', labels: { 'pt-BR': 'Trifásico', 'en-US': 'Three-phase', 'es-ES': 'Trifásico' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 1,
       },
       {
         key: 'device.mainBreaker',
         type: 'number',
-        labels: { 'pt-BR': 'Disjuntor Geral (A)', 'en-US': 'Main Breaker (A)' },
+        labels: { 'pt-BR': 'Disjuntor Geral (A)', 'en-US': 'Main Breaker (A)', 'es-ES': 'Interruptor General (A)' },
         min: 1,
         max: 400,
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 2,
       },
     ],
@@ -488,6 +810,7 @@ const SEGMENTS = [
   {
     id: 'plumbing',
     name: 'Hidráulica (Encanador)',
+    nameI18n: { 'pt-BR': 'Hidráulica (Encanador)', 'en-US': 'Plumbing', 'es-ES': 'Fontanería (Fontanero)' },
     icon: '💧',
     active: true,
     customFields: [
@@ -495,44 +818,57 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Instalação', 'en-US': 'Installation' }
+        labels: { 'pt-BR': 'Instalação', 'en-US': 'Installation', 'es-ES': 'Instalación' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Instalações', 'en-US': 'Installations' }
+        labels: { 'pt-BR': 'Instalações', 'en-US': 'Installations', 'es-ES': 'Instalaciones' }
       },
       {
         key: 'actions.create_device',
         type: 'label',
-        labels: { 'pt-BR': 'Adicionar Instalação', 'en-US': 'Add Installation' }
+        labels: { 'pt-BR': 'Adicionar Instalação', 'en-US': 'Add Installation', 'es-ES': 'Agregar Instalación' }
       },
       {
         key: 'status.in_progress',
         type: 'label',
-        labels: { 'pt-BR': 'Em Atendimento', 'en-US': 'In Service' }
+        labels: { 'pt-BR': 'Em Atendimento', 'en-US': 'In Service', 'es-ES': 'En Servicio' }
       },
       {
         key: 'status.completed',
         type: 'label',
-        labels: { 'pt-BR': 'Resolvido', 'en-US': 'Resolved' }
+        labels: { 'pt-BR': 'Resolvido', 'en-US': 'Resolved', 'es-ES': 'Resuelto' }
       },
 
       // Campos (para evolução futura)
       {
         key: 'device.waterType',
         type: 'select',
-        labels: { 'pt-BR': 'Tipo de Água', 'en-US': 'Water Type' },
+        labels: { 'pt-BR': 'Tipo de Água', 'en-US': 'Water Type', 'es-ES': 'Tipo de Agua' },
         options: ['Fria', 'Quente', 'Ambas'],
+        optionsI18n: [
+          { value: 'Fria', labels: { 'pt-BR': 'Fria', 'en-US': 'Cold', 'es-ES': 'Fría' } },
+          { value: 'Quente', labels: { 'pt-BR': 'Quente', 'en-US': 'Hot', 'es-ES': 'Caliente' } },
+          { value: 'Ambas', labels: { 'pt-BR': 'Ambas', 'en-US': 'Both', 'es-ES': 'Ambas' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 1,
       },
       {
         key: 'device.pressure',
         type: 'select',
-        labels: { 'pt-BR': 'Pressão', 'en-US': 'Pressure' },
+        labels: { 'pt-BR': 'Pressão', 'en-US': 'Pressure', 'es-ES': 'Presión' },
         options: ['Baixa', 'Normal', 'Alta', 'Não avaliada'],
+        optionsI18n: [
+          { value: 'Baixa', labels: { 'pt-BR': 'Baixa', 'en-US': 'Low', 'es-ES': 'Baja' } },
+          { value: 'Normal', labels: { 'pt-BR': 'Normal', 'en-US': 'Normal', 'es-ES': 'Normal' } },
+          { value: 'Alta', labels: { 'pt-BR': 'Alta', 'en-US': 'High', 'es-ES': 'Alta' } },
+          { value: 'Não avaliada', labels: { 'pt-BR': 'Não avaliada', 'en-US': 'Not assessed', 'es-ES': 'No evaluada' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 2,
       },
     ],
@@ -544,6 +880,7 @@ const SEGMENTS = [
   {
     id: 'security',
     name: 'Segurança Eletrônica',
+    nameI18n: { 'pt-BR': 'Segurança Eletrônica', 'en-US': 'Electronic Security', 'es-ES': 'Seguridad Electrónica' },
     icon: '📹',
     active: true,
     subspecialties: [
@@ -577,44 +914,59 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Sistema', 'en-US': 'System' }
+        labels: { 'pt-BR': 'Sistema', 'en-US': 'System', 'es-ES': 'Sistema' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems' }
+        labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems', 'es-ES': 'Sistemas' }
       },
       {
         key: 'device.serialNumber',
         type: 'label',
-        labels: { 'pt-BR': 'Identificador', 'en-US': 'Identifier' }
+        labels: { 'pt-BR': 'Identificador', 'en-US': 'Identifier', 'es-ES': 'Identificador' }
       },
       {
         key: 'status.in_progress',
         type: 'label',
-        labels: { 'pt-BR': 'Em Instalação', 'en-US': 'Installing' }
+        labels: { 'pt-BR': 'Em Instalação', 'en-US': 'Installing', 'es-ES': 'En Instalación' }
       },
       {
         key: 'status.completed',
         type: 'label',
-        labels: { 'pt-BR': 'Operacional', 'en-US': 'Operational' }
+        labels: { 'pt-BR': 'Operacional', 'en-US': 'Operational', 'es-ES': 'Operativo' }
       },
 
       // Campos (para evolução futura)
       {
         key: 'device.systemType',
         type: 'select',
-        labels: { 'pt-BR': 'Tipo de Sistema', 'en-US': 'System Type' },
+        labels: { 'pt-BR': 'Tipo de Sistema', 'en-US': 'System Type', 'es-ES': 'Tipo de Sistema' },
         options: ['CFTV', 'Alarme', 'Cerca elétrica', 'Controle de acesso', 'Interfonia'],
+        optionsI18n: [
+          { value: 'CFTV', labels: { 'pt-BR': 'CFTV', 'en-US': 'CCTV', 'es-ES': 'CCTV' } },
+          { value: 'Alarme', labels: { 'pt-BR': 'Alarme', 'en-US': 'Alarm', 'es-ES': 'Alarma' } },
+          { value: 'Cerca elétrica', labels: { 'pt-BR': 'Cerca elétrica', 'en-US': 'Electric Fence', 'es-ES': 'Cerca eléctrica' } },
+          { value: 'Controle de acesso', labels: { 'pt-BR': 'Controle de acesso', 'en-US': 'Access Control', 'es-ES': 'Control de acceso' } },
+          { value: 'Interfonia', labels: { 'pt-BR': 'Interfonia', 'en-US': 'Intercom', 'es-ES': 'Intercomunicador' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 1,
       },
       {
         key: 'device.channels',
         type: 'select',
-        labels: { 'pt-BR': 'Canais', 'en-US': 'Channels' },
+        labels: { 'pt-BR': 'Canais', 'en-US': 'Channels', 'es-ES': 'Canales' },
         options: ['4', '8', '16', '32'],
+        optionsI18n: [
+          { value: '4', labels: { 'pt-BR': '4', 'en-US': '4', 'es-ES': '4' } },
+          { value: '8', labels: { 'pt-BR': '8', 'en-US': '8', 'es-ES': '8' } },
+          { value: '16', labels: { 'pt-BR': '16', 'en-US': '16', 'es-ES': '16' } },
+          { value: '32', labels: { 'pt-BR': '32', 'en-US': '32', 'es-ES': '32' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 2,
       },
     ],
@@ -626,6 +978,7 @@ const SEGMENTS = [
   {
     id: 'solar',
     name: 'Energia Solar',
+    nameI18n: { 'pt-BR': 'Energia Solar', 'en-US': 'Solar Energy', 'es-ES': 'Energía Solar' },
     icon: '☀️',
     active: true,
     customFields: [
@@ -633,53 +986,56 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Sistema', 'en-US': 'System' }
+        labels: { 'pt-BR': 'Sistema', 'en-US': 'System', 'es-ES': 'Sistema' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems' }
+        labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems', 'es-ES': 'Sistemas' }
       },
       {
         key: 'device.serialNumber',
         type: 'label',
-        labels: { 'pt-BR': 'Nº do Inversor', 'en-US': 'Inverter Serial' }
+        labels: { 'pt-BR': 'Nº do Inversor', 'en-US': 'Inverter Serial', 'es-ES': 'Nº del Inversor' }
       },
       {
         key: 'status.in_progress',
         type: 'label',
-        labels: { 'pt-BR': 'Em Instalação', 'en-US': 'Installing' }
+        labels: { 'pt-BR': 'Em Instalação', 'en-US': 'Installing', 'es-ES': 'En Instalación' }
       },
       {
         key: 'status.completed',
         type: 'label',
-        labels: { 'pt-BR': 'Gerando', 'en-US': 'Generating' }
+        labels: { 'pt-BR': 'Gerando', 'en-US': 'Generating', 'es-ES': 'Generando' }
       },
 
       // Campos (para evolução futura)
       {
         key: 'device.kwp',
         type: 'number',
-        labels: { 'pt-BR': 'Potência do Sistema (kWp)', 'en-US': 'System Power (kWp)' },
+        labels: { 'pt-BR': 'Potência do Sistema (kWp)', 'en-US': 'System Power (kWp)', 'es-ES': 'Potencia del Sistema (kWp)' },
         min: 0,
         max: 999,
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 1,
       },
       {
         key: 'device.panelCount',
         type: 'number',
-        labels: { 'pt-BR': 'Qtd. de Placas', 'en-US': 'Panel Count' },
+        labels: { 'pt-BR': 'Qtd. de Placas', 'en-US': 'Panel Count', 'es-ES': 'Cantidad de Paneles' },
         min: 0,
         max: 999,
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 2,
       },
       {
         key: 'device.installationDate',
         type: 'date',
-        labels: { 'pt-BR': 'Data de Instalação', 'en-US': 'Installation Date' },
+        labels: { 'pt-BR': 'Data de Instalação', 'en-US': 'Installation Date', 'es-ES': 'Fecha de Instalación' },
         section: 'Instalação',
+        sectionI18n: { 'pt-BR': 'Instalação', 'en-US': 'Installation', 'es-ES': 'Instalación' },
         order: 3,
       },
     ],
@@ -691,6 +1047,7 @@ const SEGMENTS = [
   {
     id: 'printers',
     name: 'Impressoras / Copiadoras',
+    nameI18n: { 'pt-BR': 'Impressoras / Copiadoras', 'en-US': 'Printers / Copiers', 'es-ES': 'Impresoras / Fotocopiadoras' },
     icon: '🖨️',
     active: true,
     customFields: [
@@ -698,39 +1055,52 @@ const SEGMENTS = [
       {
         key: 'device._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Impressora', 'en-US': 'Printer' }
+        labels: { 'pt-BR': 'Impressora', 'en-US': 'Printer', 'es-ES': 'Impresora' }
       },
       {
         key: 'device._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Impressoras', 'en-US': 'Printers' }
+        labels: { 'pt-BR': 'Impressoras', 'en-US': 'Printers', 'es-ES': 'Impresoras' }
       },
       {
         key: 'device.serialNumber',
         type: 'label',
-        labels: { 'pt-BR': 'Número de Série', 'en-US': 'Serial Number' }
+        labels: { 'pt-BR': 'Número de Série', 'en-US': 'Serial Number', 'es-ES': 'Número de Serie' }
       },
       {
         key: 'status.in_progress',
         type: 'label',
-        labels: { 'pt-BR': 'Em Manutenção', 'en-US': 'Under Maintenance' }
+        labels: { 'pt-BR': 'Em Manutenção', 'en-US': 'Under Maintenance', 'es-ES': 'En Mantenimiento' }
       },
 
       // Campos (para evolução futura)
       {
         key: 'device.technology',
         type: 'select',
-        labels: { 'pt-BR': 'Tecnologia', 'en-US': 'Technology' },
+        labels: { 'pt-BR': 'Tecnologia', 'en-US': 'Technology', 'es-ES': 'Tecnología' },
         options: ['Laser', 'Jato de tinta', 'Térmica', 'Matricial', 'Outra'],
+        optionsI18n: [
+          { value: 'Laser', labels: { 'pt-BR': 'Laser', 'en-US': 'Laser', 'es-ES': 'Láser' } },
+          { value: 'Jato de tinta', labels: { 'pt-BR': 'Jato de tinta', 'en-US': 'Inkjet', 'es-ES': 'Inyección de tinta' } },
+          { value: 'Térmica', labels: { 'pt-BR': 'Térmica', 'en-US': 'Thermal', 'es-ES': 'Térmica' } },
+          { value: 'Matricial', labels: { 'pt-BR': 'Matricial', 'en-US': 'Dot Matrix', 'es-ES': 'Matricial' } },
+          { value: 'Outra', labels: { 'pt-BR': 'Outra', 'en-US': 'Other', 'es-ES': 'Otra' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 1,
       },
       {
         key: 'device.isColor',
         type: 'select',
-        labels: { 'pt-BR': 'Colorida?', 'en-US': 'Color?' },
+        labels: { 'pt-BR': 'Colorida?', 'en-US': 'Color?', 'es-ES': '¿Color?' },
         options: ['Sim', 'Não'],
+        optionsI18n: [
+          { value: 'Sim', labels: { 'pt-BR': 'Sim', 'en-US': 'Yes', 'es-ES': 'Sí' } },
+          { value: 'Não', labels: { 'pt-BR': 'Não', 'en-US': 'No', 'es-ES': 'No' } },
+        ],
         section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
         order: 2,
       },
     ],
@@ -742,6 +1112,7 @@ const SEGMENTS = [
   {
     id: 'other',
     name: 'Outro',
+    nameI18n: { 'pt-BR': 'Outro', 'en-US': 'Other', 'es-ES': 'Otro' },
     icon: '🔧',
     active: true,
     customFields: [], // Sem customizações, usa padrões do sistema

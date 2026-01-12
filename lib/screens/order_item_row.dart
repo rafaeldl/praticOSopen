@@ -1,6 +1,6 @@
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:praticos/services/format_service.dart';
 
 class OrderItemRow extends StatelessWidget {
   final String? title;
@@ -172,11 +172,6 @@ class OrderItemRow extends StatelessWidget {
 
   String _convertToCurrency(double? total) {
     if (total == null) return '';
-    final numberFormat = NumberFormat.currency(
-      locale: 'pt-BR',
-      symbol: 'R\$',
-      decimalDigits: 2,
-    );
-    return numberFormat.format(total);
+    return FormatService().formatCurrency(total, decimalDigits: 2);
   }
 }

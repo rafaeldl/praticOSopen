@@ -267,6 +267,59 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentDate => 'Payment Date';
 
   @override
+  String get payTotalAmount => 'Pay total amount';
+
+  @override
+  String get registerPayment => 'Register Payment';
+
+  @override
+  String get applyDiscount => 'Apply Discount';
+
+  @override
+  String get paymentAmount => 'Payment amount';
+
+  @override
+  String get discountAmount => 'Discount amount';
+
+  @override
+  String get fillValue => 'Fill in the value';
+
+  @override
+  String get paymentCannotExceedBalance => 'Payment cannot exceed balance';
+
+  @override
+  String get discountCannotExceedBalance => 'Discount cannot exceed balance';
+
+  @override
+  String get paymentRegistered => 'Payment registered';
+
+  @override
+  String get discountApplied => 'Discount applied';
+
+  @override
+  String get register => 'Register';
+
+  @override
+  String get history => 'History';
+
+  @override
+  String get valueMustBeGreaterThanZero => 'Value must be greater than zero';
+
+  @override
+  String get exampleCashPayment => 'Ex: Cash payment';
+
+  @override
+  String get exampleLoyaltyDiscount => 'Ex: Loyalty discount';
+
+  @override
+  String get noTransactionsRecorded => 'No transactions recorded';
+
+  @override
+  String confirmRemoveTransaction(String type, String amount) {
+    return 'Do you want to remove this $type of $amount?';
+  }
+
+  @override
   String get requiredField => 'Required field';
 
   @override
@@ -931,9 +984,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logoutConfirm => 'Do you really want to sign out?';
 
   @override
-  String get register => 'Register';
-
-  @override
   String get signUp => 'Sign Up';
 
   @override
@@ -1449,9 +1499,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get companyData => 'Company Data';
 
   @override
-  String get procedures => 'Procedures';
-
-  @override
   String get interface_ => 'Interface';
 
   @override
@@ -1518,6 +1565,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get networkError =>
       'Connection error. Check your internet and try again.';
+
+  @override
+  String get reauthenticationRequired => 'Re-authentication Required';
+
+  @override
+  String get pleaseSignInAgainToDelete =>
+      'For security reasons, you need to sign in again before deleting your account.';
+
+  @override
+  String get signInAgain => 'Sign In Again';
+
+  @override
+  String get authenticated => 'Authenticated';
+
+  @override
+  String get nowDeletingAccount => 'You can now proceed with account deletion.';
+
+  @override
+  String get reauthenticationFailed => 'Re-authentication Failed';
+
+  @override
+  String get couldNotReauthenticate => 'Could not re-authenticate.';
 
   @override
   String get errorLoadingData => 'Error loading data';
@@ -1950,6 +2019,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userCanAttachPhotos => 'User can attach photos to this item';
+
+  @override
+  String get procedures => 'Procedures';
+
+  @override
+  String get searchProcedure => 'Search procedure';
+
+  @override
+  String get myProcedures => 'My Procedures';
+
+  @override
+  String get globalProcedures => 'Global Procedures';
+
+  @override
+  String get noProceduresRegistered => 'No procedures registered';
+
+  @override
+  String get noProceduresAvailable => 'No procedures available';
+
+  @override
+  String get tapPlusToCreateFirst => 'Tap + to create your first procedure.';
+
+  @override
+  String get fromCompany => 'From Company';
+
+  @override
+  String get global => 'Global';
+
+  @override
+  String itemCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String importConfirmationMessage(String title) {
+    return 'Do you want to import the procedure \"$title\" to your company?\n\nYou will be able to edit it after import.';
+  }
 
   @override
   String get errorLoadingProcedures => 'Error loading procedures';

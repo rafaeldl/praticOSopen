@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
+import '../services/format_service.dart';
 
 class CurrencyInputFormatter extends TextInputFormatter {
   @override
@@ -9,7 +9,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
 
     double value = double.parse(newValue.text);
 
-    final formatter = NumberFormat.simpleCurrency(locale: "pt_Br");
+    final formatter = FormatService().simpleCurrencyFormat;
 
     String newText = formatter.format(value / 100);
 

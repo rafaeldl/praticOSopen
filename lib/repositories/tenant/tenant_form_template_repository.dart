@@ -9,21 +9,38 @@ import 'package:praticos/repositories/tenant_repository.dart';
 class TenantFormTemplateRepository extends TenantRepository<FormDefinition?> {
   TenantFormTemplateRepository() : super('forms');
 
+  Map<String, dynamic> _convertTimestamps(Map<String, dynamic> data) {
+    final converted = Map<String, dynamic>.from(data);
+
+    if (converted['createdAt'] is Timestamp) {
+      converted['createdAt'] =
+          (converted['createdAt'] as Timestamp).toDate().toIso8601String();
+    }
+    if (converted['updatedAt'] is Timestamp) {
+      converted['updatedAt'] =
+          (converted['updatedAt'] as Timestamp).toDate().toIso8601String();
+    }
+
+    return converted;
+  }
+
   @override
   FormDefinition fromJson(Map<String, dynamic> data) {
+    final normalized = _convertTimestamps(data);
+
     // Normaliza campos legados: name -> title
-    if (data['title'] == null && data['name'] != null) {
-      data['title'] = data['name'];
+    if (normalized['title'] == null && normalized['name'] != null) {
+      normalized['title'] = normalized['name'];
     }
 
     // Normaliza campos legados: fields -> items
-    if (data['items'] == null && data['fields'] != null) {
-      data['items'] = data['fields'];
+    if (normalized['items'] == null && normalized['fields'] != null) {
+      normalized['items'] = normalized['fields'];
     }
 
     // Garante que todos os items tenham IDs válidos (string)
-    if (data['items'] is List) {
-      final items = data['items'] as List;
+    if (normalized['items'] is List) {
+      final items = normalized['items'] as List;
       for (int i = 0; i < items.length; i++) {
         if (items[i] is Map<String, dynamic>) {
           final item = items[i] as Map<String, dynamic>;
@@ -43,7 +60,7 @@ class TenantFormTemplateRepository extends TenantRepository<FormDefinition?> {
         }
       }
     }
-    return FormDefinition.fromJson(data);
+    return FormDefinition.fromJson(normalized);
   }
 
   @override

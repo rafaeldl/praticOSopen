@@ -259,6 +259,178 @@ Sistema de checklists e vistorias personalizados.
 **Instâncias:** `/companies/{companyId}/orders/{orderId}/forms/{instanceId}`
 **Fotos:** `tenants/{companyId}/orders/{orderId}/forms/{instanceId}/items/{itemId}/`
 
+## Internacionalização (i18n)
+
+O sistema suporta múltiplos idiomas (pt-BR, en-US, es-ES) com detecção automática.
+
+### Uso de Strings Localizadas
+
+```dart
+import 'package:praticos/extensions/context_extensions.dart';
+
+// Strings simples
+Text(context.l10n.save)
+Text(context.l10n.cancel)
+
+// Strings com parâmetros
+Text(context.l10n.welcome('João'))
+
+// Plurais (ICU format)
+Text(context.l10n.itemCount(5))  // "5 itens" (pt), "5 items" (en)
+```
+
+### FormatService - Formatação Consciente de Locale
+
+```dart
+import 'package:praticos/services/format_service.dart';
+
+final formatService = FormatService();
+formatService.setLocale(AppLocalizations.of(context).localeName);
+
+// Datas
+formatService.formatDate(DateTime.now());         // 09/01/2025 (pt), 01/09/2025 (en)
+formatService.formatDateTime(DateTime.now());     // 09/01/2025 14:30, 01/09/2025 2:30 PM
+formatService.formatDateLong(DateTime.now());     // 9 de janeiro de 2025
+
+// Moedas (detecta símbolo automaticamente)
+formatService.formatCurrency(1234.56);
+// pt-BR → R$ 1.234,56
+// en-US → $1,234.56
+// es-ES → 1.234,56 €
+
+// Números decimais
+formatService.formatDecimal(1234.56);             // 1.234,56 (pt), 1,234.56 (en)
+
+// Porcentagem
+formatService.formatPercent(15.5);                // 15,5%
+```
+
+### Parsing de Valores do Usuário
+
+```dart
+// Para parsear valores de TextFields de moeda
+double _parseValue(String value) {
+  try {
+    final parsed = FormatService().currencyFormat.parse(value);
+    return parsed.toDouble();
+  } catch (e) {
+    return 0;
+  }
+}
+```
+
+### Adicionar Nova Tradução
+
+1. **Adicionar nos 3 arquivos .arb:**
+```json
+// lib/l10n/app_pt.arb
+"newKey": "Texto em português"
+
+// lib/l10n/app_en.arb
+"newKey": "Text in English"
+
+// lib/l10n/app_es.arb
+"newKey": "Texto en español"
+```
+
+2. **Gerar arquivos:**
+```bash
+fvm flutter gen-l10n
+```
+
+3. **Usar no código:**
+```dart
+Text(context.l10n.newKey)
+```
+
+### Regras de Localização
+
+**✅ SEMPRE localizar:**
+- Títulos de telas
+- Labels de campos
+- Botões e ações
+- Mensagens de erro/sucesso
+- Placeholders
+- Headers de seções
+- Estados vazios
+- Diálogos
+
+**❌ NUNCA localizar:**
+- Nomes próprios (clientes, empresas)
+- Dados do usuário
+- IDs técnicos
+- Comentários de código
+
+**⚠️ Números e moedas:**
+- SEMPRE usar `FormatService`
+- NUNCA formatar manualmente
+- NUNCA usar `toStringAsFixed()` direto
+
+Ver `docs/I18N.md` para detalhes completos.
+
+## Campos Customizados por Segmento
+
+Cada segmento pode ter labels customizados para adaptar terminologia.
+
+### SegmentConfigService
+
+```dart
+import 'package:praticos/services/segment_config_service.dart';
+
+final segmentService = SegmentConfigService();
+
+// Obter label customizado com fallback i18n
+final deviceLabel = segmentService.getLabel(
+  'device',
+  fallback: context.l10n.device,
+);
+
+Text(deviceLabel)  // "Veículo" (mecânica), "Aparelho" (eletrônica), "Dispositivo" (padrão)
+```
+
+### Campos Customizáveis
+
+| Campo | Chave | Exemplo Mecânica | Exemplo Eletrônica |
+|-------|-------|------------------|---------------------|
+| Dispositivo | `device` | Veículo | Aparelho |
+| Placeholder | `devicePlaceholder` | Ex: Fiat Uno 2015 | Ex: iPhone 12 |
+| Produto | `product` | Peça | Componente |
+
+### Ordem de Prioridade
+
+```
+1. customLabels do segmento (se disponível)
+   ↓
+2. Tradução i18n do idioma atual (fallback obrigatório)
+   ↓
+3. String padrão em inglês (último recurso)
+```
+
+### Exemplo Completo
+
+```dart
+// ✅ CORRETO - i18n + customização de segmento
+final deviceLabel = SegmentConfigService().getLabel(
+  'device',
+  fallback: context.l10n.device,
+);
+
+CupertinoNavigationBar(
+  middle: Text(deviceLabel),
+  // pt-BR + mecânica → "Veículo"
+  // en-US + mecânica → "Vehicle"
+  // pt-BR + eletrônica → "Aparelho"
+  // pt-BR + sem segmento → "Dispositivo"
+)
+
+// ❌ ERRADO - Hardcoded
+CupertinoNavigationBar(
+  middle: Text('Veículo'),  // Não adapta idioma nem segmento
+)
+```
+
+Ver `docs/SEGMENT_CUSTOM_FIELDS.md` para detalhes completos.
+
 ## Deploy
 
 ### Versionamento Automático (Conventional Commits)
@@ -343,14 +515,17 @@ bundle exec fastlane beta               # TestFlight (manual)
 ## Regras Importantes
 
 1. **Inglês no Código**: SEMPRE usar inglês para classes, variáveis, constantes, enums, chaves JSON e valores no banco
-2. **Conventional Commits**: Usar formato `tipo: descrição` para commits (feat, fix, refactor, etc.)
-3. **Multi-Tenancy é Prioridade**: Sempre verificar estrutura de company/roles
-4. **Build Runner**: Executar após alterar Stores/Models
-5. **AuthService**: Usar para criar novos usuários (não gravar direto no banco)
-6. **CollaboratorStore**: Usar para gerenciar membros da equipe (não usar CompanyStore)
-7. **Cupertino-first**: App deve parecer nativo iOS
-8. **Dark Mode**: Sempre usar `.resolveFrom(context)` para cores dinâmicas
-9. **Documentação Obrigatória**: Documentar toda nova funcionalidade (ver seção abaixo)
+2. **i18n Obrigatório**: SEMPRE usar `context.l10n` para strings visíveis ao usuário, NUNCA hardcoded
+3. **FormatService Obrigatório**: SEMPRE usar `FormatService` para datas, números e moedas, NUNCA formatar manualmente
+4. **Segmento + i18n**: Labels customizáveis DEVEM ter fallback com `context.l10n`
+5. **Conventional Commits**: Usar formato `tipo: descrição` para commits (feat, fix, refactor, etc.)
+6. **Multi-Tenancy é Prioridade**: Sempre verificar estrutura de company/roles
+7. **Build Runner**: Executar após alterar Stores/Models, e `fvm flutter gen-l10n` após alterar .arb
+8. **AuthService**: Usar para criar novos usuários (não gravar direto no banco)
+9. **CollaboratorStore**: Usar para gerenciar membros da equipe (não usar CompanyStore)
+10. **Cupertino-first**: App deve parecer nativo iOS
+11. **Dark Mode**: Sempre usar `.resolveFrom(context)` para cores dinâmicas
+12. **Documentação Obrigatória**: Documentar toda nova funcionalidade (ver seção abaixo)
 
 ---
 
@@ -447,6 +622,8 @@ Antes de finalizar uma feature, verificar:
 ## Documentação Adicional
 
 - `docs/AUTO_VERSIONING.md` - Versionamento automático e Conventional Commits
+- `docs/I18N.md` - Sistema de internacionalização completo
+- `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
 - `docs/MULTI_TENANCY.md` - Detalhes da arquitetura multi-tenant

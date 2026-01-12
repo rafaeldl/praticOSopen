@@ -91,6 +91,36 @@
   "installment": "Cuota",
   "dueDate": "Vencimiento",
   "paymentDate": "Fecha de Pago",
+  "payTotalAmount": "Pagar importe total",
+  "registerPayment": "Registrar Pago",
+  "applyDiscount": "Aplicar Descuento",
+  "paymentAmount": "Importe del pago",
+  "discountAmount": "Importe del descuento",
+  "fillValue": "Complete el valor",
+  "paymentCannotExceedBalance": "El pago no puede exceder el saldo",
+  "discountCannotExceedBalance": "El descuento no puede exceder el saldo",
+  "paymentRegistered": "Pago registrado",
+  "discountApplied": "Descuento aplicado",
+  "register": "Registrar",
+  "history": "Historial",
+  "valueMustBeGreaterThanZero": "El valor debe ser mayor que cero",
+  "exampleCashPayment": "Ej: Pago en efectivo",
+  "exampleLoyaltyDiscount": "Ej: Descuento de fidelidad",
+  "noTransactionsRecorded": "No hay transacciones registradas",
+  "confirmRemoveTransaction": "¿Desea eliminar este {type} de {amount}?",
+  "@confirmRemoveTransaction": {
+    "description": "Mensaje de confirmación para eliminar transacción",
+    "placeholders": {
+      "type": {
+        "type": "String",
+        "example": "pago"
+      },
+      "amount": {
+        "type": "String",
+        "example": "$100.00"
+      }
+    }
+  },
 
   "requiredField": "Campo obligatorio",
   "invalidEmail": "Correo inválido",
@@ -323,7 +353,6 @@
   "login": "Iniciar Sesión",
   "logout": "Cerrar Sesión",
   "logoutConfirm": "¿Realmente desea cerrar sesión?",
-  "register": "Registrarse",
   "signUp": "Crear Cuenta",
   "signIn": "Iniciar Sesión",
   "forgotPassword": "Olvidé mi contraseña",
@@ -502,7 +531,6 @@
   "switchBetweenOrganizations": "Alternar entre organizaciones",
   "management": "Gestión",
   "companyData": "Datos de la Empresa",
-  "procedures": "Procedimientos",
   "interface_": "Interfaz",
   "nightMode": "Modo Nocturno",
   "account": "Cuenta",
@@ -524,6 +552,13 @@
   "requiresRecentLogin": "Por seguridad, Firebase requiere un inicio de sesión reciente antes de eliminar la cuenta.\n\nPor favor:\n1. Cierre sesión de su cuenta\n2. Inicie sesión nuevamente\n3. Intente eliminar la cuenta inmediatamente después de iniciar sesión",
   "noPermissionDelete": "No tiene permiso para eliminar su cuenta. Intente de nuevo más tarde.",
   "networkError": "Error de conexión. Verifique su internet e intente de nuevo.",
+  "reauthenticationRequired": "Re-autenticación Requerida",
+  "pleaseSignInAgainToDelete": "Por razones de seguridad, necesita iniciar sesión nuevamente antes de eliminar su cuenta.",
+  "signInAgain": "Iniciar Sesión Nuevamente",
+  "authenticated": "Autenticado",
+  "nowDeletingAccount": "Ahora puede proceder con la eliminación de la cuenta.",
+  "reauthenticationFailed": "Falló la Re-autenticación",
+  "couldNotReauthenticate": "No se pudo autenticar nuevamente.",
 
   "errorLoadingData": "Error al cargar datos",
   "tapToAddFirst": "Toque + para agregar",
@@ -699,6 +734,34 @@
   "newOrder": "Nueva Orden",
 
   "procedures": "Procedimientos",
+  "searchProcedure": "Buscar procedimiento",
+  "myProcedures": "Mis Procedimientos",
+  "globalProcedures": "Procedimientos Globales",
+  "noProceduresRegistered": "No hay procedimientos registrados",
+  "noProceduresAvailable": "No hay procedimientos disponibles",
+  "tapPlusToCreateFirst": "Toque + para crear su primer procedimiento.",
+  "fromCompany": "De la Empresa",
+  "global": "Globales",
+  "itemCount": "{count} {count, plural, =1{elemento} other{elementos}}",
+  "@itemCount": {
+    "description": "Recuento de elementos con plural correcto",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "importConfirmationMessage": "¿Desea importar el procedimiento \"{title}\" a su empresa?\n\nPodrá editarlo después de la importación.",
+  "@importConfirmationMessage": {
+    "description": "Mensaje de confirmación de importación de procedimiento",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Inspección de Vehículo"
+      }
+    }
+  },
   "errorLoadingProcedures": "Error al cargar procedimientos",
   "tryAgain": "Intente de nuevo",
   "importProcedure": "Importar Procedimiento",

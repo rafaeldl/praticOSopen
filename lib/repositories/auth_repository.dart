@@ -127,6 +127,75 @@ class AuthRepository {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
+  /// Re-authenticates the current user with their provider (Google or Apple)
+  /// This is required before sensitive operations like account deletion
+  Future<void> reauthenticate() async {
+    final User? user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('No authenticated user to reauthenticate');
+    }
+
+    // Check which provider the user used to sign in
+    final providerData = user.providerData;
+    if (providerData.isEmpty) {
+      throw Exception('No provider data found for user');
+    }
+
+    final providerId = providerData.first.providerId;
+
+    try {
+      if (providerId == 'google.com') {
+        // Re-authenticate with Google
+        final GoogleSignInAccount? googleSignInAccount = await _googleSignIn.signIn();
+        if (googleSignInAccount == null) {
+          throw Exception('Login cancelado pelo usuário');
+        }
+
+        final GoogleSignInAuthentication googleSignInAuthentication =
+            await googleSignInAccount.authentication;
+        final AuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleSignInAuthentication.accessToken,
+          idToken: googleSignInAuthentication.idToken,
+        );
+
+        await user.reauthenticateWithCredential(credential);
+        print('✅ Re-authentication with Google successful');
+      } else if (providerId == 'apple.com') {
+        // Re-authenticate with Apple
+        final rawNonce = _generateNonce();
+        final nonce = _sha256ofString(rawNonce);
+
+        final appleIdCredential = await SignInWithApple.getAppleIDCredential(
+          scopes: [
+            AppleIDAuthorizationScopes.email,
+            AppleIDAuthorizationScopes.fullName,
+          ],
+          nonce: nonce,
+          webAuthenticationOptions: WebAuthenticationOptions(
+            clientId: 'br.com.rafsoft.praticos.app',
+            redirectUri: Uri.parse(
+              'https://praticos.firebaseapp.com/__/auth/handler',
+            ),
+          ),
+        );
+
+        final OAuthCredential credential = OAuthProvider("apple.com").credential(
+          idToken: appleIdCredential.identityToken,
+          accessToken: appleIdCredential.authorizationCode,
+          rawNonce: rawNonce,
+        );
+
+        await user.reauthenticateWithCredential(credential);
+        print('✅ Re-authentication with Apple successful');
+      } else {
+        throw Exception('Unsupported provider: $providerId');
+      }
+    } catch (e) {
+      print('❌ Re-authentication failed: $e');
+      rethrow;
+    }
+  }
+
   /// Deletes the current user's account from Firebase Auth.
   /// Note: Firestore data cleanup should be handled separately via Cloud Functions
   /// or before calling this method, as this only deletes the authentication account.

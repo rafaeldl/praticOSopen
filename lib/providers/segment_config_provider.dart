@@ -74,7 +74,10 @@ class SegmentConfigProvider extends ChangeNotifier {
   }
 
   /// Inicializa com um segmento específico
-  Future<void> initialize(String segmentId, {String locale = 'pt-BR'}) async {
+  ///
+  /// NOTE: Não controla locale aqui - isso é feito automaticamente pelo
+  /// MaterialApp builder via injectL10n() quando AppLocalizations muda
+  Future<void> initialize(String segmentId) async {
     if (_service.currentSegmentId == segmentId && _service.isLoaded) {
       return; // Já carregado
     }
@@ -84,7 +87,8 @@ class SegmentConfigProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _service.setLocale(locale);
+      // Apenas carrega o segmento, não força locale
+      // O locale será configurado automaticamente por injectL10n()
       await _service.load(segmentId);
       _isLoading = false;
       notifyListeners();
@@ -96,24 +100,26 @@ class SegmentConfigProvider extends ChangeNotifier {
     }
   }
 
-  /// Injeta o AppLocalizations para usar traduções dos ARB files
+  /// Injeta ou atualiza o AppLocalizations para usar traduções dos ARB files
+  /// Chamado no MaterialApp builder, então é executado a cada rebuild
+  /// Detecta mudanças de locale e recarrega cache automaticamente
   void injectL10n(dynamic l10n) {
     if (l10n != null) {
-      _service.setL10n(l10n);
+      final currentL10nInstance = _service.currentL10n;
+      final isDifferent = currentL10nInstance != l10n;
+
+      if (isDifferent) {
+        // Locale mudou, recarrega cache com nova AppLocalizations
+        _service.updateL10n(l10n);
+      } else {
+        // Primeira injeção ou mesma locale, apenas armazena
+        _service.setL10n(l10n);
+      }
     }
   }
 
-  /// Troca o idioma e recarrega os labels (se um segmento estiver carregado)
-  Future<void> setLocale(String locale) async {
-    _service.setLocale(locale);
-
-    // Only reload if a segment is already loaded
-    if (_service.currentSegmentId != null) {
-      _service.clear();
-      await _service.load(_service.currentSegmentId!);
-      notifyListeners();
-    }
-  }
+  // NOTE: setLocale() removido - locale é controlado automaticamente
+  // via injectL10n() quando MaterialApp rebuilds com novo AppLocalizations
 
   // ════════════════════════════════════════════════════════════
   // LABELS
