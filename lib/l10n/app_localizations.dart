@@ -373,7 +373,7 @@ abstract class AppLocalizations {
   /// No description provided for @no.
   ///
   /// In pt, this message translates to:
-  /// **'Não'**
+  /// **'Nenhum'**
   String get no;
 
   /// No description provided for @more.
@@ -3219,6 +3219,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Minha Empresa'**
   String get myCompany;
+
+  /// No description provided for @noFeminine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma'**
+  String get noFeminine;
+
+  /// No description provided for @registered.
+  ///
+  /// In pt, this message translates to:
+  /// **'cadastrado'**
+  String get registered;
+
+  /// No description provided for @registeredFeminine.
+  ///
+  /// In pt, this message translates to:
+  /// **'cadastrada'**
+  String get registeredFeminine;
+
+  /// No description provided for @errorLoading.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao carregar'**
+  String get errorLoading;
+
+  /// No description provided for @tapPlusToAddYourFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque em + para adicionar seu primeiro'**
+  String get tapPlusToAddYourFirst;
+
+  /// No description provided for @tapPlusToAddYourFirstFeminine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque em + para adicionar sua primeira'**
+  String get tapPlusToAddYourFirstFeminine;
+
+  /// No description provided for @doYouWantToRemoveThe.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja remover o'**
+  String get doYouWantToRemoveThe;
+
+  /// No description provided for @doYouWantToRemoveTheFeminine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja remover a'**
+  String get doYouWantToRemoveTheFeminine;
 }
 
 class _AppLocalizationsDelegate

@@ -579,5 +579,15 @@
   "noSegmentsAvailable": "Nenhum segmento disponível",
   "errorLoadingSegments": "Erro ao carregar segmentos",
   "specialties": "especialidades",
-  "myCompany": "Minha Empresa"
+  "myCompany": "Minha Empresa",
+
+  "no": "Nenhum",
+  "noFeminine": "Nenhuma",
+  "registered": "cadastrado",
+  "registeredFeminine": "cadastrada",
+  "errorLoading": "Erro ao carregar",
+  "tapPlusToAddYourFirst": "Toque em + para adicionar seu primeiro",
+  "tapPlusToAddYourFirstFeminine": "Toque em + para adicionar sua primeira",
+  "doYouWantToRemoveThe": "Deseja remover o",
+  "doYouWantToRemoveTheFeminine": "Deseja remover a"
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class CustomerOsList extends StatefulWidget {
   @override
@@ -55,7 +56,7 @@ class _CustomerOsListState extends State<CustomerOsList> {
     if (rawData == null || rawData.isEmpty) {
       return Center(
         child: Text(
-          'Nenhum ${config.customer.toLowerCase()} cadastrado',
+          '${context.l10n.no} ${config.customer.toLowerCase()} ${context.l10n.registered}',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w400,

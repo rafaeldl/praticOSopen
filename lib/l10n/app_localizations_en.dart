@@ -1587,4 +1587,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get myCompany => 'My Company';
+
+  @override
+  String get noFeminine => 'No';
+
+  @override
+  String get registered => 'registered';
+
+  @override
+  String get registeredFeminine => 'registered';
+
+  @override
+  String get errorLoading => 'Error loading';
+
+  @override
+  String get tapPlusToAddYourFirst => 'Tap + to add your first';
+
+  @override
+  String get tapPlusToAddYourFirstFeminine => 'Tap + to add your first';
+
+  @override
+  String get doYouWantToRemoveThe => 'Do you want to remove the';
+
+  @override
+  String get doYouWantToRemoveTheFeminine => 'Do you want to remove the';
 }

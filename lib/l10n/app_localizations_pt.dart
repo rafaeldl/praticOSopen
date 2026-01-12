@@ -144,7 +144,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get yes => 'Sim';
 
   @override
-  String get no => 'Não';
+  String get no => 'Nenhum';
 
   @override
   String get more => 'Mais';
@@ -1589,4 +1589,29 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get myCompany => 'Minha Empresa';
+
+  @override
+  String get noFeminine => 'Nenhuma';
+
+  @override
+  String get registered => 'cadastrado';
+
+  @override
+  String get registeredFeminine => 'cadastrada';
+
+  @override
+  String get errorLoading => 'Erro ao carregar';
+
+  @override
+  String get tapPlusToAddYourFirst => 'Toque em + para adicionar seu primeiro';
+
+  @override
+  String get tapPlusToAddYourFirstFeminine =>
+      'Toque em + para adicionar sua primeira';
+
+  @override
+  String get doYouWantToRemoveThe => 'Deseja remover o';
+
+  @override
+  String get doYouWantToRemoveTheFeminine => 'Deseja remover a';
 }

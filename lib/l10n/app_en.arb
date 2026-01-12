@@ -547,5 +547,15 @@
   "noSegmentsAvailable": "No segments available",
   "errorLoadingSegments": "Error loading segments",
   "specialties": "specialties",
-  "myCompany": "My Company"
+  "myCompany": "My Company",
+
+  "no": "No",
+  "noFeminine": "No",
+  "registered": "registered",
+  "registeredFeminine": "registered",
+  "errorLoading": "Error loading",
+  "tapPlusToAddYourFirst": "Tap + to add your first",
+  "tapPlusToAddYourFirstFeminine": "Tap + to add your first",
+  "doYouWantToRemoveThe": "Do you want to remove the",
+  "doYouWantToRemoveTheFeminine": "Do you want to remove the"
 }

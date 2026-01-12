@@ -66,7 +66,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar ${config.device.toLowerCase()}',
+                  placeholder: '${context.l10n.search} ${config.device.toLowerCase()}',
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -104,7 +104,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             children: [
               const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
               const SizedBox(height: 16),
-              Text('Erro ao carregar ${config.devicePlural.toLowerCase()}'),
+              Text('${context.l10n.errorLoading} ${config.devicePlural.toLowerCase()}'),
               const SizedBox(height: 16),
               CupertinoButton(
                 child: Text(config.label(LabelKeys.retryAgain)),
@@ -138,7 +138,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 Icon(config.deviceIcon, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
                 const SizedBox(height: 16),
                 Text(
-                  'Nenhum ${config.device.toLowerCase()} cadastrado',
+                  '${context.l10n.no} ${config.device.toLowerCase()} ${context.l10n.registered}',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -147,7 +147,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Toque em + para adicionar seu primeiro ${config.device.toLowerCase()}.',
+                  '${context.l10n.tapPlusToAddYourFirst} ${config.device.toLowerCase()}.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -244,7 +244,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: Text(config.label(LabelKeys.confirmDeletion)),
-              content: Text('Deseja remover o ${config.device.toLowerCase()} "${device.name}"?'),
+              content: Text('${context.l10n.doYouWantToRemoveThe} ${config.device.toLowerCase()} "${device.name}"?'),
               actions: [
                 CupertinoDialogAction(
                   child: Text(config.label(LabelKeys.cancel)),
