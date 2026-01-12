@@ -15,6 +15,7 @@ class Company extends BaseAudit {
   String? phone;
   String? site;
   String? segment; // ID do segmento de negócio (hvac, automotive, etc.)
+  String? country; // Código do país (ISO 3166-1 alpha-2): BR, US, PT, ES, etc.
   List<String>? subspecialties; // IDs das subcategorias: ['mechanical', 'carwash']
   UserAggr? owner;
   List<UserRoleAggr>? users;

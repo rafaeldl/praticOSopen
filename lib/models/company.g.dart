@@ -27,6 +27,7 @@ Company _$CompanyFromJson(Map<String, dynamic> json) => Company()
   ..phone = json['phone'] as String?
   ..site = json['site'] as String?
   ..segment = json['segment'] as String?
+  ..country = json['country'] as String?
   ..subspecialties = (json['subspecialties'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList()
@@ -50,6 +51,7 @@ Map<String, dynamic> _$CompanyToJson(Company instance) => <String, dynamic>{
   'phone': instance.phone,
   'site': instance.site,
   'segment': instance.segment,
+  'country': instance.country,
   'subspecialties': instance.subspecialties,
   'owner': instance.owner?.toJson(),
   'users': instance.users?.map((e) => e.toJson()).toList(),

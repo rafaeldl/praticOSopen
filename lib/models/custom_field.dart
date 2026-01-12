@@ -18,6 +18,12 @@ class CustomField {
   // Para select/radio
   final List<String>? options;
 
+  // Configurações de input mask
+  final List<String>? masks; // Máscaras universais (não variam por país)
+  final Map<String, List<String>>? masksByCountry; // Máscaras por país (BR, US, PT, etc)
+  final String? keyboardType; // 'phone', 'text', 'number', 'email', 'decimal'
+  final String? textCapitalization; // 'characters', 'words', 'sentences', 'none'
+
   // Organização
   final String? section;
   final int? order;
@@ -36,6 +42,10 @@ class CustomField {
     this.prefix,
     this.placeholder,
     this.options,
+    this.masks,
+    this.masksByCountry,
+    this.keyboardType,
+    this.textCapitalization,
     this.section,
     this.order,
   });
@@ -58,6 +68,15 @@ class CustomField {
       options: json['options'] != null
           ? List<String>.from(json['options'])
           : null,
+      masks: json['masks'] != null
+          ? List<String>.from(json['masks'])
+          : null,
+      masksByCountry: json['masksByCountry'] != null
+          ? (json['masksByCountry'] as Map<String, dynamic>).map(
+              (key, value) => MapEntry(key, List<String>.from(value)))
+          : null,
+      keyboardType: json['keyboardType'],
+      textCapitalization: json['textCapitalization'],
       section: json['section'],
       order: json['order'],
     );
@@ -79,6 +98,10 @@ class CustomField {
       if (prefix != null) 'prefix': prefix,
       if (placeholder != null) 'placeholder': placeholder,
       if (options != null) 'options': options,
+      if (masks != null) 'masks': masks,
+      if (masksByCountry != null) 'masksByCountry': masksByCountry,
+      if (keyboardType != null) 'keyboardType': keyboardType,
+      if (textCapitalization != null) 'textCapitalization': textCapitalization,
       if (section != null) 'section': section,
       if (order != null) 'order': order,
     };

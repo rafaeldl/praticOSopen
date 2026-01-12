@@ -341,6 +341,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidDate => 'Invalid date';
 
   @override
+  String get invalidFormat => 'Invalid format';
+
+  @override
+  String get minimum => 'Minimum';
+
+  @override
+  String get maximum => 'Maximum';
+
+  @override
+  String get characters => 'characters';
+
+  @override
   String get selectOption => 'Select an option';
 
   @override

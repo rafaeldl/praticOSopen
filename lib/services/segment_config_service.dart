@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/custom_field.dart';
 import '../l10n/app_localizations.dart';
@@ -17,6 +18,7 @@ class SegmentConfigService {
   // Estado
   String _locale = 'pt-BR';
   String? _segmentId;
+  String? _countryCode; // Código do país (BR, US, PT, ES, etc)
   AppLocalizations? _l10n;
 
   // Cache
@@ -75,6 +77,12 @@ class SegmentConfigService {
         load(_segmentId!).ignore();
       }
     }
+  }
+
+  /// Define o código do país da empresa
+  /// Usado para determinar máscaras e validações específicas por país
+  void setCountry(String? countryCode) {
+    _countryCode = countryCode;
   }
 
   /// Carrega a configuração de um segmento do Firestore
@@ -328,6 +336,117 @@ class SegmentConfigService {
     return label(labelKey);
   }
 
+  /// Obtém CustomField para um campo específico
+  /// Retorna apenas campos reais (isField = true), não labels
+  CustomField? getField(String key) {
+    try {
+      return _customFields.firstWhere(
+        (f) => f.key == key && f.isField,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Obtém máscaras para um campo
+  /// Prioridade: 1. masks (universal), 2. masksByCountry[país], 3. [] (sem máscara)
+  List<String> getMasks(String fieldKey) {
+    final field = getField(fieldKey);
+    if (field == null) return [];
+
+    // 1. Máscaras universais (não variam por país)
+    if (field.masks != null && field.masks!.isNotEmpty) {
+      return field.masks!;
+    }
+
+    // 2. Máscaras por país (regional)
+    if (field.masksByCountry != null && _countryCode != null) {
+      final masks = field.masksByCountry![_countryCode];
+      if (masks != null && masks.isNotEmpty) {
+        return masks;
+      }
+    }
+
+    // 3. Sem máscara (campo livre)
+    return [];
+  }
+
+  /// Obtém tipo de teclado para um campo
+  /// Retorna TextInputType baseado na configuração ou fallback inteligente
+  TextInputType getKeyboardType(String fieldKey) {
+    final field = getField(fieldKey);
+
+    // Se campo tem configuração explícita, usa
+    if (field?.keyboardType != null) {
+      return _parseKeyboardType(field!.keyboardType!);
+    }
+
+    // Fallback inteligente baseado no fieldKey
+    if (fieldKey.contains('phone')) return TextInputType.phone;
+    if (fieldKey.contains('email')) return TextInputType.emailAddress;
+    if (fieldKey.contains('number') || fieldKey.contains('quantity')) {
+      return TextInputType.number;
+    }
+    if (fieldKey.contains('value') || fieldKey.contains('price')) {
+      return const TextInputType.numberWithOptions(decimal: true);
+    }
+
+    return TextInputType.text;
+  }
+
+  /// Obtém capitalização de texto para um campo
+  /// Retorna TextCapitalization baseado na configuração ou fallback
+  TextCapitalization getTextCapitalization(String fieldKey) {
+    final field = getField(fieldKey);
+
+    // Se campo tem configuração explícita, usa
+    if (field?.textCapitalization != null) {
+      return _parseTextCapitalization(field!.textCapitalization!);
+    }
+
+    // Fallback baseado no fieldKey
+    if (fieldKey.contains('serial') || fieldKey.contains('plate')) {
+      return TextCapitalization.characters;
+    }
+    if (fieldKey.contains('name') || fieldKey.contains('title')) {
+      return TextCapitalization.words;
+    }
+
+    return TextCapitalization.none;
+  }
+
+  /// Converte string para TextInputType
+  static TextInputType _parseKeyboardType(String value) {
+    switch (value) {
+      case 'phone':
+        return TextInputType.phone;
+      case 'email':
+        return TextInputType.emailAddress;
+      case 'number':
+        return TextInputType.number;
+      case 'decimal':
+        return const TextInputType.numberWithOptions(decimal: true);
+      case 'url':
+        return TextInputType.url;
+      default:
+        return TextInputType.text;
+    }
+  }
+
+  /// Converte string para TextCapitalization
+  static TextCapitalization _parseTextCapitalization(String value) {
+    switch (value) {
+      case 'characters':
+        return TextCapitalization.characters;
+      case 'words':
+        return TextCapitalization.words;
+      case 'sentences':
+        return TextCapitalization.sentences;
+      default:
+        return TextCapitalization.none;
+    }
+  }
+
   /// Obtém todos os campos customizados de um namespace
   List<CustomField> fieldsFor(String namespace) {
     return _customFields.where((f) => f.namespace == namespace).toList();
@@ -357,5 +476,6 @@ class SegmentConfigService {
   bool get isLoaded => _segmentId != null;
   String? get currentSegmentId => _segmentId;
   String get currentLocale => _locale;
+  String? get countryCode => _countryCode;
   AppLocalizations? get currentL10n => _l10n;
 }

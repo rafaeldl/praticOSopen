@@ -343,6 +343,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get invalidDate => 'Data inválida';
 
   @override
+  String get invalidFormat => 'Formato inválido';
+
+  @override
+  String get minimum => 'Mínimo';
+
+  @override
+  String get maximum => 'Máximo';
+
+  @override
+  String get characters => 'caracteres';
+
+  @override
   String get selectOption => 'Selecione uma opção';
 
   @override

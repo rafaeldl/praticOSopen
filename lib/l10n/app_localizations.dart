@@ -760,6 +760,30 @@ abstract class AppLocalizations {
   /// **'Data inválida'**
   String get invalidDate;
 
+  /// No description provided for @invalidFormat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Formato inválido'**
+  String get invalidFormat;
+
+  /// No description provided for @minimum.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mínimo'**
+  String get minimum;
+
+  /// No description provided for @maximum.
+  ///
+  /// In pt, this message translates to:
+  /// **'Máximo'**
+  String get maximum;
+
+  /// No description provided for @characters.
+  ///
+  /// In pt, this message translates to:
+  /// **'caracteres'**
+  String get characters;
+
   /// No description provided for @selectOption.
   ///
   /// In pt, this message translates to:
