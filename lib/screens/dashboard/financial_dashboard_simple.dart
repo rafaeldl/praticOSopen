@@ -703,7 +703,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'COMPOSIÇÃO',
+                context.l10n.composition.toUpperCase(),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -755,7 +755,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Serviços',
+                              context.l10n.services,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: secondaryColor,
@@ -791,7 +791,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Produtos',
+                              context.l10n.products,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: secondaryColor,
@@ -838,10 +838,10 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         : (filteredRanking.length > 5 ? 5 : filteredRanking.length);
 
     String sectionTitle = orderStore.paymentFilter == 'paid'
-        ? 'CLIENTES - RECEBIDO'
+        ? context.l10n.customersReceived.toUpperCase()
         : orderStore.paymentFilter == 'unpaid'
-            ? 'CLIENTES - A RECEBER'
-            : 'CLIENTES';
+            ? context.l10n.customersToReceive.toUpperCase()
+            : context.l10n.customers.toUpperCase();
 
     // Calculate total for header
     final totalValue = filteredRanking.fold<double>(0, (sum, customer) {
@@ -909,7 +909,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isRankingExpanded ? 'Ver menos' : 'Ver todos (${filteredRanking.length})',
+                        _isRankingExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(filteredRanking.length),
                         style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(width: 4),
@@ -1005,7 +1005,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    customer['name'] ?? 'Cliente sem nome',
+                    customer['name'] ?? context.l10n.customerWithoutName,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -1056,7 +1056,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       if (order?.services != null) {
         for (final service in order!.services!) {
           final name =
-              service.service?.name ?? service.description ?? 'Serviço sem nome';
+              service.service?.name ?? service.description ?? context.l10n.serviceWithoutName;
           final value = service.value ?? 0.0;
 
           if (servicesMap.containsKey(name)) {
@@ -1150,7 +1150,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isServicesExpanded ? 'Ver menos' : 'Ver todos (${servicesRanking.length})',
+                        _isServicesExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(servicesRanking.length),
                         style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(width: 4),
@@ -1182,7 +1182,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       if (order?.products != null) {
         for (final product in order!.products!) {
           final name =
-              product.product?.name ?? product.description ?? 'Produto sem nome';
+              product.product?.name ?? product.description ?? context.l10n.productWithoutName;
           final total =
               product.total ?? (product.value ?? 0.0) * (product.quantity ?? 1);
           final quantity = product.quantity ?? 1;
@@ -1278,7 +1278,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isProductsExpanded ? 'Ver menos' : 'Ver todos (${productsRanking.length})',
+                        _isProductsExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(productsRanking.length),
                         style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(width: 4),
@@ -1426,7 +1426,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isRecentOrdersExpanded ? 'Ver menos' : 'Ver todos (${filteredOrders.length})',
+                        _isRecentOrdersExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(filteredOrders.length),
                         style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(width: 4),
@@ -1652,11 +1652,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         showCupertinoDialog(
           context: currentContext,
           builder: (context) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content: Text('Erro ao gerar relatório: ${e.toString()}'),
+            title: Text(currentContext.l10n.error),
+            content: Text('${currentContext.l10n.errorGeneratingReport}: ${e.toString()}'),
             actions: [
               CupertinoDialogAction(
-                child: const Text('OK'),
+                child: Text(currentContext.l10n.ok),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
