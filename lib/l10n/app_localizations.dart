@@ -1855,7 +1855,7 @@ abstract class AppLocalizations {
   /// No description provided for @tryAgain.
   ///
   /// In pt, this message translates to:
-  /// **'Tente novamente'**
+  /// **'Tentar novamente'**
   String get tryAgain;
 
   /// No description provided for @operationFailed.
@@ -2101,7 +2101,7 @@ abstract class AppLocalizations {
   /// No description provided for @selectSegment.
   ///
   /// In pt, this message translates to:
-  /// **'Selecione seu Segmento'**
+  /// **'Selecionar Segmento'**
   String get selectSegment;
 
   /// No description provided for @selectSpecialties.
@@ -2557,7 +2557,7 @@ abstract class AppLocalizations {
   /// No description provided for @complete.
   ///
   /// In pt, this message translates to:
-  /// **'Completo'**
+  /// **'Concluir'**
   String get complete;
 
   /// No description provided for @incomplete.
@@ -3657,6 +3657,300 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Pendente'**
   String get pendingPayment;
+
+  /// No description provided for @chooseCompanySegment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolha o ramo de atuação da empresa'**
+  String get chooseCompanySegment;
+
+  /// No description provided for @changeLogo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar Logo'**
+  String get changeLogo;
+
+  /// No description provided for @companyNamePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome da Empresa'**
+  String get companyNamePlaceholder;
+
+  /// No description provided for @companyEmailPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'contato@empresa.com'**
+  String get companyEmailPlaceholder;
+
+  /// No description provided for @phonePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'(00) 00000-0000'**
+  String get phonePlaceholder;
+
+  /// No description provided for @fullAddress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Endereço completo'**
+  String get fullAddress;
+
+  /// No description provided for @websitePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'www.empresa.com.br'**
+  String get websitePlaceholder;
+
+  /// No description provided for @segment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Segmento'**
+  String get segment;
+
+  /// No description provided for @website.
+  ///
+  /// In pt, this message translates to:
+  /// **'Site'**
+  String get website;
+
+  /// No description provided for @noName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem nome'**
+  String get noName;
+
+  /// No description provided for @errorSendingPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao Enviar Foto'**
+  String get errorSendingPhoto;
+
+  /// No description provided for @couldNotSendPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível enviar a foto. Tente novamente.'**
+  String get couldNotSendPhoto;
+
+  /// No description provided for @errorSendingPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao Enviar Fotos'**
+  String get errorSendingPhotos;
+
+  /// No description provided for @couldNotSendPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível enviar as fotos. Tente novamente.'**
+  String get couldNotSendPhotos;
+
+  /// No description provided for @requiredFields.
+  ///
+  /// In pt, this message translates to:
+  /// **'Campos Obrigatórios'**
+  String get requiredFields;
+
+  /// No description provided for @pleaseFill.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor preencha:'**
+  String get pleaseFill;
+
+  /// No description provided for @couldNotCompleteForm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível concluir o procedimento. Tente novamente.'**
+  String get couldNotCompleteForm;
+
+  /// No description provided for @noPermissionReopenForm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apenas Administradores, Gerentes e Supervisores podem reabrir procedimentos concluídos.'**
+  String get noPermissionReopenForm;
+
+  /// No description provided for @couldNotReopenForm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível reabrir o procedimento. Tente novamente.'**
+  String get couldNotReopenForm;
+
+  /// No description provided for @formCompleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Procedimento concluído'**
+  String get formCompleted;
+
+  /// No description provided for @noPhotoAdded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma foto adicionada'**
+  String get noPhotoAdded;
+
+  /// No description provided for @tapCameraIconToAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque no ícone da câmera para adicionar'**
+  String get tapCameraIconToAdd;
+
+  /// No description provided for @type.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digitar'**
+  String get type;
+
+  /// No description provided for @errorLoadingPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao carregar foto'**
+  String get errorLoadingPhoto;
+
+  /// No description provided for @reopen.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reabrir'**
+  String get reopen;
+
+  /// No description provided for @addItems.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicione itens'**
+  String get addItems;
+
+  /// No description provided for @pleaseAddAtLeastOneItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Por favor, adicione pelo menos um item ao procedimento.'**
+  String get pleaseAddAtLeastOneItem;
+
+  /// No description provided for @couldNotSaveForm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar o procedimento.'**
+  String get couldNotSaveForm;
+
+  /// No description provided for @removeItem.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover item'**
+  String get removeItem;
+
+  /// No description provided for @minOptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mínimo de opções'**
+  String get minOptions;
+
+  /// No description provided for @pleaseEnterAtLeast2Options.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe pelo menos 2 opções.'**
+  String get pleaseEnterAtLeast2Options;
+
+  /// No description provided for @selectItemType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo do Item'**
+  String get selectItemType;
+
+  /// No description provided for @selectResponseType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione o tipo de resposta esperada'**
+  String get selectResponseType;
+
+  /// No description provided for @itemConfiguration.
+  ///
+  /// In pt, this message translates to:
+  /// **'CONFIGURAÇÃO DO ITEM'**
+  String get itemConfiguration;
+
+  /// No description provided for @formInformation.
+  ///
+  /// In pt, this message translates to:
+  /// **'INFORMAÇÕES'**
+  String get formInformation;
+
+  /// No description provided for @formConfiguration.
+  ///
+  /// In pt, this message translates to:
+  /// **'CONFIGURAÇÕES'**
+  String get formConfiguration;
+
+  /// No description provided for @title.
+  ///
+  /// In pt, this message translates to:
+  /// **'Título'**
+  String get title;
+
+  /// No description provided for @label.
+  ///
+  /// In pt, this message translates to:
+  /// **'Label'**
+  String get label;
+
+  /// No description provided for @itemType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo'**
+  String get itemType;
+
+  /// No description provided for @optionsHeader.
+  ///
+  /// In pt, this message translates to:
+  /// **'OPÇÕES'**
+  String get optionsHeader;
+
+  /// No description provided for @typeOneOptionPerLine.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite uma opção por linha'**
+  String get typeOneOptionPerLine;
+
+  /// No description provided for @allowPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Permitir fotos'**
+  String get allowPhotos;
+
+  /// No description provided for @userCanAttachPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usuário pode anexar fotos a este item'**
+  String get userCanAttachPhotos;
+
+  /// No description provided for @errorLoadingProcedures.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao carregar procedimentos'**
+  String get errorLoadingProcedures;
+
+  /// No description provided for @importProcedure.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importar Procedimento'**
+  String get importProcedure;
+
+  /// No description provided for @importForMyCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importar para Minha Empresa'**
+  String get importForMyCompany;
+
+  /// No description provided for @couldNotImportProcedure.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível importar o procedimento. Tente novamente.'**
+  String get couldNotImportProcedure;
+
+  /// No description provided for @procedureImportedSuccessfully.
+  ///
+  /// In pt, this message translates to:
+  /// **'Procedimento importado com sucesso!'**
+  String get procedureImportedSuccessfully;
+
+  /// No description provided for @closeDialog.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fechar'**
+  String get closeDialog;
 }
 
 class _AppLocalizationsDelegate

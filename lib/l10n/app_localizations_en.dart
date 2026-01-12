@@ -1015,7 +1015,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get letsStart => 'Let\'s Start';
 
   @override
-  String get selectSegment => 'Select your Segment';
+  String get selectSegment => 'Select Segment';
 
   @override
   String get selectSpecialties => 'Select your Specialties';
@@ -1817,4 +1817,157 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pendingPayment => 'Pending';
+
+  @override
+  String get chooseCompanySegment => 'Choose the company\'s line of business';
+
+  @override
+  String get changeLogo => 'Change Logo';
+
+  @override
+  String get companyNamePlaceholder => 'Company Name';
+
+  @override
+  String get companyEmailPlaceholder => 'contact@company.com';
+
+  @override
+  String get phonePlaceholder => '(00) 00000-0000';
+
+  @override
+  String get fullAddress => 'Full address';
+
+  @override
+  String get websitePlaceholder => 'www.company.com';
+
+  @override
+  String get segment => 'Segment';
+
+  @override
+  String get website => 'Website';
+
+  @override
+  String get noName => 'No name';
+
+  @override
+  String get errorSendingPhoto => 'Error Sending Photo';
+
+  @override
+  String get couldNotSendPhoto => 'Could not send photo. Please try again.';
+
+  @override
+  String get errorSendingPhotos => 'Error Sending Photos';
+
+  @override
+  String get couldNotSendPhotos => 'Could not send photos. Please try again.';
+
+  @override
+  String get requiredFields => 'Required Fields';
+
+  @override
+  String get pleaseFill => 'Please fill in:';
+
+  @override
+  String get couldNotCompleteForm =>
+      'Could not complete the procedure. Please try again.';
+
+  @override
+  String get noPermissionReopenForm =>
+      'Only Administrators, Managers and Supervisors can reopen completed procedures.';
+
+  @override
+  String get couldNotReopenForm =>
+      'Could not reopen the procedure. Please try again.';
+
+  @override
+  String get formCompleted => 'Procedure completed';
+
+  @override
+  String get noPhotoAdded => 'No photo added';
+
+  @override
+  String get tapCameraIconToAdd => 'Tap the camera icon to add';
+
+  @override
+  String get type => 'Type';
+
+  @override
+  String get errorLoadingPhoto => 'Error loading photo';
+
+  @override
+  String get reopen => 'Reopen';
+
+  @override
+  String get addItems => 'Add items';
+
+  @override
+  String get pleaseAddAtLeastOneItem =>
+      'Please add at least one item to the procedure.';
+
+  @override
+  String get couldNotSaveForm => 'Could not save the procedure.';
+
+  @override
+  String get removeItem => 'Remove item';
+
+  @override
+  String get minOptions => 'Minimum options';
+
+  @override
+  String get pleaseEnterAtLeast2Options => 'Please enter at least 2 options.';
+
+  @override
+  String get selectItemType => 'Item Type';
+
+  @override
+  String get selectResponseType => 'Select the expected response type';
+
+  @override
+  String get itemConfiguration => 'ITEM CONFIGURATION';
+
+  @override
+  String get formInformation => 'INFORMATION';
+
+  @override
+  String get formConfiguration => 'CONFIGURATION';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get label => 'Label';
+
+  @override
+  String get itemType => 'Type';
+
+  @override
+  String get optionsHeader => 'OPTIONS';
+
+  @override
+  String get typeOneOptionPerLine => 'Type one option per line';
+
+  @override
+  String get allowPhotos => 'Allow photos';
+
+  @override
+  String get userCanAttachPhotos => 'User can attach photos to this item';
+
+  @override
+  String get errorLoadingProcedures => 'Error loading procedures';
+
+  @override
+  String get importProcedure => 'Import Procedure';
+
+  @override
+  String get importForMyCompany => 'Import to My Company';
+
+  @override
+  String get couldNotImportProcedure =>
+      'Could not import the procedure. Please try again.';
+
+  @override
+  String get procedureImportedSuccessfully =>
+      'Procedure imported successfully!';
+
+  @override
+  String get closeDialog => 'Close';
 }

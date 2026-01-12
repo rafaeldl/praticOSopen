@@ -892,7 +892,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorOccurred => 'Ocurrió un error';
 
   @override
-  String get tryAgain => 'Intentar de nuevo';
+  String get tryAgain => 'Intente de nuevo';
 
   @override
   String get operationFailed => 'Operación fallida';
@@ -1015,7 +1015,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get letsStart => 'Empecemos';
 
   @override
-  String get selectSegment => 'Seleccione su Segmento';
+  String get selectSegment => 'Seleccionar Segmento';
 
   @override
   String get selectSpecialties => 'Seleccione sus Especialidades';
@@ -1237,13 +1237,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get clearSignature => 'Limpiar Firma';
 
   @override
-  String get required => 'Obligatorio';
+  String get required => 'Requerido';
 
   @override
   String get optional => 'Opcional';
 
   @override
-  String get complete => 'Completo';
+  String get complete => 'Completar';
 
   @override
   String get incomplete => 'Incompleto';
@@ -1821,4 +1821,160 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pendingPayment => 'Pendiente';
+
+  @override
+  String get chooseCompanySegment => 'Elija el ramo de actividad de la empresa';
+
+  @override
+  String get changeLogo => 'Cambiar Logo';
+
+  @override
+  String get companyNamePlaceholder => 'Nombre de la Empresa';
+
+  @override
+  String get companyEmailPlaceholder => 'contacto@empresa.com';
+
+  @override
+  String get phonePlaceholder => '(00) 00000-0000';
+
+  @override
+  String get fullAddress => 'Dirección completa';
+
+  @override
+  String get websitePlaceholder => 'www.empresa.com';
+
+  @override
+  String get segment => 'Segmento';
+
+  @override
+  String get website => 'Sitio web';
+
+  @override
+  String get noName => 'Sin nombre';
+
+  @override
+  String get errorSendingPhoto => 'Error al Enviar Foto';
+
+  @override
+  String get couldNotSendPhoto =>
+      'No se pudo enviar la foto. Intente de nuevo.';
+
+  @override
+  String get errorSendingPhotos => 'Error al Enviar Fotos';
+
+  @override
+  String get couldNotSendPhotos =>
+      'No se pudieron enviar las fotos. Intente de nuevo.';
+
+  @override
+  String get requiredFields => 'Campos Requeridos';
+
+  @override
+  String get pleaseFill => 'Por favor complete:';
+
+  @override
+  String get couldNotCompleteForm =>
+      'No se pudo completar el procedimiento. Intente de nuevo.';
+
+  @override
+  String get noPermissionReopenForm =>
+      'Solo Administradores, Gerentes y Supervisores pueden reabrir procedimientos completados.';
+
+  @override
+  String get couldNotReopenForm =>
+      'No se pudo reabrir el procedimiento. Intente de nuevo.';
+
+  @override
+  String get formCompleted => 'Procedimiento completado';
+
+  @override
+  String get noPhotoAdded => 'Ninguna foto añadida';
+
+  @override
+  String get tapCameraIconToAdd => 'Toque el icono de la cámara para añadir';
+
+  @override
+  String get type => 'Escribir';
+
+  @override
+  String get errorLoadingPhoto => 'Error al cargar foto';
+
+  @override
+  String get reopen => 'Reabrir';
+
+  @override
+  String get addItems => 'Añadir elementos';
+
+  @override
+  String get pleaseAddAtLeastOneItem =>
+      'Por favor añada al menos un elemento al procedimiento.';
+
+  @override
+  String get couldNotSaveForm => 'No se pudo guardar el procedimiento.';
+
+  @override
+  String get removeItem => 'Eliminar elemento';
+
+  @override
+  String get minOptions => 'Opciones mínimas';
+
+  @override
+  String get pleaseEnterAtLeast2Options => 'Ingrese al menos 2 opciones.';
+
+  @override
+  String get selectItemType => 'Tipo de Elemento';
+
+  @override
+  String get selectResponseType => 'Seleccione el tipo de respuesta esperada';
+
+  @override
+  String get itemConfiguration => 'CONFIGURACIÓN DE ELEMENTO';
+
+  @override
+  String get formInformation => 'INFORMACIÓN';
+
+  @override
+  String get formConfiguration => 'CONFIGURACIÓN';
+
+  @override
+  String get title => 'Título';
+
+  @override
+  String get label => 'Etiqueta';
+
+  @override
+  String get itemType => 'Tipo';
+
+  @override
+  String get optionsHeader => 'OPCIONES';
+
+  @override
+  String get typeOneOptionPerLine => 'Escriba una opción por línea';
+
+  @override
+  String get allowPhotos => 'Permitir fotos';
+
+  @override
+  String get userCanAttachPhotos =>
+      'El usuario puede adjuntar fotos a este elemento';
+
+  @override
+  String get errorLoadingProcedures => 'Error al cargar procedimientos';
+
+  @override
+  String get importProcedure => 'Importar Procedimiento';
+
+  @override
+  String get importForMyCompany => 'Importar a Mi Empresa';
+
+  @override
+  String get couldNotImportProcedure =>
+      'No se pudo importar el procedimiento. Intente de nuevo.';
+
+  @override
+  String get procedureImportedSuccessfully =>
+      '¡Procedimiento importado con éxito!';
+
+  @override
+  String get closeDialog => 'Cerrar';
 }

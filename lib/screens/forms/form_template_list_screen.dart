@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'
     show Colors, Material, MaterialType, Divider, InkWell;
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/form_template_store.dart';
 import 'package:praticos/models/form_definition.dart';
 
@@ -36,7 +37,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Procedimentos'),
+              largeTitle: Text(context.l10n.procedures),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
@@ -96,10 +97,10 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                 const Icon(CupertinoIcons.exclamationmark_circle,
                     size: 48, color: CupertinoColors.systemRed),
                 const SizedBox(height: 16),
-                const Text('Erro ao carregar procedimentos'),
+                Text(context.l10n.errorLoadingProcedures),
                 const SizedBox(height: 16),
                 CupertinoButton(
-                  child: const Text('Tentar novamente'),
+                  child: Text(context.l10n.tryAgain),
                   onPressed: () => templateStore.retrieveTemplates(),
                 )
               ],
@@ -282,17 +283,17 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
           return await showCupertinoDialog<bool>(
                 context: context,
                 builder: (context) => CupertinoAlertDialog(
-                  title: const Text('Confirmar exclusão'),
+                  title: Text(context.l10n.confirmDelete),
                   content: Text(
-                      'Deseja remover o procedimento "${template.title}"?'),
+                      '${context.l10n.discard} "${template.title}"?'),
                   actions: [
                     CupertinoDialogAction(
-                      child: const Text('Cancelar'),
+                      child: Text(context.l10n.cancel),
                       onPressed: () => Navigator.pop(context, false),
                     ),
                     CupertinoDialogAction(
                       isDestructiveAction: true,
-                      child: const Text('Remover'),
+                      child: Text(context.l10n.delete),
                       onPressed: () => Navigator.pop(context, true),
                     ),
                   ],
@@ -543,12 +544,12 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
               Navigator.pop(ctx);
               _importGlobalTemplate(template);
             },
-            child: const Text('Importar para Minha Empresa'),
+            child: Text(context.l10n.importForMyCompany),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Fechar'),
+          child: Text(context.l10n.closeDialog),
         ),
       ),
     );
@@ -558,17 +559,17 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Importar Procedimento'),
+        title: Text(context.l10n.importProcedure),
         content: Text(
             'Deseja importar o procedimento "${template.title}" para sua empresa?\n\nVocê poderá editá-lo após a importação.'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
           ),
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Importar'),
+            child: Text(context.l10n.import),
           ),
         ],
       ),
@@ -583,12 +584,12 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Sucesso'),
-            content: const Text('Procedimento importado com sucesso!'),
+            title: Text(context.l10n.confirmAction),
+            content: Text(context.l10n.procedureImportedSuccessfully),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),
@@ -599,13 +600,12 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content:
-                const Text('Não foi possível importar o procedimento. Tente novamente.'),
+            title: Text(context.l10n.error),
+            content: Text(context.l10n.couldNotImportProcedure),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),

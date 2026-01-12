@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -122,12 +123,12 @@ class _FormFillScreenState extends State<FormFillScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro ao Enviar Foto'),
-            content: const Text('Não foi possível enviar a foto. Tente novamente.'),
+            title: Text(context.l10n.errorSendingPhoto),
+            content: Text(context.l10n.couldNotSendPhoto),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),
@@ -199,12 +200,12 @@ class _FormFillScreenState extends State<FormFillScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro ao Enviar Fotos'),
-            content: const Text('Não foi possível enviar as fotos. Tente novamente.'),
+            title: Text(context.l10n.errorSendingPhotos),
+            content: Text(context.l10n.couldNotSendPhotos),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),
@@ -258,12 +259,12 @@ class _FormFillScreenState extends State<FormFillScreen> {
       showCupertinoDialog(
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
-          title: const Text('Campos Obrigatórios'),
-          content: Text('Por favor preencha:\n${missingRequired.map((e) => "• ${e.label}").join("\n")}'),
+          title: Text(context.l10n.requiredFields),
+          content: Text('${context.l10n.pleaseFill}\n${missingRequired.map((e) => "• ${e.label}").join("\n")}'),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
+              child: Text(context.l10n.ok),
             ),
           ],
         ),
@@ -289,12 +290,12 @@ class _FormFillScreenState extends State<FormFillScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content: const Text('Não foi possível concluir o procedimento. Tente novamente.'),
+            title: Text(context.l10n.error),
+            content: Text(context.l10n.couldNotCompleteForm),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),
@@ -366,12 +367,12 @@ class _FormFillScreenState extends State<FormFillScreen> {
       showCupertinoDialog(
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
-          title: const Text('Sem Permissão'),
-          content: const Text('Apenas Administradores, Gerentes e Supervisores podem reabrir procedimentos concluídos.'),
+          title: Text(context.l10n.noPermission),
+          content: Text(context.l10n.noPermissionReopenForm),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
+              child: Text(context.l10n.ok),
             ),
           ],
         ),
@@ -399,12 +400,12 @@ class _FormFillScreenState extends State<FormFillScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content: const Text('Não foi possível reabrir o procedimento. Tente novamente.'),
+            title: Text(context.l10n.error),
+            content: Text(context.l10n.couldNotReopenForm),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),
@@ -448,19 +449,19 @@ class _FormFillScreenState extends State<FormFillScreen> {
               Navigator.pop(ctx);
               _addPhoto(itemId, ImageSource.camera);
             },
-            child: const Text('Tirar Foto'),
+            child: Text(context.l10n.takePhoto),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(ctx);
               _addPhoto(itemId, ImageSource.gallery);
             },
-            child: const Text('Escolher da Galeria'),
+            child: Text(context.l10n.chooseFromGallery),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancelar'),
+          child: Text(context.l10n.cancel),
         ),
       ),
     );
@@ -520,7 +521,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: _handleClose,
-              child: const Text('Fechar'),
+              child: Text(context.l10n.close),
             ),
             trailing: _isSaving
                 ? const CupertinoActivityIndicator()
@@ -529,18 +530,18 @@ class _FormFillScreenState extends State<FormFillScreen> {
                         ? CupertinoButton(
                             padding: EdgeInsets.zero,
                             onPressed: _reopenForm,
-                            child: const Text(
-                              'Reabrir',
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                            child: Text(
+                              context.l10n.reopen,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
                             ),
                           )
                         : null
                     : CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: _finishForm,
-                        child: const Text(
-                          'Concluir',
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                        child: Text(
+                          context.l10n.complete,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),
           ),
@@ -566,7 +567,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Procedimento concluído',
+                            context.l10n.formCompleted,
                             style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                               color: CupertinoColors.systemGreen,
                               fontWeight: FontWeight.w500,
@@ -687,8 +688,8 @@ class _FormFillScreenState extends State<FormFillScreen> {
           return CupertinoListTile(
             title: Text(
               isCompleted
-                ? 'Nenhuma foto adicionada'
-                : 'Toque no ícone da câmera para adicionar',
+                ? context.l10n.noPhotoAdded
+                : context.l10n.tapCameraIconToAdd,
               style: TextStyle(
                 color: CupertinoColors.secondaryLabel.resolveFrom(context),
                 fontSize: 15,
@@ -784,7 +785,7 @@ class _TextInputTileState extends State<_TextInputTile> {
   Widget build(BuildContext context) {
     return CupertinoTextFormFieldRow(
       controller: _controller,
-      placeholder: widget.isReadOnly ? '' : 'Digitar',
+      placeholder: widget.isReadOnly ? '' : context.l10n.type,
       textAlign: TextAlign.right,
       enabled: !widget.isReadOnly,
       style: CupertinoTheme.of(context).textTheme.textStyle,
@@ -830,14 +831,14 @@ class _BooleanInputTile extends StatelessWidget {
               true: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: Text(
-                  'Sim',
+                  context.l10n.yes,
                   style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
                 ),
               ),
               false: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 child: Text(
-                  'Não',
+                  context.l10n.no,
                   style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontSize: 14),
                 ),
               ),
@@ -867,7 +868,7 @@ class _SelectInputTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isChecklist = item.type == FormItemType.checklist;
-    String displayValue = 'Selecionar';
+    String displayValue = context.l10n.select;
     bool hasValue = false;
 
     final responseValue = response?.value;
@@ -954,13 +955,13 @@ class _ChecklistSelectionScreenState extends State<_ChecklistSelectionScreen> {
             largeTitle: Text(widget.title),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
-              child: const Text('Cancelar'),
+              child: Text(context.l10n.cancel),
               onPressed: () => Navigator.pop(context),
             ),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: () => Navigator.pop(context, _selected),
-              child: const Text('OK', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: Text(context.l10n.ok, style: const TextStyle(fontWeight: FontWeight.w600)),
             ),
           ),
           SliverSafeArea(
@@ -1095,7 +1096,7 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Erro ao carregar foto',
+                            context.l10n.errorLoadingPhoto,
                             style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                               color: CupertinoColors.white,
                             ),
@@ -1118,12 +1119,12 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
       context: context,
       builder: (dialogContext) {
         return CupertinoAlertDialog(
-          title: const Text('Remover Foto'),
-          content: const Text('Tem certeza que deseja remover esta foto?'),
+          title: Text(context.l10n.removePhoto),
+          content: Text(context.l10n.cannotUndo),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancelar'),
+              child: Text(context.l10n.cancel),
             ),
             CupertinoDialogAction(
               isDestructiveAction: true,
@@ -1148,7 +1149,7 @@ class _PhotoGalleryScreenState extends State<_PhotoGalleryScreen> {
                   }
                 }
               },
-              child: const Text('Remover'),
+              child: Text(context.l10n.delete),
             ),
           ],
         );
