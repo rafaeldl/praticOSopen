@@ -1,4 +1,19 @@
-Esta actualización incluye:
-• Mejoras de rendimiento
-• Corrección de errores
-• Mejoras de UI/UX
+Novedades en esta versión:
+
+• Sistema de Perfiles de Usuario: Control completo de permisos por rol (Propietario, Administrador, Gerente, Supervisor, Técnico y Visualizador). Cada perfil tiene acceso específico a las funciones de la app.
+
+• Pagos Parciales: Registre y siga múltiples pagos para una misma orden de servicio, con historial completo de transacciones en el PDF.
+
+• Búsqueda Mejorada: Nueva búsqueda con scroll infinito, filtros en chips e indicador de fecha de vencimiento con resaltado visual para órdenes atrasadas.
+
+• Formularios Dinámicos: Cree checklists y procedimientos personalizados, con selección múltiple de fotos y navegación por swipe en la galería.
+
+• Edición de Perfil: Actualice sus datos y foto de perfil directamente en la app.
+
+• Sistema de Invitaciones: Invite colaboradores por correo electrónico a su empresa.
+
+• Mejoras en la Interfaz: Rediseño de la lista de órdenes de servicio siguiendo las guías Apple HIG, modo oscuro totalmente funcional y varias correcciones visuales.
+
+• PDF Mejorado: Diseño optimizado con enlaces a las tiendas y resaltado para los valores pagados.
+
+¡Gracias por usar PraticOS!

@@ -5,6 +5,7 @@ import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/menu_navigation/settings.dart';
 import 'package:praticos/routes.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 import 'home.dart';
 
@@ -64,7 +65,7 @@ class _NavigationControllerState extends State<NavigationController> {
               child: const Icon(CupertinoIcons.house),
             ),
             activeIcon: const Icon(CupertinoIcons.house_fill),
-            label: 'Início',
+            label: context.l10n.home,
           ),
           BottomNavigationBarItem(
             icon: Semantics(
@@ -72,14 +73,14 @@ class _NavigationControllerState extends State<NavigationController> {
               child: const Icon(CupertinoIcons.person_2),
             ),
             activeIcon: const Icon(CupertinoIcons.person_2_fill),
-            label: 'Clientes',
+            label: context.l10n.customers,
           ),
           BottomNavigationBarItem(
             icon: Semantics(
               identifier: 'tab_settings',
               child: const Icon(CupertinoIcons.ellipsis),
             ),
-            label: 'Mais',
+            label: context.l10n.more,
           ),
         ],
       ),

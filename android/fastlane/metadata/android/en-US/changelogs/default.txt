@@ -1,4 +1,4 @@
-What's New:
+What's new:
 
 • User Profiles: Permission control by role (Owner, Admin, Manager, Technician, etc.)
 
