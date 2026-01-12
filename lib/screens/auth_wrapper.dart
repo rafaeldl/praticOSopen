@@ -202,7 +202,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
 
       // Pega a primeira empresa (ou a empresa já carregada no store)
-      final companyId = widget.authStore.companyAggr?.id ?? companies[0];
+      final companyId = widget.authStore.companyAggr?.id ??
+          companies[0]['company']['id'] as String;
 
       final companyDoc = await FirebaseFirestore.instance
           .collection('companies')

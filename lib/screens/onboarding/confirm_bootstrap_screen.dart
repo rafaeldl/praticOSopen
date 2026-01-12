@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/models/company.dart';
+import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/services/bootstrap_service.dart';
@@ -175,6 +177,12 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
             locale: _currentLocale,
           );
         }
+      }
+
+      // Reload authStore to update companyAggr
+      if (mounted) {
+        final authStore = Provider.of<AuthStore>(context, listen: false);
+        await authStore.reloadUserAndCompany();
       }
 
       if (mounted) {
