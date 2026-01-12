@@ -2,9 +2,10 @@ import 'package:currency_text_input_formatter/currency_text_input_formatter.dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/services/format_service.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 /// Unified payment management screen that combines:
 /// - Financial summary
@@ -26,13 +27,6 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   int _selectedType = 0; // 0 = payment, 1 = discount
   final TextEditingController _valueController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-
-  final NumberFormat _currencyFormat = NumberFormat.currency(
-    locale: 'pt-BR',
-    symbol: 'R\$',
-  );
-
-  final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
   @override
   void didChangeDependencies() {
@@ -59,7 +53,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     if (_store != null && _selectedType == 0) {
       final remaining = _store!.remainingBalance;
       if (remaining > 0) {
-        _valueController.text = _currencyFormat.format(remaining);
+        _valueController.text = FormatService().formatCurrency(remaining);
       }
     }
   }
@@ -73,8 +67,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         type: MaterialType.transparency,
         child: CustomScrollView(
           slivers: [
-            const CupertinoSliverNavigationBar(
-              largeTitle: Text('Pagamentos'),
+            CupertinoSliverNavigationBar(
+              largeTitle: Text(context.l10n.payments),
             ),
             SliverSafeArea(
               top: false,
@@ -109,28 +103,28 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         final isFullyPaid = _store?.isFullyPaid ?? false;
 
         return _buildGroupedSection(
-          header: 'RESUMO',
+          header: context.l10n.overview.toUpperCase(),
           children: [
             _buildSummaryRow(
               icon: CupertinoIcons.money_dollar_circle_fill,
               iconColor: CupertinoColors.systemBlue,
-              label: 'Total da OS',
-              value: _currencyFormat.format(total),
+              label: context.l10n.total,
+              value: FormatService().formatCurrency(total),
               valueColor: CupertinoColors.label.resolveFrom(context),
             ),
             if (discount > 0)
               _buildSummaryRow(
                 icon: CupertinoIcons.tag_fill,
                 iconColor: CupertinoColors.systemOrange,
-                label: 'Descontos',
-                value: '- ${_currencyFormat.format(discount)}',
+                label: context.l10n.discount,
+                value: '- ${FormatService().formatCurrency(discount)}',
                 valueColor: CupertinoColors.systemOrange,
               ),
             _buildSummaryRow(
               icon: CupertinoIcons.checkmark_circle_fill,
               iconColor: CupertinoColors.systemGreen,
-              label: 'Já pago',
-              value: _currencyFormat.format(paid),
+              label: context.l10n.totalPaid,
+              value: FormatService().formatCurrency(paid),
               valueColor: CupertinoColors.systemGreen,
             ),
             _buildSummaryRow(
@@ -140,8 +134,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               iconColor: isFullyPaid
                   ? CupertinoColors.systemGreen
                   : CupertinoColors.systemOrange,
-              label: 'Saldo restante',
-              value: _currencyFormat.format(remaining),
+              label: context.l10n.remaining,
+              value: FormatService().formatCurrency(remaining),
               valueColor: isFullyPaid
                   ? CupertinoColors.systemGreen
                   : CupertinoColors.systemOrange,
@@ -243,8 +237,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               const SizedBox(height: 12),
               Text(
                 isQuote
-                    ? 'Pagamentos não disponíveis'
-                    : 'OS cancelada',
+                    ? context.l10n.payments
+                    : context.l10n.statusCancelled,
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
@@ -254,8 +248,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               const SizedBox(height: 4),
               Text(
                 isQuote
-                    ? 'Aprove o orçamento para registrar pagamentos'
-                    : 'Não é possível registrar pagamentos',
+                    ? context.l10n.statusQuote
+                    : context.l10n.statusCancelled,
                 style: TextStyle(
                   fontSize: 15,
                   color: CupertinoColors.tertiaryLabel.resolveFrom(context),
@@ -287,7 +281,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Totalmente pago',
+                    context.l10n.paid,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -301,7 +295,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                 padding: EdgeInsets.zero,
                 onPressed: _confirmResetPayment,
                 child: Text(
-                  'Marcar como A Receber',
+                  context.l10n.toReceive,
                   style: TextStyle(
                     fontSize: 15,
                     color: CupertinoColors.systemRed,
@@ -320,7 +314,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     final isPayment = _selectedType == 0;
 
     return _buildGroupedSection(
-      header: 'REGISTRAR',
+      header: context.l10n.register.toUpperCase(),
       children: [
         // Segmented Control
         Padding(
@@ -356,7 +350,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Pagamento',
+                        context.l10n.payment,
                         style: TextStyle(
                           color: _selectedType == 0
                               ? CupertinoColors.label.resolveFrom(context)
@@ -383,7 +377,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Desconto',
+                        context.l10n.discount,
                         style: TextStyle(
                           color: _selectedType == 1
                               ? CupertinoColors.label.resolveFrom(context)
@@ -406,7 +400,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isPayment ? 'Valor do pagamento' : 'Valor do desconto',
+                isPayment ? context.l10n.paymentAmount : context.l10n.discountAmount,
                 style: TextStyle(
                   fontSize: 13,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -415,7 +409,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               const SizedBox(height: 8),
               CupertinoTextField(
                 controller: _valueController,
-                placeholder: 'R\$ 0,00',
+                placeholder: FormatService().formatCurrency(0),
                 prefix: Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: Icon(
@@ -456,7 +450,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Observação (opcional)',
+                '${context.l10n.observation} (${context.l10n.optional})',
                 style: TextStyle(
                   fontSize: 13,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -466,8 +460,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               CupertinoTextField(
                 controller: _descriptionController,
                 placeholder: isPayment
-                    ? 'Ex: Pagamento em dinheiro'
-                    : 'Ex: Desconto de fidelidade',
+                    ? context.l10n.exampleCashPayment
+                    : context.l10n.exampleLoyaltyDiscount,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                 maxLines: 2,
@@ -491,7 +485,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
             width: double.infinity,
             child: CupertinoButton.filled(
               onPressed: _registerTransaction,
-              child: Text(isPayment ? 'Registrar Pagamento' : 'Aplicar Desconto'),
+              child: Text(isPayment ? context.l10n.registerPayment : context.l10n.applyDiscount),
             ),
           ),
         ),
@@ -513,7 +507,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Pagar valor total: ${_currencyFormat.format(remaining)}',
+                    '${context.l10n.payTotalAmount}: ${FormatService().formatCurrency(remaining)}',
                     style: TextStyle(
                       fontSize: 15,
                       color: CupertinoTheme.of(context).primaryColor,
@@ -538,7 +532,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
         if (transactions.isEmpty) {
           return _buildGroupedSection(
-            header: 'HISTÓRICO',
+            header: context.l10n.history.toUpperCase(),
             children: [
               Padding(
                 padding: const EdgeInsets.all(32),
@@ -552,7 +546,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'Nenhuma transação registrada',
+                        context.l10n.noTransactionsRecorded,
                         style: TextStyle(
                           fontSize: 15,
                           color: CupertinoColors.secondaryLabel
@@ -572,7 +566,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         sortedTransactions.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         return _buildGroupedSection(
-          header: 'HISTÓRICO',
+          header: context.l10n.history.toUpperCase(),
           children: sortedTransactions.asMap().entries.map((entry) {
             final index = transactions.indexOf(entry.value);
             final transaction = entry.value;
@@ -640,7 +634,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          transaction.typeLabel,
+                          transaction.typeLabel(context.l10n),
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w500,
@@ -650,7 +644,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                         const SizedBox(height: 2),
                         Text(
                           transaction.description ??
-                              _dateFormat.format(transaction.createdAt),
+                              FormatService().formatDateTime(transaction.createdAt),
                           style: TextStyle(
                             fontSize: 13,
                             color: CupertinoColors.secondaryLabel
@@ -661,7 +655,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                         ),
                         if (transaction.description != null)
                           Text(
-                            _dateFormat.format(transaction.createdAt),
+                            FormatService().formatDateTime(transaction.createdAt),
                             style: TextStyle(
                               fontSize: 12,
                               color: CupertinoColors.tertiaryLabel
@@ -674,8 +668,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                   // Amount
                   Text(
                     isPayment
-                        ? '+ ${_currencyFormat.format(transaction.amount)}'
-                        : '- ${_currencyFormat.format(transaction.amount)}',
+                        ? '+ ${FormatService().formatCurrency(transaction.amount)}'
+                        : '- ${FormatService().formatCurrency(transaction.amount)}',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -742,29 +736,45 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   // ============================================================
 
   double _parseValue(String value) {
-    final cleanValue = value
-        .replaceAll(RegExp(r'R\$'), '')
-        .replaceAll(RegExp(r'BRL'), '')
-        .replaceAll(RegExp(r'\.'), '')
-        .replaceAll(RegExp(r','), '.')
-        .trim();
-    return double.tryParse(cleanValue) ?? 0;
+    if (value.isEmpty) return 0;
+
+    try {
+      // Tenta fazer parse usando o formato de moeda do locale atual
+      final formatService = FormatService();
+      final currencyFormat = formatService.currencyFormat;
+
+      // Remove espaços extras
+      final cleanValue = value.trim();
+
+      // Tenta parsear usando o NumberFormat do locale
+      final parsed = currencyFormat.parse(cleanValue);
+      return parsed.toDouble();
+    } catch (e) {
+      // Fallback: tenta remover símbolos comuns e parsear
+      final cleanValue = value
+          .replaceAll(RegExp(r'[R\$€£¥\s]'), '') // Remove símbolos de moeda e espaços
+          .replaceAll(RegExp(r'\.(?=.*,)'), '') // Remove pontos antes de vírgula (pt-BR)
+          .replaceAll(RegExp(r',(?=.*\.)'), '') // Remove vírgulas antes de ponto (en-US)
+          .replaceAll(',', '.') // Normaliza decimal para ponto
+          .trim();
+      return double.tryParse(cleanValue) ?? 0;
+    }
   }
 
   String? _validateValue(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Preencha o valor';
+      return context.l10n.fillValue;
     }
 
     final valueDouble = _parseValue(value);
     if (valueDouble <= 0) {
-      return 'O valor deve ser maior que zero';
+      return context.l10n.valueMustBeGreaterThanZero;
     }
 
     if (_store != null && valueDouble > _store!.remainingBalance) {
       return _selectedType == 0
-          ? 'Pagamento não pode ser maior que o saldo'
-          : 'Desconto não pode ser maior que o saldo';
+          ? context.l10n.paymentCannotExceedBalance
+          : context.l10n.discountCannotExceedBalance;
     }
 
     return null;
@@ -794,14 +804,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
     // Show feedback
     _showSuccess(_selectedType == 0
-        ? 'Pagamento registrado'
-        : 'Desconto aplicado');
+        ? context.l10n.paymentRegistered
+        : context.l10n.discountApplied);
   }
 
   void _fillRemainingBalance() {
     final remaining = _store?.remainingBalance ?? 0.0;
     if (remaining > 0) {
-      _valueController.text = _currencyFormat.format(remaining);
+      _valueController.text = FormatService().formatCurrency(remaining);
     }
   }
 
@@ -809,13 +819,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Marcar como A Receber'),
-        content: const Text(
-          'Isso irá remover todos os pagamentos e descontos registrados. Deseja continuar?',
-        ),
+        title: Text(context.l10n.markAsToReceive),
+        content: Text(context.l10n.thisWillRemoveAllPayments),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -824,7 +832,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               Navigator.pop(context);
               _resetPayment();
             },
-            child: const Text('Confirmar'),
+            child: Text(context.l10n.confirm),
           ),
         ],
       ),
@@ -847,13 +855,16 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: Text('Remover ${transaction.typeLabel}'),
+        title: Text('${context.l10n.remove} ${transaction.typeLabel(context.l10n)}'),
         content: Text(
-          'Deseja remover este ${transaction.typeLabel.toLowerCase()} de ${_currencyFormat.format(transaction.amount)}?',
+          context.l10n.confirmRemoveTransaction(
+            transaction.typeLabel(context.l10n).toLowerCase(),
+            FormatService().formatCurrency(transaction.amount),
+          ),
         ),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -863,7 +874,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               _store?.removeTransaction(index);
               _prefillValue();
             },
-            child: const Text('Remover'),
+            child: Text(context.l10n.remove),
           ),
         ],
       ),
@@ -874,11 +885,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Atenção'),
+        title: Text(context.l10n.attention),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -905,7 +916,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),
         ],

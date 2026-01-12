@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/user.dart';
+import 'package:praticos/services/format_service.dart';
 
 part 'payment_transaction.g.dart';
 
@@ -74,20 +76,21 @@ class PaymentTransaction {
   }
 
   /// Retorna o valor formatado com sinal (+ para pagamento, - para desconto)
-  String get formattedAmount {
+  String formattedAmount(FormatService formatService) {
+    final formatted = formatService.formatCurrency(amount);
     if (type == PaymentTransactionType.discount) {
-      return '- R\$ ${amount.toStringAsFixed(2)}';
+      return '- $formatted';
     }
-    return '+ R\$ ${amount.toStringAsFixed(2)}';
+    return '+ $formatted';
   }
 
-  /// Retorna o label do tipo de transação
-  String get typeLabel {
+  /// Retorna o label do tipo de transação localizado
+  String typeLabel(AppLocalizations l10n) {
     switch (type) {
       case PaymentTransactionType.payment:
-        return 'Pagamento';
+        return l10n.payment;
       case PaymentTransactionType.discount:
-        return 'Desconto';
+        return l10n.discount;
     }
   }
 }

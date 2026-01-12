@@ -5,15 +5,16 @@ import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 import '../../global.dart';
 
@@ -34,9 +35,13 @@ class _HomeState extends State<Home> {
   List<Map<String, dynamic>> _getFilters(SegmentConfigProvider config) {
     final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
 
+    final l10n = WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'pt'
+        ? _PtLabels()
+        : (WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'es' ? _EsLabels() : _EnLabels());
+
     final baseFilters = [
-      {'status': 'Todos', 'icon': CupertinoIcons.square_grid_2x2, 'field': null},
-      {'status': 'Entrega', 'field': 'due_date', 'icon': CupertinoIcons.clock},
+      {'status': l10n.all, 'icon': CupertinoIcons.square_grid_2x2, 'field': null},
+      {'status': l10n.delivery, 'field': 'due_date', 'icon': CupertinoIcons.clock},
       {'status': config.getStatus('approved'), 'field': 'approved', 'icon': CupertinoIcons.hand_thumbsup},
       {'status': config.getStatus('progress'), 'field': 'progress', 'icon': CupertinoIcons.arrow_2_circlepath},
       {'status': config.getStatus('quote'), 'field': 'quote', 'icon': CupertinoIcons.doc_text},
@@ -47,8 +52,8 @@ class _HomeState extends State<Home> {
     // Apenas adicionar filtros financeiros se usuário tem permissão
     if (canViewPrices) {
       baseFilters.addAll([
-        {'status': 'A receber', 'field': 'unpaid', 'icon': CupertinoIcons.money_dollar},
-        {'status': 'Pago', 'field': 'paid', 'icon': CupertinoIcons.money_dollar_circle},
+        {'status': l10n.toReceive, 'field': 'unpaid', 'icon': CupertinoIcons.money_dollar},
+        {'status': l10n.paid, 'field': 'paid', 'icon': CupertinoIcons.money_dollar_circle},
       ]);
     }
 
@@ -179,7 +184,7 @@ class _HomeState extends State<Home> {
                                    color: CupertinoColors.activeBlue,
                                  ),
                                  const SizedBox(width: 8),
-                                 const Text('Carregar mais'),
+                                 Text(context.l10n.seeMore),
                                ],
                              ),
                            ),
@@ -214,7 +219,7 @@ class _HomeState extends State<Home> {
               Semantics(
                 identifier: 'dashboard_button',
                 button: true,
-                label: 'Painel Financeiro',
+                label: context.l10n.dashboard,
                 child: CupertinoButton(
                   padding: EdgeInsets.zero,
                   child: const Icon(CupertinoIcons.chart_bar_alt_fill),
@@ -303,7 +308,7 @@ class _HomeState extends State<Home> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
         child: CupertinoSearchTextField(
           controller: _searchController,
-          placeholder: 'Buscar ${config.serviceOrderPlural}',
+          placeholder: '${context.l10n.search} ${config.serviceOrderPlural}',
           onChanged: (value) {
             setState(() => _searchQuery = value.toLowerCase());
           },
@@ -460,7 +465,7 @@ class _HomeState extends State<Home> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Nenhuma ${config.serviceOrder} encontrada',
+                    context.l10n.noOrders,
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -469,7 +474,7 @@ class _HomeState extends State<Home> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Toque em + para criar uma nova',
+                    context.l10n.noData,
                     style: TextStyle(
                       fontSize: 15,
                       color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -496,7 +501,7 @@ class _HomeState extends State<Home> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Nenhum resultado encontrado',
+                      context.l10n.noResults,
                       style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w600,
@@ -507,7 +512,7 @@ class _HomeState extends State<Home> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: Text(
-                        'Há mais ordens para carregar. Role para baixo ou toque no botão para buscar nas próximas páginas.',
+                        context.l10n.seeMore,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 15,
@@ -534,7 +539,7 @@ class _HomeState extends State<Home> {
                                   color: CupertinoColors.activeBlue,
                                 ),
                                 const SizedBox(width: 8),
-                                const Text('Carregar mais'),
+                                Text(context.l10n.seeMore),
                               ],
                             ),
                     ),
@@ -548,7 +553,7 @@ class _HomeState extends State<Home> {
           return SliverFillRemaining(
             child: Center(
               child: Text(
-                'Nenhum resultado encontrado',
+                context.l10n.noResults,
                 style: TextStyle(
                   fontSize: 15,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -649,7 +654,7 @@ class _HomeState extends State<Home> {
                             if (order.dueDate != null) ...[
                               const SizedBox(width: 8),
                               Text(
-                                DateFormat('dd/MM').format(order.dueDate!),
+                                FormatService().formatDayMonth(order.dueDate),
                                 style: TextStyle(
                                   fontSize: 15,
                                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -824,6 +829,35 @@ class _HomeState extends State<Home> {
   }
 
   String _formatCurrency(double? value) {
-    return NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$', decimalDigits: 2).format(value ?? 0);
+    return FormatService().formatCurrency(value ?? 0, decimalDigits: 2);
   }
+}
+
+// Helper classes for filter labels (used outside BuildContext)
+abstract class _FilterLabels {
+  String get all;
+  String get delivery;
+  String get toReceive;
+  String get paid;
+}
+
+class _PtLabels implements _FilterLabels {
+  @override String get all => 'Todos';
+  @override String get delivery => 'Entrega';
+  @override String get toReceive => 'A receber';
+  @override String get paid => 'Pago';
+}
+
+class _EnLabels implements _FilterLabels {
+  @override String get all => 'All';
+  @override String get delivery => 'Delivery';
+  @override String get toReceive => 'Receivable';
+  @override String get paid => 'Paid';
+}
+
+class _EsLabels implements _FilterLabels {
+  @override String get all => 'Todos';
+  @override String get delivery => 'Entrega';
+  @override String get toReceive => 'Por cobrar';
+  @override String get paid => 'Pagado';
 }

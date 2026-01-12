@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell; 
+import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class HomeCustomerList extends StatefulWidget {
   @override
@@ -27,6 +29,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
     orderStore = Provider.of<OrderStore>(context);
     navegationStore = Provider.of<BottomNavigationBarStore>(context);
 
@@ -37,7 +40,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Clientes'),
+              largeTitle: Text(config.customerPlural),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
@@ -51,7 +54,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar cliente',
+                  placeholder: '${context.l10n.search} ${config.customer.toLowerCase()}',
                   onChanged: (value) {
                     setState(() {
                       _searchQuery = value.toLowerCase();
@@ -90,10 +93,10 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                 children: [
                   const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
                   const SizedBox(height: 16),
-                  const Text('Erro ao carregar clientes'),
+                  Text('${context.l10n.errorLoading} ${context.read<SegmentConfigProvider>().customerPlural.toLowerCase()}'),
                   const SizedBox(height: 16),
                   CupertinoButton(
-                    child: const Text('Tentar novamente'),
+                    child: Text(context.l10n.retryAgain),
                     onPressed: () => customerStore.retrieveCustomers(),
                   )
                 ],
@@ -110,6 +113,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
 
   Widget _buildCustomerListContent(List<Customer?>? customerList) {
     if (customerList == null || customerList.isEmpty) {
+      final config = context.read<SegmentConfigProvider>();
       return SliverFillRemaining(
         child: Center(
           child: Column(
@@ -118,7 +122,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
               Icon(CupertinoIcons.person_2, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
               const SizedBox(height: 16),
               Text(
-                'Nenhum cliente cadastrado',
+                '${context.l10n.no} ${config.customer.toLowerCase()} ${context.l10n.registered}',
                 style: TextStyle(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
               ),
             ],
@@ -138,9 +142,9 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
     }).toList();
 
     if (filteredList.isEmpty) {
-      return const SliverFillRemaining(
+      return SliverFillRemaining(
         child: Center(
-          child: Text('Nenhum resultado encontrado'),
+          child: Text(context.l10n.noResultsFound),
         ),
       );
     }
@@ -194,20 +198,21 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
           return false; // Don't dismiss
         } else {
           // Swipe Left -> Delete
+          final config = context.read<SegmentConfigProvider>();
           return await showCupertinoDialog<bool>(
             context: context,
-            builder: (context) => CupertinoAlertDialog(
-              title: const Text('Confirmar exclusão'),
-              content: Text('Deseja remover o cliente "${customer.name}"?'),
+            builder: (dialogContext) => CupertinoAlertDialog(
+              title: Text(context.l10n.confirmDelete),
+              content: Text('${context.l10n.doYouWantToRemoveThe} ${config.customer.toLowerCase()} "${customer.name}"?'),
               actions: [
                 CupertinoDialogAction(
-                  child: const Text('Cancelar'),
-                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(context.l10n.cancel),
+                  onPressed: () => Navigator.pop(dialogContext, false),
                 ),
                 CupertinoDialogAction(
                   isDestructiveAction: true,
-                  child: const Text('Remover'),
-                  onPressed: () => Navigator.pop(context, true),
+                  child: Text(context.l10n.remove),
+                  onPressed: () => Navigator.pop(dialogContext, true),
                 ),
               ],
             ),
@@ -266,7 +271,7 @@ class _HomeCustomerListState extends State<HomeCustomerList> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              customer.name ?? 'Cliente',
+                              customer.name ?? context.read<SegmentConfigProvider>().customer,
                               style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w600,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class CollaboratorFormScreen extends StatefulWidget {
   @override
@@ -30,14 +31,14 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
         if (wasAddedDirectly) {
           // Usuário já existia e foi adicionado diretamente
           _showSuccessDialog(
-            'Colaborador Adicionado',
-            'O colaborador foi adicionado à empresa com sucesso.',
+            context.l10n.collaboratorAdded,
+            context.l10n.collaboratorAddedSuccess,
           );
         } else {
           // Usuário não existia, convite foi criado
           _showSuccessDialog(
-            'Convite Enviado',
-            'O usuário ainda não está cadastrado no sistema. Um convite foi criado e aparecerá quando ele se cadastrar.',
+            context.l10n.inviteSent,
+            context.l10n.inviteCreatedMessage,
           );
         }
       }
@@ -60,7 +61,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () {
               Navigator.pop(context); // Fecha o dialog
               Navigator.pop(this.context, true); // Volta para a lista
@@ -75,11 +76,11 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Erro'),
+        title: Text(context.l10n.error),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -91,8 +92,8 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Selecionar Perfil'),
-        message: const Text('Escolha o perfil de acesso do colaborador'),
+        title: Text(context.l10n.selectProfile),
+        message: Text(context.l10n.chooseCollaboratorRole),
         actions: RolePermissions.availableRoles.map((role) {
           final isSelected = _selectedRole == role;
           return CupertinoActionSheetAction(
@@ -103,7 +104,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      '${RolePermissions.getRoleIcon(role)} ${RolePermissions.getRoleLabel(role)}',
+                      '${RolePermissions.getRoleIcon(role)} ${RolePermissions.getRoleLabel(role, context.l10n)}',
                       style: TextStyle(
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
@@ -116,7 +117,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  RolePermissions.getRoleDescription(role),
+                  RolePermissions.getRoleDescription(role, context.l10n),
                   style: TextStyle(
                     fontSize: 12,
                     color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -131,7 +132,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
           );
         }).toList(),
         cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancelar'),
+          child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -139,7 +140,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
   }
 
   String _getRoleLabel(RolesType role) {
-    return RolePermissions.getRoleLabel(role);
+    return RolePermissions.getRoleLabel(role, context.l10n);
   }
 
   @override
@@ -147,13 +148,13 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('Novo Colaborador'),
+        middle: Text(context.l10n.newCollaborator),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isLoading ? null : _submit,
           child: _isLoading
               ? const CupertinoActivityIndicator()
-              : const Text("Adicionar", style: TextStyle(fontWeight: FontWeight.bold)),
+              : Text(context.l10n.add, style: const TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
       child: Material(
@@ -184,29 +185,29 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
                 const SizedBox(height: 20),
 
                 CupertinoListSection.insetGrouped(
-                  header: const Text('INFORMAÇÕES DO USUÁRIO'),
-                  footer: const Text('O usuário receberá um convite por email.'),
+                  header: Text(context.l10n.userInformation.toUpperCase()),
+                  footer: Text(context.l10n.userWillReceiveInviteByEmail),
                   children: [
                     CupertinoTextFormFieldRow(
                       controller: _emailController,
-                      prefix: const Text('Email', style: TextStyle(fontSize: 16)),
-                      placeholder: 'email@exemplo.com',
+                      prefix: Text(context.l10n.email, style: const TextStyle(fontSize: 16)),
+                      placeholder: context.l10n.emailPlaceholder,
                       keyboardType: TextInputType.emailAddress,
                       textAlign: TextAlign.right,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Obrigatório';
+                          return context.l10n.required;
                         }
                         if (!value.contains('@')) {
-                          return 'Email inválido';
+                          return context.l10n.invalidEmail;
                         }
                         return null;
                       },
                     ),
                     CupertinoListTile(
-                      title: const Text('Perfil'),
+                      title: Text(context.l10n.profile),
                       subtitle: Text(
-                        RolePermissions.getRoleDescription(_selectedRole),
+                        RolePermissions.getRoleDescription(_selectedRole, context.l10n),
                         style: TextStyle(
                           fontSize: 13,
                           color: CupertinoColors.secondaryLabel.resolveFrom(context),

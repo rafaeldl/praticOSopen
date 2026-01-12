@@ -5,7 +5,18 @@ import '../services/segment_config_service.dart';
 /// Provider que gerencia labels dinâmicos e campos customizados
 /// baseado no segmento da empresa
 class SegmentConfigProvider extends ChangeNotifier {
+  /// Singleton instance for global access (used by LocaleStore)
+  static SegmentConfigProvider? _instance;
+  static SegmentConfigProvider get instance {
+    _instance ??= SegmentConfigProvider();
+    return _instance!;
+  }
+
   final _service = SegmentConfigService();
+
+  SegmentConfigProvider() {
+    _instance = this;
+  }
 
   bool _isLoading = false;
   String? _error;
@@ -63,7 +74,10 @@ class SegmentConfigProvider extends ChangeNotifier {
   }
 
   /// Inicializa com um segmento específico
-  Future<void> initialize(String segmentId, {String locale = 'pt-BR'}) async {
+  ///
+  /// NOTE: Não controla locale aqui - isso é feito automaticamente pelo
+  /// MaterialApp builder via injectL10n() quando AppLocalizations muda
+  Future<void> initialize(String segmentId) async {
     if (_service.currentSegmentId == segmentId && _service.isLoaded) {
       return; // Já carregado
     }
@@ -73,7 +87,8 @@ class SegmentConfigProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _service.setLocale(locale);
+      // Apenas carrega o segmento, não força locale
+      // O locale será configurado automaticamente por injectL10n()
       await _service.load(segmentId);
       _isLoading = false;
       notifyListeners();
@@ -85,17 +100,26 @@ class SegmentConfigProvider extends ChangeNotifier {
     }
   }
 
-  /// Troca o idioma e recarrega os labels
-  Future<void> setLocale(String locale) async {
-    if (_service.currentSegmentId == null) {
-      throw Exception('Nenhum segmento carregado');
-    }
+  /// Injeta ou atualiza o AppLocalizations para usar traduções dos ARB files
+  /// Chamado no MaterialApp builder, então é executado a cada rebuild
+  /// Detecta mudanças de locale e recarrega cache automaticamente
+  void injectL10n(dynamic l10n) {
+    if (l10n != null) {
+      final currentL10nInstance = _service.currentL10n;
+      final isDifferent = currentL10nInstance != l10n;
 
-    _service.setLocale(locale);
-    _service.clear();
-    await _service.load(_service.currentSegmentId!);
-    notifyListeners();
+      if (isDifferent) {
+        // Locale mudou, recarrega cache com nova AppLocalizations
+        _service.updateL10n(l10n);
+      } else {
+        // Primeira injeção ou mesma locale, apenas armazena
+        _service.setL10n(l10n);
+      }
+    }
   }
+
+  // NOTE: setLocale() removido - locale é controlado automaticamente
+  // via injectL10n() quando MaterialApp rebuilds com novo AppLocalizations
 
   // ════════════════════════════════════════════════════════════
   // LABELS

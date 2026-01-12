@@ -194,6 +194,11 @@ abstract class _AuthStore with Store {
   }
 
   @action
+  Future<void> reauthenticate() async {
+    await _auth.reauthenticate();
+  }
+
+  @action
   Future<void> deleteAccount() async {
     final user = currentUser?.value;
     if (user == null) {
@@ -205,7 +210,15 @@ abstract class _AuthStore with Store {
       await _authService.deleteUserData(user.uid);
 
       // 2. Delete Firebase Auth account
-      await _auth.deleteAccount();
+      try {
+        await _auth.deleteAccount();
+      } on FirebaseAuthException catch (e) {
+        // If requires recent login, throw a specific error to handle in UI
+        if (e.code == 'requires-recent-login') {
+          throw Exception('REQUIRES_RECENT_LOGIN');
+        }
+        rethrow;
+      }
 
       // 3. Clear local preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();

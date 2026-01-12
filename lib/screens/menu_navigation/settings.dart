@@ -10,7 +10,7 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
-import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -36,8 +36,8 @@ class _SettingsState extends State<Settings> {
         type: MaterialType.transparency,
         child: CustomScrollView(
           slivers: [
-                      const CupertinoSliverNavigationBar(
-                        largeTitle: Text('Ajustes'),
+                      CupertinoSliverNavigationBar(
+                        largeTitle: Text(context.l10n.settings),
                       ),
                       SliverSafeArea(
                         top: false,
@@ -110,7 +110,7 @@ class _SettingsState extends State<Settings> {
                     _userStore.user!.value!.companies != null &&
                     _userStore.user!.value!.companies!.length > 1) {
                   return CupertinoListSection.insetGrouped(
-                    header: const Text('ORGANIZAÇÃO'),
+                    header: Text(context.l10n.organization.toUpperCase()),
                     children: [
                       CupertinoListTile(
                         leading: Container(
@@ -121,8 +121,8 @@ class _SettingsState extends State<Settings> {
                           ),
                           child: const Icon(CupertinoIcons.building_2_fill, color: CupertinoColors.white, size: 20),
                         ),
-                        title: const Text('Trocar Empresa'),
-                        subtitle: const Text('Alternar entre organizações'),
+                        title: Text(context.l10n.switchCompany),
+                        subtitle: Text(context.l10n.switchBetweenOrganizations),
                         trailing: const CupertinoListTileChevron(),
                         onTap: () => _showCompanySelectionModal(context, config),
                       ),
@@ -133,7 +133,7 @@ class _SettingsState extends State<Settings> {
               }),
 
               // Admin/Management Section - RBAC based
-              Observer(builder: (context) {
+              Observer(builder: (ctx) {
                 final canManageCompany = _authService.hasPermission(PermissionType.manageCompany);
                 final canManageUsers = _authService.hasPermission(PermissionType.manageUsers);
                 final canManageForms = _authService.hasPermission(PermissionType.manageForms);
@@ -142,14 +142,14 @@ class _SettingsState extends State<Settings> {
                 final canViewProducts = _authService.hasPermission(PermissionType.viewProducts);
 
                 return CupertinoListSection.insetGrouped(
-                  header: const Text('GERENCIAMENTO'),
+                  header: Text(context.l10n.management.toUpperCase()),
                   children: [
                     // Dados da Empresa - apenas Admin
                     if (canManageCompany)
                       _buildSettingsTile(
                         icon: CupertinoIcons.briefcase_fill,
                         color: CupertinoColors.systemOrange,
-                        title: 'Dados da Empresa',
+                        title: context.l10n.companyData,
                         onTap: () => Navigator.pushNamed(context, '/company_form'),
                       ),
 
@@ -158,7 +158,7 @@ class _SettingsState extends State<Settings> {
                       _buildSettingsTile(
                         icon: CupertinoIcons.person_3_fill,
                         color: CupertinoColors.systemBlue,
-                        title: 'Colaboradores',
+                        title: context.l10n.collaborators,
                         onTap: () => Navigator.pushNamed(context, '/collaborator_list'),
                       ),
 
@@ -176,7 +176,7 @@ class _SettingsState extends State<Settings> {
                       _buildSettingsTile(
                         icon: CupertinoIcons.wrench_fill,
                         color: CupertinoColors.systemIndigo,
-                        title: 'Serviços',
+                        title: context.l10n.services,
                         onTap: () => Navigator.pushNamed(context, '/service_list'),
                       ),
 
@@ -185,7 +185,7 @@ class _SettingsState extends State<Settings> {
                       _buildSettingsTile(
                         icon: CupertinoIcons.cube_box_fill,
                         color: CupertinoColors.systemPink,
-                        title: 'Produtos',
+                        title: context.l10n.products,
                         onTap: () => Navigator.pushNamed(context, '/product_list'),
                       ),
 
@@ -194,7 +194,7 @@ class _SettingsState extends State<Settings> {
                       _buildSettingsTile(
                         icon: CupertinoIcons.doc_text_fill,
                         color: CupertinoColors.systemTeal,
-                        title: 'Procedimentos',
+                        title: context.l10n.procedures,
                         onTap: () => Navigator.pushNamed(context, '/form_template_list'),
                       ),
                   ],
@@ -203,7 +203,7 @@ class _SettingsState extends State<Settings> {
 
               // Interface Section
               CupertinoListSection.insetGrouped(
-                header: const Text('INTERFACE'),
+                header: Text(context.l10n.interface_.toUpperCase()),
                 children: [
                   CupertinoListTile(
                     leading: Container(
@@ -214,8 +214,8 @@ class _SettingsState extends State<Settings> {
                       ),
                       child: const Icon(CupertinoIcons.moon_fill, color: CupertinoColors.white, size: 20),
                     ),
-                    title: const Text('Modo Noturno'),
-                    additionalInfo: Text(_getThemeModeText(themeStore.themeMode)),
+                    title: Text(context.l10n.nightMode),
+                    additionalInfo: Text(_getThemeModeText(context, themeStore.themeMode)),
                     trailing: const CupertinoListTileChevron(),
                     onTap: () => _showThemeSelectionDialog(context, themeStore, config),
                   ),
@@ -224,7 +224,7 @@ class _SettingsState extends State<Settings> {
 
               // Account Section
               CupertinoListSection.insetGrouped(
-                header: const Text('CONTA'),
+                header: Text(context.l10n.account.toUpperCase()),
                 children: [
                   CupertinoListTile(
                     leading: Container(
@@ -235,7 +235,7 @@ class _SettingsState extends State<Settings> {
                       ),
                       child: const Icon(CupertinoIcons.arrow_right_square_fill, color: CupertinoColors.white, size: 20),
                     ),
-                    title: const Text('Sair', style: TextStyle(color: CupertinoColors.systemRed)),
+                    title: Text(context.l10n.logout, style: const TextStyle(color: CupertinoColors.systemRed)),
                     onTap: () => _showLogoutConfirmation(context, config),
                   ),
                   CupertinoListTile(
@@ -247,8 +247,8 @@ class _SettingsState extends State<Settings> {
                       ),
                       child: const Icon(CupertinoIcons.trash_fill, color: CupertinoColors.white, size: 20),
                     ),
-                    title: const Text('Excluir Conta', style: TextStyle(color: CupertinoColors.systemRed)),
-                    subtitle: const Text('Remover permanentemente todos os dados'),
+                    title: Text(context.l10n.deleteAccount, style: const TextStyle(color: CupertinoColors.systemRed)),
+                    subtitle: Text(context.l10n.permanentlyRemoveAllData),
                     onTap: () => _showDeleteAccountConfirmation(context, config),
                   ),
                 ],
@@ -308,36 +308,36 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  String _getThemeModeText(ThemeMode mode) {
+  String _getThemeModeText(BuildContext context, ThemeMode mode) {
     switch (mode) {
-      case ThemeMode.system: return 'Automático';
-      case ThemeMode.light: return 'Claro';
-      case ThemeMode.dark: return 'Escuro';
+      case ThemeMode.system: return context.l10n.automatic;
+      case ThemeMode.light: return context.l10n.light;
+      case ThemeMode.dark: return context.l10n.dark;
     }
   }
 
   void _showThemeSelectionDialog(BuildContext context, ThemeStore themeStore, SegmentConfigProvider config) {
     showCupertinoModalPopup(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
-        title: const Text('Escolher tema'),
+      builder: (BuildContext dialogContext) => CupertinoActionSheet(
+        title: Text(context.l10n.chooseTheme),
         actions: [
           CupertinoActionSheetAction(
-            child: const Text('Automático (Sistema)'),
-            onPressed: () { themeStore.setThemeMode(ThemeMode.system); Navigator.pop(context); },
+            child: Text(context.l10n.automaticSystem),
+            onPressed: () { themeStore.setThemeMode(ThemeMode.system); Navigator.pop(dialogContext); },
           ),
           CupertinoActionSheetAction(
-            child: const Text('Claro'),
-            onPressed: () { themeStore.setThemeMode(ThemeMode.light); Navigator.pop(context); },
+            child: Text(context.l10n.light),
+            onPressed: () { themeStore.setThemeMode(ThemeMode.light); Navigator.pop(dialogContext); },
           ),
           CupertinoActionSheetAction(
-            child: const Text('Escuro'),
-            onPressed: () { themeStore.setThemeMode(ThemeMode.dark); Navigator.pop(context); },
+            child: Text(context.l10n.dark),
+            onPressed: () { themeStore.setThemeMode(ThemeMode.dark); Navigator.pop(dialogContext); },
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: Text(config.label(LabelKeys.cancel)),
-          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(dialogContext),
         ),
       ),
     );
@@ -346,21 +346,21 @@ class _SettingsState extends State<Settings> {
   void _showLogoutConfirmation(BuildContext context, SegmentConfigProvider config) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Sair'),
-        content: const Text('Tem certeza que deseja sair?'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.logout),
+        content: Text(context.l10n.logoutConfirm),
         actions: [
           CupertinoDialogAction(
-            child: Text(config.label(LabelKeys.cancel)),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               await _authStore.signOutGoogle();
             },
-            child: const Text('Sair'),
+            child: Text(context.l10n.logout),
           ),
         ],
       ),
@@ -370,14 +370,14 @@ class _SettingsState extends State<Settings> {
   void _showCompanySelectionModal(BuildContext context, SegmentConfigProvider config) {
     showCupertinoModalPopup(
       context: context,
-      builder: (context) => CupertinoActionSheet(
-        title: const Text('Selecionar Empresa'),
+      builder: (dialogContext) => CupertinoActionSheet(
+        title: Text(context.l10n.selectCompany),
         actions: _userStore.user?.value?.companies?.map((companyRole) {
           return CupertinoActionSheetAction(
-            child: Text(companyRole.company?.name ?? 'Empresa sem nome'),
+            child: Text(companyRole.company?.name ?? context.l10n.companyNoName),
             onPressed: () async {
               if (companyRole.company?.id != null) {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 await _authStore.switchCompany(companyRole.company!.id!);
                 Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
               }
@@ -385,8 +385,8 @@ class _SettingsState extends State<Settings> {
           );
         }).toList() ?? [],
         cancelButton: CupertinoActionSheetAction(
-          child: Text(config.label(LabelKeys.cancel)),
-          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(dialogContext),
         ),
       ),
     );
@@ -395,26 +395,21 @@ class _SettingsState extends State<Settings> {
   void _showDeleteAccountConfirmation(BuildContext context, SegmentConfigProvider config) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Excluir Conta'),
-        content: const Text(
-          'Esta ação é permanente e não pode ser desfeita.\n\n'
-          'Todos os seus dados, incluindo ordens de serviço, clientes e configurações '
-          'serão removidos permanentemente.\n\n'
-          'Tem certeza que deseja continuar?',
-        ),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.deleteAccount),
+        content: Text(context.l10n.deleteAccountWarning),
         actions: [
           CupertinoDialogAction(
-            child: Text(config.label(LabelKeys.cancel)),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               _showDeleteAccountFinalConfirmation(context);
             },
-            child: const Text('Continuar'),
+            child: Text(context.l10n.continue_),
           ),
         ],
       ),
@@ -424,22 +419,19 @@ class _SettingsState extends State<Settings> {
   void _showDeleteAccountFinalConfirmation(BuildContext context) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Confirmação Final'),
-        content: const Text(
-          'Esta é sua última chance de cancelar.\n\n'
-          'Confirma a exclusão permanente da sua conta?',
-        ),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.finalConfirmation),
+        content: Text(context.l10n.lastChanceCancel),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
               // Close confirmation dialog
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
 
               // Save the navigator state before showing dialog
               final navigatorState = Navigator.of(context);
@@ -448,7 +440,7 @@ class _SettingsState extends State<Settings> {
               showCupertinoDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (context) => const Center(
+                builder: (loadingContext) => const Center(
                   child: CupertinoActivityIndicator(radius: 20),
                 ),
               );
@@ -472,22 +464,29 @@ class _SettingsState extends State<Settings> {
                   print('⚠️  Could not close loading dialog (widget may be unmounted): $popError');
                 }
 
+                // Check if re-authentication is required
+                if (e.toString().contains('REQUIRES_RECENT_LOGIN')) {
+                  print('🔐 Re-authentication required, prompting user...');
+                  _showReauthenticationDialog(context);
+                  return;
+                }
+
                 // Show error dialog
                 try {
                   showCupertinoDialog(
                     context: context,
-                    builder: (context) => CupertinoAlertDialog(
-                      title: const Text('Erro ao Excluir Conta'),
+                    builder: (errorContext) => CupertinoAlertDialog(
+                      title: Text(context.l10n.errorDeletingAccount),
                       content: Text(
-                        'Não foi possível excluir sua conta.\n\n'
-                        '${_formatErrorMessage(e.toString())}',
+                        '${context.l10n.couldNotDeleteAccount}\n\n'
+                        '${_formatErrorMessage(context, e.toString())}',
                       ),
                       actions: [
                         CupertinoDialogAction(
-                          child: const Text('OK'),
+                          child: Text(context.l10n.ok),
                           onPressed: () {
                             try {
-                              Navigator.pop(context);
+                              Navigator.pop(errorContext);
                             } catch (e) {
                               print('⚠️  Could not close error dialog: $e');
                             }
@@ -501,7 +500,87 @@ class _SettingsState extends State<Settings> {
                 }
               }
             },
-            child: const Text('Excluir Permanentemente'),
+            child: Text(context.l10n.permanentlyDelete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReauthenticationDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.reauthenticationRequired),
+        content: Text(context.l10n.pleaseSignInAgainToDelete),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+
+              // Show loading indicator
+              showCupertinoDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (loadingContext) => const Center(
+                  child: CupertinoActivityIndicator(radius: 20),
+                ),
+              );
+
+              try {
+                // Re-authenticate the user
+                await _authStore.reauthenticate();
+
+                // Close loading dialog
+                Navigator.pop(context);
+
+                // Show success message and retry deletion
+                showCupertinoDialog(
+                  context: context,
+                  builder: (successContext) => CupertinoAlertDialog(
+                    title: Text(context.l10n.authenticated),
+                    content: Text(context.l10n.nowDeletingAccount),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: Text(context.l10n.ok),
+                        onPressed: () async {
+                          Navigator.pop(successContext);
+                          // Retry deletion after re-authentication
+                          _showDeleteAccountFinalConfirmation(context);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              } catch (e) {
+                // Close loading dialog
+                Navigator.pop(context);
+
+                // Show error
+                showCupertinoDialog(
+                  context: context,
+                  builder: (errorContext) => CupertinoAlertDialog(
+                    title: Text(context.l10n.reauthenticationFailed),
+                    content: Text(
+                      '${context.l10n.couldNotReauthenticate}\n\n'
+                      '${_formatErrorMessage(context, e.toString())}',
+                    ),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: Text(context.l10n.ok),
+                        onPressed: () => Navigator.pop(errorContext),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            child: Text(context.l10n.signInAgain),
           ),
         ],
       ),
@@ -509,7 +588,7 @@ class _SettingsState extends State<Settings> {
   }
 
   /// Format error messages to be user-friendly
-  String _formatErrorMessage(String error) {
+  String _formatErrorMessage(BuildContext context, String error) {
     // Check for business logic errors
     if (error.contains('proprietário de uma empresa com outros membros')) {
       return error.replaceAll('Exception: ', '');
@@ -517,20 +596,16 @@ class _SettingsState extends State<Settings> {
 
     // Check for Firebase Auth errors
     if (error.contains('requires-recent-login')) {
-      return 'Por segurança, o Firebase exige login recente antes de deletar a conta.\n\n'
-          'Por favor:\n'
-          '1. Faça logout da sua conta\n'
-          '2. Faça login novamente\n'
-          '3. Tente deletar a conta imediatamente após o login';
+      return context.l10n.requiresRecentLogin;
     }
     if (error.contains('permission-denied')) {
-      return 'Você não tem permissão para deletar sua conta. Tente novamente mais tarde.';
+      return context.l10n.noPermissionDelete;
     }
     if (error.contains('network')) {
-      return 'Erro de conexão. Verifique sua internet e tente novamente.';
+      return context.l10n.networkError;
     }
 
     // Generic error
-    return 'Erro: ${error.replaceAll('[firebase_auth/', '').replaceAll('Exception: ', '').replaceAll(']', '')}';
+    return '${context.l10n.error}: ${error.replaceAll('[firebase_auth/', '').replaceAll('Exception: ', '').replaceAll(']', '')}';
   }
 }

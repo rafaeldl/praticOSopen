@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
@@ -15,6 +15,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:http/http.dart' as http;
 import 'dart:typed_data';
+import 'package:praticos/extensions/context_extensions.dart';
 
 /// Dashboard financeiro protegido por permissões RBAC.
 ///
@@ -30,13 +31,6 @@ class FinancialDashboardSimple extends StatefulWidget {
 
 class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   String selectedPeriod = 'mês';
-  final Map<String, String> periodLabelsMap = {
-    'hoje': 'Hoje',
-    'semana': 'Semana',
-    'mês': 'Mês',
-    'ano': 'Ano',
-    'custom': 'Período',
-  };
   int _periodOffset = 0;
   bool _isRankingExpanded = false;
   bool _isServicesExpanded = false;
@@ -51,7 +45,6 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   @override
   void initState() {
     super.initState();
-    initializeDateFormatting('pt_BR', null);
   }
 
   @override
@@ -68,8 +61,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     if (selectedPeriod == 'custom' &&
         _customStartDate != null &&
         _customEndDate != null) {
-      final DateFormat dateFormat = DateFormat('dd/MM/yy', 'pt_BR');
-      return '${dateFormat.format(_customStartDate!)} - ${dateFormat.format(_customEndDate!)}';
+      return '${FormatService().formatDate(_customStartDate)} - ${FormatService().formatDate(_customEndDate)}';
     }
 
     DateTime now = DateTime.now();
@@ -98,20 +90,28 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
 
     switch (selectedPeriod) {
       case 'hoje':
-        return _periodOffset != 0 ? dayFormat.format(periodDate) : 'Hoje';
+        return _periodOffset != 0 ? dayFormat.format(periodDate) : context.l10n.today;
       case 'semana':
         DateTime startOfWeek =
             periodDate.subtract(Duration(days: periodDate.weekday));
         DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
         return "${dayFormat.format(startOfWeek)} - ${dayFormat.format(endOfWeek)}";
       case 'mês':
-        return _periodOffset != 0 ? monthFormat.format(periodDate) : 'Mês atual';
+        return _periodOffset != 0 ? monthFormat.format(periodDate) : context.l10n.currentMonth;
       case 'ano':
-        return _periodOffset != 0 ? yearFormat.format(periodDate) : 'Ano atual';
+        return _periodOffset != 0 ? yearFormat.format(periodDate) : context.l10n.currentYear;
       default:
         return selectedPeriod;
     }
   }
+
+  Map<String, String> get periodLabelsMap => {
+    'hoje': context.l10n.today,
+    'semana': context.l10n.week,
+    'mês': context.l10n.month,
+    'ano': context.l10n.year,
+    'custom': context.l10n.period,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +120,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     // Protege a tela com verificação de permissão RBAC
     return ProtectedRoute(
       permission: PermissionType.viewFinancialReports,
-      accessDeniedMessage: 'Você não tem permissão para acessar o painel financeiro.\n\nApenas Administradores e Gerentes podem visualizar dados financeiros.',
+      accessDeniedMessage: context.l10n.financialAccessDenied,
       child: CupertinoPageScaffold(
         backgroundColor: CupertinoColors.systemGroupedBackground,
         child: Material(
@@ -129,7 +129,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               CupertinoSliverNavigationBar(
-                largeTitle: const Text('Painel Financeiro'),
+                largeTitle: Text(context.l10n.financialDashboard),
                 trailing: CupertinoButton(
                   padding: EdgeInsets.zero,
                   child: Icon(
@@ -175,23 +175,23 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 children: {
                   'hoje': Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('Hoje', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                    child: Text(context.l10n.today, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
                   ),
                   'semana': Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('Semana', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                    child: Text(context.l10n.week, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
                   ),
                   'mês': Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('Mês', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                    child: Text(context.l10n.month, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
                   ),
                   'ano': Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('Ano', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                    child: Text(context.l10n.year, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
                   ),
                   'custom': Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text('Período', style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
+                    child: Text(context.l10n.period, style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context))),
                   ),
                 },
                 onValueChanged: (value) {
@@ -307,7 +307,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   ),
                   if (_periodOffset != 0)
                     Text(
-                      'Toque para voltar ao atual',
+                      context.l10n.tapToReturnToCurrent,
                       style: TextStyle(
                         fontSize: 12,
                         decoration: TextDecoration.none,
@@ -363,11 +363,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CupertinoButton(
-                        child: const Text('Cancelar'),
+                        child: Text(context.l10n.cancel),
                         onPressed: () => Navigator.pop(context),
                       ),
                       Text(
-                        'Selecionar Período',
+                        context.l10n.selectPeriod,
                         style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
@@ -376,7 +376,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         ),
                       ),
                       CupertinoButton(
-                        child: const Text('OK'),
+                        child: Text(context.l10n.ok),
                         onPressed: () {
                           setState(() {
                             selectedPeriod = 'custom';
@@ -400,11 +400,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     groupValue: isSelectingStart,
                     children: {
                       true: Text(
-                        'Início: ${DateFormat('dd/MM/yy').format(tempStartDate)}',
+                        '${context.l10n.start}: ${FormatService().formatDate(tempStartDate)}',
                         style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context)),
                       ),
                       false: Text(
-                        'Fim: ${DateFormat('dd/MM/yy').format(tempEndDate)}',
+                        '${context.l10n.end}: ${FormatService().formatDate(tempEndDate)}',
                         style: TextStyle(fontSize: 13, decoration: TextDecoration.none, color: CupertinoColors.label.resolveFrom(context)),
                       ),
                     },
@@ -488,7 +488,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'FATURAMENTO',
+                    context.l10n.billing.toUpperCase(),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -543,7 +543,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     children: [
                       Expanded(
                         child: _buildHealthLegendItem(
-                          label: 'Recebido',
+                          label: context.l10n.received,
                           value: _convertToCurrency(orderStore.totalPaidAmount),
                           count: paidOrders,
                           color: greenColor,
@@ -558,7 +558,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       ),
                       Expanded(
                         child: _buildHealthLegendItem(
-                          label: 'A Receber',
+                          label: context.l10n.toReceive,
                           value: _convertToCurrency(orderStore.totalUnpaidAmount),
                           count: unpaidOrders,
                           color: orangeColor,
@@ -701,7 +701,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'COMPOSIÇÃO',
+                context.l10n.composition.toUpperCase(),
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -753,7 +753,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Serviços',
+                              context.l10n.services,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: secondaryColor,
@@ -789,7 +789,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'Produtos',
+                              context.l10n.products,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: secondaryColor,
@@ -836,10 +836,10 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         : (filteredRanking.length > 5 ? 5 : filteredRanking.length);
 
     String sectionTitle = orderStore.paymentFilter == 'paid'
-        ? 'CLIENTES - RECEBIDO'
+        ? context.l10n.customersReceived.toUpperCase()
         : orderStore.paymentFilter == 'unpaid'
-            ? 'CLIENTES - A RECEBER'
-            : 'CLIENTES';
+            ? context.l10n.customersToReceive.toUpperCase()
+            : context.l10n.customers.toUpperCase();
 
     // Calculate total for header
     final totalValue = filteredRanking.fold<double>(0, (sum, customer) {
@@ -907,7 +907,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isRankingExpanded ? 'Ver menos' : 'Ver todos (${filteredRanking.length})',
+                        _isRankingExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(filteredRanking.length),
                         style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(width: 4),
@@ -1003,7 +1003,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    customer['name'] ?? 'Cliente sem nome',
+                    customer['name'] ?? context.l10n.customerWithoutName,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -1054,7 +1054,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       if (order?.services != null) {
         for (final service in order!.services!) {
           final name =
-              service.service?.name ?? service.description ?? 'Serviço sem nome';
+              service.service?.name ?? service.description ?? context.l10n.serviceWithoutName;
           final value = service.value ?? 0.0;
 
           if (servicesMap.containsKey(name)) {
@@ -1148,7 +1148,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isServicesExpanded ? 'Ver menos' : 'Ver todos (${servicesRanking.length})',
+                        _isServicesExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(servicesRanking.length),
                         style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(width: 4),
@@ -1180,7 +1180,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       if (order?.products != null) {
         for (final product in order!.products!) {
           final name =
-              product.product?.name ?? product.description ?? 'Produto sem nome';
+              product.product?.name ?? product.description ?? context.l10n.productWithoutName;
           final total =
               product.total ?? (product.value ?? 0.0) * (product.quantity ?? 1);
           final quantity = product.quantity ?? 1;
@@ -1276,7 +1276,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isProductsExpanded ? 'Ver menos' : 'Ver todos (${productsRanking.length})',
+                        _isProductsExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(productsRanking.length),
                         style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(width: 4),
@@ -1424,7 +1424,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isRecentOrdersExpanded ? 'Ver menos' : 'Ver todos (${filteredOrders.length})',
+                        _isRecentOrdersExpanded ? context.l10n.seeLess : context.l10n.seeAllCount(filteredOrders.length),
                         style: const TextStyle(fontSize: 15),
                       ),
                       const SizedBox(width: 4),
@@ -1593,10 +1593,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   }
 
   String _convertToCurrency(double? total) {
-    total ??= 0.0;
-    NumberFormat numberFormat =
-        NumberFormat.currency(locale: 'pt-BR', symbol: 'R\$');
-    return numberFormat.format(total);
+    return FormatService().formatCurrency(total ?? 0.0);
   }
 
   // ============================================================
@@ -1650,11 +1647,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
         showCupertinoDialog(
           context: currentContext,
           builder: (context) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content: Text('Erro ao gerar relatório: ${e.toString()}'),
+            title: Text(currentContext.l10n.error),
+            content: Text('${currentContext.l10n.errorGeneratingReport}: ${e.toString()}'),
             actions: [
               CupertinoDialogAction(
-                child: const Text('OK'),
+                child: Text(currentContext.l10n.ok),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -1882,7 +1879,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     ),
                     pw.SizedBox(height: 2),
                     pw.Text(
-                      'Gerado em ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                      'Gerado em ${FormatService().formatDateTime(DateTime.now())}',
                       style: pw.TextStyle(
                         font: baseFont,
                         fontSize: 8,
@@ -2622,7 +2619,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       (index) {
         final order = orders[index];
         final dateStr = order?.createdAt != null
-            ? DateFormat('dd/MM/yyyy').format(order!.createdAt!)
+            ? FormatService().formatDate(order!.createdAt!)
             : '';
         final isPaid = order?.payment == 'paid';
         String vehicleInfo = _getVehicleInfo(order);

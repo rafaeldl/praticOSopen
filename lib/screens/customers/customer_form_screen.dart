@@ -1,10 +1,8 @@
 import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
-import 'package:praticos/providers/segment_config_provider.dart';
-import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class CustomerFormScreen extends StatefulWidget {
   const CustomerFormScreen({super.key});
@@ -51,20 +49,18 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final config = context.watch<SegmentConfigProvider>();
-
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
         middle: Text(_isEditing
-            ? config.label(LabelKeys.editCustomer)
-            : config.label(LabelKeys.createCustomer)),
+            ? context.l10n.editCustomer
+            : context.l10n.newCustomer),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _isLoading ? null : _saveCustomer,
           child: _isLoading
               ? const CupertinoActivityIndicator()
-              : Text(config.label(LabelKeys.save),
+              : Text(context.l10n.save,
                   style: const TextStyle(fontWeight: FontWeight.bold)),
         ),
       ),
@@ -97,22 +93,21 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   CupertinoTextFormFieldRow(
-                    prefix: Text(config.label(LabelKeys.customerName),
+                    prefix: Text(context.l10n.name,
                         style: const TextStyle(fontSize: 16)),
                     initialValue: _customer?.name,
-                    placeholder:
-                        "Nome do ${config.customer.toLowerCase()}",
+                    placeholder: context.l10n.fullName,
                     textCapitalization: TextCapitalization.words,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _customer?.name = val,
                     validator: (val) => val == null || val.isEmpty
-                        ? config.label(LabelKeys.required)
+                        ? context.l10n.requiredField
                         : null,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: Text(config.label(LabelKeys.customerPhone),
+                    prefix: Text(context.l10n.phone,
                         style: const TextStyle(fontSize: 16)),
-                    initialValue: _customer?.phone, // Note: Mask might need controller logic if buggy, but trying standard first
+                    initialValue: _customer?.phone,
                     placeholder: "(00) 00000-0000",
                     keyboardType: TextInputType.phone,
                     textAlign: TextAlign.right,
@@ -120,7 +115,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                     onSaved: (val) => _customer?.phone = val?.replaceAll(RegExp(r'\D'), ''),
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: Text(config.label(LabelKeys.customerEmail),
+                    prefix: Text(context.l10n.email,
                         style: const TextStyle(fontSize: 16)),
                     initialValue: _customer?.email,
                     placeholder: "email@exemplo.com",
@@ -129,10 +124,10 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                     onSaved: (val) => _customer?.email = val,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: Text(config.label(LabelKeys.customerAddress),
+                    prefix: Text(context.l10n.address,
                         style: const TextStyle(fontSize: 16)),
                     initialValue: _customer?.address,
-                    placeholder: "Endereço completo",
+                    placeholder: context.l10n.address,
                     textCapitalization: TextCapitalization.sentences,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _customer?.address = val,

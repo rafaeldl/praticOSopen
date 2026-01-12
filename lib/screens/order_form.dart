@@ -6,8 +6,8 @@ import 'package:flutter/material.dart' show Colors, ScaffoldMessenger, SnackBar,
 // I will try to rely purely on Cupertino for the visual tree.
 
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -19,6 +19,7 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/authorization_service.dart';
 
 // Formulários Dinâmicos
@@ -156,12 +157,12 @@ class _OrderFormState extends State<OrderForm> {
         final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
 
         return _buildGroupedSection(
-          header: "RESUMO",
+          header: context.l10n.overview.toUpperCase(),
           children: [
             _buildListTile(
               context: context,
               icon: CupertinoIcons.flag_fill,
-              title: "Status",
+              title: context.l10n.orderStatus,
               value: config.getStatus(_store.status),
               onTap: () => _selectStatus(config),
               showChevron: true,
@@ -171,7 +172,7 @@ class _OrderFormState extends State<OrderForm> {
               _buildListTile(
                 context: context,
                 icon: CupertinoIcons.clock,
-                title: "Criado em",
+                title: context.l10n.createdAt,
                 value: _store.formattedCreatedDate,
                 onTap: () {},
                 showChevron: false,
@@ -179,9 +180,9 @@ class _OrderFormState extends State<OrderForm> {
             _buildListTile(
               context: context,
               icon: CupertinoIcons.calendar,
-              title: "Entrega",
-              value: _store.dueDate ?? 'Definir',
-              placeholder: "Definir",
+              title: context.l10n.statusDelivery,
+              value: _store.dueDate ?? context.l10n.select,
+              placeholder: context.l10n.select,
               onTap: _selectDueDate,
               showChevron: true,
               enabled: _store.order != null
@@ -207,8 +208,8 @@ class _OrderFormState extends State<OrderForm> {
                 icon: isPaid
                     ? CupertinoIcons.checkmark_circle_fill
                     : (isPartial ? CupertinoIcons.circle_lefthalf_fill : CupertinoIcons.clock_fill),
-                title: "Pagamento",
-                value: isPaid ? "Pago" : (isPartial ? "Parcial" : "A Receber"),
+                title: context.l10n.payment,
+                value: isPaid ? context.l10n.paid : (isPartial ? context.l10n.partiallyPaid : context.l10n.toReceive),
                 onTap: _openPaymentManagement,
                 showChevron: true,
                 valueColor: isPaid
@@ -237,7 +238,7 @@ class _OrderFormState extends State<OrderForm> {
               icon: CupertinoIcons.person_fill,
               title: config.customer,
               value: _store.customerName,
-              placeholder: "Selecionar ${config.customer}",
+              placeholder: "${context.l10n.select} ${config.customer}",
               onTap: _selectCustomer,
               showChevron: true,
               enabled: canEditFields,
@@ -247,7 +248,7 @@ class _OrderFormState extends State<OrderForm> {
               icon: config.deviceIcon,
               title: config.device,
               value: _store.deviceName,
-              placeholder: "Selecionar ${config.device}",
+              placeholder: "${context.l10n.select} ${config.device}",
               onTap: _selectDevice,
               showChevron: true,
               isLast: true,
@@ -275,8 +276,8 @@ class _OrderFormState extends State<OrderForm> {
             final forms = snapshot.data ?? [];
 
             return _buildGroupedSection(
-              header: "PROCEDIMENTOS",
-              trailing: forms.isNotEmpty && canManageForms ? _buildAddButton(onTap: () => _addForm(config)) : null,
+              header: context.l10n.forms.toUpperCase(),
+              trailing: forms.isNotEmpty && canManageForms ? _buildAddButton(onTap: () => _addForm(config), label: context.l10n.add) : null,
               children: [
                 if (isLoading)
                   const Padding(
@@ -287,7 +288,7 @@ class _OrderFormState extends State<OrderForm> {
                   _buildListTile(
                     context: context,
                     icon: CupertinoIcons.plus_circle,
-                    title: "Adicionar Procedimento",
+                    title: "${context.l10n.add} ${context.l10n.form}",
                     value: "",
                     onTap: () {
                       if (canManageForms) {
@@ -385,7 +386,7 @@ class _OrderFormState extends State<OrderForm> {
                           const SizedBox(height: 2),
                           Text(
                             isCompleted
-                              ? "Concluído"
+                              ? context.l10n.statusCompleted
                               : "$answered de $total ($percent%)",
                             style: TextStyle(
                               fontSize: 13,
@@ -423,11 +424,11 @@ class _OrderFormState extends State<OrderForm> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Remover Procedimento'),
-        content: Text('Deseja remover "${form.title}" desta OS?'),
+        title: Text('${context.l10n.delete} ${context.l10n.form}'),
+        content: Text(context.l10n.confirmDeleteMessageNamed(form.title)),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
             onPressed: () => Navigator.pop(context),
           ),
           CupertinoDialogAction(
@@ -436,7 +437,7 @@ class _OrderFormState extends State<OrderForm> {
               Navigator.pop(context);
               _formsService.deleteOrderForm(_store.companyId!, _store.order!.id!, form.id);
             },
-            child: const Text('Remover'),
+            child: Text(context.l10n.delete),
           ),
         ],
       ),
@@ -492,9 +493,9 @@ class _OrderFormState extends State<OrderForm> {
             : true;
 
         return _buildGroupedSection(
-          header: "SERVIÇOS",
+          header: context.l10n.services.toUpperCase(),
           trailing: services.isNotEmpty && canEditFields
-              ? _buildAddButton(onTap: _addService)
+              ? _buildAddButton(onTap: _addService, label: context.l10n.add)
               : null,
           children: [
             if (services.isEmpty)
@@ -530,9 +531,9 @@ class _OrderFormState extends State<OrderForm> {
             : true;
 
         return _buildGroupedSection(
-          header: "PEÇAS E PRODUTOS",
+          header: context.l10n.products.toUpperCase(),
           trailing: products.isNotEmpty && canEditFields
-              ? _buildAddButton(onTap: _addProduct)
+              ? _buildAddButton(onTap: _addProduct, label: context.l10n.add)
               : null,
           children: [
             if (products.isEmpty)
@@ -604,14 +605,14 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   /// Botão de adicionar no padrão iOS (texto azul simples)
-  Widget _buildAddButton({required VoidCallback onTap, String label = 'Adicionar'}) {
+  Widget _buildAddButton({required VoidCallback onTap, String? label}) {
     return Builder(
       builder: (context) => CupertinoButton(
         padding: EdgeInsets.zero,
         minimumSize: Size.zero,
         onPressed: onTap,
         child: Text(
-          label,
+          label ?? context.l10n.add,
           style: TextStyle(
             fontSize: 17,
             color: CupertinoTheme.of(context).primaryColor,
@@ -883,12 +884,12 @@ class _OrderFormState extends State<OrderForm> {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text('Opções da ${config.serviceOrder}'),
+        title: Text('${context.l10n.options} ${config.serviceOrder}'),
         actions: <CupertinoActionSheetAction>[
           // Apenas exibir opção de PDF para usuários com acesso a valores
           if (canViewPrices)
             CupertinoActionSheetAction(
-              child: const Text('Compartilhar PDF'),
+              child: Text('${context.l10n.share} PDF'),
               onPressed: () {
                 Navigator.pop(context);
                 _onShare(context, _store.order, config);
@@ -904,7 +905,7 @@ class _OrderFormState extends State<OrderForm> {
         ],
         cancelButton: CupertinoActionSheetAction(
           isDestructiveAction: canDelete,
-          child: Text(canDelete ? 'Excluir ${config.serviceOrder}' : config.label(LabelKeys.cancel)),
+          child: Text(canDelete ? '${context.l10n.delete} ${config.serviceOrder}' : context.l10n.cancel),
           onPressed: () {
             Navigator.pop(context);
             if (canDelete) {
@@ -977,11 +978,11 @@ class _OrderFormState extends State<OrderForm> {
        showCupertinoDialog(
          context: context,
          builder: (context) => CupertinoAlertDialog(
-           title: const Text('Sem Permissão'),
-           content: const Text('Não é possível alterar o status desta OS com seu perfil atual.'),
+           title: Text(context.l10n.permissionDenied),
+           content: Text(context.l10n.permissionDenied),
            actions: [
              CupertinoDialogAction(
-               child: const Text('OK'),
+               child: Text(context.l10n.ok),
                onPressed: () => Navigator.pop(context),
              ),
            ],
@@ -993,7 +994,7 @@ class _OrderFormState extends State<OrderForm> {
      showCupertinoModalPopup(
        context: context,
        builder: (context) => CupertinoActionSheet(
-         title: const Text("Alterar Status"),
+         title: Text(context.l10n.changeStatus),
          actions: availableStatuses.map((key) {
            return CupertinoActionSheetAction(
              child: Text(config.getStatus(key)),
@@ -1008,7 +1009,7 @@ class _OrderFormState extends State<OrderForm> {
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text(config.label(LabelKeys.cancel)),
+            child: Text(context.l10n.cancel),
           ),
        ),
      );
@@ -1024,11 +1025,11 @@ class _OrderFormState extends State<OrderForm> {
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: const Text('Sem Permissão'),
-          content: const Text('Você não tem permissão para alterar para este status.'),
+          title: Text(context.l10n.permissionDenied),
+          content: Text(context.l10n.permissionDenied),
           actions: [
             CupertinoDialogAction(
-              child: const Text('OK'),
+              child: Text(context.l10n.ok),
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -1059,15 +1060,15 @@ class _OrderFormState extends State<OrderForm> {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
-        title: const Text('Checklists Pendentes'),
+        title: Text('${context.l10n.checklists} ${context.l10n.statusPending}'),
         content: Text(
           pendingForms.length == 1
-            ? 'O checklist "${pendingForms.first.title}" ainda não foi concluído.'
-            : '${pendingForms.length} checklists ainda não foram concluídos:\n\n${pendingForms.map((f) => '• ${f.title}').join('\n')}',
+            ? '${context.l10n.checklist} "${pendingForms.first.title}" ${context.l10n.incomplete}.'
+            : '${pendingForms.length} ${context.l10n.checklists} ${context.l10n.incomplete}:\n\n${pendingForms.map((f) => '• ${f.title}').join('\n')}',
         ),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
+            child: Text(context.l10n.ok),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -1202,35 +1203,35 @@ class _OrderFormState extends State<OrderForm> {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: Text(config.label(LabelKeys.addPhoto)),
+        title: Text(context.l10n.addPhoto),
         actions: [
            CupertinoActionSheetAction(
-            child: const Text("Tirar Foto"),
+            child: Text(context.l10n.takePhoto),
             onPressed: () async {
               Navigator.pop(context);
               final success = await _store.addPhotoFromCamera();
               if (!success && mounted) {
                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Erro ao adicionar foto')),
+                    SnackBar(content: Text(context.l10n.errorOccurred)),
                   );
               }
             },
           ),
            CupertinoActionSheetAction(
-            child: const Text("Escolher da Galeria"),
+            child: Text(context.l10n.chooseFromGallery),
             onPressed: () async {
               Navigator.pop(context);
               final success = await _store.addPhotoFromGallery();
                if (!success && mounted) {
                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Erro ao adicionar foto')),
+                    SnackBar(content: Text(context.l10n.errorOccurred)),
                   );
               }
             },
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          child: Text(config.label(LabelKeys.cancel)),
+          child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -1256,12 +1257,7 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   String _convertToCurrency(double? total) {
-    total ??= 0.0;
-    NumberFormat numberFormat = NumberFormat.currency(
-      locale: 'pt-BR',
-      symbol: 'R\$',
-    );
-    return numberFormat.format(total);
+    return FormatService().formatCurrency(total ?? 0.0);
   }
   
   // PDF Generation Logic - Usando novo PdfService
@@ -1277,10 +1273,10 @@ class _OrderFormState extends State<OrderForm> {
       builder: (BuildContext dialogContext) {
         return CupertinoAlertDialog(
           content: Column(
-            children: const [
-              CupertinoActivityIndicator(),
-              SizedBox(height: 10),
-              Text('Gerando PDF...'),
+            children: [
+              const CupertinoActivityIndicator(),
+              const SizedBox(height: 10),
+              Text('${context.l10n.loading}...'),
             ],
           ),
         );
@@ -1343,11 +1339,11 @@ class _OrderFormState extends State<OrderForm> {
         showCupertinoDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content: Text('Erro ao gerar PDF: $e'),
+            title: Text(context.l10n.errorOccurred),
+            content: Text('${context.l10n.errorOccurred}: $e'),
             actions: [
               CupertinoDialogAction(
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
                 onPressed: () => Navigator.pop(context),
               ),
             ],

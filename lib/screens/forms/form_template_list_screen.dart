@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'
     show Colors, Material, MaterialType, Divider, InkWell;
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/form_template_store.dart';
 import 'package:praticos/models/form_definition.dart';
 
@@ -36,7 +37,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Procedimentos'),
+              largeTitle: Text(context.l10n.procedures),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
@@ -52,7 +53,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar procedimento',
+                  placeholder: context.l10n.searchProcedure,
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -96,10 +97,10 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                 const Icon(CupertinoIcons.exclamationmark_circle,
                     size: 48, color: CupertinoColors.systemRed),
                 const SizedBox(height: 16),
-                const Text('Erro ao carregar procedimentos'),
+                Text(context.l10n.errorLoadingProcedures),
                 const SizedBox(height: 16),
                 CupertinoButton(
-                  child: const Text('Tentar novamente'),
+                  child: Text(context.l10n.tryAgain),
                   onPressed: () => templateStore.retrieveTemplates(),
                 )
               ],
@@ -135,7 +136,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
             return Padding(
               padding: const EdgeInsets.fromLTRB(32, 16, 16, 8),
               child: Text(
-                'MEUS PROCEDIMENTOS',
+                context.l10n.myProcedures.toUpperCase(),
                 style: TextStyle(
                   fontSize: 13,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -158,8 +159,8 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                     const SizedBox(height: 12),
                     Text(
                       _searchQuery.isEmpty
-                          ? 'Nenhum procedimento cadastrado'
-                          : 'Nenhum resultado encontrado',
+                          ? context.l10n.noProceduresRegistered
+                          : context.l10n.noResultsFound,
                       style: TextStyle(
                           color:
                               CupertinoColors.secondaryLabel.resolveFrom(context)),
@@ -222,7 +223,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      'PROCEDIMENTOS GLOBAIS',
+                      context.l10n.globalProcedures.toUpperCase(),
                       style: TextStyle(
                         fontSize: 13,
                         color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -282,17 +283,17 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
           return await showCupertinoDialog<bool>(
                 context: context,
                 builder: (context) => CupertinoAlertDialog(
-                  title: const Text('Confirmar exclusão'),
+                  title: Text(context.l10n.confirmDelete),
                   content: Text(
-                      'Deseja remover o procedimento "${template.title}"?'),
+                      '${context.l10n.discard} "${template.title}"?'),
                   actions: [
                     CupertinoDialogAction(
-                      child: const Text('Cancelar'),
+                      child: Text(context.l10n.cancel),
                       onPressed: () => Navigator.pop(context, false),
                     ),
                     CupertinoDialogAction(
                       isDestructiveAction: true,
-                      child: const Text('Remover'),
+                      child: Text(context.l10n.delete),
                       onPressed: () => Navigator.pop(context, true),
                     ),
                   ],
@@ -351,7 +352,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
-                                    'Inativo',
+                                    context.l10n.inactive,
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: CupertinoColors.secondaryLabel
@@ -377,7 +378,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                           ],
                           const SizedBox(height: 4),
                           Text(
-                            '${template.items.length} ${template.items.length == 1 ? 'item' : 'itens'}',
+                            context.l10n.itemCount(template.items.length),
                             style: TextStyle(
                               fontSize: 13,
                               color: CupertinoColors.systemGrey
@@ -461,7 +462,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                         ],
                         const SizedBox(height: 4),
                         Text(
-                          '${template.items.length} ${template.items.length == 1 ? 'item' : 'itens'}',
+                          context.l10n.itemCount(template.items.length),
                           style: TextStyle(
                             fontSize: 13,
                             color:
@@ -481,9 +482,9 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                         color: CupertinoColors.activeBlue,
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text(
-                        'Importar',
-                        style: TextStyle(
+                      child: Text(
+                        context.l10n.import,
+                        style: const TextStyle(
                           color: CupertinoColors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -524,7 +525,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
             ],
             const SizedBox(height: 12),
             Text(
-              'Itens: ${template.items.length}',
+              context.l10n.itemCount(template.items.length),
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 8),
@@ -543,12 +544,12 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
               Navigator.pop(ctx);
               _importGlobalTemplate(template);
             },
-            child: const Text('Importar para Minha Empresa'),
+            child: Text(context.l10n.importForMyCompany),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Fechar'),
+          child: Text(context.l10n.closeDialog),
         ),
       ),
     );
@@ -558,17 +559,17 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Importar Procedimento'),
+        title: Text(context.l10n.importProcedure),
         content: Text(
-            'Deseja importar o procedimento "${template.title}" para sua empresa?\n\nVocê poderá editá-lo após a importação.'),
+            context.l10n.importConfirmationMessage(template.title)),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancelar'),
+            child: Text(context.l10n.cancel),
           ),
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Importar'),
+            child: Text(context.l10n.import),
           ),
         ],
       ),
@@ -583,12 +584,12 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Sucesso'),
-            content: const Text('Procedimento importado com sucesso!'),
+            title: Text(context.l10n.confirmAction),
+            content: Text(context.l10n.procedureImportedSuccessfully),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),
@@ -599,13 +600,12 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
         showCupertinoDialog(
           context: context,
           builder: (ctx) => CupertinoAlertDialog(
-            title: const Text('Erro'),
-            content:
-                const Text('Não foi possível importar o procedimento. Tente novamente.'),
+            title: Text(context.l10n.error),
+            content: Text(context.l10n.couldNotImportProcedure),
             actions: [
               CupertinoDialogAction(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('OK'),
+                child: Text(context.l10n.ok),
               ),
             ],
           ),

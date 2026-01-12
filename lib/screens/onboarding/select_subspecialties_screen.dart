@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/screens/onboarding/confirm_bootstrap_screen.dart';
 
@@ -77,14 +78,12 @@ class _SelectSubspecialtiesScreenState
       showCupertinoDialog(
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
-          title: const Text('Selecione ao menos uma opção'),
-          content: const Text(
-            'Por favor, selecione pelo menos uma especialidade para continuar.',
-          ),
+          title: Text(context.l10n.selectAtLeastOne),
+          content: Text(context.l10n.pleaseSelectAtLeastOneSpecialty),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
+              child: Text(context.l10n.ok),
             ),
           ],
         ),
@@ -160,7 +159,7 @@ class _SelectSubspecialtiesScreenState
               Expanded(
                 child: SingleChildScrollView(
                   child: CupertinoListSection.insetGrouped(
-                    header: const Text('ESPECIALIDADES DISPONÍVEIS'),
+                    header: Text(context.l10n.availableSpecialties),
                     margin:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     children: widget.subspecialties.map((subspecialty) {
