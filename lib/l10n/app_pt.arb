@@ -643,5 +643,48 @@
   "inviteCreatedMessage": "O usuário ainda não está cadastrado no sistema. Um convite foi criado e aparecerá quando ele se cadastrar.",
   "required": "Obrigatório",
   "invalidEmail": "Email inválido",
-  "no": "Não"
+  "no": "Não",
+
+  "financialDashboard": "Painel Financeiro",
+  "financialAccessDenied": "Você não tem permissão para acessar o painel financeiro.\\n\\nApenas Administradores e Gerentes podem visualizar dados financeiros.",
+  "today": "Hoje",
+  "week": "Semana",
+  "month": "Mês",
+  "year": "Ano",
+  "period": "Período",
+  "currentMonth": "Mês atual",
+  "currentYear": "Ano atual",
+  "tapToReturnToCurrent": "Toque para voltar ao atual",
+  "selectPeriod": "Selecionar Período",
+  "start": "Início",
+  "end": "Fim",
+  "billing": "Faturamento",
+  "received": "Recebido",
+  "toReceive": "A Receber",
+  "composition": "Composição",
+  "services": "Serviços",
+  "products": "Produtos",
+  "customers": "Clientes",
+  "customersReceived": "Clientes - Recebido",
+  "customersToReceive": "Clientes - A Receber",
+  "customerWithoutName": "Cliente sem nome",
+  "noCustomerDataInPeriod": "Sem dados de clientes neste período",
+  "serviceWithoutName": "Serviço sem nome",
+  "productWithoutName": "Produto sem nome",
+  "noServiceDataInPeriod": "Sem dados de serviços neste período",
+  "noProductDataInPeriod": "Sem dados de produtos neste período",
+  "seeLess": "Ver menos",
+  "seeAll": "Ver todos",
+  "seeAllCount": "Ver todos ({count})",
+  "@seeAllCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "toReceiveLowerCase": "A receber",
+  "errorGeneratingReport": "Erro ao gerar relatório",
+  "paid": "Pago",
+  "pendingPayment": "Pendente"
 }

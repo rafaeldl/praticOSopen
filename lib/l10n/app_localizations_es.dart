@@ -153,7 +153,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get less => 'Menos';
 
   @override
-  String get seeAll => 'Ver Todos';
+  String get seeAll => 'Ver todos';
 
   @override
   String get seeMore => 'Ver Más';
@@ -222,7 +222,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get partiallyPaid => 'Parcialmente Pagado';
 
   @override
-  String get toReceive => 'Por Cobrar';
+  String get toReceive => 'Por Recibir';
 
   @override
   String get toPay => 'Por Pagar';
@@ -1740,4 +1740,85 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get inviteCreatedMessage =>
       'El usuario aún no está registrado en el sistema. Se ha creado una invitación y aparecerá cuando se registre.';
+
+  @override
+  String get financialDashboard => 'Panel Financiero';
+
+  @override
+  String get financialAccessDenied =>
+      'No tiene permiso para acceder al panel financiero.\\n\\nSolo los Administradores y Gerentes pueden ver datos financieros.';
+
+  @override
+  String get week => 'Semana';
+
+  @override
+  String get month => 'Mes';
+
+  @override
+  String get year => 'Año';
+
+  @override
+  String get currentMonth => 'Mes actual';
+
+  @override
+  String get currentYear => 'Año actual';
+
+  @override
+  String get tapToReturnToCurrent => 'Toque para volver al actual';
+
+  @override
+  String get selectPeriod => 'Seleccionar Período';
+
+  @override
+  String get start => 'Inicio';
+
+  @override
+  String get end => 'Fin';
+
+  @override
+  String get billing => 'Facturación';
+
+  @override
+  String get composition => 'Composición';
+
+  @override
+  String get customersReceived => 'Clientes - Recibido';
+
+  @override
+  String get customersToReceive => 'Clientes - Por Recibir';
+
+  @override
+  String get customerWithoutName => 'Cliente sin nombre';
+
+  @override
+  String get noCustomerDataInPeriod => 'Sin datos de clientes en este período';
+
+  @override
+  String get serviceWithoutName => 'Servicio sin nombre';
+
+  @override
+  String get productWithoutName => 'Producto sin nombre';
+
+  @override
+  String get noServiceDataInPeriod => 'Sin datos de servicios en este período';
+
+  @override
+  String get noProductDataInPeriod => 'Sin datos de productos en este período';
+
+  @override
+  String get seeLess => 'Ver menos';
+
+  @override
+  String seeAllCount(int count) {
+    return 'Ver todos ($count)';
+  }
+
+  @override
+  String get toReceiveLowerCase => 'Por recibir';
+
+  @override
+  String get errorGeneratingReport => 'Error al generar informe';
+
+  @override
+  String get pendingPayment => 'Pendiente';
 }

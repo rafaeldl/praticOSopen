@@ -391,7 +391,7 @@ abstract class AppLocalizations {
   /// No description provided for @seeAll.
   ///
   /// In pt, this message translates to:
-  /// **'Ver Todos'**
+  /// **'Ver todos'**
   String get seeAll;
 
   /// No description provided for @seeMore.
@@ -3501,6 +3501,162 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'O usuário ainda não está cadastrado no sistema. Um convite foi criado e aparecerá quando ele se cadastrar.'**
   String get inviteCreatedMessage;
+
+  /// No description provided for @financialDashboard.
+  ///
+  /// In pt, this message translates to:
+  /// **'Painel Financeiro'**
+  String get financialDashboard;
+
+  /// No description provided for @financialAccessDenied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você não tem permissão para acessar o painel financeiro.\\n\\nApenas Administradores e Gerentes podem visualizar dados financeiros.'**
+  String get financialAccessDenied;
+
+  /// No description provided for @week.
+  ///
+  /// In pt, this message translates to:
+  /// **'Semana'**
+  String get week;
+
+  /// No description provided for @month.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mês'**
+  String get month;
+
+  /// No description provided for @year.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ano'**
+  String get year;
+
+  /// No description provided for @currentMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mês atual'**
+  String get currentMonth;
+
+  /// No description provided for @currentYear.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ano atual'**
+  String get currentYear;
+
+  /// No description provided for @tapToReturnToCurrent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque para voltar ao atual'**
+  String get tapToReturnToCurrent;
+
+  /// No description provided for @selectPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecionar Período'**
+  String get selectPeriod;
+
+  /// No description provided for @start.
+  ///
+  /// In pt, this message translates to:
+  /// **'Início'**
+  String get start;
+
+  /// No description provided for @end.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fim'**
+  String get end;
+
+  /// No description provided for @billing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Faturamento'**
+  String get billing;
+
+  /// No description provided for @composition.
+  ///
+  /// In pt, this message translates to:
+  /// **'Composição'**
+  String get composition;
+
+  /// No description provided for @customersReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Clientes - Recebido'**
+  String get customersReceived;
+
+  /// No description provided for @customersToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Clientes - A Receber'**
+  String get customersToReceive;
+
+  /// No description provided for @customerWithoutName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente sem nome'**
+  String get customerWithoutName;
+
+  /// No description provided for @noCustomerDataInPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem dados de clientes neste período'**
+  String get noCustomerDataInPeriod;
+
+  /// No description provided for @serviceWithoutName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço sem nome'**
+  String get serviceWithoutName;
+
+  /// No description provided for @productWithoutName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto sem nome'**
+  String get productWithoutName;
+
+  /// No description provided for @noServiceDataInPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem dados de serviços neste período'**
+  String get noServiceDataInPeriod;
+
+  /// No description provided for @noProductDataInPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem dados de produtos neste período'**
+  String get noProductDataInPeriod;
+
+  /// No description provided for @seeLess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver menos'**
+  String get seeLess;
+
+  /// No description provided for @seeAllCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver todos ({count})'**
+  String seeAllCount(int count);
+
+  /// No description provided for @toReceiveLowerCase.
+  ///
+  /// In pt, this message translates to:
+  /// **'A receber'**
+  String get toReceiveLowerCase;
+
+  /// No description provided for @errorGeneratingReport.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao gerar relatório'**
+  String get errorGeneratingReport;
+
+  /// No description provided for @pendingPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pendente'**
+  String get pendingPayment;
 }
 
 class _AppLocalizationsDelegate

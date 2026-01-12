@@ -153,7 +153,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get less => 'Menos';
 
   @override
-  String get seeAll => 'Ver Todos';
+  String get seeAll => 'Ver todos';
 
   @override
   String get seeMore => 'Ver Mais';
@@ -1739,4 +1739,85 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get inviteCreatedMessage =>
       'O usuário ainda não está cadastrado no sistema. Um convite foi criado e aparecerá quando ele se cadastrar.';
+
+  @override
+  String get financialDashboard => 'Painel Financeiro';
+
+  @override
+  String get financialAccessDenied =>
+      'Você não tem permissão para acessar o painel financeiro.\\n\\nApenas Administradores e Gerentes podem visualizar dados financeiros.';
+
+  @override
+  String get week => 'Semana';
+
+  @override
+  String get month => 'Mês';
+
+  @override
+  String get year => 'Ano';
+
+  @override
+  String get currentMonth => 'Mês atual';
+
+  @override
+  String get currentYear => 'Ano atual';
+
+  @override
+  String get tapToReturnToCurrent => 'Toque para voltar ao atual';
+
+  @override
+  String get selectPeriod => 'Selecionar Período';
+
+  @override
+  String get start => 'Início';
+
+  @override
+  String get end => 'Fim';
+
+  @override
+  String get billing => 'Faturamento';
+
+  @override
+  String get composition => 'Composição';
+
+  @override
+  String get customersReceived => 'Clientes - Recebido';
+
+  @override
+  String get customersToReceive => 'Clientes - A Receber';
+
+  @override
+  String get customerWithoutName => 'Cliente sem nome';
+
+  @override
+  String get noCustomerDataInPeriod => 'Sem dados de clientes neste período';
+
+  @override
+  String get serviceWithoutName => 'Serviço sem nome';
+
+  @override
+  String get productWithoutName => 'Produto sem nome';
+
+  @override
+  String get noServiceDataInPeriod => 'Sem dados de serviços neste período';
+
+  @override
+  String get noProductDataInPeriod => 'Sem dados de produtos neste período';
+
+  @override
+  String get seeLess => 'Ver menos';
+
+  @override
+  String seeAllCount(int count) {
+    return 'Ver todos ($count)';
+  }
+
+  @override
+  String get toReceiveLowerCase => 'A receber';
+
+  @override
+  String get errorGeneratingReport => 'Erro ao gerar relatório';
+
+  @override
+  String get pendingPayment => 'Pendente';
 }

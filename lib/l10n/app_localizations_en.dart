@@ -153,7 +153,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get less => 'Less';
 
   @override
-  String get seeAll => 'See All';
+  String get seeAll => 'See all';
 
   @override
   String get seeMore => 'See More';
@@ -222,7 +222,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get partiallyPaid => 'Partially Paid';
 
   @override
-  String get toReceive => 'Receivable';
+  String get toReceive => 'To Receive';
 
   @override
   String get toPay => 'Payable';
@@ -1736,4 +1736,85 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get inviteCreatedMessage =>
       'The user is not yet registered in the system. An invite has been created and will appear when they sign up.';
+
+  @override
+  String get financialDashboard => 'Financial Dashboard';
+
+  @override
+  String get financialAccessDenied =>
+      'You don\'t have permission to access the financial dashboard.\\n\\nOnly Administrators and Managers can view financial data.';
+
+  @override
+  String get week => 'Week';
+
+  @override
+  String get month => 'Month';
+
+  @override
+  String get year => 'Year';
+
+  @override
+  String get currentMonth => 'Current month';
+
+  @override
+  String get currentYear => 'Current year';
+
+  @override
+  String get tapToReturnToCurrent => 'Tap to return to current';
+
+  @override
+  String get selectPeriod => 'Select Period';
+
+  @override
+  String get start => 'Start';
+
+  @override
+  String get end => 'End';
+
+  @override
+  String get billing => 'Billing';
+
+  @override
+  String get composition => 'Composition';
+
+  @override
+  String get customersReceived => 'Customers - Received';
+
+  @override
+  String get customersToReceive => 'Customers - To Receive';
+
+  @override
+  String get customerWithoutName => 'Customer without name';
+
+  @override
+  String get noCustomerDataInPeriod => 'No customer data in this period';
+
+  @override
+  String get serviceWithoutName => 'Service without name';
+
+  @override
+  String get productWithoutName => 'Product without name';
+
+  @override
+  String get noServiceDataInPeriod => 'No service data in this period';
+
+  @override
+  String get noProductDataInPeriod => 'No product data in this period';
+
+  @override
+  String get seeLess => 'See less';
+
+  @override
+  String seeAllCount(int count) {
+    return 'See all ($count)';
+  }
+
+  @override
+  String get toReceiveLowerCase => 'To receive';
+
+  @override
+  String get errorGeneratingReport => 'Error generating report';
+
+  @override
+  String get pendingPayment => 'Pending';
 }
