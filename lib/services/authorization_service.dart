@@ -438,17 +438,33 @@ class AuthorizationService {
   // ═══════════════════════════════════════════════════════════════════
 
   /// Retorna o label amigável do perfil atual.
+  /// Uses fallback to Portuguese. For localized version, use getRoleLabelLocalized.
   String get currentRoleLabel {
     final role = normalizedRole;
     if (role == null) return 'Sem perfil';
-    return RolePermissions.getRoleLabel(role);
+    return RolePermissions.getRoleLabel(role, null);
+  }
+
+  /// Retorna o label amigável do perfil com i18n.
+  String getRoleLabelLocalized(dynamic l10n) {
+    final role = normalizedRole;
+    if (role == null) return l10n?.noRole ?? 'Sem perfil';
+    return RolePermissions.getRoleLabel(role, l10n);
   }
 
   /// Retorna a descrição do perfil atual.
+  /// Uses fallback to Portuguese. For localized version, use getRoleDescriptionLocalized.
   String get currentRoleDescription {
     final role = normalizedRole;
     if (role == null) return '';
-    return RolePermissions.getRoleDescription(role);
+    return RolePermissions.getRoleDescription(role, null);
+  }
+
+  /// Retorna a descrição do perfil com i18n.
+  String getRoleDescriptionLocalized(dynamic l10n) {
+    final role = normalizedRole;
+    if (role == null) return '';
+    return RolePermissions.getRoleDescription(role, l10n);
   }
 
   /// Filtra uma lista de OS baseado nas permissões do usuário.

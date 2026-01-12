@@ -3244,6 +3244,66 @@ abstract class AppLocalizations {
   /// **'Definir como capa'**
   String get setAsCover;
 
+  /// No description provided for @roleAdmin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Administrador'**
+  String get roleAdmin;
+
+  /// No description provided for @roleSupervisor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Supervisor'**
+  String get roleSupervisor;
+
+  /// No description provided for @roleManager.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerente'**
+  String get roleManager;
+
+  /// No description provided for @roleConsultant.
+  ///
+  /// In pt, this message translates to:
+  /// **'Consultor'**
+  String get roleConsultant;
+
+  /// No description provided for @roleTechnician.
+  ///
+  /// In pt, this message translates to:
+  /// **'Técnico'**
+  String get roleTechnician;
+
+  /// No description provided for @roleDescAdmin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesso total ao sistema'**
+  String get roleDescAdmin;
+
+  /// No description provided for @roleDescSupervisor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gestão operacional dos técnicos'**
+  String get roleDescSupervisor;
+
+  /// No description provided for @roleDescManager.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gestão financeira e relatórios'**
+  String get roleDescManager;
+
+  /// No description provided for @roleDescConsultant.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vendas e acompanhamento comercial'**
+  String get roleDescConsultant;
+
+  /// No description provided for @roleDescTechnician.
+  ///
+  /// In pt, this message translates to:
+  /// **'Execução de serviços'**
+  String get roleDescTechnician;
+
   /// No description provided for @noFeminine.
   ///
   /// In pt, this message translates to:

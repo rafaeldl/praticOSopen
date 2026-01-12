@@ -1601,6 +1601,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setAsCover => 'Set as cover';
 
   @override
+  String get roleAdmin => 'Administrator';
+
+  @override
+  String get roleSupervisor => 'Supervisor';
+
+  @override
+  String get roleManager => 'Manager';
+
+  @override
+  String get roleConsultant => 'Consultant';
+
+  @override
+  String get roleTechnician => 'Technician';
+
+  @override
+  String get roleDescAdmin => 'Full system access';
+
+  @override
+  String get roleDescSupervisor => 'Operational management of technicians';
+
+  @override
+  String get roleDescManager => 'Financial management and reports';
+
+  @override
+  String get roleDescConsultant => 'Sales and commercial tracking';
+
+  @override
+  String get roleDescTechnician => 'Service execution';
+
+  @override
   String get noFeminine => 'No';
 
   @override

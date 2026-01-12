@@ -1603,6 +1603,36 @@ class AppLocalizationsPt extends AppLocalizations {
   String get setAsCover => 'Definir como capa';
 
   @override
+  String get roleAdmin => 'Administrador';
+
+  @override
+  String get roleSupervisor => 'Supervisor';
+
+  @override
+  String get roleManager => 'Gerente';
+
+  @override
+  String get roleConsultant => 'Consultor';
+
+  @override
+  String get roleTechnician => 'Técnico';
+
+  @override
+  String get roleDescAdmin => 'Acesso total ao sistema';
+
+  @override
+  String get roleDescSupervisor => 'Gestão operacional dos técnicos';
+
+  @override
+  String get roleDescManager => 'Gestão financeira e relatórios';
+
+  @override
+  String get roleDescConsultant => 'Vendas e acompanhamento comercial';
+
+  @override
+  String get roleDescTechnician => 'Execução de serviços';
+
+  @override
   String get noFeminine => 'Nenhuma';
 
   @override

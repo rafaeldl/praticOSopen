@@ -1605,6 +1605,36 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setAsCover => 'Establecer como portada';
 
   @override
+  String get roleAdmin => 'Administrador';
+
+  @override
+  String get roleSupervisor => 'Supervisor';
+
+  @override
+  String get roleManager => 'Gerente';
+
+  @override
+  String get roleConsultant => 'Consultor';
+
+  @override
+  String get roleTechnician => 'Técnico';
+
+  @override
+  String get roleDescAdmin => 'Acceso total al sistema';
+
+  @override
+  String get roleDescSupervisor => 'Gestión operacional de técnicos';
+
+  @override
+  String get roleDescManager => 'Gestión financiera e informes';
+
+  @override
+  String get roleDescConsultant => 'Ventas y seguimiento comercial';
+
+  @override
+  String get roleDescTechnician => 'Ejecución de servicios';
+
+  @override
   String get noFeminine => 'Ninguna';
 
   @override

@@ -553,6 +553,17 @@
   "unitValue": "Unit value",
   "setAsCover": "Set as cover",
 
+  "roleAdmin": "Administrator",
+  "roleSupervisor": "Supervisor",
+  "roleManager": "Manager",
+  "roleConsultant": "Consultant",
+  "roleTechnician": "Technician",
+  "roleDescAdmin": "Full system access",
+  "roleDescSupervisor": "Operational management of technicians",
+  "roleDescManager": "Financial management and reports",
+  "roleDescConsultant": "Sales and commercial tracking",
+  "roleDescTechnician": "Service execution",
+
   "no": "No",
   "noFeminine": "No",
   "registered": "registered",

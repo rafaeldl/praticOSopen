@@ -553,6 +553,17 @@
   "unitValue": "Valor unitario",
   "setAsCover": "Establecer como portada",
 
+  "roleAdmin": "Administrador",
+  "roleSupervisor": "Supervisor",
+  "roleManager": "Gerente",
+  "roleConsultant": "Consultor",
+  "roleTechnician": "Técnico",
+  "roleDescAdmin": "Acceso total al sistema",
+  "roleDescSupervisor": "Gestión operacional de técnicos",
+  "roleDescManager": "Gestión financiera e informes",
+  "roleDescConsultant": "Ventas y seguimiento comercial",
+  "roleDescTechnician": "Ejecución de servicios",
+
   "no": "Ningún",
   "noFeminine": "Ninguna",
   "registered": "registrado",

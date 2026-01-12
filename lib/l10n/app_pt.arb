@@ -585,6 +585,17 @@
   "unitValue": "Valor unitário",
   "setAsCover": "Definir como capa",
 
+  "roleAdmin": "Administrador",
+  "roleSupervisor": "Supervisor",
+  "roleManager": "Gerente",
+  "roleConsultant": "Consultor",
+  "roleTechnician": "Técnico",
+  "roleDescAdmin": "Acesso total ao sistema",
+  "roleDescSupervisor": "Gestão operacional dos técnicos",
+  "roleDescManager": "Gestão financeira e relatórios",
+  "roleDescConsultant": "Vendas e acompanhamento comercial",
+  "roleDescTechnician": "Execução de serviços",
+
   "no": "Nenhum",
   "noFeminine": "Nenhuma",
   "registered": "cadastrado",
