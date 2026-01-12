@@ -9,6 +9,7 @@ import 'package:praticos/screens/onboarding/welcome_screen.dart';
 import 'package:praticos/screens/onboarding/pending_invites_screen.dart';
 import 'package:praticos/screens/loading_screen.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 /// Widget que verifica se o usuário tem empresa cadastrada E segmento definido
 /// Se sim → NavigationController (Home)
@@ -289,13 +290,13 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
           .get();
 
       if (!companyDoc.exists) {
-        throw Exception('Empresa não encontrada');
+        throw Exception(context.l10n.companyNotFound);
       }
 
       final segment = companyDoc.data()?['segment'] as String?;
 
       if (segment == null || segment.isEmpty) {
-        throw Exception('Empresa sem segmento definido');
+        throw Exception(context.l10n.companyNoSegment);
       }
 
       // Carregar configuração do segmento
@@ -329,7 +330,7 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text('Erro ao carregar configuração'),
+              Text(context.l10n.errorLoadingConfig),
               const SizedBox(height: 8),
               Text(
                 _error!,

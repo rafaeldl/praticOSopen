@@ -7,6 +7,7 @@ import 'package:praticos/models/service.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class ServiceListScreen extends StatefulWidget {
   @override
@@ -44,7 +45,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         child: CustomScrollView(
           slivers: [
             CupertinoSliverNavigationBar(
-              largeTitle: const Text('Serviços'),
+              largeTitle: Text(context.l10n.services),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
                 child: const Icon(CupertinoIcons.add),
@@ -58,7 +59,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: CupertinoSearchTextField(
                   controller: _searchController,
-                  placeholder: 'Buscar serviço',
+                  placeholder: context.l10n.searchService,
                   onChanged: (value) {
                     setState(() => _searchQuery = value.toLowerCase());
                   },
@@ -94,10 +95,10 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             children: [
               const Icon(CupertinoIcons.exclamationmark_circle, size: 48, color: CupertinoColors.systemRed),
               const SizedBox(height: 16),
-              const Text('Erro ao carregar serviços'),
+              Text(context.l10n.errorLoadingData),
               const SizedBox(height: 16),
               CupertinoButton(
-                child: const Text('Tentar novamente'),
+                child: Text(context.l10n.tryAgain),
                 onPressed: () => serviceStore.retrieveServices(),
               )
             ],
@@ -125,7 +126,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                 Icon(CupertinoIcons.wrench, size: 64, color: CupertinoColors.systemGrey.resolveFrom(context)),
                 const SizedBox(height: 16),
                 Text(
-                  'Nenhum serviço cadastrado',
+                  context.l10n.noServices,
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -134,7 +135,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Toque em + para adicionar seu primeiro serviço.',
+                  context.l10n.tapToAddFirst,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -157,9 +158,9 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           }).toList();
 
     if (filteredList.isEmpty) {
-      return const SliverFillRemaining(
+      return SliverFillRemaining(
         child: Center(
-          child: Text('Nenhum resultado encontrado'),
+          child: Text(context.l10n.noResults),
         ),
       );
     }
@@ -205,18 +206,18 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           // Swipe Left -> Delete
           return await showCupertinoDialog<bool>(
             context: context,
-            builder: (context) => CupertinoAlertDialog(
-              title: const Text('Confirmar exclusão'),
-              content: Text('Deseja remover o serviço "${service.name}"?'),
+            builder: (dialogContext) => CupertinoAlertDialog(
+              title: Text(context.l10n.confirmDelete),
+              content: Text('${context.l10n.confirmRemove} "${service.name}"?'),
               actions: [
                 CupertinoDialogAction(
-                  child: const Text('Cancelar'),
-                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(context.l10n.cancel),
+                  onPressed: () => Navigator.pop(dialogContext, false),
                 ),
                 CupertinoDialogAction(
                   isDestructiveAction: true,
-                  child: const Text('Remover'),
-                  onPressed: () => Navigator.pop(context, true),
+                  child: Text(context.l10n.remove),
+                  onPressed: () => Navigator.pop(dialogContext, true),
                 ),
               ],
             ),

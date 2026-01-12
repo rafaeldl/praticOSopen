@@ -9,6 +9,7 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class DeviceListScreen extends StatefulWidget {
   @override
@@ -225,13 +226,13 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           if (!_authService.hasPermission(PermissionType.manageDevices)) {
              await showCupertinoDialog(
               context: context,
-              builder: (context) => CupertinoAlertDialog(
-                title: const Text('Sem Permissão'),
-                content: const Text('Você não tem permissão para remover dispositivos.'),
+              builder: (dialogContext) => CupertinoAlertDialog(
+                title: Text(context.l10n.noPermission),
+                content: Text(context.l10n.noPermissionToRemove),
                 actions: [
                   CupertinoDialogAction(
-                    child: const Text('OK'),
-                    onPressed: () => Navigator.pop(context),
+                    child: Text(context.l10n.ok),
+                    onPressed: () => Navigator.pop(dialogContext),
                   ),
                 ],
               ),

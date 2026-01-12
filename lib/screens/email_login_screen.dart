@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
@@ -37,7 +38,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        _showError(_getErrorMessage(e.toString()));
+        _showError(context, _getErrorMessage(context, e.toString()));
       }
     } finally {
       if (mounted) {
@@ -46,29 +47,29 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
     }
   }
 
-  String _getErrorMessage(String error) {
+  String _getErrorMessage(BuildContext context, String error) {
     if (error.contains('user-not-found')) {
-      return 'Usuário não encontrado';
+      return context.l10n.userNotFound;
     } else if (error.contains('wrong-password')) {
-      return 'Senha incorreta';
+      return context.l10n.wrongPassword;
     } else if (error.contains('invalid-email')) {
-      return 'Email inválido';
+      return context.l10n.invalidEmail;
     } else if (error.contains('invalid-credential')) {
-      return 'Credenciais inválidas';
+      return context.l10n.invalidCredentials;
     }
-    return 'Erro ao entrar. Tente novamente.';
+    return context.l10n.errorSignIn;
   }
 
-  void _showError(String message) {
+  void _showError(BuildContext context, String message) {
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Erro'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.error),
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.ok),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
         ],
       ),
@@ -79,8 +80,8 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Entrar com Email'),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(context.l10n.signInWithEmail),
       ),
       child: SafeArea(
         child: DefaultTextStyle(
@@ -113,7 +114,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
-                  'Digite seu email e senha para acessar sua conta',
+                  context.l10n.enterEmailPassword,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 15,
@@ -125,15 +126,15 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
 
               // Form Fields
               CupertinoListSection.insetGrouped(
-                header: const Text('CREDENCIAIS'),
+                header: Text(context.l10n.credentials.toUpperCase()),
                 children: [
                   Semantics(
                     identifier: 'email_field',
                     child: CupertinoTextFormFieldRow(
                       controller: _emailController,
-                      prefix: const SizedBox(
+                      prefix: SizedBox(
                         width: 80,
-                        child: Text('Email', style: TextStyle(fontSize: 16)),
+                        child: Text(context.l10n.email, style: const TextStyle(fontSize: 16)),
                       ),
                       placeholder: 'seu@email.com',
                       keyboardType: TextInputType.emailAddress,
@@ -142,10 +143,10 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                       textInputAction: TextInputAction.next,
                       validator: (val) {
                         if (val == null || val.isEmpty) {
-                          return 'Obrigatório';
+                          return context.l10n.requiredField;
                         }
                         if (!val.contains('@') || !val.contains('.')) {
-                          return 'Email inválido';
+                          return context.l10n.invalidEmail;
                         }
                         return null;
                       },
@@ -158,20 +159,20 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                         Expanded(
                           child: CupertinoTextFormFieldRow(
                             controller: _passwordController,
-                            prefix: const SizedBox(
+                            prefix: SizedBox(
                               width: 80,
-                              child: Text('Senha', style: TextStyle(fontSize: 16)),
+                              child: Text(context.l10n.password, style: const TextStyle(fontSize: 16)),
                             ),
-                            placeholder: 'Digite sua senha',
+                            placeholder: context.l10n.enterYourPassword,
                             obscureText: _obscurePassword,
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _handleSignIn(),
                             validator: (val) {
                               if (val == null || val.isEmpty) {
-                                return 'Obrigatório';
+                                return context.l10n.requiredField;
                               }
                               if (val.length < 6) {
-                                return 'Mínimo 6 caracteres';
+                                return context.l10n.minLength(6);
                               }
                               return null;
                             },
@@ -207,9 +208,9 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                     onPressed: _isLoading ? null : _handleSignIn,
                     child: _isLoading
                         ? const CupertinoActivityIndicator(color: CupertinoColors.white)
-                        : const Text(
-                            'Entrar',
-                            style: TextStyle(
+                        : Text(
+                            context.l10n.login,
+                            style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                             ),
@@ -226,7 +227,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   padding: EdgeInsets.zero,
                   onPressed: () => _showForgotPasswordDialog(),
                   child: Text(
-                    'Esqueceu sua senha?',
+                    '${context.l10n.forgotPassword}?',
                     style: TextStyle(
                       fontSize: 15,
                       color: CupertinoColors.activeBlue.resolveFrom(context),
@@ -249,13 +250,13 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
 
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Recuperar Senha'),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.resetPassword),
         content: Padding(
           padding: const EdgeInsets.only(top: 16),
           child: CupertinoTextField(
             controller: resetEmailController,
-            placeholder: 'Digite seu email',
+            placeholder: context.l10n.enterYourEmail,
             keyboardType: TextInputType.emailAddress,
             autocorrect: false,
             textCapitalization: TextCapitalization.none,
@@ -264,31 +265,29 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
-            child: const Text('Cancelar'),
-            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
           CupertinoDialogAction(
-            child: const Text('Enviar'),
+            child: Text(context.l10n.send),
             onPressed: () async {
               final email = resetEmailController.text.trim();
               if (email.isEmpty || !email.contains('@')) {
                 return;
               }
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               try {
                 await _auth.sendPasswordResetEmail(email);
                 if (mounted) {
                   showCupertinoDialog(
                     context: context,
-                    builder: (context) => CupertinoAlertDialog(
-                      title: const Text('Email Enviado'),
-                      content: const Text(
-                        'Verifique sua caixa de entrada para redefinir sua senha.',
-                      ),
+                    builder: (successContext) => CupertinoAlertDialog(
+                      title: Text(context.l10n.emailSent),
+                      content: Text(context.l10n.checkInboxResetPassword),
                       actions: [
                         CupertinoDialogAction(
-                          child: const Text('OK'),
-                          onPressed: () => Navigator.pop(context),
+                          child: Text(context.l10n.ok),
+                          onPressed: () => Navigator.pop(successContext),
                         ),
                       ],
                     ),
@@ -296,7 +295,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                 }
               } catch (e) {
                 if (mounted) {
-                  _showError('Erro ao enviar email de recuperação');
+                  _showError(context, context.l10n.errorSendingRecoveryEmail);
                 }
               }
             },
