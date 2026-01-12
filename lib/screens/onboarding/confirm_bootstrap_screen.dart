@@ -125,10 +125,18 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         await companyStore.updateCompany(existingCompany);
 
+        setState(() => _statusMessage = 'Importando formulários...');
+        final bootstrapService = BootstrapService();
+        await bootstrapService.syncCompanyFormsFromSegment(
+          companyId: targetCompanyId,
+          segmentId: widget.segmentId,
+          subspecialties: widget.subspecialties,
+          userAggr: dbUser.toAggr(),
+        );
+
         // Bootstrap se solicitado
         if (runBootstrap) {
           setState(() => _statusMessage = 'Criando dados de exemplo...');
-          final bootstrapService = BootstrapService();
           await bootstrapService.executeBootstrap(
             companyId: targetCompanyId,
             segmentId: widget.segmentId,
@@ -161,16 +169,24 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
           ..logo = logoUrl
           ..owner = userAggr
           ..createdAt = DateTime.now()
-          ..createdBy = userAggr
-          ..updatedAt = DateTime.now()
-          ..updatedBy = userAggr;
+        ..createdBy = userAggr
+        ..updatedAt = DateTime.now()
+        ..updatedBy = userAggr;
 
         await userStore.createCompanyForUser(company);
+
+        setState(() => _statusMessage = 'Importando formulários...');
+        final bootstrapService = BootstrapService();
+        await bootstrapService.syncCompanyFormsFromSegment(
+          companyId: targetCompanyId,
+          segmentId: widget.segmentId,
+          subspecialties: widget.subspecialties,
+          userAggr: userAggr,
+        );
 
         // Bootstrap se solicitado
         if (runBootstrap) {
           setState(() => _statusMessage = 'Criando dados de exemplo...');
-          final bootstrapService = BootstrapService();
           await bootstrapService.executeBootstrap(
             companyId: targetCompanyId,
             segmentId: widget.segmentId,
