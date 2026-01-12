@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'company_contact_screen.dart';
 
 class CompanyInfoScreen extends StatefulWidget {
+  final AuthStore authStore;
   final String? companyId; // ID da empresa existente (se houver)
   final String? initialName;
   final String? initialAddress;
@@ -15,6 +17,7 @@ class CompanyInfoScreen extends StatefulWidget {
 
   const CompanyInfoScreen({
     super.key,
+    required this.authStore,
     this.companyId,
     this.initialName,
     this.initialAddress,
@@ -80,6 +83,7 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
         context,
         CupertinoPageRoute(
           builder: (context) => CompanyContactScreen(
+            authStore: widget.authStore,
             companyId: widget.companyId,
             companyName: _nameController.text,
             address: _addressController.text,

@@ -697,7 +697,7 @@ class _HomeState extends State<Home> {
                                   deviceText,
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

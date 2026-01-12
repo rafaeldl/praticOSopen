@@ -5,7 +5,7 @@ import 'package:praticos/repositories/v2/repository_v2.dart';
 
 /// Repository V2 para FormTemplates usando subcollections por tenant.
 ///
-/// Path: `/companies/{companyId}/form_templates/{templateId}`
+/// Path: `/companies/{companyId}/forms/{templateId}`
 class FormTemplateRepositoryV2 extends RepositoryV2<FormDefinition?> {
   final TenantFormTemplateRepository _tenant = TenantFormTemplateRepository();
 

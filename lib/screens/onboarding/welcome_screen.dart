@@ -42,6 +42,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       context,
       CupertinoPageRoute(
         builder: (context) => CompanyInfoScreen(
+          authStore: widget.authStore,
           companyId: widget.companyId,
           initialName: widget.initialName,
           initialAddress: widget.initialAddress,

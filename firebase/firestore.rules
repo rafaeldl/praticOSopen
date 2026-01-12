@@ -340,12 +340,6 @@ service cloud.firestore {
         allow read: if belongsToCompany(companyId);
         allow write: if canManageTemplates(companyId);
       }
-
-      // Legado: form_templates (pode ser removido após migração)
-      match /form_templates/{formId} {
-        allow read: if belongsToCompany(companyId);
-        allow write: if canManageTemplates(companyId);
-      }
     }
   }
 }

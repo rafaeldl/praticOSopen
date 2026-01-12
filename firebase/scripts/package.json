@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "seed-segments": "node seed_segments.js",
+    "seed-bootstrap": "node seed_bootstrap_data.js",
     "migrate": "node migrate.js",
     "rollback": "node rollback.js",
     "refresh-claims": "node refresh_claims.js",

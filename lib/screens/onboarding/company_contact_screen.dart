@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:easy_mask/easy_mask.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/mobx/auth_store.dart';
 import 'select_segment_screen.dart';
 
 class CompanyContactScreen extends StatefulWidget {
+  final AuthStore authStore;
   final String? companyId;
   final String companyName;
   final String? address;
@@ -14,6 +16,7 @@ class CompanyContactScreen extends StatefulWidget {
 
   const CompanyContactScreen({
     super.key,
+    required this.authStore,
     this.companyId,
     required this.companyName,
     this.address,
@@ -47,6 +50,7 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
         context,
         CupertinoPageRoute(
           builder: (context) => SelectSegmentScreen(
+            authStore: widget.authStore,
             companyId: widget.companyId,
             companyName: widget.companyName,
             address: widget.address ?? '',

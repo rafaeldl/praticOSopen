@@ -201,10 +201,13 @@ abstract class _AuthStore with Store {
     }
 
     try {
-      // 1. Delete all Firestore data
+      // 1. Delete all Firestore data (company, user document, everything)
       await _authService.deleteUserData(user.uid);
 
-      // 2. Clear local preferences
+      // 2. Delete Firebase Auth account
+      await _auth.deleteAccount();
+
+      // 3. Clear local preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.remove("userId");
       await prefs.remove("userDisplayName");
@@ -213,12 +216,9 @@ abstract class _AuthStore with Store {
       await prefs.remove("companyId");
       await prefs.remove("companyName");
 
-      // 3. Clear global state
+      // 4. Clear global state
       Global.currentUser = null;
       Global.companyAggr = null;
-
-      // 4. Delete Firebase Auth account
-      await _auth.deleteAccount();
 
       logout = true;
     } catch (e) {

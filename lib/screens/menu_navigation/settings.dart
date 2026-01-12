@@ -438,7 +438,11 @@ class _SettingsState extends State<Settings> {
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
+              // Close confirmation dialog
               Navigator.pop(context);
+
+              // Save the navigator state before showing dialog
+              final navigatorState = Navigator.of(context);
 
               // Show loading indicator
               showCupertinoDialog(
@@ -451,26 +455,50 @@ class _SettingsState extends State<Settings> {
 
               try {
                 await _authStore.deleteAccount();
-                // The auth state change will automatically redirect to login
+
+                // Close loading dialog - use try-catch to prevent crash if widget unmounted
+                try {
+                  navigatorState.pop();
+                } catch (e) {
+                  print('⚠️  Could not close loading dialog (widget may be unmounted): $e');
+                }
+
+                // Auth state change will automatically redirect to login
               } catch (e) {
-                Navigator.pop(context); // Close loading
-                showCupertinoDialog(
-                  context: context,
-                  builder: (context) => CupertinoAlertDialog(
-                    title: const Text('Erro'),
-                    content: Text(
-                      'Não foi possível excluir sua conta. '
-                      'Por favor, tente novamente ou entre em contato com o suporte.\n\n'
-                      'Erro: ${e.toString()}',
-                    ),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: const Text('OK'),
-                        onPressed: () => Navigator.pop(context),
+                // Close loading dialog - use try-catch to prevent crash if widget unmounted
+                try {
+                  navigatorState.pop();
+                } catch (popError) {
+                  print('⚠️  Could not close loading dialog (widget may be unmounted): $popError');
+                }
+
+                // Show error dialog
+                try {
+                  showCupertinoDialog(
+                    context: context,
+                    builder: (context) => CupertinoAlertDialog(
+                      title: const Text('Erro ao Excluir Conta'),
+                      content: Text(
+                        'Não foi possível excluir sua conta.\n\n'
+                        '${_formatErrorMessage(e.toString())}',
                       ),
-                    ],
-                  ),
-                );
+                      actions: [
+                        CupertinoDialogAction(
+                          child: const Text('OK'),
+                          onPressed: () {
+                            try {
+                              Navigator.pop(context);
+                            } catch (e) {
+                              print('⚠️  Could not close error dialog: $e');
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                } catch (dialogError) {
+                  print('⚠️  Could not show error dialog (widget may be unmounted): $dialogError');
+                }
               }
             },
             child: const Text('Excluir Permanentemente'),
@@ -478,5 +506,31 @@ class _SettingsState extends State<Settings> {
         ],
       ),
     );
+  }
+
+  /// Format error messages to be user-friendly
+  String _formatErrorMessage(String error) {
+    // Check for business logic errors
+    if (error.contains('proprietário de uma empresa com outros membros')) {
+      return error.replaceAll('Exception: ', '');
+    }
+
+    // Check for Firebase Auth errors
+    if (error.contains('requires-recent-login')) {
+      return 'Por segurança, o Firebase exige login recente antes de deletar a conta.\n\n'
+          'Por favor:\n'
+          '1. Faça logout da sua conta\n'
+          '2. Faça login novamente\n'
+          '3. Tente deletar a conta imediatamente após o login';
+    }
+    if (error.contains('permission-denied')) {
+      return 'Você não tem permissão para deletar sua conta. Tente novamente mais tarde.';
+    }
+    if (error.contains('network')) {
+      return 'Erro de conexão. Verifique sua internet e tente novamente.';
+    }
+
+    // Generic error
+    return 'Erro: ${error.replaceAll('[firebase_auth/', '').replaceAll('Exception: ', '').replaceAll(']', '')}';
   }
 }

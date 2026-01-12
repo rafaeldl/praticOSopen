@@ -19,13 +19,7 @@ class AuthRepository {
   }
 
   Future<User> signInWithGoogle() async {
-    // Desconecta sessão anterior para permitir escolher outra conta
-    // Isso é especialmente útil no simulador iOS
-    try {
-      await _googleSignIn.disconnect();
-    } catch (_) {
-      // Ignora erro se não havia sessão anterior
-    }
+    print('🔑 signInWithGoogle() called');
 
     final GoogleSignInAccount? googleSignInAccount =
         await (_googleSignIn.signIn());

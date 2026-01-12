@@ -16,13 +16,12 @@ import 'package:praticos/screens/info_form_screen.dart';
 import 'package:praticos/screens/service_form_screen.dart';
 import 'package:praticos/screens/service_list_screen.dart';
 import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
-import 'package:praticos/screens/onboarding/company_info_screen.dart';
 import 'package:praticos/screens/forms/form_template_list_screen.dart';
 import 'package:praticos/screens/forms/form_template_form_screen.dart';
 import 'package:praticos/screens/user_profile_edit_screen.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
-  '/onboarding': (context) => const CompanyInfoScreen(),
+  // '/onboarding': removed - onboarding now handled by AuthWrapper with authStore
   '/service_list': (context) => ServiceListScreen(),
   '/service_form': (context) => ServiceFormScreen(),
   '/product_list': (context) => ProductListScreen(),
