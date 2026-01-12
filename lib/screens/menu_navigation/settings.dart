@@ -438,13 +438,15 @@ class _SettingsState extends State<Settings> {
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              if (!mounted) return;
+              // Close confirmation dialog
               Navigator.pop(context);
 
+              // Save context for later use (in case widget gets unmounted)
+              final navigationContext = context;
+
               // Show loading indicator
-              if (!mounted) return;
               showCupertinoDialog(
-                context: context,
+                context: navigationContext,
                 barrierDismissible: false,
                 builder: (context) => const Center(
                   child: CupertinoActivityIndicator(radius: 20),
@@ -454,18 +456,17 @@ class _SettingsState extends State<Settings> {
               try {
                 await _authStore.deleteAccount();
 
-                // Close loading dialog
-                if (!mounted) return;
-                Navigator.pop(context);
+                // Close loading dialog - use Navigator.of with rootNavigator
+                Navigator.of(navigationContext, rootNavigator: true).pop();
 
-                // The auth state change will automatically redirect to login
+                // Auth state change will automatically redirect to login
               } catch (e) {
-                if (!mounted) return;
-                Navigator.pop(context); // Close loading
+                // Close loading dialog - use Navigator.of with rootNavigator
+                Navigator.of(navigationContext, rootNavigator: true).pop();
 
-                if (!mounted) return;
+                // Show error dialog
                 showCupertinoDialog(
-                  context: context,
+                  context: navigationContext,
                   builder: (context) => CupertinoAlertDialog(
                     title: const Text('Erro ao Excluir Conta'),
                     content: Text(
@@ -498,8 +499,11 @@ class _SettingsState extends State<Settings> {
 
     // Check for Firebase Auth errors
     if (error.contains('requires-recent-login')) {
-      return 'Por segurança, você precisa fazer login novamente antes de deletar sua conta. '
-          'Por favor, faça logout e login novamente.';
+      return 'Por segurança, o Firebase exige login recente antes de deletar a conta.\n\n'
+          'Por favor:\n'
+          '1. Faça logout da sua conta\n'
+          '2. Faça login novamente\n'
+          '3. Tente deletar a conta imediatamente após o login';
     }
     if (error.contains('permission-denied')) {
       return 'Você não tem permissão para deletar sua conta. Tente novamente mais tarde.';
