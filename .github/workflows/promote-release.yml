@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       rc_tag:
-        description: 'RC tag to promote (leave empty for latest -rc)'
+        description: 'RC tag override (tip: select tag directly in "Use workflow from" dropdown)'
         required: false
         type: string
         default: ''
@@ -36,10 +36,18 @@ jobs:
         id: validate
         run: |
           RC_TAG="${{ inputs.rc_tag }}"
+          GIT_REF="${{ github.ref_name }}"
 
-          # If no tag provided, get the latest -rc tag
-          if [ -z "$RC_TAG" ]; then
-            echo "📌 No tag provided, fetching latest -rc tag..."
+          # Priority: 1) Manual input, 2) Selected tag from UI, 3) Latest -rc
+          if [ -n "$RC_TAG" ]; then
+            echo "📌 Using manually specified tag: $RC_TAG"
+          elif [[ "$GIT_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc$ ]]; then
+            # Workflow was triggered on a -rc tag directly from GitHub UI
+            RC_TAG="$GIT_REF"
+            echo "📌 Using selected tag from GitHub UI: $RC_TAG"
+          else
+            # Fallback: get the latest -rc tag
+            echo "📌 No tag specified, fetching latest -rc tag..."
             RC_TAG=$(git tag -l 'v*-rc' | sort -V | tail -1)
 
             if [ -z "$RC_TAG" ]; then
