@@ -1955,6 +1955,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sampleEquipment => 'Sample equipment';
 
   @override
+  String get sampleForms => 'Inspection forms';
+
+  @override
   String get demoCustomer => 'Demo customer';
 
   @override
@@ -1963,16 +1966,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noStartFromScratch => 'No, start from scratch';
-
-  @override
-  String get formsToImport => 'Forms to Import';
-
-  @override
-  String get theseFormsWillBeImported =>
-      'The following forms will be imported to your company:';
-
-  @override
-  String get noFormsAvailable => 'No forms available for this segment';
 
   @override
   String get changeLogo => 'Change Logo';

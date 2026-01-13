@@ -1962,6 +1962,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sampleEquipment => 'Equipamentos de exemplo';
 
   @override
+  String get sampleForms => 'Formulários de vistoria';
+
+  @override
   String get demoCustomer => 'Cliente de demonstração';
 
   @override
@@ -1970,17 +1973,6 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noStartFromScratch => 'Não, começar do zero';
-
-  @override
-  String get formsToImport => 'Formulários a Importar';
-
-  @override
-  String get theseFormsWillBeImported =>
-      'Os seguintes formulários serão importados para sua empresa:';
-
-  @override
-  String get noFormsAvailable =>
-      'Nenhum formulário disponível para este segmento';
 
   @override
   String get changeLogo => 'Alterar Logo';

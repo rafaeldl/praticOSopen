@@ -748,13 +748,10 @@
   "commonServicesForSegment": "Serviços comuns do seu segmento",
   "mostUsedProducts": "Produtos e peças mais utilizados",
   "sampleEquipment": "Equipamentos de exemplo",
+  "sampleForms": "Formulários de vistoria",
   "demoCustomer": "Cliente de demonstração",
   "canEditOrDeleteAnytime": "Você poderá editar ou excluir esses dados a qualquer momento.",
   "noStartFromScratch": "Não, começar do zero",
-
-  "formsToImport": "Formulários a Importar",
-  "theseFormsWillBeImported": "Os seguintes formulários serão importados para sua empresa:",
-  "noFormsAvailable": "Nenhum formulário disponível para este segmento",
 
   "changeLogo": "Alterar Logo",
   "takePhoto": "Tirar Foto",

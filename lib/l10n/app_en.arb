@@ -831,11 +831,8 @@
   "commonServicesForSegment": "Common services for your segment",
   "mostUsedProducts": "Most used products and parts",
   "sampleEquipment": "Sample equipment",
+  "sampleForms": "Inspection forms",
   "demoCustomer": "Demo customer",
   "canEditOrDeleteAnytime": "You can edit or delete this data at any time.",
-  "noStartFromScratch": "No, start from scratch",
-
-  "formsToImport": "Forms to Import",
-  "theseFormsWillBeImported": "The following forms will be imported to your company:",
-  "noFormsAvailable": "No forms available for this segment"
+  "noStartFromScratch": "No, start from scratch"
 }

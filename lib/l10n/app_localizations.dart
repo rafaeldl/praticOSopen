@@ -3922,6 +3922,12 @@ abstract class AppLocalizations {
   /// **'Equipamentos de exemplo'**
   String get sampleEquipment;
 
+  /// No description provided for @sampleForms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Formulários de vistoria'**
+  String get sampleForms;
+
   /// No description provided for @demoCustomer.
   ///
   /// In pt, this message translates to:
@@ -3939,24 +3945,6 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Não, começar do zero'**
   String get noStartFromScratch;
-
-  /// No description provided for @formsToImport.
-  ///
-  /// In pt, this message translates to:
-  /// **'Formulários a Importar'**
-  String get formsToImport;
-
-  /// No description provided for @theseFormsWillBeImported.
-  ///
-  /// In pt, this message translates to:
-  /// **'Os seguintes formulários serão importados para sua empresa:'**
-  String get theseFormsWillBeImported;
-
-  /// No description provided for @noFormsAvailable.
-  ///
-  /// In pt, this message translates to:
-  /// **'Nenhum formulário disponível para este segmento'**
-  String get noFormsAvailable;
 
   /// No description provided for @changeLogo.
   ///
