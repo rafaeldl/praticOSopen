@@ -736,6 +736,26 @@
   "contacts": "Contatos",
   "contactMethods": "Meios de Contato",
   "howCustomersCanReachYou": "Como seus clientes podem falar com você?",
+
+  "preparing": "Preparando...",
+  "uploadingLogo": "Enviando logo...",
+  "creatingCompany": "Criando empresa...",
+  "importingForms": "Importando formulários...",
+  "creatingSampleData": "Criando dados de exemplo...",
+
+  "createSampleDataQuestion": "Deseja criar dados de exemplo?",
+  "sampleDataDescription": "Podemos criar alguns dados de exemplo para você começar a usar o sistema imediatamente:",
+  "commonServicesForSegment": "Serviços comuns do seu segmento",
+  "mostUsedProducts": "Produtos e peças mais utilizados",
+  "sampleEquipment": "Equipamentos de exemplo",
+  "demoCustomer": "Cliente de demonstração",
+  "canEditOrDeleteAnytime": "Você poderá editar ou excluir esses dados a qualquer momento.",
+  "noStartFromScratch": "Não, começar do zero",
+
+  "formsToImport": "Formulários a Importar",
+  "theseFormsWillBeImported": "Os seguintes formulários serão importados para sua empresa:",
+  "noFormsAvailable": "Nenhum formulário disponível para este segmento",
+
   "changeLogo": "Alterar Logo",
   "takePhoto": "Tirar Foto",
   "chooseFromGallery": "Escolher da Galeria",

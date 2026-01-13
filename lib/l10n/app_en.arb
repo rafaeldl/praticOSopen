@@ -818,5 +818,24 @@
 
   "contacts": "Contacts",
   "contactMethods": "Contact Methods",
-  "howCustomersCanReachYou": "How can your customers reach you?"
+  "howCustomersCanReachYou": "How can your customers reach you?",
+
+  "preparing": "Preparing...",
+  "uploadingLogo": "Uploading logo...",
+  "creatingCompany": "Creating company...",
+  "importingForms": "Importing forms...",
+  "creatingSampleData": "Creating sample data...",
+
+  "createSampleDataQuestion": "Create sample data?",
+  "sampleDataDescription": "We can create some sample data for you to start using the system immediately:",
+  "commonServicesForSegment": "Common services for your segment",
+  "mostUsedProducts": "Most used products and parts",
+  "sampleEquipment": "Sample equipment",
+  "demoCustomer": "Demo customer",
+  "canEditOrDeleteAnytime": "You can edit or delete this data at any time.",
+  "noStartFromScratch": "No, start from scratch",
+
+  "formsToImport": "Forms to Import",
+  "theseFormsWillBeImported": "The following forms will be imported to your company:",
+  "noFormsAvailable": "No forms available for this segment"
 }

@@ -1924,6 +1924,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get howCustomersCanReachYou => 'How can your customers reach you?';
 
   @override
+  String get preparing => 'Preparing...';
+
+  @override
+  String get uploadingLogo => 'Uploading logo...';
+
+  @override
+  String get creatingCompany => 'Creating company...';
+
+  @override
+  String get importingForms => 'Importing forms...';
+
+  @override
+  String get creatingSampleData => 'Creating sample data...';
+
+  @override
+  String get createSampleDataQuestion => 'Create sample data?';
+
+  @override
+  String get sampleDataDescription =>
+      'We can create some sample data for you to start using the system immediately:';
+
+  @override
+  String get commonServicesForSegment => 'Common services for your segment';
+
+  @override
+  String get mostUsedProducts => 'Most used products and parts';
+
+  @override
+  String get sampleEquipment => 'Sample equipment';
+
+  @override
+  String get demoCustomer => 'Demo customer';
+
+  @override
+  String get canEditOrDeleteAnytime =>
+      'You can edit or delete this data at any time.';
+
+  @override
+  String get noStartFromScratch => 'No, start from scratch';
+
+  @override
+  String get formsToImport => 'Forms to Import';
+
+  @override
+  String get theseFormsWillBeImported =>
+      'The following forms will be imported to your company:';
+
+  @override
+  String get noFormsAvailable => 'No forms available for this segment';
+
+  @override
   String get changeLogo => 'Change Logo';
 
   @override

@@ -165,14 +165,14 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
                   CupertinoTextFormFieldRow(
                     controller: _emailController,
                     prefix: Text(context.l10n.email),
-                    placeholder: 'contato@empresa.com',
+                    placeholder: context.l10n.emailPlaceholder,
                     keyboardType: TextInputType.emailAddress,
                     textAlign: TextAlign.right,
                   ),
                   CupertinoTextFormFieldRow(
                     controller: _siteController,
                     prefix: Text(context.l10n.website),
-                    placeholder: 'www.exemplo.com.br',
+                    placeholder: context.l10n.websitePlaceholder,
                     keyboardType: TextInputType.url,
                     textAlign: TextAlign.right,
                   ),

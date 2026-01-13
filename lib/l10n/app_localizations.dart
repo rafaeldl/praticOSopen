@@ -3862,6 +3862,102 @@ abstract class AppLocalizations {
   /// **'Como seus clientes podem falar com você?'**
   String get howCustomersCanReachYou;
 
+  /// No description provided for @preparing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preparando...'**
+  String get preparing;
+
+  /// No description provided for @uploadingLogo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviando logo...'**
+  String get uploadingLogo;
+
+  /// No description provided for @creatingCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criando empresa...'**
+  String get creatingCompany;
+
+  /// No description provided for @importingForms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importando formulários...'**
+  String get importingForms;
+
+  /// No description provided for @creatingSampleData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criando dados de exemplo...'**
+  String get creatingSampleData;
+
+  /// No description provided for @createSampleDataQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja criar dados de exemplo?'**
+  String get createSampleDataQuestion;
+
+  /// No description provided for @sampleDataDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Podemos criar alguns dados de exemplo para você começar a usar o sistema imediatamente:'**
+  String get sampleDataDescription;
+
+  /// No description provided for @commonServicesForSegment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços comuns do seu segmento'**
+  String get commonServicesForSegment;
+
+  /// No description provided for @mostUsedProducts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produtos e peças mais utilizados'**
+  String get mostUsedProducts;
+
+  /// No description provided for @sampleEquipment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equipamentos de exemplo'**
+  String get sampleEquipment;
+
+  /// No description provided for @demoCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente de demonstração'**
+  String get demoCustomer;
+
+  /// No description provided for @canEditOrDeleteAnytime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você poderá editar ou excluir esses dados a qualquer momento.'**
+  String get canEditOrDeleteAnytime;
+
+  /// No description provided for @noStartFromScratch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não, começar do zero'**
+  String get noStartFromScratch;
+
+  /// No description provided for @formsToImport.
+  ///
+  /// In pt, this message translates to:
+  /// **'Formulários a Importar'**
+  String get formsToImport;
+
+  /// No description provided for @theseFormsWillBeImported.
+  ///
+  /// In pt, this message translates to:
+  /// **'Os seguintes formulários serão importados para sua empresa:'**
+  String get theseFormsWillBeImported;
+
+  /// No description provided for @noFormsAvailable.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum formulário disponível para este segmento'**
+  String get noFormsAvailable;
+
   /// No description provided for @changeLogo.
   ///
   /// In pt, this message translates to:

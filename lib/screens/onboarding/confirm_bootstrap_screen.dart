@@ -44,6 +44,70 @@ class ConfirmBootstrapScreen extends StatefulWidget {
 class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
   bool _isCreating = false;
   String _statusMessage = '';
+  List<Map<String, dynamic>> _formTemplates = [];
+  bool _isLoadingForms = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFormTemplates();
+  }
+
+  /// Carrega os form templates do segmento
+  Future<void> _loadFormTemplates() async {
+    try {
+      final formsSnapshot = await FirebaseFirestore.instance
+          .collection('segments')
+          .doc(widget.segmentId)
+          .collection('forms')
+          .orderBy('order')
+          .get();
+
+      final forms = formsSnapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+
+      if (mounted) {
+        setState(() {
+          _formTemplates = forms;
+          _isLoadingForms = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading form templates: $e');
+      if (mounted) {
+        setState(() {
+          _formTemplates = [];
+          _isLoadingForms = false;
+        });
+      }
+    }
+  }
+
+  /// Obtém o nome localizado do form template
+  String _getLocalizedFormName(Map<String, dynamic> form) {
+    final locale = Localizations.localeOf(context);
+    final localeTag = '${locale.languageCode}-${locale.countryCode ?? locale.languageCode.toUpperCase()}';
+
+    final nameI18n = form['name'] as Map<String, dynamic>?;
+    if (nameI18n != null) {
+      // Tenta o locale completo
+      if (nameI18n.containsKey(localeTag)) {
+        return nameI18n[localeTag] as String;
+      }
+      // Tenta só o idioma
+      final languageOnly = locale.languageCode;
+      final fallbackKey = nameI18n.keys.firstWhere(
+        (key) => key.toString().startsWith(languageOnly),
+        orElse: () => nameI18n.keys.first,
+      );
+      return nameI18n[fallbackKey] as String? ?? form['id'] as String? ?? 'Form';
+    }
+
+    return form['id'] as String? ?? 'Form';
+  }
 
   /// Obtém o locale atual do dispositivo
   String get _currentLocale {
@@ -76,7 +140,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
     setState(() {
       _isCreating = true;
-      _statusMessage = 'Preparando...';
+      _statusMessage = context.l10n.preparing;
     });
 
     try {
@@ -88,13 +152,13 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
           widget.companyId ?? db.collection('companies').doc().id;
 
       // Upload da logo
-      setState(() => _statusMessage = 'Enviando logo...');
+      setState(() => _statusMessage = context.l10n.uploadingLogo);
       String? logoUrl;
       if (widget.logoFile != null) {
         logoUrl = await _uploadLogo(targetCompanyId);
       }
 
-      setState(() => _statusMessage = 'Criando empresa...');
+      setState(() => _statusMessage = context.l10n.creatingCompany);
 
       if (widget.companyId != null) {
         // ATUALIZAR empresa existente
@@ -125,7 +189,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         await companyStore.updateCompany(existingCompany);
 
-        setState(() => _statusMessage = 'Importando formulários...');
+        setState(() => _statusMessage = context.l10n.importingForms);
         final bootstrapService = BootstrapService();
         await bootstrapService.syncCompanyFormsFromSegment(
           companyId: targetCompanyId,
@@ -136,7 +200,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         // Bootstrap se solicitado
         if (runBootstrap) {
-          setState(() => _statusMessage = 'Criando dados de exemplo...');
+          setState(() => _statusMessage = context.l10n.creatingSampleData);
           await bootstrapService.executeBootstrap(
             companyId: targetCompanyId,
             segmentId: widget.segmentId,
@@ -175,7 +239,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         await userStore.createCompanyForUser(company);
 
-        setState(() => _statusMessage = 'Importando formulários...');
+        setState(() => _statusMessage = context.l10n.importingForms);
         final bootstrapService = BootstrapService();
         await bootstrapService.syncCompanyFormsFromSegment(
           companyId: targetCompanyId,
@@ -186,7 +250,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         // Bootstrap se solicitado
         if (runBootstrap) {
-          setState(() => _statusMessage = 'Criando dados de exemplo...');
+          setState(() => _statusMessage = context.l10n.creatingSampleData);
           await bootstrapService.executeBootstrap(
             companyId: targetCompanyId,
             segmentId: widget.segmentId,
@@ -264,7 +328,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Deseja criar dados de exemplo?',
+                        context.l10n.createSampleDataQuestion,
                         style: CupertinoTheme.of(context)
                             .textTheme
                             .navLargeTitleTextStyle
@@ -273,7 +337,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Podemos criar alguns dados de exemplo para você começar a usar o sistema imediatamente:',
+                        context.l10n.sampleDataDescription,
                         textAlign: TextAlign.center,
                         style: CupertinoTheme.of(context)
                             .textTheme
@@ -300,26 +364,126 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                             _buildBenefitRow(
                               context,
                               CupertinoIcons.wrench,
-                              'Serviços comuns do seu segmento',
+                              context.l10n.commonServicesForSegment,
                             ),
                             const SizedBox(height: 12),
                             _buildBenefitRow(
                               context,
                               CupertinoIcons.cube_box,
-                              'Produtos e peças mais utilizados',
+                              context.l10n.mostUsedProducts,
                             ),
                             const SizedBox(height: 12),
                             _buildBenefitRow(
                               context,
                               CupertinoIcons.device_phone_portrait,
-                              'Equipamentos de exemplo',
+                              context.l10n.sampleEquipment,
                             ),
                             const SizedBox(height: 12),
                             _buildBenefitRow(
                               context,
                               CupertinoIcons.person,
-                              'Cliente de demonstração',
+                              context.l10n.demoCustomer,
                             ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      // Lista de formulários que serão importados
+                      Container(
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemBackground
+                              .resolveFrom(context),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  CupertinoIcons.doc_text,
+                                  size: 20,
+                                  color: CupertinoColors.activeBlue,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  context.l10n.formsToImport,
+                                  style: CupertinoTheme.of(context)
+                                      .textTheme
+                                      .textStyle
+                                      .copyWith(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              context.l10n.theseFormsWillBeImported,
+                              style: CupertinoTheme.of(context)
+                                  .textTheme
+                                  .textStyle
+                                  .copyWith(
+                                    fontSize: 13,
+                                    color: CupertinoColors.secondaryLabel
+                                        .resolveFrom(context),
+                                  ),
+                            ),
+                            const SizedBox(height: 12),
+                            if (_isLoadingForms)
+                              const Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: CupertinoActivityIndicator(),
+                                ),
+                              )
+                            else if (_formTemplates.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Text(
+                                  context.l10n.noFormsAvailable,
+                                  style: CupertinoTheme.of(context)
+                                      .textTheme
+                                      .textStyle
+                                      .copyWith(
+                                        fontSize: 13,
+                                        color: CupertinoColors.secondaryLabel
+                                            .resolveFrom(context),
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                ),
+                              )
+                            else
+                              Column(
+                                children: _formTemplates.map((form) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          CupertinoIcons.checkmark_circle_fill,
+                                          size: 16,
+                                          color: CupertinoColors.systemGreen,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            _getLocalizedFormName(form),
+                                            style: CupertinoTheme.of(context)
+                                                .textTheme
+                                                .textStyle
+                                                .copyWith(fontSize: 14),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                           ],
                         ),
                       ),
@@ -327,7 +491,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                       const SizedBox(height: 16),
 
                       Text(
-                        'Você poderá editar ou excluir esses dados a qualquer momento.',
+                        context.l10n.canEditOrDeleteAnytime,
                         textAlign: TextAlign.center,
                         style: CupertinoTheme.of(context)
                             .textTheme
@@ -358,7 +522,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                         child: CupertinoButton(
                           onPressed: () => _saveCompany(runBootstrap: false),
                           child: Text(
-                            'Não, começar do zero',
+                            context.l10n.noStartFromScratch,
                             style: TextStyle(
                               color: CupertinoColors.secondaryLabel
                                   .resolveFrom(context),
