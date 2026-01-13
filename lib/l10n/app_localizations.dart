@@ -3844,6 +3844,24 @@ abstract class AppLocalizations {
   /// **'Escolha o ramo de atuação da empresa'**
   String get chooseCompanySegment;
 
+  /// No description provided for @contacts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contatos'**
+  String get contacts;
+
+  /// No description provided for @contactMethods.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meios de Contato'**
+  String get contactMethods;
+
+  /// No description provided for @howCustomersCanReachYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como seus clientes podem falar com você?'**
+  String get howCustomersCanReachYou;
+
   /// No description provided for @changeLogo.
   ///
   /// In pt, this message translates to:

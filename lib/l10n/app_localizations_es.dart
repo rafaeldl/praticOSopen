@@ -1921,6 +1921,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chooseCompanySegment => 'Elija el ramo de actividad de la empresa';
 
   @override
+  String get contacts => 'Contactos';
+
+  @override
+  String get contactMethods => 'Medios de Contacto';
+
+  @override
+  String get howCustomersCanReachYou =>
+      '¿Cómo pueden sus clientes contactarlo?';
+
+  @override
   String get changeLogo => 'Cambiar Logo';
 
   @override

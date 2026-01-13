@@ -1915,6 +1915,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseCompanySegment => 'Choose the company\'s line of business';
 
   @override
+  String get contacts => 'Contacts';
+
+  @override
+  String get contactMethods => 'Contact Methods';
+
+  @override
+  String get howCustomersCanReachYou => 'How can your customers reach you?';
+
+  @override
   String get changeLogo => 'Change Logo';
 
   @override

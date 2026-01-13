@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/widgets/dynamic_text_field.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 import 'select_segment_screen.dart';
 
 class CompanyContactScreen extends StatefulWidget {
@@ -118,8 +119,8 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
 
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Contatos'),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(context.l10n.contacts),
       ),
       child: SafeArea(
         child: Form(
@@ -133,13 +134,13 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
                 child: Column(
                   children: [
                     Text(
-                      'Meios de Contato',
+                      context.l10n.contactMethods,
                       style: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Como seus clientes podem falar com você?',
+                      context.l10n.howCustomersCanReachYou,
                       style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
                         color: CupertinoColors.secondaryLabel.resolveFrom(context),
                         fontSize: 16,
@@ -153,7 +154,7 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
               const SizedBox(height: 20),
 
               CupertinoListSection.insetGrouped(
-                header: const Text('CONTATOS'),
+                header: Text(context.l10n.contacts.toUpperCase()),
                 children: [
                   DynamicTextField(
                     fieldKey: 'company.phone',
@@ -163,14 +164,14 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
                   ),
                   CupertinoTextFormFieldRow(
                     controller: _emailController,
-                    prefix: const Text('Email'),
+                    prefix: Text(context.l10n.email),
                     placeholder: 'contato@empresa.com',
                     keyboardType: TextInputType.emailAddress,
                     textAlign: TextAlign.right,
                   ),
                   CupertinoTextFormFieldRow(
                     controller: _siteController,
-                    prefix: const Text('Site'),
+                    prefix: Text(context.l10n.website),
                     placeholder: 'www.exemplo.com.br',
                     keyboardType: TextInputType.url,
                     textAlign: TextAlign.right,
@@ -186,7 +187,7 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
                   width: double.infinity,
                   child: CupertinoButton.filled(
                     onPressed: _next,
-                    child: const Text('Próximo'),
+                    child: Text(context.l10n.next),
                   ),
                 ),
               ),

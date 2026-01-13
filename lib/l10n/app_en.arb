@@ -814,5 +814,9 @@
   "availableSpecialties": "AVAILABLE SPECIALTIES",
   "pleaseSelectAtLeastOneSpecialty": "Please select at least one specialty to continue.",
 
-  "selectCountry": "Select Country"
+  "selectCountry": "Select Country",
+
+  "contacts": "Contacts",
+  "contactMethods": "Contact Methods",
+  "howCustomersCanReachYou": "How can your customers reach you?"
 }
