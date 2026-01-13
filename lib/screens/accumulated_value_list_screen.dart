@@ -445,7 +445,7 @@ class _AccumulatedValueListScreenState
             ),
           ),
           confirmDismiss: (direction) async {
-            return await showCupertinoDialog<bool>(
+            final confirmed = await showCupertinoDialog<bool>(
               context: context,
               builder: (context) => CupertinoAlertDialog(
                 title: Text(context.l10n.delete),
@@ -464,17 +464,27 @@ class _AccumulatedValueListScreenState
                 ],
               ),
             );
-          },
-          onDismissed: (direction) async {
-            if (value.id != null) {
+
+            if (confirmed == true && value.id != null) {
               try {
                 await _repo.remove(_companyId!, _fieldType!, value.id!);
                 debugPrint('AccumulatedValueListScreen: Deleted value: ${value.value}');
-                await _loadValues();
+                // Remove from local list to prevent item from reappearing
+                setState(() {
+                  _allValues.removeWhere((v) => v.id == value.id);
+                  _filteredValues.removeWhere((v) => v.id == value.id);
+                });
+                return true;
               } catch (e) {
                 debugPrint('Error deleting accumulated value: $e');
+                return false;
               }
             }
+            return false;
+          },
+          onDismissed: (direction) {
+            // Deletion already handled in confirmDismiss
+            debugPrint('AccumulatedValueListScreen: Item dismissed from UI');
           },
           child: CupertinoButton(
             padding: EdgeInsets.zero,
