@@ -250,25 +250,31 @@ platform :ios do
     FileUtils.rm_rf(Dir.glob("#{screenshots_dir}/#{device}*.png"))
     FileUtils.mkdir_p(screenshots_dir)
 
-    # Boot simulator if not already running
-    UI.message("🚀 Ensuring simulator is booted: #{device}")
+    # Reset simulator to clean state before each test
+    UI.message("🔄 Resetting simulator to clean state: #{device}")
     begin
-      # Check if simulator is already booted
-      booted_devices = sh("xcrun simctl list devices | grep Booted | grep '#{device}' || true").strip
+      # 1. Shutdown simulator if running
+      UI.message("Shutting down simulator if running...")
+      sh("xcrun simctl shutdown '#{device}' || true")
+      sleep(2)
 
-      if booted_devices.empty?
-        UI.message("Starting simulator: #{device}")
-        sh("xcrun", "simctl", "boot", device)
-        sh("open", "-a", "Simulator")
+      # 2. Erase all data (factory reset)
+      UI.message("Erasing simulator data (factory reset)...")
+      sh("xcrun", "simctl", "erase", device)
+      sleep(2)
 
-        # Wait for simulator to be ready
-        UI.message("⏳ Waiting for simulator to be ready...")
-        sleep(10)
-      else
-        UI.message("✅ Simulator already running: #{device}")
-      end
+      # 3. Boot fresh simulator
+      UI.message("🚀 Booting fresh simulator: #{device}")
+      sh("xcrun", "simctl", "boot", device)
+      sh("open", "-a", "Simulator")
+
+      # 4. Wait for simulator to be fully ready
+      UI.message("⏳ Waiting for simulator to be ready...")
+      sleep(15)
+
+      UI.success("✅ Simulator ready: #{device}")
     rescue => ex
-      UI.error("⚠️ Error booting simulator: #{ex}")
+      UI.error("⚠️ Error resetting simulator: #{ex}")
       UI.message("Continuing anyway, Flutter might handle it...")
     end
 
