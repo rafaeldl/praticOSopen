@@ -50,9 +50,31 @@ void main() {
       await _performLogin(tester);
 
       // ========== SCREENSHOT 2: Home (Order List) ==========
-      print('📸 Capturing Screenshot 2: Home');
+      print('\n--- Screenshot 2: Home ---');
+      print('Waiting for home screen to load...');
       await tester.pumpAndSettle();
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      print('Home screen loaded');
+
+      // Debug: print widget tree to see what's actually on screen
+      print('\n=== WIDGET TREE DEBUG ===');
+      final widgets = tester.allWidgets.toList();
+      print('Total widgets: ${widgets.length}');
+
+      // Check for common widgets
+      final inkWells = widgets.where((w) => w.runtimeType.toString() == 'InkWell').length;
+      final tabBars = widgets.where((w) => w.runtimeType.toString() == 'CupertinoTabBar').length;
+      final buttons = widgets.where((w) => w.runtimeType.toString().contains('Button')).length;
+      final icons = widgets.where((w) => w.runtimeType.toString() == 'Icon').length;
+
+      print('InkWell widgets: $inkWells');
+      print('CupertinoTabBar widgets: $tabBars');
+      print('Button widgets: $buttons');
+      print('Icon widgets: $icons');
+      print('=========================\n');
+
+      print('📸 Capturing Screenshot 2: Home');
       await binding.takeScreenshot('2_home');
 
       // ========== SCREENSHOT 3: Order Detail ==========
