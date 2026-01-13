@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/invite.dart';
@@ -39,7 +40,9 @@ abstract class _InviteStore with Store {
   /// Carrega os convites pendentes para o email do usuário atual.
   @action
   Future<void> loadPendingInvites() async {
-    final email = Global.currentUser?.email;
+    // Usa FirebaseAuth diretamente para evitar race condition com Global.currentUser
+    // que é definido assincronamente após o login
+    final email = FirebaseAuth.instance.currentUser?.email;
     if (email == null) return;
 
     isLoading = true;
