@@ -11,15 +11,21 @@ void main() {
     testWidgets('capture all 7 screenshots for App Store', (WidgetTester tester) async {
       // Get locale from environment (default: pt-BR)
       const locale = String.fromEnvironment('TEST_LOCALE', defaultValue: 'pt-BR');
-      print('📱 Running tests with locale: $locale');
+      print('\n========================================');
+      print('📱 Starting screenshot tests');
+      print('🌍 Locale: $locale');
+      print('========================================\n');
 
       // Initialize the app
+      print('🚀 Initializing app...');
       app.main();
       await tester.pumpAndSettle();
 
       // Wait for app to fully load
-      await Future.delayed(const Duration(seconds: 3));
+      print('⏳ Waiting for app initialization...');
+      await Future.delayed(const Duration(seconds: 5));
       await tester.pumpAndSettle();
+      print('✅ App initialized');
 
       // Check if already logged in and logout if requested
       const forceLogout = bool.fromEnvironment('FORCE_LOGOUT', defaultValue: true);
@@ -68,16 +74,22 @@ void main() {
       }
 
       // ========== SCREENSHOT 4: Order Form (Create New OS) ==========
-      print('📸 Navigating to Order Form...');
+      print('\n--- Screenshot 4: Order Form ---');
+      print('Looking for add button...');
       final addButton = find.byIcon(CupertinoIcons.add);
+      print('Found ${addButton.evaluate().length} add buttons');
+
       if (addButton.evaluate().isNotEmpty) {
+        print('Tapping add button to create new order...');
         await tester.tap(addButton.first);
         await tester.pumpAndSettle();
         await Future.delayed(const Duration(seconds: 3));
+        print('Order form opened');
 
         // Scroll down a bit to show more form fields
         final scrollable = find.byType(SingleChildScrollView);
         if (scrollable.evaluate().isNotEmpty) {
+          print('Scrolling form to show more fields...');
           await tester.drag(scrollable.first, const Offset(0, -200));
           await tester.pumpAndSettle();
           await Future.delayed(const Duration(seconds: 1));
@@ -87,10 +99,14 @@ void main() {
         await binding.takeScreenshot('4_order_form');
 
         // Go back
+        print('Navigating back to home...');
         final backNav = tester.state<NavigatorState>(find.byType(Navigator).first);
         backNav.pop();
         await tester.pumpAndSettle();
         await Future.delayed(const Duration(seconds: 1));
+        print('✅ Back to home');
+      } else {
+        print('⚠️ Add button not found, skipping order form screenshot');
       }
 
       // ========== SCREENSHOT 5: Dynamic Forms (Checklist) ==========

@@ -5,17 +5,87 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000275">
+      <testcase classname="fastlane.lanes" name="00: default_platform" time="0.000167">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart -d iPhone\ 16e" time="92.432633">
+      <testcase classname="fastlane.lanes" name="01: xcrun simctl list devices | grep Booted | grep &apos;iPhone 16e&apos; || true" time="0.06807">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart -d iPhone\ 17" time="103.145649">
+      <testcase classname="fastlane.lanes" name="02: xcrun simctl boot iPhone\ 16e" time="0.985845">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="03: open -a Simulator" time="0.05427">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="04: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=pt-BR -d iPhone\ 16e" time="65.77287">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="05: xcrun simctl list devices | grep Booted | grep &apos;iPhone 17&apos; || true" time="0.092165">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="06: xcrun simctl boot iPhone\ 17" time="0.344038">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="07: open -a Simulator" time="0.068882">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="08: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=pt-BR -d iPhone\ 17" time="98.323594">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="09: xcrun simctl list devices | grep Booted | grep &apos;iPhone 16e&apos; || true" time="0.083013">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="10: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=en-US -d iPhone\ 16e" time="57.224077">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="11: xcrun simctl list devices | grep Booted | grep &apos;iPhone 17&apos; || true" time="0.089018">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="12: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=en-US -d iPhone\ 17" time="76.090906">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="13: xcrun simctl list devices | grep Booted | grep &apos;iPhone 16e&apos; || true" time="0.087785">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="14: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=es-ES -d iPhone\ 16e" time="54.184731">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="15: xcrun simctl list devices | grep Booted | grep &apos;iPhone 17&apos; || true" time="0.091967">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="16: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=es-ES -d iPhone\ 17" time="77.470738">
         
       </testcase>
     

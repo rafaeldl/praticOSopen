@@ -217,7 +217,7 @@ platform :ios do
   desc "Gera screenshots para todos dispositivos e idiomas"
   lane :screenshots_all do |options|
     force_logout = options[:force_logout]
-    parallel = options[:parallel] != false  # Default: true
+    parallel = options[:parallel] == true  # Default: false (changed for debugging)
     locales = ["pt-BR", "en-US", "es-ES"]
     devices = ["iPhone 16e", "iPhone 17"]
 
@@ -287,10 +287,33 @@ platform :ios do
       sh("open", "-a", "Simulator")
 
       # 4. Wait for simulator to be fully ready
-      UI.message("⏳ Waiting for simulator to be ready...")
-      sleep(15)
+      UI.message("⏳ Waiting for simulator to boot...")
+      sleep(10)
 
-      UI.success("✅ Simulator ready: #{device}")
+      # 5. Set locale on simulator after booting
+      UI.message("🌍 Setting simulator locale to: #{locale}")
+
+      # Map locale to iOS language codes
+      ios_language = case locale
+        when "pt-BR" then "pt-BR"
+        when "en-US" then "en"
+        when "es-ES" then "es"
+        else "en"
+      end
+
+      # Set AppleLanguages and AppleLocale
+      sh("xcrun", "simctl", "spawn", device, "defaults", "write", "NSGlobalDomain", "AppleLanguages", "-array", ios_language) rescue nil
+      sh("xcrun", "simctl", "spawn", device, "defaults", "write", "NSGlobalDomain", "AppleLocale", "-string", locale) rescue nil
+
+      # Restart SpringBoard to apply locale changes
+      UI.message("Restarting SpringBoard to apply locale...")
+      sh("xcrun", "simctl", "spawn", device, "killall", "SpringBoard") rescue nil
+
+      # 6. Wait for locale to apply
+      UI.message("⏳ Waiting for locale to apply...")
+      sleep(10)
+
+      UI.success("✅ Simulator ready: #{device} (locale: #{locale})")
     rescue => ex
       UI.error("⚠️ Error resetting simulator: #{ex}")
       UI.message("Continuing anyway, Flutter might handle it...")

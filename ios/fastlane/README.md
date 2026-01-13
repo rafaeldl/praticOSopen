@@ -15,6 +15,14 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## iOS
 
+### ios build_check
+
+```sh
+[bundle exec] fastlane ios build_check
+```
+
+Build check para CI (simulador, sem assinatura)
+
 ### ios get_next_build_number
 
 ```sh
@@ -55,6 +63,14 @@ Upload do IPA gerado pelo Flutter build
 
 Build + Upload para App Store (com metadados e screenshots)
 
+### ios promote
+
+```sh
+[bundle exec] fastlane ios promote
+```
+
+Promote TestFlight build to App Store (no re-upload)
+
 ### ios screenshots
 
 ```sh
@@ -69,7 +85,15 @@ Gera screenshots automaticamente usando Flutter integration tests
 [bundle exec] fastlane ios screenshots_all
 ```
 
-Gera screenshots para iPhone 16e e iPhone 17
+Gera screenshots para todos dispositivos e idiomas
+
+### ios screenshots_pt_br
+
+```sh
+[bundle exec] fastlane ios screenshots_pt_br
+```
+
+Gera screenshots apenas para pt-BR (backwards compatibility)
 
 ----
 
