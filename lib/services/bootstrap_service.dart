@@ -383,13 +383,26 @@ class BootstrapService {
     }
 
     // 7. Criar OSs de exemplo (usando customers, devices e services criados)
-    final orderResults = await _createSampleOrders(
-      companyId: companyId,
-      locale: locale,
-      userAggr: userAggr,
+    // Verificar se já existem OSs criadas para evitar duplicação
+    final existingOrders = await _orderRepo.getQueryList(
+      companyId,
+      limit: 1,
     );
-    createdOrders.addAll(orderResults['created'] as List<String>);
-    skippedOrders.addAll(orderResults['skipped'] as List<String>);
+
+    if (existingOrders.isEmpty) {
+      // Primeira vez executando o bootstrap, criar OSs demo
+      final orderResults = await _createSampleOrders(
+        companyId: companyId,
+        locale: locale,
+        userAggr: userAggr,
+      );
+      createdOrders.addAll(orderResults['created'] as List<String>);
+      skippedOrders.addAll(orderResults['skipped'] as List<String>);
+    } else {
+      // Bootstrap já foi executado antes, não criar OSs duplicadas
+      skippedOrders.add('Orders already exist, skipping demo orders creation');
+      print('⏭️ Skipping demo orders creation - company already has orders');
+    }
 
     // 8. Salvar metadata do bootstrap
     final result = BootstrapResult(
