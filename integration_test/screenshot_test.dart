@@ -142,8 +142,44 @@ void main() {
         print('⚠️ Dashboard button not found, skipping screenshot 3');
       }
 
-      // ========== SCREENSHOT 4: Order Detail ==========
-      print('\n--- Screenshot 4: Order Detail ---');
+      // ========== SCREENSHOT 4: Order Form (Create New OS) ==========
+      print('\n--- Screenshot 4: Order Form ---');
+      print('Looking for add button...');
+      final addButton = find.byIcon(CupertinoIcons.add);
+      print('Found ${addButton.evaluate().length} add buttons');
+
+      if (addButton.evaluate().isNotEmpty) {
+        print('Tapping add button to create new order...');
+        await tester.tap(addButton.first);
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(seconds: 3));
+        print('Order form opened');
+
+        // Scroll down a bit to show more form fields
+        final scrollable = find.byType(SingleChildScrollView);
+        if (scrollable.evaluate().isNotEmpty) {
+          print('Scrolling form to show more fields...');
+          await tester.drag(scrollable.first, const Offset(0, -200));
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+        }
+
+        print('📸 Capturing Screenshot 4: Order Form');
+        await binding.takeScreenshot('03_order_form');
+
+        // Go back
+        print('Navigating back to home...');
+        final backNav = tester.state<NavigatorState>(find.byType(Navigator).first);
+        backNav.pop();
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(seconds: 1));
+        print('✅ Back to home');
+      } else {
+        print('⚠️ Add button not found, skipping order form screenshot');
+      }
+
+      // ========== SCREENSHOT 5: Order Detail ==========
+      print('\n--- Screenshot 5: Order Detail ---');
       print('Looking for order cards with semantic identifiers...');
 
       // Find all Semantics widgets and filter for order_card_ identifiers
@@ -169,8 +205,8 @@ void main() {
         await Future.delayed(const Duration(seconds: 3));
         print('Order detail opened');
 
-        print('📸 Capturing Screenshot 4: Order Detail');
-        await binding.takeScreenshot('03_order_detail');
+        print('📸 Capturing Screenshot 5: Order Detail');
+        await binding.takeScreenshot('04_order_detail');
 
         // Go back
         print('Navigating back to home...');
@@ -181,42 +217,6 @@ void main() {
         print('✅ Back to home');
       } else {
         print('⚠️ No order items found, skipping order detail screenshot');
-      }
-
-      // ========== SCREENSHOT 5: Order Form (Create New OS) ==========
-      print('\n--- Screenshot 5: Order Form ---');
-      print('Looking for add button...');
-      final addButton = find.byIcon(CupertinoIcons.add);
-      print('Found ${addButton.evaluate().length} add buttons');
-
-      if (addButton.evaluate().isNotEmpty) {
-        print('Tapping add button to create new order...');
-        await tester.tap(addButton.first);
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 3));
-        print('Order form opened');
-
-        // Scroll down a bit to show more form fields
-        final scrollable = find.byType(SingleChildScrollView);
-        if (scrollable.evaluate().isNotEmpty) {
-          print('Scrolling form to show more fields...');
-          await tester.drag(scrollable.first, const Offset(0, -200));
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 1));
-        }
-
-        print('📸 Capturing Screenshot 5: Order Form');
-        await binding.takeScreenshot('04_order_form');
-
-        // Go back
-        print('Navigating back to home...');
-        final backNav = tester.state<NavigatorState>(find.byType(Navigator).first);
-        backNav.pop();
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 1));
-        print('✅ Back to home');
-      } else {
-        print('⚠️ Add button not found, skipping order form screenshot');
       }
 
       // ========== SCREENSHOT 6: Dynamic Forms (Checklist) ==========
