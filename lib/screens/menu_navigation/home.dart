@@ -607,17 +607,21 @@ class _HomeState extends State<Home> {
       }
     }
 
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      onPressed: () {
-        Navigator.of(context, rootNavigator: true)
-            .pushNamed('/order', arguments: {'order': order})
-            .then((_) {
-          final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
-          _loadOrders(_getFilters(configInner));
-        });
-      },
-      child: Container(
+    return Semantics(
+      identifier: 'order_card_${order.id ?? index}',
+      button: true,
+      label: '${order.customer?.name ?? config.customer} - ${order.device?.name ?? ""}',
+      child: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          Navigator.of(context, rootNavigator: true)
+              .pushNamed('/order', arguments: {'order': order})
+              .then((_) {
+            final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
+            _loadOrders(_getFilters(configInner));
+          });
+        },
+        child: Container(
         color: CupertinoColors.systemBackground.resolveFrom(context),
         child: Column(
           children: [
@@ -744,6 +748,7 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
+    ),
     );
   }
 

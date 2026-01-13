@@ -2992,6 +2992,12 @@ abstract class AppLocalizations {
   /// **'Erro'**
   String get error;
 
+  /// No description provided for @couldNotLoadCompanyData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar os dados da empresa'**
+  String get couldNotLoadCompanyData;
+
   /// No description provided for @errorSignInApple.
   ///
   /// In pt, this message translates to:
@@ -3123,6 +3129,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Modo Noturno'**
   String get nightMode;
+
+  /// No description provided for @reopenOnboarding.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações Iniciais'**
+  String get reopenOnboarding;
+
+  /// No description provided for @reconfigureCompanySetup.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reconfigurar dados e segmento da empresa'**
+  String get reconfigureCompanySetup;
 
   /// No description provided for @account.
   ///

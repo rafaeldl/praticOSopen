@@ -5,10 +5,12 @@ import 'package:praticos/models/product.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/user.dart';
+import 'package:praticos/models/order.dart' as models;
 import 'package:praticos/repositories/v2/service_repository_v2.dart';
 import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
+import 'package:praticos/repositories/v2/order_repository_v2.dart';
 
 /// Resultado da execução do bootstrap
 class BootstrapResult {
@@ -16,43 +18,51 @@ class BootstrapResult {
   final List<String> createdProducts;
   final List<String> createdDevices;
   final List<String> createdCustomers;
+  final List<String> createdOrders;
   final List<String> skippedServices;
   final List<String> skippedProducts;
   final List<String> skippedDevices;
   final List<String> skippedCustomers;
+  final List<String> skippedOrders;
 
   BootstrapResult({
     this.createdServices = const [],
     this.createdProducts = const [],
     this.createdDevices = const [],
     this.createdCustomers = const [],
+    this.createdOrders = const [],
     this.skippedServices = const [],
     this.skippedProducts = const [],
     this.skippedDevices = const [],
     this.skippedCustomers = const [],
+    this.skippedOrders = const [],
   });
 
   int get totalCreated =>
       createdServices.length +
       createdProducts.length +
       createdDevices.length +
-      createdCustomers.length;
+      createdCustomers.length +
+      createdOrders.length;
 
   int get totalSkipped =>
       skippedServices.length +
       skippedProducts.length +
       skippedDevices.length +
-      skippedCustomers.length;
+      skippedCustomers.length +
+      skippedOrders.length;
 
   Map<String, dynamic> toJson() => {
         'createdServices': createdServices,
         'createdProducts': createdProducts,
         'createdDevices': createdDevices,
         'createdCustomers': createdCustomers,
+        'createdOrders': createdOrders,
         'skippedServices': skippedServices,
         'skippedProducts': skippedProducts,
         'skippedDevices': skippedDevices,
         'skippedCustomers': skippedCustomers,
+        'skippedOrders': skippedOrders,
       };
 }
 
@@ -64,6 +74,7 @@ class BootstrapService {
   final ProductRepositoryV2 _productRepo = ProductRepositoryV2();
   final DeviceRepositoryV2 _deviceRepo = DeviceRepositoryV2();
   final CustomerRepositoryV2 _customerRepo = CustomerRepositoryV2();
+  final OrderRepositoryV2 _orderRepo = OrderRepositoryV2();
 
   /// Extrai string localizada de um valor que pode ser:
   /// - String simples: retorna diretamente
@@ -250,10 +261,12 @@ class BootstrapService {
     final List<String> createdProducts = [];
     final List<String> createdDevices = [];
     final List<String> createdCustomers = [];
+    final List<String> createdOrders = [];
     final List<String> skippedServices = [];
     final List<String> skippedProducts = [];
     final List<String> skippedDevices = [];
     final List<String> skippedCustomers = [];
+    final List<String> skippedOrders = [];
 
     // 1. Fazer merge dos dados de bootstrap
     final mergedData = await _mergeBootstrapData(segmentId, subspecialties);
@@ -369,16 +382,27 @@ class BootstrapService {
       }
     }
 
-    // 7. Salvar metadata do bootstrap
+    // 7. Criar OSs de exemplo (usando customers, devices e services criados)
+    final orderResults = await _createSampleOrders(
+      companyId: companyId,
+      locale: locale,
+      userAggr: userAggr,
+    );
+    createdOrders.addAll(orderResults['created'] as List<String>);
+    skippedOrders.addAll(orderResults['skipped'] as List<String>);
+
+    // 8. Salvar metadata do bootstrap
     final result = BootstrapResult(
       createdServices: createdServices,
       createdProducts: createdProducts,
       createdDevices: createdDevices,
       createdCustomers: createdCustomers,
+      createdOrders: createdOrders,
       skippedServices: skippedServices,
       skippedProducts: skippedProducts,
       skippedDevices: skippedDevices,
       skippedCustomers: skippedCustomers,
+      skippedOrders: skippedOrders,
     );
 
     await _saveMetadata(companyId, segmentId, subspecialties, result);
@@ -408,14 +432,97 @@ class BootstrapService {
         'products': result.createdProducts,
         'devices': result.createdDevices,
         'customers': result.createdCustomers,
+        'orders': result.createdOrders,
       },
       'skipped': {
         'services': result.skippedServices,
         'products': result.skippedProducts,
         'devices': result.skippedDevices,
         'customers': result.skippedCustomers,
+        'orders': result.skippedOrders,
       },
     });
+  }
+
+  /// Cria OSs de exemplo com dados localizados
+  Future<Map<String, List<String>>> _createSampleOrders({
+    required String companyId,
+    required String locale,
+    required UserAggr userAggr,
+  }) async {
+    final List<String> created = [];
+    final List<String> skipped = [];
+
+    try {
+      // Buscar customers, devices e services criados (limit 10 para evitar sobrecarga)
+      final customers = await _customerRepo.getQueryList(companyId, limit: 10);
+      final devices = await _deviceRepo.getQueryList(companyId, limit: 10);
+      final services = await _serviceRepo.getQueryList(companyId, limit: 10);
+
+      // Filtrar nulls
+      final validCustomers = customers.where((c) => c != null).cast<Customer>().toList();
+      final validDevices = devices.where((d) => d != null).cast<Device>().toList();
+      final validServices = services.where((s) => s != null).cast<Service>().toList();
+
+      // Se não houver dados suficientes, pular criação
+      if (validCustomers.isEmpty || validDevices.isEmpty || validServices.isEmpty) {
+        skipped.add('Insufficient data to create orders');
+        return {'created': created, 'skipped': skipped};
+      }
+
+      // Criar 4 OSs com diferentes status
+      for (int i = 0; i < 4; i++) {
+        final customer = validCustomers[i % validCustomers.length];
+        final device = validDevices[i % validDevices.length];
+        final service = validServices[i % validServices.length];
+
+        // Definir status baseado no índice
+        final status = _getOrderStatus(i);
+        final dueDate = DateTime.now().subtract(Duration(days: 10 - (i * 2)));
+
+        // Criar OrderService (usa o nome do serviço que já foi criado pelo bootstrap do segmento)
+        final orderService = models.OrderService()
+          ..service = service.toAggr()
+          ..value = service.value;
+
+        final order = models.Order()
+          ..customer = customer.toAggr()
+          ..device = device.toAggr()
+          ..services = [orderService]
+          ..status = status
+          ..dueDate = dueDate
+          ..total = service.value ?? 0
+          ..company = Global.companyAggr
+          ..createdAt = DateTime.now().subtract(Duration(days: 11 - (i * 2)))
+          ..createdBy = userAggr
+          ..updatedAt = DateTime.now().subtract(Duration(days: 10 - (i * 2)))
+          ..updatedBy = userAggr;
+
+        await _orderRepo.createItem(companyId, order);
+        created.add('OS #${i + 1} - ${customer.name} - $status');
+      }
+    } catch (e) {
+      print('Error creating sample orders: $e');
+      skipped.add('Error: $e');
+    }
+
+    return {'created': created, 'skipped': skipped};
+  }
+
+  /// Retorna status da OS baseado no índice
+  String _getOrderStatus(int index) {
+    switch (index) {
+      case 0:
+        return 'quote'; // Orçamento - aguardando aprovação do cliente
+      case 1:
+        return 'approved'; // Aprovado - aprovado mas ainda não iniciado
+      case 2:
+        return 'progress'; // Em Andamento - técnico trabalhando
+      case 3:
+        return 'done'; // Concluído - finalizado
+      default:
+        return 'quote';
+    }
   }
 
   /// Verifica se o bootstrap já foi executado para uma empresa

@@ -1469,6 +1469,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get error => 'Erro';
 
   @override
+  String get couldNotLoadCompanyData =>
+      'Não foi possível carregar os dados da empresa';
+
+  @override
   String get errorSignInApple => 'Erro ao entrar com Apple';
 
   @override
@@ -1535,6 +1539,13 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get nightMode => 'Modo Noturno';
+
+  @override
+  String get reopenOnboarding => 'Configurações Iniciais';
+
+  @override
+  String get reconfigureCompanySetup =>
+      'Reconfigurar dados e segmento da empresa';
 
   @override
   String get account => 'Conta';
