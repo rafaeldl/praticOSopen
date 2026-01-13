@@ -364,6 +364,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noData => 'Nenhum dado disponível';
 
   @override
+  String get noValuesRegistered => 'Nenhum valor cadastrado';
+
+  @override
+  String get typeAboveToAdd => 'Digite no campo acima para adicionar';
+
+  @override
+  String get addNewValue => 'Adicionar novo valor';
+
+  @override
   String get selectAtLeastOne => 'Selecione ao menos uma opção';
 
   @override

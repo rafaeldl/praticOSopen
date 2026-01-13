@@ -802,6 +802,24 @@ abstract class AppLocalizations {
   /// **'Nenhum dado disponível'**
   String get noData;
 
+  /// No description provided for @noValuesRegistered.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum valor cadastrado'**
+  String get noValuesRegistered;
+
+  /// No description provided for @typeAboveToAdd.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite no campo acima para adicionar'**
+  String get typeAboveToAdd;
+
+  /// No description provided for @addNewValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar novo valor'**
+  String get addNewValue;
+
   /// No description provided for @selectAtLeastOne.
   ///
   /// In pt, this message translates to:
