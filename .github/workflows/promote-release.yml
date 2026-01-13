@@ -3,11 +3,6 @@ name: Promote Release to Production
 on:
   workflow_dispatch:
     inputs:
-      rc_tag:
-        description: 'RC tag to promote (leave empty for latest -rc)'
-        required: false
-        type: string
-        default: ''
       skip_android:
         description: 'Skip Android promotion'
         required: false
@@ -35,11 +30,14 @@ jobs:
       - name: Validate RC tag
         id: validate
         run: |
-          RC_TAG="${{ inputs.rc_tag }}"
+          GIT_REF="${{ github.ref_name }}"
 
-          # If no tag provided, get the latest -rc tag
-          if [ -z "$RC_TAG" ]; then
-            echo "📌 No tag provided, fetching latest -rc tag..."
+          # Detect RC tag from GitHub UI selection or use latest
+          if [[ "$GIT_REF" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-rc$ ]]; then
+            RC_TAG="$GIT_REF"
+            echo "📌 Using selected tag: $RC_TAG"
+          else
+            echo "📌 Fetching latest -rc tag..."
             RC_TAG=$(git tag -l 'v*-rc' | sort -V | tail -1)
 
             if [ -z "$RC_TAG" ]; then
@@ -47,7 +45,7 @@ jobs:
               exit 1
             fi
 
-            echo "📌 Found latest RC tag: $RC_TAG"
+            echo "📌 Using latest RC tag: $RC_TAG"
           fi
 
           # Validate format
