@@ -129,11 +129,95 @@ class BootstrapService {
     return [];
   }
 
+  /// Maps country code or locale to locale code for i18n
+  /// Accepts: BR, PT, pt-BR, pt-PT -> pt
+  /// Accepts: US, en-US -> en
+  /// Accepts: ES, es-ES -> es
+  String _getLocaleFromCountry(String? countryOrLocale) {
+    if (countryOrLocale == null) return 'pt';
+    final input = countryOrLocale.toUpperCase();
+
+    // Check if it's a locale format (pt-BR, en-US, es-ES)
+    if (input.contains('-')) {
+      final parts = input.split('-');
+      final languageCode = parts[0].toLowerCase();
+      if (languageCode == 'PT') return 'pt';
+      if (languageCode == 'EN') return 'en';
+      if (languageCode == 'ES') return 'es';
+      return 'pt';
+    }
+
+    // Otherwise, treat as country code
+    if (input == 'BR' || input == 'PT') return 'pt';
+    if (input == 'US') return 'en';
+    if (input == 'ES') return 'es';
+    return 'pt'; // default fallback
+  }
+
+  /// Localizes form data based on company locale
+  /// Extracts localized strings from i18n fields and removes them
+  Map<String, dynamic> _localizeFormData(
+    Map<String, dynamic> data,
+    String localeCode,
+  ) {
+    final localized = Map<String, dynamic>.from(data);
+
+    // Localize title
+    if (data['titleI18n'] is Map) {
+      final titleI18n = data['titleI18n'] as Map;
+      localized['title'] = titleI18n[localeCode] ??
+                          titleI18n['pt'] ??
+                          data['title'];
+      localized.remove('titleI18n');
+    }
+
+    // Localize description
+    if (data['descriptionI18n'] is Map) {
+      final descI18n = data['descriptionI18n'] as Map;
+      localized['description'] = descI18n[localeCode] ??
+                                descI18n['pt'] ??
+                                data['description'];
+      localized.remove('descriptionI18n');
+    }
+
+    // Localize items
+    if (data['items'] is List) {
+      final items = List<Map<String, dynamic>>.from(
+        (data['items'] as List).map((item) => Map<String, dynamic>.from(item)),
+      );
+
+      for (var item in items) {
+        // Localize item label
+        if (item['labelI18n'] is Map) {
+          final labelI18n = item['labelI18n'] as Map;
+          item['label'] = labelI18n[localeCode] ??
+                         labelI18n['pt'] ??
+                         item['label'];
+          item.remove('labelI18n');
+        }
+
+        // Localize item options
+        if (item['optionsI18n'] is Map) {
+          final optionsI18n = item['optionsI18n'] as Map;
+          item['options'] = optionsI18n[localeCode] ??
+                           optionsI18n['pt'] ??
+                           item['options'];
+          item.remove('optionsI18n');
+        }
+      }
+
+      localized['items'] = items;
+    }
+
+    return localized;
+  }
+
   Future<void> syncCompanyFormsFromSegment({
     required String companyId,
     required String segmentId,
     required List<String> subspecialties,
     required UserAggr userAggr,
+    String? locale,
   }) async {
     final segmentSnapshot = await _db
         .collection('segments')
@@ -148,6 +232,9 @@ class BootstrapService {
     final existingSnapshot = await companyFormsRef.get();
     final existingIds = existingSnapshot.docs.map((doc) => doc.id).toSet();
 
+    // Get locale code from company country or locale
+    final localeCode = _getLocaleFromCountry(locale);
+
     for (final doc in segmentSnapshot.docs) {
       final data = Map<String, dynamic>.from(doc.data());
       final isActive = data['isActive'] != false;
@@ -158,7 +245,10 @@ class BootstrapService {
         continue;
       }
 
-      final formData = Map<String, dynamic>.from(data)
+      // Localize form data based on company locale and remove i18n fields
+      final localizedData = _localizeFormData(data, localeCode);
+
+      final formData = Map<String, dynamic>.from(localizedData)
         ..['updatedAt'] = FieldValue.serverTimestamp()
         ..['updatedBy'] = userAggr.toJson();
 

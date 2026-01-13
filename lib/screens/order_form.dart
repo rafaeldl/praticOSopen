@@ -40,6 +40,9 @@ class _OrderFormState extends State<OrderForm> {
   final FormsService _formsService = FormsService();
   final AuthorizationService _authService = AuthorizationService.instance;
 
+  /// Gets the current locale code for i18n (e.g., 'pt', 'en', 'es')
+  String? get _localeCode => context.l10n.localeName;
+
   @override
   void initState() {
     super.initState();
@@ -375,7 +378,7 @@ class _OrderFormState extends State<OrderForm> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            form.title,
+                            form.getLocalizedTitle(_localeCode),
                             style: TextStyle(
                               fontSize: 17,
                               color: CupertinoColors.label.resolveFrom(context),
@@ -425,7 +428,7 @@ class _OrderFormState extends State<OrderForm> {
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: Text('${context.l10n.delete} ${context.l10n.form}'),
-        content: Text(context.l10n.confirmDeleteMessageNamed(form.title)),
+        content: Text(context.l10n.confirmDeleteMessageNamed(form.getLocalizedTitle(_localeCode))),
         actions: [
           CupertinoDialogAction(
             child: Text(context.l10n.cancel),
@@ -1063,8 +1066,8 @@ class _OrderFormState extends State<OrderForm> {
         title: Text('${context.l10n.checklists} ${context.l10n.statusPending}'),
         content: Text(
           pendingForms.length == 1
-            ? '${context.l10n.checklist} "${pendingForms.first.title}" ${context.l10n.incomplete}.'
-            : '${pendingForms.length} ${context.l10n.checklists} ${context.l10n.incomplete}:\n\n${pendingForms.map((f) => '• ${f.title}').join('\n')}',
+            ? '${context.l10n.checklist} "${pendingForms.first.getLocalizedTitle(_localeCode)}" ${context.l10n.incomplete}.'
+            : '${pendingForms.length} ${context.l10n.checklists} ${context.l10n.incomplete}:\n\n${pendingForms.map((f) => '• ${f.getLocalizedTitle(_localeCode)}').join('\n')}',
         ),
         actions: [
           CupertinoDialogAction(

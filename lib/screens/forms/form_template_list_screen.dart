@@ -16,6 +16,9 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
+  /// Gets the current locale code for i18n (e.g., 'pt', 'en', 'es')
+  String? get _localeCode => context.l10n.localeName;
+
   @override
   void initState() {
     super.initState();
@@ -122,8 +125,8 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
     final filteredList = _searchQuery.isEmpty
         ? templateList.whereType<FormDefinition>().toList()
         : templateList.whereType<FormDefinition>().where((template) {
-            final title = template.title.toLowerCase();
-            final description = template.description?.toLowerCase() ?? '';
+            final title = template.getLocalizedTitle(_localeCode).toLowerCase();
+            final description = template.getLocalizedDescription(_localeCode)?.toLowerCase() ?? '';
             return title.contains(_searchQuery) ||
                 description.contains(_searchQuery);
           }).toList();
@@ -202,8 +205,8 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
     final filteredGlobalList = _searchQuery.isEmpty
         ? globalList
         : globalList.where((template) {
-            final title = template.title.toLowerCase();
-            final description = template.description?.toLowerCase() ?? '';
+            final title = template.getLocalizedTitle(_localeCode).toLowerCase();
+            final description = template.getLocalizedDescription(_localeCode)?.toLowerCase() ?? '';
             return title.contains(_searchQuery) ||
                 description.contains(_searchQuery);
           }).toList();
@@ -254,6 +257,9 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
   }
 
   Widget _buildTemplateItem(FormDefinition template, bool isLast) {
+    final localizedTitle = template.getLocalizedTitle(_localeCode);
+    final localizedDescription = template.getLocalizedDescription(_localeCode);
+
     return Dismissible(
       key: Key(template.id!),
       direction: DismissDirection.horizontal,
@@ -285,7 +291,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                 builder: (context) => CupertinoAlertDialog(
                   title: Text(context.l10n.confirmDelete),
                   content: Text(
-                      '${context.l10n.discard} "${template.title}"?'),
+                      '${context.l10n.discard} "$localizedTitle"?'),
                   actions: [
                     CupertinoDialogAction(
                       child: Text(context.l10n.cancel),
@@ -333,7 +339,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  template.title,
+                                  localizedTitle,
                                   style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
@@ -362,11 +368,11 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                                 ),
                             ],
                           ),
-                          if (template.description != null &&
-                              template.description!.isNotEmpty) ...[
+                          if (localizedDescription != null &&
+                              localizedDescription.isNotEmpty) ...[
                             const SizedBox(height: 4),
                             Text(
-                              template.description!,
+                              localizedDescription,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -408,6 +414,9 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
   }
 
   Widget _buildGlobalTemplateItem(FormDefinition template, bool isLast) {
+    final localizedTitle = template.getLocalizedTitle(_localeCode);
+    final localizedDescription = template.getLocalizedDescription(_localeCode);
+
     return Container(
       color: CupertinoColors.systemBackground.resolveFrom(context),
       child: InkWell(
@@ -439,18 +448,18 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          template.title,
+                          localizedTitle,
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
                             color: CupertinoColors.label.resolveFrom(context),
                           ),
                         ),
-                        if (template.description != null &&
-                            template.description!.isNotEmpty) ...[
+                        if (localizedDescription != null &&
+                            localizedDescription.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           Text(
-                            template.description!,
+                            localizedDescription,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -508,18 +517,21 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
   }
 
   void _showGlobalTemplateDetails(FormDefinition template) {
+    final localizedTitle = template.getLocalizedTitle(_localeCode);
+    final localizedDescription = template.getLocalizedDescription(_localeCode);
+
     showCupertinoModalPopup(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: Text(template.title),
+        title: Text(localizedTitle),
         message: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (template.description != null &&
-                template.description!.isNotEmpty) ...[
+            if (localizedDescription != null &&
+                localizedDescription.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                template.description!,
+                localizedDescription,
                 style: const TextStyle(fontSize: 14),
               ),
             ],
@@ -532,7 +544,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
             ...template.items.map((item) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
-                    '• ${item.label}',
+                    '• ${item.getLocalizedLabel(_localeCode)}',
                     style: const TextStyle(fontSize: 13),
                   ),
                 )),
@@ -556,12 +568,14 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
   }
 
   Future<void> _importGlobalTemplate(FormDefinition template) async {
+    final localizedTitle = template.getLocalizedTitle(_localeCode);
+
     final confirmed = await showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: Text(context.l10n.importProcedure),
         content: Text(
-            context.l10n.importConfirmationMessage(template.title)),
+            context.l10n.importConfirmationMessage(localizedTitle)),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx, false),
