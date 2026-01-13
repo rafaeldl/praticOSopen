@@ -307,54 +307,10 @@ class _FormFillScreenState extends State<FormFillScreen> {
     }
   }
 
-  /// Verifica se todos os campos obrigatórios foram preenchidos
-  bool _isFormComplete() {
-    for (final item in _currentForm.items) {
-      if (!item.required) continue;
-
-      final response = _currentForm.getResponse(item.id);
-
-      if (item.type == FormItemType.photoOnly) {
-        if (response == null || response.photoUrls.isEmpty) return false;
-      } else {
-        if (response == null || response.value == null || response.value.toString().isEmpty) return false;
-      }
-    }
-    return true;
-  }
-
-  /// Lida com o fechamento da tela, auto-concluindo se estiver completo
-  Future<void> _handleClose() async {
-    // Se já está concluído ou não está completo, apenas fecha
-    if (_currentForm.status == FormStatus.completed || !_isFormComplete()) {
-      if (mounted) {
-        Navigator.pop(context);
-      }
-      return;
-    }
-
-    // Formulário completo mas não marcado como concluído - auto-concluir
+  /// Lida com o fechamento da tela (não auto-finaliza o formulário)
+  void _handleClose() {
     if (mounted) {
-      setState(() => _isSaving = true);
-    }
-
-    bool completed = false;
-    try {
-      await _formsService.updateStatus(
-        widget.companyId,
-        widget.orderId,
-        _currentForm.id,
-        FormStatus.completed
-      );
-      HapticFeedback.mediumImpact();
-      completed = true;
-    } catch (e) {
-      // Se falhar, apenas fecha sem concluir
-    } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-        Navigator.pop(context, completed);
-      }
+      Navigator.pop(context);
     }
   }
 
