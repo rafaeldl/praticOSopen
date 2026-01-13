@@ -56,18 +56,49 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
   /// Carrega os form templates do segmento
   Future<void> _loadFormTemplates() async {
     try {
+      debugPrint('🔍 Loading forms for segment: ${widget.segmentId}');
+      debugPrint('🔍 Subspecialties: ${widget.subspecialties}');
+
       final formsSnapshot = await FirebaseFirestore.instance
           .collection('segments')
           .doc(widget.segmentId)
           .collection('forms')
-          .orderBy('order')
           .get();
 
-      final forms = formsSnapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return data;
-      }).toList();
+      debugPrint('🔍 Found ${formsSnapshot.docs.length} forms in Firestore');
+
+      final forms = formsSnapshot.docs
+          .where((doc) {
+            final data = doc.data();
+            final isActive = data['isActive'] != false;
+
+            // Filtra por subspecialties se o form tiver restrição
+            final formSubspecialties = data['subspecialties'] as List?;
+            if (formSubspecialties == null || formSubspecialties.isEmpty) {
+              return isActive; // Form sem restrição de subspecialty
+            }
+
+            // Verifica se alguma subspecialty do form está na lista selecionada
+            if (widget.subspecialties.isEmpty) {
+              return isActive; // Sem subspecialties selecionadas, mostra todos ativos
+            }
+
+            final subspecialtyStrings = formSubspecialties
+                .whereType<String>()
+                .toList();
+            final hasMatch = subspecialtyStrings
+                .any((s) => widget.subspecialties.contains(s));
+
+            return isActive && hasMatch;
+          })
+          .map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return data;
+          })
+          .toList();
+
+      debugPrint('✅ After filtering: ${forms.length} forms will be imported');
 
       if (mounted) {
         setState(() {
@@ -76,7 +107,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
         });
       }
     } catch (e) {
-      debugPrint('Error loading form templates: $e');
+      debugPrint('❌ Error loading form templates: $e');
       if (mounted) {
         setState(() {
           _formTemplates = [];
