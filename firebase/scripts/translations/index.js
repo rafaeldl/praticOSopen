@@ -53,11 +53,16 @@ function applyTranslations(form) {
         return item;
       }
 
-      return {
-        ...item,
-        labelI18n: itemTranslations.label,
-        optionsI18n: itemTranslations.options,
-      };
+      // Só adiciona campos i18n se eles existirem (não são undefined)
+      const translatedItem = { ...item };
+      if (itemTranslations.label) {
+        translatedItem.labelI18n = itemTranslations.label;
+      }
+      if (itemTranslations.options) {
+        translatedItem.optionsI18n = itemTranslations.options;
+      }
+
+      return translatedItem;
     }),
   };
 
