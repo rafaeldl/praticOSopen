@@ -61,8 +61,16 @@ const SEGMENTS = [
       },
       {
         key: 'customer.phone',
-        type: 'label',
-        labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }
+        type: 'text',
+        labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' },
+        masksByCountry: {
+          'BR': ['(99) 9999-9999', '(99) 99999-9999'],
+          'US': ['(999) 999-9999'],
+          'PT': ['999 999 999'],
+          'ES': ['999 99 99 99'],
+          'MX': ['99 9999 9999']
+        },
+        keyboardType: 'phone'
       },
       {
         key: 'customer.email',
@@ -73,6 +81,20 @@ const SEGMENTS = [
         key: 'customer.address',
         type: 'label',
         labels: { 'pt-BR': 'Endereço', 'en-US': 'Address', 'es-ES': 'Dirección' }
+      },
+      // Configuração de máscaras de telefone por país
+      {
+        key: 'company.phone',
+        type: 'text',
+        labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' },
+        masksByCountry: {
+          'BR': ['(99) 9999-9999', '(99) 99999-9999'],
+          'US': ['(999) 999-9999'],
+          'PT': ['999 999 999'],
+          'ES': ['999 99 99 99'],
+          'MX': ['99 9999 9999']
+        },
+        keyboardType: 'phone'
       },
       // Configuração de máscaras de CEP/ZIP por país
       {
@@ -334,18 +356,18 @@ const SEGMENTS = [
         type: 'label',
         labels: { 'pt-BR': 'Modelo', 'en-US': 'Model', 'es-ES': 'Modelo' }
       },
-      {
-        key: 'device.serialNumber',
-        type: 'label',
-        labels: { 'pt-BR': 'Placa', 'en-US': 'License Plate', 'es-ES': 'Placa' }
-      },
-      // Configuração de máscara para placa de veículo
+      // Configuração de máscara para placa/serial de veículo por país
       {
         key: 'device.serial',
         type: 'text',
         labels: { 'pt-BR': 'Placa', 'en-US': 'License Plate', 'es-ES': 'Placa' },
-        masks: ['AAA-9999', 'AAA9N99'], // Padrão antigo e Mercosul (Brasil)
-        placeholder: 'ABC-1234',
+        masksByCountry: {
+          'BR': ['AAA-9999', 'AAA9N99'], // Padrão antigo e Mercosul (Brasil)
+          'US': ['AAA-9999', 'AAA 9999'], // Padrões variados nos EUA
+          'PT': ['AA-99-AA', '99-AA-99'], // Portugal
+          'ES': ['9999-AAA'], // Espanha
+          'MX': ['AAA-99-99', 'AAA-999-A'] // México
+        },
         textCapitalization: 'characters',
         required: true
       },

@@ -31,6 +31,7 @@ class Company extends BaseAudit {
 @JsonSerializable(explicitToJson: true)
 class CompanyAggr extends Base {
   String? name;
+  String? country; // Código do país (ISO 3166-1 alpha-2): BR, US, PT, ES, etc.
 
   CompanyAggr();
   factory CompanyAggr.fromJson(Map<String, dynamic> json) =>

@@ -1909,6 +1909,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pendingPayment => 'Pending';
 
   @override
+  String get selectCountry => 'Select Country';
+
+  @override
   String get chooseCompanySegment => 'Choose the company\'s line of business';
 
   @override

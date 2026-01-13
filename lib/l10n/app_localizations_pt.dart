@@ -1915,6 +1915,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pendingPayment => 'Pendente';
 
   @override
+  String get selectCountry => 'Selecionar País';
+
+  @override
   String get chooseCompanySegment => 'Escolha o ramo de atuação da empresa';
 
   @override

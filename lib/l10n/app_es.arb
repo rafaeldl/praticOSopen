@@ -812,5 +812,7 @@
   "yesCreateSampleData": "Sí, crear datos de ejemplo",
 
   "availableSpecialties": "ESPECIALIDADES DISPONIBLES",
-  "pleaseSelectAtLeastOneSpecialty": "Por favor, seleccione al menos una especialidad para continuar."
+  "pleaseSelectAtLeastOneSpecialty": "Por favor, seleccione al menos una especialidad para continuar.",
+
+  "selectCountry": "Seleccionar País"
 }

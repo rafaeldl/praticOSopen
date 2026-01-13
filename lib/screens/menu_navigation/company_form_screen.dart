@@ -1,14 +1,14 @@
-import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/widgets/cached_image.dart';
-import 'package:praticos/widgets/phone_field.dart';
+import 'package:praticos/widgets/dynamic_text_field.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
@@ -60,8 +60,19 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     setState(() => _isLoading = true);
     if (Global.companyAggr?.id != null) {
       _company = await _companyStore.retrieveCompany(Global.companyAggr!.id);
-      if (_company?.segment != null) {
-        await _loadSegment(_company!.segment!);
+
+      if (mounted) {
+        final provider = context.read<SegmentConfigProvider>();
+
+        // 1. Carrega o segmento primeiro
+        if (_company?.segment != null) {
+          await _loadSegment(_company!.segment!);
+          await provider.initialize(_company!.segment!);
+        }
+
+        // 2. Depois seta o país (após segmento carregado)
+        // Se não tem país definido, usa BR como padrão
+        provider.setCountry(_company?.country ?? 'BR');
       }
     }
     setState(() => _isLoading = false);
@@ -99,12 +110,18 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
 
       if (Global.companyAggr != null && _company!.id == Global.companyAggr!.id) {
         Global.companyAggr!.name = _company!.name;
-        
-        if (_company!.segment != null) {
-          final provider = context.read<SegmentConfigProvider>();
-          if (mounted && provider.segmentId != _company!.segment) {
-            provider.initialize(_company!.segment!);
-          }
+        Global.companyAggr!.country = _company!.country;
+
+        final provider = context.read<SegmentConfigProvider>();
+
+        // Atualiza segmento se mudou
+        if (_company!.segment != null && mounted && provider.segmentId != _company!.segment) {
+          provider.initialize(_company!.segment!);
+        }
+
+        // Atualiza país no provider
+        if (mounted && _company!.country != null) {
+          provider.setCountry(_company!.country!);
         }
       }
       
@@ -176,6 +193,102 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     }
   }
 
+  Future<void> _pickCountry() async {
+    // Usa IsoCode.values da phone_numbers_parser
+    // Lista apenas os países mais comuns primeiro
+    final priorityCountries = ['BR', 'US', 'PT', 'ES', 'MX'];
+    final allIsoCodes = IsoCode.values.toList();
+
+    // Separa em prioridade e resto
+    final priority = allIsoCodes.where((iso) => priorityCountries.contains(iso.name)).toList();
+    final others = allIsoCodes.where((iso) => !priorityCountries.contains(iso.name)).toList();
+
+    // Ordena prioridade pela lista priorityCountries
+    priority.sort((a, b) => priorityCountries.indexOf(a.name).compareTo(priorityCountries.indexOf(b.name)));
+    // Ordena o resto alfabeticamente
+    others.sort((a, b) => a.name.compareTo(b.name));
+
+    final sortedIsoCodes = [...priority, ...others];
+
+    if (!mounted) return;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(context.l10n.selectCountry),
+        message: const Text('Selecione o país da empresa'),
+        actions: sortedIsoCodes.take(50).map((isoCode) {
+          return CupertinoActionSheetAction(
+            child: Text('${_getCountryFlag(isoCode.name)} ${_getCountryName(isoCode.name)}'),
+            onPressed: () {
+              setState(() {
+                _company?.country = isoCode.name;
+              });
+
+              // Atualiza o país no provider imediatamente
+              if (mounted) {
+                final provider = context.read<SegmentConfigProvider>();
+                provider.setCountry(isoCode.name);
+              }
+
+              Navigator.pop(context);
+            },
+          );
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+    );
+  }
+
+  String _getCountryFlag(String countryCode) {
+    // Retorna emoji da bandeira baseado no código ISO
+    final int firstLetter = countryCode.codeUnitAt(0) - 0x41 + 0x1F1E6;
+    final int secondLetter = countryCode.codeUnitAt(1) - 0x41 + 0x1F1E6;
+    return String.fromCharCode(firstLetter) + String.fromCharCode(secondLetter);
+  }
+
+  String _getCountryName(String countryCode) {
+    // Nomes em português dos países mais comuns
+    switch (countryCode) {
+      case 'BR':
+        return 'Brasil';
+      case 'US':
+        return 'Estados Unidos';
+      case 'PT':
+        return 'Portugal';
+      case 'ES':
+        return 'Espanha';
+      case 'MX':
+        return 'México';
+      case 'AR':
+        return 'Argentina';
+      case 'CL':
+        return 'Chile';
+      case 'CO':
+        return 'Colômbia';
+      case 'PE':
+        return 'Peru';
+      case 'UY':
+        return 'Uruguai';
+      case 'FR':
+        return 'França';
+      case 'IT':
+        return 'Itália';
+      case 'DE':
+        return 'Alemanha';
+      case 'GB':
+        return 'Reino Unido';
+      case 'CA':
+        return 'Canadá';
+      default:
+        // Para outros, retorna o código ISO
+        return countryCode;
+    }
+  }
+
   Future<void> _pickImage() async {
     showCupertinoModalPopup(
       context: context,
@@ -215,7 +328,10 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading && _company == null) {
+    final config = context.watch<SegmentConfigProvider>();
+
+    // Mostra loading enquanto carrega empresa OU segmento
+    if (_isLoading || (_company != null && config.isLoading)) {
       return const CupertinoPageScaffold(
         child: Center(child: CupertinoActivityIndicator()),
       );
@@ -359,6 +475,40 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                       ),
                     ),
                   ),
+                  GestureDetector(
+                    onTap: _pickCountry,
+                    child: CupertinoFormRow(
+                      prefix: Text(context.l10n.country),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _company?.country != null
+                                    ? _getCountryName(_company!.country!)
+                                    : context.l10n.select,
+                                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                  color: _company?.country != null
+                                      ? CupertinoColors.label.resolveFrom(context)
+                                      : CupertinoColors.placeholderText.resolveFrom(context),
+                                ),
+                                textAlign: TextAlign.right,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              CupertinoIcons.chevron_forward,
+                              size: 20,
+                              color: CupertinoColors.systemGrey2.resolveFrom(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                   CupertinoTextFormFieldRow(
                     prefix: Text(context.l10n.email),
                     initialValue: _company?.email,
@@ -367,7 +517,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     textAlign: TextAlign.right,
                     onSaved: (val) => _company?.email = val,
                   ),
-                  PhoneField(
+                  DynamicTextField(
                     fieldKey: 'company.phone',
                     initialValue: _company?.phone,
                     onSaved: (val) => _company?.phone = val,

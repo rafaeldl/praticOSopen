@@ -59,7 +59,12 @@ Map<String, dynamic> _$CompanyToJson(Company instance) => <String, dynamic>{
 
 CompanyAggr _$CompanyAggrFromJson(Map<String, dynamic> json) => CompanyAggr()
   ..id = json['id'] as String?
-  ..name = json['name'] as String?;
+  ..name = json['name'] as String?
+  ..country = json['country'] as String?;
 
 Map<String, dynamic> _$CompanyAggrToJson(CompanyAggr instance) =>
-    <String, dynamic>{'id': instance.id, 'name': instance.name};
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'country': instance.country,
+    };

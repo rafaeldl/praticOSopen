@@ -3832,6 +3832,12 @@ abstract class AppLocalizations {
   /// **'Pendente'**
   String get pendingPayment;
 
+  /// No description provided for @selectCountry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecionar País'**
+  String get selectCountry;
+
   /// No description provided for @chooseCompanySegment.
   ///
   /// In pt, this message translates to:

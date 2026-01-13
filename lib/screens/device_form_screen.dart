@@ -1,6 +1,4 @@
-import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
@@ -334,37 +332,5 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         _device?.name = value;
       });
     }
-  }
-
-  Widget _buildCupertinoFormField({
-    required String label,
-    String? initialValue,
-    String? placeholder,
-    TextCapitalization textCapitalization = TextCapitalization.none,
-    List<TextInputFormatter>? inputFormatters,
-    required FormFieldSetter<String> onSaved,
-    required FormFieldValidator<String> validator,
-  }) {
-    return CupertinoListTile(
-      title: SizedBox(
-        width: 80,
-        child: Text(label, style: const TextStyle(fontSize: 16)),
-      ),
-      additionalInfo: SizedBox(
-        width: 200, // Constrain width or use Expanded logic if possible within ListTile
-        child: CupertinoTextFormFieldRow(
-          initialValue: initialValue,
-          placeholder: placeholder,
-          textCapitalization: textCapitalization,
-          inputFormatters: inputFormatters,
-          padding: EdgeInsets.zero,
-          textAlign: TextAlign.right,
-          decoration: null, // Remove border
-          style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
-          validator: validator,
-          onSaved: onSaved,
-        ),
-      ),
-    );
   }
 }

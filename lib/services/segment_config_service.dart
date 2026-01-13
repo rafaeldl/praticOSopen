@@ -97,7 +97,7 @@ class SegmentConfigService {
       _labelCache.clear();
       _customFields.clear();
 
-      // 1. Carrega labels globais (se segmentId != 'global')
+      // 1. Carrega labels e campos globais (se segmentId != 'global')
       if (segmentId != 'global') {
         try {
           final globalDoc = await _db.collection('segments').doc('global').get();
@@ -106,7 +106,11 @@ class SegmentConfigService {
             for (final json in globalCustomFields) {
               final field = CustomField.fromJson(json as Map<String, dynamic>);
               if (field.isLabel) {
+                // É um label override - armazena no cache
                 _labelCache[field.key] = field.getLabel(_locale);
+              } else {
+                // É um campo customizado real - adiciona aos campos
+                _customFields.add(field);
               }
             }
           }
@@ -183,12 +187,16 @@ class SegmentConfigService {
       case 'customer.address':
         return _l10n!.address;
 
+      // Campos de company
+      case 'company.phone':
+        return _l10n!.phone;
+
       // Campos de device
       case 'device.brand':
         return _l10n!.brand;
       case 'device.model':
         return _l10n!.model;
-      case 'device.serialNumber':
+      case 'device.serial':
         return _l10n!.serialNumber;
       case 'device.description':
         return _l10n!.description;
@@ -296,16 +304,24 @@ class SegmentConfigService {
 
   /// Obtém um label (com fallback: segment → ARB → key)
   String label(String key) {
-    // 1. Firestore custom (por segmento)
+    // 1. Firestore custom labels (type: 'label')
     if (_labelCache.containsKey(key)) {
       return _labelCache[key]!;
     }
 
-    // 2. AppLocalizations (ARB files)
+    // 2. Firestore custom fields (type: 'text', 'select', etc) com labels
+    try {
+      final field = _customFields.firstWhere((f) => f.key == key);
+      return field.getLabel(_locale);
+    } catch (e) {
+      // Campo não encontrado, continua para próximo fallback
+    }
+
+    // 3. AppLocalizations (ARB files)
     final arbValue = _getFromArb(key);
     if (arbValue != null) return arbValue;
 
-    // 3. Key herself (fallback final)
+    // 4. Key herself (fallback final)
     return key;
   }
 

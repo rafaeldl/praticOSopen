@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:easy_mask/easy_mask.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/widgets/dynamic_text_field.dart';
 import 'select_segment_screen.dart';
 
 class CompanyContactScreen extends StatefulWidget {
@@ -32,20 +32,22 @@ class CompanyContactScreen extends StatefulWidget {
 
 class _CompanyContactScreenState extends State<CompanyContactScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _phoneController;
+  String? _phone;
   late final TextEditingController _emailController;
   late final TextEditingController _siteController;
 
   @override
   void initState() {
     super.initState();
-    _phoneController = TextEditingController(text: widget.initialPhone);
+    _phone = widget.initialPhone;
     _emailController = TextEditingController(text: widget.initialEmail);
     _siteController = TextEditingController(text: widget.initialSite);
   }
 
   void _next() {
     if (_formKey.currentState?.validate() ?? false) {
+      _formKey.currentState?.save();
+
       Navigator.push(
         context,
         CupertinoPageRoute(
@@ -54,7 +56,7 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
             companyId: widget.companyId,
             companyName: widget.companyName,
             address: widget.address ?? '',
-            phone: _phoneController.text,
+            phone: _phone ?? '',
             email: _emailController.text,
             site: _siteController.text,
             logoFile: widget.logoFile,
@@ -105,21 +107,11 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
               CupertinoListSection.insetGrouped(
                 header: const Text('CONTATOS'),
                 children: [
-                  CupertinoTextFormFieldRow(
-                    controller: _phoneController,
-                    prefix: const Text('Telefone'),
-                    placeholder: '(00) 00000-0000',
-                    keyboardType: TextInputType.phone,
-                    textAlign: TextAlign.right,
-                    inputFormatters: [
-                      TextInputMask(mask: ['(99) 9999-9999', '(99) 99999-9999'])
-                    ],
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Obrigatório';
-                      }
-                      return null;
-                    },
+                  DynamicTextField(
+                    fieldKey: 'company.phone',
+                    initialValue: _phone,
+                    required: true,
+                    onSaved: (val) => _phone = val,
                   ),
                   CupertinoTextFormFieldRow(
                     controller: _emailController,
@@ -160,7 +152,6 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
 
   @override
   void dispose() {
-    _phoneController.dispose();
     _emailController.dispose();
     _siteController.dispose();
     super.dispose();

@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import '../models/custom_field.dart';
 import '../services/segment_config_service.dart';
 
@@ -107,6 +106,7 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Define o código do país da empresa
   void setCountry(String? countryCode) {
     _service.setCountry(countryCode);
+    notifyListeners(); // Notifica listeners para atualizar máscaras
   }
 
   /// Injeta ou atualiza o AppLocalizations para usar traduções dos ARB files
