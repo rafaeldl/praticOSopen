@@ -141,9 +141,9 @@ class BootstrapService {
     if (input.contains('-')) {
       final parts = input.split('-');
       final languageCode = parts[0].toLowerCase();
-      if (languageCode == 'PT') return 'pt';
-      if (languageCode == 'EN') return 'en';
-      if (languageCode == 'ES') return 'es';
+      if (languageCode == 'pt') return 'pt';
+      if (languageCode == 'en') return 'en';
+      if (languageCode == 'es') return 'es';
       return 'pt';
     }
 
