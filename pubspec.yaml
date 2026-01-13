@@ -61,6 +61,7 @@ dependencies:
   share_plus: ^11.0.0
   currency_text_input_formatter: ^2.1.8
   easy_mask: ^2.0.1
+  phone_numbers_parser: ^9.0.18
   package_info_plus: ^8.3.0
   printing: ^5.14.2
   provider: ^6.1.1

@@ -1,10 +1,9 @@
-import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/widgets/dynamic_text_field.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -261,14 +260,11 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                   ),
 
                   // Serial Number Field
-                  _buildCupertinoFormField(
-                    label: config.label(LabelKeys.deviceSerialNumber),
+                  DynamicTextField(
+                    fieldKey: 'device.serial',
                     initialValue: _device?.serial,
-                    placeholder: "ABC1D23",
-                    textCapitalization: TextCapitalization.characters,
-                    inputFormatters: [TextInputMask(mask: 'AAA9N99')],
                     onSaved: (val) => _device?.serial = val?.toUpperCase(),
-                    validator: (val) => val == null || val.isEmpty ? config.label(LabelKeys.required) : null,
+                    required: true,
                   ),
                 ],
               ),
@@ -336,37 +332,5 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         _device?.name = value;
       });
     }
-  }
-
-  Widget _buildCupertinoFormField({
-    required String label,
-    String? initialValue,
-    String? placeholder,
-    TextCapitalization textCapitalization = TextCapitalization.none,
-    List<TextInputFormatter>? inputFormatters,
-    required FormFieldSetter<String> onSaved,
-    required FormFieldValidator<String> validator,
-  }) {
-    return CupertinoListTile(
-      title: SizedBox(
-        width: 80,
-        child: Text(label, style: const TextStyle(fontSize: 16)),
-      ),
-      additionalInfo: SizedBox(
-        width: 200, // Constrain width or use Expanded logic if possible within ListTile
-        child: CupertinoTextFormFieldRow(
-          initialValue: initialValue,
-          placeholder: placeholder,
-          textCapitalization: textCapitalization,
-          inputFormatters: inputFormatters,
-          padding: EdgeInsets.zero,
-          textAlign: TextAlign.right,
-          decoration: null, // Remove border
-          style: TextStyle(color: CupertinoColors.label.resolveFrom(context)),
-          validator: validator,
-          onSaved: onSaved,
-        ),
-      ),
-    );
   }
 }

@@ -61,8 +61,16 @@ const SEGMENTS = [
       },
       {
         key: 'customer.phone',
-        type: 'label',
-        labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' }
+        type: 'text',
+        labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' },
+        masksByCountry: {
+          'BR': ['(99) 9999-9999', '(99) 99999-9999'],
+          'US': ['(999) 999-9999'],
+          'PT': ['999 999 999'],
+          'ES': ['999 99 99 99'],
+          'MX': ['99 9999 9999']
+        },
+        keyboardType: 'phone'
       },
       {
         key: 'customer.email',
@@ -73,6 +81,35 @@ const SEGMENTS = [
         key: 'customer.address',
         type: 'label',
         labels: { 'pt-BR': 'Endereço', 'en-US': 'Address', 'es-ES': 'Dirección' }
+      },
+      // Configuração de máscaras de telefone por país
+      {
+        key: 'company.phone',
+        type: 'text',
+        labels: { 'pt-BR': 'Telefone', 'en-US': 'Phone', 'es-ES': 'Teléfono' },
+        masksByCountry: {
+          'BR': ['(99) 9999-9999', '(99) 99999-9999'],
+          'US': ['(999) 999-9999'],
+          'PT': ['999 999 999'],
+          'ES': ['999 99 99 99'],
+          'MX': ['99 9999 9999']
+        },
+        keyboardType: 'phone'
+      },
+      // Configuração de máscaras de CEP/ZIP por país
+      {
+        key: 'company.zipCode',
+        type: 'text',
+        labels: { 'pt-BR': 'CEP', 'en-US': 'ZIP Code', 'es-ES': 'Código Postal' },
+        masksByCountry: {
+          'BR': ['99999-999'],
+          'US': ['99999', '99999-9999'],
+          'PT': ['9999-999'],
+          'ES': ['99999'],
+          'MX': ['99999']
+        },
+        placeholder: '12345-678',
+        keyboardType: 'number'
       },
       // Ações globais (device)
       {
@@ -319,10 +356,20 @@ const SEGMENTS = [
         type: 'label',
         labels: { 'pt-BR': 'Modelo', 'en-US': 'Model', 'es-ES': 'Modelo' }
       },
+      // Configuração de máscara para placa/serial de veículo por país
       {
-        key: 'device.serialNumber',
-        type: 'label',
-        labels: { 'pt-BR': 'Placa', 'en-US': 'License Plate', 'es-ES': 'Placa' }
+        key: 'device.serial',
+        type: 'text',
+        labels: { 'pt-BR': 'Placa', 'en-US': 'License Plate', 'es-ES': 'Placa' },
+        masksByCountry: {
+          'BR': ['AAA-9999', 'AAA9N99'], // Padrão antigo e Mercosul (Brasil)
+          'US': ['AAA-9999', 'AAA 9999'], // Padrões variados nos EUA
+          'PT': ['AA-99-AA', '99-AA-99'], // Portugal
+          'ES': ['9999-AAA'], // Espanha
+          'MX': ['AAA-99-99', 'AAA-999-A'] // México
+        },
+        textCapitalization: 'characters',
+        required: true
       },
       {
         key: 'actions.create_device',
@@ -539,6 +586,16 @@ const SEGMENTS = [
         key: 'device.serialNumber',
         type: 'label',
         labels: { 'pt-BR': 'IMEI', 'en-US': 'IMEI', 'es-ES': 'IMEI' }
+      },
+      // Configuração de máscara para IMEI
+      {
+        key: 'device.serial',
+        type: 'text',
+        labels: { 'pt-BR': 'IMEI/Número de Série', 'en-US': 'IMEI/Serial Number', 'es-ES': 'IMEI/Número de Serie' },
+        masks: ['999999999999999'], // IMEI padrão (15 dígitos)
+        placeholder: '123456789012345',
+        keyboardType: 'number',
+        maxLength: 15
       },
       {
         key: 'actions.create_device',

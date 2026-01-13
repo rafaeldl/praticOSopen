@@ -129,6 +129,10 @@
   "invalidPhone": "Invalid phone",
   "invalidValue": "Invalid value",
   "invalidDate": "Invalid date",
+  "invalidFormat": "Invalid format",
+  "minimum": "Minimum",
+  "maximum": "Maximum",
+  "characters": "characters",
   "selectOption": "Select an option",
   "noResults": "No results found",
   "noData": "No data available",
@@ -584,7 +588,7 @@
   "availableSegments": "Available Segments",
   "noSegmentsAvailable": "No segments available",
   "errorLoadingSegments": "Error loading segments",
-  "specialties": "specialties",
+  "specialties": "Specialties",
   "myCompany": "My Company",
   "retryAgain": "Try again",
   "noResultsFound": "No results found",
@@ -808,5 +812,27 @@
   "yesCreateSampleData": "Yes, create sample data",
 
   "availableSpecialties": "AVAILABLE SPECIALTIES",
-  "pleaseSelectAtLeastOneSpecialty": "Please select at least one specialty to continue."
+  "pleaseSelectAtLeastOneSpecialty": "Please select at least one specialty to continue.",
+
+  "selectCountry": "Select Country",
+
+  "contacts": "Contacts",
+  "contactMethods": "Contact Methods",
+  "howCustomersCanReachYou": "How can your customers reach you?",
+
+  "preparing": "Preparing...",
+  "uploadingLogo": "Uploading logo...",
+  "creatingCompany": "Creating company...",
+  "importingForms": "Importing forms...",
+  "creatingSampleData": "Creating sample data...",
+
+  "createSampleDataQuestion": "Create sample data?",
+  "sampleDataDescription": "We can create some sample data for you to start using the system immediately:",
+  "commonServicesForSegment": "Common services for your segment",
+  "mostUsedProducts": "Most used products and parts",
+  "sampleEquipment": "Sample equipment",
+  "sampleForms": "Inspection forms",
+  "demoCustomer": "Demo customer",
+  "canEditOrDeleteAnytime": "You can edit or delete this data at any time.",
+  "noStartFromScratch": "No, start from scratch"
 }

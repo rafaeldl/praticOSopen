@@ -341,6 +341,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidDate => 'Invalid date';
 
   @override
+  String get invalidFormat => 'Invalid format';
+
+  @override
+  String get minimum => 'Minimum';
+
+  @override
+  String get maximum => 'Maximum';
+
+  @override
+  String get characters => 'characters';
+
+  @override
   String get selectOption => 'Select an option';
 
   @override
@@ -1661,7 +1673,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorLoadingSegments => 'Error loading segments';
 
   @override
-  String get specialties => 'specialties';
+  String get specialties => 'Specialties';
 
   @override
   String get myCompany => 'My Company';
@@ -1897,7 +1909,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pendingPayment => 'Pending';
 
   @override
+  String get selectCountry => 'Select Country';
+
+  @override
   String get chooseCompanySegment => 'Choose the company\'s line of business';
+
+  @override
+  String get contacts => 'Contacts';
+
+  @override
+  String get contactMethods => 'Contact Methods';
+
+  @override
+  String get howCustomersCanReachYou => 'How can your customers reach you?';
+
+  @override
+  String get preparing => 'Preparing...';
+
+  @override
+  String get uploadingLogo => 'Uploading logo...';
+
+  @override
+  String get creatingCompany => 'Creating company...';
+
+  @override
+  String get importingForms => 'Importing forms...';
+
+  @override
+  String get creatingSampleData => 'Creating sample data...';
+
+  @override
+  String get createSampleDataQuestion => 'Create sample data?';
+
+  @override
+  String get sampleDataDescription =>
+      'We can create some sample data for you to start using the system immediately:';
+
+  @override
+  String get commonServicesForSegment => 'Common services for your segment';
+
+  @override
+  String get mostUsedProducts => 'Most used products and parts';
+
+  @override
+  String get sampleEquipment => 'Sample equipment';
+
+  @override
+  String get sampleForms => 'Inspection forms';
+
+  @override
+  String get demoCustomer => 'Demo customer';
+
+  @override
+  String get canEditOrDeleteAnytime =>
+      'You can edit or delete this data at any time.';
+
+  @override
+  String get noStartFromScratch => 'No, start from scratch';
 
   @override
   String get changeLogo => 'Change Logo';

@@ -293,17 +293,24 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         throw Exception(context.l10n.companyNotFound);
       }
 
-      final segment = companyDoc.data()?['segment'] as String?;
+      final companyData = companyDoc.data();
+      final segment = companyData?['segment'] as String?;
+      final country = companyData?['country'] as String?;
 
       if (segment == null || segment.isEmpty) {
         throw Exception(context.l10n.companyNoSegment);
       }
 
-      // Carregar configuração do segmento
+      // Carregar configuração do segmento e país
       // Como o widget tem key única baseada no companyId, ele é recriado quando muda
       // Então o initialize sempre será chamado para a empresa correta
       final segmentProvider = context.read<SegmentConfigProvider>();
       await segmentProvider.initialize(segment);
+
+      // Seta o país para formatação de telefone
+      if (country != null) {
+        segmentProvider.setCountry(country);
+      }
 
       setState(() {
         _isLoading = false;
