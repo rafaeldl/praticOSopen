@@ -27,8 +27,8 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
   Company? _company;
   Map<String, dynamic>? _selectedSegment;
 
-  // Altura mínima padrão para todos os campos
-  static const double _minRowHeight = 44.0;
+  // Padding vertical para garantir altura consistente entre todos os campos
+  static const EdgeInsets _rowPadding = EdgeInsets.symmetric(vertical: 11.0);
 
   String _currentLocaleTag(BuildContext context) {
     final locale = Localizations.localeOf(context);
@@ -583,38 +583,35 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     onTap: _pickSegment,
                     child: CupertinoFormRow(
                       prefix: Text(context.l10n.segment),
-                      child: Container(
-                        constraints: const BoxConstraints(minHeight: _minRowHeight),
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16.0), // Respiro entre label e valor
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  _selectedSegment != null
-                                      ? (_segmentDisplayName(_selectedSegment!).isEmpty
-                                          ? context.l10n.select
-                                          : _segmentDisplayName(_selectedSegment!))
-                                      : context.l10n.select,
-                                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                    color: _selectedSegment != null
-                                        ? CupertinoColors.label.resolveFrom(context)
-                                        : CupertinoColors.placeholderText.resolveFrom(context),
-                                  ),
-                                  textAlign: TextAlign.right,
-                                  overflow: TextOverflow.ellipsis,
+                      padding: _rowPadding,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _selectedSegment != null
+                                    ? (_segmentDisplayName(_selectedSegment!).isEmpty
+                                        ? context.l10n.select
+                                        : _segmentDisplayName(_selectedSegment!))
+                                    : context.l10n.select,
+                                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                  color: _selectedSegment != null
+                                      ? CupertinoColors.label.resolveFrom(context)
+                                      : CupertinoColors.placeholderText.resolveFrom(context),
                                 ),
+                                textAlign: TextAlign.right,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                CupertinoIcons.chevron_forward,
-                                size: 20,
-                                color: CupertinoColors.systemGrey2.resolveFrom(context),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              CupertinoIcons.chevron_forward,
+                              size: 20,
+                              color: CupertinoColors.systemGrey2.resolveFrom(context),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -626,45 +623,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                       onTap: _pickSubspecialties,
                       child: CupertinoFormRow(
                         prefix: Text(context.l10n.specialties),
-                        child: Container(
-                          constraints: const BoxConstraints(minHeight: _minRowHeight),
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 16.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    _getSubspecialtiesDisplayText(),
-                                    style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                      color: (_company?.subspecialties?.isNotEmpty ?? false)
-                                          ? CupertinoColors.label.resolveFrom(context)
-                                          : CupertinoColors.placeholderText.resolveFrom(context),
-                                    ),
-                                    textAlign: TextAlign.right,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Icon(
-                                  CupertinoIcons.chevron_forward,
-                                  size: 20,
-                                  color: CupertinoColors.systemGrey2.resolveFrom(context),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  GestureDetector(
-                    onTap: _pickCountry,
-                    child: CupertinoFormRow(
-                      prefix: Text(context.l10n.country),
-                      child: Container(
-                        constraints: const BoxConstraints(minHeight: _minRowHeight),
-                        alignment: Alignment.centerRight,
+                        padding: _rowPadding,
                         child: Padding(
                           padding: const EdgeInsets.only(left: 16.0),
                           child: Row(
@@ -672,11 +631,9 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  _company?.country != null
-                                      ? _getCountryName(_company!.country!)
-                                      : context.l10n.select,
+                                  _getSubspecialtiesDisplayText(),
                                   style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                    color: _company?.country != null
+                                    color: (_company?.subspecialties?.isNotEmpty ?? false)
                                         ? CupertinoColors.label.resolveFrom(context)
                                         : CupertinoColors.placeholderText.resolveFrom(context),
                                   ),
@@ -692,6 +649,40 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                               ),
                             ],
                           ),
+                        ),
+                      ),
+                    ),
+                  GestureDetector(
+                    onTap: _pickCountry,
+                    child: CupertinoFormRow(
+                      prefix: Text(context.l10n.country),
+                      padding: _rowPadding,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _company?.country != null
+                                    ? _getCountryName(_company!.country!)
+                                    : context.l10n.select,
+                                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                  color: _company?.country != null
+                                      ? CupertinoColors.label.resolveFrom(context)
+                                      : CupertinoColors.placeholderText.resolveFrom(context),
+                                ),
+                                textAlign: TextAlign.right,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Icon(
+                              CupertinoIcons.chevron_forward,
+                              size: 20,
+                              color: CupertinoColors.systemGrey2.resolveFrom(context),
+                            ),
+                          ],
                         ),
                       ),
                     ),
