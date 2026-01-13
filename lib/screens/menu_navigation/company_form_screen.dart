@@ -50,6 +50,36 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     return _localizedValue(segment['nameI18n'] ?? segment['name'], locale);
   }
 
+  String _getSubspecialtiesDisplayText() {
+    if (_company?.subspecialties == null || _company!.subspecialties!.isEmpty) {
+      return context.l10n.select;
+    }
+
+    if (_selectedSegment == null) return context.l10n.select;
+
+    final subspecialties = _selectedSegment!['subspecialties'] as List?;
+    if (subspecialties == null) return context.l10n.select;
+
+    final locale = _currentLocaleTag(context);
+    final names = <String>[];
+
+    for (final selectedId in _company!.subspecialties!) {
+      try {
+        final subspecialty = subspecialties.firstWhere(
+          (s) => (s as Map)['id'] == selectedId,
+        ) as Map;
+        final name = _localizedValue(subspecialty['name'], locale);
+        if (name.isNotEmpty) names.add(name);
+      } catch (e) {
+        // Subspecialidade não encontrada, ignora
+      }
+    }
+
+    if (names.isEmpty) return context.l10n.select;
+    if (names.length == 1) return names.first;
+    return '${names.first} +${names.length - 1}';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -177,6 +207,8 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                 setState(() {
                   _selectedSegment = segment;
                   _company?.segment = segment['id'];
+                  // Limpa subspecialidades quando muda o segmento
+                  _company?.subspecialties = null;
                 });
                 Navigator.pop(context);
               },
@@ -191,6 +223,111 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     } catch (e) {
       // Ignorar erro silenciosamente
     }
+  }
+
+  Future<void> _pickSubspecialties() async {
+    if (_selectedSegment == null) return;
+
+    final subspecialties = _selectedSegment!['subspecialties'] as List?;
+    if (subspecialties == null || subspecialties.isEmpty) {
+      // Segmento não tem subspecialidades
+      return;
+    }
+
+    final locale = _currentLocaleTag(context);
+    final subspecialtyList = subspecialties
+        .map((s) => Map<String, dynamic>.from(s as Map))
+        .toList();
+
+    if (!mounted) return;
+
+    // Cria um set com as subspecialties atualmente selecionadas
+    final selectedIds = Set<String>.from(_company?.subspecialties ?? []);
+
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => StatefulBuilder(
+        builder: (context, setModalState) => CupertinoActionSheet(
+          title: Text(context.l10n.selectSpecialties),
+          message: Column(
+            children: [
+              const SizedBox(height: 8),
+              ...subspecialtyList.map((subspecialty) {
+                final id = subspecialty['id'] as String;
+                final isSelected = selectedIds.contains(id);
+                final name = _localizedValue(subspecialty['name'], locale);
+                final icon = subspecialty['icon'] as String? ?? '•';
+
+                return CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    setModalState(() {
+                      if (isSelected) {
+                        selectedIds.remove(id);
+                      } else {
+                        selectedIds.add(id);
+                      }
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? CupertinoColors.activeBlue.withValues(alpha: 0.1)
+                          : CupertinoColors.systemBackground.resolveFrom(context),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isSelected
+                              ? CupertinoIcons.checkmark_circle_fill
+                              : CupertinoIcons.circle,
+                          color: isSelected
+                              ? CupertinoColors.activeBlue
+                              : CupertinoColors.systemGrey,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          icon,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            name,
+                            style: TextStyle(
+                              color: CupertinoColors.label.resolveFrom(context),
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                setState(() {
+                  _company?.subspecialties = selectedIds.isEmpty ? null : selectedIds.toList();
+                });
+                Navigator.pop(context);
+              },
+              child: Text(context.l10n.done),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.cancel),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _pickCountry() async {
@@ -475,6 +612,41 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                       ),
                     ),
                   ),
+                  // Campo de subspecialidades (só aparece se o segmento tem subspecialties)
+                  if (_selectedSegment != null &&
+                      (_selectedSegment!['subspecialties'] as List?)?.isNotEmpty == true)
+                    GestureDetector(
+                      onTap: _pickSubspecialties,
+                      child: CupertinoFormRow(
+                        prefix: Text(context.l10n.specialties),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _getSubspecialtiesDisplayText(),
+                                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                    color: (_company?.subspecialties?.isNotEmpty ?? false)
+                                        ? CupertinoColors.label.resolveFrom(context)
+                                        : CupertinoColors.placeholderText.resolveFrom(context),
+                                  ),
+                                  textAlign: TextAlign.right,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                CupertinoIcons.chevron_forward,
+                                size: 20,
+                                color: CupertinoColors.systemGrey2.resolveFrom(context),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   GestureDetector(
                     onTap: _pickCountry,
                     child: CupertinoFormRow(
