@@ -36,6 +36,9 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Idioma atual
   String get locale => _service.currentLocale;
 
+  /// Código do país (ISO 3166-1 alpha-2)
+  String? get countryCode => _service.countryCode;
+
   /// Define se o device deve ser exibido na listagem de OS
   /// Por enquanto, true para todos os segmentos
   bool get showDeviceInOrderList {
@@ -100,6 +103,12 @@ class SegmentConfigProvider extends ChangeNotifier {
     }
   }
 
+  /// Define o código do país da empresa
+  void setCountry(String? countryCode) {
+    _service.setCountry(countryCode);
+    notifyListeners(); // Notifica listeners para atualizar máscaras
+  }
+
   /// Injeta ou atualiza o AppLocalizations para usar traduções dos ARB files
   /// Chamado no MaterialApp builder, então é executado a cada rebuild
   /// Detecta mudanças de locale e recarrega cache automaticamente
@@ -157,6 +166,24 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Obtém campos customizados agrupados por section
   Map<String, List<CustomField>> fieldsGroupedBySection(String namespace) =>
       _service.fieldsGroupedBySection(namespace);
+
+  // ════════════════════════════════════════════════════════════
+  // FIELD VALIDATION & MASKS
+  // ════════════════════════════════════════════════════════════
+
+  /// Obtém configuração de um campo específico
+  CustomField? getField(String key) => _service.getField(key);
+
+  /// Obtém máscaras para um campo
+  List<String> getMasks(String fieldKey) => _service.getMasks(fieldKey);
+
+  /// Obtém tipo de teclado para um campo
+  TextInputType getKeyboardType(String fieldKey) =>
+      _service.getKeyboardType(fieldKey);
+
+  /// Obtém capitalização de texto para um campo
+  TextCapitalization getTextCapitalization(String fieldKey) =>
+      _service.getTextCapitalization(fieldKey);
 
   // ════════════════════════════════════════════════════════════
   // UTILS
