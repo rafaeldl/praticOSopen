@@ -584,35 +584,32 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     child: CupertinoFormRow(
                       prefix: Text(context.l10n.segment),
                       padding: _rowPadding,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _selectedSegment != null
-                                    ? (_segmentDisplayName(_selectedSegment!).isEmpty
-                                        ? context.l10n.select
-                                        : _segmentDisplayName(_selectedSegment!))
-                                    : context.l10n.select,
-                                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                  color: _selectedSegment != null
-                                      ? CupertinoColors.label.resolveFrom(context)
-                                      : CupertinoColors.placeholderText.resolveFrom(context),
-                                ),
-                                textAlign: TextAlign.right,
-                                overflow: TextOverflow.ellipsis,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              _selectedSegment != null
+                                  ? (_segmentDisplayName(_selectedSegment!).isEmpty
+                                      ? context.l10n.select
+                                      : _segmentDisplayName(_selectedSegment!))
+                                  : context.l10n.select,
+                              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                color: _selectedSegment != null
+                                    ? CupertinoColors.label.resolveFrom(context)
+                                    : CupertinoColors.placeholderText.resolveFrom(context),
                               ),
+                              textAlign: TextAlign.right,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              CupertinoIcons.chevron_forward,
-                              size: 20,
-                              color: CupertinoColors.systemGrey2.resolveFrom(context),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            CupertinoIcons.chevron_forward,
+                            size: 20,
+                            color: CupertinoColors.systemGrey2.resolveFrom(context),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -624,51 +621,14 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                       child: CupertinoFormRow(
                         prefix: Text(context.l10n.specialties),
                         padding: _rowPadding,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 16.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  _getSubspecialtiesDisplayText(),
-                                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                    color: (_company?.subspecialties?.isNotEmpty ?? false)
-                                        ? CupertinoColors.label.resolveFrom(context)
-                                        : CupertinoColors.placeholderText.resolveFrom(context),
-                                  ),
-                                  textAlign: TextAlign.right,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Icon(
-                                CupertinoIcons.chevron_forward,
-                                size: 20,
-                                color: CupertinoColors.systemGrey2.resolveFrom(context),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  GestureDetector(
-                    onTap: _pickCountry,
-                    child: CupertinoFormRow(
-                      prefix: Text(context.l10n.country),
-                      padding: _rowPadding,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Expanded(
+                            Flexible(
                               child: Text(
-                                _company?.country != null
-                                    ? _getCountryName(_company!.country!)
-                                    : context.l10n.select,
+                                _getSubspecialtiesDisplayText(),
                                 style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                  color: _company?.country != null
+                                  color: (_company?.subspecialties?.isNotEmpty ?? false)
                                       ? CupertinoColors.label.resolveFrom(context)
                                       : CupertinoColors.placeholderText.resolveFrom(context),
                                 ),
@@ -684,6 +644,37 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                             ),
                           ],
                         ),
+                      ),
+                    ),
+                  GestureDetector(
+                    onTap: _pickCountry,
+                    child: CupertinoFormRow(
+                      prefix: Text(context.l10n.country),
+                      padding: _rowPadding,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              _company?.country != null
+                                  ? _getCountryName(_company!.country!)
+                                  : context.l10n.select,
+                              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                                color: _company?.country != null
+                                    ? CupertinoColors.label.resolveFrom(context)
+                                    : CupertinoColors.placeholderText.resolveFrom(context),
+                              ),
+                              textAlign: TextAlign.right,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            CupertinoIcons.chevron_forward,
+                            size: 20,
+                            color: CupertinoColors.systemGrey2.resolveFrom(context),
+                          ),
+                        ],
                       ),
                     ),
                   ),
