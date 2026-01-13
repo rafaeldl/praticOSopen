@@ -269,85 +269,67 @@ void main() {
         await Future.delayed(const Duration(seconds: 3));
         print('Order detail opened');
 
-        // Look for forms/checklist button (icon or text)
-        print('Looking for forms button (doc_text_fill icon)...');
-        final formsButton = find.byIcon(CupertinoIcons.doc_text_fill);
-        print('Found ${formsButton.evaluate().length} forms buttons');
+        // Forms are displayed inline in the order screen, scroll down to find them
+        print('Scrolling to find forms section...');
+        final orderScrollable = find.byType(CustomScrollView);
+        if (orderScrollable.evaluate().isNotEmpty) {
+          await tester.drag(orderScrollable.first, const Offset(0, -300));
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+        }
 
-        if (formsButton.evaluate().isNotEmpty) {
-          print('Tapping forms button to see forms list...');
-          await tester.tap(formsButton.first);
+        // Look for form items (they use chevron_right icon for navigation)
+        print('Looking for form items inline...');
+        final formItems = find.byIcon(CupertinoIcons.chevron_right);
+        print('Found ${formItems.evaluate().length} chevron items');
+
+        // Try to find a clickable form item (below 200px to avoid header)
+        Finder? formToTap;
+        for (var i = 0; i < formItems.evaluate().length; i++) {
+          try {
+            final itemPos = tester.getTopLeft(formItems.at(i));
+            if (itemPos.dy > 200) {
+              formToTap = formItems.at(i);
+              print('  ✅ Found form item at position: $itemPos');
+              break;
+            }
+          } catch (e) {
+            // Skip items that can't be measured
+          }
+        }
+
+        if (formToTap != null && formToTap.evaluate().isNotEmpty) {
+          print('Tapping form item to open it...');
+          await tester.tap(formToTap);
           await tester.pumpAndSettle();
           await Future.delayed(const Duration(seconds: 2));
-          print('Forms list opened');
+          print('Form opened');
 
-          // Find first form card to tap (should be a filled form)
-          print('Looking for first form card...');
-          final formCards = find.byType(CupertinoButton);
-          print('Found ${formCards.evaluate().length} buttons (potential form cards)');
-
-          // Find a button in the scrollable area (not in navigation bar)
-          Finder? firstFormCard;
-          for (var i = 0; i < formCards.evaluate().length; i++) {
-            try {
-              final buttonPos = tester.getTopLeft(formCards.at(i));
-              // Form cards should be below navigation bar (>150px from top)
-              if (buttonPos.dy > 150) {
-                firstFormCard = formCards.at(i);
-                print('  ✅ Found form card at position: $buttonPos');
-                break;
-              }
-            } catch (e) {
-              // Skip buttons that can't be measured
-            }
-          }
-
-          if (firstFormCard != null && firstFormCard.evaluate().isNotEmpty) {
-            print('Tapping first form card to open filled form...');
-            await tester.tap(firstFormCard);
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 2));
-            print('Form opened');
-
-            // Scroll down a bit to show more form content
-            final scrollable = find.byType(SingleChildScrollView);
-            if (scrollable.evaluate().isNotEmpty) {
-              print('Scrolling form to show more items...');
-              await tester.drag(scrollable.first, const Offset(0, -200));
-              await tester.pumpAndSettle();
-              await Future.delayed(const Duration(seconds: 1));
-            }
-
-            print('📸 Capturing Screenshot 6: Dynamic Forms');
-            await binding.takeScreenshot('05_forms');
-
-            // Go back three times (from form to forms list, to order detail, to home)
-            print('Navigating back to home...');
-            final nav = tester.state<NavigatorState>(find.byType(Navigator).first);
-            nav.pop(); // form to forms list
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(milliseconds: 500));
-            nav.pop(); // forms list to order
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(milliseconds: 500));
-            nav.pop(); // order to home
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 1));
-            print('✅ Back to home');
-          } else {
-            print('⚠️ No form cards found in list, skipping screenshot 6');
-            // Go back twice (from forms list to order, order to home)
-            final nav = tester.state<NavigatorState>(find.byType(Navigator).first);
-            nav.pop();
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(milliseconds: 500));
-            nav.pop();
+          // Scroll down a bit to show more form content
+          final formScrollable = find.byType(CustomScrollView);
+          if (formScrollable.evaluate().isNotEmpty) {
+            print('Scrolling form to show more items...');
+            await tester.drag(formScrollable.first, const Offset(0, -200));
             await tester.pumpAndSettle();
             await Future.delayed(const Duration(seconds: 1));
           }
+
+          print('📸 Capturing Screenshot 6: Dynamic Forms');
+          await binding.takeScreenshot('05_forms');
+
+          // Go back twice (from form to order, order to home)
+          print('Navigating back to home...');
+          final nav = tester.state<NavigatorState>(find.byType(Navigator).first);
+          nav.pop(); // form to order
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(milliseconds: 500));
+          nav.pop(); // order to home
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+          print('✅ Back to home');
         } else {
-          // If no forms button found, just go back to home
-          print('⚠️ Forms button not found, skipping screenshot 6');
+          print('⚠️ Form items not found, skipping screenshot 6');
+          // Go back from order to home
           final nav = tester.state<NavigatorState>(find.byType(Navigator).first);
           nav.pop();
           await tester.pumpAndSettle();
