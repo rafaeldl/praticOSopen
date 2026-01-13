@@ -3385,7 +3385,7 @@ abstract class AppLocalizations {
   /// No description provided for @specialties.
   ///
   /// In pt, this message translates to:
-  /// **'especialidades'**
+  /// **'Especialidades'**
   String get specialties;
 
   /// No description provided for @myCompany.

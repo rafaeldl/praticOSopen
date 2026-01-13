@@ -37,43 +37,36 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(
-              color: CupertinoColors.separator.resolveFrom(context),
-              width: 0.0,
-            ),
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 11.0),
-          child: Row(
-            children: [
-              Text(
-                label,
-                style: CupertinoTheme.of(context).textTheme.textStyle,
-              ),
-              const Spacer(),
-              Flexible(
-                child: Text(
-                  value,
-                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                    color: hasValue
-                        ? CupertinoColors.label.resolveFrom(context)
-                        : CupertinoColors.placeholderText.resolveFrom(context),
+      child: CupertinoFormRow(
+        prefix: Text(label),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 36.0),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    value,
+                    style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                      color: hasValue
+                          ? CupertinoColors.label.resolveFrom(context)
+                          : CupertinoColors.placeholderText.resolveFrom(context),
+                    ),
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  textAlign: TextAlign.right,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(width: 8),
-              Icon(
-                CupertinoIcons.chevron_forward,
-                size: 20,
-                color: CupertinoColors.systemGrey3.resolveFrom(context),
-              ),
-            ],
+                const SizedBox(width: 6),
+                Icon(
+                  CupertinoIcons.chevron_forward,
+                  size: 20,
+                  color: CupertinoColors.systemGrey3.resolveFrom(context),
+                ),
+              ],
+            ),
           ),
         ),
       ),

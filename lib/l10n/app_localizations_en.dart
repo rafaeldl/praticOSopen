@@ -1673,7 +1673,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorLoadingSegments => 'Error loading segments';
 
   @override
-  String get specialties => 'specialties';
+  String get specialties => 'Specialties';
 
   @override
   String get myCompany => 'My Company';

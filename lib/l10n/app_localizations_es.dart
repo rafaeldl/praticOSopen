@@ -1679,7 +1679,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorLoadingSegments => 'Error al cargar segmentos';
 
   @override
-  String get specialties => 'especialidades';
+  String get specialties => 'Especialidades';
 
   @override
   String get myCompany => 'Mi Empresa';
