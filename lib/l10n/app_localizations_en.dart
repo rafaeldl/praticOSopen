@@ -362,6 +362,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noData => 'No data available';
 
   @override
+  String get noValuesRegistered => 'No values registered';
+
+  @override
+  String get typeAboveToAdd => 'Type above to add';
+
+  @override
+  String get addNewValue => 'Add new value';
+
+  @override
   String get selectAtLeastOne => 'Select at least one option';
 
   @override

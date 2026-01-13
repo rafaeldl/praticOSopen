@@ -1,1 +1,1 @@
-service order,work order,management,customers,repair shop,technical service,quote,services,control,business
+service order,work order,management,customers,repair shop,technical service,quote,services
