@@ -419,21 +419,36 @@ Future<void> _performLogin(WidgetTester tester) async {
       await Future.delayed(const Duration(seconds: 1));
       print('  ✅ Keyboard dismissed');
 
-      // Tap login button (try multiple texts)
+      // Tap login button (try semantic identifier first, then texts)
       print('Step 6: Looking for login button...');
-      final loginTexts = ['Entrar', 'Login', 'Sign in', 'Iniciar sesión'];
-      Finder? loginButton;
-      for (final text in loginTexts) {
-        final finder = find.text(text);
-        print('  Searching for button with text "$text": found ${finder.evaluate().length}');
-        if (finder.evaluate().isNotEmpty) {
-          loginButton = finder;
-          print('  ✅ Found login button with text: "$text"');
-          break;
+
+      // Try semantic identifier first
+      print('  Searching by semantic identifier "email_login_button"...');
+      var loginButton = find.bySemanticsLabel('email_login_button');
+      print('  Found ${loginButton.evaluate().length} by semantic identifier');
+
+      if (loginButton.evaluate().isEmpty) {
+        // Try by button type with filled style
+        print('  Searching by CupertinoButton.filled type...');
+        loginButton = find.byType(CupertinoButton);
+        print('  Found ${loginButton.evaluate().length} CupertinoButtons');
+
+        if (loginButton.evaluate().isNotEmpty) {
+          // Filter for filled buttons (they have a background)
+          final filledButtons = loginButton.evaluate().where((element) {
+            final widget = element.widget as CupertinoButton;
+            return widget.color != null;
+          });
+          print('  Found ${filledButtons.length} filled buttons');
+          if (filledButtons.isNotEmpty) {
+            print('  ✅ Found login button by type');
+          }
         }
+      } else {
+        print('  ✅ Found login button by semantic identifier');
       }
 
-      if (loginButton != null) {
+      if (loginButton.evaluate().isNotEmpty) {
         print('Step 7: Tapping login button...');
         await tester.ensureVisible(loginButton.first);
         await tester.tap(loginButton.first);
