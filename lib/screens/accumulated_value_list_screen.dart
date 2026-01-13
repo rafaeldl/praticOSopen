@@ -138,13 +138,17 @@ class _AccumulatedValueListScreenState
   Future<void> _selectValue(String value) async {
     if (_companyId == null || _fieldType == null) return;
 
-    debugPrint('AccumulatedValueListScreen: Adding/selecting value: $value');
+    // Trim whitespace from value
+    final trimmedValue = value.trim();
+    if (trimmedValue.isEmpty) return;
+
+    debugPrint('AccumulatedValueListScreen: Adding/selecting value: $trimmedValue');
 
     // Record usage (create or increment)
     final valueId = await _repo.use(
       _companyId!,
       _fieldType!,
-      value,
+      trimmedValue,
       group: _group,
     );
 
@@ -153,16 +157,16 @@ class _AccumulatedValueListScreenState
     if (_multiSelect) {
       // Multi-select: toggle selection and update UI
       setState(() {
-        if (_selectedValues.contains(value)) {
-          _selectedValues.remove(value);
+        if (_selectedValues.contains(trimmedValue)) {
+          _selectedValues.remove(trimmedValue);
         } else {
-          _selectedValues.add(value);
+          _selectedValues.add(trimmedValue);
         }
       });
     } else {
       // Single select: close immediately
       if (mounted) {
-        Navigator.pop(context, value);
+        Navigator.pop(context, trimmedValue);
       }
     }
   }

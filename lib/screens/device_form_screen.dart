@@ -181,32 +181,6 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.basicInfo.toUpperCase()),
                 children: [
-                  // Category Field
-                  CupertinoListTile(
-                    title: SizedBox(
-                      width: 100,
-                      child: Text(
-                        context.l10n.deviceCategory,
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    additionalInfo: Text(
-                      _device?.category ?? context.l10n.select,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _device?.category != null
-                            ? CupertinoColors.label.resolveFrom(context)
-                            : CupertinoColors.placeholderText.resolveFrom(context),
-                      ),
-                    ),
-                    trailing: Icon(
-                      CupertinoIcons.chevron_right,
-                      size: 20,
-                      color: CupertinoColors.systemGrey.resolveFrom(context),
-                    ),
-                    onTap: () => _selectCategory(context),
-                  ),
-
                   // Brand/Manufacturer Field
                   CupertinoListTile(
                     title: SizedBox(
@@ -275,26 +249,6 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     );
   }
 
-  Future<void> _selectCategory(BuildContext context) async {
-    final value = await Navigator.pushNamed(
-      context,
-      '/accumulated_value_list',
-      arguments: {
-        'fieldType': 'deviceCategory',
-        'title': context.l10n.deviceCategory,
-        'currentValue': _device?.category,
-      },
-    );
-
-    if (value != null && value is String) {
-      setState(() {
-        _device?.category = value;
-        // Clear model when category changes (group will be different)
-        _device?.name = null;
-      });
-    }
-  }
-
   Future<void> _selectBrand(BuildContext context, SegmentConfigProvider config) async {
     final value = await Navigator.pushNamed(
       context,
@@ -323,7 +277,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         'fieldType': 'deviceModel',
         'title': config.label(LabelKeys.deviceModel),
         'currentValue': _device?.name,
-        'group': [_device?.category, _device?.manufacturer],
+        'group': _device?.manufacturer,
       },
     );
 

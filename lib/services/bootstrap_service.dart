@@ -326,7 +326,6 @@ class BootstrapService {
       final device = Device()
         ..name = name
         ..manufacturer = _localizedString(deviceData['manufacturer'], locale)
-        ..category = _localizedString(deviceData['category'], locale)
         ..company = Global.companyAggr
         ..createdAt = DateTime.now()
         ..createdBy = userAggr
