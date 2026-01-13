@@ -131,34 +131,75 @@ platform :android do
   desc "Capture screenshots automatically using Flutter integration tests"
   lane :screenshots do |options|
     device = options[:device] || "emulator-5554"
+    locale = options[:locale] || "pt-BR"
     force_logout = options[:force_logout]
-    
+
     capture_screenshots_for_device(
       device: device,
       folder_name: "phoneScreenshots",
+      locale: locale,
       force_logout: force_logout
     )
   end
 
-  desc "Capture screenshots for Phone, 7-inch Tablet, and 10-inch Tablet"
+  desc "Capture screenshots for all locales and all device types"
   lane :screenshots_all do |options|
     # Default emulator names (usually 5554=Phone, 5556=7", 5558=10" if launched in that order)
     phone_device = options[:phone_device] || "emulator-5554"
     tablet7_device = options[:tablet7_device] || "emulator-5556"
     tablet10_device = options[:tablet10_device] || "emulator-5558"
-    
+
     force_logout = options[:force_logout]
+    locales = ["pt-BR", "en-US", "es-ES"]
 
     UI.important("⚠️  Ensure you have 3 emulators running!")
     UI.message("   📱 Phone: #{phone_device}")
     UI.message("   📟 Tablet 7\": #{tablet7_device}")
     UI.message("   💻 Tablet 10\": #{tablet10_device}")
-    UI.message("   (If your IDs are different, pass them like: tablet10_device:'emulator-5560')")
+
+    locales.each do |locale|
+      UI.message("🌍 Generating screenshots for locale: #{locale}")
+
+      # Phone
+      capture_screenshots_for_device(
+        device: phone_device,
+        folder_name: "phoneScreenshots",
+        locale: locale,
+        force_logout: force_logout
+      )
+
+      # 7-inch Tablet
+      capture_screenshots_for_device(
+        device: tablet7_device,
+        folder_name: "sevenInchScreenshots",
+        locale: locale,
+        force_logout: force_logout
+      )
+
+      # 10-inch Tablet
+      capture_screenshots_for_device(
+        device: tablet10_device,
+        folder_name: "tenInchScreenshots",
+        locale: locale,
+        force_logout: force_logout
+      )
+    end
+
+    UI.success("✅ All screenshots generated for #{locales.length} locales!")
+  end
+
+  desc "Capture screenshots only for pt-BR (backwards compatibility)"
+  lane :screenshots_pt_br do |options|
+    phone_device = options[:phone_device] || "emulator-5554"
+    tablet7_device = options[:tablet7_device] || "emulator-5556"
+    tablet10_device = options[:tablet10_device] || "emulator-5558"
+    force_logout = options[:force_logout]
 
     # Phone
     capture_screenshots_for_device(
       device: phone_device,
       folder_name: "phoneScreenshots",
+      locale: "pt-BR",
       force_logout: force_logout
     )
 
@@ -166,6 +207,7 @@ platform :android do
     capture_screenshots_for_device(
       device: tablet7_device,
       folder_name: "sevenInchScreenshots",
+      locale: "pt-BR",
       force_logout: force_logout
     )
 
@@ -173,18 +215,19 @@ platform :android do
     capture_screenshots_for_device(
       device: tablet10_device,
       folder_name: "tenInchScreenshots",
+      locale: "pt-BR",
       force_logout: force_logout
     )
   end
-  
-  # Helper function to run the screenshot process
-  def capture_screenshots_for_device(device:, folder_name:, force_logout:)
-    UI.message("📸 Capturing screenshots for #{folder_name} on device: #{device}")
 
-    # Define o diretório baseado no tipo (folder_name)
-    base_screenshots_dir = "fastlane/metadata/android/pt-BR/images"
+  # Helper function to run the screenshot process
+  def capture_screenshots_for_device(device:, folder_name:, locale:, force_logout:)
+    UI.message("📸 Capturing screenshots for #{folder_name} on device: #{device}, locale: #{locale}")
+
+    # Define o diretório baseado no tipo (folder_name) e locale
+    base_screenshots_dir = "fastlane/metadata/android/#{locale}/images"
     target_dir = "#{base_screenshots_dir}/#{folder_name}"
-    
+
     # Limpa screenshots anteriores desse tipo
     FileUtils.rm_rf(Dir.glob("#{target_dir}/*.png"))
     FileUtils.mkdir_p(target_dir)
@@ -192,30 +235,32 @@ platform :android do
     # Executa o teste de integração Flutter
     Dir.chdir("..") do
       ENV['FLUTTER_TEST_PLATFORM'] = 'android'
+      ENV['TEST_LOCALE'] = locale
       # Passa o diretório de destino para o driver Dart via variável de ambiente
       ENV['SCREENSHOT_DIR'] = "android/#{target_dir}"
-      
+
       command_args = [
         "fvm", "flutter", "drive",
         "--driver=test_driver/integration_test.dart",
         "--target=integration_test/screenshot_test.dart",
+        "--dart-define=TEST_LOCALE=#{locale}",
         "-d", device
       ]
-      
+
       if force_logout
         command_args << "--dart-define=FORCE_LOGOUT=#{force_logout}"
       end
-      
+
       begin
         sh(*command_args)
       rescue => ex
-        UI.error("❌ Error capturing screenshots for #{folder_name} on #{device}: #{ex}")
+        UI.error("❌ Error capturing screenshots for #{folder_name} on #{device} (#{locale}): #{ex}")
         # Não para o processo inteiro se um falhar, mas avisa
       end
     end
 
     # Lista screenshots capturadas
     screenshots = Dir.glob("#{target_dir}/*.png")
-    UI.success("✅ Captured #{screenshots.length} screenshots for #{folder_name}")
+    UI.success("✅ Captured #{screenshots.length} screenshots for #{folder_name} (#{locale})")
   end
 end

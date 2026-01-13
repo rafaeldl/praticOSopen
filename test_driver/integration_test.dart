@@ -2,18 +2,22 @@ import 'dart:io';
 import 'package:integration_test/integration_test_driver_extended.dart';
 
 Future<void> main() async {
+  // Get locale from environment (default: pt-BR)
+  final locale = Platform.environment['TEST_LOCALE'] ?? 'pt-BR';
+  print('🌍 Test locale: $locale');
+
   // Detecta a plataforma baseado no device conectado
   final isAndroid = Platform.environment['FLUTTER_TEST_PLATFORM'] == 'android' ||
       !Platform.environment.containsKey('FLUTTER_TEST_PLATFORM');
 
-  // Define o diretório de destino baseado na plataforma
+  // Define o diretório de destino baseado na plataforma e locale
   final String screenshotDir;
   if (Platform.environment.containsKey('SCREENSHOT_DIR')) {
     screenshotDir = Platform.environment['SCREENSHOT_DIR']!;
   } else if (isAndroid) {
-    screenshotDir = 'android/fastlane/metadata/android/pt-BR/images/phoneScreenshots';
+    screenshotDir = 'android/fastlane/metadata/android/$locale/images/phoneScreenshots';
   } else {
-    screenshotDir = 'ios/fastlane/screenshots/pt-BR';
+    screenshotDir = 'ios/fastlane/screenshots/$locale';
   }
 
   print('📸 Screenshots will be saved to: $screenshotDir');
@@ -23,10 +27,10 @@ Future<void> main() async {
     '1_login': '00_Login',
     '2_home': '01_Home',
     '3_order_detail': '02_OrderDetail',
-    '4_dashboard': '03_Dashboard',
-    '5_customers': '04_Customers',
-    '6_customer_detail': '05_CustomerDetail',
-    '7_settings': '06_Settings',
+    '4_order_form': '03_OrderForm',
+    '5_forms': '04_Forms',
+    '6_collaborators': '05_Collaborators',
+    '7_dashboard': '06_Dashboard',
   };
 
   await integrationDriver(
