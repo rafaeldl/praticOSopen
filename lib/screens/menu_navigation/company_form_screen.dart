@@ -27,8 +27,58 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
   Company? _company;
   Map<String, dynamic>? _selectedSegment;
 
-  // Padding vertical para garantir altura consistente entre todos os campos
-  static const EdgeInsets _rowPadding = EdgeInsets.symmetric(vertical: 11.0);
+  // Widget auxiliar para criar rows clicáveis com mesmo estilo dos text fields
+  Widget _buildSelectableRow({
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+    required bool hasValue,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: CupertinoColors.separator.resolveFrom(context),
+              width: 0.0,
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 11.0),
+          child: Row(
+            children: [
+              Text(
+                label,
+                style: CupertinoTheme.of(context).textTheme.textStyle,
+              ),
+              const Spacer(),
+              Flexible(
+                child: Text(
+                  value,
+                  style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                    color: hasValue
+                        ? CupertinoColors.label.resolveFrom(context)
+                        : CupertinoColors.placeholderText.resolveFrom(context),
+                  ),
+                  textAlign: TextAlign.right,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                CupertinoIcons.chevron_forward,
+                size: 20,
+                color: CupertinoColors.systemGrey3.resolveFrom(context),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   String _currentLocaleTag(BuildContext context) {
     final locale = Localizations.localeOf(context);
@@ -579,104 +629,32 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     onSaved: (val) => _company?.name = val,
                     validator: (val) => val == null || val.isEmpty ? context.l10n.required : null,
                   ),
-                  GestureDetector(
+                  _buildSelectableRow(
+                    label: context.l10n.segment,
+                    value: _selectedSegment != null
+                        ? (_segmentDisplayName(_selectedSegment!).isEmpty
+                            ? context.l10n.select
+                            : _segmentDisplayName(_selectedSegment!))
+                        : context.l10n.select,
                     onTap: _pickSegment,
-                    child: CupertinoFormRow(
-                      prefix: Text(context.l10n.segment),
-                      padding: _rowPadding,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              _selectedSegment != null
-                                  ? (_segmentDisplayName(_selectedSegment!).isEmpty
-                                      ? context.l10n.select
-                                      : _segmentDisplayName(_selectedSegment!))
-                                  : context.l10n.select,
-                              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                color: _selectedSegment != null
-                                    ? CupertinoColors.label.resolveFrom(context)
-                                    : CupertinoColors.placeholderText.resolveFrom(context),
-                              ),
-                              textAlign: TextAlign.right,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            CupertinoIcons.chevron_forward,
-                            size: 20,
-                            color: CupertinoColors.systemGrey2.resolveFrom(context),
-                          ),
-                        ],
-                      ),
-                    ),
+                    hasValue: _selectedSegment != null && _segmentDisplayName(_selectedSegment!).isNotEmpty,
                   ),
                   // Campo de subspecialidades (só aparece se o segmento tem subspecialties)
                   if (_selectedSegment != null &&
                       (_selectedSegment!['subspecialties'] as List?)?.isNotEmpty == true)
-                    GestureDetector(
+                    _buildSelectableRow(
+                      label: context.l10n.specialties,
+                      value: _getSubspecialtiesDisplayText(),
                       onTap: _pickSubspecialties,
-                      child: CupertinoFormRow(
-                        prefix: Text(context.l10n.specialties),
-                        padding: _rowPadding,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                _getSubspecialtiesDisplayText(),
-                                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                  color: (_company?.subspecialties?.isNotEmpty ?? false)
-                                      ? CupertinoColors.label.resolveFrom(context)
-                                      : CupertinoColors.placeholderText.resolveFrom(context),
-                                ),
-                                textAlign: TextAlign.right,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              CupertinoIcons.chevron_forward,
-                              size: 20,
-                              color: CupertinoColors.systemGrey2.resolveFrom(context),
-                            ),
-                          ],
-                        ),
-                      ),
+                      hasValue: _company?.subspecialties?.isNotEmpty ?? false,
                     ),
-                  GestureDetector(
+                  _buildSelectableRow(
+                    label: context.l10n.country,
+                    value: _company?.country != null
+                        ? _getCountryName(_company!.country!)
+                        : context.l10n.select,
                     onTap: _pickCountry,
-                    child: CupertinoFormRow(
-                      prefix: Text(context.l10n.country),
-                      padding: _rowPadding,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              _company?.country != null
-                                  ? _getCountryName(_company!.country!)
-                                  : context.l10n.select,
-                              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                color: _company?.country != null
-                                    ? CupertinoColors.label.resolveFrom(context)
-                                    : CupertinoColors.placeholderText.resolveFrom(context),
-                              ),
-                              textAlign: TextAlign.right,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            CupertinoIcons.chevron_forward,
-                            size: 20,
-                            color: CupertinoColors.systemGrey2.resolveFrom(context),
-                          ),
-                        ],
-                      ),
-                    ),
+                    hasValue: _company?.country != null,
                   ),
                   CupertinoTextFormFieldRow(
                     prefix: Text(context.l10n.email),
