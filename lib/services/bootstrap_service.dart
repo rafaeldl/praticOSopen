@@ -11,6 +11,7 @@ import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
+import 'package:praticos/services/forms_service.dart';
 
 /// Resultado da execução do bootstrap
 class BootstrapResult {
@@ -75,6 +76,7 @@ class BootstrapService {
   final DeviceRepositoryV2 _deviceRepo = DeviceRepositoryV2();
   final CustomerRepositoryV2 _customerRepo = CustomerRepositoryV2();
   final OrderRepositoryV2 _orderRepo = OrderRepositoryV2();
+  final FormsService _formsService = FormsService();
 
   /// Extrai string localizada de um valor que pode ser:
   /// - String simples: retorna diretamente
@@ -603,6 +605,23 @@ class BootstrapService {
 
         await _orderRepo.createItem(companyId, order);
         created.add('OS #${i + 1} - ${customer.name} - $status');
+
+        // Add a form to the first order (for screenshots)
+        if (i == 0 && order.id != null) {
+          try {
+            final templates = await _formsService.getCompanyTemplates(companyId);
+            if (templates.isNotEmpty) {
+              await _formsService.addFormToOrder(
+                companyId,
+                order.id!,
+                templates.first,
+              );
+              print('✅ Added form "${templates.first.title}" to order #1');
+            }
+          } catch (e) {
+            print('⚠️ Could not add form to order: $e');
+          }
+        }
       }
     } catch (e) {
       print('Error creating sample orders: $e');
