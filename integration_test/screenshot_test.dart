@@ -125,32 +125,9 @@ void main() {
         await Future.delayed(const Duration(seconds: 3));
         print('Dashboard opened');
 
-        // Select "Ano" (Year) filter
-        print('Looking for Year filter...');
-        final yearText = _findTextByLocale(locale, 'year');
-        print('Year text for locale: "$yearText"');
-        final yearButton = find.text(yearText);
-        print('Found ${yearButton.evaluate().length} year buttons');
-
-        if (yearButton.evaluate().isNotEmpty) {
-          print('Tapping year filter...');
-          await tester.tap(yearButton);
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 1));
-
-          // Go back to previous year (2025)
-          print('Looking for back chevron to navigate to 2025...');
-          final backChevron = find.byIcon(CupertinoIcons.chevron_left);
-          print('Found ${backChevron.evaluate().length} back chevrons');
-
-          if (backChevron.evaluate().isNotEmpty) {
-            print('Tapping back chevron...');
-            await tester.tap(backChevron.first);
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 2));
-            print('Navigated to 2025');
-          }
-        }
+        // Dashboard now has current data, no need to change year
+        print('Waiting for dashboard to load data...');
+        await Future.delayed(const Duration(seconds: 2));
 
         print('📸 Capturing Screenshot 3: Dashboard');
         await binding.takeScreenshot('02_dashboard');
