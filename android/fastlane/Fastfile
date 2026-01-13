@@ -150,6 +150,7 @@ platform :android do
     tablet10_device = options[:tablet10_device] || "emulator-5558"
 
     force_logout = options[:force_logout]
+    parallel = options[:parallel] != false  # Default: true
     locales = ["pt-BR", "en-US", "es-ES"]
 
     UI.important("⚠️  Ensure you have 3 emulators running!")
@@ -160,29 +161,57 @@ platform :android do
     locales.each do |locale|
       UI.message("🌍 Generating screenshots for locale: #{locale}")
 
-      # Phone
-      capture_screenshots_for_device(
-        device: phone_device,
-        folder_name: "phoneScreenshots",
-        locale: locale,
-        force_logout: force_logout
-      )
+      if parallel
+        UI.important("⚡ Running devices in PARALLEL mode")
 
-      # 7-inch Tablet
-      capture_screenshots_for_device(
-        device: tablet7_device,
-        folder_name: "sevenInchScreenshots",
-        locale: locale,
-        force_logout: force_logout
-      )
+        # Define device configurations
+        device_configs = [
+          { device: phone_device, folder: "phoneScreenshots" },
+          { device: tablet7_device, folder: "sevenInchScreenshots" },
+          { device: tablet10_device, folder: "tenInchScreenshots" }
+        ]
 
-      # 10-inch Tablet
-      capture_screenshots_for_device(
-        device: tablet10_device,
-        folder_name: "tenInchScreenshots",
-        locale: locale,
-        force_logout: force_logout
-      )
+        # Run devices in parallel using threads
+        threads = device_configs.map do |config|
+          Thread.new do
+            capture_screenshots_for_device(
+              device: config[:device],
+              folder_name: config[:folder],
+              locale: locale,
+              force_logout: force_logout
+            )
+          end
+        end
+
+        # Wait for all threads to complete
+        threads.each(&:join)
+      else
+        UI.message("🐌 Running devices in SEQUENTIAL mode")
+
+        # Phone
+        capture_screenshots_for_device(
+          device: phone_device,
+          folder_name: "phoneScreenshots",
+          locale: locale,
+          force_logout: force_logout
+        )
+
+        # 7-inch Tablet
+        capture_screenshots_for_device(
+          device: tablet7_device,
+          folder_name: "sevenInchScreenshots",
+          locale: locale,
+          force_logout: force_logout
+        )
+
+        # 10-inch Tablet
+        capture_screenshots_for_device(
+          device: tablet10_device,
+          folder_name: "tenInchScreenshots",
+          locale: locale,
+          force_logout: force_logout
+        )
+      end
     end
 
     UI.success("✅ All screenshots generated for #{locales.length} locales!")

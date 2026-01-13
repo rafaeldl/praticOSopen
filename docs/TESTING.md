@@ -85,8 +85,15 @@ bundle exec fastlane screenshots locale:"pt-BR" device:"iPhone 16e"
 ```bash
 cd ios
 bundle exec fastlane screenshots_all
+# Default: modo PARALELO (mais rápido)
 ```
 **Resultado:** 42 screenshots (3 idiomas × 2 dispositivos × 7 telas)
+
+#### Modo sequencial (se tiver problemas com paralelo)
+```bash
+cd ios
+bundle exec fastlane screenshots_all parallel:false
+```
 
 #### Apenas pt-BR (backwards compatibility)
 ```bash
@@ -112,6 +119,7 @@ bundle exec fastlane screenshots locale:"pt-BR" device:"emulator-5554"
 ```bash
 cd android
 bundle exec fastlane screenshots_all
+# Default: modo PARALELO (mais rápido)
 ```
 **Resultado:** 63 screenshots (3 idiomas × 3 tipos de dispositivo × 7 telas)
 
@@ -119,6 +127,12 @@ bundle exec fastlane screenshots_all
 - `emulator-5554` - Phone (padrão)
 - `emulator-5556` - Tablet 7"
 - `emulator-5558` - Tablet 10"
+
+#### Modo sequencial (se tiver problemas com paralelo)
+```bash
+cd android
+bundle exec fastlane screenshots_all parallel:false
+```
 
 #### Apenas pt-BR (backwards compatibility)
 ```bash
@@ -401,12 +415,16 @@ jobs:
 
 ### Tempo Estimado de Execução
 
-| Plataforma | Dispositivo | Idioma | Tempo |
-|------------|-------------|--------|-------|
-| iOS | iPhone 16e | 1 idioma | ~3 min |
-| iOS | Todos | Todos idiomas | ~18 min |
-| Android | Phone | 1 idioma | ~4 min |
-| Android | Todos | Todos idiomas | ~36 min |
+| Plataforma | Modo | Dispositivos | Idiomas | Tempo |
+|------------|------|--------------|---------|-------|
+| iOS | Single | 1 dispositivo | 1 idioma | ~3.5 min |
+| iOS | Sequential | 2 dispositivos | 3 idiomas | ~21 min |
+| iOS | **Parallel** ⚡ | 2 dispositivos | 3 idiomas | **~11 min** |
+| Android | Single | 1 dispositivo | 1 idioma | ~4 min |
+| Android | Sequential | 3 dispositivos | 3 idiomas | ~36 min |
+| Android | **Parallel** ⚡ | 3 dispositivos | 3 idiomas | **~12 min** |
+
+**Parallel Mode:** Roda múltiplos dispositivos simultaneamente (requer mais RAM/CPU).
 
 ### Tamanho dos Screenshots
 
@@ -426,6 +444,12 @@ jobs:
 ---
 
 ## Changelog
+
+### v1.2.0 (2026-01-13)
+- ⚡ **Paralelização**: Modo paralelo por padrão (reduz tempo de 21min → 11min no iOS)
+- 🔄 **Auto-reset**: Simuladores iOS resetados automaticamente antes de cada teste
+- 🎯 **Clean state**: Garante que testes sempre começam na tela de login
+- 📝 Documentação atualizada com novos tempos e comandos
 
 ### v1.1.0 (2026-01-13)
 - ✨ Adicionado suporte multi-idioma (pt-BR, en-US, es-ES)

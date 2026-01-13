@@ -217,14 +217,32 @@ platform :ios do
   desc "Gera screenshots para todos dispositivos e idiomas"
   lane :screenshots_all do |options|
     force_logout = options[:force_logout]
+    parallel = options[:parallel] != false  # Default: true
     locales = ["pt-BR", "en-US", "es-ES"]
     devices = ["iPhone 16e", "iPhone 17"]
 
     locales.each do |locale|
       UI.message("🌍 Generating screenshots for locale: #{locale}")
 
-      devices.each do |device|
-        capture_ios_screenshots(device: device, locale: locale, force_logout: force_logout)
+      if parallel
+        UI.important("⚡ Running devices in PARALLEL mode")
+
+        # Run devices in parallel using threads
+        threads = devices.map do |device|
+          Thread.new do
+            capture_ios_screenshots(device: device, locale: locale, force_logout: force_logout)
+          end
+        end
+
+        # Wait for all threads to complete
+        threads.each(&:join)
+      else
+        UI.message("🐌 Running devices in SEQUENTIAL mode")
+
+        # Run devices sequentially (original behavior)
+        devices.each do |device|
+          capture_ios_screenshots(device: device, locale: locale, force_logout: force_logout)
+        end
       end
     end
 
