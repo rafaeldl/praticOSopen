@@ -33,9 +33,32 @@ class SelectSegmentScreen extends StatefulWidget {
 }
 
 class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
+  /// Obtém o nome localizado do segmento baseado no locale do dispositivo
+  String _getLocalizedName(Map<String, dynamic> segmentData) {
+    final locale = Localizations.localeOf(context);
+    final localeTag = '${locale.languageCode}-${locale.countryCode ?? locale.languageCode.toUpperCase()}';
+
+    final nameI18n = segmentData['nameI18n'] as Map<String, dynamic>?;
+    if (nameI18n != null) {
+      // Tenta o locale completo (ex: pt-BR)
+      if (nameI18n.containsKey(localeTag)) {
+        return nameI18n[localeTag] as String;
+      }
+      // Tenta só o idioma (ex: pt)
+      final languageOnly = locale.languageCode;
+      final fallbackKey = nameI18n.keys.firstWhere(
+        (key) => key.startsWith(languageOnly),
+        orElse: () => 'en-US',
+      );
+      return nameI18n[fallbackKey] as String? ?? segmentData['name'] as String? ?? 'No name';
+    }
+
+    return segmentData['name'] as String? ?? 'No name';
+  }
+
   void _onSegmentTap(String segmentId, Map<String, dynamic> segmentData) {
     final subspecialties = segmentData['subspecialties'] as List?;
-    final segmentName = segmentData['name'] as String? ?? 'Sem nome';
+    final segmentName = _getLocalizedName(segmentData);
 
     if (subspecialties != null && subspecialties.isNotEmpty) {
       // Segmento tem subspecialties -> navegar para seleção de subspecialties
@@ -188,7 +211,7 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
                                   .copyWith(fontSize: 24),
                             ),
                             title: Text(
-                              segment['name'] ?? 'Sem nome',
+                              _getLocalizedName(segment),
                               style: CupertinoTheme.of(context)
                                   .textTheme
                                   .textStyle

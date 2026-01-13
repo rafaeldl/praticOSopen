@@ -72,6 +72,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get search => 'Buscar';
 
   @override
+  String get searchOrAddNew => 'Buscar o añadir nuevo';
+
+  @override
   String get filter => 'Filtrar';
 
   @override
@@ -133,6 +136,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reset => 'Restablecer';
+
+  @override
+  String get basicInfo => 'Información Básica';
 
   @override
   String get apply => 'Aplicar';
@@ -334,6 +340,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get invalidDate => 'Fecha inválida';
+
+  @override
+  String get invalidFormat => 'Formato inválido';
+
+  @override
+  String get minimum => 'Mínimo';
+
+  @override
+  String get maximum => 'Máximo';
+
+  @override
+  String get characters => 'caracteres';
 
   @override
   String get selectOption => 'Seleccione una opción';
@@ -707,6 +725,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get device => 'Equipo';
+
+  @override
+  String get deviceCategory => 'Categoría';
 
   @override
   String get newDevice => 'Nuevo Equipo';
@@ -1658,7 +1679,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get errorLoadingSegments => 'Error al cargar segmentos';
 
   @override
-  String get specialties => 'especialidades';
+  String get specialties => 'Especialidades';
 
   @override
   String get myCompany => 'Mi Empresa';
@@ -1894,7 +1915,64 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pendingPayment => 'Pendiente';
 
   @override
+  String get selectCountry => 'Seleccionar País';
+
+  @override
   String get chooseCompanySegment => 'Elija el ramo de actividad de la empresa';
+
+  @override
+  String get contacts => 'Contactos';
+
+  @override
+  String get contactMethods => 'Medios de Contacto';
+
+  @override
+  String get howCustomersCanReachYou =>
+      '¿Cómo pueden sus clientes contactarlo?';
+
+  @override
+  String get preparing => 'Preparando...';
+
+  @override
+  String get uploadingLogo => 'Subiendo logo...';
+
+  @override
+  String get creatingCompany => 'Creando empresa...';
+
+  @override
+  String get importingForms => 'Importando formularios...';
+
+  @override
+  String get creatingSampleData => 'Creando datos de ejemplo...';
+
+  @override
+  String get createSampleDataQuestion => '¿Crear datos de ejemplo?';
+
+  @override
+  String get sampleDataDescription =>
+      'Podemos crear algunos datos de ejemplo para que comience a usar el sistema inmediatamente:';
+
+  @override
+  String get commonServicesForSegment => 'Servicios comunes de su segmento';
+
+  @override
+  String get mostUsedProducts => 'Productos y piezas más utilizados';
+
+  @override
+  String get sampleEquipment => 'Equipos de ejemplo';
+
+  @override
+  String get sampleForms => 'Formularios de inspección';
+
+  @override
+  String get demoCustomer => 'Cliente de demostración';
+
+  @override
+  String get canEditOrDeleteAnytime =>
+      'Puede editar o eliminar estos datos en cualquier momento.';
+
+  @override
+  String get noStartFromScratch => 'No, comenzar desde cero';
 
   @override
   String get changeLogo => 'Cambiar Logo';

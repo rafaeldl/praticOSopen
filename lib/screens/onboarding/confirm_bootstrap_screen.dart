@@ -76,7 +76,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
     setState(() {
       _isCreating = true;
-      _statusMessage = 'Preparando...';
+      _statusMessage = context.l10n.preparing;
     });
 
     try {
@@ -88,13 +88,13 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
           widget.companyId ?? db.collection('companies').doc().id;
 
       // Upload da logo
-      setState(() => _statusMessage = 'Enviando logo...');
+      setState(() => _statusMessage = context.l10n.uploadingLogo);
       String? logoUrl;
       if (widget.logoFile != null) {
         logoUrl = await _uploadLogo(targetCompanyId);
       }
 
-      setState(() => _statusMessage = 'Criando empresa...');
+      setState(() => _statusMessage = context.l10n.creatingCompany);
 
       if (widget.companyId != null) {
         // ATUALIZAR empresa existente
@@ -125,7 +125,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         await companyStore.updateCompany(existingCompany);
 
-        setState(() => _statusMessage = 'Importando formulários...');
+        setState(() => _statusMessage = context.l10n.importingForms);
         final bootstrapService = BootstrapService();
         await bootstrapService.syncCompanyFormsFromSegment(
           companyId: targetCompanyId,
@@ -136,7 +136,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         // Bootstrap se solicitado
         if (runBootstrap) {
-          setState(() => _statusMessage = 'Criando dados de exemplo...');
+          setState(() => _statusMessage = context.l10n.creatingSampleData);
           await bootstrapService.executeBootstrap(
             companyId: targetCompanyId,
             segmentId: widget.segmentId,
@@ -175,7 +175,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         await userStore.createCompanyForUser(company);
 
-        setState(() => _statusMessage = 'Importando formulários...');
+        setState(() => _statusMessage = context.l10n.importingForms);
         final bootstrapService = BootstrapService();
         await bootstrapService.syncCompanyFormsFromSegment(
           companyId: targetCompanyId,
@@ -186,7 +186,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         // Bootstrap se solicitado
         if (runBootstrap) {
-          setState(() => _statusMessage = 'Criando dados de exemplo...');
+          setState(() => _statusMessage = context.l10n.creatingSampleData);
           await bootstrapService.executeBootstrap(
             companyId: targetCompanyId,
             segmentId: widget.segmentId,
@@ -264,7 +264,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        'Deseja criar dados de exemplo?',
+                        context.l10n.createSampleDataQuestion,
                         style: CupertinoTheme.of(context)
                             .textTheme
                             .navLargeTitleTextStyle
@@ -273,7 +273,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Podemos criar alguns dados de exemplo para você começar a usar o sistema imediatamente:',
+                        context.l10n.sampleDataDescription,
                         textAlign: TextAlign.center,
                         style: CupertinoTheme.of(context)
                             .textTheme
@@ -300,25 +300,31 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                             _buildBenefitRow(
                               context,
                               CupertinoIcons.wrench,
-                              'Serviços comuns do seu segmento',
+                              context.l10n.commonServicesForSegment,
                             ),
                             const SizedBox(height: 12),
                             _buildBenefitRow(
                               context,
                               CupertinoIcons.cube_box,
-                              'Produtos e peças mais utilizados',
+                              context.l10n.mostUsedProducts,
                             ),
                             const SizedBox(height: 12),
                             _buildBenefitRow(
                               context,
                               CupertinoIcons.device_phone_portrait,
-                              'Equipamentos de exemplo',
+                              context.l10n.sampleEquipment,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildBenefitRow(
+                              context,
+                              CupertinoIcons.doc_text,
+                              context.l10n.sampleForms,
                             ),
                             const SizedBox(height: 12),
                             _buildBenefitRow(
                               context,
                               CupertinoIcons.person,
-                              'Cliente de demonstração',
+                              context.l10n.demoCustomer,
                             ),
                           ],
                         ),
@@ -327,7 +333,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                       const SizedBox(height: 16),
 
                       Text(
-                        'Você poderá editar ou excluir esses dados a qualquer momento.',
+                        context.l10n.canEditOrDeleteAnytime,
                         textAlign: TextAlign.center,
                         style: CupertinoTheme.of(context)
                             .textTheme
@@ -358,7 +364,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                         child: CupertinoButton(
                           onPressed: () => _saveCompany(runBootstrap: false),
                           child: Text(
-                            'Não, começar do zero',
+                            context.l10n.noStartFromScratch,
                             style: TextStyle(
                               color: CupertinoColors.secondaryLabel
                                   .resolveFrom(context),

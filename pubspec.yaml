@@ -11,7 +11,7 @@ description: PraticOS - Gestão de ordem de serviços
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.6.0+25
+version: 1.8.0+28
 
 environment:
   sdk: '>=3.8.0 <4.0.0'
@@ -61,6 +61,7 @@ dependencies:
   share_plus: ^11.0.0
   currency_text_input_formatter: ^2.1.8
   easy_mask: ^2.0.1
+  phone_numbers_parser: ^9.0.18
   package_info_plus: ^8.3.0
   printing: ^5.14.2
   provider: ^6.1.1

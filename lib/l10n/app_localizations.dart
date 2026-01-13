@@ -226,6 +226,12 @@ abstract class AppLocalizations {
   /// **'Buscar'**
   String get search;
 
+  /// No description provided for @searchOrAddNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar ou adicionar novo'**
+  String get searchOrAddNew;
+
   /// No description provided for @filter.
   ///
   /// In pt, this message translates to:
@@ -351,6 +357,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Redefinir'**
   String get reset;
+
+  /// No description provided for @basicInfo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informações Básicas'**
+  String get basicInfo;
 
   /// No description provided for @apply.
   ///
@@ -747,6 +759,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Data inválida'**
   String get invalidDate;
+
+  /// No description provided for @invalidFormat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Formato inválido'**
+  String get invalidFormat;
+
+  /// No description provided for @minimum.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mínimo'**
+  String get minimum;
+
+  /// No description provided for @maximum.
+  ///
+  /// In pt, this message translates to:
+  /// **'Máximo'**
+  String get maximum;
+
+  /// No description provided for @characters.
+  ///
+  /// In pt, this message translates to:
+  /// **'caracteres'**
+  String get characters;
 
   /// No description provided for @selectOption.
   ///
@@ -1479,6 +1515,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Equipamento'**
   String get device;
+
+  /// No description provided for @deviceCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Categoria'**
+  String get deviceCategory;
 
   /// No description provided for @newDevice.
   ///
@@ -3343,7 +3385,7 @@ abstract class AppLocalizations {
   /// No description provided for @specialties.
   ///
   /// In pt, this message translates to:
-  /// **'especialidades'**
+  /// **'Especialidades'**
   String get specialties;
 
   /// No description provided for @myCompany.
@@ -3790,11 +3832,119 @@ abstract class AppLocalizations {
   /// **'Pendente'**
   String get pendingPayment;
 
+  /// No description provided for @selectCountry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecionar País'**
+  String get selectCountry;
+
   /// No description provided for @chooseCompanySegment.
   ///
   /// In pt, this message translates to:
   /// **'Escolha o ramo de atuação da empresa'**
   String get chooseCompanySegment;
+
+  /// No description provided for @contacts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contatos'**
+  String get contacts;
+
+  /// No description provided for @contactMethods.
+  ///
+  /// In pt, this message translates to:
+  /// **'Meios de Contato'**
+  String get contactMethods;
+
+  /// No description provided for @howCustomersCanReachYou.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como seus clientes podem falar com você?'**
+  String get howCustomersCanReachYou;
+
+  /// No description provided for @preparing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preparando...'**
+  String get preparing;
+
+  /// No description provided for @uploadingLogo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviando logo...'**
+  String get uploadingLogo;
+
+  /// No description provided for @creatingCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criando empresa...'**
+  String get creatingCompany;
+
+  /// No description provided for @importingForms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Importando formulários...'**
+  String get importingForms;
+
+  /// No description provided for @creatingSampleData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criando dados de exemplo...'**
+  String get creatingSampleData;
+
+  /// No description provided for @createSampleDataQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja criar dados de exemplo?'**
+  String get createSampleDataQuestion;
+
+  /// No description provided for @sampleDataDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Podemos criar alguns dados de exemplo para você começar a usar o sistema imediatamente:'**
+  String get sampleDataDescription;
+
+  /// No description provided for @commonServicesForSegment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviços comuns do seu segmento'**
+  String get commonServicesForSegment;
+
+  /// No description provided for @mostUsedProducts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produtos e peças mais utilizados'**
+  String get mostUsedProducts;
+
+  /// No description provided for @sampleEquipment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equipamentos de exemplo'**
+  String get sampleEquipment;
+
+  /// No description provided for @sampleForms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Formulários de vistoria'**
+  String get sampleForms;
+
+  /// No description provided for @demoCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente de demonstração'**
+  String get demoCustomer;
+
+  /// No description provided for @canEditOrDeleteAnytime.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você poderá editar ou excluir esses dados a qualquer momento.'**
+  String get canEditOrDeleteAnytime;
+
+  /// No description provided for @noStartFromScratch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não, começar do zero'**
+  String get noStartFromScratch;
 
   /// No description provided for @changeLogo.
   ///

@@ -24,6 +24,7 @@
   "create": "Crear",
   "update": "Actualizar",
   "search": "Buscar",
+  "searchOrAddNew": "Buscar o añadir nuevo",
   "filter": "Filtrar",
   "sort": "Ordenar",
   "refresh": "Actualizar",
@@ -45,6 +46,7 @@
   "selectAll": "Seleccionar Todo",
   "clear": "Limpiar",
   "reset": "Restablecer",
+  "basicInfo": "Información Básica",
   "apply": "Aplicar",
   "ok": "OK",
   "yes": "Sí",
@@ -127,6 +129,10 @@
   "invalidPhone": "Teléfono inválido",
   "invalidValue": "Valor inválido",
   "invalidDate": "Fecha inválida",
+  "invalidFormat": "Formato inválido",
+  "minimum": "Mínimo",
+  "maximum": "Máximo",
+  "characters": "caracteres",
   "selectOption": "Seleccione una opción",
   "noResults": "No se encontraron resultados",
   "noData": "No hay datos disponibles",
@@ -256,6 +262,7 @@
   "priorityUrgent": "Urgente",
 
   "device": "Equipo",
+  "deviceCategory": "Categoría",
   "newDevice": "Nuevo Equipo",
   "editDevice": "Editar Equipo",
   "deviceDetails": "Detalles del Equipo",
@@ -581,7 +588,7 @@
   "availableSegments": "Segmentos Disponibles",
   "noSegmentsAvailable": "Ningún segmento disponible",
   "errorLoadingSegments": "Error al cargar segmentos",
-  "specialties": "especialidades",
+  "specialties": "Especialidades",
   "myCompany": "Mi Empresa",
   "retryAgain": "Intentar de nuevo",
   "noResultsFound": "No se encontraron resultados",
@@ -805,5 +812,27 @@
   "yesCreateSampleData": "Sí, crear datos de ejemplo",
 
   "availableSpecialties": "ESPECIALIDADES DISPONIBLES",
-  "pleaseSelectAtLeastOneSpecialty": "Por favor, seleccione al menos una especialidad para continuar."
+  "pleaseSelectAtLeastOneSpecialty": "Por favor, seleccione al menos una especialidad para continuar.",
+
+  "selectCountry": "Seleccionar País",
+
+  "contacts": "Contactos",
+  "contactMethods": "Medios de Contacto",
+  "howCustomersCanReachYou": "¿Cómo pueden sus clientes contactarlo?",
+
+  "preparing": "Preparando...",
+  "uploadingLogo": "Subiendo logo...",
+  "creatingCompany": "Creando empresa...",
+  "importingForms": "Importando formularios...",
+  "creatingSampleData": "Creando datos de ejemplo...",
+
+  "createSampleDataQuestion": "¿Crear datos de ejemplo?",
+  "sampleDataDescription": "Podemos crear algunos datos de ejemplo para que comience a usar el sistema inmediatamente:",
+  "commonServicesForSegment": "Servicios comunes de su segmento",
+  "mostUsedProducts": "Productos y piezas más utilizados",
+  "sampleEquipment": "Equipos de ejemplo",
+  "sampleForms": "Formularios de inspección",
+  "demoCustomer": "Cliente de demostración",
+  "canEditOrDeleteAnytime": "Puede editar o eliminar estos datos en cualquier momento.",
+  "noStartFromScratch": "No, comenzar desde cero"
 }

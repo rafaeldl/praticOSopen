@@ -624,6 +624,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/AUTO_VERSIONING.md` - Versionamento automático e Conventional Commits
 - `docs/I18N.md` - Sistema de internacionalização completo
 - `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
+- `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
 - `docs/MULTI_TENANCY.md` - Detalhes da arquitetura multi-tenant

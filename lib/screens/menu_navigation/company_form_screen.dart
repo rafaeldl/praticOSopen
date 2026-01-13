@@ -1,13 +1,14 @@
-import 'package:easy_mask/easy_mask.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/widgets/dynamic_text_field.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
@@ -25,6 +26,52 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
   bool _isLoading = true;
   Company? _company;
   Map<String, dynamic>? _selectedSegment;
+
+  // Widget auxiliar para criar rows clicáveis com mesmo estilo dos text fields
+  Widget _buildSelectableRow({
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+    required bool hasValue,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: CupertinoFormRow(
+        prefix: Text(label),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 36.0),
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    value,
+                    style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                      color: hasValue
+                          ? CupertinoColors.label.resolveFrom(context)
+                          : CupertinoColors.placeholderText.resolveFrom(context),
+                    ),
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Icon(
+                  CupertinoIcons.chevron_forward,
+                  size: 20,
+                  color: CupertinoColors.systemGrey3.resolveFrom(context),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   String _currentLocaleTag(BuildContext context) {
     final locale = Localizations.localeOf(context);
@@ -49,6 +96,36 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     return _localizedValue(segment['nameI18n'] ?? segment['name'], locale);
   }
 
+  String _getSubspecialtiesDisplayText() {
+    if (_company?.subspecialties == null || _company!.subspecialties!.isEmpty) {
+      return context.l10n.select;
+    }
+
+    if (_selectedSegment == null) return context.l10n.select;
+
+    final subspecialties = _selectedSegment!['subspecialties'] as List?;
+    if (subspecialties == null) return context.l10n.select;
+
+    final locale = _currentLocaleTag(context);
+    final names = <String>[];
+
+    for (final selectedId in _company!.subspecialties!) {
+      try {
+        final subspecialty = subspecialties.firstWhere(
+          (s) => (s as Map)['id'] == selectedId,
+        ) as Map;
+        final name = _localizedValue(subspecialty['name'], locale);
+        if (name.isNotEmpty) names.add(name);
+      } catch (e) {
+        // Subspecialidade não encontrada, ignora
+      }
+    }
+
+    if (names.isEmpty) return context.l10n.select;
+    if (names.length == 1) return names.first;
+    return '${names.first} +${names.length - 1}';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -59,8 +136,19 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     setState(() => _isLoading = true);
     if (Global.companyAggr?.id != null) {
       _company = await _companyStore.retrieveCompany(Global.companyAggr!.id);
-      if (_company?.segment != null) {
-        await _loadSegment(_company!.segment!);
+
+      if (mounted) {
+        final provider = context.read<SegmentConfigProvider>();
+
+        // 1. Carrega o segmento primeiro
+        if (_company?.segment != null) {
+          await _loadSegment(_company!.segment!);
+          await provider.initialize(_company!.segment!);
+        }
+
+        // 2. Depois seta o país (após segmento carregado)
+        // Se não tem país definido, usa BR como padrão
+        provider.setCountry(_company?.country ?? 'BR');
       }
     }
     setState(() => _isLoading = false);
@@ -98,12 +186,18 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
 
       if (Global.companyAggr != null && _company!.id == Global.companyAggr!.id) {
         Global.companyAggr!.name = _company!.name;
-        
-        if (_company!.segment != null) {
-          final provider = context.read<SegmentConfigProvider>();
-          if (mounted && provider.segmentId != _company!.segment) {
-            provider.initialize(_company!.segment!);
-          }
+        Global.companyAggr!.country = _company!.country;
+
+        final provider = context.read<SegmentConfigProvider>();
+
+        // Atualiza segmento se mudou
+        if (_company!.segment != null && mounted && provider.segmentId != _company!.segment) {
+          provider.initialize(_company!.segment!);
+        }
+
+        // Atualiza país no provider
+        if (mounted && _company!.country != null) {
+          provider.setCountry(_company!.country!);
         }
       }
       
@@ -159,6 +253,8 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                 setState(() {
                   _selectedSegment = segment;
                   _company?.segment = segment['id'];
+                  // Limpa subspecialidades quando muda o segmento
+                  _company?.subspecialties = null;
                 });
                 Navigator.pop(context);
               },
@@ -172,6 +268,207 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
       );
     } catch (e) {
       // Ignorar erro silenciosamente
+    }
+  }
+
+  Future<void> _pickSubspecialties() async {
+    if (_selectedSegment == null) return;
+
+    final subspecialties = _selectedSegment!['subspecialties'] as List?;
+    if (subspecialties == null || subspecialties.isEmpty) {
+      // Segmento não tem subspecialidades
+      return;
+    }
+
+    final locale = _currentLocaleTag(context);
+    final subspecialtyList = subspecialties
+        .map((s) => Map<String, dynamic>.from(s as Map))
+        .toList();
+
+    if (!mounted) return;
+
+    // Cria um set com as subspecialties atualmente selecionadas
+    final selectedIds = Set<String>.from(_company?.subspecialties ?? []);
+
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => StatefulBuilder(
+        builder: (context, setModalState) => CupertinoActionSheet(
+          title: Text(context.l10n.selectSpecialties),
+          message: Column(
+            children: [
+              const SizedBox(height: 8),
+              ...subspecialtyList.map((subspecialty) {
+                final id = subspecialty['id'] as String;
+                final isSelected = selectedIds.contains(id);
+                final name = _localizedValue(subspecialty['name'], locale);
+                final icon = subspecialty['icon'] as String? ?? '•';
+
+                return CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () {
+                    setModalState(() {
+                      if (isSelected) {
+                        selectedIds.remove(id);
+                      } else {
+                        selectedIds.add(id);
+                      }
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? CupertinoColors.activeBlue.withValues(alpha: 0.1)
+                          : CupertinoColors.systemBackground.resolveFrom(context),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isSelected
+                              ? CupertinoIcons.checkmark_circle_fill
+                              : CupertinoIcons.circle,
+                          color: isSelected
+                              ? CupertinoColors.activeBlue
+                              : CupertinoColors.systemGrey,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          icon,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            name,
+                            style: TextStyle(
+                              color: CupertinoColors.label.resolveFrom(context),
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ],
+          ),
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                setState(() {
+                  _company?.subspecialties = selectedIds.isEmpty ? null : selectedIds.toList();
+                });
+                Navigator.pop(context);
+              },
+              child: Text(context.l10n.done),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.cancel),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickCountry() async {
+    // Usa IsoCode.values da phone_numbers_parser
+    // Lista apenas os países mais comuns primeiro
+    final priorityCountries = ['BR', 'US', 'PT', 'ES', 'MX'];
+    final allIsoCodes = IsoCode.values.toList();
+
+    // Separa em prioridade e resto
+    final priority = allIsoCodes.where((iso) => priorityCountries.contains(iso.name)).toList();
+    final others = allIsoCodes.where((iso) => !priorityCountries.contains(iso.name)).toList();
+
+    // Ordena prioridade pela lista priorityCountries
+    priority.sort((a, b) => priorityCountries.indexOf(a.name).compareTo(priorityCountries.indexOf(b.name)));
+    // Ordena o resto alfabeticamente
+    others.sort((a, b) => a.name.compareTo(b.name));
+
+    final sortedIsoCodes = [...priority, ...others];
+
+    if (!mounted) return;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(context.l10n.selectCountry),
+        message: const Text('Selecione o país da empresa'),
+        actions: sortedIsoCodes.take(50).map((isoCode) {
+          return CupertinoActionSheetAction(
+            child: Text('${_getCountryFlag(isoCode.name)} ${_getCountryName(isoCode.name)}'),
+            onPressed: () {
+              setState(() {
+                _company?.country = isoCode.name;
+              });
+
+              // Atualiza o país no provider imediatamente
+              if (mounted) {
+                final provider = context.read<SegmentConfigProvider>();
+                provider.setCountry(isoCode.name);
+              }
+
+              Navigator.pop(context);
+            },
+          );
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+    );
+  }
+
+  String _getCountryFlag(String countryCode) {
+    // Retorna emoji da bandeira baseado no código ISO
+    final int firstLetter = countryCode.codeUnitAt(0) - 0x41 + 0x1F1E6;
+    final int secondLetter = countryCode.codeUnitAt(1) - 0x41 + 0x1F1E6;
+    return String.fromCharCode(firstLetter) + String.fromCharCode(secondLetter);
+  }
+
+  String _getCountryName(String countryCode) {
+    // Nomes em português dos países mais comuns
+    switch (countryCode) {
+      case 'BR':
+        return 'Brasil';
+      case 'US':
+        return 'Estados Unidos';
+      case 'PT':
+        return 'Portugal';
+      case 'ES':
+        return 'Espanha';
+      case 'MX':
+        return 'México';
+      case 'AR':
+        return 'Argentina';
+      case 'CL':
+        return 'Chile';
+      case 'CO':
+        return 'Colômbia';
+      case 'PE':
+        return 'Peru';
+      case 'UY':
+        return 'Uruguai';
+      case 'FR':
+        return 'França';
+      case 'IT':
+        return 'Itália';
+      case 'DE':
+        return 'Alemanha';
+      case 'GB':
+        return 'Reino Unido';
+      case 'CA':
+        return 'Canadá';
+      default:
+        // Para outros, retorna o código ISO
+        return countryCode;
     }
   }
 
@@ -214,7 +511,10 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading && _company == null) {
+    final config = context.watch<SegmentConfigProvider>();
+
+    // Mostra loading enquanto carrega empresa OU segmento
+    if (_isLoading || (_company != null && config.isLoading)) {
       return const CupertinoPageScaffold(
         child: Center(child: CupertinoActivityIndicator()),
       );
@@ -322,41 +622,32 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     onSaved: (val) => _company?.name = val,
                     validator: (val) => val == null || val.isEmpty ? context.l10n.required : null,
                   ),
-                  GestureDetector(
+                  _buildSelectableRow(
+                    label: context.l10n.segment,
+                    value: _selectedSegment != null
+                        ? (_segmentDisplayName(_selectedSegment!).isEmpty
+                            ? context.l10n.select
+                            : _segmentDisplayName(_selectedSegment!))
+                        : context.l10n.select,
                     onTap: _pickSegment,
-                    child: CupertinoFormRow(
-                      prefix: Text(context.l10n.segment),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16.0), // Respiro entre label e valor
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _selectedSegment != null
-                                    ? (_segmentDisplayName(_selectedSegment!).isEmpty
-                                        ? context.l10n.select
-                                        : _segmentDisplayName(_selectedSegment!))
-                                    : context.l10n.select,
-                                style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
-                                  color: _selectedSegment != null
-                                      ? CupertinoColors.label.resolveFrom(context)
-                                      : CupertinoColors.placeholderText.resolveFrom(context),
-                                ),
-                                textAlign: TextAlign.right,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              CupertinoIcons.chevron_forward,
-                              size: 20,
-                              color: CupertinoColors.systemGrey2.resolveFrom(context),
-                            ),
-                          ],
-                        ),
-                      ),
+                    hasValue: _selectedSegment != null && _segmentDisplayName(_selectedSegment!).isNotEmpty,
+                  ),
+                  // Campo de subspecialidades (só aparece se o segmento tem subspecialties)
+                  if (_selectedSegment != null &&
+                      (_selectedSegment!['subspecialties'] as List?)?.isNotEmpty == true)
+                    _buildSelectableRow(
+                      label: context.l10n.specialties,
+                      value: _getSubspecialtiesDisplayText(),
+                      onTap: _pickSubspecialties,
+                      hasValue: _company?.subspecialties?.isNotEmpty ?? false,
                     ),
+                  _buildSelectableRow(
+                    label: context.l10n.country,
+                    value: _company?.country != null
+                        ? _getCountryName(_company!.country!)
+                        : context.l10n.select,
+                    onTap: _pickCountry,
+                    hasValue: _company?.country != null,
                   ),
                   CupertinoTextFormFieldRow(
                     prefix: Text(context.l10n.email),
@@ -366,13 +657,9 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     textAlign: TextAlign.right,
                     onSaved: (val) => _company?.email = val,
                   ),
-                  CupertinoTextFormFieldRow(
-                    prefix: Text(context.l10n.phone),
+                  DynamicTextField(
+                    fieldKey: 'company.phone',
                     initialValue: _company?.phone,
-                    placeholder: context.l10n.phonePlaceholder,
-                    keyboardType: TextInputType.phone,
-                    textAlign: TextAlign.right,
-                    inputFormatters: [TextInputMask(mask: ['(99) 9999-9999', '(99) 99999-9999'])],
                     onSaved: (val) => _company?.phone = val,
                   ),
                   CupertinoTextFormFieldRow(
