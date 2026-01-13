@@ -366,67 +366,106 @@ Future<void> _performLogout(WidgetTester tester) async {
 
 /// Performs login with demo account
 Future<void> _performLogin(WidgetTester tester) async {
+  print('\n=== LOGIN FLOW DEBUG ===');
+
   // Find and tap "Entrar com email" link (try multiple languages)
+  print('Step 1: Looking for email login link...');
   final emailTexts = ['email', 'e-mail', 'correo'];
   Finder? emailLink;
   for (final text in emailTexts) {
     final finder = find.textContaining(text, skipOffstage: false);
+    print('  Searching for text containing "$text": found ${finder.evaluate().length}');
     if (finder.evaluate().isNotEmpty) {
       emailLink = finder;
+      print('  ✅ Found email link with text: "$text"');
       break;
     }
   }
 
   if (emailLink != null) {
+    print('Step 2: Tapping email login link...');
     await tester.tap(emailLink.first);
     await tester.pumpAndSettle();
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 2));
+    print('  ✅ Email login screen opened');
 
     // Enter email
-    final emailField = find.byType(CupertinoTextFormFieldRow).first;
-    await tester.enterText(emailField, 'demo@praticos.com.br');
-    await tester.pumpAndSettle();
+    print('Step 3: Looking for email field...');
+    final emailFields = find.byType(CupertinoTextFormFieldRow);
+    print('  Found ${emailFields.evaluate().length} text fields');
 
-    // Enter password
-    final passwordField = find.byType(CupertinoTextFormFieldRow).at(1);
-    await tester.enterText(passwordField, 'Demo@2024!');
-    await tester.pumpAndSettle();
-
-    // Dismiss keyboard
-    FocusManager.instance.primaryFocus?.unfocus();
-    await tester.pumpAndSettle();
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Tap login button (try multiple texts)
-    final loginTexts = ['Entrar', 'Login', 'Sign in', 'Iniciar sesión'];
-    Finder? loginButton;
-    for (final text in loginTexts) {
-      final finder = find.text(text);
-      if (finder.evaluate().isNotEmpty) {
-        loginButton = finder;
-        break;
-      }
-    }
-
-    if (loginButton != null) {
-      await tester.ensureVisible(loginButton.first);
-      await tester.tap(loginButton.first);
+    if (emailFields.evaluate().isNotEmpty) {
+      print('  Entering email: demo@praticos.com.br');
+      await tester.enterText(emailFields.first, 'demo@praticos.com.br');
       await tester.pumpAndSettle();
+      await Future.delayed(const Duration(milliseconds: 500));
+      print('  ✅ Email entered');
 
-      // Wait for login to complete and data to load
-      print('⏳ Waiting for login and data load...');
-      await Future.delayed(const Duration(seconds: 10));
-      await tester.pumpAndSettle();
-
-      // Ensure orders are loaded
-      final loadingIndicator = find.byType(CupertinoActivityIndicator);
-      if (loadingIndicator.evaluate().isNotEmpty) {
-        print('⏳ Still loading data, waiting more...');
-        await Future.delayed(const Duration(seconds: 5));
+      // Enter password
+      print('Step 4: Entering password...');
+      if (emailFields.evaluate().length > 1) {
+        await tester.enterText(emailFields.at(1), 'Demo@2024!');
         await tester.pumpAndSettle();
+        await Future.delayed(const Duration(milliseconds: 500));
+        print('  ✅ Password entered');
+      } else {
+        print('  ⚠️ Password field not found!');
       }
+
+      // Dismiss keyboard
+      print('Step 5: Dismissing keyboard...');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(seconds: 1));
+      print('  ✅ Keyboard dismissed');
+
+      // Tap login button (try multiple texts)
+      print('Step 6: Looking for login button...');
+      final loginTexts = ['Entrar', 'Login', 'Sign in', 'Iniciar sesión'];
+      Finder? loginButton;
+      for (final text in loginTexts) {
+        final finder = find.text(text);
+        print('  Searching for button with text "$text": found ${finder.evaluate().length}');
+        if (finder.evaluate().isNotEmpty) {
+          loginButton = finder;
+          print('  ✅ Found login button with text: "$text"');
+          break;
+        }
+      }
+
+      if (loginButton != null) {
+        print('Step 7: Tapping login button...');
+        await tester.ensureVisible(loginButton.first);
+        await tester.tap(loginButton.first);
+        await tester.pumpAndSettle();
+        print('  ✅ Login button tapped');
+
+        // Wait for login to complete and data to load
+        print('Step 8: Waiting for login to complete...');
+        await Future.delayed(const Duration(seconds: 10));
+        await tester.pumpAndSettle();
+        print('  Initial wait complete');
+
+        // Ensure orders are loaded
+        final loadingIndicator = find.byType(CupertinoActivityIndicator);
+        print('  Loading indicators: ${loadingIndicator.evaluate().length}');
+        if (loadingIndicator.evaluate().isNotEmpty) {
+          print('  ⏳ Still loading data, waiting more...');
+          await Future.delayed(const Duration(seconds: 5));
+          await tester.pumpAndSettle();
+        }
+        print('  ✅ Login complete');
+      } else {
+        print('  ❌ Login button not found!');
+      }
+    } else {
+      print('  ❌ Email fields not found!');
     }
+  } else {
+    print('  ❌ Email login link not found!');
   }
+
+  print('=========================\n');
 }
 
 /// Helper to find locale-specific text
