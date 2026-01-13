@@ -256,25 +256,31 @@ void main() {
         }
 
         // Look for form items (they use chevron_right icon for navigation)
+        // Forms is the LAST item in the order screen
         print('Looking for form items inline...');
         final formItems = find.byIcon(CupertinoIcons.chevron_right);
         print('Found ${formItems.evaluate().length} chevron items');
 
-        // Try to find a clickable form item (below 400px to skip status/customer/device sections)
+        // Find the LAST chevron (forms section is always last)
         Finder? formToTap;
+        int lastValidIndex = -1;
         for (var i = 0; i < formItems.evaluate().length; i++) {
           try {
             final itemPos = tester.getTopLeft(formItems.at(i));
             print('  Chevron $i at position: $itemPos');
-            // Forms section is typically below 400px (after status, customer, device, services sections)
-            if (itemPos.dy > 400) {
-              formToTap = formItems.at(i);
-              print('  ✅ Found form item at position: $itemPos');
-              break;
+            // Keep track of the last valid chevron (below 200px to skip navigation bar)
+            if (itemPos.dy > 200) {
+              lastValidIndex = i;
             }
           } catch (e) {
             // Skip items that can't be measured
           }
+        }
+
+        if (lastValidIndex >= 0) {
+          formToTap = formItems.at(lastValidIndex);
+          final pos = tester.getTopLeft(formToTap);
+          print('  ✅ Using LAST chevron at index $lastValidIndex, position: $pos');
         }
 
         if (formToTap != null && formToTap.evaluate().isNotEmpty) {
@@ -312,52 +318,88 @@ void main() {
         print('⚠️ No order items found for forms navigation');
       }
 
-      // ========== SCREENSHOT 7: Collaborators (Team Management) ==========
-      print('\n--- Screenshot 7: Collaborators ---');
-      print('Looking for tab bar...');
-      final tabBar = find.byType(CupertinoTabBar);
-      print('Found ${tabBar.evaluate().length} tab bars');
+      // ========== SCREENSHOT 7: Payments Management ==========
+      print('\n--- Screenshot 7: Payments ---');
 
-      if (tabBar.evaluate().isNotEmpty) {
-        final tabBarBox = tester.getRect(tabBar);
-        // Tap third tab (Settings/More)
-        final thirdTabX = tabBarBox.left + (tabBarBox.width / 3) * 2.5;
-        final tabY = tabBarBox.center.dy;
+      // Go back to home first
+      print('Going back to home...');
+      final nav = tester.state<NavigatorState>(find.byType(Navigator).first);
+      while (nav.canPop()) {
+        nav.pop();
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(milliseconds: 300));
+      }
+      print('At home screen');
 
-        print('Tapping Settings/More tab...');
-        await tester.tapAt(Offset(thirdTabX, tabY));
+      // Find and tap first order card again
+      print('Looking for order cards...');
+      final allSemantics3 = find.byType(Semantics);
+      Finder? orderCardForPayments;
+
+      for (var i = 0; i < allSemantics3.evaluate().length; i++) {
+        final widget = tester.widget<Semantics>(allSemantics3.at(i));
+        final identifier = widget.properties.identifier?.toString() ?? '';
+        if (identifier.startsWith('order_card_')) {
+          orderCardForPayments = allSemantics3.at(i);
+          print('Found order card: $identifier');
+          break;
+        }
+      }
+
+      if (orderCardForPayments != null) {
+        print('Tapping order card...');
+        await tester.tap(orderCardForPayments);
         await tester.pumpAndSettle();
         await Future.delayed(const Duration(seconds: 2));
-        print('Settings screen opened');
+        print('Order detail opened');
 
-        // Find and tap Collaborators menu item
-        final collaboratorsText = _findTextByLocale(locale, 'collaborators');
-        print('Looking for collaborators button with text: "$collaboratorsText"');
-        final collaboratorsButton = find.text(collaboratorsText);
-        print('Found ${collaboratorsButton.evaluate().length} collaborators buttons');
-
-        if (collaboratorsButton.evaluate().isNotEmpty) {
-          print('Tapping collaborators button...');
-          await tester.tap(collaboratorsButton.first);
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 3));
-          print('Collaborators screen opened');
-
-          print('📸 Capturing Screenshot 7: Collaborators');
-          await binding.takeScreenshot('06_collaborators');
-
-          // Go back to settings
-          print('Navigating back to settings...');
-          final nav = tester.state<NavigatorState>(find.byType(Navigator).first);
-          nav.pop();
+        // Scroll to find payments section (penultimate section, before forms)
+        print('Scrolling to payments section...');
+        final orderScroll = find.byType(CustomScrollView);
+        if (orderScroll.evaluate().isNotEmpty) {
+          await tester.drag(orderScroll.first, const Offset(0, -350));
           await tester.pumpAndSettle();
           await Future.delayed(const Duration(seconds: 1));
-          print('✅ Back to settings');
+        }
+
+        // Look for payments chevron (second-to-last chevron)
+        final paymentChevrons = find.byIcon(CupertinoIcons.chevron_right);
+        print('Found ${paymentChevrons.evaluate().length} chevrons');
+
+        // Get second-to-last chevron (payments is before forms)
+        int secondToLastIndex = -1;
+        List<int> validIndices = [];
+        for (var i = 0; i < paymentChevrons.evaluate().length; i++) {
+          try {
+            final itemPos = tester.getTopLeft(paymentChevrons.at(i));
+            if (itemPos.dy > 200) {
+              validIndices.add(i);
+            }
+          } catch (e) {
+            // Skip
+          }
+        }
+
+        if (validIndices.length >= 2) {
+          secondToLastIndex = validIndices[validIndices.length - 2];
+          print('Using second-to-last chevron at index $secondToLastIndex for payments');
+
+          final paymentsChevron = paymentChevrons.at(secondToLastIndex);
+          print('Tapping payments chevron...');
+          await tester.tap(paymentsChevron);
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 2));
+          print('Payments screen opened');
+
+          print('📸 Capturing Screenshot 7: Payments');
+          await binding.takeScreenshot('06_payments');
+
+          print('✅ Payments screenshot captured');
         } else {
-          print('⚠️ Collaborators button not found, skipping screenshot 7');
+          print('⚠️ Could not find payments chevron, skipping screenshot 7');
         }
       } else {
-        print('⚠️ Tab bar not found, skipping collaborators');
+        print('⚠️ Order card not found for payments, skipping screenshot 7');
       }
 
       print('✅ All screenshots captured successfully for locale: $locale');
@@ -557,22 +599,4 @@ Future<void> _performLogin(WidgetTester tester, String locale) async {
   }
 
   print('=========================\n');
-}
-
-/// Helper to find locale-specific text
-String _findTextByLocale(String locale, String key) {
-  final texts = {
-    'collaborators': {
-      'pt-BR': 'Colaboradores',
-      'en-US': 'Collaborators',
-      'es-ES': 'Colaboradores',
-    },
-    'year': {
-      'pt-BR': 'Ano',
-      'en-US': 'Year',
-      'es-ES': 'Año',
-    },
-  };
-
-  return texts[key]?[locale] ?? texts[key]?['pt-BR'] ?? key;
 }
