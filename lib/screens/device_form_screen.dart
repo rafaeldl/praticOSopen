@@ -283,14 +283,20 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         'fieldType': 'deviceCategory',
         'title': context.l10n.deviceCategory,
         'currentValue': _device?.category,
+        'allowClear': true,
       },
     );
 
-    if (value != null && value is String) {
+    if (value is String && value != 'clear') {
       setState(() {
         _device?.category = value;
-        // Clear model when category changes (group will be different)
-        _device?.name = null;
+        // Note: We don't clear the model anymore to preserve legacy data
+        // The user can clear it manually if needed
+      });
+    } else if (value == 'clear') {
+      // User explicitly cleared the selection
+      setState(() {
+        _device?.category = null;
       });
     }
   }
@@ -303,14 +309,20 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         'fieldType': 'deviceBrand',
         'title': config.label(LabelKeys.deviceBrand),
         'currentValue': _device?.manufacturer,
+        'allowClear': true,
       },
     );
 
-    if (value != null && value is String) {
+    if (value is String && value != 'clear') {
       setState(() {
         _device?.manufacturer = value;
-        // Clear model when brand changes
-        _device?.name = null;
+        // Note: We don't clear the model anymore to preserve legacy data
+        // The user can clear it manually if needed
+      });
+    } else if (value == 'clear') {
+      // User explicitly cleared the selection
+      setState(() {
+        _device?.manufacturer = null;
       });
     }
   }
@@ -324,12 +336,18 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         'title': config.label(LabelKeys.deviceModel),
         'currentValue': _device?.name,
         'group': [_device?.category, _device?.manufacturer],
+        'allowClear': true,
       },
     );
 
-    if (value != null && value is String) {
+    if (value is String && value != 'clear') {
       setState(() {
         _device?.name = value;
+      });
+    } else if (value == 'clear') {
+      // User explicitly cleared the selection
+      setState(() {
+        _device?.name = null;
       });
     }
   }

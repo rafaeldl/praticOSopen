@@ -32,6 +32,7 @@ class _AccumulatedValueListScreenState
   List<String>? _currentValues; // For multi-select
   String? _group;
   bool _multiSelect = false;
+  bool _allowClear = false; // Allow clearing the selection
   Set<String> _selectedValues = {}; // Track selected values in multi-select mode
   bool _argumentsLoaded = false;
 
@@ -56,6 +57,7 @@ class _AccumulatedValueListScreenState
         _fieldType = args['fieldType'];
         _title = args['title'] ?? context.l10n.select;
         _multiSelect = args['multiSelect'] ?? false;
+        _allowClear = args['allowClear'] ?? false;
 
         // Handle current value(s) for single or multi-select
         if (_multiSelect) {
@@ -173,12 +175,34 @@ class _AccumulatedValueListScreenState
     }
   }
 
+  void _clearSelection() {
+    if (mounted) {
+      Navigator.pop(context, 'clear');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Show clear button if allowed and there's a current value
+    final showClearButton = _allowClear && !_multiSelect &&
+        _currentValue != null && _currentValue!.isNotEmpty;
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
         middle: Text(_title ?? context.l10n.select),
+        leading: showClearButton
+            ? CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: _clearSelection,
+                child: Text(
+                  context.l10n.clear,
+                  style: const TextStyle(
+                    color: CupertinoColors.destructiveRed,
+                  ),
+                ),
+              )
+            : null,
         trailing: _multiSelect
             ? CupertinoButton(
                 padding: EdgeInsets.zero,
@@ -250,7 +274,7 @@ class _AccumulatedValueListScreenState
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Adicionar novo valor',
+                          context.l10n.addNewValue,
                           style: TextStyle(
                             fontSize: 13,
                             color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -301,7 +325,7 @@ class _AccumulatedValueListScreenState
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Adicionar novo valor',
+                            context.l10n.addNewValue,
                             style: TextStyle(
                               fontSize: 13,
                               color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -330,7 +354,7 @@ class _AccumulatedValueListScreenState
             ),
             const SizedBox(height: 16),
             Text(
-              'Nenhum valor cadastrado',
+              context.l10n.noValuesRegistered,
               style: TextStyle(
                 fontSize: 17,
                 color: CupertinoColors.label.resolveFrom(context),
@@ -338,7 +362,7 @@ class _AccumulatedValueListScreenState
             ),
             const SizedBox(height: 8),
             Text(
-              'Digite no campo acima para adicionar',
+              context.l10n.typeAboveToAdd,
               style: TextStyle(
                 fontSize: 15,
                 color: CupertinoColors.secondaryLabel.resolveFrom(context),

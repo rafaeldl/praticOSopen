@@ -139,6 +139,9 @@
   "selectOption": "Selecione uma opção",
   "noResults": "Nenhum resultado encontrado",
   "noData": "Nenhum dado disponível",
+  "noValuesRegistered": "Nenhum valor cadastrado",
+  "typeAboveToAdd": "Digite no campo acima para adicionar",
+  "addNewValue": "Adicionar novo valor",
   "selectAtLeastOne": "Selecione ao menos uma opção",
   "minLength": "Mínimo de {count} caracteres",
   "@minLength": {
