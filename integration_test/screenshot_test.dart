@@ -250,7 +250,7 @@ void main() {
         print('Scrolling to find forms section...');
         final orderScrollable = find.byType(CustomScrollView);
         if (orderScrollable.evaluate().isNotEmpty) {
-          await tester.drag(orderScrollable.first, const Offset(0, -300));
+          await tester.drag(orderScrollable.first, const Offset(0, -400));
           await tester.pumpAndSettle();
           await Future.delayed(const Duration(seconds: 1));
         }
@@ -260,12 +260,14 @@ void main() {
         final formItems = find.byIcon(CupertinoIcons.chevron_right);
         print('Found ${formItems.evaluate().length} chevron items');
 
-        // Try to find a clickable form item (below 200px to avoid header)
+        // Try to find a clickable form item (below 400px to skip status/customer/device sections)
         Finder? formToTap;
         for (var i = 0; i < formItems.evaluate().length; i++) {
           try {
             final itemPos = tester.getTopLeft(formItems.at(i));
-            if (itemPos.dy > 200) {
+            print('  Chevron $i at position: $itemPos');
+            // Forms section is typically below 400px (after status, customer, device, services sections)
+            if (itemPos.dy > 400) {
               formToTap = formItems.at(i);
               print('  ✅ Found form item at position: $itemPos');
               break;
@@ -282,14 +284,8 @@ void main() {
           await Future.delayed(const Duration(seconds: 2));
           print('Form opened');
 
-          // Scroll down a bit to show more form content
-          final formScrollable = find.byType(CustomScrollView);
-          if (formScrollable.evaluate().isNotEmpty) {
-            print('Scrolling form to show more items...');
-            await tester.drag(formScrollable.first, const Offset(0, -200));
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 1));
-          }
+          // Wait for form to fully render
+          await Future.delayed(const Duration(seconds: 1));
 
           print('📸 Capturing Screenshot 6: Dynamic Forms');
           await binding.takeScreenshot('05_forms');
