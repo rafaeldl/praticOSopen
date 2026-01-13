@@ -819,6 +819,17 @@
 
   "availableSpecialties": "AVAILABLE SPECIALTIES",
   "pleaseSelectAtLeastOneSpecialty": "Please select at least one specialty to continue.",
+  "selectSpecialtiesDescription": "Select your company's specialties.\nYou can choose more than one.",
+  "noName": "No name",
+  "selectAtLeastOneOption": "Select at least one option",
+  "continueWithCount": "Continue ({count} {count, plural, =1{selected} other{selected}})",
+  "@continueWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
 
   "selectCountry": "Select Country",
 

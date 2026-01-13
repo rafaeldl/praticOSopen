@@ -2235,4 +2235,22 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get pleaseSelectAtLeastOneSpecialty =>
       'Please select at least one specialty to continue.';
+
+  @override
+  String get selectSpecialtiesDescription =>
+      'Select your company\'s specialties.\nYou can choose more than one.';
+
+  @override
+  String get selectAtLeastOneOption => 'Select at least one option';
+
+  @override
+  String continueWithCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'selected',
+      one: 'selected',
+    );
+    return 'Continue ($count $_temp0)';
+  }
 }

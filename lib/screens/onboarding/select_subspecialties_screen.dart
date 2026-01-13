@@ -114,8 +114,8 @@ class _SelectSubspecialtiesScreenState
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Especialidades'),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(context.l10n.specialties),
       ),
       child: SafeArea(
         child: DefaultTextStyle(
@@ -142,7 +142,7 @@ class _SelectSubspecialtiesScreenState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Selecione as especialidades da sua empresa.\nVocê pode escolher mais de uma.',
+                      context.l10n.selectSpecialtiesDescription,
                       textAlign: TextAlign.center,
                       style:
                           CupertinoTheme.of(context).textTheme.textStyle.copyWith(
@@ -184,7 +184,7 @@ class _SelectSubspecialtiesScreenState
                               .copyWith(fontSize: 24),
                         ),
                         title: Text(
-                          name.isEmpty ? 'Sem nome' : name,
+                          name.isEmpty ? context.l10n.noName : name,
                           style: CupertinoTheme.of(context)
                               .textTheme
                               .textStyle
@@ -228,8 +228,8 @@ class _SelectSubspecialtiesScreenState
                     onPressed: _selectedIds.isNotEmpty ? _continue : null,
                     child: Text(
                       _selectedIds.isEmpty
-                          ? 'Selecione ao menos uma opção'
-                          : 'Continuar (${_selectedIds.length} selecionada${_selectedIds.length > 1 ? 's' : ''})',
+                          ? context.l10n.selectAtLeastOneOption
+                          : context.l10n.continueWithCount(_selectedIds.length),
                     ),
                   ),
                 ),

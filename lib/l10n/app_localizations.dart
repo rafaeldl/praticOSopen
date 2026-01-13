@@ -4437,6 +4437,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Por favor, selecione pelo menos uma especialidade para continuar.'**
   String get pleaseSelectAtLeastOneSpecialty;
+
+  /// No description provided for @selectSpecialtiesDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione as especialidades da sua empresa.\nVocê pode escolher mais de uma.'**
+  String get selectSpecialtiesDescription;
+
+  /// No description provided for @selectAtLeastOneOption.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione ao menos uma opção'**
+  String get selectAtLeastOneOption;
+
+  /// No description provided for @continueWithCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar ({count} {count, plural, =1{selecionada} other{selecionadas}})'**
+  String continueWithCount(int count);
 }
 
 class _AppLocalizationsDelegate
