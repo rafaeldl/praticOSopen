@@ -19,6 +19,12 @@ FormDefinition _$FormDefinitionFromJson(Map<String, dynamic> json) =>
                 )
                 .toList() ??
             const [],
+        titleI18n: (json['titleI18n'] as Map<String, dynamic>?)?.map(
+          (k, e) => MapEntry(k, e as String),
+        ),
+        descriptionI18n: (json['descriptionI18n'] as Map<String, dynamic>?)?.map(
+          (k, e) => MapEntry(k, e as String),
+        ),
         createdAt: json['createdAt'] == null
             ? null
             : DateTime.parse(json['createdAt'] as String),
@@ -48,6 +54,8 @@ Map<String, dynamic> _$FormDefinitionToJson(FormDefinition instance) =>
       'description': instance.description,
       'isActive': instance.isActive,
       'items': instance.items.map((e) => e.toJson()).toList(),
+      'titleI18n': instance.titleI18n,
+      'descriptionI18n': instance.descriptionI18n,
     };
 
 FormItemDefinition _$FormItemDefinitionFromJson(Map<String, dynamic> json) =>
@@ -60,6 +68,12 @@ FormItemDefinition _$FormItemDefinitionFromJson(Map<String, dynamic> json) =>
           .toList(),
       required: json['required'] as bool? ?? false,
       allowPhotos: json['allowPhotos'] as bool? ?? true,
+      labelI18n: (json['labelI18n'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ),
+      optionsI18n: (json['optionsI18n'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as List<dynamic>).map((item) => item as String).toList()),
+      ),
     );
 
 Map<String, dynamic> _$FormItemDefinitionToJson(FormItemDefinition instance) =>
@@ -70,6 +84,8 @@ Map<String, dynamic> _$FormItemDefinitionToJson(FormItemDefinition instance) =>
       'options': instance.options,
       'required': instance.required,
       'allowPhotos': instance.allowPhotos,
+      'labelI18n': instance.labelI18n,
+      'optionsI18n': instance.optionsI18n,
     };
 
 const _$FormItemTypeEnumMap = {

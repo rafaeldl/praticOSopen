@@ -32,6 +32,9 @@ OrderForm _$OrderFormFromJson(Map<String, dynamic> json) => OrderForm(
   updatedAt: json['updatedAt'] == null
       ? null
       : DateTime.parse(json['updatedAt'] as String),
+  titleI18n: (json['titleI18n'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
 );
 
 Map<String, dynamic> _$OrderFormToJson(OrderForm instance) => <String, dynamic>{
@@ -44,6 +47,7 @@ Map<String, dynamic> _$OrderFormToJson(OrderForm instance) => <String, dynamic>{
   'startedAt': instance.startedAt?.toIso8601String(),
   'completedAt': instance.completedAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),
+  'titleI18n': instance.titleI18n,
 };
 
 const _$FormStatusEnumMap = {

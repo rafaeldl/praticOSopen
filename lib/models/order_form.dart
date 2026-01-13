@@ -22,6 +22,9 @@ class OrderForm {
   DateTime? completedAt;
   DateTime? updatedAt;
 
+  /// i18n translations for title: {'pt': 'Título', 'en': 'Title', 'es': 'Título'}
+  Map<String, String>? titleI18n;
+
   OrderForm({
     required this.id,
     required this.formDefinitionId,
@@ -32,11 +35,19 @@ class OrderForm {
     this.startedAt,
     this.completedAt,
     this.updatedAt,
+    this.titleI18n,
   });
 
   factory OrderForm.fromJson(Map<String, dynamic> json) =>
       _$OrderFormFromJson(json);
   Map<String, dynamic> toJson() => _$OrderFormToJson(this);
+
+  /// Returns the localized title for the given locale code (e.g., 'pt', 'en', 'es')
+  /// Falls back to the default title if translation is not available
+  String getLocalizedTitle(String? localeCode) {
+    if (localeCode == null || titleI18n == null) return title;
+    return titleI18n![localeCode] ?? titleI18n!['pt'] ?? title;
+  }
 
   /// Retorna a resposta para um determinado item, se existir
   FormResponse? getResponse(String itemId) {

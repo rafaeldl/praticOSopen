@@ -110,7 +110,8 @@ class FormsService {
       id: '', // Será gerado pelo Firestore
       formDefinitionId: template.id!,
       title: template.title,
-      items: template.items,
+      titleI18n: template.titleI18n, // Copy i18n translations
+      items: template.items, // Items already have their i18n fields
       status: FormStatus.pending,
       startedAt: DateTime.now(),
       updatedAt: DateTime.now(),
@@ -122,7 +123,7 @@ class FormsService {
 
     final docRef = await _getFormsCollection(companyId, orderId).add(data);
     orderForm.id = docRef.id;
-    
+
     return orderForm;
   }
 

@@ -1,4 +1,5 @@
 const { initializeFirebase, admin } = require('./firebase-init');
+const { applyTranslations } = require('./translations');
 
 // Inicializar Firebase (aceita caminho do service account como argumento)
 try {
@@ -2813,7 +2814,9 @@ async function seedForms() {
       }
 
       for (const form of forms) {
-        const { id, ...data } = form;
+        // Apply i18n translations to the form
+        const translatedForm = applyTranslations(form);
+        const { id, ...data } = translatedForm;
         const normalizedData = {
           ...data,
           subspecialties: Array.isArray(data.subspecialties) ? data.subspecialties : [],
