@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/widgets/dynamic_text_field.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'select_segment_screen.dart';
 
 class CompanyContactScreen extends StatefulWidget {
@@ -35,6 +37,8 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
   String? _phone;
   late final TextEditingController _emailController;
   late final TextEditingController _siteController;
+  bool _isLoading = true;
+  bool _initialized = false;
 
   @override
   void initState() {
@@ -42,6 +46,44 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
     _phone = widget.initialPhone;
     _emailController = TextEditingController(text: widget.initialEmail);
     _siteController = TextEditingController(text: widget.initialSite);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Executa apenas uma vez
+    if (!_initialized) {
+      _initialized = true;
+      _loadGlobalSegment();
+    }
+  }
+
+  Future<void> _loadGlobalSegment() async {
+    // Agenda para depois do build
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      final provider = context.read<SegmentConfigProvider>();
+
+      // Se já está carregado, não precisa carregar novamente
+      if (!provider.isLoaded) {
+        try {
+          await provider.initialize('global');
+
+          // Detecta país do locale do dispositivo
+          final locale = Localizations.localeOf(context);
+          final countryCode = locale.countryCode ?? 'BR'; // Fallback para BR
+          provider.setCountry(countryCode);
+        } catch (e) {
+          // Se falhar, continua sem máscaras
+        }
+      }
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    });
   }
 
   void _next() {
@@ -68,6 +110,12 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const CupertinoPageScaffold(
+        child: Center(child: CupertinoActivityIndicator()),
+      );
+    }
+
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: const CupertinoNavigationBar(
