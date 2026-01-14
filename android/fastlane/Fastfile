@@ -171,6 +171,13 @@ platform :android do
     UI.message("   📟 Tablet 7\": #{tablet7_avd}")
     UI.message("   💻 Tablet 10\": #{tablet10_avd}")
 
+    # 🏗️ Build Flutter app ONCE at the beginning
+    UI.important("🏗️ Building Flutter app (one-time build)...")
+    Dir.chdir("..") do
+      sh("fvm", "flutter", "build", "apk", "--debug")
+    end
+    UI.success("✅ Flutter build completed")
+
     locales.each do |locale|
       UI.message("🌍 Generating screenshots for locale: #{locale}")
       UI.message("🐌 Running devices in SEQUENTIAL mode (auto-boot)")
@@ -181,7 +188,8 @@ platform :android do
         folder_name: "phoneScreenshots",
         locale: locale,
         force_logout: force_logout,
-        avd_name: phone_avd
+        avd_name: phone_avd,
+        skip_build: true
       )
 
       # 7-inch Tablet
@@ -190,7 +198,8 @@ platform :android do
         folder_name: "sevenInchScreenshots",
         locale: locale,
         force_logout: force_logout,
-        avd_name: tablet7_avd
+        avd_name: tablet7_avd,
+        skip_build: true
       )
 
       # 10-inch Tablet
@@ -199,7 +208,8 @@ platform :android do
         folder_name: "tenInchScreenshots",
         locale: locale,
         force_logout: force_logout,
-        avd_name: tablet10_avd
+        avd_name: tablet10_avd,
+        skip_build: true
       )
     end
 
@@ -346,7 +356,7 @@ platform :android do
   end
 
   # Helper function to run the screenshot process
-  def capture_screenshots_for_device(device:, folder_name:, locale:, force_logout:, avd_name: nil)
+  def capture_screenshots_for_device(device:, folder_name:, locale:, force_logout:, avd_name: nil, skip_build: false)
     UI.message("📸 Capturing screenshots for #{folder_name} on device: #{device}, locale: #{locale}")
 
     # Boot emulator if AVD name provided
@@ -381,6 +391,11 @@ platform :android do
         "--dart-define=TEST_LOCALE=#{locale}",
         "-d", device
       ]
+
+      # Skip build if already built (when running screenshots_all)
+      if skip_build
+        command_args << "--no-build"
+      end
 
       if force_logout
         command_args << "--dart-define=FORCE_LOGOUT=#{force_logout}"

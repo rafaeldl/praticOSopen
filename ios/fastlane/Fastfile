@@ -221,6 +221,13 @@ platform :ios do
     locales = ["pt-BR", "en-US", "es-ES"]
     devices = ["iPhone 16e", "iPhone 17"]
 
+    # 🏗️ Build Flutter app ONCE at the beginning
+    UI.important("🏗️ Building Flutter app (one-time build)...")
+    Dir.chdir("..") do
+      sh("fvm", "flutter", "build", "ios", "--debug")
+    end
+    UI.success("✅ Flutter build completed")
+
     locales.each do |locale|
       UI.message("🌍 Generating screenshots for locale: #{locale}")
 
@@ -230,7 +237,7 @@ platform :ios do
         # Run devices in parallel using threads
         threads = devices.map do |device|
           Thread.new do
-            capture_ios_screenshots(device: device, locale: locale, force_logout: force_logout)
+            capture_ios_screenshots(device: device, locale: locale, force_logout: force_logout, skip_build: true)
           end
         end
 
@@ -241,7 +248,7 @@ platform :ios do
 
         # Run devices sequentially (original behavior)
         devices.each do |device|
-          capture_ios_screenshots(device: device, locale: locale, force_logout: force_logout)
+          capture_ios_screenshots(device: device, locale: locale, force_logout: force_logout, skip_build: true)
         end
       end
     end
@@ -260,7 +267,7 @@ platform :ios do
   end
 
   # Helper function for iOS screenshots
-  def capture_ios_screenshots(device:, locale:, force_logout:)
+  def capture_ios_screenshots(device:, locale:, force_logout:, skip_build: false)
     UI.message("📸 Capturing screenshots on device: #{device}, locale: #{locale}")
 
     # Limpa screenshots anteriores do dispositivo e locale específicos
@@ -332,6 +339,11 @@ platform :ios do
         "--dart-define=TEST_LOCALE=#{locale}",
         "-d", device
       ]
+
+      # Skip build if already built (when running screenshots_all)
+      if skip_build
+        command_args << "--no-build"
+      end
 
       if force_logout
         command_args << "--dart-define=FORCE_LOGOUT=#{force_logout}"
