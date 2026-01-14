@@ -15,7 +15,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home => 'Home';
 
   @override
-  String get orders => 'Service Orders';
+  String get orders => 'Work Orders';
 
   @override
   String get customers => 'Customers';
@@ -627,10 +627,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cpfCnpj => 'CPF/CNPJ';
 
   @override
-  String get order => 'Service Order';
+  String get order => 'Work Order';
 
   @override
-  String get orderShort => 'SO';
+  String get orderShort => 'WO';
 
   @override
   String get newOrder => 'New Order';
@@ -1454,8 +1454,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeToApp => 'Welcome to PraticOS';
 
   @override
-  String get appSubtitle =>
-      'Manage your service orders\nsimply and efficiently';
+  String get appSubtitle => 'Manage your work orders\nsimply and efficiently';
 
   @override
   String get signInWithEmail => 'Sign in with email';
@@ -1575,7 +1574,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deleteAccountWarning =>
-      'This action is permanent and cannot be undone.\n\nAll your data, including service orders, customers and settings will be permanently removed.\n\nAre you sure you want to continue?';
+      'This action is permanent and cannot be undone.\n\nAll your data, including work orders, customers and settings will be permanently removed.\n\nAre you sure you want to continue?';
 
   @override
   String get finalConfirmation => 'Final Confirmation';
@@ -1651,13 +1650,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get configureCompanyProfile =>
-      'Set up your company profile to issue professional service orders right now.';
+      'Set up your company profile to issue professional work orders right now.';
 
   @override
   String get professionalOrders => 'Professional Orders';
 
   @override
-  String get createDigitalOrders => 'Create customized digital service orders.';
+  String get createDigitalOrders => 'Create customized digital work orders.';
 
   @override
   String get customerManagement => 'Customer Management';
