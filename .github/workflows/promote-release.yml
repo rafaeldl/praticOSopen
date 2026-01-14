@@ -13,6 +13,11 @@ on:
         required: false
         type: boolean
         default: false
+      upload_screenshots:
+        description: 'Upload screenshots to stores (overrides auto-detection)'
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   validate:
@@ -102,6 +107,16 @@ jobs:
         run: |
           echo "📸 Screenshots changed: ${{ steps.filter.outputs.screenshots }}"
           echo "📝 Metadata changed: ${{ steps.filter.outputs.metadata }}"
+          echo "🎯 Upload screenshots input: ${{ inputs.upload_screenshots }}"
+
+          # Determine if screenshots should be uploaded
+          if [[ "${{ inputs.upload_screenshots }}" == "true" ]]; then
+            echo "✅ Screenshots WILL be uploaded (manual override enabled)"
+          elif [[ "${{ steps.filter.outputs.screenshots }}" == "true" ]]; then
+            echo "✅ Screenshots WILL be uploaded (changes detected)"
+          else
+            echo "⏭️  Screenshots will be SKIPPED (no changes detected and manual override disabled)"
+          fi
 
       # Setup Ruby + Bundler
       - name: Ruby (bundler cache)
@@ -125,13 +140,14 @@ jobs:
           CI: "true"
         run: |
           bundle exec fastlane promote_to_production \
-            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }}
+            skip_screenshots:${{ inputs.upload_screenshots == false && steps.filter.outputs.screenshots == 'false' }}
 
       - name: Summary
         run: |
+          SCREENSHOTS_UPLOADED="${{ inputs.upload_screenshots == true || steps.filter.outputs.screenshots == 'true' }}"
           echo "✅ Android promoted to production!"
           echo "   - Metadata uploaded: ${{ steps.filter.outputs.metadata }}"
-          echo "   - Screenshots uploaded: ${{ steps.filter.outputs.screenshots }}"
+          echo "   - Screenshots uploaded: $SCREENSHOTS_UPLOADED"
 
   promote-ios:
     needs: validate
@@ -161,6 +177,16 @@ jobs:
         run: |
           echo "📸 Screenshots changed: ${{ steps.filter.outputs.screenshots }}"
           echo "📝 Metadata changed: ${{ steps.filter.outputs.metadata }}"
+          echo "🎯 Upload screenshots input: ${{ inputs.upload_screenshots }}"
+
+          # Determine if screenshots should be uploaded
+          if [[ "${{ inputs.upload_screenshots }}" == "true" ]]; then
+            echo "✅ Screenshots WILL be uploaded (manual override enabled)"
+          elif [[ "${{ steps.filter.outputs.screenshots }}" == "true" ]]; then
+            echo "✅ Screenshots WILL be uploaded (changes detected)"
+          else
+            echo "⏭️  Screenshots will be SKIPPED (no changes detected and manual override disabled)"
+          fi
 
       # Setup Ruby + Bundler
       - name: Ruby (bundler cache)
@@ -183,13 +209,14 @@ jobs:
         run: |
           bundle exec fastlane promote \
             app_version:${{ needs.validate.outputs.version }} \
-            skip_screenshots:${{ steps.filter.outputs.screenshots == 'false' }}
+            skip_screenshots:${{ inputs.upload_screenshots == false && steps.filter.outputs.screenshots == 'false' }}
 
       - name: Summary
         run: |
+          SCREENSHOTS_UPLOADED="${{ inputs.upload_screenshots == true || steps.filter.outputs.screenshots == 'true' }}"
           echo "✅ iOS promoted to App Store!"
           echo "   - Metadata uploaded: ${{ steps.filter.outputs.metadata }}"
-          echo "   - Screenshots uploaded: ${{ steps.filter.outputs.screenshots }}"
+          echo "   - Screenshots uploaded: $SCREENSHOTS_UPLOADED"
 
   create-production-tag:
     needs: [validate, promote-android, promote-ios]
