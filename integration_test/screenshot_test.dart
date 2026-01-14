@@ -42,7 +42,7 @@ void main() {
       print('📸 Capturing Screenshot 1: Login');
       await Future.delayed(const Duration(seconds: 4));
       await tester.pumpAndSettle();
-      await binding.takeScreenshot('1_login');
+      await binding.takeScreenshot('01_login');
 
       // ========== LOGIN WITH DEMO ACCOUNT ==========
       print('🔐 Logging in with demo account for locale: $locale...');
@@ -74,7 +74,7 @@ void main() {
       print('=========================\n');
 
       print('📸 Capturing Screenshot 2: Home');
-      await binding.takeScreenshot('2_home');
+      await binding.takeScreenshot('02_home');
 
       // ========== SCREENSHOT 3: Dashboard ==========
       print('\n--- Screenshot 3: Dashboard ---');
@@ -130,7 +130,7 @@ void main() {
         await Future.delayed(const Duration(seconds: 2));
 
         print('📸 Capturing Screenshot 3: Dashboard');
-        await binding.takeScreenshot('02_dashboard');
+        await binding.takeScreenshot('03_dashboard');
 
         // Navigate back to home
         print('Navigating back to home...');
@@ -165,7 +165,7 @@ void main() {
         }
 
         print('📸 Capturing Screenshot 4: Order Form');
-        await binding.takeScreenshot('03_order_form');
+        await binding.takeScreenshot('04_order_form');
 
         // Go back
         print('Navigating back to home...');
@@ -206,7 +206,7 @@ void main() {
         print('Order detail opened');
 
         print('📸 Capturing Screenshot 5: Order Detail');
-        await binding.takeScreenshot('04_order_detail');
+        await binding.takeScreenshot('05_order_detail');
 
         // Go back
         print('Navigating back to home...');
@@ -294,7 +294,7 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
 
           print('📸 Capturing Screenshot 6: Dynamic Forms');
-          await binding.takeScreenshot('05_forms');
+          await binding.takeScreenshot('06_forms');
 
           // Go back twice (from form to order, order to home)
           print('Navigating back to home...');
@@ -385,7 +385,7 @@ void main() {
           print('Payments screen opened');
 
           print('📸 Capturing Screenshot 7: Payments');
-          await binding.takeScreenshot('06_payments');
+          await binding.takeScreenshot('07_payments');
 
           print('✅ Payments screenshot captured');
         } else {

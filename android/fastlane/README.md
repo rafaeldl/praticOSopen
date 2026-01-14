@@ -39,6 +39,14 @@ Build the Android App Bundle (AAB) using Flutter
 
 Deploy a new version to the Google Play Internal Track
 
+### android deploy_with_metadata
+
+```sh
+[bundle exec] fastlane android deploy_with_metadata
+```
+
+Deploy to Internal Track with Metadata and Screenshots
+
 ### android promote_to_production
 
 ```sh
@@ -61,7 +69,15 @@ Capture screenshots automatically using Flutter integration tests
 [bundle exec] fastlane android screenshots_all
 ```
 
-Capture screenshots for Phone, 7-inch Tablet, and 10-inch Tablet
+Capture screenshots for all locales and all device types
+
+### android screenshots_pt_br
+
+```sh
+[bundle exec] fastlane android screenshots_pt_br
+```
+
+Capture screenshots only for pt-BR (backwards compatibility)
 
 ----
 

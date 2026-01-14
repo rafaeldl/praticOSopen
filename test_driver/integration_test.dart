@@ -22,27 +22,35 @@ Future<void> main() async {
 
   print('📸 Screenshots will be saved to: $screenshotDir');
 
-  // Mapeamento de nomes para o formato iOS
+  // Mapeamento de nomes para diferentes plataformas
   final Map<String, String> iosNameMapping = {
-    '1_login': '00_Login',
-    '2_home': '01_Home',
-    '3_order_detail': '02_OrderDetail',
-    '4_order_form': '03_OrderForm',
-    '5_forms': '04_Forms',
-    '6_collaborators': '05_Collaborators',
-    '7_dashboard': '06_Dashboard',
+    '01_login': '00_Login',
+    '02_home': '01_Home',
+    '03_dashboard': '02_dashboard',
+    '04_order_form': '03_order_form',
+    '05_order_detail': '04_order_detail',
+    '06_forms': '05_forms',
+    '07_payments': '06_payments',
+  };
+
+  final Map<String, String> androidNameMapping = {
+    '01_login': '01-login',
+    '02_home': '02-home',
+    '03_dashboard': '03-dashboard',
+    '04_order_form': '04-order_form',
+    '05_order_detail': '05-order_detail',
+    '06_forms': '06-forms',
+    '07_payments': '07-payments',
   };
 
   await integrationDriver(
     onScreenshot: (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {
-      // Extrai o número do nome (ex: "1_login" -> "1")
-      final number = screenshotName.split('_').first;
-
       // Define o nome final do arquivo
       final String filename;
       if (screenshotDir.contains('android')) {
-        // Android: usa apenas número (1.png, 2.png, etc.)
-        filename = '$number.png';
+        // Android: usa formato descritivo (01-login.png, 02-home.png, etc.)
+        final androidName = androidNameMapping[screenshotName] ?? screenshotName;
+        filename = '$androidName.png';
       } else {
         // iOS: usa formato com prefixo do dispositivo e nome mapeado
         final deviceName = Platform.environment['DEVICE_NAME'] ?? 'iPhone 16e';
