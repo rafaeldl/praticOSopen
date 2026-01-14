@@ -219,6 +219,7 @@ class _OrderFormState extends State<OrderForm> {
                     ? CupertinoColors.systemGreen
                     : (isPartial ? CupertinoColors.systemBlue : CupertinoColors.systemOrange),
                 isLast: true,
+                identifier: 'payment_button',
               ),
           ],
         );
@@ -638,9 +639,10 @@ class _OrderFormState extends State<OrderForm> {
     Color? textColor,
     bool isBold = false,
     bool enabled = true,
+    String? identifier,
   }) {
     final hasValue = value != null && value.isNotEmpty;
-    return GestureDetector(
+    final tile = GestureDetector(
       onTap: enabled ? onTap : null,
       child: Container(
         color: Colors.transparent, // Hit test
@@ -707,6 +709,17 @@ class _OrderFormState extends State<OrderForm> {
         ),
       ),
     );
+
+    // Wrap with Semantics if identifier is provided
+    if (identifier != null) {
+      return Semantics(
+        identifier: identifier,
+        button: true,
+        child: tile,
+      );
+    }
+
+    return tile;
   }
   
   Widget _buildServiceRow(BuildContext context, dynamic service, int index, bool isLast, SegmentConfigProvider config) {

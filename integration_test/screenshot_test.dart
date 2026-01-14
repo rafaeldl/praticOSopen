@@ -362,31 +362,24 @@ void main() {
           await Future.delayed(const Duration(seconds: 1));
         }
 
-        // Look for payments chevron (second-to-last chevron)
-        final paymentChevrons = find.byIcon(CupertinoIcons.chevron_right);
-        print('Found ${paymentChevrons.evaluate().length} chevrons');
+        // Look for payment button using semantic identifier
+        print('Looking for payment button by semantic identifier...');
+        final paymentSemantics = find.byType(Semantics);
+        Finder? paymentButton;
 
-        // Get second-to-last chevron (payments is before forms)
-        int secondToLastIndex = -1;
-        List<int> validIndices = [];
-        for (var i = 0; i < paymentChevrons.evaluate().length; i++) {
-          try {
-            final itemPos = tester.getTopLeft(paymentChevrons.at(i));
-            if (itemPos.dy > 200) {
-              validIndices.add(i);
-            }
-          } catch (e) {
-            // Skip
+        for (var i = 0; i < paymentSemantics.evaluate().length; i++) {
+          final widget = tester.widget<Semantics>(paymentSemantics.at(i));
+          final identifier = widget.properties.identifier?.toString() ?? '';
+          if (identifier == 'payment_button') {
+            paymentButton = paymentSemantics.at(i);
+            print('Found payment button with semantic identifier');
+            break;
           }
         }
 
-        if (validIndices.length >= 2) {
-          secondToLastIndex = validIndices[validIndices.length - 2];
-          print('Using second-to-last chevron at index $secondToLastIndex for payments');
-
-          final paymentsChevron = paymentChevrons.at(secondToLastIndex);
-          print('Tapping payments chevron...');
-          await tester.tap(paymentsChevron);
+        if (paymentButton != null) {
+          print('Tapping payment button...');
+          await tester.tap(paymentButton);
           await tester.pumpAndSettle();
           await Future.delayed(const Duration(seconds: 2));
           print('Payments screen opened');
@@ -396,7 +389,7 @@ void main() {
 
           print('✅ Payments screenshot captured');
         } else {
-          print('⚠️ Could not find payments chevron, skipping screenshot 7');
+          print('⚠️ Could not find payment button, skipping screenshot 7');
         }
       } else {
         print('⚠️ Order card not found for payments, skipping screenshot 7');
