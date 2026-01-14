@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, ScaffoldMessenger, SnackBar, Material, MaterialType, Divider; 
+import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider;
 // Keeping Material for some specific helpers or if absolutely needed, but main UI is Cupertino.
 // Actually, strict HIG means avoiding Material widgets where possible.
 // I will try to rely purely on Cupertino for the visual tree.
@@ -1216,39 +1216,62 @@ class _OrderFormState extends State<OrderForm> {
   }
   
   void _showAddPhotoOptions(SegmentConfigProvider config) {
+    // Save the widget's context before entering the action sheet builder
+    final widgetContext = context;
+
     showCupertinoModalPopup(
       context: context,
-      builder: (context) => CupertinoActionSheet(
+      builder: (actionSheetContext) => CupertinoActionSheet(
         title: Text(context.l10n.addPhoto),
         actions: [
            CupertinoActionSheetAction(
             child: Text(context.l10n.takePhoto),
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(actionSheetContext);
               final success = await _store.addPhotoFromCamera();
               if (!success && mounted) {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.l10n.errorOccurred)),
-                  );
+                showCupertinoDialog(
+                  context: widgetContext,
+                  builder: (dialogContext) => CupertinoAlertDialog(
+                    title: Text(widgetContext.l10n.errorOccurred),
+                    content: Text(widgetContext.l10n.errorOccurred),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: Text(widgetContext.l10n.ok),
+                        onPressed: () => Navigator.pop(dialogContext),
+                      ),
+                    ],
+                  ),
+                );
               }
             },
           ),
            CupertinoActionSheetAction(
             child: Text(context.l10n.chooseFromGallery),
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(actionSheetContext);
               final success = await _store.addPhotoFromGallery();
-               if (!success && mounted) {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.l10n.errorOccurred)),
-                  );
+              if (!success && mounted) {
+                showCupertinoDialog(
+                  context: widgetContext,
+                  builder: (dialogContext) => CupertinoAlertDialog(
+                    title: Text(widgetContext.l10n.errorOccurred),
+                    content: Text(widgetContext.l10n.errorOccurred),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: Text(widgetContext.l10n.ok),
+                        onPressed: () => Navigator.pop(dialogContext),
+                      ),
+                    ],
+                  ),
+                );
               }
             },
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(actionSheetContext),
         ),
       ),
     );
