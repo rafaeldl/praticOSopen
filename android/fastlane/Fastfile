@@ -130,35 +130,94 @@ platform :android do
 
   desc "Capture screenshots automatically using Flutter integration tests"
   lane :screenshots do |options|
-    device = options[:device] || "emulator-5554"
+    device = options[:device]
+    avd_name = options[:avd] || options[:avd_name]
+    locale = options[:locale] || "pt-BR"
     force_logout = options[:force_logout]
-    
+
+    # If AVD name provided, boot automatically. Otherwise use existing device.
+    if avd_name
+      UI.message("🤖 Will boot emulator automatically: #{avd_name}")
+    elsif device
+      UI.message("📱 Using existing device: #{device}")
+    else
+      UI.user_error!("❌ Must provide either :device or :avd parameter")
+    end
+
     capture_screenshots_for_device(
       device: device,
       folder_name: "phoneScreenshots",
-      force_logout: force_logout
+      locale: locale,
+      force_logout: force_logout,
+      avd_name: avd_name
     )
   end
 
-  desc "Capture screenshots for Phone, 7-inch Tablet, and 10-inch Tablet"
+  desc "Capture screenshots for all locales and all device types"
   lane :screenshots_all do |options|
-    # Default emulator names (usually 5554=Phone, 5556=7", 5558=10" if launched in that order)
+    # AVD names (can be customized via options)
+    # Run `emulator -list-avds` to see your available AVDs
+    phone_avd = options[:phone_avd] || "Pixel_7"
+    tablet7_avd = options[:tablet7_avd] || "Pixel_Tablet"
+    tablet10_avd = options[:tablet10_avd] || "Pixel_Tablet"  # Using same as 7" if no 10" available
+
+    force_logout = options[:force_logout]
+    # Parallel is NOT supported when using auto-boot (emulators conflict)
+    parallel = false
+    locales = ["pt-BR", "en-US", "es-ES"]
+
+    UI.important("🤖 Emulators will be started automatically!")
+    UI.message("   📱 Phone: #{phone_avd}")
+    UI.message("   📟 Tablet 7\": #{tablet7_avd}")
+    UI.message("   💻 Tablet 10\": #{tablet10_avd}")
+
+    locales.each do |locale|
+      UI.message("🌍 Generating screenshots for locale: #{locale}")
+      UI.message("🐌 Running devices in SEQUENTIAL mode (auto-boot)")
+
+      # Phone
+      capture_screenshots_for_device(
+        device: nil,  # Will be determined after boot
+        folder_name: "phoneScreenshots",
+        locale: locale,
+        force_logout: force_logout,
+        avd_name: phone_avd
+      )
+
+      # 7-inch Tablet
+      capture_screenshots_for_device(
+        device: nil,
+        folder_name: "sevenInchScreenshots",
+        locale: locale,
+        force_logout: force_logout,
+        avd_name: tablet7_avd
+      )
+
+      # 10-inch Tablet
+      capture_screenshots_for_device(
+        device: nil,
+        folder_name: "tenInchScreenshots",
+        locale: locale,
+        force_logout: force_logout,
+        avd_name: tablet10_avd
+      )
+    end
+
+    UI.success("✅ All screenshots generated for #{locales.length} locales!")
+  end
+
+  desc "Capture screenshots only for pt-BR (backwards compatibility)"
+  lane :screenshots_pt_br do |options|
     phone_device = options[:phone_device] || "emulator-5554"
     tablet7_device = options[:tablet7_device] || "emulator-5556"
     tablet10_device = options[:tablet10_device] || "emulator-5558"
-    
     force_logout = options[:force_logout]
-
-    UI.important("⚠️  Ensure you have 3 emulators running!")
-    UI.message("   📱 Phone: #{phone_device}")
-    UI.message("   📟 Tablet 7\": #{tablet7_device}")
-    UI.message("   💻 Tablet 10\": #{tablet10_device}")
-    UI.message("   (If your IDs are different, pass them like: tablet10_device:'emulator-5560')")
 
     # Phone
     capture_screenshots_for_device(
       device: phone_device,
       folder_name: "phoneScreenshots",
+      locale: "pt-BR",
       force_logout: force_logout
     )
 
@@ -166,6 +225,7 @@ platform :android do
     capture_screenshots_for_device(
       device: tablet7_device,
       folder_name: "sevenInchScreenshots",
+      locale: "pt-BR",
       force_logout: force_logout
     )
 
@@ -173,18 +233,136 @@ platform :android do
     capture_screenshots_for_device(
       device: tablet10_device,
       folder_name: "tenInchScreenshots",
+      locale: "pt-BR",
       force_logout: force_logout
     )
   end
-  
-  # Helper function to run the screenshot process
-  def capture_screenshots_for_device(device:, folder_name:, force_logout:)
-    UI.message("📸 Capturing screenshots for #{folder_name} on device: #{device}")
 
-    # Define o diretório baseado no tipo (folder_name)
-    base_screenshots_dir = "fastlane/metadata/android/pt-BR/images"
+  # Helper function to get Android SDK path
+  def get_android_sdk_path
+    # Try ANDROID_HOME or ANDROID_SDK_ROOT environment variables
+    sdk_path = ENV['ANDROID_HOME'] || ENV['ANDROID_SDK_ROOT']
+
+    # If not set, try common locations
+    if sdk_path.nil? || sdk_path.empty?
+      common_paths = [
+        File.expand_path("~/Library/Android/sdk"),     # macOS default
+        File.expand_path("~/Android/Sdk"),             # Linux default
+        "/usr/local/android-sdk"                       # Alternative
+      ]
+
+      sdk_path = common_paths.find { |path| Dir.exist?(path) }
+    end
+
+    if sdk_path.nil?
+      UI.user_error!("❌ Android SDK not found. Please set ANDROID_HOME environment variable or install Android SDK.")
+    end
+
+    sdk_path
+  end
+
+  # Helper function to boot and reset emulator
+  def boot_emulator(avd_name:, locale:)
+    UI.message("🔄 Preparing emulator: #{avd_name} with locale: #{locale}")
+
+    # Get Android SDK paths
+    sdk_path = get_android_sdk_path
+    adb = File.join(sdk_path, "platform-tools", "adb")
+    emulator = File.join(sdk_path, "emulator", "emulator")
+
+    UI.message("Using Android SDK: #{sdk_path}")
+
+    # 1. Kill emulator if already running
+    UI.message("Killing any existing emulator instances...")
+    sh("#{adb} devices | grep emulator | cut -f1 | xargs -I {} #{adb} -s {} emu kill || true")
+    sleep(2)
+
+    # 2. Start emulator fresh (no snapshot, wipe data for clean state)
+    UI.message("🚀 Starting emulator: #{avd_name}")
+    spawn("#{emulator} -avd #{avd_name} -no-snapshot-load -no-audio -no-boot-anim")
+
+    # 3. Wait for emulator to boot (check boot_completed property)
+    UI.message("⏳ Waiting for emulator to boot...")
+    max_attempts = 60
+    attempts = 0
+    booted = false
+
+    while attempts < max_attempts && !booted
+      sleep(5)
+      attempts += 1
+
+      # Get first emulator device
+      device = `#{adb} devices | grep emulator | head -1 | cut -f1`.strip
+
+      if !device.empty?
+        boot_status = `#{adb} -s #{device} shell getprop sys.boot_completed 2>/dev/null`.strip
+        if boot_status == "1"
+          booted = true
+          UI.message("✅ Emulator booted: #{device}")
+
+          # 4. Set locale
+          UI.message("🌍 Setting locale to: #{locale}")
+
+          # Map locale to Android format
+          android_locale = case locale
+            when "pt-BR" then "pt-BR"
+            when "en-US" then "en-US"
+            when "es-ES" then "es-ES"
+            else "en-US"
+          end
+
+          # Set system locale
+          sh("#{adb} -s #{device} shell settings put system system_locales #{android_locale}") rescue nil
+          sh("#{adb} -s #{device} shell setprop persist.sys.locale #{android_locale}") rescue nil
+
+          # 5. Restart UI to apply locale
+          UI.message("Restarting UI to apply locale...")
+          sh("#{adb} -s #{device} shell stop") rescue nil
+          sleep(2)
+          sh("#{adb} -s #{device} shell start") rescue nil
+          sleep(5)
+
+          # 6. Wait for boot_completed again after restart
+          UI.message("⏳ Waiting for UI to restart...")
+          wait_attempts = 0
+          ui_ready = false
+          while wait_attempts < 20 && !ui_ready
+            sleep(2)
+            wait_attempts += 1
+            boot_status = `#{adb} -s #{device} shell getprop sys.boot_completed 2>/dev/null`.strip
+            if boot_status == "1"
+              ui_ready = true
+              UI.success("✅ Emulator ready: #{device} (locale: #{locale})")
+            end
+          end
+
+          return device
+        end
+      end
+    end
+
+    UI.error("❌ Emulator failed to boot after #{max_attempts * 5} seconds")
+    nil
+  end
+
+  # Helper function to run the screenshot process
+  def capture_screenshots_for_device(device:, folder_name:, locale:, force_logout:, avd_name: nil)
+    UI.message("📸 Capturing screenshots for #{folder_name} on device: #{device}, locale: #{locale}")
+
+    # Boot emulator if AVD name provided
+    if avd_name
+      actual_device = boot_emulator(avd_name: avd_name, locale: locale)
+      if actual_device.nil?
+        UI.error("⚠️ Failed to boot emulator, skipping screenshots")
+        return
+      end
+      device = actual_device
+    end
+
+    # Define o diretório baseado no tipo (folder_name) e locale
+    base_screenshots_dir = "fastlane/metadata/android/#{locale}/images"
     target_dir = "#{base_screenshots_dir}/#{folder_name}"
-    
+
     # Limpa screenshots anteriores desse tipo
     FileUtils.rm_rf(Dir.glob("#{target_dir}/*.png"))
     FileUtils.mkdir_p(target_dir)
@@ -192,30 +370,32 @@ platform :android do
     # Executa o teste de integração Flutter
     Dir.chdir("..") do
       ENV['FLUTTER_TEST_PLATFORM'] = 'android'
+      ENV['TEST_LOCALE'] = locale
       # Passa o diretório de destino para o driver Dart via variável de ambiente
       ENV['SCREENSHOT_DIR'] = "android/#{target_dir}"
-      
+
       command_args = [
         "fvm", "flutter", "drive",
         "--driver=test_driver/integration_test.dart",
         "--target=integration_test/screenshot_test.dart",
+        "--dart-define=TEST_LOCALE=#{locale}",
         "-d", device
       ]
-      
+
       if force_logout
         command_args << "--dart-define=FORCE_LOGOUT=#{force_logout}"
       end
-      
+
       begin
         sh(*command_args)
       rescue => ex
-        UI.error("❌ Error capturing screenshots for #{folder_name} on #{device}: #{ex}")
+        UI.error("❌ Error capturing screenshots for #{folder_name} on #{device} (#{locale}): #{ex}")
         # Não para o processo inteiro se um falhar, mas avisa
       end
     end
 
     # Lista screenshots capturadas
     screenshots = Dir.glob("#{target_dir}/*.png")
-    UI.success("✅ Captured #{screenshots.length} screenshots for #{folder_name}")
+    UI.success("✅ Captured #{screenshots.length} screenshots for #{folder_name} (#{locale})")
   end
 end

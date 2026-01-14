@@ -2,43 +2,55 @@ import 'dart:io';
 import 'package:integration_test/integration_test_driver_extended.dart';
 
 Future<void> main() async {
+  // Get locale from environment (default: pt-BR)
+  final locale = Platform.environment['TEST_LOCALE'] ?? 'pt-BR';
+  print('🌍 Test locale: $locale');
+
   // Detecta a plataforma baseado no device conectado
   final isAndroid = Platform.environment['FLUTTER_TEST_PLATFORM'] == 'android' ||
       !Platform.environment.containsKey('FLUTTER_TEST_PLATFORM');
 
-  // Define o diretório de destino baseado na plataforma
+  // Define o diretório de destino baseado na plataforma e locale
   final String screenshotDir;
   if (Platform.environment.containsKey('SCREENSHOT_DIR')) {
     screenshotDir = Platform.environment['SCREENSHOT_DIR']!;
   } else if (isAndroid) {
-    screenshotDir = 'android/fastlane/metadata/android/pt-BR/images/phoneScreenshots';
+    screenshotDir = 'android/fastlane/metadata/android/$locale/images/phoneScreenshots';
   } else {
-    screenshotDir = 'ios/fastlane/screenshots/pt-BR';
+    screenshotDir = 'ios/fastlane/screenshots/$locale';
   }
 
   print('📸 Screenshots will be saved to: $screenshotDir');
 
-  // Mapeamento de nomes para o formato iOS
+  // Mapeamento de nomes para diferentes plataformas
   final Map<String, String> iosNameMapping = {
-    '1_login': '00_Login',
-    '2_home': '01_Home',
-    '3_order_detail': '02_OrderDetail',
-    '4_dashboard': '03_Dashboard',
-    '5_customers': '04_Customers',
-    '6_customer_detail': '05_CustomerDetail',
-    '7_settings': '06_Settings',
+    '01_home': '00_Home',
+    '02_order_detail': '01_OrderDetail',
+    '03_segments': '02_Segments',
+    '04_dashboard': '03_Dashboard',
+    '05_payments': '04_Payments',
+    '06_forms': '05_Forms',
+    '07_login': '06_Login',
+  };
+
+  final Map<String, String> androidNameMapping = {
+    '01_home': '01-home',
+    '02_order_detail': '02-order_detail',
+    '03_segments': '03-segments',
+    '04_dashboard': '04-dashboard',
+    '05_payments': '05-payments',
+    '06_forms': '06-forms',
+    '07_login': '07-login',
   };
 
   await integrationDriver(
     onScreenshot: (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {
-      // Extrai o número do nome (ex: "1_login" -> "1")
-      final number = screenshotName.split('_').first;
-
       // Define o nome final do arquivo
       final String filename;
       if (screenshotDir.contains('android')) {
-        // Android: usa apenas número (1.png, 2.png, etc.)
-        filename = '$number.png';
+        // Android: usa formato descritivo (01-login.png, 02-home.png, etc.)
+        final androidName = androidNameMapping[screenshotName] ?? screenshotName;
+        filename = '$androidName.png';
       } else {
         // iOS: usa formato com prefixo do dispositivo e nome mapeado
         final deviceName = Platform.environment['DEVICE_NAME'] ?? 'iPhone 16e';

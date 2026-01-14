@@ -521,6 +521,7 @@
   "signInWithEmail": "Iniciar sesión con email",
   "byContinuingYouAgree": "Al continuar, acepta nuestra",
   "error": "Error",
+  "couldNotLoadCompanyData": "No se pudieron cargar los datos de la empresa",
   "errorSignInApple": "Error al iniciar sesión con Apple",
   "errorSignInGoogle": "Error al iniciar sesión con Google",
   "companyNotFound": "Empresa no encontrada",
@@ -543,6 +544,8 @@
   "companyData": "Datos de la Empresa",
   "interface_": "Interfaz",
   "nightMode": "Modo Nocturno",
+  "reopenOnboarding": "Configuración Inicial",
+  "reconfigureCompanySetup": "Reconfigurar datos y segmento de la empresa",
   "account": "Cuenta",
   "deleteAccount": "Eliminar Cuenta",
   "permanentlyRemoveAllData": "Eliminar permanentemente todos los datos",
@@ -816,6 +819,17 @@
 
   "availableSpecialties": "ESPECIALIDADES DISPONIBLES",
   "pleaseSelectAtLeastOneSpecialty": "Por favor, seleccione al menos una especialidad para continuar.",
+  "selectSpecialtiesDescription": "Seleccione las especialidades de su empresa.\nPuede elegir más de una.",
+  "noName": "Sin nombre",
+  "selectAtLeastOneOption": "Seleccione al menos una opción",
+  "continueWithCount": "Continuar ({count} {count, plural, =1{seleccionada} other{seleccionadas}})",
+  "@continueWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
 
   "selectCountry": "Seleccionar País",
 

@@ -2,7 +2,7 @@ What's new in this version:
 
 • User Profiles System: Complete permission control by role (Owner, Administrator, Manager, Supervisor, Technician, and Viewer). Each role has specific access to app features.
 
-• Partial Payments: Record and track multiple payments for a single service order, with full transaction history in the PDF.
+• Partial Payments: Record and track multiple payments for a single work order, with full transaction history in the PDF.
 
 • Improved Search: New search with infinite scroll, chip filters, and due date indicator with visual highlight for overdue orders.
 
@@ -12,7 +12,7 @@ What's new in this version:
 
 • Invitation System: Invite collaborators by email to your company.
 
-• Interface Improvements: Service order list redesign following Apple HIG, fully functional dark mode, and several visual fixes.
+• Interface Improvements: Work order list redesign following Apple HIG, fully functional dark mode, and several visual fixes.
 
 • Enhanced PDF: Optimized layout with store links and highlights for paid amounts.
 

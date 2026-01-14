@@ -11,6 +11,8 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/onboarding/company_info_screen.dart';
+import 'package:praticos/repositories/company_repository.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -219,6 +221,31 @@ class _SettingsState extends State<Settings> {
                     trailing: const CupertinoListTileChevron(),
                     onTap: () => _showThemeSelectionDialog(context, themeStore, config),
                   ),
+                  // Reabrir Onboarding - para reconfigurar empresa e capturar screenshots
+                  Observer(builder: (_) {
+                    if (_authService.hasPermission(PermissionType.manageCompany)) {
+                      return Semantics(
+                        identifier: 'reopen_onboarding_button',
+                        button: true,
+                        label: context.l10n.reopenOnboarding,
+                        child: CupertinoListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: CupertinoColors.systemPurple,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Icon(CupertinoIcons.refresh_bold, color: CupertinoColors.white, size: 20),
+                          ),
+                          title: Text(context.l10n.reopenOnboarding),
+                          subtitle: Text(context.l10n.reconfigureCompanySetup),
+                          trailing: const CupertinoListTileChevron(),
+                          onTap: () => _reopenOnboarding(context),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  }),
                 ],
               ),
 
@@ -238,19 +265,6 @@ class _SettingsState extends State<Settings> {
                     title: Text(context.l10n.logout, style: const TextStyle(color: CupertinoColors.systemRed)),
                     onTap: () => _showLogoutConfirmation(context, config),
                   ),
-                  CupertinoListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemRed,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(CupertinoIcons.trash_fill, color: CupertinoColors.white, size: 20),
-                    ),
-                    title: Text(context.l10n.deleteAccount, style: const TextStyle(color: CupertinoColors.systemRed)),
-                    subtitle: Text(context.l10n.permanentlyRemoveAllData),
-                    onTap: () => _showDeleteAccountConfirmation(context, config),
-                  ),
                 ],
               ),
 
@@ -267,10 +281,8 @@ class _SettingsState extends State<Settings> {
                   ),
                 ),
               ),
-              
-                
-              
-                const SizedBox(height: 40),
+
+              const SizedBox(height: 40),
               
               ]),
               
@@ -392,220 +404,54 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  void _showDeleteAccountConfirmation(BuildContext context, SegmentConfigProvider config) {
-    showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.deleteAccount),
-        content: Text(context.l10n.deleteAccountWarning),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              _showDeleteAccountFinalConfirmation(context);
-            },
-            child: Text(context.l10n.continue_),
-          ),
-        ],
-      ),
-    );
-  }
+  /// Reopen onboarding to reconfigure company setup
+  Future<void> _reopenOnboarding(BuildContext context) async {
+    final companyAggr = _authStore.companyAggr;
 
-  void _showDeleteAccountFinalConfirmation(BuildContext context) {
-    showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.finalConfirmation),
-        content: Text(context.l10n.lastChanceCancel),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              // Close confirmation dialog
-              Navigator.pop(dialogContext);
-
-              // Save the navigator state before showing dialog
-              final navigatorState = Navigator.of(context);
-
-              // Show loading indicator
-              showCupertinoDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (loadingContext) => const Center(
-                  child: CupertinoActivityIndicator(radius: 20),
-                ),
-              );
-
-              try {
-                await _authStore.deleteAccount();
-
-                // Close loading dialog - use try-catch to prevent crash if widget unmounted
-                try {
-                  navigatorState.pop();
-                } catch (e) {
-                  print('⚠️  Could not close loading dialog (widget may be unmounted): $e');
-                }
-
-                // Auth state change will automatically redirect to login
-              } catch (e) {
-                // Close loading dialog - use try-catch to prevent crash if widget unmounted
-                try {
-                  navigatorState.pop();
-                } catch (popError) {
-                  print('⚠️  Could not close loading dialog (widget may be unmounted): $popError');
-                }
-
-                // Check if re-authentication is required
-                if (e.toString().contains('REQUIRES_RECENT_LOGIN')) {
-                  print('🔐 Re-authentication required, prompting user...');
-                  _showReauthenticationDialog(context);
-                  return;
-                }
-
-                // Show error dialog
-                try {
-                  showCupertinoDialog(
-                    context: context,
-                    builder: (errorContext) => CupertinoAlertDialog(
-                      title: Text(context.l10n.errorDeletingAccount),
-                      content: Text(
-                        '${context.l10n.couldNotDeleteAccount}\n\n'
-                        '${_formatErrorMessage(context, e.toString())}',
-                      ),
-                      actions: [
-                        CupertinoDialogAction(
-                          child: Text(context.l10n.ok),
-                          onPressed: () {
-                            try {
-                              Navigator.pop(errorContext);
-                            } catch (e) {
-                              print('⚠️  Could not close error dialog: $e');
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                } catch (dialogError) {
-                  print('⚠️  Could not show error dialog (widget may be unmounted): $dialogError');
-                }
-              }
-            },
-            child: Text(context.l10n.permanentlyDelete),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showReauthenticationDialog(BuildContext context) {
-    showCupertinoDialog(
-      context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(context.l10n.reauthenticationRequired),
-        content: Text(context.l10n.pleaseSignInAgainToDelete),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-
-              // Show loading indicator
-              showCupertinoDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (loadingContext) => const Center(
-                  child: CupertinoActivityIndicator(radius: 20),
-                ),
-              );
-
-              try {
-                // Re-authenticate the user
-                await _authStore.reauthenticate();
-
-                // Close loading dialog
-                Navigator.pop(context);
-
-                // Show success message and retry deletion
-                showCupertinoDialog(
-                  context: context,
-                  builder: (successContext) => CupertinoAlertDialog(
-                    title: Text(context.l10n.authenticated),
-                    content: Text(context.l10n.nowDeletingAccount),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text(context.l10n.ok),
-                        onPressed: () async {
-                          Navigator.pop(successContext);
-                          // Retry deletion after re-authentication
-                          _showDeleteAccountFinalConfirmation(context);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              } catch (e) {
-                // Close loading dialog
-                Navigator.pop(context);
-
-                // Show error
-                showCupertinoDialog(
-                  context: context,
-                  builder: (errorContext) => CupertinoAlertDialog(
-                    title: Text(context.l10n.reauthenticationFailed),
-                    content: Text(
-                      '${context.l10n.couldNotReauthenticate}\n\n'
-                      '${_formatErrorMessage(context, e.toString())}',
-                    ),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text(context.l10n.ok),
-                        onPressed: () => Navigator.pop(errorContext),
-                      ),
-                    ],
-                  ),
-                );
-              }
-            },
-            child: Text(context.l10n.signInAgain),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Format error messages to be user-friendly
-  String _formatErrorMessage(BuildContext context, String error) {
-    // Check for business logic errors
-    if (error.contains('proprietário de uma empresa com outros membros')) {
-      return error.replaceAll('Exception: ', '');
+    if (companyAggr?.id == null) {
+      return;
     }
 
-    // Check for Firebase Auth errors
-    if (error.contains('requires-recent-login')) {
-      return context.l10n.requiresRecentLogin;
-    }
-    if (error.contains('permission-denied')) {
-      return context.l10n.noPermissionDelete;
-    }
-    if (error.contains('network')) {
-      return context.l10n.networkError;
-    }
+    try {
+      // Fetch full company data
+      final companyRepo = CompanyRepository();
+      final company = await companyRepo.getSingle(companyAggr!.id);
 
-    // Generic error
-    return '${context.l10n.error}: ${error.replaceAll('[firebase_auth/', '').replaceAll('Exception: ', '').replaceAll(']', '')}';
+      // Navigate directly to company info screen (skip welcome screen)
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => CompanyInfoScreen(
+              authStore: _authStore,
+              companyId: company?.id,
+              initialName: company?.name,
+              initialAddress: company?.address,
+              initialPhone: company?.phone,
+              initialEmail: company?.email,
+              initialSite: company?.site,
+              initialLogoUrl: company?.logo,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Show error
+      if (context.mounted) {
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: Text(context.l10n.error),
+            content: Text('${context.l10n.couldNotLoadCompanyData}\n\n$e'),
+            actions: [
+              CupertinoDialogAction(
+                child: Text(context.l10n.ok),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 }

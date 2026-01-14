@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show InkWell, Navigator, NavigatorState, Icon;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:praticos/main.dart' as app;
@@ -8,249 +7,606 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Screenshot Tests', () {
-    testWidgets('capture all 7 screenshots for Play Store', (WidgetTester tester) async {
+    testWidgets('capture all 7 screenshots for App Store', (WidgetTester tester) async {
+      // Get locale from environment (default: pt-BR)
+      const locale = String.fromEnvironment('TEST_LOCALE', defaultValue: 'pt-BR');
+      print('\n========================================');
+      print('📱 Starting screenshot tests');
+      print('🌍 Locale: $locale');
+      print('========================================\n');
+
       // Initialize the app
+      print('🚀 Initializing app...');
       app.main();
       await tester.pumpAndSettle();
 
       // Wait for app to fully load
-      await Future.delayed(const Duration(seconds: 3));
+      print('⏳ Waiting for app initialization...');
+      await Future.delayed(const Duration(seconds: 5));
       await tester.pumpAndSettle();
+      print('✅ App initialized');
 
       // Check if already logged in and logout if requested
       const forceLogout = bool.fromEnvironment('FORCE_LOGOUT', defaultValue: true);
-      
+
       final emailLoginLink = find.textContaining('email');
       if (forceLogout && emailLoginLink.evaluate().isEmpty) {
         print('📱 App already logged in, forcing logout to start fresh...');
-        
-        // Find CupertinoTabBar and tap third item (Settings)
-        final tabBar = find.byType(CupertinoTabBar);
-        if (tabBar.evaluate().isNotEmpty) {
-          final tabBarBox = tester.getRect(tabBar);
-          // 3 tabs: 0-1/3 (Home), 1/3-2/3 (Customers), 2/3-1 (Settings)
-          final settingsTabX = tabBarBox.left + (tabBarBox.width / 3) * 2.5;
-          final tabY = tabBarBox.center.dy;
-          
-          await tester.tapAt(Offset(settingsTabX, tabY));
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 2));
-
-          // Find "Sair" button in Settings
-          final logoutTile = find.text('Sair');
-          if (logoutTile.evaluate().isNotEmpty) {
-            await tester.tap(logoutTile.first);
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 1));
-
-            // Confirm logout in CupertinoAlertDialog
-            final confirmButton = find.descendant(
-              of: find.byType(CupertinoAlertDialog),
-              matching: find.text('Sair'),
-            );
-            
-            if (confirmButton.evaluate().isNotEmpty) {
-              await tester.tap(confirmButton.last); // Usually the action button is the last one
-              await tester.pumpAndSettle();
-              print('✅ Logged out successfully');
-              
-              // Wait for login page to appear
-              await Future.delayed(const Duration(seconds: 3));
-              await tester.pumpAndSettle();
-            }
-          }
-        }
+        await _performLogout(tester);
       }
 
       // Android specific: Enable screenshot capture
       await binding.convertFlutterSurfaceToImage();
 
-      // ========== SCREENSHOT 1: Login ==========
-      print('📸 Capturing Screenshot 1: Login');
-      // Wait extra time for the logo and assets to decode and render clearly
+      // ========== SCREENSHOT 7: Login Screen (captured before login) ==========
+      print('\n--- Screenshot 7: Login Screen ---');
+      print('Waiting for login screen to be ready...');
       await Future.delayed(const Duration(seconds: 4));
       await tester.pumpAndSettle();
-      await binding.takeScreenshot('1_login');
+      print('📸 Capturing Screenshot 7: Login');
+      await binding.takeScreenshot('07_login');
 
       // ========== LOGIN WITH DEMO ACCOUNT ==========
-      print('🔐 Logging in with demo account...');
+      print('🔐 Logging in with demo account for locale: $locale...');
+      await _performLogin(tester, locale);
 
-      // Find and tap "Entrar com email" link
-      final emailLinkByText = find.textContaining('email', skipOffstage: false);
-      if (emailLinkByText.evaluate().isNotEmpty) {
-        await tester.tap(emailLinkByText.first);
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 1));
+      // ========== SCREENSHOT 1: Home (Order List) ==========
+      print('\n--- Screenshot 1: Home ---');
+      print('Waiting for home screen to load...');
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(seconds: 5));
+      await tester.pumpAndSettle();
+      print('Home screen loaded');
 
-        // Enter email
-        final emailField = find.byType(CupertinoTextFormFieldRow).first;
-        await tester.enterText(emailField, 'demo@praticos.com.br');
-        await tester.pumpAndSettle();
+      // Debug: print widget tree to see what's actually on screen
+      print('\n=== WIDGET TREE DEBUG ===');
+      final widgets = tester.allWidgets.toList();
+      print('Total widgets: ${widgets.length}');
 
-        // Enter password
-        final passwordField = find.byType(CupertinoTextFormFieldRow).at(1);
-        await tester.enterText(passwordField, 'Demo@2024!');
-        await tester.pumpAndSettle();
+      // Check for common widgets
+      final inkWells = widgets.where((w) => w.runtimeType.toString() == 'InkWell').length;
+      final tabBars = widgets.where((w) => w.runtimeType.toString() == 'CupertinoTabBar').length;
+      final buttons = widgets.where((w) => w.runtimeType.toString().contains('Button')).length;
+      final icons = widgets.where((w) => w.runtimeType.toString() == 'Icon').length;
 
-        // Dismiss keyboard to reveal login button
-        FocusManager.instance.primaryFocus?.unfocus();
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 1));
+      print('InkWell widgets: $inkWells');
+      print('CupertinoTabBar widgets: $tabBars');
+      print('Button widgets: $buttons');
+      print('Icon widgets: $icons');
+      print('=========================\n');
 
-        // Tap login button
-        final loginButton = find.text('Entrar');
-        await tester.ensureVisible(loginButton.first); // Ensure it's in view
-        await tester.tap(loginButton.first);
-        await tester.pumpAndSettle();
+      print('📸 Capturing Screenshot 1: Home');
+      await binding.takeScreenshot('01_home');
 
-        // Wait for login to complete and data to load
-        print('⏳ Waiting for login and data load...');
-        await Future.delayed(const Duration(seconds: 10)); // Increased from 8 to 10
-        await tester.pumpAndSettle();
+      // ========== SCREENSHOT 2, 5, 6: Enter OS once and capture Detail, Payments, Forms ==========
+      print('\n--- Entering OS to capture Order Detail, Payments, and Forms ---');
+      print('Looking for order cards with semantic identifiers...');
 
-        // Ensure orders are loaded (wait for possible loading indicators to disappear)
-        final loadingIndicator = find.byType(CupertinoActivityIndicator);
-        if (loadingIndicator.evaluate().isNotEmpty) {
-          print('⏳ Still loading data, waiting more...');
-          await Future.delayed(const Duration(seconds: 5));
-          await tester.pumpAndSettle();
+      // Find all Semantics widgets and filter for order_card_ identifiers
+      final allSemanticsOrder = find.byType(Semantics);
+      Finder? orderCard;
+
+      for (var i = 0; i < allSemanticsOrder.evaluate().length; i++) {
+        final widget = tester.widget<Semantics>(allSemanticsOrder.at(i));
+        final identifier = widget.properties.identifier?.toString() ?? '';
+        if (identifier.startsWith('order_card_')) {
+          orderCard = allSemanticsOrder.at(i);
+          print('Found order card: $identifier');
+          break;
         }
       }
 
-      // ========== SCREENSHOT 2: Home (Order List) ==========
-      print('📸 Capturing Screenshot 2: Home');
-      await tester.pumpAndSettle();
-      await Future.delayed(const Duration(seconds: 2));
-      await binding.takeScreenshot('2_home');
+      print('Order cards found: ${orderCard != null ? 1 : 0}');
 
-      // ========== SCREENSHOT 3: Order Detail ==========
-      print('📸 Navigating to Order Detail...');
-      final orderItems = find.byType(InkWell);
-      if (orderItems.evaluate().isNotEmpty) {
-        await tester.tap(orderItems.first);
+      if (orderCard != null) {
+        print('Tapping order card...');
+        await tester.tap(orderCard);
         await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 2));
+        await Future.delayed(const Duration(seconds: 3));
+        print('Order detail opened');
 
-        print('📸 Capturing Screenshot 3: Order Detail');
-        await binding.takeScreenshot('3_order_detail');
+        // SCREENSHOT 2: Order Detail (top of screen)
+        print('📸 Capturing Screenshot 2: Order Detail');
+        await binding.takeScreenshot('02_order_detail');
 
-        // Go back using Navigator pop
-        final navigator = tester.state<NavigatorState>(find.byType(Navigator).first);
-        navigator.pop();
+        // SCREENSHOT 5: Payments (scroll down to payments section)
+        print('\n--- Screenshot 5: Payments ---');
+        print('Scrolling to payments section...');
+        final orderScroll = find.byType(CustomScrollView);
+        if (orderScroll.evaluate().isNotEmpty) {
+          await tester.drag(orderScroll.first, const Offset(0, -350));
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+        }
+
+        // Look for payment button using semantic identifier
+        print('Looking for payment button by semantic identifier...');
+        final paymentSemantics = find.byType(Semantics);
+        Finder? paymentButton;
+
+        for (var i = 0; i < paymentSemantics.evaluate().length; i++) {
+          final widget = tester.widget<Semantics>(paymentSemantics.at(i));
+          final identifier = widget.properties.identifier?.toString() ?? '';
+          if (identifier == 'payment_button') {
+            paymentButton = paymentSemantics.at(i);
+            print('Found payment button with semantic identifier');
+            break;
+          }
+        }
+
+        if (paymentButton != null) {
+          print('Tapping payment button...');
+          await tester.tap(paymentButton);
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 2));
+          print('Payments screen opened');
+
+          print('📸 Capturing Screenshot 5: Payments');
+          await binding.takeScreenshot('05_payments');
+
+          // Go back to order detail
+          print('Navigating back to order detail...');
+          final navPayments = tester.state<NavigatorState>(find.byType(Navigator).first);
+          navPayments.pop();
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+          print('✅ Back to order detail');
+        } else {
+          print('⚠️ Could not find payment button, skipping screenshot 5');
+        }
+
+        // SCREENSHOT 6: Forms (scroll down further to forms section)
+        print('\n--- Screenshot 6: Forms ---');
+        print('Scrolling to forms section...');
+        final orderScrollForms = find.byType(CustomScrollView);
+        if (orderScrollForms.evaluate().isNotEmpty) {
+          await tester.drag(orderScrollForms.first, const Offset(0, -400));
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+        }
+
+        // Look for form items (they use chevron_right icon for navigation)
+        // Forms is the LAST item in the order screen
+        print('Looking for form items inline...');
+        final formItems = find.byIcon(CupertinoIcons.chevron_right);
+        print('Found ${formItems.evaluate().length} chevron items');
+
+        // Find the LAST chevron (forms section is always last)
+        Finder? formToTap;
+        int lastValidIndex = -1;
+        for (var i = 0; i < formItems.evaluate().length; i++) {
+          try {
+            final itemPos = tester.getTopLeft(formItems.at(i));
+            print('  Chevron $i at position: $itemPos');
+            // Keep track of the last valid chevron (below 200px to skip navigation bar)
+            if (itemPos.dy > 200) {
+              lastValidIndex = i;
+            }
+          } catch (e) {
+            // Skip items that can't be measured
+          }
+        }
+
+        if (lastValidIndex >= 0) {
+          formToTap = formItems.at(lastValidIndex);
+          final pos = tester.getTopLeft(formToTap);
+          print('  ✅ Using LAST chevron at index $lastValidIndex, position: $pos');
+        }
+
+        if (formToTap != null && formToTap.evaluate().isNotEmpty) {
+          print('Tapping form item to open it...');
+          await tester.tap(formToTap);
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 2));
+          print('Form opened');
+
+          // Wait for form to fully render (forms can have many fields and images)
+          print('Waiting for form to fully render...');
+          await Future.delayed(const Duration(seconds: 3));
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+
+          print('Form fully rendered, ready to capture');
+          print('📸 Capturing Screenshot 6: Forms');
+          await binding.takeScreenshot('06_forms');
+
+          // Go back to order detail
+          print('Navigating back to order detail...');
+          final navForms = tester.state<NavigatorState>(find.byType(Navigator).first);
+          navForms.pop();
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(milliseconds: 500));
+          print('✅ Back to order detail');
+        } else {
+          print('⚠️ Form items not found, skipping screenshot 6');
+        }
+
+        // Go back to home
+        print('Navigating back to home...');
+        final navHome = tester.state<NavigatorState>(find.byType(Navigator).first);
+        navHome.pop();
         await tester.pumpAndSettle();
         await Future.delayed(const Duration(seconds: 1));
+        print('✅ Back to home');
+      } else {
+        print('⚠️ No order items found, skipping order detail, payments, and forms screenshots');
       }
 
       // ========== SCREENSHOT 4: Dashboard ==========
-      print('📸 Navigating to Dashboard...');
-      await tester.pumpAndSettle();
+      print('\n--- Screenshot 4: Dashboard ---');
+      print('Looking for dashboard button...');
 
-      // Find dashboard button by icon
-      final allIcons = find.byType(Icon);
-      for (var i = 0; i < allIcons.evaluate().length; i++) {
-        final iconWidget = tester.widget<Icon>(allIcons.at(i));
-        if (iconWidget.icon == CupertinoIcons.chart_bar_alt_fill ||
-            iconWidget.icon == CupertinoIcons.chart_bar) {
-          // Found the dashboard icon, tap its parent button
-          final parentButton = find.ancestor(
-            of: allIcons.at(i),
-            matching: find.byType(CupertinoButton),
-          );
-          if (parentButton.evaluate().isNotEmpty) {
-            await tester.tap(parentButton.first);
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 2));
+      // Try to find the chart icon first
+      final chartIcons = find.byIcon(CupertinoIcons.chart_bar_alt_fill);
+      print('Chart icons found: ${chartIcons.evaluate().length}');
 
-            // Select "Ano" (Year) filter
-            print('📅 Selecting Year filter...');
-            final anoButton = find.text('Ano');
-            if (anoButton.evaluate().isNotEmpty) {
-              await tester.tap(anoButton);
-              await tester.pumpAndSettle();
-              await Future.delayed(const Duration(seconds: 1));
+      Finder? dashboardButton;
 
-              // Go back to previous year (2025)
-              print('📅 Navigating to 2025...');
-              final backChevron = find.byIcon(CupertinoIcons.chevron_left);
-              if (backChevron.evaluate().isNotEmpty) {
-                await tester.tap(backChevron.first);
-                await tester.pumpAndSettle();
-                await Future.delayed(const Duration(seconds: 2));
-              }
+      // Strategy 1: Find by icon
+      if (chartIcons.evaluate().isNotEmpty) {
+        // Find parent button
+        dashboardButton = find.ancestor(
+          of: chartIcons.first,
+          matching: find.byType(CupertinoButton),
+        );
+        print('Dashboard button via icon: ${dashboardButton.evaluate().length}');
+      }
+
+      // Strategy 2: Find buttons in navigation bar area (top of screen)
+      if (dashboardButton == null || dashboardButton.evaluate().isEmpty) {
+        print('Trying position-based search...');
+        final allButtons = find.byType(CupertinoButton);
+        print('Total CupertinoButtons: ${allButtons.evaluate().length}');
+
+        for (var i = 0; i < allButtons.evaluate().length; i++) {
+          try {
+            final buttonPos = tester.getTopLeft(allButtons.at(i));
+            print('  Button $i at position: $buttonPos');
+            // Dashboard button should be in the top 120 pixels (navigation bar)
+            if (buttonPos.dy < 120) {
+              dashboardButton = allButtons.at(i);
+              print('  ✅ Using button at index $i as dashboard button');
+              break;
             }
-
-            print('📸 Capturing Screenshot 4: Dashboard');
-            await binding.takeScreenshot('4_dashboard');
-
-            // Go back
-            final backNav = tester.state<NavigatorState>(find.byType(Navigator).first);
-            backNav.pop();
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 1));
-            break;
+          } catch (e) {
+            print('  Button $i: error - $e');
           }
         }
       }
 
-      // ========== SCREENSHOT 5: Customers ==========
-      print('📸 Navigating to Customers tab...');
-      await tester.pumpAndSettle();
-
-      // Find CupertinoTabBar and tap second item (Clientes)
-      final tabBar = find.byType(CupertinoTabBar);
-      if (tabBar.evaluate().isNotEmpty) {
-        // Get the tab bar widget to find its position
-        final tabBarBox = tester.getRect(tabBar);
-
-        // Calculate tap position for second tab (Clientes) - middle of second third
-        final secondTabX = tabBarBox.left + (tabBarBox.width / 3) * 1.5;
-        final tabY = tabBarBox.center.dy;
-
-        await tester.tapAt(Offset(secondTabX, tabY));
+      if (dashboardButton != null && dashboardButton.evaluate().isNotEmpty) {
+        print('Tapping dashboard button...');
+        await tester.tap(dashboardButton);
         await tester.pumpAndSettle();
+        await Future.delayed(const Duration(seconds: 3));
+        print('Dashboard opened');
 
-        // Wait longer for customers to load from Firebase
-        print('⏳ Waiting for customers to load...');
-        await Future.delayed(const Duration(seconds: 5));
-        await tester.pumpAndSettle();
-
-        print('📸 Capturing Screenshot 5: Customers');
-        await binding.takeScreenshot('5_customers');
-
-        // ========== SCREENSHOT 6: Customer Detail (filtered orders) ==========
-        print('📸 Selecting a customer for filtered view...');
-
-        // Wait more for list to be ready
-        await Future.delayed(const Duration(seconds: 2));
-        await tester.pumpAndSettle();
-
-        final customerItems = find.byType(InkWell);
-        print('Found ${customerItems.evaluate().length} customer items');
-        if (customerItems.evaluate().isNotEmpty) {
-          await tester.tap(customerItems.first);
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 3));
-
-          print('📸 Capturing Screenshot 6: Customer Detail (filtered orders)');
-          await binding.takeScreenshot('6_customer_detail');
-        } else {
-          print('⚠️ No customer items found to tap');
-        }
-
-        // ========== SCREENSHOT 7: Settings ==========
-        print('📸 Navigating to Settings tab...');
-
-        // Tap third tab (Mais/Settings)
-        final thirdTabX = tabBarBox.left + (tabBarBox.width / 3) * 2.5;
-        await tester.tapAt(Offset(thirdTabX, tabY));
-        await tester.pumpAndSettle();
+        // Dashboard now has current data, no need to change year
+        print('Waiting for dashboard to load data...');
         await Future.delayed(const Duration(seconds: 2));
 
-        print('📸 Capturing Screenshot 7: Settings');
-        await binding.takeScreenshot('7_settings');
+        print('📸 Capturing Screenshot 4: Dashboard');
+        await binding.takeScreenshot('04_dashboard');
+
+        // Navigate back to home
+        print('Navigating back to home...');
+        await tester.pageBack();
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(seconds: 2));
+        print('✅ Back to home');
+      } else {
+        print('⚠️ Dashboard button not found, skipping screenshot 4');
       }
 
-      print('✅ All screenshots captured successfully!');
+      // ========== SCREENSHOT 3: Segments Screen (Onboarding) ==========
+      print('\n--- Screenshot 3: Segments Screen ---');
+      print('Navigating to settings to trigger re-onboarding...');
+
+      // Go to settings tab using semantic identifier
+      print('Looking for settings tab...');
+      final allSemanticsTabsForSegments = find.byType(Semantics);
+      Finder? settingsTabForSegments;
+
+      for (var i = 0; i < allSemanticsTabsForSegments.evaluate().length; i++) {
+        final widget = tester.widget<Semantics>(allSemanticsTabsForSegments.at(i));
+        final identifier = widget.properties.identifier?.toString() ?? '';
+        if (identifier == 'tab_settings') {
+          settingsTabForSegments = allSemanticsTabsForSegments.at(i);
+          print('Found settings tab with semantic identifier');
+          break;
+        }
+      }
+
+      if (settingsTabForSegments != null) {
+        await tester.tap(settingsTabForSegments);
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(seconds: 1));
+        print('Settings tab opened');
+
+        // Find "Reopen Onboarding" button using semantic identifier
+        print('Looking for Reopen Onboarding button by semantic identifier...');
+        final allSemanticsForReopen = find.byType(Semantics);
+        Finder? reopenButton;
+
+        for (var i = 0; i < allSemanticsForReopen.evaluate().length; i++) {
+          final widget = tester.widget<Semantics>(allSemanticsForReopen.at(i));
+          final identifier = widget.properties.identifier?.toString() ?? '';
+          if (identifier == 'reopen_onboarding_button') {
+            reopenButton = allSemanticsForReopen.at(i);
+            print('  ✅ Found reopen onboarding button with semantic identifier');
+            break;
+          }
+        }
+
+        if (reopenButton != null) {
+          print('Tapping Reopen Onboarding button...');
+          await tester.tap(reopenButton);
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 2));
+          print('Company Info screen opened');
+
+          // Navigate through onboarding: Company Info -> Company Contact -> Segments
+
+          // Step 1: Company Info Screen - tap "Next" button using semantic identifier
+          print('Step 1: Looking for Next button in Company Info by semantic identifier...');
+          final allSemanticsInfo = find.byType(Semantics);
+          Finder? nextButton1;
+
+          for (var i = 0; i < allSemanticsInfo.evaluate().length; i++) {
+            final widget = tester.widget<Semantics>(allSemanticsInfo.at(i));
+            final identifier = widget.properties.identifier?.toString() ?? '';
+            if (identifier == 'next_button_company_info') {
+              nextButton1 = allSemanticsInfo.at(i);
+              print('  ✅ Found Next button (Company Info) with semantic identifier');
+              break;
+            }
+          }
+
+          if (nextButton1 != null) {
+            print('Tapping Next button (Company Info)...');
+            await tester.tap(nextButton1);
+            await tester.pumpAndSettle();
+            await Future.delayed(const Duration(seconds: 2));
+            print('Company Contact screen opened');
+
+            // Step 2: Company Contact Screen - tap "Next" button using semantic identifier
+            print('Step 2: Looking for Next button in Company Contact by semantic identifier...');
+            final allSemanticsContact = find.byType(Semantics);
+            Finder? nextButton2;
+
+            for (var i = 0; i < allSemanticsContact.evaluate().length; i++) {
+              final widget = tester.widget<Semantics>(allSemanticsContact.at(i));
+              final identifier = widget.properties.identifier?.toString() ?? '';
+              if (identifier == 'next_button_company_contact') {
+                nextButton2 = allSemanticsContact.at(i);
+                print('  ✅ Found Next button (Company Contact) with semantic identifier');
+                break;
+              }
+            }
+
+            if (nextButton2 != null) {
+              print('Tapping Next button (Company Contact)...');
+              await tester.tap(nextButton2);
+              await tester.pumpAndSettle();
+              await Future.delayed(const Duration(seconds: 2));
+              print('Segments screen opened!');
+
+              // Now we're on the Segments screen - capture it!
+              print('Waiting for segments screen to fully load...');
+              await Future.delayed(const Duration(seconds: 2));
+
+              print('📸 Capturing Screenshot 3: Segments Screen');
+              await binding.takeScreenshot('03_segments');
+
+              print('✅ Segments screenshot captured');
+            } else {
+              print('⚠️ Next button not found in Company Contact screen');
+            }
+          } else {
+            print('⚠️ Next button not found in Company Info screen');
+          }
+        } else {
+          print('⚠️ Reopen Onboarding button not found, skipping segments screenshot');
+        }
+      } else {
+        print('⚠️ Settings tab not found, skipping segments screenshot');
+      }
+
+      print('✅ All screenshots captured successfully for locale: $locale');
     });
   });
+}
+
+/// Performs logout flow
+Future<void> _performLogout(WidgetTester tester) async {
+  // Find CupertinoTabBar and tap third item (Settings)
+  final tabBar = find.byType(CupertinoTabBar);
+  if (tabBar.evaluate().isNotEmpty) {
+    final tabBarBox = tester.getRect(tabBar);
+    final settingsTabX = tabBarBox.left + (tabBarBox.width / 3) * 2.5;
+    final tabY = tabBarBox.center.dy;
+
+    await tester.tapAt(Offset(settingsTabX, tabY));
+    await tester.pumpAndSettle();
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Find logout button (try multiple possible texts)
+    final logoutTexts = ['Sair', 'Logout', 'Cerrar sesión'];
+    Finder? logoutTile;
+    for (final text in logoutTexts) {
+      final finder = find.text(text);
+      if (finder.evaluate().isNotEmpty) {
+        logoutTile = finder;
+        break;
+      }
+    }
+
+    if (logoutTile != null) {
+      await tester.tap(logoutTile.first);
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Confirm logout in CupertinoAlertDialog
+      final confirmButton = find.descendant(
+        of: find.byType(CupertinoAlertDialog),
+        matching: find.textContaining('Sai', skipOffstage: false),
+      );
+
+      if (confirmButton.evaluate().isNotEmpty) {
+        await tester.tap(confirmButton.last);
+        await tester.pumpAndSettle();
+        print('✅ Logged out successfully');
+
+        await Future.delayed(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+      }
+    }
+  }
+}
+
+/// Performs login with demo account
+/// Get demo account email based on locale
+String _getEmailByLocale(String locale) {
+  switch (locale) {
+    case 'pt-BR':
+      return 'demo-pt@praticos.com.br';
+    case 'en-US':
+      return 'demo-en@praticos.com.br';
+    case 'es-ES':
+      return 'demo-es@praticos.com.br';
+    default:
+      return 'demo@praticos.com.br'; // Fallback
+  }
+}
+
+/// Get demo account password (same for all locales)
+String _getPasswordByLocale(String locale) {
+  return 'Demo@2024!';
+}
+
+/// Performs login flow with locale-specific demo account
+Future<void> _performLogin(WidgetTester tester, String locale) async {
+  print('\n=== LOGIN FLOW DEBUG ===');
+
+  final email = _getEmailByLocale(locale);
+  final password = _getPasswordByLocale(locale);
+  print('Using account: $email');
+
+  // Find and tap "Entrar com email" link (try multiple languages)
+  print('Step 1: Looking for email login link...');
+  final emailTexts = ['email', 'e-mail', 'correo'];
+  Finder? emailLink;
+  for (final text in emailTexts) {
+    final finder = find.textContaining(text, skipOffstage: false);
+    print('  Searching for text containing "$text": found ${finder.evaluate().length}');
+    if (finder.evaluate().isNotEmpty) {
+      emailLink = finder;
+      print('  ✅ Found email link with text: "$text"');
+      break;
+    }
+  }
+
+  if (emailLink != null) {
+    print('Step 2: Tapping email login link...');
+    await tester.tap(emailLink.first);
+    await tester.pumpAndSettle();
+    await Future.delayed(const Duration(seconds: 2));
+    print('  ✅ Email login screen opened');
+
+    // Enter email
+    print('Step 3: Looking for email field...');
+    final emailFields = find.byType(CupertinoTextFormFieldRow);
+    print('  Found ${emailFields.evaluate().length} text fields');
+
+    if (emailFields.evaluate().isNotEmpty) {
+      print('  Entering email: $email');
+      await tester.enterText(emailFields.first, email);
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(milliseconds: 500));
+      print('  ✅ Email entered');
+
+      // Enter password
+      print('Step 4: Entering password...');
+      if (emailFields.evaluate().length > 1) {
+        await tester.enterText(emailFields.at(1), password);
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(milliseconds: 500));
+        print('  ✅ Password entered');
+      } else {
+        print('  ⚠️ Password field not found!');
+      }
+
+      // Dismiss keyboard
+      print('Step 5: Dismissing keyboard...');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(seconds: 1));
+      print('  ✅ Keyboard dismissed');
+
+      // Tap login button - scroll down first to ensure it's visible
+      print('Step 6: Scrolling down to reveal login button...');
+      await tester.drag(find.byType(CupertinoPageScaffold), const Offset(0, -150));
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(milliseconds: 500));
+      print('  ✅ Scrolled down');
+
+      print('Step 7: Looking for login button...');
+
+      // Find all CupertinoButtons
+      final allButtons = find.byType(CupertinoButton);
+      print('  Found ${allButtons.evaluate().length} CupertinoButtons total');
+
+      // The login button should be the last visible filled button in a Padding widget
+      // It's wrapped in Padding with horizontal: 20
+      Finder? loginButton;
+
+      for (var i = 0; i < allButtons.evaluate().length; i++) {
+        final button = allButtons.at(i);
+        final widget = tester.widget<CupertinoButton>(button);
+
+        // Check if button child is not an Icon (login button has Text, eye button has Icon)
+        final childIsNotIcon = widget.child.runtimeType.toString() != 'Icon';
+
+        print('  Button $i: child type=${widget.child.runtimeType}, color=${widget.color}');
+
+        if (childIsNotIcon) {
+          loginButton = button;
+          print('  ✅ Found login button at index $i (non-icon child)');
+          break;
+        }
+      }
+
+      if (loginButton != null) {
+        print('Step 8: Tapping login button...');
+        await tester.ensureVisible(loginButton);
+        await tester.tap(loginButton);
+        await tester.pumpAndSettle();
+        print('  ✅ Login button tapped');
+
+        // Wait for login to complete and data to load
+        print('Step 9: Waiting for login to complete...');
+        await Future.delayed(const Duration(seconds: 10));
+        await tester.pumpAndSettle();
+        print('  Initial wait complete');
+
+        // Ensure orders are loaded
+        final loadingIndicator = find.byType(CupertinoActivityIndicator);
+        print('  Loading indicators: ${loadingIndicator.evaluate().length}');
+        if (loadingIndicator.evaluate().isNotEmpty) {
+          print('  ⏳ Still loading data, waiting more...');
+          await Future.delayed(const Duration(seconds: 5));
+          await tester.pumpAndSettle();
+        }
+        print('  ✅ Login complete');
+      } else {
+        print('  ❌ Login button not found!');
+      }
+    } else {
+      print('  ❌ Email fields not found!');
+    }
+  } else {
+    print('  ❌ Email login link not found!');
+  }
+
+  print('=========================\n');
 }

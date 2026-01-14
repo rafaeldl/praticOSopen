@@ -1,7 +1,7 @@
-Simplify your business management with PraticOS, the complete app for managing service orders, customers, and finances in one place.
+Simplify your business management with PraticOS, the complete app for managing work orders, customers, and finances in one place.
 
-SERVICE ORDER MANAGEMENT
-• Create and track service orders with ease
+WORK ORDER MANAGEMENT
+• Create and track work orders with ease
 • Control status: quote, approved, in progress, completed
 • Add services, products, and notes
 • View complete history of each order

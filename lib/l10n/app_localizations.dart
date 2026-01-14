@@ -2992,6 +2992,12 @@ abstract class AppLocalizations {
   /// **'Erro'**
   String get error;
 
+  /// No description provided for @couldNotLoadCompanyData.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível carregar os dados da empresa'**
+  String get couldNotLoadCompanyData;
+
   /// No description provided for @errorSignInApple.
   ///
   /// In pt, this message translates to:
@@ -3123,6 +3129,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Modo Noturno'**
   String get nightMode;
+
+  /// No description provided for @reopenOnboarding.
+  ///
+  /// In pt, this message translates to:
+  /// **'Configurações Iniciais'**
+  String get reopenOnboarding;
+
+  /// No description provided for @reconfigureCompanySetup.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reconfigurar dados e segmento da empresa'**
+  String get reconfigureCompanySetup;
 
   /// No description provided for @account.
   ///
@@ -4419,6 +4437,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Por favor, selecione pelo menos uma especialidade para continuar.'**
   String get pleaseSelectAtLeastOneSpecialty;
+
+  /// No description provided for @selectSpecialtiesDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione as especialidades da sua empresa.\nVocê pode escolher mais de uma.'**
+  String get selectSpecialtiesDescription;
+
+  /// No description provided for @selectAtLeastOneOption.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione ao menos uma opção'**
+  String get selectAtLeastOneOption;
+
+  /// No description provided for @continueWithCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Continuar ({count} {count, plural, =1{selecionada} other{selecionadas}})'**
+  String continueWithCount(int count);
 }
 
 class _AppLocalizationsDelegate

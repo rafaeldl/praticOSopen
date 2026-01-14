@@ -132,6 +132,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
           segmentId: widget.segmentId,
           subspecialties: widget.subspecialties,
           userAggr: dbUser.toAggr(),
+          locale: _currentLocale,
         );
 
         // Bootstrap se solicitado
@@ -182,6 +183,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
           segmentId: widget.segmentId,
           subspecialties: widget.subspecialties,
           userAggr: userAggr,
+          locale: _currentLocale,
         );
 
         // Bootstrap se solicitado

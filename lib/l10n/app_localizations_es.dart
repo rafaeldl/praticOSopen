@@ -1468,6 +1468,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get error => 'Error';
 
   @override
+  String get couldNotLoadCompanyData =>
+      'No se pudieron cargar los datos de la empresa';
+
+  @override
   String get errorSignInApple => 'Error al iniciar sesión con Apple';
 
   @override
@@ -1535,6 +1539,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get nightMode => 'Modo Nocturno';
+
+  @override
+  String get reopenOnboarding => 'Configuración Inicial';
+
+  @override
+  String get reconfigureCompanySetup =>
+      'Reconfigurar datos y segmento de la empresa';
 
   @override
   String get account => 'Cuenta';
@@ -2237,4 +2248,22 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get pleaseSelectAtLeastOneSpecialty =>
       'Por favor, seleccione al menos una especialidad para continuar.';
+
+  @override
+  String get selectSpecialtiesDescription =>
+      'Seleccione las especialidades de su empresa.\nPuede elegir más de una.';
+
+  @override
+  String get selectAtLeastOneOption => 'Seleccione al menos una opción';
+
+  @override
+  String continueWithCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'seleccionadas',
+      one: 'seleccionada',
+    );
+    return 'Continuar ($count $_temp0)';
+  }
 }

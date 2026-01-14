@@ -5,10 +5,13 @@ import 'package:praticos/models/product.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/user.dart';
+import 'package:praticos/models/order.dart' as models;
 import 'package:praticos/repositories/v2/service_repository_v2.dart';
 import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
+import 'package:praticos/repositories/v2/order_repository_v2.dart';
+import 'package:praticos/services/forms_service.dart';
 
 /// Resultado da execução do bootstrap
 class BootstrapResult {
@@ -16,43 +19,51 @@ class BootstrapResult {
   final List<String> createdProducts;
   final List<String> createdDevices;
   final List<String> createdCustomers;
+  final List<String> createdOrders;
   final List<String> skippedServices;
   final List<String> skippedProducts;
   final List<String> skippedDevices;
   final List<String> skippedCustomers;
+  final List<String> skippedOrders;
 
   BootstrapResult({
     this.createdServices = const [],
     this.createdProducts = const [],
     this.createdDevices = const [],
     this.createdCustomers = const [],
+    this.createdOrders = const [],
     this.skippedServices = const [],
     this.skippedProducts = const [],
     this.skippedDevices = const [],
     this.skippedCustomers = const [],
+    this.skippedOrders = const [],
   });
 
   int get totalCreated =>
       createdServices.length +
       createdProducts.length +
       createdDevices.length +
-      createdCustomers.length;
+      createdCustomers.length +
+      createdOrders.length;
 
   int get totalSkipped =>
       skippedServices.length +
       skippedProducts.length +
       skippedDevices.length +
-      skippedCustomers.length;
+      skippedCustomers.length +
+      skippedOrders.length;
 
   Map<String, dynamic> toJson() => {
         'createdServices': createdServices,
         'createdProducts': createdProducts,
         'createdDevices': createdDevices,
         'createdCustomers': createdCustomers,
+        'createdOrders': createdOrders,
         'skippedServices': skippedServices,
         'skippedProducts': skippedProducts,
         'skippedDevices': skippedDevices,
         'skippedCustomers': skippedCustomers,
+        'skippedOrders': skippedOrders,
       };
 }
 
@@ -64,6 +75,8 @@ class BootstrapService {
   final ProductRepositoryV2 _productRepo = ProductRepositoryV2();
   final DeviceRepositoryV2 _deviceRepo = DeviceRepositoryV2();
   final CustomerRepositoryV2 _customerRepo = CustomerRepositoryV2();
+  final OrderRepositoryV2 _orderRepo = OrderRepositoryV2();
+  final FormsService _formsService = FormsService();
 
   /// Extrai string localizada de um valor que pode ser:
   /// - String simples: retorna diretamente
@@ -118,11 +131,95 @@ class BootstrapService {
     return [];
   }
 
+  /// Maps country code or locale to locale code for i18n
+  /// Accepts: BR, PT, pt-BR, pt-PT -> pt
+  /// Accepts: US, en-US -> en
+  /// Accepts: ES, es-ES -> es
+  String _getLocaleFromCountry(String? countryOrLocale) {
+    if (countryOrLocale == null) return 'pt';
+    final input = countryOrLocale.toUpperCase();
+
+    // Check if it's a locale format (pt-BR, en-US, es-ES)
+    if (input.contains('-')) {
+      final parts = input.split('-');
+      final languageCode = parts[0].toLowerCase();
+      if (languageCode == 'pt') return 'pt';
+      if (languageCode == 'en') return 'en';
+      if (languageCode == 'es') return 'es';
+      return 'pt';
+    }
+
+    // Otherwise, treat as country code
+    if (input == 'BR' || input == 'PT') return 'pt';
+    if (input == 'US') return 'en';
+    if (input == 'ES') return 'es';
+    return 'pt'; // default fallback
+  }
+
+  /// Localizes form data based on company locale
+  /// Extracts localized strings from i18n fields and removes them
+  Map<String, dynamic> _localizeFormData(
+    Map<String, dynamic> data,
+    String localeCode,
+  ) {
+    final localized = Map<String, dynamic>.from(data);
+
+    // Localize title
+    if (data['titleI18n'] is Map) {
+      final titleI18n = data['titleI18n'] as Map;
+      localized['title'] = titleI18n[localeCode] ??
+                          titleI18n['pt'] ??
+                          data['title'];
+      localized.remove('titleI18n');
+    }
+
+    // Localize description
+    if (data['descriptionI18n'] is Map) {
+      final descI18n = data['descriptionI18n'] as Map;
+      localized['description'] = descI18n[localeCode] ??
+                                descI18n['pt'] ??
+                                data['description'];
+      localized.remove('descriptionI18n');
+    }
+
+    // Localize items
+    if (data['items'] is List) {
+      final items = List<Map<String, dynamic>>.from(
+        (data['items'] as List).map((item) => Map<String, dynamic>.from(item)),
+      );
+
+      for (var item in items) {
+        // Localize item label
+        if (item['labelI18n'] is Map) {
+          final labelI18n = item['labelI18n'] as Map;
+          item['label'] = labelI18n[localeCode] ??
+                         labelI18n['pt'] ??
+                         item['label'];
+          item.remove('labelI18n');
+        }
+
+        // Localize item options
+        if (item['optionsI18n'] is Map) {
+          final optionsI18n = item['optionsI18n'] as Map;
+          item['options'] = optionsI18n[localeCode] ??
+                           optionsI18n['pt'] ??
+                           item['options'];
+          item.remove('optionsI18n');
+        }
+      }
+
+      localized['items'] = items;
+    }
+
+    return localized;
+  }
+
   Future<void> syncCompanyFormsFromSegment({
     required String companyId,
     required String segmentId,
     required List<String> subspecialties,
     required UserAggr userAggr,
+    String? locale,
   }) async {
     final segmentSnapshot = await _db
         .collection('segments')
@@ -137,6 +234,9 @@ class BootstrapService {
     final existingSnapshot = await companyFormsRef.get();
     final existingIds = existingSnapshot.docs.map((doc) => doc.id).toSet();
 
+    // Get locale code from company country or locale
+    final localeCode = _getLocaleFromCountry(locale);
+
     for (final doc in segmentSnapshot.docs) {
       final data = Map<String, dynamic>.from(doc.data());
       final isActive = data['isActive'] != false;
@@ -147,7 +247,10 @@ class BootstrapService {
         continue;
       }
 
-      final formData = Map<String, dynamic>.from(data)
+      // Localize form data based on company locale and remove i18n fields
+      final localizedData = _localizeFormData(data, localeCode);
+
+      final formData = Map<String, dynamic>.from(localizedData)
         ..['updatedAt'] = FieldValue.serverTimestamp()
         ..['updatedBy'] = userAggr.toJson();
 
@@ -250,10 +353,12 @@ class BootstrapService {
     final List<String> createdProducts = [];
     final List<String> createdDevices = [];
     final List<String> createdCustomers = [];
+    final List<String> createdOrders = [];
     final List<String> skippedServices = [];
     final List<String> skippedProducts = [];
     final List<String> skippedDevices = [];
     final List<String> skippedCustomers = [];
+    final List<String> skippedOrders = [];
 
     // 1. Fazer merge dos dados de bootstrap
     final mergedData = await _mergeBootstrapData(segmentId, subspecialties);
@@ -369,16 +474,40 @@ class BootstrapService {
       }
     }
 
-    // 7. Salvar metadata do bootstrap
+    // 7. Criar OSs de exemplo (usando customers, devices e services criados)
+    // Verificar se já existem OSs criadas para evitar duplicação
+    final existingOrders = await _orderRepo.getQueryList(
+      companyId,
+      limit: 1,
+    );
+
+    if (existingOrders.isEmpty) {
+      // Primeira vez executando o bootstrap, criar OSs demo
+      final orderResults = await _createSampleOrders(
+        companyId: companyId,
+        locale: locale,
+        userAggr: userAggr,
+      );
+      createdOrders.addAll(orderResults['created'] as List<String>);
+      skippedOrders.addAll(orderResults['skipped'] as List<String>);
+    } else {
+      // Bootstrap já foi executado antes, não criar OSs duplicadas
+      skippedOrders.add('Orders already exist, skipping demo orders creation');
+      print('⏭️ Skipping demo orders creation - company already has orders');
+    }
+
+    // 8. Salvar metadata do bootstrap
     final result = BootstrapResult(
       createdServices: createdServices,
       createdProducts: createdProducts,
       createdDevices: createdDevices,
       createdCustomers: createdCustomers,
+      createdOrders: createdOrders,
       skippedServices: skippedServices,
       skippedProducts: skippedProducts,
       skippedDevices: skippedDevices,
       skippedCustomers: skippedCustomers,
+      skippedOrders: skippedOrders,
     );
 
     await _saveMetadata(companyId, segmentId, subspecialties, result);
@@ -408,14 +537,114 @@ class BootstrapService {
         'products': result.createdProducts,
         'devices': result.createdDevices,
         'customers': result.createdCustomers,
+        'orders': result.createdOrders,
       },
       'skipped': {
         'services': result.skippedServices,
         'products': result.skippedProducts,
         'devices': result.skippedDevices,
         'customers': result.skippedCustomers,
+        'orders': result.skippedOrders,
       },
     });
+  }
+
+  /// Cria OSs de exemplo com dados localizados
+  Future<Map<String, List<String>>> _createSampleOrders({
+    required String companyId,
+    required String locale,
+    required UserAggr userAggr,
+  }) async {
+    final List<String> created = [];
+    final List<String> skipped = [];
+
+    try {
+      // Buscar customers, devices e services criados (limit 10 para evitar sobrecarga)
+      final customers = await _customerRepo.getQueryList(companyId, limit: 10);
+      final devices = await _deviceRepo.getQueryList(companyId, limit: 10);
+      final services = await _serviceRepo.getQueryList(companyId, limit: 10);
+
+      // Filtrar nulls
+      final validCustomers = customers.where((c) => c != null).cast<Customer>().toList();
+      final validDevices = devices.where((d) => d != null).cast<Device>().toList();
+      final validServices = services.where((s) => s != null).cast<Service>().toList();
+
+      // Se não houver dados suficientes, pular criação
+      if (validCustomers.isEmpty || validDevices.isEmpty || validServices.isEmpty) {
+        skipped.add('Insufficient data to create orders');
+        return {'created': created, 'skipped': skipped};
+      }
+
+      // Criar 4 OSs com diferentes status
+      for (int i = 0; i < 4; i++) {
+        final customer = validCustomers[i % validCustomers.length];
+        final device = validDevices[i % validDevices.length];
+        final service = validServices[i % validServices.length];
+
+        // Definir status baseado no índice
+        final status = _getOrderStatus(i);
+        final dueDate = DateTime.now().subtract(Duration(days: 10 - (i * 2)));
+
+        // Criar OrderService (usa o nome do serviço que já foi criado pelo bootstrap do segmento)
+        final orderService = models.OrderService()
+          ..service = service.toAggr()
+          ..value = service.value;
+
+        final order = models.Order()
+          ..customer = customer.toAggr()
+          ..device = device.toAggr()
+          ..services = [orderService]
+          ..status = status
+          ..dueDate = dueDate
+          ..total = service.value ?? 0
+          ..company = Global.companyAggr
+          ..createdAt = DateTime.now().subtract(Duration(days: 11 - (i * 2)))
+          ..createdBy = userAggr
+          ..updatedAt = DateTime.now().subtract(Duration(days: 10 - (i * 2)))
+          ..updatedBy = userAggr;
+
+        await _orderRepo.createItem(companyId, order);
+        created.add('OS #${i + 1} - ${customer.name} - $status');
+
+        // Add a form to the first order (for screenshots)
+        if (i == 0 && order.id != null) {
+          try {
+            final templates = await _formsService.getCompanyTemplates(companyId);
+            if (templates.isNotEmpty) {
+              await _formsService.addFormToOrder(
+                companyId,
+                order.id!,
+                templates.first,
+              );
+              print('✅ Added form "${templates.first.title}" to order #1');
+            }
+          } catch (e) {
+            print('⚠️ Could not add form to order: $e');
+          }
+        }
+      }
+    } catch (e) {
+      print('Error creating sample orders: $e');
+      skipped.add('Error: $e');
+    }
+
+    return {'created': created, 'skipped': skipped};
+  }
+
+  /// Retorna status da OS baseado no índice
+  String _getOrderStatus(int index) {
+    switch (index) {
+      case 0:
+        return 'quote'; // Orçamento - aguardando aprovação do cliente
+      case 1:
+        return 'approved'; // Aprovado - aprovado mas ainda não iniciado
+      case 2:
+        return 'progress'; // Em Andamento - técnico trabalhando
+      case 3:
+        return 'done'; // Concluído - finalizado
+      default:
+        return 'quote';
+    }
   }
 
   /// Verifica se o bootstrap já foi executado para uma empresa

@@ -1,1 +1,1 @@
-Manage service orders and customers simply and practically.
+Manage work orders and customers simply and practically.

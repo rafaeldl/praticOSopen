@@ -4,7 +4,7 @@
   "appName": "PraticOS",
 
   "home": "Home",
-  "orders": "Service Orders",
+  "orders": "Work Orders",
   "customers": "Customers",
   "devices": "Devices",
   "services": "Services",
@@ -228,8 +228,8 @@
   "cnpj": "CNPJ",
   "cpfCnpj": "CPF/CNPJ",
 
-  "order": "Service Order",
-  "orderShort": "SO",
+  "order": "Work Order",
+  "orderShort": "WO",
   "newOrder": "New Order",
   "editOrder": "Edit Order",
   "orderDetails": "Order Details",
@@ -517,10 +517,11 @@
   "recommended": "Recommended",
 
   "welcomeToApp": "Welcome to PraticOS",
-  "appSubtitle": "Manage your service orders\nsimply and efficiently",
+  "appSubtitle": "Manage your work orders\nsimply and efficiently",
   "signInWithEmail": "Sign in with email",
   "byContinuingYouAgree": "By continuing, you agree to our",
   "error": "Error",
+  "couldNotLoadCompanyData": "Could not load company data",
   "errorSignInApple": "Error signing in with Apple",
   "errorSignInGoogle": "Error signing in with Google",
   "companyNotFound": "Company not found",
@@ -543,6 +544,8 @@
   "companyData": "Company Data",
   "interface_": "Interface",
   "nightMode": "Night Mode",
+  "reopenOnboarding": "Initial Setup",
+  "reconfigureCompanySetup": "Reconfigure company data and segment",
   "account": "Account",
   "deleteAccount": "Delete Account",
   "permanentlyRemoveAllData": "Permanently remove all data",
@@ -553,7 +556,7 @@
   "dark": "Dark",
   "selectCompany": "Select Company",
   "companyNoName": "Company without name",
-  "deleteAccountWarning": "This action is permanent and cannot be undone.\n\nAll your data, including service orders, customers and settings will be permanently removed.\n\nAre you sure you want to continue?",
+  "deleteAccountWarning": "This action is permanent and cannot be undone.\n\nAll your data, including work orders, customers and settings will be permanently removed.\n\nAre you sure you want to continue?",
   "finalConfirmation": "Final Confirmation",
   "lastChanceCancel": "This is your last chance to cancel.\n\nConfirm the permanent deletion of your account?",
   "permanentlyDelete": "Permanently Delete",
@@ -578,9 +581,9 @@
   "noPermissionToRemove": "You don't have permission to remove this item.",
 
   "professionalizeYourBusiness": "Professionalize your business",
-  "configureCompanyProfile": "Set up your company profile to issue professional service orders right now.",
+  "configureCompanyProfile": "Set up your company profile to issue professional work orders right now.",
   "professionalOrders": "Professional Orders",
-  "createDigitalOrders": "Create customized digital service orders.",
+  "createDigitalOrders": "Create customized digital work orders.",
   "customerManagement": "Customer Management",
   "keepHistoryOrganized": "Keep history and contacts organized.",
   "configureMyBusiness": "Configure My Business",
@@ -816,6 +819,17 @@
 
   "availableSpecialties": "AVAILABLE SPECIALTIES",
   "pleaseSelectAtLeastOneSpecialty": "Please select at least one specialty to continue.",
+  "selectSpecialtiesDescription": "Select your company's specialties.\nYou can choose more than one.",
+  "noName": "No name",
+  "selectAtLeastOneOption": "Select at least one option",
+  "continueWithCount": "Continue ({count} {count, plural, =1{selected} other{selected}})",
+  "@continueWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
 
   "selectCountry": "Select Country",
 

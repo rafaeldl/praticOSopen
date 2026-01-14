@@ -198,44 +198,49 @@ class _SelectSegmentScreenState extends State<SelectSegmentScreen> {
                           final hasSubspecialties =
                               subspecialties != null && subspecialties.isNotEmpty;
 
-                          return CupertinoListTile.notched(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                          return Semantics(
+                            identifier: 'segment_$segmentId',
+                            button: true,
+                            label: _getLocalizedName(segment),
+                            child: CupertinoListTile.notched(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              leading: Text(
+                                segment['icon'] ?? '🔧',
+                                style: CupertinoTheme.of(context)
+                                    .textTheme
+                                    .textStyle
+                                    .copyWith(fontSize: 24),
+                              ),
+                              title: Text(
+                                _getLocalizedName(segment),
+                                style: CupertinoTheme.of(context)
+                                    .textTheme
+                                    .textStyle
+                                    .copyWith(fontWeight: FontWeight.w500),
+                              ),
+                              subtitle: hasSubspecialties
+                                  ? Text(
+                                      '${subspecialties.length} ${context.l10n.specialties}',
+                                      style: CupertinoTheme.of(context)
+                                          .textTheme
+                                          .textStyle
+                                          .copyWith(
+                                            fontSize: 13,
+                                            color: CupertinoColors.secondaryLabel
+                                                .resolveFrom(context),
+                                          ),
+                                    )
+                                  : null,
+                              trailing: const Icon(
+                                CupertinoIcons.chevron_forward,
+                                color: CupertinoColors.systemGrey3,
+                                size: 18,
+                              ),
+                              onTap: () => _onSegmentTap(segmentId, segment),
                             ),
-                            leading: Text(
-                              segment['icon'] ?? '🔧',
-                              style: CupertinoTheme.of(context)
-                                  .textTheme
-                                  .textStyle
-                                  .copyWith(fontSize: 24),
-                            ),
-                            title: Text(
-                              _getLocalizedName(segment),
-                              style: CupertinoTheme.of(context)
-                                  .textTheme
-                                  .textStyle
-                                  .copyWith(fontWeight: FontWeight.w500),
-                            ),
-                            subtitle: hasSubspecialties
-                                ? Text(
-                                    '${subspecialties.length} ${context.l10n.specialties}',
-                                    style: CupertinoTheme.of(context)
-                                        .textTheme
-                                        .textStyle
-                                        .copyWith(
-                                          fontSize: 13,
-                                          color: CupertinoColors.secondaryLabel
-                                              .resolveFrom(context),
-                                        ),
-                                  )
-                                : null,
-                            trailing: const Icon(
-                              CupertinoIcons.chevron_forward,
-                              color: CupertinoColors.systemGrey3,
-                              size: 18,
-                            ),
-                            onTap: () => _onSegmentTap(segmentId, segment),
                           );
                         }).toList(),
                       ),
