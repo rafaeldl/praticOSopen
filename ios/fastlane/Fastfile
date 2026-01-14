@@ -191,6 +191,8 @@ platform :ios do
     # Use existing TestFlight build - no binary upload needed
     # Always upload metadata when promoting to App Store
     # reject_if_possible: cancels any pending "Waiting for Review" submission
+    # IMPORTANT: When uploading screenshots, DO NOT submit_for_review immediately
+    # App Store Connect needs time to process screenshots before submission
     upload_to_app_store(
       app_version: app_version,  # Version to create/use in App Store
       skip_binary_upload: true,  # Use build already in TestFlight
@@ -198,12 +200,19 @@ platform :ios do
       skip_screenshots: skip_screenshots,
       skip_metadata: false,  # Always upload metadata
       overwrite_screenshots: true,  # Replace existing screenshots instead of adding
-      submit_for_review: true,
+      submit_for_review: skip_screenshots,  # Only auto-submit if NO screenshots uploaded
       reject_if_possible: true,  # Cancel pending review before submitting new one
-      run_precheck_before_submit: false
+      run_precheck_before_submit: false,
+      precheck_default_rule_level: :skip  # Skip precheck validations that might fail with API key
     )
 
-    UI.success("✅ TestFlight build submitted for App Store review!")
+    if skip_screenshots
+      UI.success("✅ TestFlight build submitted for App Store review!")
+    else
+      UI.important("📸 Screenshots uploaded. App Store Connect is processing them.")
+      UI.important("⏳ Please wait 5-10 minutes for processing to complete.")
+      UI.important("🔄 Then manually submit for review in App Store Connect or run this workflow again with skip_screenshots:true")
+    end
   end
 
   desc "Gera screenshots automaticamente usando Flutter integration tests"
