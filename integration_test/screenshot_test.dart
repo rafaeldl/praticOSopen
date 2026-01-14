@@ -146,9 +146,22 @@ void main() {
       print('\n--- Screenshot 4: Segments Screen ---');
       print('Navigating to settings to trigger re-onboarding...');
 
-      // Go to settings tab
-      final settingsTab = find.byIcon(CupertinoIcons.settings);
-      if (settingsTab.evaluate().isNotEmpty) {
+      // Go to settings tab using semantic identifier
+      print('Looking for settings tab...');
+      final allSemanticsTabs = find.byType(Semantics);
+      Finder? settingsTab;
+
+      for (var i = 0; i < allSemanticsTabs.evaluate().length; i++) {
+        final widget = tester.widget<Semantics>(allSemanticsTabs.at(i));
+        final identifier = widget.properties.identifier?.toString() ?? '';
+        if (identifier == 'tab_settings') {
+          settingsTab = allSemanticsTabs.at(i);
+          print('Found settings tab with semantic identifier');
+          break;
+        }
+      }
+
+      if (settingsTab != null) {
         await tester.tap(settingsTab);
         await tester.pumpAndSettle();
         await Future.delayed(const Duration(seconds: 1));
@@ -180,9 +193,20 @@ void main() {
             await tester.pumpAndSettle();
             await Future.delayed(const Duration(milliseconds: 500));
 
-            // Tap home tab to ensure we're back
-            final homeTab = find.byIcon(CupertinoIcons.house_fill);
-            if (homeTab.evaluate().isNotEmpty) {
+            // Tap home tab to ensure we're back using semantic identifier
+            final allSemanticsHome = find.byType(Semantics);
+            Finder? homeTab;
+
+            for (var i = 0; i < allSemanticsHome.evaluate().length; i++) {
+              final widget = tester.widget<Semantics>(allSemanticsHome.at(i));
+              final identifier = widget.properties.identifier?.toString() ?? '';
+              if (identifier == 'tab_home') {
+                homeTab = allSemanticsHome.at(i);
+                break;
+              }
+            }
+
+            if (homeTab != null) {
               await tester.tap(homeTab);
               await tester.pumpAndSettle();
               await Future.delayed(const Duration(seconds: 1));
@@ -210,10 +234,21 @@ void main() {
           await tester.pumpAndSettle();
           await Future.delayed(const Duration(milliseconds: 500));
 
-          // Tap home tab to ensure we're back
-          final homeTab = find.byIcon(CupertinoIcons.house_fill);
-          if (homeTab.evaluate().isNotEmpty) {
-            await tester.tap(homeTab);
+          // Tap home tab to ensure we're back using semantic identifier
+          final allSemanticsHome2 = find.byType(Semantics);
+          Finder? homeTab2;
+
+          for (var i = 0; i < allSemanticsHome2.evaluate().length; i++) {
+            final widget = tester.widget<Semantics>(allSemanticsHome2.at(i));
+            final identifier = widget.properties.identifier?.toString() ?? '';
+            if (identifier == 'tab_home') {
+              homeTab2 = allSemanticsHome2.at(i);
+              break;
+            }
+          }
+
+          if (homeTab2 != null) {
+            await tester.tap(homeTab2);
             await tester.pumpAndSettle();
             await Future.delayed(const Duration(seconds: 1));
           }
