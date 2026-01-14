@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:integration_test/integration_test_driver_extended.dart';
+import 'package:image/image.dart' as img;
 
 Future<void> main() async {
   // Get locale from environment (default: pt-BR)
@@ -58,10 +60,44 @@ Future<void> main() async {
         filename = '$deviceName-$iosName.png';
       }
 
-      final filePath = '$screenshotDir/$filename';
-      final File image = await File(filePath).create(recursive: true);
-      image.writeAsBytesSync(screenshotBytes);
-      print('✅ Saved: $filePath');
+      // Decode the image from bytes
+      // Convert List<int> to Uint8List as required by image package
+      final bytes = screenshotBytes is Uint8List ? screenshotBytes : Uint8List.fromList(screenshotBytes);
+      final originalImage = img.decodeImage(bytes);
+
+      if (originalImage != null) {
+        // Remove alpha channel by converting to RGB (no transparency)
+        // This is required by App Store Connect - screenshots cannot have alpha channel
+        // Create a new image without alpha by copying RGB channels only
+        final rgbImage = img.Image(
+          width: originalImage.width,
+          height: originalImage.height,
+          numChannels: 3, // RGB only, no alpha
+        );
+
+        // Copy RGB data from original (alpha is automatically dropped)
+        for (var y = 0; y < originalImage.height; y++) {
+          for (var x = 0; x < originalImage.width; x++) {
+            final pixel = originalImage.getPixel(x, y);
+            rgbImage.setPixelRgb(x, y, pixel.r.toInt(), pixel.g.toInt(), pixel.b.toInt());
+          }
+        }
+
+        // Encode back to PNG without alpha
+        final processedBytes = img.encodePng(rgbImage, level: 6);
+
+        final filePath = '$screenshotDir/$filename';
+        final File image = await File(filePath).create(recursive: true);
+        image.writeAsBytesSync(processedBytes);
+        print('✅ Saved (RGB): $filePath');
+      } else {
+        // Fallback: save original bytes if decoding fails
+        final filePath = '$screenshotDir/$filename';
+        final File image = await File(filePath).create(recursive: true);
+        image.writeAsBytesSync(screenshotBytes);
+        print('⚠️  Saved (original): $filePath');
+      }
+
       return true;
     },
   );
