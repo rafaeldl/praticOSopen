@@ -224,19 +224,24 @@ class _SettingsState extends State<Settings> {
                   // Reabrir Onboarding - para reconfigurar empresa e capturar screenshots
                   Observer(builder: (_) {
                     if (_authService.hasPermission(PermissionType.manageCompany)) {
-                      return CupertinoListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: CupertinoColors.systemPurple,
-                            borderRadius: BorderRadius.circular(6),
+                      return Semantics(
+                        identifier: 'reopen_onboarding_button',
+                        button: true,
+                        label: context.l10n.reopenOnboarding,
+                        child: CupertinoListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: CupertinoColors.systemPurple,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Icon(CupertinoIcons.refresh_bold, color: CupertinoColors.white, size: 20),
                           ),
-                          child: const Icon(CupertinoIcons.refresh_bold, color: CupertinoColors.white, size: 20),
+                          title: Text(context.l10n.reopenOnboarding),
+                          subtitle: Text(context.l10n.reconfigureCompanySetup),
+                          trailing: const CupertinoListTileChevron(),
+                          onTap: () => _reopenOnboarding(context),
                         ),
-                        title: Text(context.l10n.reopenOnboarding),
-                        subtitle: Text(context.l10n.reconfigureCompanySetup),
-                        trailing: const CupertinoListTileChevron(),
-                        onTap: () => _reopenOnboarding(context),
                       );
                     }
                     return const SizedBox.shrink();

@@ -185,9 +185,14 @@ class _CompanyContactScreenState extends State<CompanyContactScreen> {
                 padding: const EdgeInsets.all(20),
                 child: SizedBox(
                   width: double.infinity,
-                  child: CupertinoButton.filled(
-                    onPressed: _next,
-                    child: Text(context.l10n.next),
+                  child: Semantics(
+                    identifier: 'next_button_company_contact',
+                    button: true,
+                    label: context.l10n.next,
+                    child: CupertinoButton.filled(
+                      onPressed: _next,
+                      child: Text(context.l10n.next),
+                    ),
                   ),
                 ),
               ),

@@ -215,9 +215,14 @@ class _CompanyInfoScreenState extends State<CompanyInfoScreen> {
                 padding: const EdgeInsets.all(20),
                 child: SizedBox(
                   width: double.infinity,
-                  child: CupertinoButton.filled(
-                    onPressed: _next,
-                    child: Text(context.l10n.next),
+                  child: Semantics(
+                    identifier: 'next_button_company_info',
+                    button: true,
+                    label: context.l10n.next,
+                    child: CupertinoButton.filled(
+                      onPressed: _next,
+                      child: Text(context.l10n.next),
+                    ),
                   ),
                 ),
               ),

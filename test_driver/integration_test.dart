@@ -24,23 +24,23 @@ Future<void> main() async {
 
   // Mapeamento de nomes para diferentes plataformas
   final Map<String, String> iosNameMapping = {
-    '01_login': '00_Login',
-    '02_home': '01_Home',
-    '03_dashboard': '02_dashboard',
-    '04_segments': '03_segments',
-    '05_order_detail': '04_order_detail',
-    '06_forms': '05_forms',
-    '07_payments': '06_payments',
+    '01_home': '00_Home',
+    '02_order_detail': '01_OrderDetail',
+    '03_segments': '02_Segments',
+    '04_dashboard': '03_Dashboard',
+    '05_payments': '04_Payments',
+    '06_forms': '05_Forms',
+    '07_login': '06_Login',
   };
 
   final Map<String, String> androidNameMapping = {
-    '01_login': '01-login',
-    '02_home': '02-home',
-    '03_dashboard': '03-dashboard',
-    '04_segments': '04-segments',
-    '05_order_detail': '05-order_detail',
+    '01_home': '01-home',
+    '02_order_detail': '02-order_detail',
+    '03_segments': '03-segments',
+    '04_dashboard': '04-dashboard',
+    '05_payments': '05-payments',
     '06_forms': '06-forms',
-    '07_payments': '07-payments',
+    '07_login': '07-login',
   };
 
   await integrationDriver(

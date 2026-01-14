@@ -38,18 +38,20 @@ void main() {
       // Android specific: Enable screenshot capture
       await binding.convertFlutterSurfaceToImage();
 
-      // ========== SCREENSHOT 1: Login ==========
-      print('📸 Capturing Screenshot 1: Login');
+      // ========== SCREENSHOT 7: Login Screen (captured before login) ==========
+      print('\n--- Screenshot 7: Login Screen ---');
+      print('Waiting for login screen to be ready...');
       await Future.delayed(const Duration(seconds: 4));
       await tester.pumpAndSettle();
-      await binding.takeScreenshot('01_login');
+      print('📸 Capturing Screenshot 7: Login');
+      await binding.takeScreenshot('07_login');
 
       // ========== LOGIN WITH DEMO ACCOUNT ==========
       print('🔐 Logging in with demo account for locale: $locale...');
       await _performLogin(tester, locale);
 
-      // ========== SCREENSHOT 2: Home (Order List) ==========
-      print('\n--- Screenshot 2: Home ---');
+      // ========== SCREENSHOT 1: Home (Order List) ==========
+      print('\n--- Screenshot 1: Home ---');
       print('Waiting for home screen to load...');
       await tester.pumpAndSettle();
       await Future.delayed(const Duration(seconds: 5));
@@ -73,11 +75,165 @@ void main() {
       print('Icon widgets: $icons');
       print('=========================\n');
 
-      print('📸 Capturing Screenshot 2: Home');
-      await binding.takeScreenshot('02_home');
+      print('📸 Capturing Screenshot 1: Home');
+      await binding.takeScreenshot('01_home');
 
-      // ========== SCREENSHOT 3: Dashboard ==========
-      print('\n--- Screenshot 3: Dashboard ---');
+      // ========== SCREENSHOT 2, 5, 6: Enter OS once and capture Detail, Payments, Forms ==========
+      print('\n--- Entering OS to capture Order Detail, Payments, and Forms ---');
+      print('Looking for order cards with semantic identifiers...');
+
+      // Find all Semantics widgets and filter for order_card_ identifiers
+      final allSemanticsOrder = find.byType(Semantics);
+      Finder? orderCard;
+
+      for (var i = 0; i < allSemanticsOrder.evaluate().length; i++) {
+        final widget = tester.widget<Semantics>(allSemanticsOrder.at(i));
+        final identifier = widget.properties.identifier?.toString() ?? '';
+        if (identifier.startsWith('order_card_')) {
+          orderCard = allSemanticsOrder.at(i);
+          print('Found order card: $identifier');
+          break;
+        }
+      }
+
+      print('Order cards found: ${orderCard != null ? 1 : 0}');
+
+      if (orderCard != null) {
+        print('Tapping order card...');
+        await tester.tap(orderCard);
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(seconds: 3));
+        print('Order detail opened');
+
+        // SCREENSHOT 2: Order Detail (top of screen)
+        print('📸 Capturing Screenshot 2: Order Detail');
+        await binding.takeScreenshot('02_order_detail');
+
+        // SCREENSHOT 5: Payments (scroll down to payments section)
+        print('\n--- Screenshot 5: Payments ---');
+        print('Scrolling to payments section...');
+        final orderScroll = find.byType(CustomScrollView);
+        if (orderScroll.evaluate().isNotEmpty) {
+          await tester.drag(orderScroll.first, const Offset(0, -350));
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+        }
+
+        // Look for payment button using semantic identifier
+        print('Looking for payment button by semantic identifier...');
+        final paymentSemantics = find.byType(Semantics);
+        Finder? paymentButton;
+
+        for (var i = 0; i < paymentSemantics.evaluate().length; i++) {
+          final widget = tester.widget<Semantics>(paymentSemantics.at(i));
+          final identifier = widget.properties.identifier?.toString() ?? '';
+          if (identifier == 'payment_button') {
+            paymentButton = paymentSemantics.at(i);
+            print('Found payment button with semantic identifier');
+            break;
+          }
+        }
+
+        if (paymentButton != null) {
+          print('Tapping payment button...');
+          await tester.tap(paymentButton);
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 2));
+          print('Payments screen opened');
+
+          print('📸 Capturing Screenshot 5: Payments');
+          await binding.takeScreenshot('05_payments');
+
+          // Go back to order detail
+          print('Navigating back to order detail...');
+          final navPayments = tester.state<NavigatorState>(find.byType(Navigator).first);
+          navPayments.pop();
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+          print('✅ Back to order detail');
+        } else {
+          print('⚠️ Could not find payment button, skipping screenshot 5');
+        }
+
+        // SCREENSHOT 6: Forms (scroll down further to forms section)
+        print('\n--- Screenshot 6: Forms ---');
+        print('Scrolling to forms section...');
+        final orderScrollForms = find.byType(CustomScrollView);
+        if (orderScrollForms.evaluate().isNotEmpty) {
+          await tester.drag(orderScrollForms.first, const Offset(0, -400));
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+        }
+
+        // Look for form items (they use chevron_right icon for navigation)
+        // Forms is the LAST item in the order screen
+        print('Looking for form items inline...');
+        final formItems = find.byIcon(CupertinoIcons.chevron_right);
+        print('Found ${formItems.evaluate().length} chevron items');
+
+        // Find the LAST chevron (forms section is always last)
+        Finder? formToTap;
+        int lastValidIndex = -1;
+        for (var i = 0; i < formItems.evaluate().length; i++) {
+          try {
+            final itemPos = tester.getTopLeft(formItems.at(i));
+            print('  Chevron $i at position: $itemPos');
+            // Keep track of the last valid chevron (below 200px to skip navigation bar)
+            if (itemPos.dy > 200) {
+              lastValidIndex = i;
+            }
+          } catch (e) {
+            // Skip items that can't be measured
+          }
+        }
+
+        if (lastValidIndex >= 0) {
+          formToTap = formItems.at(lastValidIndex);
+          final pos = tester.getTopLeft(formToTap);
+          print('  ✅ Using LAST chevron at index $lastValidIndex, position: $pos');
+        }
+
+        if (formToTap != null && formToTap.evaluate().isNotEmpty) {
+          print('Tapping form item to open it...');
+          await tester.tap(formToTap);
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 2));
+          print('Form opened');
+
+          // Wait for form to fully render (forms can have many fields and images)
+          print('Waiting for form to fully render...');
+          await Future.delayed(const Duration(seconds: 3));
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+
+          print('Form fully rendered, ready to capture');
+          print('📸 Capturing Screenshot 6: Forms');
+          await binding.takeScreenshot('06_forms');
+
+          // Go back to order detail
+          print('Navigating back to order detail...');
+          final navForms = tester.state<NavigatorState>(find.byType(Navigator).first);
+          navForms.pop();
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(milliseconds: 500));
+          print('✅ Back to order detail');
+        } else {
+          print('⚠️ Form items not found, skipping screenshot 6');
+        }
+
+        // Go back to home
+        print('Navigating back to home...');
+        final navHome = tester.state<NavigatorState>(find.byType(Navigator).first);
+        navHome.pop();
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(seconds: 1));
+        print('✅ Back to home');
+      } else {
+        print('⚠️ No order items found, skipping order detail, payments, and forms screenshots');
+      }
+
+      // ========== SCREENSHOT 4: Dashboard ==========
+      print('\n--- Screenshot 4: Dashboard ---');
       print('Looking for dashboard button...');
 
       // Try to find the chart icon first
@@ -129,8 +285,8 @@ void main() {
         print('Waiting for dashboard to load data...');
         await Future.delayed(const Duration(seconds: 2));
 
-        print('📸 Capturing Screenshot 3: Dashboard');
-        await binding.takeScreenshot('03_dashboard');
+        print('📸 Capturing Screenshot 4: Dashboard');
+        await binding.takeScreenshot('04_dashboard');
 
         // Navigate back to home
         print('Navigating back to home...');
@@ -139,340 +295,121 @@ void main() {
         await Future.delayed(const Duration(seconds: 2));
         print('✅ Back to home');
       } else {
-        print('⚠️ Dashboard button not found, skipping screenshot 3');
+        print('⚠️ Dashboard button not found, skipping screenshot 4');
       }
 
-      // ========== SCREENSHOT 4: Segments Screen (Onboarding) ==========
-      print('\n--- Screenshot 4: Segments Screen ---');
+      // ========== SCREENSHOT 3: Segments Screen (Onboarding) ==========
+      print('\n--- Screenshot 3: Segments Screen ---');
       print('Navigating to settings to trigger re-onboarding...');
 
       // Go to settings tab using semantic identifier
       print('Looking for settings tab...');
-      final allSemanticsTabs = find.byType(Semantics);
-      Finder? settingsTab;
+      final allSemanticsTabsForSegments = find.byType(Semantics);
+      Finder? settingsTabForSegments;
 
-      for (var i = 0; i < allSemanticsTabs.evaluate().length; i++) {
-        final widget = tester.widget<Semantics>(allSemanticsTabs.at(i));
+      for (var i = 0; i < allSemanticsTabsForSegments.evaluate().length; i++) {
+        final widget = tester.widget<Semantics>(allSemanticsTabsForSegments.at(i));
         final identifier = widget.properties.identifier?.toString() ?? '';
         if (identifier == 'tab_settings') {
-          settingsTab = allSemanticsTabs.at(i);
+          settingsTabForSegments = allSemanticsTabsForSegments.at(i);
           print('Found settings tab with semantic identifier');
           break;
         }
       }
 
-      if (settingsTab != null) {
-        await tester.tap(settingsTab);
+      if (settingsTabForSegments != null) {
+        await tester.tap(settingsTabForSegments);
         await tester.pumpAndSettle();
         await Future.delayed(const Duration(seconds: 1));
         print('Settings tab opened');
 
-        // Find "Reopen Onboarding" button by looking for button with text
-        print('Looking for Reopen Onboarding button...');
-        final reopenButton = find.widgetWithText(CupertinoButton, 'Reabrir Configuração Inicial');
+        // Find "Reopen Onboarding" button using semantic identifier
+        print('Looking for Reopen Onboarding button by semantic identifier...');
+        final allSemanticsForReopen = find.byType(Semantics);
+        Finder? reopenButton;
 
-        if (reopenButton.evaluate().isEmpty) {
-          // Try English
-          final reopenButtonEn = find.text('Reopen Onboarding');
-          if (reopenButtonEn.evaluate().isNotEmpty) {
-            print('Tapping Reopen Onboarding button...');
-            await tester.tap(reopenButtonEn);
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 2));
-
-            // Should be on segment selection screen now
-            print('Waiting for segments screen to load...');
-            await Future.delayed(const Duration(seconds: 2));
-
-            print('📸 Capturing Screenshot 4: Segments Screen');
-            await binding.takeScreenshot('04_segments');
-
-            // Go back to home by tapping back button twice
-            print('Navigating back to home...');
-            await tester.pageBack();
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(milliseconds: 500));
-
-            // Tap home tab to ensure we're back using semantic identifier
-            final allSemanticsHome = find.byType(Semantics);
-            Finder? homeTab;
-
-            for (var i = 0; i < allSemanticsHome.evaluate().length; i++) {
-              final widget = tester.widget<Semantics>(allSemanticsHome.at(i));
-              final identifier = widget.properties.identifier?.toString() ?? '';
-              if (identifier == 'tab_home') {
-                homeTab = allSemanticsHome.at(i);
-                break;
-              }
-            }
-
-            if (homeTab != null) {
-              await tester.tap(homeTab);
-              await tester.pumpAndSettle();
-              await Future.delayed(const Duration(seconds: 1));
-            }
-            print('✅ Back to home');
-          } else {
-            print('⚠️ Reopen Onboarding button not found, skipping segments screenshot');
-          }
-        } else {
-          print('Tapping Reopen Onboarding button (PT)...');
-          await tester.tap(reopenButton);
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 2));
-
-          // Should be on segment selection screen now
-          print('Waiting for segments screen to load...');
-          await Future.delayed(const Duration(seconds: 2));
-
-          print('📸 Capturing Screenshot 4: Segments Screen');
-          await binding.takeScreenshot('04_segments');
-
-          // Go back to home
-          print('Navigating back to home...');
-          await tester.pageBack();
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(milliseconds: 500));
-
-          // Tap home tab to ensure we're back using semantic identifier
-          final allSemanticsHome2 = find.byType(Semantics);
-          Finder? homeTab2;
-
-          for (var i = 0; i < allSemanticsHome2.evaluate().length; i++) {
-            final widget = tester.widget<Semantics>(allSemanticsHome2.at(i));
-            final identifier = widget.properties.identifier?.toString() ?? '';
-            if (identifier == 'tab_home') {
-              homeTab2 = allSemanticsHome2.at(i);
-              break;
-            }
-          }
-
-          if (homeTab2 != null) {
-            await tester.tap(homeTab2);
-            await tester.pumpAndSettle();
-            await Future.delayed(const Duration(seconds: 1));
-          }
-          print('✅ Back to home');
-        }
-      } else {
-        print('⚠️ Settings tab not found, skipping segments screenshot');
-      }
-
-      // ========== SCREENSHOT 5: Order Detail ==========
-      print('\n--- Screenshot 5: Order Detail ---');
-      print('Looking for order cards with semantic identifiers...');
-
-      // Find all Semantics widgets and filter for order_card_ identifiers
-      final allSemantics = find.byType(Semantics);
-      Finder? firstOrderCard;
-
-      for (var i = 0; i < allSemantics.evaluate().length; i++) {
-        final widget = tester.widget<Semantics>(allSemantics.at(i));
-        final identifier = widget.properties.identifier?.toString() ?? '';
-        if (identifier.startsWith('order_card_')) {
-          firstOrderCard = allSemantics.at(i);
-          print('Found order card: $identifier');
-          break;
-        }
-      }
-
-      print('Order cards found: ${firstOrderCard != null ? 1 : 0}');
-
-      if (firstOrderCard != null) {
-        print('Tapping first order card...');
-        await tester.tap(firstOrderCard);
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 3));
-        print('Order detail opened');
-
-        print('📸 Capturing Screenshot 5: Order Detail');
-        await binding.takeScreenshot('05_order_detail');
-
-        // Go back
-        print('Navigating back to home...');
-        final navigator = tester.state<NavigatorState>(find.byType(Navigator).first);
-        navigator.pop();
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 1));
-        print('✅ Back to home');
-      } else {
-        print('⚠️ No order items found, skipping order detail screenshot');
-      }
-
-      // ========== SCREENSHOT 6: Dynamic Forms (Checklist) ==========
-      print('\n--- Screenshot 6: Dynamic Forms ---');
-      print('Looking for order cards again...');
-
-      // Find order cards again
-      final allSemantics2 = find.byType(Semantics);
-      Finder? firstOrderCard2;
-
-      for (var i = 0; i < allSemantics2.evaluate().length; i++) {
-        final widget = tester.widget<Semantics>(allSemantics2.at(i));
-        final identifier = widget.properties.identifier?.toString() ?? '';
-        if (identifier.startsWith('order_card_')) {
-          firstOrderCard2 = allSemantics2.at(i);
-          print('Found order card: $identifier');
-          break;
-        }
-      }
-
-      print('Order cards found: ${firstOrderCard2 != null ? 1 : 0}');
-
-      if (firstOrderCard2 != null) {
-        print('Tapping first order card...');
-        await tester.tap(firstOrderCard2);
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 3));
-        print('Order detail opened');
-
-        // Forms are displayed inline in the order screen, scroll down to find them
-        print('Scrolling to find forms section...');
-        final orderScrollable = find.byType(CustomScrollView);
-        if (orderScrollable.evaluate().isNotEmpty) {
-          await tester.drag(orderScrollable.first, const Offset(0, -400));
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 1));
-        }
-
-        // Look for form items (they use chevron_right icon for navigation)
-        // Forms is the LAST item in the order screen
-        print('Looking for form items inline...');
-        final formItems = find.byIcon(CupertinoIcons.chevron_right);
-        print('Found ${formItems.evaluate().length} chevron items');
-
-        // Find the LAST chevron (forms section is always last)
-        Finder? formToTap;
-        int lastValidIndex = -1;
-        for (var i = 0; i < formItems.evaluate().length; i++) {
-          try {
-            final itemPos = tester.getTopLeft(formItems.at(i));
-            print('  Chevron $i at position: $itemPos');
-            // Keep track of the last valid chevron (below 200px to skip navigation bar)
-            if (itemPos.dy > 200) {
-              lastValidIndex = i;
-            }
-          } catch (e) {
-            // Skip items that can't be measured
-          }
-        }
-
-        if (lastValidIndex >= 0) {
-          formToTap = formItems.at(lastValidIndex);
-          final pos = tester.getTopLeft(formToTap);
-          print('  ✅ Using LAST chevron at index $lastValidIndex, position: $pos');
-        }
-
-        if (formToTap != null && formToTap.evaluate().isNotEmpty) {
-          print('Tapping form item to open it...');
-          await tester.tap(formToTap);
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 2));
-          print('Form opened');
-
-          // Wait for form to fully render
-          await Future.delayed(const Duration(seconds: 1));
-
-          print('📸 Capturing Screenshot 6: Dynamic Forms');
-          await binding.takeScreenshot('06_forms');
-
-          // Go back twice (from form to order, order to home)
-          print('Navigating back to home...');
-          final nav = tester.state<NavigatorState>(find.byType(Navigator).first);
-          nav.pop(); // form to order
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(milliseconds: 500));
-          nav.pop(); // order to home
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 1));
-          print('✅ Back to home');
-        } else {
-          print('⚠️ Form items not found, skipping screenshot 6');
-          // Go back from order to home
-          final nav = tester.state<NavigatorState>(find.byType(Navigator).first);
-          nav.pop();
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 1));
-        }
-      } else {
-        print('⚠️ No order items found for forms navigation');
-      }
-
-      // ========== SCREENSHOT 7: Payments Management ==========
-      print('\n--- Screenshot 7: Payments ---');
-
-      // Go back to home first
-      print('Going back to home...');
-      final nav = tester.state<NavigatorState>(find.byType(Navigator).first);
-      while (nav.canPop()) {
-        nav.pop();
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(milliseconds: 300));
-      }
-      print('At home screen');
-
-      // Find and tap first order card again
-      print('Looking for order cards...');
-      final allSemantics3 = find.byType(Semantics);
-      Finder? orderCardForPayments;
-
-      for (var i = 0; i < allSemantics3.evaluate().length; i++) {
-        final widget = tester.widget<Semantics>(allSemantics3.at(i));
-        final identifier = widget.properties.identifier?.toString() ?? '';
-        if (identifier.startsWith('order_card_')) {
-          orderCardForPayments = allSemantics3.at(i);
-          print('Found order card: $identifier');
-          break;
-        }
-      }
-
-      if (orderCardForPayments != null) {
-        print('Tapping order card...');
-        await tester.tap(orderCardForPayments);
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 2));
-        print('Order detail opened');
-
-        // Scroll to find payments section (penultimate section, before forms)
-        print('Scrolling to payments section...');
-        final orderScroll = find.byType(CustomScrollView);
-        if (orderScroll.evaluate().isNotEmpty) {
-          await tester.drag(orderScroll.first, const Offset(0, -350));
-          await tester.pumpAndSettle();
-          await Future.delayed(const Duration(seconds: 1));
-        }
-
-        // Look for payment button using semantic identifier
-        print('Looking for payment button by semantic identifier...');
-        final paymentSemantics = find.byType(Semantics);
-        Finder? paymentButton;
-
-        for (var i = 0; i < paymentSemantics.evaluate().length; i++) {
-          final widget = tester.widget<Semantics>(paymentSemantics.at(i));
+        for (var i = 0; i < allSemanticsForReopen.evaluate().length; i++) {
+          final widget = tester.widget<Semantics>(allSemanticsForReopen.at(i));
           final identifier = widget.properties.identifier?.toString() ?? '';
-          if (identifier == 'payment_button') {
-            paymentButton = paymentSemantics.at(i);
-            print('Found payment button with semantic identifier');
+          if (identifier == 'reopen_onboarding_button') {
+            reopenButton = allSemanticsForReopen.at(i);
+            print('  ✅ Found reopen onboarding button with semantic identifier');
             break;
           }
         }
 
-        if (paymentButton != null) {
-          print('Tapping payment button...');
-          await tester.tap(paymentButton);
+        if (reopenButton != null) {
+          print('Tapping Reopen Onboarding button...');
+          await tester.tap(reopenButton);
           await tester.pumpAndSettle();
           await Future.delayed(const Duration(seconds: 2));
-          print('Payments screen opened');
+          print('Company Info screen opened');
 
-          print('📸 Capturing Screenshot 7: Payments');
-          await binding.takeScreenshot('07_payments');
+          // Navigate through onboarding: Company Info -> Company Contact -> Segments
 
-          print('✅ Payments screenshot captured');
+          // Step 1: Company Info Screen - tap "Next" button using semantic identifier
+          print('Step 1: Looking for Next button in Company Info by semantic identifier...');
+          final allSemanticsInfo = find.byType(Semantics);
+          Finder? nextButton1;
+
+          for (var i = 0; i < allSemanticsInfo.evaluate().length; i++) {
+            final widget = tester.widget<Semantics>(allSemanticsInfo.at(i));
+            final identifier = widget.properties.identifier?.toString() ?? '';
+            if (identifier == 'next_button_company_info') {
+              nextButton1 = allSemanticsInfo.at(i);
+              print('  ✅ Found Next button (Company Info) with semantic identifier');
+              break;
+            }
+          }
+
+          if (nextButton1 != null) {
+            print('Tapping Next button (Company Info)...');
+            await tester.tap(nextButton1);
+            await tester.pumpAndSettle();
+            await Future.delayed(const Duration(seconds: 2));
+            print('Company Contact screen opened');
+
+            // Step 2: Company Contact Screen - tap "Next" button using semantic identifier
+            print('Step 2: Looking for Next button in Company Contact by semantic identifier...');
+            final allSemanticsContact = find.byType(Semantics);
+            Finder? nextButton2;
+
+            for (var i = 0; i < allSemanticsContact.evaluate().length; i++) {
+              final widget = tester.widget<Semantics>(allSemanticsContact.at(i));
+              final identifier = widget.properties.identifier?.toString() ?? '';
+              if (identifier == 'next_button_company_contact') {
+                nextButton2 = allSemanticsContact.at(i);
+                print('  ✅ Found Next button (Company Contact) with semantic identifier');
+                break;
+              }
+            }
+
+            if (nextButton2 != null) {
+              print('Tapping Next button (Company Contact)...');
+              await tester.tap(nextButton2);
+              await tester.pumpAndSettle();
+              await Future.delayed(const Duration(seconds: 2));
+              print('Segments screen opened!');
+
+              // Now we're on the Segments screen - capture it!
+              print('Waiting for segments screen to fully load...');
+              await Future.delayed(const Duration(seconds: 2));
+
+              print('📸 Capturing Screenshot 3: Segments Screen');
+              await binding.takeScreenshot('03_segments');
+
+              print('✅ Segments screenshot captured');
+            } else {
+              print('⚠️ Next button not found in Company Contact screen');
+            }
+          } else {
+            print('⚠️ Next button not found in Company Info screen');
+          }
         } else {
-          print('⚠️ Could not find payment button, skipping screenshot 7');
+          print('⚠️ Reopen Onboarding button not found, skipping segments screenshot');
         }
       } else {
-        print('⚠️ Order card not found for payments, skipping screenshot 7');
+        print('⚠️ Settings tab not found, skipping segments screenshot');
       }
 
       print('✅ All screenshots captured successfully for locale: $locale');
