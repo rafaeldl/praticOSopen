@@ -124,7 +124,8 @@ platform :android do
       skip_upload_metadata: false,      # Always upload metadata
       skip_upload_changelogs: false,    # Always upload changelogs
       skip_upload_images: skip_screenshots,
-      skip_upload_screenshots: skip_screenshots
+      skip_upload_screenshots: skip_screenshots,
+      timeout: 900                      # 15 minutes timeout for multi-locale uploads (3 locales × ~3-5min each)
     )
   end
 
