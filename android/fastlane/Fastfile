@@ -156,9 +156,10 @@ platform :android do
   desc "Capture screenshots for all locales and all device types"
   lane :screenshots_all do |options|
     # AVD names (can be customized via options)
-    phone_avd = options[:phone_avd] || "Pixel_8_API_34"
-    tablet7_avd = options[:tablet7_avd] || "Pixel_Tablet_API_34"
-    tablet10_avd = options[:tablet10_avd] || "Pixel_C_API_34"
+    # Run `emulator -list-avds` to see your available AVDs
+    phone_avd = options[:phone_avd] || "Pixel_7"
+    tablet7_avd = options[:tablet7_avd] || "Pixel_Tablet"
+    tablet10_avd = options[:tablet10_avd] || "Pixel_Tablet"  # Using same as 7" if no 10" available
 
     force_logout = options[:force_logout]
     # Parallel is NOT supported when using auto-boot (emulators conflict)
@@ -237,18 +238,48 @@ platform :android do
     )
   end
 
+  # Helper function to get Android SDK path
+  def get_android_sdk_path
+    # Try ANDROID_HOME or ANDROID_SDK_ROOT environment variables
+    sdk_path = ENV['ANDROID_HOME'] || ENV['ANDROID_SDK_ROOT']
+
+    # If not set, try common locations
+    if sdk_path.nil? || sdk_path.empty?
+      common_paths = [
+        File.expand_path("~/Library/Android/sdk"),     # macOS default
+        File.expand_path("~/Android/Sdk"),             # Linux default
+        "/usr/local/android-sdk"                       # Alternative
+      ]
+
+      sdk_path = common_paths.find { |path| Dir.exist?(path) }
+    end
+
+    if sdk_path.nil?
+      UI.user_error!("❌ Android SDK not found. Please set ANDROID_HOME environment variable or install Android SDK.")
+    end
+
+    sdk_path
+  end
+
   # Helper function to boot and reset emulator
   def boot_emulator(avd_name:, locale:)
     UI.message("🔄 Preparing emulator: #{avd_name} with locale: #{locale}")
 
+    # Get Android SDK paths
+    sdk_path = get_android_sdk_path
+    adb = File.join(sdk_path, "platform-tools", "adb")
+    emulator = File.join(sdk_path, "emulator", "emulator")
+
+    UI.message("Using Android SDK: #{sdk_path}")
+
     # 1. Kill emulator if already running
     UI.message("Killing any existing emulator instances...")
-    sh("adb devices | grep emulator | cut -f1 | xargs -I {} adb -s {} emu kill || true")
+    sh("#{adb} devices | grep emulator | cut -f1 | xargs -I {} #{adb} -s {} emu kill || true")
     sleep(2)
 
     # 2. Start emulator fresh (no snapshot, wipe data for clean state)
     UI.message("🚀 Starting emulator: #{avd_name}")
-    spawn("emulator -avd #{avd_name} -no-snapshot-load -no-audio -no-boot-anim")
+    spawn("#{emulator} -avd #{avd_name} -no-snapshot-load -no-audio -no-boot-anim")
 
     # 3. Wait for emulator to boot (check boot_completed property)
     UI.message("⏳ Waiting for emulator to boot...")
@@ -261,10 +292,10 @@ platform :android do
       attempts += 1
 
       # Get first emulator device
-      device = `adb devices | grep emulator | head -1 | cut -f1`.strip
+      device = `#{adb} devices | grep emulator | head -1 | cut -f1`.strip
 
       if !device.empty?
-        boot_status = `adb -s #{device} shell getprop sys.boot_completed 2>/dev/null`.strip
+        boot_status = `#{adb} -s #{device} shell getprop sys.boot_completed 2>/dev/null`.strip
         if boot_status == "1"
           booted = true
           UI.message("✅ Emulator booted: #{device}")
@@ -281,14 +312,14 @@ platform :android do
           end
 
           # Set system locale
-          sh("adb -s #{device} shell settings put system system_locales #{android_locale}") rescue nil
-          sh("adb -s #{device} shell setprop persist.sys.locale #{android_locale}") rescue nil
+          sh("#{adb} -s #{device} shell settings put system system_locales #{android_locale}") rescue nil
+          sh("#{adb} -s #{device} shell setprop persist.sys.locale #{android_locale}") rescue nil
 
           # 5. Restart UI to apply locale
           UI.message("Restarting UI to apply locale...")
-          sh("adb -s #{device} shell stop") rescue nil
+          sh("#{adb} -s #{device} shell stop") rescue nil
           sleep(2)
-          sh("adb -s #{device} shell start") rescue nil
+          sh("#{adb} -s #{device} shell start") rescue nil
           sleep(5)
 
           # 6. Wait for boot_completed again after restart
@@ -298,7 +329,7 @@ platform :android do
           while wait_attempts < 20 && !ui_ready
             sleep(2)
             wait_attempts += 1
-            boot_status = `adb -s #{device} shell getprop sys.boot_completed 2>/dev/null`.strip
+            boot_status = `#{adb} -s #{device} shell getprop sys.boot_completed 2>/dev/null`.strip
             if boot_status == "1"
               ui_ready = true
               UI.success("✅ Emulator ready: #{device} (locale: #{locale})")
