@@ -130,88 +130,76 @@ platform :android do
 
   desc "Capture screenshots automatically using Flutter integration tests"
   lane :screenshots do |options|
-    device = options[:device] || "emulator-5554"
+    device = options[:device]
+    avd_name = options[:avd] || options[:avd_name]
     locale = options[:locale] || "pt-BR"
     force_logout = options[:force_logout]
+
+    # If AVD name provided, boot automatically. Otherwise use existing device.
+    if avd_name
+      UI.message("🤖 Will boot emulator automatically: #{avd_name}")
+    elsif device
+      UI.message("📱 Using existing device: #{device}")
+    else
+      UI.user_error!("❌ Must provide either :device or :avd parameter")
+    end
 
     capture_screenshots_for_device(
       device: device,
       folder_name: "phoneScreenshots",
       locale: locale,
-      force_logout: force_logout
+      force_logout: force_logout,
+      avd_name: avd_name
     )
   end
 
   desc "Capture screenshots for all locales and all device types"
   lane :screenshots_all do |options|
-    # Default emulator names (usually 5554=Phone, 5556=7", 5558=10" if launched in that order)
-    phone_device = options[:phone_device] || "emulator-5554"
-    tablet7_device = options[:tablet7_device] || "emulator-5556"
-    tablet10_device = options[:tablet10_device] || "emulator-5558"
+    # AVD names (can be customized via options)
+    phone_avd = options[:phone_avd] || "Pixel_8_API_34"
+    tablet7_avd = options[:tablet7_avd] || "Pixel_Tablet_API_34"
+    tablet10_avd = options[:tablet10_avd] || "Pixel_C_API_34"
 
     force_logout = options[:force_logout]
-    parallel = options[:parallel] != false  # Default: true
+    # Parallel is NOT supported when using auto-boot (emulators conflict)
+    parallel = false
     locales = ["pt-BR", "en-US", "es-ES"]
 
-    UI.important("⚠️  Ensure you have 3 emulators running!")
-    UI.message("   📱 Phone: #{phone_device}")
-    UI.message("   📟 Tablet 7\": #{tablet7_device}")
-    UI.message("   💻 Tablet 10\": #{tablet10_device}")
+    UI.important("🤖 Emulators will be started automatically!")
+    UI.message("   📱 Phone: #{phone_avd}")
+    UI.message("   📟 Tablet 7\": #{tablet7_avd}")
+    UI.message("   💻 Tablet 10\": #{tablet10_avd}")
 
     locales.each do |locale|
       UI.message("🌍 Generating screenshots for locale: #{locale}")
+      UI.message("🐌 Running devices in SEQUENTIAL mode (auto-boot)")
 
-      if parallel
-        UI.important("⚡ Running devices in PARALLEL mode")
+      # Phone
+      capture_screenshots_for_device(
+        device: nil,  # Will be determined after boot
+        folder_name: "phoneScreenshots",
+        locale: locale,
+        force_logout: force_logout,
+        avd_name: phone_avd
+      )
 
-        # Define device configurations
-        device_configs = [
-          { device: phone_device, folder: "phoneScreenshots" },
-          { device: tablet7_device, folder: "sevenInchScreenshots" },
-          { device: tablet10_device, folder: "tenInchScreenshots" }
-        ]
+      # 7-inch Tablet
+      capture_screenshots_for_device(
+        device: nil,
+        folder_name: "sevenInchScreenshots",
+        locale: locale,
+        force_logout: force_logout,
+        avd_name: tablet7_avd
+      )
 
-        # Run devices in parallel using threads
-        threads = device_configs.map do |config|
-          Thread.new do
-            capture_screenshots_for_device(
-              device: config[:device],
-              folder_name: config[:folder],
-              locale: locale,
-              force_logout: force_logout
-            )
-          end
-        end
-
-        # Wait for all threads to complete
-        threads.each(&:join)
-      else
-        UI.message("🐌 Running devices in SEQUENTIAL mode")
-
-        # Phone
-        capture_screenshots_for_device(
-          device: phone_device,
-          folder_name: "phoneScreenshots",
-          locale: locale,
-          force_logout: force_logout
-        )
-
-        # 7-inch Tablet
-        capture_screenshots_for_device(
-          device: tablet7_device,
-          folder_name: "sevenInchScreenshots",
-          locale: locale,
-          force_logout: force_logout
-        )
-
-        # 10-inch Tablet
-        capture_screenshots_for_device(
-          device: tablet10_device,
-          folder_name: "tenInchScreenshots",
-          locale: locale,
-          force_logout: force_logout
-        )
-      end
+      # 10-inch Tablet
+      capture_screenshots_for_device(
+        device: nil,
+        folder_name: "tenInchScreenshots",
+        locale: locale,
+        force_logout: force_logout,
+        avd_name: tablet10_avd
+      )
     end
 
     UI.success("✅ All screenshots generated for #{locales.length} locales!")
@@ -249,9 +237,96 @@ platform :android do
     )
   end
 
+  # Helper function to boot and reset emulator
+  def boot_emulator(avd_name:, locale:)
+    UI.message("🔄 Preparing emulator: #{avd_name} with locale: #{locale}")
+
+    # 1. Kill emulator if already running
+    UI.message("Killing any existing emulator instances...")
+    sh("adb devices | grep emulator | cut -f1 | xargs -I {} adb -s {} emu kill || true")
+    sleep(2)
+
+    # 2. Start emulator fresh (no snapshot, wipe data for clean state)
+    UI.message("🚀 Starting emulator: #{avd_name}")
+    spawn("emulator -avd #{avd_name} -no-snapshot-load -no-audio -no-boot-anim")
+
+    # 3. Wait for emulator to boot (check boot_completed property)
+    UI.message("⏳ Waiting for emulator to boot...")
+    max_attempts = 60
+    attempts = 0
+    booted = false
+
+    while attempts < max_attempts && !booted
+      sleep(5)
+      attempts += 1
+
+      # Get first emulator device
+      device = `adb devices | grep emulator | head -1 | cut -f1`.strip
+
+      if !device.empty?
+        boot_status = `adb -s #{device} shell getprop sys.boot_completed 2>/dev/null`.strip
+        if boot_status == "1"
+          booted = true
+          UI.message("✅ Emulator booted: #{device}")
+
+          # 4. Set locale
+          UI.message("🌍 Setting locale to: #{locale}")
+
+          # Map locale to Android format
+          android_locale = case locale
+            when "pt-BR" then "pt-BR"
+            when "en-US" then "en-US"
+            when "es-ES" then "es-ES"
+            else "en-US"
+          end
+
+          # Set system locale
+          sh("adb -s #{device} shell settings put system system_locales #{android_locale}") rescue nil
+          sh("adb -s #{device} shell setprop persist.sys.locale #{android_locale}") rescue nil
+
+          # 5. Restart UI to apply locale
+          UI.message("Restarting UI to apply locale...")
+          sh("adb -s #{device} shell stop") rescue nil
+          sleep(2)
+          sh("adb -s #{device} shell start") rescue nil
+          sleep(5)
+
+          # 6. Wait for boot_completed again after restart
+          UI.message("⏳ Waiting for UI to restart...")
+          wait_attempts = 0
+          ui_ready = false
+          while wait_attempts < 20 && !ui_ready
+            sleep(2)
+            wait_attempts += 1
+            boot_status = `adb -s #{device} shell getprop sys.boot_completed 2>/dev/null`.strip
+            if boot_status == "1"
+              ui_ready = true
+              UI.success("✅ Emulator ready: #{device} (locale: #{locale})")
+            end
+          end
+
+          return device
+        end
+      end
+    end
+
+    UI.error("❌ Emulator failed to boot after #{max_attempts * 5} seconds")
+    nil
+  end
+
   # Helper function to run the screenshot process
-  def capture_screenshots_for_device(device:, folder_name:, locale:, force_logout:)
+  def capture_screenshots_for_device(device:, folder_name:, locale:, force_logout:, avd_name: nil)
     UI.message("📸 Capturing screenshots for #{folder_name} on device: #{device}, locale: #{locale}")
+
+    # Boot emulator if AVD name provided
+    if avd_name
+      actual_device = boot_emulator(avd_name: avd_name, locale: locale)
+      if actual_device.nil?
+        UI.error("⚠️ Failed to boot emulator, skipping screenshots")
+        return
+      end
+      device = actual_device
+    end
 
     # Define o diretório baseado no tipo (folder_name) e locale
     base_screenshots_dir = "fastlane/metadata/android/#{locale}/images"
