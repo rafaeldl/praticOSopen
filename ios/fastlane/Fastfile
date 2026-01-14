@@ -197,6 +197,7 @@ platform :ios do
       force: true,
       skip_screenshots: skip_screenshots,
       skip_metadata: false,  # Always upload metadata
+      overwrite_screenshots: true,  # Replace existing screenshots instead of adding
       submit_for_review: true,
       reject_if_possible: true,  # Cancel pending review before submitting new one
       run_precheck_before_submit: false
