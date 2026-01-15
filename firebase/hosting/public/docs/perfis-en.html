@@ -88,31 +88,31 @@
                         <a href="#admin" class="profile-card profile-admin">
                             <div class="profile-icon"><span class="profile-emoji">&#128104;&#8205;&#128188;</span></div>
                             <h3>Administrator</h3>
-                            <p>Full system access</p>
+                            <p>Full access. Configures the company, manages users, and accesses all data.</p>
                             <span class="profile-tag">Complete Management</span>
                         </a>
                         <a href="#manager" class="profile-card profile-manager">
                             <div class="profile-icon"><span class="profile-emoji">&#128176;</span></div>
                             <h3>Manager</h3>
-                            <p>Financial management and reports</p>
+                            <p>Focus on results. Views billing and costs, but does not execute services.</p>
                             <span class="profile-tag">Financial</span>
                         </a>
                         <a href="#supervisor" class="profile-card profile-supervisor">
                             <div class="profile-icon"><span class="profile-emoji">&#129489;&#8205;&#128295;</span></div>
                             <h3>Supervisor</h3>
-                            <p>Operational management of technicians</p>
+                            <p>Coordinates teams and equipment. Does not view financial values.</p>
                             <span class="profile-tag">Operational</span>
                         </a>
                         <a href="#consultant" class="profile-card profile-consultant">
                             <div class="profile-icon"><span class="profile-emoji">&#129489;&#8205;&#128188;</span></div>
                             <h3>Consultant</h3>
-                            <p>Sales and commercial tracking</p>
+                            <p>Creates quotes. Views prices, but accesses only their own Service Orders.</p>
                             <span class="profile-tag">Commercial</span>
                         </a>
                         <a href="#technician" class="profile-card profile-technician">
                             <div class="profile-icon"><span class="profile-emoji">&#128119;</span></div>
                             <h3>Technician</h3>
-                            <p>Field service execution</p>
+                            <p>Executes services. Does not view prices and has limited editing after SO approval.</p>
                             <span class="profile-tag">Execution</span>
                         </a>
                     </div>
@@ -121,7 +121,7 @@
                 <section id="admin" class="docs-section">
                     <div class="section-header-inline">
                         <span class="profile-badge admin">&#128104;&#8205;&#128188;</span>
-                        <div><h2>Administrator</h2><p class="section-subtitle">Full system access. Responsible for company settings and managing all resources.</p></div>
+                        <div><h2>Administrator</h2><p class="section-subtitle">Full access. Configures the company, manages users, and accesses all data.</p></div>
                     </div>
                     <div class="permissions-grid">
                         <div class="permission-category">
@@ -168,7 +168,7 @@
                 <section id="manager" class="docs-section">
                     <div class="section-header-inline">
                         <span class="profile-badge manager">&#128176;</span>
-                        <div><h2>Manager (Financial)</h2><p class="section-subtitle">Responsible for the company's financial management. Full access to financial data and reports, but without interfering with technical operations.</p></div>
+                        <div><h2>Manager (Financial)</h2><p class="section-subtitle">Focus on results. Views billing and costs, but does not execute services.</p></div>
                     </div>
                     <div class="permissions-grid">
                         <div class="permission-category">
@@ -196,7 +196,7 @@
                 <section id="supervisor" class="docs-section">
                     <div class="section-header-inline">
                         <span class="profile-badge supervisor">&#129489;&#8205;&#128295;</span>
-                        <div><h2>Supervisor</h2><p class="section-subtitle">Responsible for operational management of the technical team. Coordinates work distribution and monitors service execution.</p></div>
+                        <div><h2>Supervisor</h2><p class="section-subtitle">Coordinates teams and equipment. Does not view financial values.</p></div>
                     </div>
                     <div class="warning-card">
                         <div class="warning-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
@@ -228,7 +228,7 @@
                 <section id="consultant" class="docs-section">
                     <div class="section-header-inline">
                         <span class="profile-badge consultant">&#129489;&#8205;&#128188;</span>
-                        <div><h2>Consultant (Salesperson)</h2><p class="section-subtitle">Commercial profile focused on sales and quote creation. Limited access to their own SOs and customer data.</p></div>
+                        <div><h2>Consultant (Salesperson)</h2><p class="section-subtitle">Creates quotes. Views prices, but accesses only their own Service Orders.</p></div>
                     </div>
                     <div class="info-card">
                         <div class="info-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
@@ -239,7 +239,7 @@
                 <section id="technician" class="docs-section">
                     <div class="section-header-inline">
                         <span class="profile-badge technician">&#128119;</span>
-                        <div><h2>Technician</h2><p class="section-subtitle">Responsible for field service execution. Access to company Service Orders for execution and reporting.</p></div>
+                        <div><h2>Technician</h2><p class="section-subtitle">Executes services. Does not view prices and has limited editing after SO approval.</p></div>
                     </div>
                     <div class="warning-card">
                         <div class="warning-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
@@ -270,6 +270,18 @@
                                 <tr><td>View prices</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td></tr>
                                 <tr><td>View billing</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="no">&#10007;</td><td class="no">&#10007;</td></tr>
                                 <tr><td>Financial reports</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="no">&#10007;</td><td class="no">&#10007;</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-wrapper">
+                        <h4>Registrations</h4>
+                        <table class="permissions-table">
+                            <thead><tr><th>Permission</th><th>Admin</th><th>Manager</th><th>Supervisor</th><th>Consultant</th><th>Technician</th></tr></thead>
+                            <tbody>
+                                <tr><td>Manage customers</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="yes">&#10003;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td></tr>
+                                <tr><td>Manage products</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="no">&#10007;</td><td class="no">&#10007;</td><td class="no">&#10007;</td></tr>
+                                <tr><td>Manage services</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="no">&#10007;</td><td class="no">&#10007;</td><td class="no">&#10007;</td></tr>
+                                <tr><td>Manage devices</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="yes">&#10003;</td><td class="no">&#10007;</td><td class="no">&#10007;</td></tr>
                             </tbody>
                         </table>
                     </div>

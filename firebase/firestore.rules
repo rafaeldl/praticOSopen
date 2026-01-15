@@ -39,10 +39,16 @@ service cloud.firestore {
         && request.auth.token.roles[companyId] == 'admin';
     }
 
-    // Verifica se o usuário pode gerenciar dispositivos (admin, manager ou supervisor)
+    // Verifica se o usuário pode gerenciar dispositivos (admin ou supervisor)
     function canManageDevices(companyId) {
       return belongsToCompany(companyId)
-        && request.auth.token.roles[companyId] in ['admin', 'manager', 'supervisor'];
+        && request.auth.token.roles[companyId] in ['admin', 'supervisor'];
+    }
+
+    // Verifica se o usuário pode gerenciar clientes (admin, supervisor ou consultant)
+    function canManageCustomers(companyId) {
+      return belongsToCompany(companyId)
+        && request.auth.token.roles[companyId] in ['admin', 'supervisor', 'consultant'];
     }
 
     // Verifica se o usuário pode visualizar dados financeiros (admin ou manager)
@@ -213,11 +219,13 @@ service cloud.firestore {
       // Acesso baseado em perfil:
       // - Admin/Manager/Supervisor: todas as OS
       // - Consultant: apenas OS que criou
-      // - Technician: qualquer OS da empresa (assignedTo ainda não está funcional)
+      // - Technician: qualquer OS da empresa
       // ──────────────────────────────────────────────────────────────────────
       match /orders/{orderId} {
-        // Leitura: todos os membros podem ler (filtro feito no app)
-        allow read: if belongsToCompany(companyId);
+        // Leitura: membros podem ler, exceto consultores que só veem as próprias
+        allow read: if belongsToCompany(companyId) && (
+          !hasRole(companyId, 'consultant') || resource.data.createdBy.id == request.auth.uid
+        );
 
         // Criação: admin, supervisor, consultant
         allow create: if canManageOrders(companyId);
@@ -230,27 +238,26 @@ service cloud.firestore {
           || hasRole(companyId, 'manager')
           // Supervisor pode gerenciar todas as OS
           || hasRole(companyId, 'supervisor')
-          // Manager pode apenas visualizar (sem write)
           // Consultant pode editar suas próprias OS
           || (hasRole(companyId, 'consultant') && resource.data.createdBy.id == request.auth.uid)
-          // Technician pode atualizar qualquer OS da empresa (assignedTo ainda não está funcional)
+          // Technician pode atualizar qualquer OS da empresa
           || hasRole(companyId, 'technician')
         );
 
         // Deleção:
-        // - Admin e Supervisor podem deletar (via canAssignOrders)
-        // - Consultant e Technician podem deletar apenas OS que criaram, em status 'quote'
+        // - Admin: sempre pode
+        // - Supervisor e Gerente: apenas status 'quote'
+        // - Consultant e Technician: apenas se criador e status 'quote'
         allow delete: if belongsToCompany(companyId) && (
-          canAssignOrders(companyId)
+          isCompanyAdmin(companyId)
           || (
-            // Permite deletar se é o criador e status é 'quote'
-            resource.data.createdBy != null
-            && resource.data.createdBy.id == request.auth.uid
+            (hasRole(companyId, 'supervisor') || hasRole(companyId, 'manager'))
             && resource.data.status == 'quote'
-            && (
-              hasRole(companyId, 'consultant')
-              || hasRole(companyId, 'technician')
-            )
+          )
+          || (
+            resource.data.createdBy.id == request.auth.uid
+            && resource.data.status == 'quote'
+            && (hasRole(companyId, 'consultant') || hasRole(companyId, 'technician'))
           )
         );
 
@@ -273,7 +280,7 @@ service cloud.firestore {
       // ──────────────────────────────────────────────────────────────────────
       match /customers/{customerId} {
         allow read: if belongsToCompany(companyId);
-        allow write: if canManageOrders(companyId);
+        allow write: if canManageCustomers(companyId);
       }
 
       // ──────────────────────────────────────────────────────────────────────

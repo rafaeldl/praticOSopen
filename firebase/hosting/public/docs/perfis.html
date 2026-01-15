@@ -130,7 +130,7 @@
                                 <span class="profile-emoji">&#128104;&#8205;&#128188;</span>
                             </div>
                             <h3>Administrador</h3>
-                            <p>Acesso total ao sistema</p>
+                            <p>Acesso total. Configura a empresa, gerencia usuários e acessa todos os dados.</p>
                             <span class="profile-tag">Gestão Completa</span>
                         </a>
 
@@ -139,7 +139,7 @@
                                 <span class="profile-emoji">&#128176;</span>
                             </div>
                             <h3>Gerente</h3>
-                            <p>Gestão financeira e relatórios</p>
+                            <p>Foco em resultados. Visualiza faturamento e custos, mas não executa serviços.</p>
                             <span class="profile-tag">Financeiro</span>
                         </a>
 
@@ -148,7 +148,7 @@
                                 <span class="profile-emoji">&#129489;&#8205;&#128295;</span>
                             </div>
                             <h3>Supervisor</h3>
-                            <p>Gestão operacional dos técnicos</p>
+                            <p>Coordena equipes e equipamentos. Não visualiza valores financeiros.</p>
                             <span class="profile-tag">Operacional</span>
                         </a>
 
@@ -157,7 +157,7 @@
                                 <span class="profile-emoji">&#129489;&#8205;&#128188;</span>
                             </div>
                             <h3>Consultor</h3>
-                            <p>Vendas e acompanhamento comercial</p>
+                            <p>Cria orçamentos. Vê preços, mas acessa apenas suas próprias Ordens de Serviço.</p>
                             <span class="profile-tag">Comercial</span>
                         </a>
 
@@ -166,7 +166,7 @@
                                 <span class="profile-emoji">&#128119;</span>
                             </div>
                             <h3>Técnico</h3>
-                            <p>Execução de serviços em campo</p>
+                            <p>Executa serviços. Não vê preços e tem edição limitada após aprovação da OS.</p>
                             <span class="profile-tag">Execução</span>
                         </a>
                     </div>
@@ -178,7 +178,7 @@
                         <span class="profile-badge admin">&#128104;&#8205;&#128188;</span>
                         <div>
                             <h2>Administrador</h2>
-                            <p class="section-subtitle">Acesso total ao sistema. Responsável pela configuração da empresa e gestão de todos os recursos.</p>
+                            <p class="section-subtitle">Acesso total. Configura a empresa, gerencia usuários e acessa todos os dados.</p>
                         </div>
                     </div>
 
@@ -259,7 +259,7 @@
                         <span class="profile-badge manager">&#128176;</span>
                         <div>
                             <h2>Gerente (Financeiro)</h2>
-                            <p class="section-subtitle">Responsável pela gestão financeira da empresa. Acesso completo a dados financeiros e relatórios, mas sem interferir na operação técnica.</p>
+                            <p class="section-subtitle">Foco em resultados. Visualiza faturamento e custos, mas não executa serviços.</p>
                         </div>
                     </div>
 
@@ -310,7 +310,7 @@
                                 <li class="allowed"><span class="icon">&#10003;</span> Visualizar clientes</li>
                                 <li class="allowed"><span class="icon">&#10003;</span> Visualizar produtos</li>
                                 <li class="allowed"><span class="icon">&#10003;</span> Visualizar serviços</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar dispositivos</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar dispositivos</li>
                                 <li class="denied"><span class="icon">&#10007;</span> Gerenciar outros cadastros</li>
                             </ul>
                         </div>
@@ -339,7 +339,7 @@
                         <span class="profile-badge supervisor">&#129489;&#8205;&#128295;</span>
                         <div>
                             <h2>Supervisor</h2>
-                            <p class="section-subtitle">Responsável pela gestão operacional da equipe técnica. Coordena a distribuição de trabalho e acompanha a execução dos serviços.</p>
+                            <p class="section-subtitle">Coordena equipes e equipamentos. Não visualiza valores financeiros.</p>
                         </div>
                     </div>
 
@@ -404,8 +404,8 @@
                             </h4>
                             <ul class="permission-list">
                                 <li class="allowed"><span class="icon">&#10003;</span> Gerenciar clientes</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Gerenciar produtos (sem ver preços)</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Gerenciar serviços (sem ver preços)</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar produtos (sem ver preços)</li>
+                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar serviços (sem ver preços)</li>
                                 <li class="allowed"><span class="icon">&#10003;</span> Gerenciar dispositivos</li>
                             </ul>
                         </div>
@@ -434,7 +434,7 @@
                         <span class="profile-badge consultant">&#129489;&#8205;&#128188;</span>
                         <div>
                             <h2>Consultor (Vendedor)</h2>
-                            <p class="section-subtitle">Perfil comercial focado em vendas e criação de orçamentos. Acesso limitado às suas próprias OS e dados de clientes.</p>
+                            <p class="section-subtitle">Cria orçamentos. Vê preços, mas acessa apenas suas próprias Ordens de Serviço.</p>
                         </div>
                     </div>
 
@@ -526,7 +526,7 @@
                         <span class="profile-badge technician">&#128119;</span>
                         <div>
                             <h2>Técnico</h2>
-                            <p class="section-subtitle">Responsável pela execução dos serviços em campo. Acesso às Ordens de Serviço da empresa para execução e reporte.</p>
+                            <p class="section-subtitle">Executa serviços. Não vê preços e tem edição limitada após aprovação da OS.</p>
                         </div>
                     </div>
 
@@ -779,7 +779,7 @@
                                 <tr>
                                     <td>Gerenciar dispositivos</td>
                                     <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
+                                    <td class="no">&#10007;</td>
                                     <td class="yes">&#10003;</td>
                                     <td class="no">&#10007;</td>
                                     <td class="no">&#10007;</td>
