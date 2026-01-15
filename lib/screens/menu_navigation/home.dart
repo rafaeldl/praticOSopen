@@ -800,17 +800,61 @@ class _HomeState extends State<Home> {
                     ),
                   ],
                 ),
-                child: Text(
-                  '#${order.number}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: CupertinoColors.white,
-                  ),
-                ),
+                child: _buildOrderNumberText(order.number!),
               ),
             ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOrderNumberText(int number) {
+    final numberStr = number.toString();
+
+    // Se tem 4 ou mais dígitos, mostra # e os primeiros menores e os últimos 3 maiores
+    if (numberStr.length > 3) {
+      final prefix = '${numberStr.substring(0, numberStr.length - 3)}.';
+      final suffix = numberStr.substring(numberStr.length - 3);
+
+      return Text.rich(
+        TextSpan(
+          children: [
+            const TextSpan(
+              text: '',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: CupertinoColors.white,
+              ),
+            ),
+            TextSpan(
+              text: prefix,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: CupertinoColors.white,
+              ),
+            ),
+            TextSpan(
+              text: suffix,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: CupertinoColors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Se tem 3 ou menos dígitos, mostra normal com #
+    return Text(
+      '#$numberStr',
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: CupertinoColors.white,
       ),
     );
   }
