@@ -90,26 +90,63 @@ O workflow `.github/workflows/ios_release.yml` é acionado em:
 O sistema utiliza `integration_test` do Flutter para navegar no app e tirar fotos.
 Arquivo principal: `integration_test/screenshot_test.dart`
 
-**Cenários cobertos:**
-1. Login.
-2. Home (Lista de OS).
-3. Detalhes da OS.
-4. Dashboard (Gráficos).
-5. Lista de Clientes.
-6. Detalhes do Cliente.
-7. Ajustes (Menu).
+**Cenários cobertos (7 telas):**
+1. **Home** - Lista de OS (`01_home`)
+2. **Detalhes da OS** (`02_order_detail`)
+3. **Seleção de Segmento** - Onboarding (`03_segments`)
+4. **Dashboard** - Gráficos (`04_dashboard`)
+5. **Pagamentos** (`05_payments`)
+6. **Formulários/Checklists** (`06_forms`)
+7. **Login** (`07_login`)
 
-**Variáveis de Ambiente Úteis:**
-- `FORCE_LOGOUT=true|false`: Força logout antes de começar (padrão: true).
+### Nomenclatura Padronizada
 
-Exemplo de uso manual via Flutter Drive:
+**Android:** `{number}_{name}.png`
+- Exemplo: `01_home.png`, `02_order_detail.png`
+
+**iOS:** `{device}-{number}_{name}.png`
+- Exemplo: `iPhone 16e-01_home.png`, `iPhone 17-02_order_detail.png`
+
+### Variáveis de Ambiente
+
+- `TEST_LOCALE`: Define o idioma do app (`pt-BR`, `en-US`, `es-ES`). O locale é forçado via `--dart-define` diretamente no app.
+- `FORCE_LOGOUT`: Força logout antes de começar (padrão: `true`)
+
+### Exemplos de uso via Fastlane:
+
+**iOS:**
+```bash
+cd ios
+bundle exec fastlane screenshots locale:pt-BR device:"iPhone 16e"
+bundle exec fastlane screenshots locale:en-US device:"iPhone 16e"
+bundle exec fastlane screenshots locale:es-ES device:"iPhone 16e"
+
+# Todos os locales e devices
+bundle exec fastlane screenshots_all
+```
+
+**Android:**
+```bash
+cd android
+bundle exec fastlane screenshots locale:pt-BR avd:Pixel_7
+bundle exec fastlane screenshots locale:en-US avd:Pixel_7
+bundle exec fastlane screenshots locale:es-ES avd:Pixel_7
+
+# Todos os locales e devices
+bundle exec fastlane screenshots_all
+```
+
+**Manual via Flutter Drive:**
 ```bash
 fvm flutter drive \
   --driver=test_driver/integration_test.dart \
   --target=integration_test/screenshot_test.dart \
   -d <DEVICE_ID> \
+  --dart-define=TEST_LOCALE=pt-BR \
   --dart-define=FORCE_LOGOUT=true
 ```
+
+**Total:** 21 screenshots por plataforma (3 idiomas × 7 telas)
 
 ---
 

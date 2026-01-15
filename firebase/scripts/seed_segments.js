@@ -35,12 +35,12 @@ const SEGMENTS = [
       {
         key: 'service_order._entity',
         type: 'label',
-        labels: { 'pt-BR': 'Ordem de Serviço', 'en-US': 'Service Order', 'es-ES': 'Orden de Servicio' }
+        labels: { 'pt-BR': 'Ordem de Serviço', 'en-US': 'Work Order', 'es-ES': 'Orden de Servicio' }
       },
       {
         key: 'service_order._entity_plural',
         type: 'label',
-        labels: { 'pt-BR': 'Ordens de Serviço', 'en-US': 'Service Orders', 'es-ES': 'Órdenes de Servicio' }
+        labels: { 'pt-BR': 'Ordens de Serviço', 'en-US': 'Work Orders', 'es-ES': 'Órdenes de Servicio' }
       },
       // Campos comuns de device
       {
