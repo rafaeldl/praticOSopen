@@ -8,6 +8,7 @@ import 'package:praticos/models/order_form.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/pdf/pdf_forms_builder.dart';
 import 'package:praticos/services/pdf/pdf_image_loader.dart';
+import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_main_os_builder.dart';
 import 'package:praticos/services/pdf/pdf_styles.dart';
 
@@ -18,6 +19,7 @@ class OsPdfData {
   final Company company;
   final List<OrderForm> forms;
   final SegmentConfigProvider config;
+  final PdfLocalizations localizations;
 
   OsPdfData({
     required this.order,
@@ -25,6 +27,7 @@ class OsPdfData {
     required this.company,
     required this.forms,
     required this.config,
+    required this.localizations,
   });
 }
 
@@ -79,6 +82,7 @@ class PdfService {
       boldFont: boldFont,
       logoImage: images.logo,
       config: data.config,
+      localizations: data.localizations,
     );
 
     final formsBuilder = PdfFormsBuilder(
@@ -86,6 +90,7 @@ class PdfService {
       boldFont: boldFont,
       logoImage: images.logo,
       config: data.config,
+      localizations: data.localizations,
     );
 
     // 4. Criar documento

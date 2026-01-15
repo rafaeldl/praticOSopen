@@ -885,5 +885,82 @@
         "type": "int"
       }
     }
+  },
+  "orderSingular": "orden",
+  "orderPlural": "ordenes",
+  "generatedAt": "Generado el {date}",
+  "@generatedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pageOf": "Pagina {current} de {total}",
+  "@pageOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "preparingReport": "Preparando informe...",
+  "appTagline": "Sistema de Gestion de Ordenes de Servicio",
+  "receivedWithPercent": "Recibido ({percent}%)",
+  "@receivedWithPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "toReceiveWithPercent": "Por Recibir ({percent}%)",
+  "@toReceiveWithPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "newOrder": "NUEVA",
+  "generatedByPraticos": "Generado por PraticOS",
+  "serviceDescriptionColumn": "DESCRIPCION DEL SERVICIO",
+  "descriptionColumn": "DESCRIPCION",
+  "unitShort": "UNIT.",
+  "subtotal": "Subtotal",
+  "alreadyPaid": "Ya pagado",
+  "remainingBalance": "SALDO RESTANTE",
+  "totalToPay": "TOTAL A PAGAR",
+  "customerSignature": "Firma del Cliente",
+  "photosAvailableDigitally": "Fotos disponibles en el sistema digital",
+  "attachedPhotosCount": "Fotos Adjuntas ({count})",
+  "@attachedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photoRecord": "REGISTRO FOTOGRAFICO",
+  "partsAndProducts": "PIEZAS Y PRODUCTOS",
+  "nPhotosCount": "{count} {count, plural, =1{foto} other{fotos}}",
+  "@nPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notSelected": "No seleccionado",
+  "formLabelWithTitle": "Formulario: {title}",
+  "@formLabelWithTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
   }
 }

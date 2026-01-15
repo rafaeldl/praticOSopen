@@ -28,6 +28,7 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
 
+import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 
 class OrderForm extends StatefulWidget {
@@ -1306,6 +1307,9 @@ class _OrderFormState extends State<OrderForm> {
     // Store navigator reference before async operations
     final navigator = Navigator.of(context, rootNavigator: true);
 
+    // Create PDF localizations from context before async operations
+    final pdfLocalizations = PdfLocalizations.fromContext(context);
+
     showCupertinoDialog(
       context: context,
       barrierDismissible: false,
@@ -1362,6 +1366,7 @@ class _OrderFormState extends State<OrderForm> {
         company: company,
         forms: forms,
         config: config,
+        localizations: pdfLocalizations,
       );
 
       // 4. Gerar e compartilhar PDF

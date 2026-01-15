@@ -5,6 +5,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_styles.dart';
 
 /// Builder para a pagina principal da OS no PDF
@@ -13,12 +14,14 @@ class PdfMainOsBuilder {
   final pw.Font boldFont;
   final pw.MemoryImage? logoImage;
   final SegmentConfigProvider config;
+  final PdfLocalizations localizations;
 
   PdfMainOsBuilder({
     required this.baseFont,
     required this.boldFont,
     this.logoImage,
     required this.config,
+    required this.localizations,
   });
 
   // ============================================
@@ -147,7 +150,7 @@ class PdfMainOsBuilder {
                     ),
                   ),
                   pw.Text(
-                    order.number?.toString() ?? "NOVA",
+                    order.number?.toString() ?? localizations.newOrder,
                     style: pw.TextStyle(
                       font: boldFont,
                       fontSize: 20.0,
@@ -219,7 +222,7 @@ class PdfMainOsBuilder {
         children: [
           // Paginacao
           pw.Text(
-            'Pagina ${context.pageNumber} de ${context.pagesCount}',
+            localizations.formatPageOf(context.pageNumber, context.pagesCount),
             style: pw.TextStyle(
               font: baseFont,
               fontSize: 7,
@@ -240,7 +243,7 @@ class PdfMainOsBuilder {
                 pw.SizedBox(width: 6),
               ],
               pw.Text(
-                'Gerado por PraticOS | ',
+                '${localizations.generatedByPraticos} | ',
                 style: pw.TextStyle(
                   font: baseFont,
                   fontSize: 7,
@@ -374,7 +377,7 @@ class PdfMainOsBuilder {
             ),
             pw.SizedBox(height: 6),
             pw.Text(
-              customer?.name ?? 'Nao informado',
+              customer?.name ?? localizations.notInformed,
               style: pw.TextStyle(
                 font: boldFont,
                 fontSize: 12,
@@ -429,7 +432,7 @@ class PdfMainOsBuilder {
             ),
             pw.SizedBox(height: 6),
             pw.Text(
-              order.device?.name ?? 'Nao informado',
+              order.device?.name ?? localizations.notInformed,
               style: pw.TextStyle(
                 font: boldFont,
                 fontSize: 12,
@@ -513,8 +516,8 @@ class PdfMainOsBuilder {
         pw.TableRow(
           decoration: pw.BoxDecoration(color: PdfStyles.backgroundLight),
           children: [
-            _buildTableHeader('DESCRICAO DO SERVICO'),
-            _buildTableHeader('VALOR', alignRight: true),
+            _buildTableHeader(localizations.serviceDescriptionColumn),
+            _buildTableHeader(localizations.value, alignRight: true),
           ],
         ),
         ...order.services!.map((s) {
@@ -553,10 +556,10 @@ class PdfMainOsBuilder {
         pw.TableRow(
           decoration: pw.BoxDecoration(color: PdfStyles.backgroundLight),
           children: [
-            _buildTableHeader('QTD'),
-            _buildTableHeader('DESCRICAO'),
-            _buildTableHeader('UNIT.', alignRight: true),
-            _buildTableHeader('TOTAL', alignRight: true),
+            _buildTableHeader(localizations.quantityShort),
+            _buildTableHeader(localizations.descriptionColumn),
+            _buildTableHeader(localizations.unitShort, alignRight: true),
+            _buildTableHeader(localizations.total, alignRight: true),
           ],
         ),
         ...order.products!.map((p) {
@@ -664,18 +667,18 @@ class PdfMainOsBuilder {
                 padding: const pw.EdgeInsets.all(10),
                 child: pw.Column(
                   children: [
-                    if (totalServices > 0) _buildSummaryRow('Servicos', totalServices),
-                    if (totalProducts > 0) _buildSummaryRow('Produtos', totalProducts),
+                    if (totalServices > 0) _buildSummaryRow(localizations.services, totalServices),
+                    if (totalProducts > 0) _buildSummaryRow(localizations.products, totalProducts),
                     pw.Divider(color: PdfStyles.borderColor, height: 16),
-                    _buildSummaryRow('Subtotal', subtotal),
-                    if (discount > 0) _buildSummaryRow('Desconto', -discount, color: PdfColors.red600),
-                    _buildSummaryRow('Total', total, isBold: true),
+                    _buildSummaryRow(localizations.subtotal, subtotal),
+                    if (discount > 0) _buildSummaryRow(localizations.discount, -discount, color: PdfColors.red600),
+                    _buildSummaryRow(localizations.total, total, isBold: true),
                     // Mostrar pagamentos parciais
                     if (hasPartialPayment) ...[
                       pw.SizedBox(height: 4),
                       pw.Divider(color: PdfStyles.borderColor, height: 8),
                       pw.SizedBox(height: 4),
-                      _buildSummaryRow('Ja pago', paidAmount, color: PdfColors.green700),
+                      _buildSummaryRow(localizations.alreadyPaid, paidAmount, color: PdfColors.green700),
                     ],
                   ],
                 ),
@@ -697,8 +700,8 @@ class PdfMainOsBuilder {
                   children: [
                     pw.Text(
                       isPaid
-                          ? 'TOTAL PAGO'
-                          : (hasPartialPayment ? 'SALDO RESTANTE' : 'TOTAL A PAGAR'),
+                          ? localizations.totalPaid.toUpperCase()
+                          : (hasPartialPayment ? localizations.remainingBalance : localizations.totalToPay),
                       style: pw.TextStyle(
                         font: boldFont,
                         color: PdfColors.white,
@@ -749,7 +752,7 @@ class PdfMainOsBuilder {
               ),
             ),
             pw.Text(
-              'Assinatura do ${config.customer}',
+              localizations.customerSignature,
               style: pw.TextStyle(
                 font: baseFont,
                 fontSize: 8,
@@ -781,7 +784,7 @@ class PdfMainOsBuilder {
             ),
             pw.SizedBox(width: 8),
             pw.Text(
-              'Fotos disponiveis no sistema digital',
+              localizations.photosAvailableDigitally,
               style: pw.TextStyle(
                 font: baseFont,
                 fontSize: 10.0,
@@ -798,7 +801,7 @@ class PdfMainOsBuilder {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'Fotos Anexadas ($totalCount)',
+          localizations.formatAttachedPhotosCount(totalCount),
           style: pw.TextStyle(
             font: boldFont,
             fontSize: 14.0,
@@ -855,7 +858,7 @@ class PdfMainOsBuilder {
 
       // Services Section
       if (order.services != null && order.services!.isNotEmpty) ...[
-        buildSectionHeader('SERVICOS', '${order.services!.length} itens'),
+        buildSectionHeader(localizations.services.toUpperCase(), localizations.formatItemsCount(order.services!.length)),
         pw.SizedBox(height: 8),
         buildServicesTable(order),
         pw.SizedBox(height: 16),
@@ -863,7 +866,7 @@ class PdfMainOsBuilder {
 
       // Products Section
       if (order.products != null && order.products!.isNotEmpty) ...[
-        buildSectionHeader('PECAS E PRODUTOS', '${order.products!.length} itens'),
+        buildSectionHeader(localizations.partsAndProducts, localizations.formatItemsCount(order.products!.length)),
         pw.SizedBox(height: 8),
         buildProductsTable(order),
         pw.SizedBox(height: 16),
@@ -882,7 +885,7 @@ class PdfMainOsBuilder {
         pw.SizedBox(height: 20),
         pw.Divider(color: PdfStyles.borderColor),
         pw.SizedBox(height: 12),
-        buildSectionHeader('REGISTRO FOTOGRAFICO', '${order.photos!.length} fotos'),
+        buildSectionHeader(localizations.photoRecord, localizations.formatPhotosCount(order.photos!.length)),
         pw.SizedBox(height: 10),
         buildPhotosGrid(osPhotos, order.photos!.length),
       ],
