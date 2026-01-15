@@ -149,24 +149,7 @@ class RolePermissions {
 
   /// Returns the friendly label for role display.
   /// Requires [l10n] for internationalization support.
-  /// Falls back to Portuguese if l10n is null.
   static String getRoleLabel(RolesType role, dynamic l10n) {
-    if (l10n == null) {
-      // Fallback to Portuguese if l10n not available
-      switch (role) {
-        case RolesType.admin:
-          return 'Administrador';
-        case RolesType.supervisor:
-          return 'Supervisor';
-        case RolesType.manager:
-          return 'Gerente';
-        case RolesType.consultant:
-          return 'Consultor';
-        case RolesType.technician:
-          return 'Técnico';
-      }
-    }
-
     switch (role) {
       case RolesType.admin:
         return l10n.roleAdmin;
@@ -183,24 +166,7 @@ class RolePermissions {
 
   /// Returns the role description.
   /// Requires [l10n] for internationalization support.
-  /// Falls back to Portuguese if l10n is null.
   static String getRoleDescription(RolesType role, dynamic l10n) {
-    if (l10n == null) {
-      // Fallback to Portuguese if l10n not available
-      switch (role) {
-        case RolesType.admin:
-          return 'Acesso total ao sistema';
-        case RolesType.supervisor:
-          return 'Coordena equipes e equipamentos';
-        case RolesType.manager:
-          return 'Gestão financeira e relatórios';
-        case RolesType.consultant:
-          return 'Vendas e acompanhamento comercial';
-        case RolesType.technician:
-          return 'Execução de serviços';
-      }
-    }
-
     switch (role) {
       case RolesType.admin:
         return l10n.roleDescAdmin;
