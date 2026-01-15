@@ -219,7 +219,7 @@ platform :ios do
 
   desc "Promote TestFlight build to App Store (no re-upload)"
   lane :promote do |options|
-    skip_screenshots = options[:skip_screenshots] || true
+    skip_screenshots = options.fetch(:skip_screenshots, true)
     app_version = options[:app_version]
 
     # Fix alpha channel in screenshots before upload
@@ -233,25 +233,69 @@ platform :ios do
       key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
     )
 
-    # Use existing TestFlight build - no binary upload needed
-    # Always upload metadata when promoting to App Store
-    # reject_if_possible: cancels any pending "Waiting for Review" submission
-    upload_to_app_store(
-      app_version: app_version,  # Version to create/use in App Store
-      skip_binary_upload: true,  # Use build already in TestFlight
-      force: true,
-      skip_screenshots: skip_screenshots,
-      skip_metadata: false,  # Always upload metadata
-      overwrite_screenshots: true,  # Replace existing screenshots instead of adding
-      ignore_language_directory_validation: true,  # Allow flexible directory structure
-      screenshots_path: "./fastlane/screenshots",  # Explicit path to screenshots
-      submit_for_review: true,  # Always submit for review after upload
-      reject_if_possible: true,  # Cancel pending review before submitting new one
-      run_precheck_before_submit: false,
-      precheck_default_rule_level: :skip  # Skip precheck validations that might fail with API key
-    )
+    # Step 1: Upload metadata and screenshots WITHOUT submitting
+    # This allows time for screenshot processing
+    UI.message("📤 Uploading metadata and screenshots...")
+    begin
+      upload_to_app_store(
+        app_version: app_version,
+        skip_binary_upload: true,
+        force: true,
+        skip_screenshots: skip_screenshots,
+        skip_metadata: false,
+        overwrite_screenshots: true,
+        ignore_language_directory_validation: true,
+        screenshots_path: "./fastlane/screenshots",
+        submit_for_review: false,  # Don't submit yet - wait for screenshots to process
+        reject_if_possible: true,
+        run_precheck_before_submit: false,
+        precheck_default_rule_level: :skip
+      )
+    rescue => e
+      # Server 500 errors during screenshot polling are common but screenshots are already uploaded
+      if e.message.include?("500") || e.message.include?("Server error")
+        UI.important("⚠️ Server error during upload verification, but screenshots were likely uploaded. Continuing...")
+      else
+        raise e
+      end
+    end
 
-    UI.success("✅ App submitted for App Store review!")
+    # Step 2: Submit for review with retry logic
+    # Apple needs time to process uploaded screenshots before submission
+    max_retries = 5
+    retry_delay = 90  # Start with 90 seconds for many screenshots
+
+    (1..max_retries).each do |attempt|
+      if !skip_screenshots && attempt == 1
+        UI.message("⏳ Waiting #{retry_delay} seconds for screenshot processing...")
+        sleep(retry_delay)
+      end
+
+      UI.message("🚀 Submitting for App Store review (attempt #{attempt}/#{max_retries})...")
+      begin
+        upload_to_app_store(
+          app_version: app_version,
+          skip_binary_upload: true,
+          force: true,
+          skip_screenshots: true,  # Already uploaded
+          skip_metadata: true,     # Already uploaded
+          submit_for_review: true,
+          reject_if_possible: false,  # Already rejected in step 1 if needed
+          run_precheck_before_submit: false,
+          precheck_default_rule_level: :skip
+        )
+        UI.success("✅ App submitted for App Store review!")
+        break  # Success - exit retry loop
+      rescue => e
+        if e.message.include?("still in progress") && attempt < max_retries
+          wait_time = 60 * attempt  # Exponential: 60, 120, 180, 240 seconds
+          UI.important("⚠️ Screenshots still processing, waiting #{wait_time}s before retry...")
+          sleep(wait_time)
+        else
+          raise e  # Re-raise if not a screenshot issue or last attempt
+        end
+      end
+    end
   end
 
   desc "Clear all screenshots from App Store Connect (useful before fresh upload)"
@@ -307,7 +351,7 @@ platform :ios do
     force_logout = options[:force_logout]
     parallel = options[:parallel] == true  # Default: false (changed for debugging)
     locales = ["pt-BR", "en-US", "es-ES"]
-    devices = ["iPhone 16e", "iPhone 17"]
+    devices = ["iPhone 16e", "iPhone 17", "iPhone 17 Pro Max"]
 
     locales.each do |locale|
       UI.message("🌍 Generating screenshots for locale: #{locale}")
@@ -340,7 +384,7 @@ platform :ios do
   desc "Gera screenshots apenas para pt-BR (backwards compatibility)"
   lane :screenshots_pt_br do |options|
     force_logout = options[:force_logout]
-    devices = ["iPhone 16e", "iPhone 17"]
+    devices = ["iPhone 16e", "iPhone 17", "iPhone 17 Pro Max"]
 
     devices.each do |device|
       capture_ios_screenshots(device: device, locale: "pt-BR", force_logout: force_logout)
