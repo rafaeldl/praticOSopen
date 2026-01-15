@@ -200,6 +200,8 @@ platform :ios do
       skip_screenshots: skip_screenshots,
       skip_metadata: false,  # Always upload metadata
       overwrite_screenshots: true,  # Replace existing screenshots instead of adding
+      ignore_language_directory_validation: true,  # Allow flexible directory structure
+      screenshots_path: "./fastlane/screenshots",  # Explicit path to screenshots
       submit_for_review: skip_screenshots,  # Only auto-submit if NO screenshots uploaded
       reject_if_possible: true,  # Cancel pending review before submitting new one
       run_precheck_before_submit: false,
@@ -213,6 +215,45 @@ platform :ios do
       UI.important("⏳ Please wait 5-10 minutes for processing to complete.")
       UI.important("🔄 Then manually submit for review in App Store Connect or run this workflow again with skip_screenshots:true")
     end
+  end
+
+  desc "Clear all screenshots from App Store Connect (useful before fresh upload)"
+  lane :clear_screenshots do |options|
+    app_version = options[:app_version]
+
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
+    )
+
+    # Upload with empty screenshots to clear existing ones
+    # This is a workaround for when overwrite_screenshots doesn't work as expected
+    UI.message("🗑️ Clearing all screenshots from App Store Connect...")
+
+    # Create temp empty screenshots directory
+    empty_screenshots_dir = "/tmp/empty_screenshots"
+    FileUtils.rm_rf(empty_screenshots_dir)
+    FileUtils.mkdir_p("#{empty_screenshots_dir}/pt-BR")
+    FileUtils.mkdir_p("#{empty_screenshots_dir}/en-US")
+    FileUtils.mkdir_p("#{empty_screenshots_dir}/es-ES")
+
+    upload_to_app_store(
+      app_version: app_version,
+      skip_binary_upload: true,
+      force: true,
+      skip_screenshots: false,
+      skip_metadata: true,
+      overwrite_screenshots: true,
+      screenshots_path: empty_screenshots_dir,
+      submit_for_review: false,
+      run_precheck_before_submit: false
+    )
+
+    # Cleanup
+    FileUtils.rm_rf(empty_screenshots_dir)
+
+    UI.success("✅ Screenshots cleared! Now run 'fastlane promote skip_screenshots:false' to upload new ones.")
   end
 
   desc "Gera screenshots automaticamente usando Flutter integration tests"
