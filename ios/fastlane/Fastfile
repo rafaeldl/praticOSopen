@@ -179,16 +179,18 @@ platform :ios do
 
   desc "Remove alpha channel from all screenshots (required by App Store)"
   lane :fix_screenshots_alpha do
-    screenshots_dir = "./fastlane/screenshots"
+    # Use absolute path to avoid working directory issues
+    screenshots_dir = File.expand_path("../fastlane/screenshots", __dir__)
 
     UI.message("🔧 Removing alpha channel from screenshots...")
+    UI.message("📁 Screenshots directory: #{screenshots_dir}")
 
     # Find all PNG files in screenshots directory
     png_files = Dir.glob("#{screenshots_dir}/**/*.png")
 
     if png_files.empty?
       UI.important("No PNG files found in #{screenshots_dir}")
-      return
+      next
     end
 
     UI.message("Found #{png_files.length} PNG files to process")
