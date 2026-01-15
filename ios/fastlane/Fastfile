@@ -177,10 +177,53 @@ platform :ios do
     )
   end
 
+  desc "Remove alpha channel from all screenshots (required by App Store)"
+  lane :fix_screenshots_alpha do
+    screenshots_dir = "./fastlane/screenshots"
+
+    UI.message("🔧 Removing alpha channel from screenshots...")
+
+    # Find all PNG files in screenshots directory
+    png_files = Dir.glob("#{screenshots_dir}/**/*.png")
+
+    if png_files.empty?
+      UI.important("No PNG files found in #{screenshots_dir}")
+      return
+    end
+
+    UI.message("Found #{png_files.length} PNG files to process")
+
+    png_files.each do |file|
+      # Use sips (macOS built-in) to remove alpha by converting to JPEG and back
+      # This is a reliable way to strip alpha channel without needing ImageMagick
+      temp_file = "#{file}.temp.jpg"
+
+      begin
+        # Convert to JPEG (removes alpha)
+        sh("sips", "-s", "format", "jpeg", "-s", "formatOptions", "100", file, "--out", temp_file, exception: false)
+
+        # Convert back to PNG (RGB, no alpha)
+        sh("sips", "-s", "format", "png", temp_file, "--out", file, exception: false)
+
+        # Clean up temp file
+        FileUtils.rm_f(temp_file)
+      rescue => ex
+        UI.error("Error processing #{file}: #{ex}")
+      end
+    end
+
+    UI.success("✅ Alpha channel removed from #{png_files.length} screenshots")
+  end
+
   desc "Promote TestFlight build to App Store (no re-upload)"
   lane :promote do |options|
     skip_screenshots = options[:skip_screenshots] || true
     app_version = options[:app_version]
+
+    # Fix alpha channel in screenshots before upload
+    unless skip_screenshots
+      fix_screenshots_alpha
+    end
 
     app_store_connect_api_key(
       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
