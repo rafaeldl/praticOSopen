@@ -754,7 +754,6 @@ class _HomeState extends State<Home> {
 
   Widget _buildThumbnail(Order order, Color statusColor, SegmentConfigProvider config) {
     const double size = 56;
-    const double dotSize = 14;
 
     return SizedBox(
       width: size,
@@ -783,7 +782,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
           ),
-          // Order number badge at top-left
+          // Order number badge with status color at top-left
           if (order.number != null)
             Positioned(
               top: -8,
@@ -791,7 +790,7 @@ class _HomeState extends State<Home> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey,
+                  color: statusColor,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
@@ -801,34 +800,61 @@ class _HomeState extends State<Home> {
                     ),
                   ],
                 ),
-                child: Text(
-                  '#${order.number}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: CupertinoColors.white,
-                  ),
-                ),
+                child: _buildOrderNumberText(order.number!),
               ),
             ),
-          // Status dot at bottom-right corner
-          Positioned(
-            right: -3,
-            bottom: -3,
-            child: Container(
-              width: dotSize,
-              height: dotSize,
-              decoration: BoxDecoration(
-                color: statusColor,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: CupertinoColors.systemBackground.resolveFrom(context),
-                  width: 2,
-                ),
-              ),
-            ),
-          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOrderNumberText(int number) {
+    final numberStr = number.toString();
+
+    // Se tem 4 ou mais dígitos, mostra # e os primeiros menores e os últimos 3 maiores
+    if (numberStr.length > 3) {
+      final prefix = '${numberStr.substring(0, numberStr.length - 3)}.';
+      final suffix = numberStr.substring(numberStr.length - 3);
+
+      return Text.rich(
+        TextSpan(
+          children: [
+            const TextSpan(
+              text: '',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: CupertinoColors.white,
+              ),
+            ),
+            TextSpan(
+              text: prefix,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: CupertinoColors.white,
+              ),
+            ),
+            TextSpan(
+              text: suffix,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: CupertinoColors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Se tem 3 ou menos dígitos, mostra normal com #
+    return Text(
+      '#$numberStr',
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w700,
+        color: CupertinoColors.white,
       ),
     );
   }
