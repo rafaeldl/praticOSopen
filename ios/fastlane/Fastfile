@@ -219,7 +219,7 @@ platform :ios do
 
   desc "Promote TestFlight build to App Store (no re-upload)"
   lane :promote do |options|
-    skip_screenshots = options[:skip_screenshots] || true
+    skip_screenshots = options.fetch(:skip_screenshots, true)
     app_version = options[:app_version]
 
     # Fix alpha channel in screenshots before upload
@@ -251,28 +251,42 @@ platform :ios do
       precheck_default_rule_level: :skip
     )
 
-    # Step 2: Wait for screenshot processing
+    # Step 2: Submit for review with retry logic
     # Apple needs time to process uploaded screenshots before submission
-    unless skip_screenshots
-      UI.message("⏳ Waiting 60 seconds for screenshot processing...")
-      sleep(60)
+    max_retries = 5
+    retry_delay = 90  # Start with 90 seconds for many screenshots
+
+    (1..max_retries).each do |attempt|
+      if !skip_screenshots && attempt == 1
+        UI.message("⏳ Waiting #{retry_delay} seconds for screenshot processing...")
+        sleep(retry_delay)
+      end
+
+      UI.message("🚀 Submitting for App Store review (attempt #{attempt}/#{max_retries})...")
+      begin
+        upload_to_app_store(
+          app_version: app_version,
+          skip_binary_upload: true,
+          force: true,
+          skip_screenshots: true,  # Already uploaded
+          skip_metadata: true,     # Already uploaded
+          submit_for_review: true,
+          reject_if_possible: false,  # Already rejected in step 1 if needed
+          run_precheck_before_submit: false,
+          precheck_default_rule_level: :skip
+        )
+        UI.success("✅ App submitted for App Store review!")
+        break  # Success - exit retry loop
+      rescue => e
+        if e.message.include?("still in progress") && attempt < max_retries
+          wait_time = 60 * attempt  # Exponential: 60, 120, 180, 240 seconds
+          UI.important("⚠️ Screenshots still processing, waiting #{wait_time}s before retry...")
+          sleep(wait_time)
+        else
+          raise e  # Re-raise if not a screenshot issue or last attempt
+        end
+      end
     end
-
-    # Step 3: Submit for review (metadata only, no re-upload)
-    UI.message("🚀 Submitting for App Store review...")
-    upload_to_app_store(
-      app_version: app_version,
-      skip_binary_upload: true,
-      force: true,
-      skip_screenshots: true,  # Already uploaded
-      skip_metadata: true,     # Already uploaded
-      submit_for_review: true,
-      reject_if_possible: false,  # Already rejected in step 1 if needed
-      run_precheck_before_submit: false,
-      precheck_default_rule_level: :skip
-    )
-
-    UI.success("✅ App submitted for App Store review!")
   end
 
   desc "Clear all screenshots from App Store Connect (useful before fresh upload)"
