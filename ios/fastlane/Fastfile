@@ -342,7 +342,7 @@ platform :ios do
     force_logout = options[:force_logout]
     parallel = options[:parallel] == true  # Default: false (changed for debugging)
     locales = ["pt-BR", "en-US", "es-ES"]
-    devices = ["iPhone 16e", "iPhone 17"]
+    devices = ["iPhone 16e", "iPhone 17", "iPhone 17 Pro Max"]
 
     locales.each do |locale|
       UI.message("🌍 Generating screenshots for locale: #{locale}")
@@ -375,7 +375,7 @@ platform :ios do
   desc "Gera screenshots apenas para pt-BR (backwards compatibility)"
   lane :screenshots_pt_br do |options|
     force_logout = options[:force_logout]
-    devices = ["iPhone 16e", "iPhone 17"]
+    devices = ["iPhone 16e", "iPhone 17", "iPhone 17 Pro Max"]
 
     devices.each do |device|
       capture_ios_screenshots(device: device, locale: "pt-BR", force_logout: force_logout)
