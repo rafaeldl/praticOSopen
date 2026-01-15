@@ -1114,7 +1114,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'SERVIÇOS',
+                      context.l10n.services.toUpperCase(),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -1242,7 +1242,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'PRODUTOS',
+                      context.l10n.products.toUpperCase(),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -1324,7 +1324,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '$quantity ${quantity == 1 ? 'item' : 'itens'}',
+                  context.l10n.nItemsCount(quantity),
                   style: TextStyle(
                     fontSize: 13,
                     color: secondaryColor,
@@ -1353,10 +1353,10 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
 
   Widget _buildRecentOrders(OrderStore orderStore) {
     String sectionTitle = orderStore.paymentFilter == 'paid'
-        ? 'ORDENS PAGAS'
+        ? context.l10n.paidOrders.toUpperCase()
         : orderStore.paymentFilter == 'unpaid'
-            ? 'ORDENS A RECEBER'
-            : 'ORDENS RECENTES';
+            ? context.l10n.ordersToReceive.toUpperCase()
+            : context.l10n.recentOrders.toUpperCase();
 
     final filteredOrders = orderStore.paymentFilter == null
         ? orderStore.recentOrders
@@ -1367,7 +1367,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     if (filteredOrders.isEmpty) {
       return _buildEmptyState(
         icon: CupertinoIcons.doc_text,
-        message: 'Nenhuma ordem neste período',
+        message: context.l10n.noOrdersInPeriod,
       );
     }
 
@@ -1470,7 +1470,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    order?.customer?.name ?? 'Cliente',
+                    order?.customer?.name ?? context.l10n.customer,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
@@ -1515,7 +1515,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      isPaid ? 'Pago' : 'Pendente',
+                      isPaid ? context.l10n.paid : context.l10n.pendingPayment,
                       style: TextStyle(
                         fontSize: 12,
                         color: secondaryColor,
@@ -1661,10 +1661,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     }
   }
 
-  String _getVehicleInfo(dynamic order) {
-    if (order == null || order.device == null) return 'Não informado';
+  String _getVehicleInfo(dynamic order, {String? notInformedText}) {
+    final notInformed = notInformedText ?? context.l10n.notInformed;
+    if (order == null || order.device == null) return notInformed;
 
-    String vehicleInfo = 'Não informado';
+    String vehicleInfo = notInformed;
     var device = order.device;
 
     try {
@@ -1698,7 +1699,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
           }
         }
       } catch (_) {
-        vehicleInfo = device?.toString() ?? 'Não informado';
+        vehicleInfo = device?.toString() ?? notInformed;
       }
     }
 

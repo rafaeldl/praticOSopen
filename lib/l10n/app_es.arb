@@ -851,5 +851,39 @@
   "sampleForms": "Formularios de inspección",
   "demoCustomer": "Cliente de demostración",
   "canEditOrDeleteAnytime": "Puede editar o eliminar estos datos en cualquier momento.",
-  "noStartFromScratch": "No, comenzar desde cero"
+  "noStartFromScratch": "No, comenzar desde cero",
+
+  "financialReport": "Informe Financiero",
+  "totalBilling": "Facturación Total",
+  "financialSummary": "Resumen Financiero",
+  "averageTicket": "Ticket Promedio",
+  "customerRanking": "Ranking de Clientes",
+  "serviceRanking": "Ranking de Servicios",
+  "productRanking": "Ranking de Productos",
+  "paidOrders": "Órdenes Pagadas",
+  "ordersToReceive": "Órdenes por Cobrar",
+  "date": "Fecha",
+  "vehicle": "Vehículo",
+  "valueColumn": "Valor",
+  "statusColumn": "Estado",
+  "quantityShort": "Cant",
+  "noOrdersInPeriod": "Sin órdenes en este período",
+  "notInformed": "No informado",
+  "company": "Empresa",
+  "nOrdersCount": "{count} {count, plural, =1{orden} other{órdenes}}",
+  "@nOrdersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nItemsCount": "{count} {count, plural, =1{ítem} other{ítems}}",
+  "@nItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -896,5 +896,39 @@
         "type": "int"
       }
     }
+  },
+
+  "financialReport": "Relatório Financeiro",
+  "totalBilling": "Faturamento Total",
+  "financialSummary": "Resumo Financeiro",
+  "averageTicket": "Ticket Médio",
+  "customerRanking": "Ranking de Clientes",
+  "serviceRanking": "Ranking de Serviços",
+  "productRanking": "Ranking de Produtos",
+  "paidOrders": "Ordens Pagas",
+  "ordersToReceive": "Ordens a Receber",
+  "date": "Data",
+  "vehicle": "Veículo",
+  "valueColumn": "Valor",
+  "statusColumn": "Status",
+  "quantityShort": "Qtd",
+  "noOrdersInPeriod": "Nenhuma ordem neste período",
+  "notInformed": "Não informado",
+  "company": "Empresa",
+  "nOrdersCount": "{count} {count, plural, =1{ordem} other{ordens}}",
+  "@nOrdersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nItemsCount": "{count} {count, plural, =1{item} other{itens}}",
+  "@nItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }
