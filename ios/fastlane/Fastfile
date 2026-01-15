@@ -269,11 +269,11 @@ platform :ios do
     end
   end
 
-  # Helper function for iOS screenshots
+  # Helper function for iOS screenshots (light mode only)
   def capture_ios_screenshots(device:, locale:, force_logout:)
     UI.message("📸 Capturing screenshots on device: #{device}, locale: #{locale}")
 
-    # Limpa screenshots anteriores do dispositivo e locale específicos
+    # Clean previous screenshots for this device and locale
     screenshots_dir = "fastlane/screenshots/#{locale}"
     FileUtils.rm_rf(Dir.glob("#{screenshots_dir}/#{device}*.png"))
     FileUtils.mkdir_p(screenshots_dir)
@@ -300,36 +300,18 @@ platform :ios do
       UI.message("⏳ Waiting for simulator to boot...")
       sleep(10)
 
-      # 5. Set locale on simulator after booting
-      UI.message("🌍 Setting simulator locale to: #{locale}")
+      # 5. Set light mode appearance
+      UI.message("🌞 Setting light mode appearance...")
+      sh("xcrun", "simctl", "ui", device, "appearance", "light") rescue nil
+      sleep(2)
 
-      # Map locale to iOS language codes
-      ios_language = case locale
-        when "pt-BR" then "pt-BR"
-        when "en-US" then "en"
-        when "es-ES" then "es"
-        else "en"
-      end
-
-      # Set AppleLanguages and AppleLocale
-      sh("xcrun", "simctl", "spawn", device, "defaults", "write", "NSGlobalDomain", "AppleLanguages", "-array", ios_language) rescue nil
-      sh("xcrun", "simctl", "spawn", device, "defaults", "write", "NSGlobalDomain", "AppleLocale", "-string", locale) rescue nil
-
-      # Restart SpringBoard to apply locale changes
-      UI.message("Restarting SpringBoard to apply locale...")
-      sh("xcrun", "simctl", "spawn", device, "killall", "SpringBoard") rescue nil
-
-      # 6. Wait for locale to apply
-      UI.message("⏳ Waiting for locale to apply...")
-      sleep(10)
-
-      UI.success("✅ Simulator ready: #{device} (locale: #{locale})")
+      UI.success("✅ Simulator ready: #{device}")
     rescue => ex
       UI.error("⚠️ Error resetting simulator: #{ex}")
       UI.message("Continuing anyway, Flutter might handle it...")
     end
 
-    # Executa o teste de integração Flutter
+    # Run Flutter integration test (light mode only)
     Dir.chdir("..") do
       ENV['FLUTTER_TEST_PLATFORM'] = 'ios'
       ENV['DEVICE_NAME'] = device
@@ -350,12 +332,12 @@ platform :ios do
       begin
         sh(*command_args)
       rescue => ex
-        UI.error("❌ Erro ao capturar screenshots para #{device} (#{locale}): #{ex}")
+        UI.error("❌ Error capturing screenshots for #{device} (#{locale}): #{ex}")
       end
     end
 
-    # Lista screenshots capturadas
+    # List captured screenshots
     screenshots = Dir.glob("#{screenshots_dir}/#{device}*.png")
-    UI.success("✅ Capturado #{screenshots.length} screenshots para #{device} (#{locale})")
+    UI.success("✅ Captured #{screenshots.length} screenshots for #{device} (#{locale})")
   end
 end

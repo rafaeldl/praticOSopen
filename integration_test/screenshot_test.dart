@@ -10,10 +10,14 @@ void main() {
     testWidgets('capture all 7 screenshots for App Store', (WidgetTester tester) async {
       // Get locale from environment (default: pt-BR)
       const locale = String.fromEnvironment('TEST_LOCALE', defaultValue: 'pt-BR');
+
       print('\n========================================');
       print('📱 Starting screenshot tests');
       print('🌍 Locale: $locale');
       print('========================================\n');
+
+      // Always use light mode for screenshots
+      tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
 
       // Initialize the app
       print('🚀 Initializing app...');
@@ -75,8 +79,8 @@ void main() {
       print('Icon widgets: $icons');
       print('=========================\n');
 
-      print('📸 Capturing Screenshot 1: Home');
-      await binding.takeScreenshot('01_home');
+        print('📸 Capturing Screenshot 1: Home');
+        await binding.takeScreenshot('01_home');
 
       // ========== SCREENSHOT 2, 5, 6: Enter OS once and capture Detail, Payments, Forms ==========
       print('\n--- Entering OS to capture Order Detail, Payments, and Forms ---');
@@ -105,9 +109,9 @@ void main() {
         await Future.delayed(const Duration(seconds: 3));
         print('Order detail opened');
 
-        // SCREENSHOT 2: Order Detail (top of screen)
-        print('📸 Capturing Screenshot 2: Order Detail');
-        await binding.takeScreenshot('02_order_detail');
+          // SCREENSHOT 2: Order Detail (top of screen)
+          print('📸 Capturing Screenshot 2: Order Detail');
+          await binding.takeScreenshot('02_order_detail');
 
         // SCREENSHOT 5: Payments (scroll down to payments section)
         print('\n--- Screenshot 5: Payments ---');
@@ -412,7 +416,7 @@ void main() {
         print('⚠️ Settings tab not found, skipping segments screenshot');
       }
 
-      print('✅ All screenshots captured successfully for locale: $locale');
+      print('\n✅ All screenshots captured successfully (locale: $locale)');
     });
   });
 }

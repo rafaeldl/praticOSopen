@@ -27,6 +27,11 @@ import 'package:praticos/providers/segment_config_provider.dart';
 AuthStore _authStore = AuthStore();
 LocaleStore _localeStore = LocaleStore();
 
+// Test locale override (set via --dart-define=TEST_LOCALE=pt-BR)
+const String? _testLocale = String.fromEnvironment('TEST_LOCALE') == ''
+    ? null
+    : String.fromEnvironment('TEST_LOCALE');
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PackageInfo info = await PackageInfo.fromPlatform();
@@ -34,7 +39,13 @@ Future<void> main() async {
   await Firebase.initializeApp();
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   FirebaseCrashlytics.instance.log("iniciando a aplicação");
-  await _localeStore.load();
+
+  // If TEST_LOCALE is set (screenshot tests), force that locale
+  if (_testLocale != null) {
+    await _localeStore.setLocale(_testLocale!);
+  } else {
+    await _localeStore.load();
+  }
 
   runApp(
     MultiProvider(
