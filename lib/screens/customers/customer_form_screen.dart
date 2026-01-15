@@ -113,7 +113,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                     prefix: Text(context.l10n.email,
                         style: const TextStyle(fontSize: 16)),
                     initialValue: _customer?.email,
-                    placeholder: "email@exemplo.com",
+                    placeholder: context.l10n.emailPlaceholder,
                     keyboardType: TextInputType.emailAddress,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _customer?.email = val,

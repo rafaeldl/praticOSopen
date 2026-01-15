@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:praticos/global.dart';
+import 'package:praticos/models/company.dart';
 import 'package:praticos/models/service.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/models/device.dart';
@@ -346,6 +346,7 @@ class BootstrapService {
     required String segmentId,
     required List<String> subspecialties,
     required UserAggr userAggr,
+    required CompanyAggr companyAggr,
     String locale = 'pt-BR',
   }) async {
     // Resultado
@@ -383,7 +384,7 @@ class BootstrapService {
       final service = Service()
         ..name = name
         ..value = (serviceData['value'] as num?)?.toDouble()
-        ..company = Global.companyAggr
+        ..company = companyAggr
         ..createdAt = DateTime.now()
         ..createdBy = userAggr
         ..updatedAt = DateTime.now()
@@ -407,7 +408,7 @@ class BootstrapService {
       final product = Product()
         ..name = name
         ..value = (productData['value'] as num?)?.toDouble()
-        ..company = Global.companyAggr
+        ..company = companyAggr
         ..createdAt = DateTime.now()
         ..createdBy = userAggr
         ..updatedAt = DateTime.now()
@@ -432,7 +433,7 @@ class BootstrapService {
         ..name = name
         ..manufacturer = _localizedString(deviceData['manufacturer'], locale)
         ..category = _localizedString(deviceData['category'], locale)
-        ..company = Global.companyAggr
+        ..company = companyAggr
         ..createdAt = DateTime.now()
         ..createdBy = userAggr
         ..updatedAt = DateTime.now()
@@ -462,7 +463,7 @@ class BootstrapService {
             ..phone = customerData['phone'] as String?
             ..email = customerData['email'] as String?
             ..address = _localizedString(customerData['address'], locale)
-            ..company = Global.companyAggr
+            ..company = companyAggr
             ..createdAt = DateTime.now()
             ..createdBy = userAggr
             ..updatedAt = DateTime.now()
@@ -487,6 +488,7 @@ class BootstrapService {
         companyId: companyId,
         locale: locale,
         userAggr: userAggr,
+        companyAggr: companyAggr,
       );
       createdOrders.addAll(orderResults['created'] as List<String>);
       skippedOrders.addAll(orderResults['skipped'] as List<String>);
@@ -554,6 +556,7 @@ class BootstrapService {
     required String companyId,
     required String locale,
     required UserAggr userAggr,
+    required CompanyAggr companyAggr,
   }) async {
     final List<String> created = [];
     final List<String> skipped = [];
@@ -597,7 +600,7 @@ class BootstrapService {
           ..status = status
           ..dueDate = dueDate
           ..total = service.value ?? 0
-          ..company = Global.companyAggr
+          ..company = companyAggr
           ..createdAt = DateTime.now().subtract(Duration(days: 11 - (i * 2)))
           ..createdBy = userAggr
           ..updatedAt = DateTime.now().subtract(Duration(days: 10 - (i * 2)))
