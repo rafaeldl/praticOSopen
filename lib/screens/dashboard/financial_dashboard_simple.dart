@@ -1479,7 +1479,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    'OS #${order?.number} • $dateStr',
+                    '${context.l10n.orderShort} #${order?.number} • $dateStr',
                     style: TextStyle(
                       fontSize: 13,
                       color: secondaryColor,

@@ -111,7 +111,7 @@ class _OrderFormState extends State<OrderForm> {
         builder: (_) {
           Order? os = _store.orderStream?.value;
           return Text(
-            os?.number != null ? "OS #${os!.number}" : config.label(LabelKeys.createServiceOrder),
+            os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           );
