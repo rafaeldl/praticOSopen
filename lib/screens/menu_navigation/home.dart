@@ -742,7 +742,7 @@ class _HomeState extends State<Home> {
             if (!isLast)
               Divider(
                 height: 1,
-                indent: 76, // 16 padding + 48 thumbnail + 12 spacing
+                indent: 84, // 16 padding + 56 thumbnail + 12 spacing
                 color: CupertinoColors.separator.resolveFrom(context),
               ),
           ],
@@ -753,7 +753,7 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildThumbnail(Order order, Color statusColor, SegmentConfigProvider config) {
-    const double size = 48;
+    const double size = 56;
     const double dotSize = 14;
 
     return SizedBox(
@@ -783,6 +783,34 @@ class _HomeState extends State<Home> {
                     ),
                   ),
           ),
+          // Order number badge at top-left
+          if (order.number != null)
+            Positioned(
+              top: -8,
+              left: -6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemGrey,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: CupertinoColors.black.withValues(alpha: 0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  '#${order.number}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: CupertinoColors.white,
+                  ),
+                ),
+              ),
+            ),
           // Status dot at bottom-right corner
           Positioned(
             right: -3,
