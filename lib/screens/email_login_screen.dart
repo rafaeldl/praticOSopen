@@ -136,7 +136,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                         width: 80,
                         child: Text(context.l10n.email, style: const TextStyle(fontSize: 16)),
                       ),
-                      placeholder: 'seu@email.com',
+                      placeholder: context.l10n.emailPlaceholder,
                       keyboardType: TextInputType.emailAddress,
                       autocorrect: false,
                       textCapitalization: TextCapitalization.none,

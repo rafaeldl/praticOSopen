@@ -6,11 +6,11 @@ Future<void> main() async {
   final locale = Platform.environment['TEST_LOCALE'] ?? 'pt-BR';
   print('🌍 Test locale: $locale');
 
-  // Detecta a plataforma baseado no device conectado
+  // Detect platform based on connected device
   final isAndroid = Platform.environment['FLUTTER_TEST_PLATFORM'] == 'android' ||
       !Platform.environment.containsKey('FLUTTER_TEST_PLATFORM');
 
-  // Define o diretório de destino baseado na plataforma e locale
+  // Define target directory based on platform and locale
   final String screenshotDir;
   if (Platform.environment.containsKey('SCREENSHOT_DIR')) {
     screenshotDir = Platform.environment['SCREENSHOT_DIR']!;
@@ -22,40 +22,40 @@ Future<void> main() async {
 
   print('📸 Screenshots will be saved to: $screenshotDir');
 
-  // Mapeamento de nomes para diferentes plataformas
-  final Map<String, String> iosNameMapping = {
-    '01_home': '00_Home',
-    '02_order_detail': '01_OrderDetail',
-    '03_segments': '02_Segments',
-    '04_dashboard': '03_Dashboard',
-    '05_payments': '04_Payments',
-    '06_forms': '05_Forms',
-    '07_login': '06_Login',
-  };
-
-  final Map<String, String> androidNameMapping = {
-    '01_home': '01-home',
-    '02_order_detail': '02-order_detail',
-    '03_segments': '03-segments',
-    '04_dashboard': '04-dashboard',
-    '05_payments': '05-payments',
-    '06_forms': '06-forms',
-    '07_login': '07-login',
+  // Standardized screenshot names (same for both platforms)
+  // Format: {number}_{name} (e.g., 01_home, 02_order_detail)
+  final Map<String, String> screenshotNames = {
+    '01_home': '01_home',
+    '02_order_detail': '02_order_detail',
+    '03_segments': '03_segments',
+    '04_dashboard': '04_dashboard',
+    '05_payments': '05_payments',
+    '06_forms': '06_forms',
+    '07_login': '07_login',
   };
 
   await integrationDriver(
     onScreenshot: (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {
-      // Define o nome final do arquivo
+      // Remove any prefix (light_, dark_) - we only capture light mode now
+      String baseScreenshotName = screenshotName;
+      if (screenshotName.startsWith('light_')) {
+        baseScreenshotName = screenshotName.substring(6);
+      } else if (screenshotName.startsWith('dark_')) {
+        baseScreenshotName = screenshotName.substring(5);
+      }
+
+      // Get standardized name
+      final standardName = screenshotNames[baseScreenshotName] ?? baseScreenshotName;
+
+      // Define final filename
       final String filename;
-      if (screenshotDir.contains('android')) {
-        // Android: usa formato descritivo (01-login.png, 02-home.png, etc.)
-        final androidName = androidNameMapping[screenshotName] ?? screenshotName;
-        filename = '$androidName.png';
+      if (isAndroid) {
+        // Android: {number}_{name}.png (e.g., 01_home.png)
+        filename = '$standardName.png';
       } else {
-        // iOS: usa formato com prefixo do dispositivo e nome mapeado
+        // iOS: {device}-{number}_{name}.png (e.g., iPhone 16e-01_home.png)
         final deviceName = Platform.environment['DEVICE_NAME'] ?? 'iPhone 16e';
-        final iosName = iosNameMapping[screenshotName] ?? screenshotName;
-        filename = '$deviceName-$iosName.png';
+        filename = '$deviceName-$standardName.png';
       }
 
       final filePath = '$screenshotDir/$filename';

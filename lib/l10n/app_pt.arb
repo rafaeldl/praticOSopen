@@ -43,6 +43,7 @@
   "share": "Compartilhar",
   "copy": "Copiar",
   "print": "Imprimir",
+  "preview": "Visualizar",
   "export": "Exportar",
   "import": "Importar",
   "select": "Selecionar",
@@ -894,6 +895,117 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+
+  "financialReport": "Relatório Financeiro",
+  "totalBilling": "Faturamento Total",
+  "financialSummary": "Resumo Financeiro",
+  "averageTicket": "Ticket Médio",
+  "customerRanking": "Ranking de Clientes",
+  "serviceRanking": "Ranking de Serviços",
+  "productRanking": "Ranking de Produtos",
+  "paidOrders": "Ordens Pagas",
+  "ordersToReceive": "Ordens a Receber",
+  "date": "Data",
+  "vehicle": "Veículo",
+  "valueColumn": "Valor",
+  "statusColumn": "Status",
+  "quantityShort": "Qtd",
+  "noOrdersInPeriod": "Nenhuma ordem neste período",
+  "notInformed": "Não informado",
+  "company": "Empresa",
+  "nOrdersCount": "{count} {count, plural, =1{ordem} other{ordens}}",
+  "@nOrdersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nItemsCount": "{count} {count, plural, =1{item} other{itens}}",
+  "@nItemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "orderSingular": "ordem",
+  "orderPlural": "ordens",
+  "generatedAt": "Gerado em {date}",
+  "@generatedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "pageOf": "Pagina {current} de {total}",
+  "@pageOf": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "preparingReport": "Preparando relatorio...",
+  "appTagline": "Sistema de Gestao de Ordens de Servico",
+  "receivedWithPercent": "Recebido ({percent}%)",
+  "@receivedWithPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "toReceiveWithPercent": "A Receber ({percent}%)",
+  "@toReceiveWithPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "newOrder": "NOVA",
+  "generatedByPraticos": "Gerado por PraticOS",
+  "serviceDescriptionColumn": "DESCRICAO DO SERVICO",
+  "descriptionColumn": "DESCRICAO",
+  "unitShort": "UNIT.",
+  "subtotal": "Subtotal",
+  "alreadyPaid": "Ja pago",
+  "remainingBalance": "SALDO RESTANTE",
+  "totalToPay": "TOTAL A PAGAR",
+  "customerSignature": "Assinatura do Cliente",
+  "photosAvailableDigitally": "Fotos disponiveis no sistema digital",
+  "attachedPhotosCount": "Fotos Anexadas ({count})",
+  "@attachedPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "photoRecord": "REGISTRO FOTOGRAFICO",
+  "partsAndProducts": "PECAS E PRODUTOS",
+  "nPhotosCount": "{count} {count, plural, =1{foto} other{fotos}}",
+  "@nPhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notSelected": "Nao selecionado",
+  "formLabelWithTitle": "Formulario: {title}",
+  "@formLabelWithTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
       }
     }
   }

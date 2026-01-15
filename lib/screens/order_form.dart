@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, ScaffoldMessenger, SnackBar, Material, MaterialType, Divider; 
+import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider;
 // Keeping Material for some specific helpers or if absolutely needed, but main UI is Cupertino.
 // Actually, strict HIG means avoiding Material widgets where possible.
 // I will try to rely purely on Cupertino for the visual tree.
@@ -28,7 +28,9 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
 
+import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
+import 'package:praticos/screens/pdf_preview_screen.dart';
 
 class OrderForm extends StatefulWidget {
   @override
@@ -111,7 +113,7 @@ class _OrderFormState extends State<OrderForm> {
         builder: (_) {
           Order? os = _store.orderStream?.value;
           return Text(
-            os?.number != null ? "OS #${os!.number}" : config.label(LabelKeys.createServiceOrder),
+            os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           );
@@ -902,8 +904,15 @@ class _OrderFormState extends State<OrderForm> {
       builder: (BuildContext context) => CupertinoActionSheet(
         title: Text('${context.l10n.options} ${config.serviceOrder}'),
         actions: <CupertinoActionSheetAction>[
-          // Apenas exibir opção de PDF para usuários com acesso a valores
-          if (canViewPrices)
+          // Apenas exibir opções de PDF para usuários com acesso a valores
+          if (canViewPrices) ...[
+            CupertinoActionSheetAction(
+              child: Text('${context.l10n.preview} PDF'),
+              onPressed: () {
+                Navigator.pop(context);
+                _onPreview(context, _store.order, config);
+              },
+            ),
             CupertinoActionSheetAction(
               child: Text('${context.l10n.share} PDF'),
               onPressed: () {
@@ -911,6 +920,7 @@ class _OrderFormState extends State<OrderForm> {
                 _onShare(context, _store.order, config);
               },
             ),
+          ],
           CupertinoActionSheetAction(
             child: Text(config.label(LabelKeys.addPhoto)),
             onPressed: () {
@@ -1216,39 +1226,62 @@ class _OrderFormState extends State<OrderForm> {
   }
   
   void _showAddPhotoOptions(SegmentConfigProvider config) {
+    // Save the widget's context before entering the action sheet builder
+    final widgetContext = context;
+
     showCupertinoModalPopup(
       context: context,
-      builder: (context) => CupertinoActionSheet(
+      builder: (actionSheetContext) => CupertinoActionSheet(
         title: Text(context.l10n.addPhoto),
         actions: [
            CupertinoActionSheetAction(
             child: Text(context.l10n.takePhoto),
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(actionSheetContext);
               final success = await _store.addPhotoFromCamera();
               if (!success && mounted) {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.l10n.errorOccurred)),
-                  );
+                showCupertinoDialog(
+                  context: widgetContext,
+                  builder: (dialogContext) => CupertinoAlertDialog(
+                    title: Text(widgetContext.l10n.errorOccurred),
+                    content: Text(widgetContext.l10n.errorOccurred),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: Text(widgetContext.l10n.ok),
+                        onPressed: () => Navigator.pop(dialogContext),
+                      ),
+                    ],
+                  ),
+                );
               }
             },
           ),
            CupertinoActionSheetAction(
             child: Text(context.l10n.chooseFromGallery),
             onPressed: () async {
-              Navigator.pop(context);
+              Navigator.pop(actionSheetContext);
               final success = await _store.addPhotoFromGallery();
-               if (!success && mounted) {
-                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(context.l10n.errorOccurred)),
-                  );
+              if (!success && mounted) {
+                showCupertinoDialog(
+                  context: widgetContext,
+                  builder: (dialogContext) => CupertinoAlertDialog(
+                    title: Text(widgetContext.l10n.errorOccurred),
+                    content: Text(widgetContext.l10n.errorOccurred),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: Text(widgetContext.l10n.ok),
+                        onPressed: () => Navigator.pop(dialogContext),
+                      ),
+                    ],
+                  ),
+                );
               }
             },
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           child: Text(context.l10n.cancel),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(actionSheetContext),
         ),
       ),
     );
@@ -1276,12 +1309,15 @@ class _OrderFormState extends State<OrderForm> {
     return FormatService().formatCurrency(total ?? 0.0);
   }
   
-  // PDF Generation Logic - Usando novo PdfService
-  _onShare(BuildContext context, Order? order, SegmentConfigProvider config) async {
+  // PDF Preview Logic - Navigate to preview screen
+  _onPreview(BuildContext context, Order? order, SegmentConfigProvider config) async {
     if (order == null) return;
 
     // Store navigator reference before async operations
     final navigator = Navigator.of(context, rootNavigator: true);
+
+    // Create PDF localizations from context before async operations
+    final pdfLocalizations = PdfLocalizations.fromContext(context);
 
     showCupertinoDialog(
       context: context,
@@ -1339,6 +1375,111 @@ class _OrderFormState extends State<OrderForm> {
         company: company,
         forms: forms,
         config: config,
+        localizations: pdfLocalizations,
+      );
+
+      // 4. Fechar dialog de loading
+      if (mounted) {
+        navigator.pop();
+      }
+
+      // 5. Navegar para tela de preview
+      if (mounted) {
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => PdfPreviewScreen(pdfData: pdfData),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        navigator.pop();
+
+        showCupertinoDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: Text(context.l10n.errorOccurred),
+            content: Text('${context.l10n.errorOccurred}: $e'),
+            actions: [
+              CupertinoDialogAction(
+                child: Text(context.l10n.ok),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+  }
+
+  // PDF Generation Logic - Usando novo PdfService
+  _onShare(BuildContext context, Order? order, SegmentConfigProvider config) async {
+    if (order == null) return;
+
+    // Store navigator reference before async operations
+    final navigator = Navigator.of(context, rootNavigator: true);
+
+    // Create PDF localizations from context before async operations
+    final pdfLocalizations = PdfLocalizations.fromContext(context);
+
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return CupertinoAlertDialog(
+          content: Column(
+            children: [
+              const CupertinoActivityIndicator(),
+              const SizedBox(height: 10),
+              Text('${context.l10n.loading}...'),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      // 1. Coletar dados
+      CompanyStore companyStore = CompanyStore();
+      Company company = await companyStore.retrieveCompany(order.company!.id);
+
+      Customer? customer;
+      if (order.customer != null) {
+        if (order.customer!.id != null && _store.companyId != null) {
+          try {
+            CustomerStore customerStore = CustomerStore();
+            customerStore.companyId = _store.companyId;
+            customer = await customerStore.retrieveCustomer(order.customer!.id);
+          } catch (e) {
+            // Silently fail and use fallback
+          }
+        }
+
+        // Fallback: usar dados do agregado se a busca falhou
+        customer ??= Customer()
+          ..id = order.customer!.id
+          ..name = order.customer!.name
+          ..phone = order.customer!.phone
+          ..email = order.customer!.email;
+      }
+
+      // 2. Buscar formularios anexados a OS
+      List<of_model.OrderForm> forms = [];
+      if (_store.companyId != null && order.id != null) {
+        forms = await _formsService
+            .getOrderForms(_store.companyId!, order.id!)
+            .first;
+      }
+
+      // 3. Criar dados para o PDF
+      final pdfData = OsPdfData(
+        order: order,
+        customer: customer,
+        company: company,
+        forms: forms,
+        config: config,
+        localizations: pdfLocalizations,
       );
 
       // 4. Gerar e compartilhar PDF

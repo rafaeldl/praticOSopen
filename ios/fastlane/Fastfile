@@ -177,10 +177,55 @@ platform :ios do
     )
   end
 
+  desc "Remove alpha channel from all screenshots (required by App Store)"
+  lane :fix_screenshots_alpha do
+    # Use absolute path to avoid working directory issues
+    screenshots_dir = File.expand_path("../fastlane/screenshots", __dir__)
+
+    UI.message("🔧 Removing alpha channel from screenshots...")
+    UI.message("📁 Screenshots directory: #{screenshots_dir}")
+
+    # Find all PNG files in screenshots directory
+    png_files = Dir.glob("#{screenshots_dir}/**/*.png")
+
+    if png_files.empty?
+      UI.important("No PNG files found in #{screenshots_dir}")
+      next
+    end
+
+    UI.message("Found #{png_files.length} PNG files to process")
+
+    png_files.each do |file|
+      # Use sips (macOS built-in) to remove alpha by converting to JPEG and back
+      # This is a reliable way to strip alpha channel without needing ImageMagick
+      temp_file = "#{file}.temp.jpg"
+
+      begin
+        # Convert to JPEG (removes alpha)
+        sh("sips", "-s", "format", "jpeg", "-s", "formatOptions", "100", file, "--out", temp_file, exception: false)
+
+        # Convert back to PNG (RGB, no alpha)
+        sh("sips", "-s", "format", "png", temp_file, "--out", file, exception: false)
+
+        # Clean up temp file
+        FileUtils.rm_f(temp_file)
+      rescue => ex
+        UI.error("Error processing #{file}: #{ex}")
+      end
+    end
+
+    UI.success("✅ Alpha channel removed from #{png_files.length} screenshots")
+  end
+
   desc "Promote TestFlight build to App Store (no re-upload)"
   lane :promote do |options|
     skip_screenshots = options[:skip_screenshots] || true
     app_version = options[:app_version]
+
+    # Fix alpha channel in screenshots before upload
+    unless skip_screenshots
+      fix_screenshots_alpha
+    end
 
     app_store_connect_api_key(
       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
@@ -200,6 +245,8 @@ platform :ios do
       skip_screenshots: skip_screenshots,
       skip_metadata: false,  # Always upload metadata
       overwrite_screenshots: true,  # Replace existing screenshots instead of adding
+      ignore_language_directory_validation: true,  # Allow flexible directory structure
+      screenshots_path: "./fastlane/screenshots",  # Explicit path to screenshots
       submit_for_review: skip_screenshots,  # Only auto-submit if NO screenshots uploaded
       reject_if_possible: true,  # Cancel pending review before submitting new one
       run_precheck_before_submit: false,
@@ -213,6 +260,45 @@ platform :ios do
       UI.important("⏳ Please wait 5-10 minutes for processing to complete.")
       UI.important("🔄 Then manually submit for review in App Store Connect or run this workflow again with skip_screenshots:true")
     end
+  end
+
+  desc "Clear all screenshots from App Store Connect (useful before fresh upload)"
+  lane :clear_screenshots do |options|
+    app_version = options[:app_version]
+
+    app_store_connect_api_key(
+      key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
+      issuer_id: ENV['APP_STORE_CONNECT_API_KEY_ISSUER_ID'],
+      key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
+    )
+
+    # Upload with empty screenshots to clear existing ones
+    # This is a workaround for when overwrite_screenshots doesn't work as expected
+    UI.message("🗑️ Clearing all screenshots from App Store Connect...")
+
+    # Create temp empty screenshots directory
+    empty_screenshots_dir = "/tmp/empty_screenshots"
+    FileUtils.rm_rf(empty_screenshots_dir)
+    FileUtils.mkdir_p("#{empty_screenshots_dir}/pt-BR")
+    FileUtils.mkdir_p("#{empty_screenshots_dir}/en-US")
+    FileUtils.mkdir_p("#{empty_screenshots_dir}/es-ES")
+
+    upload_to_app_store(
+      app_version: app_version,
+      skip_binary_upload: true,
+      force: true,
+      skip_screenshots: false,
+      skip_metadata: true,
+      overwrite_screenshots: true,
+      screenshots_path: empty_screenshots_dir,
+      submit_for_review: false,
+      run_precheck_before_submit: false
+    )
+
+    # Cleanup
+    FileUtils.rm_rf(empty_screenshots_dir)
+
+    UI.success("✅ Screenshots cleared! Now run 'fastlane promote skip_screenshots:false' to upload new ones.")
   end
 
   desc "Gera screenshots automaticamente usando Flutter integration tests"
@@ -269,11 +355,11 @@ platform :ios do
     end
   end
 
-  # Helper function for iOS screenshots
+  # Helper function for iOS screenshots (light mode only)
   def capture_ios_screenshots(device:, locale:, force_logout:)
     UI.message("📸 Capturing screenshots on device: #{device}, locale: #{locale}")
 
-    # Limpa screenshots anteriores do dispositivo e locale específicos
+    # Clean previous screenshots for this device and locale
     screenshots_dir = "fastlane/screenshots/#{locale}"
     FileUtils.rm_rf(Dir.glob("#{screenshots_dir}/#{device}*.png"))
     FileUtils.mkdir_p(screenshots_dir)
@@ -300,36 +386,18 @@ platform :ios do
       UI.message("⏳ Waiting for simulator to boot...")
       sleep(10)
 
-      # 5. Set locale on simulator after booting
-      UI.message("🌍 Setting simulator locale to: #{locale}")
+      # 5. Set light mode appearance
+      UI.message("🌞 Setting light mode appearance...")
+      sh("xcrun", "simctl", "ui", device, "appearance", "light") rescue nil
+      sleep(2)
 
-      # Map locale to iOS language codes
-      ios_language = case locale
-        when "pt-BR" then "pt-BR"
-        when "en-US" then "en"
-        when "es-ES" then "es"
-        else "en"
-      end
-
-      # Set AppleLanguages and AppleLocale
-      sh("xcrun", "simctl", "spawn", device, "defaults", "write", "NSGlobalDomain", "AppleLanguages", "-array", ios_language) rescue nil
-      sh("xcrun", "simctl", "spawn", device, "defaults", "write", "NSGlobalDomain", "AppleLocale", "-string", locale) rescue nil
-
-      # Restart SpringBoard to apply locale changes
-      UI.message("Restarting SpringBoard to apply locale...")
-      sh("xcrun", "simctl", "spawn", device, "killall", "SpringBoard") rescue nil
-
-      # 6. Wait for locale to apply
-      UI.message("⏳ Waiting for locale to apply...")
-      sleep(10)
-
-      UI.success("✅ Simulator ready: #{device} (locale: #{locale})")
+      UI.success("✅ Simulator ready: #{device}")
     rescue => ex
       UI.error("⚠️ Error resetting simulator: #{ex}")
       UI.message("Continuing anyway, Flutter might handle it...")
     end
 
-    # Executa o teste de integração Flutter
+    # Run Flutter integration test (light mode only)
     Dir.chdir("..") do
       ENV['FLUTTER_TEST_PLATFORM'] = 'ios'
       ENV['DEVICE_NAME'] = device
@@ -350,12 +418,12 @@ platform :ios do
       begin
         sh(*command_args)
       rescue => ex
-        UI.error("❌ Erro ao capturar screenshots para #{device} (#{locale}): #{ex}")
+        UI.error("❌ Error capturing screenshots for #{device} (#{locale}): #{ex}")
       end
     end
 
-    # Lista screenshots capturadas
+    # List captured screenshots
     screenshots = Dir.glob("#{screenshots_dir}/#{device}*.png")
-    UI.success("✅ Capturado #{screenshots.length} screenshots para #{device} (#{locale})")
+    UI.success("✅ Captured #{screenshots.length} screenshots for #{device} (#{locale})")
   end
 end

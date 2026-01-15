@@ -322,6 +322,12 @@ abstract class AppLocalizations {
   /// **'Imprimir'**
   String get print;
 
+  /// No description provided for @preview.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visualizar'**
+  String get preview;
+
   /// No description provided for @export.
   ///
   /// In pt, this message translates to:
@@ -1333,7 +1339,7 @@ abstract class AppLocalizations {
   /// No description provided for @newOrder.
   ///
   /// In pt, this message translates to:
-  /// **'Nova OS'**
+  /// **'NOVA'**
   String get newOrder;
 
   /// No description provided for @editOrder.
@@ -4455,6 +4461,240 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Continuar ({count} {count, plural, =1{selecionada} other{selecionadas}})'**
   String continueWithCount(int count);
+
+  /// No description provided for @financialReport.
+  ///
+  /// In pt, this message translates to:
+  /// **'Relatório Financeiro'**
+  String get financialReport;
+
+  /// No description provided for @totalBilling.
+  ///
+  /// In pt, this message translates to:
+  /// **'Faturamento Total'**
+  String get totalBilling;
+
+  /// No description provided for @financialSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo Financeiro'**
+  String get financialSummary;
+
+  /// No description provided for @averageTicket.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ticket Médio'**
+  String get averageTicket;
+
+  /// No description provided for @customerRanking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ranking de Clientes'**
+  String get customerRanking;
+
+  /// No description provided for @serviceRanking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ranking de Serviços'**
+  String get serviceRanking;
+
+  /// No description provided for @productRanking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ranking de Produtos'**
+  String get productRanking;
+
+  /// No description provided for @paidOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ordens Pagas'**
+  String get paidOrders;
+
+  /// No description provided for @ordersToReceive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ordens a Receber'**
+  String get ordersToReceive;
+
+  /// No description provided for @vehicle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Veículo'**
+  String get vehicle;
+
+  /// No description provided for @valueColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor'**
+  String get valueColumn;
+
+  /// No description provided for @statusColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Status'**
+  String get statusColumn;
+
+  /// No description provided for @quantityShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qtd'**
+  String get quantityShort;
+
+  /// No description provided for @noOrdersInPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma ordem neste período'**
+  String get noOrdersInPeriod;
+
+  /// No description provided for @notInformed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não informado'**
+  String get notInformed;
+
+  /// No description provided for @nOrdersCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} {count, plural, =1{ordem} other{ordens}}'**
+  String nOrdersCount(int count);
+
+  /// No description provided for @nItemsCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} {count, plural, =1{item} other{itens}}'**
+  String nItemsCount(int count);
+
+  /// No description provided for @orderSingular.
+  ///
+  /// In pt, this message translates to:
+  /// **'ordem'**
+  String get orderSingular;
+
+  /// No description provided for @orderPlural.
+  ///
+  /// In pt, this message translates to:
+  /// **'ordens'**
+  String get orderPlural;
+
+  /// No description provided for @generatedAt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerado em {date}'**
+  String generatedAt(String date);
+
+  /// No description provided for @pageOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagina {current} de {total}'**
+  String pageOf(int current, int total);
+
+  /// No description provided for @preparingReport.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preparando relatorio...'**
+  String get preparingReport;
+
+  /// No description provided for @appTagline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sistema de Gestao de Ordens de Servico'**
+  String get appTagline;
+
+  /// No description provided for @receivedWithPercent.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebido ({percent}%)'**
+  String receivedWithPercent(String percent);
+
+  /// No description provided for @toReceiveWithPercent.
+  ///
+  /// In pt, this message translates to:
+  /// **'A Receber ({percent}%)'**
+  String toReceiveWithPercent(String percent);
+
+  /// No description provided for @generatedByPraticos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerado por PraticOS'**
+  String get generatedByPraticos;
+
+  /// No description provided for @serviceDescriptionColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'DESCRICAO DO SERVICO'**
+  String get serviceDescriptionColumn;
+
+  /// No description provided for @descriptionColumn.
+  ///
+  /// In pt, this message translates to:
+  /// **'DESCRICAO'**
+  String get descriptionColumn;
+
+  /// No description provided for @unitShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'UNIT.'**
+  String get unitShort;
+
+  /// No description provided for @alreadyPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ja pago'**
+  String get alreadyPaid;
+
+  /// No description provided for @remainingBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'SALDO RESTANTE'**
+  String get remainingBalance;
+
+  /// No description provided for @totalToPay.
+  ///
+  /// In pt, this message translates to:
+  /// **'TOTAL A PAGAR'**
+  String get totalToPay;
+
+  /// No description provided for @photosAvailableDigitally.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fotos disponiveis no sistema digital'**
+  String get photosAvailableDigitally;
+
+  /// No description provided for @attachedPhotosCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fotos Anexadas ({count})'**
+  String attachedPhotosCount(int count);
+
+  /// No description provided for @photoRecord.
+  ///
+  /// In pt, this message translates to:
+  /// **'REGISTRO FOTOGRAFICO'**
+  String get photoRecord;
+
+  /// No description provided for @partsAndProducts.
+  ///
+  /// In pt, this message translates to:
+  /// **'PECAS E PRODUTOS'**
+  String get partsAndProducts;
+
+  /// No description provided for @nPhotosCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} {count, plural, =1{foto} other{fotos}}'**
+  String nPhotosCount(int count);
+
+  /// No description provided for @notSelected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nao selecionado'**
+  String get notSelected;
+
+  /// No description provided for @formLabelWithTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Formulario: {title}'**
+  String formLabelWithTitle(String title);
 }
 
 class _AppLocalizationsDelegate

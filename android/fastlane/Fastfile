@@ -304,17 +304,34 @@ platform :android do
           # 4. Set locale
           UI.message("🌍 Setting locale to: #{locale}")
 
-          # Map locale to Android format
+          # Map locale to Android format (Android uses underscore: pt_BR, not pt-BR)
           android_locale = case locale
-            when "pt-BR" then "pt-BR"
-            when "en-US" then "en-US"
-            when "es-ES" then "es-ES"
-            else "en-US"
+            when "pt-BR" then "pt_BR"
+            when "en-US" then "en_US"
+            when "es-ES" then "es_ES"
+            else "en_US"
           end
 
-          # Set system locale
-          sh("#{adb} -s #{device} shell settings put system system_locales #{android_locale}") rescue nil
+          # Extract language and country for Android settings
+          lang_parts = android_locale.split('_')
+          language = lang_parts[0]
+          country = lang_parts[1] || ""
+
+          # Set system locale using multiple methods for better compatibility
+          UI.message("Setting Android locale: #{android_locale} (lang: #{language}, country: #{country})")
+
+          # Method 1: persist.sys.locale (requires root on some devices)
           sh("#{adb} -s #{device} shell setprop persist.sys.locale #{android_locale}") rescue nil
+
+          # Method 2: system_locales setting
+          sh("#{adb} -s #{device} shell settings put system system_locales #{android_locale}") rescue nil
+
+          # Method 3: global settings for language and country
+          sh("#{adb} -s #{device} shell settings put global system_language #{language}") rescue nil
+          sh("#{adb} -s #{device} shell settings put global system_country #{country}") rescue nil
+
+          # Method 4: secure settings (works on more Android versions)
+          sh("#{adb} -s #{device} shell settings put secure system_locales #{android_locale}") rescue nil
 
           # 5. Restart UI to apply locale
           UI.message("Restarting UI to apply locale...")
@@ -346,7 +363,7 @@ platform :android do
     nil
   end
 
-  # Helper function to run the screenshot process
+  # Helper function to run the screenshot process (light mode only)
   def capture_screenshots_for_device(device:, folder_name:, locale:, force_logout:, avd_name: nil)
     UI.message("📸 Capturing screenshots for #{folder_name} on device: #{device}, locale: #{locale}")
 
@@ -360,19 +377,18 @@ platform :android do
       device = actual_device
     end
 
-    # Define o diretório baseado no tipo (folder_name) e locale
+    # Define directory based on type (folder_name) and locale
     base_screenshots_dir = "fastlane/metadata/android/#{locale}/images"
     target_dir = "#{base_screenshots_dir}/#{folder_name}"
 
-    # Limpa screenshots anteriores desse tipo
+    # Clean previous screenshots
     FileUtils.rm_rf(Dir.glob("#{target_dir}/*.png"))
     FileUtils.mkdir_p(target_dir)
 
-    # Executa o teste de integração Flutter
+    # Run Flutter integration test (light mode only)
     Dir.chdir("..") do
       ENV['FLUTTER_TEST_PLATFORM'] = 'android'
       ENV['TEST_LOCALE'] = locale
-      # Passa o diretório de destino para o driver Dart via variável de ambiente
       ENV['SCREENSHOT_DIR'] = "android/#{target_dir}"
 
       command_args = [
@@ -391,11 +407,10 @@ platform :android do
         sh(*command_args)
       rescue => ex
         UI.error("❌ Error capturing screenshots for #{folder_name} on #{device} (#{locale}): #{ex}")
-        # Não para o processo inteiro se um falhar, mas avisa
       end
     end
 
-    # Lista screenshots capturadas
+    # List captured screenshots
     screenshots = Dir.glob("#{target_dir}/*.png")
     UI.success("✅ Captured #{screenshots.length} screenshots for #{folder_name} (#{locale})")
   end

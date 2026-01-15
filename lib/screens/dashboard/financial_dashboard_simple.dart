@@ -826,7 +826,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     if (orderStore.customerRanking.isEmpty) {
       return _buildEmptyState(
         icon: CupertinoIcons.person_2,
-        message: 'Sem dados de clientes neste período',
+        message: context.l10n.noCustomerDataInPeriod,
       );
     }
 
@@ -1013,7 +1013,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   ),
                   if (unpaidAmount > 0 && orderStore.paymentFilter == null)
                     Text(
-                      'A receber: ${_convertToCurrency(unpaidAmount)}',
+                      '${context.l10n.toReceive}: ${_convertToCurrency(unpaidAmount)}',
                       style: TextStyle(
                         fontSize: 13,
                         color: CupertinoColors.systemOrange,
@@ -1084,7 +1084,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     if (servicesRanking.isEmpty) {
       return _buildEmptyState(
         icon: CupertinoIcons.wrench,
-        message: 'Sem dados de serviços neste período',
+        message: context.l10n.noServiceDataInPeriod,
       );
     }
 
@@ -1114,7 +1114,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'SERVIÇOS',
+                      context.l10n.services.toUpperCase(),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -1212,7 +1212,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     if (productsRanking.isEmpty) {
       return _buildEmptyState(
         icon: CupertinoIcons.cube_box,
-        message: 'Sem dados de produtos neste período',
+        message: context.l10n.noProductDataInPeriod,
       );
     }
 
@@ -1242,7 +1242,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'PRODUTOS',
+                      context.l10n.products.toUpperCase(),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -1324,7 +1324,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
-                  '$quantity ${quantity == 1 ? 'item' : 'itens'}',
+                  context.l10n.nItemsCount(quantity),
                   style: TextStyle(
                     fontSize: 13,
                     color: secondaryColor,
@@ -1353,10 +1353,10 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
 
   Widget _buildRecentOrders(OrderStore orderStore) {
     String sectionTitle = orderStore.paymentFilter == 'paid'
-        ? 'ORDENS PAGAS'
+        ? context.l10n.paidOrders.toUpperCase()
         : orderStore.paymentFilter == 'unpaid'
-            ? 'ORDENS A RECEBER'
-            : 'ORDENS RECENTES';
+            ? context.l10n.ordersToReceive.toUpperCase()
+            : context.l10n.recentOrders.toUpperCase();
 
     final filteredOrders = orderStore.paymentFilter == null
         ? orderStore.recentOrders
@@ -1367,7 +1367,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     if (filteredOrders.isEmpty) {
       return _buildEmptyState(
         icon: CupertinoIcons.doc_text,
-        message: 'Nenhuma ordem neste período',
+        message: context.l10n.noOrdersInPeriod,
       );
     }
 
@@ -1470,7 +1470,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    order?.customer?.name ?? 'Cliente',
+                    order?.customer?.name ?? context.l10n.customer,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w500,
@@ -1479,7 +1479,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    'OS #${order?.number} • $dateStr',
+                    '${context.l10n.orderShort} #${order?.number} • $dateStr',
                     style: TextStyle(
                       fontSize: 13,
                       color: secondaryColor,
@@ -1515,7 +1515,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      isPaid ? 'Pago' : 'Pendente',
+                      isPaid ? context.l10n.paid : context.l10n.pendingPayment,
                       style: TextStyle(
                         fontSize: 12,
                         color: secondaryColor,
@@ -1617,7 +1617,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             const CupertinoActivityIndicator(),
             const SizedBox(width: 16),
             Text(
-              'Preparando relatório...',
+              currentContext.l10n.preparingReport,
               style: TextStyle(
                 color: CupertinoColors.label.resolveFrom(context),
               ),
@@ -1635,9 +1635,10 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
       }
 
       if (currentContext.mounted) {
+        final reportName = _latinCharactersOnly(currentContext.l10n.financialReport).replaceAll(' ', '_');
         await Printing.sharePdf(
           bytes: pdf,
-          filename: 'Relatorio_Financeiro_${periodLabel.replaceAll('/', '-').replaceAll(' ', '_')}.pdf',
+          filename: '${reportName}_${periodLabel.replaceAll('/', '-').replaceAll(' ', '_')}.pdf',
         );
       }
     } catch (e) {
@@ -1661,10 +1662,11 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     }
   }
 
-  String _getVehicleInfo(dynamic order) {
-    if (order == null || order.device == null) return 'Não informado';
+  String _getVehicleInfo(dynamic order, {String? notInformedText}) {
+    final notInformed = notInformedText ?? context.l10n.notInformed;
+    if (order == null || order.device == null) return notInformed;
 
-    String vehicleInfo = 'Não informado';
+    String vehicleInfo = notInformed;
     var device = order.device;
 
     try {
@@ -1698,7 +1700,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
           }
         }
       } catch (_) {
-        vehicleInfo = device?.toString() ?? 'Não informado';
+        vehicleInfo = device?.toString() ?? notInformed;
       }
     }
 
@@ -1708,8 +1710,63 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
   Future<Uint8List> _buildPdf(OrderStore orderStore) async {
     final pdf = pw.Document();
     final bool isClientSelected = orderStore.selectedCustomerInRanking != null;
+
+    // Capture l10n strings before entering PDF builder context
+    final l10n = context.l10n;
+    final l10nFinancialReport = _latinCharactersOnly(l10n.financialReport.toUpperCase());
+    final l10nFinancialSummary = _latinCharactersOnly(l10n.financialSummary);
+    final l10nTotalBilling = _latinCharactersOnly(l10n.totalBilling);
+    final l10nReceived = _latinCharactersOnly(l10n.received);
+    final l10nToReceive = _latinCharactersOnly(l10n.toReceive);
+    final l10nAverageTicket = _latinCharactersOnly(l10n.averageTicket);
+    final l10nCustomerRanking = _latinCharactersOnly(l10n.customerRanking);
+    final l10nServiceRanking = _latinCharactersOnly(l10n.serviceRanking);
+    final l10nProductRanking = _latinCharactersOnly(l10n.productRanking);
+    final l10nCustomer = _latinCharactersOnly(l10n.customer);
+    final l10nTotal = _latinCharactersOnly(l10n.total);
+    final l10nService = _latinCharactersOnly(l10n.service);
+    final l10nProduct = _latinCharactersOnly(l10n.product);
+    final l10nQuantityShort = _latinCharactersOnly(l10n.quantityShort);
+    final l10nValueColumn = _latinCharactersOnly(l10n.valueColumn);
+    final l10nOrders = _latinCharactersOnly(l10n.orders);
+    final l10nOrderShort = _latinCharactersOnly(l10n.orderShort);
+    final l10nDate = _latinCharactersOnly(l10n.date);
+    final l10nVehicle = _latinCharactersOnly(l10n.vehicle);
+    final l10nStatusColumn = _latinCharactersOnly(l10n.statusColumn);
+    final l10nPaid = _latinCharactersOnly(l10n.paid);
+    final l10nPendingPayment = _latinCharactersOnly(l10n.pendingPayment);
+    final l10nCompany = _latinCharactersOnly(l10n.company);
+    final l10nNotInformed = _latinCharactersOnly(l10n.notInformed);
+    final l10nOrderSingular = _latinCharactersOnly(l10n.orderSingular);
+    final l10nOrderPlural = _latinCharactersOnly(l10n.orderPlural);
+    final l10nAppTagline = _latinCharactersOnly(l10n.appTagline);
+    final l10nGeneratedAt = _latinCharactersOnly(l10n.generatedAt(FormatService().formatDateTime(DateTime.now())));
+    // Capture pageOf format function to use in PDF footer
+    String formatPageOf(int current, int total) => _latinCharactersOnly(l10n.pageOf(current, total));
+    // Capture receivedWithPercent format function
+    String formatReceivedWithPercent(String percent) => _latinCharactersOnly(l10n.receivedWithPercent(percent));
+    // Capture toReceiveWithPercent format function
+    String formatToReceiveWithPercent(String percent) => _latinCharactersOnly(l10n.toReceiveWithPercent(percent));
+
+    // Map for passing to _buildPdfOrdersTable
+    final l10nStrings = {
+      'orders': l10nOrders,
+      'orderShort': l10nOrderShort,
+      'date': l10nDate,
+      'vehicle': l10nVehicle,
+      'value': l10nValueColumn,
+      'status': l10nStatusColumn,
+      'customer': l10nCustomer,
+      'paid': l10nPaid,
+      'pending': l10nPendingPayment,
+      'total': l10nTotal,
+      'notInformed': l10nNotInformed,
+      'orderSingular': l10nOrderSingular,
+      'orderPlural': l10nOrderPlural,
+    };
+
     final selectedClientName = isClientSelected
-        ? orderStore.selectedCustomerInRanking!['name'] ?? 'Cliente'
+        ? orderStore.selectedCustomerInRanking!['name'] ?? l10nCustomer
         : '';
 
     // Fetch full company data for logo and contact info
@@ -1816,7 +1873,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     children: [
                       pw.Text(
                         _latinCharactersOnly(
-                            company?.name ?? Global.companyAggr?.name ?? 'Empresa'),
+                            company?.name ?? Global.companyAggr?.name ?? l10nCompany),
                         style: pw.TextStyle(
                           font: boldFont,
                           fontSize: 16,
@@ -1859,7 +1916,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         borderRadius: pw.BorderRadius.circular(4),
                       ),
                       child: pw.Text(
-                        'RELATORIO FINANCEIRO',
+                        l10nFinancialReport,
                         style: pw.TextStyle(
                           font: boldFont,
                           fontSize: 8,
@@ -1879,7 +1936,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                     ),
                     pw.SizedBox(height: 2),
                     pw.Text(
-                      'Gerado em ${FormatService().formatDateTime(DateTime.now())}',
+                      l10nGeneratedAt,
                       style: pw.TextStyle(
                         font: baseFont,
                         fontSize: 8,
@@ -1904,7 +1961,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
                 pw.Text(
-                  'PraticOS - Sistema de Gestao de Ordens de Servico',
+                  'PraticOS - $l10nAppTagline',
                   style: pw.TextStyle(
                     font: baseFont,
                     fontSize: 8,
@@ -1912,7 +1969,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   ),
                 ),
                 pw.Text(
-                  'Pagina ${context.pageNumber} de ${context.pagesCount}',
+                  formatPageOf(context.pageNumber, context.pagesCount),
                   style: pw.TextStyle(
                     font: baseFont,
                     fontSize: 8,
@@ -1960,7 +2017,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       child: pw.Row(
                         children: [
                           pw.Text(
-                            'Cliente: ',
+                            '$l10nCustomer: ',
                             style:
                                 pw.TextStyle(font: baseFont, color: textColor),
                           ),
@@ -1979,7 +2036,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       children: [
                         pw.Expanded(
                           child: _buildPdfKpiBox(
-                            'Faturamento Total',
+                            l10nTotalBilling,
                             _convertToCurrency(clientTotal),
                             primaryColor,
                             boldFont,
@@ -1989,7 +2046,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         pw.SizedBox(width: 12),
                         pw.Expanded(
                           child: _buildPdfKpiBox(
-                            'Recebido',
+                            l10nReceived,
                             _convertToCurrency(clientPaidTotal),
                             successColor,
                             boldFont,
@@ -1999,7 +2056,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         pw.SizedBox(width: 12),
                         pw.Expanded(
                           child: _buildPdfKpiBox(
-                            'A Receber',
+                            l10nToReceive,
                             _convertToCurrency(clientUnpaidTotal),
                             warningColor,
                             boldFont,
@@ -2015,7 +2072,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
 
             if (clientOrders.isNotEmpty) {
               content.add(_buildPdfOrdersTable(
-                  clientOrders, boldFont, baseFont, textColor, accentColor, true));
+                  clientOrders, boldFont, baseFont, textColor, accentColor, true, l10nStrings));
             }
           } else {
             // Summary header with stats
@@ -2030,7 +2087,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       crossAxisAlignment: pw.CrossAxisAlignment.end,
                       children: [
                         pw.Text(
-                          'Resumo Financeiro',
+                          l10nFinancialSummary,
                           style: pw.TextStyle(
                               font: boldFont, fontSize: 16, color: accentColor),
                         ),
@@ -2078,7 +2135,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         pw.Expanded(
                           flex: 2,
                           child: _buildPdfKpiBoxLarge(
-                            'Faturamento Total',
+                            l10nTotalBilling,
                             _convertToCurrency(orderStore.totalRevenue),
                             primaryColor,
                             boldFont,
@@ -2088,7 +2145,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         pw.SizedBox(width: 12),
                         pw.Expanded(
                           child: _buildPdfKpiBox(
-                            'Ticket Medio',
+                            l10nAverageTicket,
                             _convertToCurrency(avgTicket),
                             PdfColors.blueGrey600,
                             boldFont,
@@ -2103,7 +2160,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       children: [
                         pw.Expanded(
                           child: _buildPdfKpiBox(
-                            'Recebido ($paidPercentage%)',
+                            formatReceivedWithPercent(paidPercentage),
                             _convertToCurrency(orderStore.totalPaidAmount),
                             successColor,
                             boldFont,
@@ -2113,7 +2170,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         pw.SizedBox(width: 12),
                         pw.Expanded(
                           child: _buildPdfKpiBox(
-                            'A Receber ($unpaidPercentage%)',
+                            formatToReceiveWithPercent(unpaidPercentage),
                             _convertToCurrency(orderStore.totalUnpaidAmount),
                             warningColor,
                             boldFont,
@@ -2152,7 +2209,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text(
-                            'Ranking de Clientes',
+                            l10nCustomerRanking,
                             style: pw.TextStyle(
                                 font: boldFont, fontSize: 14, color: accentColor),
                           ),
@@ -2188,7 +2245,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           3: pw.Alignment.centerRight,
                           4: pw.Alignment.centerRight,
                         },
-                        headers: ['#', 'Cliente', 'Recebido', 'A Receber', 'Total'],
+                        headers: ['#', l10nCustomer, l10nReceived, l10nToReceive, l10nTotal],
                         data: List.generate(
                           filteredRanking.length,
                           (index) {
@@ -2201,7 +2258,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                             return [
                               '${index + 1}',
                               _latinCharactersOnly(
-                                  filteredRanking[index]['name'] ?? 'Cliente'),
+                                  filteredRanking[index]['name'] ?? l10nCustomer),
                               _convertToCurrency(paidTotal),
                               _convertToCurrency(unpaidTotal),
                               _convertToCurrency(total),
@@ -2280,7 +2337,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text(
-                            'Ranking de Servicos',
+                            l10nServiceRanking,
                             style: pw.TextStyle(
                                 font: boldFont,
                                 fontSize: 14,
@@ -2317,7 +2374,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           2: pw.Alignment.center,
                           3: pw.Alignment.centerRight,
                         },
-                        headers: ['#', 'Servico', 'Qtd', 'Valor'],
+                        headers: ['#', l10nService, l10nQuantityShort, l10nValueColumn],
                         data: List.generate(
                           servicesRanking.length,
                           (index) => [
@@ -2393,7 +2450,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
                           pw.Text(
-                            'Ranking de Produtos',
+                            l10nProductRanking,
                             style: pw.TextStyle(
                                 font: boldFont,
                                 fontSize: 14,
@@ -2430,7 +2487,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                           2: pw.Alignment.center,
                           3: pw.Alignment.centerRight,
                         },
-                        headers: ['#', 'Produto', 'Qtd', 'Valor'],
+                        headers: ['#', l10nProduct, l10nQuantityShort, l10nValueColumn],
                         data: List.generate(
                           productsRanking.length,
                           (index) => [
@@ -2496,7 +2553,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       .toList();
 
               content.add(_buildPdfOrdersTable(
-                  filteredOrders, boldFont, baseFont, textColor, accentColor, false));
+                  filteredOrders, boldFont, baseFont, textColor, accentColor, false, l10nStrings));
             }
           }
 
@@ -2600,6 +2657,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
     PdfColor textColor,
     PdfColor accentColor,
     bool isClientReport,
+    Map<String, String> l10nStrings,
   ) {
     // Calculate totals
     double totalAmount = 0;
@@ -2622,7 +2680,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             ? FormatService().formatDate(order!.createdAt!)
             : '';
         final isPaid = order?.payment == 'paid';
-        String vehicleInfo = _getVehicleInfo(order);
+        String vehicleInfo = _getVehicleInfo(order, notInformedText: l10nStrings['notInformed']);
 
         if (isClientReport) {
           return [
@@ -2630,15 +2688,15 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             dateStr,
             vehicleInfo,
             _convertToCurrency(order?.total ?? 0.0),
-            isPaid ? 'Pago' : 'Pendente',
+            isPaid ? l10nStrings['paid']! : l10nStrings['pending']!,
           ];
         } else {
           return [
             '#${order?.number ?? ""}',
-            _latinCharactersOnly(order?.customer?.name ?? 'Cliente'),
+            _latinCharactersOnly(order?.customer?.name ?? l10nStrings['customer']!),
             dateStr,
             _convertToCurrency(order?.total ?? 0.0),
-            isPaid ? 'Pago' : 'Pendente',
+            isPaid ? l10nStrings['paid']! : l10nStrings['pending']!,
           ];
         }
       },
@@ -2653,7 +2711,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text(
-                'Ordens de Servico',
+                l10nStrings['orders']!,
                 style:
                     pw.TextStyle(font: boldFont, fontSize: 14, color: accentColor),
               ),
@@ -2666,7 +2724,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       borderRadius: pw.BorderRadius.circular(3),
                     ),
                     child: pw.Text(
-                      '$paidCount pagos',
+                      '$paidCount ${l10nStrings['paid']!.toLowerCase()}',
                       style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.green800),
                     ),
                   ),
@@ -2678,7 +2736,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                       borderRadius: pw.BorderRadius.circular(3),
                     ),
                     child: pw.Text(
-                      '$pendingCount pendentes',
+                      '$pendingCount ${l10nStrings['pending']!.toLowerCase()}',
                       style: pw.TextStyle(font: baseFont, fontSize: 8, color: PdfColors.orange800),
                     ),
                   ),
@@ -2724,8 +2782,8 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
               4: pw.Alignment.center,
             },
             headers: isClientReport
-                ? ['OS', 'Data', 'Veiculo', 'Valor', 'Status']
-                : ['OS', 'Cliente', 'Data', 'Valor', 'Status'],
+                ? [l10nStrings['orderShort']!, l10nStrings['date']!, l10nStrings['vehicle']!, l10nStrings['value']!, l10nStrings['status']!]
+                : [l10nStrings['orderShort']!, l10nStrings['customer']!, l10nStrings['date']!, l10nStrings['value']!, l10nStrings['status']!],
             data: tableData,
           ),
           // Totals row
@@ -2742,7 +2800,7 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                 pw.Expanded(
                   flex: 5,
                   child: pw.Text(
-                    'TOTAL (${orders.length} ordens)',
+                    '${l10nStrings['total']!.toUpperCase()} (${orders.length} ${orders.length == 1 ? l10nStrings['orderSingular']! : l10nStrings['orderPlural']!})',
                     style: pw.TextStyle(font: boldFont, fontSize: 9, color: textColor),
                   ),
                 ),

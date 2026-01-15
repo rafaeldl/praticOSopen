@@ -120,6 +120,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get print => 'Imprimir';
 
   @override
+  String get preview => 'Visualizar';
+
+  @override
   String get export => 'Exportar';
 
   @override
@@ -635,7 +638,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get orderShort => 'OS';
 
   @override
-  String get newOrder => 'Nova OS';
+  String get newOrder => 'NOVA';
 
   @override
   String get editOrder => 'Editar OS';
@@ -2264,5 +2267,158 @@ class AppLocalizationsPt extends AppLocalizations {
       one: 'selecionada',
     );
     return 'Continuar ($count $_temp0)';
+  }
+
+  @override
+  String get financialReport => 'Relatório Financeiro';
+
+  @override
+  String get totalBilling => 'Faturamento Total';
+
+  @override
+  String get financialSummary => 'Resumo Financeiro';
+
+  @override
+  String get averageTicket => 'Ticket Médio';
+
+  @override
+  String get customerRanking => 'Ranking de Clientes';
+
+  @override
+  String get serviceRanking => 'Ranking de Serviços';
+
+  @override
+  String get productRanking => 'Ranking de Produtos';
+
+  @override
+  String get paidOrders => 'Ordens Pagas';
+
+  @override
+  String get ordersToReceive => 'Ordens a Receber';
+
+  @override
+  String get vehicle => 'Veículo';
+
+  @override
+  String get valueColumn => 'Valor';
+
+  @override
+  String get statusColumn => 'Status';
+
+  @override
+  String get quantityShort => 'Qtd';
+
+  @override
+  String get noOrdersInPeriod => 'Nenhuma ordem neste período';
+
+  @override
+  String get notInformed => 'Não informado';
+
+  @override
+  String nOrdersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'ordens',
+      one: 'ordem',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String nItemsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'itens',
+      one: 'item',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get orderSingular => 'ordem';
+
+  @override
+  String get orderPlural => 'ordens';
+
+  @override
+  String generatedAt(String date) {
+    return 'Gerado em $date';
+  }
+
+  @override
+  String pageOf(int current, int total) {
+    return 'Pagina $current de $total';
+  }
+
+  @override
+  String get preparingReport => 'Preparando relatorio...';
+
+  @override
+  String get appTagline => 'Sistema de Gestao de Ordens de Servico';
+
+  @override
+  String receivedWithPercent(String percent) {
+    return 'Recebido ($percent%)';
+  }
+
+  @override
+  String toReceiveWithPercent(String percent) {
+    return 'A Receber ($percent%)';
+  }
+
+  @override
+  String get generatedByPraticos => 'Gerado por PraticOS';
+
+  @override
+  String get serviceDescriptionColumn => 'DESCRICAO DO SERVICO';
+
+  @override
+  String get descriptionColumn => 'DESCRICAO';
+
+  @override
+  String get unitShort => 'UNIT.';
+
+  @override
+  String get alreadyPaid => 'Ja pago';
+
+  @override
+  String get remainingBalance => 'SALDO RESTANTE';
+
+  @override
+  String get totalToPay => 'TOTAL A PAGAR';
+
+  @override
+  String get photosAvailableDigitally => 'Fotos disponiveis no sistema digital';
+
+  @override
+  String attachedPhotosCount(int count) {
+    return 'Fotos Anexadas ($count)';
+  }
+
+  @override
+  String get photoRecord => 'REGISTRO FOTOGRAFICO';
+
+  @override
+  String get partsAndProducts => 'PECAS E PRODUTOS';
+
+  @override
+  String nPhotosCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'fotos',
+      one: 'foto',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get notSelected => 'Nao selecionado';
+
+  @override
+  String formLabelWithTitle(String title) {
+    return 'Formulario: $title';
   }
 }

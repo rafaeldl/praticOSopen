@@ -6,6 +6,7 @@ import 'package:praticos/models/form_definition.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_styles.dart';
 
 /// Builder para as paginas de formularios/checklists no PDF
@@ -14,12 +15,14 @@ class PdfFormsBuilder {
   final pw.Font boldFont;
   final pw.MemoryImage? logoImage;
   final SegmentConfigProvider config;
+  final PdfLocalizations localizations;
 
   PdfFormsBuilder({
     required this.baseFont,
     required this.boldFont,
     this.logoImage,
     required this.config,
+    required this.localizations,
   });
 
   // ============================================
@@ -173,11 +176,11 @@ class PdfFormsBuilder {
   String _getFormStatusText(FormStatus status) {
     switch (status) {
       case FormStatus.completed:
-        return 'Concluido';
+        return localizations.statusCompleted;
       case FormStatus.inProgress:
-        return 'Em Andamento';
+        return localizations.statusInProgress;
       case FormStatus.pending:
-        return 'Pendente';
+        return localizations.statusPending;
     }
   }
 
@@ -269,7 +272,7 @@ class PdfFormsBuilder {
   pw.Widget _buildResponseContent(FormItemDefinition item, FormResponse? response) {
     if (response == null) {
       return pw.Text(
-        'Nao respondido',
+        localizations.notAnswered,
         style: pw.TextStyle(
           font: baseFont,
           fontSize: 9,
@@ -292,7 +295,7 @@ class PdfFormsBuilder {
 
       case FormItemType.select:
         return pw.Text(
-          response.value?.toString() ?? 'Nao selecionado',
+          response.value?.toString() ?? localizations.notSelected,
           style: pw.TextStyle(
             font: baseFont,
             fontSize: 10,
@@ -309,7 +312,7 @@ class PdfFormsBuilder {
         final value = response.value?.toString() ?? '';
         if (value.isEmpty) {
           return pw.Text(
-            'Nao informado',
+            localizations.notInformed,
             style: pw.TextStyle(
               font: baseFont,
               fontSize: 9,
@@ -563,7 +566,7 @@ class PdfFormsBuilder {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'Formulario: ${form.title}',
+                localizations.formatFormLabel(form.title),
                 style: pw.TextStyle(
                   font: baseFont,
                   fontSize: 7,
@@ -572,7 +575,7 @@ class PdfFormsBuilder {
               ),
               pw.SizedBox(height: 2),
               pw.Text(
-                'Pagina ${context.pageNumber} de ${context.pagesCount}',
+                localizations.formatPageOf(context.pageNumber, context.pagesCount),
                 style: pw.TextStyle(
                   font: baseFont,
                   fontSize: 7,
@@ -595,7 +598,7 @@ class PdfFormsBuilder {
                 pw.SizedBox(width: 6),
               ],
               pw.Text(
-                'Gerado por PraticOS | ',
+                '${localizations.generatedByPraticos} | ',
                 style: pw.TextStyle(
                   font: baseFont,
                   fontSize: 7,

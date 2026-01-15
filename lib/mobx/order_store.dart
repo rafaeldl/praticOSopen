@@ -275,6 +275,11 @@ abstract class _OrderStore with Store {
 
     this.order = order;
 
+    // Garante que a order tenha o company setado
+    if (this.order!.company == null) {
+      this.order!.company = Global.companyAggr;
+    }
+
     // Atualiza a data de criação
     createdAt = order.createdAt;
 
