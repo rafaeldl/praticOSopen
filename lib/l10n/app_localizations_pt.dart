@@ -120,6 +120,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get print => 'Imprimir';
 
   @override
+  String get preview => 'Visualizar';
+
+  @override
   String get export => 'Exportar';
 
   @override

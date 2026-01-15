@@ -7,7 +7,7 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Screenshot Tests', () {
-    testWidgets('capture all 7 screenshots for App Store', (WidgetTester tester) async {
+    testWidgets('capture all 8 screenshots for App Store', (WidgetTester tester) async {
       // Get locale from environment (default: pt-BR)
       const locale = String.fromEnvironment('TEST_LOCALE', defaultValue: 'pt-BR');
 
@@ -112,6 +112,62 @@ void main() {
           // SCREENSHOT 2: Order Detail (top of screen)
           print('📸 Capturing Screenshot 2: Order Detail');
           await binding.takeScreenshot('02_order_detail');
+
+        // SCREENSHOT 8: PDF Preview (via action sheet)
+        print('\n--- Screenshot 8: PDF Preview ---');
+        print('Looking for action sheet button (ellipsis)...');
+        final ellipsisButton = find.byIcon(CupertinoIcons.ellipsis_circle);
+        if (ellipsisButton.evaluate().isNotEmpty) {
+          print('Tapping ellipsis button to open action sheet...');
+          await tester.tap(ellipsisButton.first);
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 1));
+          print('Action sheet opened');
+
+          // Find and tap "Visualizar PDF" / "Preview PDF" / "Vista previa PDF" option
+          print('Looking for PDF Preview option...');
+          final previewTexts = ['Visualizar PDF', 'Preview PDF', 'Vista previa PDF'];
+          Finder? previewOption;
+          for (final text in previewTexts) {
+            final finder = find.text(text);
+            if (finder.evaluate().isNotEmpty) {
+              previewOption = finder;
+              print('Found preview option: "$text"');
+              break;
+            }
+          }
+
+          if (previewOption != null) {
+            print('Tapping PDF Preview option...');
+            await tester.tap(previewOption);
+            await tester.pumpAndSettle();
+
+            // Wait for PDF to generate and render (loading dialog + PDF render)
+            print('Waiting for PDF to generate...');
+            await Future.delayed(const Duration(seconds: 8));
+            await tester.pumpAndSettle();
+            await Future.delayed(const Duration(seconds: 2));
+            print('PDF preview loaded');
+
+            print('📸 Capturing Screenshot 8: PDF Preview');
+            await binding.takeScreenshot('08_pdf_preview');
+
+            // Go back to order detail
+            print('Navigating back to order detail...');
+            final navPdf = tester.state<NavigatorState>(find.byType(Navigator).first);
+            navPdf.pop();
+            await tester.pumpAndSettle();
+            await Future.delayed(const Duration(seconds: 1));
+            print('✅ Back to order detail');
+          } else {
+            print('⚠️ PDF Preview option not found in action sheet, skipping screenshot 8');
+            // Close action sheet
+            await tester.tapAt(const Offset(200, 100));
+            await tester.pumpAndSettle();
+          }
+        } else {
+          print('⚠️ Ellipsis button not found, skipping screenshot 8');
+        }
 
         // SCREENSHOT 5: Payments (scroll down to payments section)
         print('\n--- Screenshot 5: Payments ---');

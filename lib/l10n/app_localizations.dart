@@ -322,6 +322,12 @@ abstract class AppLocalizations {
   /// **'Imprimir'**
   String get print;
 
+  /// No description provided for @preview.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visualizar'**
+  String get preview;
+
   /// No description provided for @export.
   ///
   /// In pt, this message translates to:

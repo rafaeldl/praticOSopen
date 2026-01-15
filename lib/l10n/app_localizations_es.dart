@@ -120,6 +120,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get print => 'Imprimir';
 
   @override
+  String get preview => 'Vista previa';
+
+  @override
   String get export => 'Exportar';
 
   @override

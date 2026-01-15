@@ -289,6 +289,9 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
           .doc(widget.companyId)
           .get();
 
+      // Check if widget is still mounted after async operation
+      if (!mounted) return;
+
       if (!companyDoc.exists) {
         throw Exception(context.l10n.companyNotFound);
       }
@@ -307,6 +310,9 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
       final segmentProvider = context.read<SegmentConfigProvider>();
       await segmentProvider.initialize(segment);
 
+      // Check if widget is still mounted after async operation
+      if (!mounted) return;
+
       // Seta o país para formatação de telefone
       if (country != null) {
         segmentProvider.setCountry(country);
@@ -316,6 +322,7 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _error = e.toString();
         _isLoading = false;
