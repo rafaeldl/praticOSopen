@@ -754,7 +754,6 @@ class _HomeState extends State<Home> {
 
   Widget _buildThumbnail(Order order, Color statusColor, SegmentConfigProvider config) {
     const double size = 56;
-    const double dotSize = 14;
 
     return SizedBox(
       width: size,
@@ -783,7 +782,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
           ),
-          // Order number badge at top-left
+          // Order number badge with status color at top-left
           if (order.number != null)
             Positioned(
               top: -8,
@@ -791,7 +790,7 @@ class _HomeState extends State<Home> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey,
+                  color: statusColor,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(
@@ -811,23 +810,6 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
-          // Status dot at bottom-right corner
-          Positioned(
-            right: -3,
-            bottom: -3,
-            child: Container(
-              width: dotSize,
-              height: dotSize,
-              decoration: BoxDecoration(
-                color: statusColor,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: CupertinoColors.systemBackground.resolveFrom(context),
-                  width: 2,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
