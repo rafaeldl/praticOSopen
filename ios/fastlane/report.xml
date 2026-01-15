@@ -5,259 +5,487 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="00: default_platform" time="0.000385">
+      <testcase classname="fastlane.lanes" name="00: default_platform" time="0.000172">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="01: xcrun simctl shutdown &apos;iPhone 16e&apos; || true" time="0.477484">
+      <testcase classname="fastlane.lanes" name="01: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-01_home.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-01_home.png.temp.jpg" time="0.036743">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="02: xcrun simctl erase iPhone\ 16e" time="0.160971">
+      <testcase classname="fastlane.lanes" name="02: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-01_home.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-01_home.png" time="0.087152">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="03: xcrun simctl boot iPhone\ 16e" time="0.455198">
+      <testcase classname="fastlane.lanes" name="03: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-02_order_detail.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-02_order_detail.png.temp.jpg" time="0.040246">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="04: open -a Simulator" time="0.087391">
+      <testcase classname="fastlane.lanes" name="04: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-02_order_detail.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-02_order_detail.png" time="0.103639">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="05: xcrun simctl spawn iPhone\ 16e defaults write NSGlobalDomain AppleLanguages -array pt-BR" time="0.444357">
+      <testcase classname="fastlane.lanes" name="05: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-03_segments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-03_segments.png.temp.jpg" time="0.027952">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="06: xcrun simctl spawn iPhone\ 16e defaults write NSGlobalDomain AppleLocale -string pt-BR" time="1.124564">
+      <testcase classname="fastlane.lanes" name="06: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-03_segments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-03_segments.png" time="0.084725">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="07: xcrun simctl spawn iPhone\ 16e killall SpringBoard" time="0.243952">
-        
-          <failure message="/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in &apos;Fastlane::Actions.execute_action&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:224:in &apos;Fastlane::FastFile.sh&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:216:in &apos;Fastlane::FastFile#sh&apos;&#10;Fastfile:310:in &apos;Fastlane::FastFile#capture_ios_screenshots&apos;&#10;Fastfile:244:in &apos;block (4 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:243:in &apos;Array#each&apos;&#10;Fastfile:243:in &apos;block (3 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:224:in &apos;Array#each&apos;&#10;Fastfile:224:in &apos;block (2 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane.rb:41:in &apos;Fastlane::Lane#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:49:in &apos;block in Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Dir.chdir&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane_manager.rb:46:in &apos;Fastlane::LaneManager.cruise_lane&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/command_line_handler.rb:34:in &apos;Fastlane::CommandLineHandler.handle&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:110:in &apos;block (2 levels) in Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:187:in &apos;Commander::Command#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:157:in &apos;Commander::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/runner.rb:444:in &apos;Commander::Runner#run_active_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:124:in &apos;Commander::Runner#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/delegates.rb:18:in &apos;Commander::Delegates#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:363:in &apos;Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:43:in &apos;Fastlane::CommandsGenerator.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/cli_tools_distributor.rb:123:in &apos;Fastlane::CLIToolsDistributor.take_off&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/bin/fastlane:23:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/bin/fastlane:25:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Kernel.load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Bundler::CLI::Exec#kernel_load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:23:in &apos;Bundler::CLI::Exec#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:456:in &apos;Bundler::CLI#exec&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/command.rb:28:in &apos;Bundler::Thor::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/invocation.rb:127:in &apos;Bundler::Thor::Invocation#invoke_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor.rb:538:in &apos;Bundler::Thor.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:35:in &apos;Bundler::CLI.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/base.rb:584:in &apos;Bundler::Thor::Base::ClassMethods#start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:29:in &apos;Bundler::CLI.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:28:in &apos;block in &lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/friendly_errors.rb:118:in &apos;Bundler.with_friendly_errors&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:20:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/opt/ruby/bin/bundle:25:in &apos;&lt;main&gt;&apos;&#10;&#10;Exit status of command &apos;xcrun simctl spawn iPhone\ 16e killall SpringBoard&apos; was 2 instead of 0.&#10;An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=2):&#10;The operation couldn’t be completed. No such file or directory&#10;No such file or directory&#10;" />
+      <testcase classname="fastlane.lanes" name="07: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-04_dashboard.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-04_dashboard.png.temp.jpg" time="0.028">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="08: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=pt-BR -d iPhone\ 16e" time="143.839506">
+      <testcase classname="fastlane.lanes" name="08: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-04_dashboard.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-04_dashboard.png" time="0.086043">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="09: xcrun simctl shutdown &apos;iPhone 17&apos; || true" time="3.240686">
+      <testcase classname="fastlane.lanes" name="09: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-05_payments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-05_payments.png.temp.jpg" time="0.02725">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="10: xcrun simctl erase iPhone\ 17" time="0.194132">
+      <testcase classname="fastlane.lanes" name="10: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-05_payments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-05_payments.png" time="0.099767">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="11: xcrun simctl boot iPhone\ 17" time="0.381719">
+      <testcase classname="fastlane.lanes" name="11: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-06_forms.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-06_forms.png.temp.jpg" time="0.029217">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="12: open -a Simulator" time="0.087775">
+      <testcase classname="fastlane.lanes" name="12: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-06_forms.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-06_forms.png" time="0.09866">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="13: xcrun simctl spawn iPhone\ 17 defaults write NSGlobalDomain AppleLanguages -array pt-BR" time="0.329218">
+      <testcase classname="fastlane.lanes" name="13: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-07_login.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-07_login.png.temp.jpg" time="0.030582">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="14: xcrun simctl spawn iPhone\ 17 defaults write NSGlobalDomain AppleLocale -string pt-BR" time="0.242126">
+      <testcase classname="fastlane.lanes" name="14: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-07_login.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-07_login.png" time="0.090718">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="15: xcrun simctl spawn iPhone\ 17 killall SpringBoard" time="0.106072">
-        
-          <failure message="/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in &apos;Fastlane::Actions.execute_action&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:224:in &apos;Fastlane::FastFile.sh&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:216:in &apos;Fastlane::FastFile#sh&apos;&#10;Fastfile:310:in &apos;Fastlane::FastFile#capture_ios_screenshots&apos;&#10;Fastfile:244:in &apos;block (4 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:243:in &apos;Array#each&apos;&#10;Fastfile:243:in &apos;block (3 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:224:in &apos;Array#each&apos;&#10;Fastfile:224:in &apos;block (2 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane.rb:41:in &apos;Fastlane::Lane#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:49:in &apos;block in Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Dir.chdir&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane_manager.rb:46:in &apos;Fastlane::LaneManager.cruise_lane&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/command_line_handler.rb:34:in &apos;Fastlane::CommandLineHandler.handle&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:110:in &apos;block (2 levels) in Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:187:in &apos;Commander::Command#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:157:in &apos;Commander::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/runner.rb:444:in &apos;Commander::Runner#run_active_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:124:in &apos;Commander::Runner#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/delegates.rb:18:in &apos;Commander::Delegates#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:363:in &apos;Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:43:in &apos;Fastlane::CommandsGenerator.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/cli_tools_distributor.rb:123:in &apos;Fastlane::CLIToolsDistributor.take_off&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/bin/fastlane:23:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/bin/fastlane:25:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Kernel.load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Bundler::CLI::Exec#kernel_load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:23:in &apos;Bundler::CLI::Exec#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:456:in &apos;Bundler::CLI#exec&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/command.rb:28:in &apos;Bundler::Thor::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/invocation.rb:127:in &apos;Bundler::Thor::Invocation#invoke_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor.rb:538:in &apos;Bundler::Thor.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:35:in &apos;Bundler::CLI.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/base.rb:584:in &apos;Bundler::Thor::Base::ClassMethods#start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:29:in &apos;Bundler::CLI.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:28:in &apos;block in &lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/friendly_errors.rb:118:in &apos;Bundler.with_friendly_errors&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:20:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/opt/ruby/bin/bundle:25:in &apos;&lt;main&gt;&apos;&#10;&#10;Exit status of command &apos;xcrun simctl spawn iPhone\ 17 killall SpringBoard&apos; was 2 instead of 0.&#10;An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=2):&#10;The operation couldn’t be completed. No such file or directory&#10;No such file or directory&#10;" />
+      <testcase classname="fastlane.lanes" name="15: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-08_pdf_preview.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-08_pdf_preview.png.temp.jpg" time="0.033711">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="16: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=pt-BR -d iPhone\ 17" time="131.308184">
+      <testcase classname="fastlane.lanes" name="16: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-08_pdf_preview.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 16e-08_pdf_preview.png" time="0.094264">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="17: xcrun simctl shutdown &apos;iPhone 16e&apos; || true" time="0.604974">
+      <testcase classname="fastlane.lanes" name="17: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-01_home.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-01_home.png.temp.jpg" time="0.032254">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="18: xcrun simctl erase iPhone\ 16e" time="0.177351">
+      <testcase classname="fastlane.lanes" name="18: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-01_home.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-01_home.png" time="0.095717">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="19: xcrun simctl boot iPhone\ 16e" time="0.37421">
+      <testcase classname="fastlane.lanes" name="19: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-02_order_detail.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-02_order_detail.png.temp.jpg" time="0.041108">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="20: open -a Simulator" time="0.071872">
+      <testcase classname="fastlane.lanes" name="20: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-02_order_detail.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-02_order_detail.png" time="0.106065">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="21: xcrun simctl spawn iPhone\ 16e defaults write NSGlobalDomain AppleLanguages -array en" time="0.280163">
+      <testcase classname="fastlane.lanes" name="21: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-03_segments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-03_segments.png.temp.jpg" time="0.031389">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="22: xcrun simctl spawn iPhone\ 16e defaults write NSGlobalDomain AppleLocale -string en-US" time="0.241825">
+      <testcase classname="fastlane.lanes" name="22: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-03_segments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-03_segments.png" time="0.088635">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="23: xcrun simctl spawn iPhone\ 16e killall SpringBoard" time="0.089871">
-        
-          <failure message="/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in &apos;Fastlane::Actions.execute_action&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:224:in &apos;Fastlane::FastFile.sh&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:216:in &apos;Fastlane::FastFile#sh&apos;&#10;Fastfile:310:in &apos;Fastlane::FastFile#capture_ios_screenshots&apos;&#10;Fastfile:244:in &apos;block (4 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:243:in &apos;Array#each&apos;&#10;Fastfile:243:in &apos;block (3 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:224:in &apos;Array#each&apos;&#10;Fastfile:224:in &apos;block (2 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane.rb:41:in &apos;Fastlane::Lane#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:49:in &apos;block in Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Dir.chdir&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane_manager.rb:46:in &apos;Fastlane::LaneManager.cruise_lane&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/command_line_handler.rb:34:in &apos;Fastlane::CommandLineHandler.handle&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:110:in &apos;block (2 levels) in Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:187:in &apos;Commander::Command#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:157:in &apos;Commander::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/runner.rb:444:in &apos;Commander::Runner#run_active_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:124:in &apos;Commander::Runner#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/delegates.rb:18:in &apos;Commander::Delegates#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:363:in &apos;Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:43:in &apos;Fastlane::CommandsGenerator.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/cli_tools_distributor.rb:123:in &apos;Fastlane::CLIToolsDistributor.take_off&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/bin/fastlane:23:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/bin/fastlane:25:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Kernel.load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Bundler::CLI::Exec#kernel_load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:23:in &apos;Bundler::CLI::Exec#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:456:in &apos;Bundler::CLI#exec&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/command.rb:28:in &apos;Bundler::Thor::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/invocation.rb:127:in &apos;Bundler::Thor::Invocation#invoke_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor.rb:538:in &apos;Bundler::Thor.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:35:in &apos;Bundler::CLI.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/base.rb:584:in &apos;Bundler::Thor::Base::ClassMethods#start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:29:in &apos;Bundler::CLI.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:28:in &apos;block in &lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/friendly_errors.rb:118:in &apos;Bundler.with_friendly_errors&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:20:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/opt/ruby/bin/bundle:25:in &apos;&lt;main&gt;&apos;&#10;&#10;Exit status of command &apos;xcrun simctl spawn iPhone\ 16e killall SpringBoard&apos; was 2 instead of 0.&#10;An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=2):&#10;The operation couldn’t be completed. No such file or directory&#10;No such file or directory&#10;" />
+      <testcase classname="fastlane.lanes" name="23: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-04_dashboard.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-04_dashboard.png.temp.jpg" time="0.029134">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="24: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=en-US -d iPhone\ 16e" time="149.499876">
+      <testcase classname="fastlane.lanes" name="24: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-04_dashboard.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-04_dashboard.png" time="0.088073">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="25: xcrun simctl shutdown &apos;iPhone 17&apos; || true" time="0.444133">
+      <testcase classname="fastlane.lanes" name="25: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-05_payments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-05_payments.png.temp.jpg" time="0.027904">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="26: xcrun simctl erase iPhone\ 17" time="0.168433">
+      <testcase classname="fastlane.lanes" name="26: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-05_payments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-05_payments.png" time="0.090272">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="27: xcrun simctl boot iPhone\ 17" time="0.431392">
+      <testcase classname="fastlane.lanes" name="27: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-06_forms.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-06_forms.png.temp.jpg" time="0.029125">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="28: open -a Simulator" time="0.153201">
+      <testcase classname="fastlane.lanes" name="28: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-06_forms.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-06_forms.png" time="0.090896">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="29: xcrun simctl spawn iPhone\ 17 defaults write NSGlobalDomain AppleLanguages -array en" time="0.402317">
+      <testcase classname="fastlane.lanes" name="29: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-07_login.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-07_login.png.temp.jpg" time="0.031707">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="30: xcrun simctl spawn iPhone\ 17 defaults write NSGlobalDomain AppleLocale -string en-US" time="0.31062">
+      <testcase classname="fastlane.lanes" name="30: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-07_login.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-07_login.png" time="0.09055">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="31: xcrun simctl spawn iPhone\ 17 killall SpringBoard" time="0.133641">
-        
-          <failure message="/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in &apos;Fastlane::Actions.execute_action&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:224:in &apos;Fastlane::FastFile.sh&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:216:in &apos;Fastlane::FastFile#sh&apos;&#10;Fastfile:310:in &apos;Fastlane::FastFile#capture_ios_screenshots&apos;&#10;Fastfile:244:in &apos;block (4 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:243:in &apos;Array#each&apos;&#10;Fastfile:243:in &apos;block (3 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:224:in &apos;Array#each&apos;&#10;Fastfile:224:in &apos;block (2 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane.rb:41:in &apos;Fastlane::Lane#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:49:in &apos;block in Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Dir.chdir&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane_manager.rb:46:in &apos;Fastlane::LaneManager.cruise_lane&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/command_line_handler.rb:34:in &apos;Fastlane::CommandLineHandler.handle&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:110:in &apos;block (2 levels) in Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:187:in &apos;Commander::Command#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:157:in &apos;Commander::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/runner.rb:444:in &apos;Commander::Runner#run_active_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:124:in &apos;Commander::Runner#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/delegates.rb:18:in &apos;Commander::Delegates#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:363:in &apos;Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:43:in &apos;Fastlane::CommandsGenerator.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/cli_tools_distributor.rb:123:in &apos;Fastlane::CLIToolsDistributor.take_off&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/bin/fastlane:23:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/bin/fastlane:25:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Kernel.load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Bundler::CLI::Exec#kernel_load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:23:in &apos;Bundler::CLI::Exec#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:456:in &apos;Bundler::CLI#exec&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/command.rb:28:in &apos;Bundler::Thor::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/invocation.rb:127:in &apos;Bundler::Thor::Invocation#invoke_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor.rb:538:in &apos;Bundler::Thor.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:35:in &apos;Bundler::CLI.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/base.rb:584:in &apos;Bundler::Thor::Base::ClassMethods#start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:29:in &apos;Bundler::CLI.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:28:in &apos;block in &lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/friendly_errors.rb:118:in &apos;Bundler.with_friendly_errors&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:20:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/opt/ruby/bin/bundle:25:in &apos;&lt;main&gt;&apos;&#10;&#10;Exit status of command &apos;xcrun simctl spawn iPhone\ 17 killall SpringBoard&apos; was 2 instead of 0.&#10;An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=2):&#10;The operation couldn’t be completed. No such file or directory&#10;No such file or directory&#10;" />
+      <testcase classname="fastlane.lanes" name="31: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-08_pdf_preview.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-08_pdf_preview.png.temp.jpg" time="0.035033">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="32: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=en-US -d iPhone\ 17" time="139.836164">
+      <testcase classname="fastlane.lanes" name="32: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-08_pdf_preview.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/en-US/iPhone\ 17-08_pdf_preview.png" time="0.097087">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="33: xcrun simctl shutdown &apos;iPhone 16e&apos; || true" time="0.353574">
+      <testcase classname="fastlane.lanes" name="33: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-01_home.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-01_home.png.temp.jpg" time="0.028856">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="34: xcrun simctl erase iPhone\ 16e" time="0.17889">
+      <testcase classname="fastlane.lanes" name="34: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-01_home.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-01_home.png" time="0.080501">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="35: xcrun simctl boot iPhone\ 16e" time="0.409569">
+      <testcase classname="fastlane.lanes" name="35: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-02_order_detail.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-02_order_detail.png.temp.jpg" time="0.037891">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="36: open -a Simulator" time="0.056435">
+      <testcase classname="fastlane.lanes" name="36: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-02_order_detail.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-02_order_detail.png" time="0.090716">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="37: xcrun simctl spawn iPhone\ 16e defaults write NSGlobalDomain AppleLanguages -array es" time="0.260923">
+      <testcase classname="fastlane.lanes" name="37: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-03_segments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-03_segments.png.temp.jpg" time="0.027424">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="38: xcrun simctl spawn iPhone\ 16e defaults write NSGlobalDomain AppleLocale -string es-ES" time="0.234892">
+      <testcase classname="fastlane.lanes" name="38: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-03_segments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-03_segments.png" time="0.076834">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="39: xcrun simctl spawn iPhone\ 16e killall SpringBoard" time="0.169123">
-        
-          <failure message="/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in &apos;Fastlane::Actions.execute_action&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:224:in &apos;Fastlane::FastFile.sh&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:216:in &apos;Fastlane::FastFile#sh&apos;&#10;Fastfile:310:in &apos;Fastlane::FastFile#capture_ios_screenshots&apos;&#10;Fastfile:244:in &apos;block (4 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:243:in &apos;Array#each&apos;&#10;Fastfile:243:in &apos;block (3 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:224:in &apos;Array#each&apos;&#10;Fastfile:224:in &apos;block (2 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane.rb:41:in &apos;Fastlane::Lane#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:49:in &apos;block in Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Dir.chdir&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane_manager.rb:46:in &apos;Fastlane::LaneManager.cruise_lane&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/command_line_handler.rb:34:in &apos;Fastlane::CommandLineHandler.handle&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:110:in &apos;block (2 levels) in Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:187:in &apos;Commander::Command#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:157:in &apos;Commander::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/runner.rb:444:in &apos;Commander::Runner#run_active_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:124:in &apos;Commander::Runner#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/delegates.rb:18:in &apos;Commander::Delegates#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:363:in &apos;Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:43:in &apos;Fastlane::CommandsGenerator.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/cli_tools_distributor.rb:123:in &apos;Fastlane::CLIToolsDistributor.take_off&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/bin/fastlane:23:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/bin/fastlane:25:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Kernel.load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Bundler::CLI::Exec#kernel_load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:23:in &apos;Bundler::CLI::Exec#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:456:in &apos;Bundler::CLI#exec&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/command.rb:28:in &apos;Bundler::Thor::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/invocation.rb:127:in &apos;Bundler::Thor::Invocation#invoke_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor.rb:538:in &apos;Bundler::Thor.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:35:in &apos;Bundler::CLI.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/base.rb:584:in &apos;Bundler::Thor::Base::ClassMethods#start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:29:in &apos;Bundler::CLI.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:28:in &apos;block in &lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/friendly_errors.rb:118:in &apos;Bundler.with_friendly_errors&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:20:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/opt/ruby/bin/bundle:25:in &apos;&lt;main&gt;&apos;&#10;&#10;Exit status of command &apos;xcrun simctl spawn iPhone\ 16e killall SpringBoard&apos; was 2 instead of 0.&#10;An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=2):&#10;The operation couldn’t be completed. No such file or directory&#10;No such file or directory&#10;" />
+      <testcase classname="fastlane.lanes" name="39: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-04_dashboard.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-04_dashboard.png.temp.jpg" time="0.025595">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="40: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=es-ES -d iPhone\ 16e" time="141.571853">
+      <testcase classname="fastlane.lanes" name="40: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-04_dashboard.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-04_dashboard.png" time="0.075527">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="41: xcrun simctl shutdown &apos;iPhone 17&apos; || true" time="0.42282">
+      <testcase classname="fastlane.lanes" name="41: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-05_payments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-05_payments.png.temp.jpg" time="0.025401">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="42: xcrun simctl erase iPhone\ 17" time="0.210883">
+      <testcase classname="fastlane.lanes" name="42: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-05_payments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-05_payments.png" time="0.105368">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="43: xcrun simctl boot iPhone\ 17" time="0.462651">
+      <testcase classname="fastlane.lanes" name="43: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-06_forms.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-06_forms.png.temp.jpg" time="0.033335">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="44: open -a Simulator" time="0.079845">
+      <testcase classname="fastlane.lanes" name="44: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-06_forms.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-06_forms.png" time="0.080511">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="45: xcrun simctl spawn iPhone\ 17 defaults write NSGlobalDomain AppleLanguages -array es" time="0.234526">
+      <testcase classname="fastlane.lanes" name="45: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-07_login.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-07_login.png.temp.jpg" time="0.027272">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="46: xcrun simctl spawn iPhone\ 17 defaults write NSGlobalDomain AppleLocale -string es-ES" time="0.218985">
+      <testcase classname="fastlane.lanes" name="46: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-07_login.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-07_login.png" time="0.079636">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="47: xcrun simctl spawn iPhone\ 17 killall SpringBoard" time="0.087158">
-        
-          <failure message="/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/actions/actions_helper.rb:67:in &apos;Fastlane::Actions.execute_action&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:224:in &apos;Fastlane::FastFile.sh&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/fast_file.rb:216:in &apos;Fastlane::FastFile#sh&apos;&#10;Fastfile:310:in &apos;Fastlane::FastFile#capture_ios_screenshots&apos;&#10;Fastfile:244:in &apos;block (4 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:243:in &apos;Array#each&apos;&#10;Fastfile:243:in &apos;block (3 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;Fastfile:224:in &apos;Array#each&apos;&#10;Fastfile:224:in &apos;block (2 levels) in Fastlane::FastFile#parsing_binding&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane.rb:41:in &apos;Fastlane::Lane#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:49:in &apos;block in Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Dir.chdir&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/runner.rb:45:in &apos;Fastlane::Runner#execute&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/lane_manager.rb:46:in &apos;Fastlane::LaneManager.cruise_lane&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/command_line_handler.rb:34:in &apos;Fastlane::CommandLineHandler.handle&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:110:in &apos;block (2 levels) in Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:187:in &apos;Commander::Command#call&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/command.rb:157:in &apos;Commander::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/runner.rb:444:in &apos;Commander::Runner#run_active_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane_core/lib/fastlane_core/ui/fastlane_runner.rb:124:in &apos;Commander::Runner#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/commander-4.6.0/lib/commander/delegates.rb:18:in &apos;Commander::Delegates#run!&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:363:in &apos;Fastlane::CommandsGenerator#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/commands_generator.rb:43:in &apos;Fastlane::CommandsGenerator.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/fastlane/lib/fastlane/cli_tools_distributor.rb:123:in &apos;Fastlane::CLIToolsDistributor.take_off&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/fastlane-2.230.0/bin/fastlane:23:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/bin/fastlane:25:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Kernel.load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:59:in &apos;Bundler::CLI::Exec#kernel_load&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli/exec.rb:23:in &apos;Bundler::CLI::Exec#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:456:in &apos;Bundler::CLI#exec&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/command.rb:28:in &apos;Bundler::Thor::Command#run&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/invocation.rb:127:in &apos;Bundler::Thor::Invocation#invoke_command&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor.rb:538:in &apos;Bundler::Thor.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:35:in &apos;Bundler::CLI.dispatch&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/vendor/thor/lib/thor/base.rb:584:in &apos;Bundler::Thor::Base::ClassMethods#start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/cli.rb:29:in &apos;Bundler::CLI.start&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:28:in &apos;block in &lt;top (required)&gt;&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/lib/bundler/friendly_errors.rb:118:in &apos;Bundler.with_friendly_errors&apos;&#10;/opt/homebrew/lib/ruby/gems/4.0.0/gems/bundler-2.7.2/exe/bundle:20:in &apos;&lt;top (required)&gt;&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Kernel#load&apos;&#10;/opt/homebrew/Cellar/ruby/4.0.0/lib/ruby/4.0.0/rubygems.rb:303:in &apos;Gem.activate_and_load_bin_path&apos;&#10;/opt/homebrew/opt/ruby/bin/bundle:25:in &apos;&lt;main&gt;&apos;&#10;&#10;Exit status of command &apos;xcrun simctl spawn iPhone\ 17 killall SpringBoard&apos; was 2 instead of 0.&#10;An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=2):&#10;The operation couldn’t be completed. No such file or directory&#10;No such file or directory&#10;" />
+      <testcase classname="fastlane.lanes" name="47: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-08_pdf_preview.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-08_pdf_preview.png.temp.jpg" time="0.033272">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="48: fvm flutter drive --driver\=test_driver/integration_test.dart --target\=integration_test/screenshot_test.dart --dart-define\=TEST_LOCALE\=es-ES -d iPhone\ 17" time="140.583622">
+      <testcase classname="fastlane.lanes" name="48: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-08_pdf_preview.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 16e-08_pdf_preview.png" time="0.087797">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="49: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-01_home.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-01_home.png.temp.jpg" time="0.030365">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="50: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-01_home.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-01_home.png" time="0.088817">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="51: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-02_order_detail.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-02_order_detail.png.temp.jpg" time="0.043968">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="52: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-02_order_detail.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-02_order_detail.png" time="0.106587">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="53: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-03_segments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-03_segments.png.temp.jpg" time="0.030565">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="54: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-03_segments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-03_segments.png" time="0.089843">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="55: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-04_dashboard.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-04_dashboard.png.temp.jpg" time="0.02875">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="56: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-04_dashboard.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-04_dashboard.png" time="0.090787">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="57: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-05_payments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-05_payments.png.temp.jpg" time="0.028848">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="58: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-05_payments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-05_payments.png" time="0.122164">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="59: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-06_forms.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-06_forms.png.temp.jpg" time="0.030068">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="60: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-06_forms.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-06_forms.png" time="0.091373">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="61: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-07_login.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-07_login.png.temp.jpg" time="0.030695">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="62: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-07_login.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-07_login.png" time="0.090913">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="63: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-08_pdf_preview.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-08_pdf_preview.png.temp.jpg" time="0.03269">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="64: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-08_pdf_preview.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/es-ES/iPhone\ 17-08_pdf_preview.png" time="0.102554">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="65: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-01_home.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-01_home.png.temp.jpg" time="0.031607">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="66: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-01_home.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-01_home.png" time="0.090696">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="67: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-02_order_detail.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-02_order_detail.png.temp.jpg" time="0.04163">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="68: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-02_order_detail.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-02_order_detail.png" time="0.102985">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="69: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-03_segments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-03_segments.png.temp.jpg" time="0.030196">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="70: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-03_segments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-03_segments.png" time="0.08883">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="71: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-04_dashboard.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-04_dashboard.png.temp.jpg" time="0.028399">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="72: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-04_dashboard.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-04_dashboard.png" time="0.087428">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="73: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-05_payments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-05_payments.png.temp.jpg" time="0.043838">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="74: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-05_payments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-05_payments.png" time="0.090983">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="75: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-06_forms.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-06_forms.png.temp.jpg" time="0.027007">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="76: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-06_forms.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-06_forms.png" time="0.079076">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="77: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-07_login.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-07_login.png.temp.jpg" time="0.026731">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="78: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-07_login.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-07_login.png" time="0.07986">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="79: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-08_pdf_preview.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-08_pdf_preview.png.temp.jpg" time="0.031569">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="80: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-08_pdf_preview.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 16e-08_pdf_preview.png" time="0.084579">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="81: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-01_home.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-01_home.png.temp.jpg" time="0.030146">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="82: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-01_home.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-01_home.png" time="0.084133">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="83: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-02_order_detail.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-02_order_detail.png.temp.jpg" time="0.03988">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="84: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-02_order_detail.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-02_order_detail.png" time="0.095445">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="85: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-03_segments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-03_segments.png.temp.jpg" time="0.029162">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="86: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-03_segments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-03_segments.png" time="0.088585">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="87: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-04_dashboard.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-04_dashboard.png.temp.jpg" time="0.027431">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="88: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-04_dashboard.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-04_dashboard.png" time="0.079717">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="89: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-05_payments.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-05_payments.png.temp.jpg" time="0.02712">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="90: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-05_payments.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-05_payments.png" time="0.08259">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="91: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-06_forms.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-06_forms.png.temp.jpg" time="0.027656">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="92: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-06_forms.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-06_forms.png" time="0.092451">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="93: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-07_login.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-07_login.png.temp.jpg" time="0.03005">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="94: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-07_login.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-07_login.png" time="0.088279">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="95: sips -s format jpeg -s formatOptions 100 /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-08_pdf_preview.png --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-08_pdf_preview.png.temp.jpg" time="0.034959">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="96: sips -s format png /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-08_pdf_preview.png.temp.jpg --out /Users/rafaeldl/Projetos/praticOSopen/ios/fastlane/screenshots/pt-BR/iPhone\ 17-08_pdf_preview.png" time="0.100245">
         
       </testcase>
     
