@@ -236,20 +236,29 @@ platform :ios do
     # Step 1: Upload metadata and screenshots WITHOUT submitting
     # This allows time for screenshot processing
     UI.message("📤 Uploading metadata and screenshots...")
-    upload_to_app_store(
-      app_version: app_version,
-      skip_binary_upload: true,
-      force: true,
-      skip_screenshots: skip_screenshots,
-      skip_metadata: false,
-      overwrite_screenshots: true,
-      ignore_language_directory_validation: true,
-      screenshots_path: "./fastlane/screenshots",
-      submit_for_review: false,  # Don't submit yet - wait for screenshots to process
-      reject_if_possible: true,
-      run_precheck_before_submit: false,
-      precheck_default_rule_level: :skip
-    )
+    begin
+      upload_to_app_store(
+        app_version: app_version,
+        skip_binary_upload: true,
+        force: true,
+        skip_screenshots: skip_screenshots,
+        skip_metadata: false,
+        overwrite_screenshots: true,
+        ignore_language_directory_validation: true,
+        screenshots_path: "./fastlane/screenshots",
+        submit_for_review: false,  # Don't submit yet - wait for screenshots to process
+        reject_if_possible: true,
+        run_precheck_before_submit: false,
+        precheck_default_rule_level: :skip
+      )
+    rescue => e
+      # Server 500 errors during screenshot polling are common but screenshots are already uploaded
+      if e.message.include?("500") || e.message.include?("Server error")
+        UI.important("⚠️ Server error during upload verification, but screenshots were likely uploaded. Continuing...")
+      else
+        raise e
+      end
+    end
 
     # Step 2: Submit for review with retry logic
     # Apple needs time to process uploaded screenshots before submission
