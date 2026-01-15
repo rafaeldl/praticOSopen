@@ -1711,34 +1711,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get setAsCover => 'Set as cover';
 
   @override
+  String get roleDescAdmin =>
+      'Full access. Configures the company, manages users, and accesses all data.';
+
+  @override
   String get roleAdmin => 'Administrator';
+
+  @override
+  String get roleDescSupervisor =>
+      'Coordinates teams and equipment. Does not view financial values.';
 
   @override
   String get roleSupervisor => 'Supervisor';
 
   @override
+  String get roleDescManager =>
+      'Focus on results. Views billing and costs, but does not execute services.';
+
+  @override
   String get roleManager => 'Manager';
+
+  @override
+  String get roleDescConsultant =>
+      'Creates quotes. Views prices, but accesses only their own Service Orders.';
 
   @override
   String get roleConsultant => 'Consultant';
 
   @override
+  String get roleDescTechnician =>
+      'Executes services. Does not view prices and has limited editing after SO approval.';
+
+  @override
   String get roleTechnician => 'Technician';
-
-  @override
-  String get roleDescAdmin => 'Full system access';
-
-  @override
-  String get roleDescSupervisor => 'Operational management of technicians';
-
-  @override
-  String get roleDescManager => 'Financial management and reports';
-
-  @override
-  String get roleDescConsultant => 'Sales and commercial tracking';
-
-  @override
-  String get roleDescTechnician => 'Service execution';
 
   @override
   String get noFeminine => 'No';

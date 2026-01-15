@@ -1720,34 +1720,39 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setAsCover => 'Establecer como portada';
 
   @override
+  String get roleDescAdmin =>
+      'Acceso total. Configura la empresa, gestiona usuarios y accede a todos los datos.';
+
+  @override
   String get roleAdmin => 'Administrador';
+
+  @override
+  String get roleDescSupervisor =>
+      'Coordina equipos y equipos. No visualiza valores financieros.';
 
   @override
   String get roleSupervisor => 'Supervisor';
 
   @override
+  String get roleDescManager =>
+      'Enfoque en resultados. Visualiza facturación y costos, pero no ejecuta servicios.';
+
+  @override
   String get roleManager => 'Gerente';
+
+  @override
+  String get roleDescConsultant =>
+      'Crea presupuestos. Ve precios, pero accede solo a sus propias Órdenes de Servicio.';
 
   @override
   String get roleConsultant => 'Consultor';
 
   @override
+  String get roleDescTechnician =>
+      'Ejecuta servicios. No ve precios y tiene edición limitada tras la aprobación de la OS.';
+
+  @override
   String get roleTechnician => 'Técnico';
-
-  @override
-  String get roleDescAdmin => 'Acceso total al sistema';
-
-  @override
-  String get roleDescSupervisor => 'Gestión operacional de técnicos';
-
-  @override
-  String get roleDescManager => 'Gestión financiera e informes';
-
-  @override
-  String get roleDescConsultant => 'Ventas y seguimiento comercial';
-
-  @override
-  String get roleDescTechnician => 'Ejecución de servicios';
 
   @override
   String get noFeminine => 'Ninguna';

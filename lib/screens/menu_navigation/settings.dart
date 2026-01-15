@@ -89,7 +89,7 @@ class _SettingsState extends State<Settings> {
                                 Padding(
                                   padding: const EdgeInsets.only(top: 2.0),
                                   child: Text(
-                                    _authService.currentRoleLabel,
+                                    _authService.getRoleLabelLocalized(context.l10n),
                                     style: TextStyle(
                                       color: CupertinoColors.secondaryLabel.resolveFrom(context),
                                       fontSize: 13,

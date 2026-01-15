@@ -1719,34 +1719,39 @@ class AppLocalizationsPt extends AppLocalizations {
   String get setAsCover => 'Definir como capa';
 
   @override
+  String get roleDescAdmin =>
+      'Acesso total. Configura a empresa, gerencia usuários e acessa todos os dados.';
+
+  @override
   String get roleAdmin => 'Administrador';
+
+  @override
+  String get roleDescSupervisor =>
+      'Coordena equipes e equipamentos. Não visualiza valores financeiros.';
 
   @override
   String get roleSupervisor => 'Supervisor';
 
   @override
+  String get roleDescManager =>
+      'Foco em resultados. Visualiza faturamento e custos, mas não executa serviços.';
+
+  @override
   String get roleManager => 'Gerente';
+
+  @override
+  String get roleDescConsultant =>
+      'Cria orçamentos. Vê preços, mas acessa apenas suas próprias Ordens de Serviço.';
 
   @override
   String get roleConsultant => 'Consultor';
 
   @override
+  String get roleDescTechnician =>
+      'Executa serviços. Não vê preços e tem edição limitada após aprovação da OS.';
+
+  @override
   String get roleTechnician => 'Técnico';
-
-  @override
-  String get roleDescAdmin => 'Acesso total ao sistema';
-
-  @override
-  String get roleDescSupervisor => 'Gestão operacional dos técnicos';
-
-  @override
-  String get roleDescManager => 'Gestão financeira e relatórios';
-
-  @override
-  String get roleDescConsultant => 'Vendas e acompanhamento comercial';
-
-  @override
-  String get roleDescTechnician => 'Execução de serviços';
 
   @override
   String get noFeminine => 'Nenhuma';
