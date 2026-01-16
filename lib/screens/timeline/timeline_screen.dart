@@ -562,6 +562,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
               isSending: _store.isSending,
               customerName: _order?.customer?.name,
               onAttachmentTap: _showAttachmentMenu,
+              onCameraTap: () => _orderStore.addPhotoFromCamera(),
             ),
           ],
         ),
