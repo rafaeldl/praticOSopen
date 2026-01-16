@@ -2,6 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/models/timeline_event.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
+/// iOS Dynamic Type font sizes
+class _FontSize {
+  static const double body = 17; // Main text
+  static const double subhead = 15; // Tertiary text
+  static const double footnote = 13; // Meta info
+  static const double caption1 = 12; // Small labels
+  static const double caption2 = 11; // Timestamps
+}
+
 class EventCard extends StatelessWidget {
   final TimelineEvent event;
   final bool isFromMe;
@@ -16,6 +25,17 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Wrap in DefaultTextStyle to remove yellow underline
+    return DefaultTextStyle(
+      style: TextStyle(
+        decoration: TextDecoration.none,
+        color: CupertinoColors.label.resolveFrom(context),
+      ),
+      child: _buildContent(context),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
     // Route to specific card type
     if (event.isComment) {
       return _buildCommentBubble(context);
@@ -83,7 +103,7 @@ class EventCard extends StatelessWidget {
                           Text(
                             event.author!.name!,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: _FontSize.footnote,
                               fontWeight: FontWeight.w600,
                               color: isCustomer
                                   ? CupertinoColors.white.withValues(alpha: 0.9)
@@ -96,7 +116,7 @@ class EventCard extends StatelessWidget {
                               child: Text(
                                 '(${context.l10n.customerLabel})',
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: _FontSize.caption2,
                                   color:
                                       CupertinoColors.white.withValues(alpha: 0.7),
                                 ),
@@ -109,7 +129,7 @@ class EventCard extends StatelessWidget {
                   Text(
                     event.data?.text ?? '',
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: _FontSize.body,
                       color: textColor,
                     ),
                   ),
@@ -121,7 +141,7 @@ class EventCard extends StatelessWidget {
                       Text(
                         _formatTime(event.createdAt),
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: _FontSize.caption2,
                           color: (isFromMe || isCustomer)
                               ? CupertinoColors.white.withValues(alpha: 0.7)
                               : CupertinoColors.secondaryLabel
@@ -133,7 +153,7 @@ class EventCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         Icon(
                           CupertinoIcons.globe,
-                          size: 10,
+                          size: _FontSize.caption2,
                           color: (isFromMe || isCustomer)
                               ? CupertinoColors.white.withValues(alpha: 0.7)
                               : CupertinoColors.secondaryLabel
@@ -153,81 +173,128 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  /// System event card (status change, payment, etc.)
+  /// System event card (WhatsApp style - centered)
   Widget _buildSystemEventCard(BuildContext context) {
+    final authorName = isFromMe ? context.l10n.you : event.author?.name;
+    final subtitle = _getEventSubtitle(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: CupertinoColors.systemGrey6.resolveFrom(context),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: CupertinoColors.separator.resolveFrom(context),
-              width: 0.5,
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.85,
             ),
-          ),
-          child: Row(
-          children: [
-            // Event Icon
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: _getEventColor(event.type).withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Text(
-                  event.icon,
-                  style: const TextStyle(fontSize: 18),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemGrey6.resolveFrom(context),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                // Main line: emoji + author + action
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(text: '${event.icon} '),
+                      if (authorName != null)
+                        TextSpan(
+                          text: authorName,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      TextSpan(
+                        text: authorName != null
+                            ? ' ${_getEventVerb(context)}'
+                            : _getEventTitle(context),
+                      ),
+                    ],
+                  ),
+                  style: TextStyle(
+                    fontSize: _FontSize.footnote,
+                    color: CupertinoColors.label.resolveFrom(context),
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Event Content
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _getEventTitle(context),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: CupertinoColors.label.resolveFrom(context),
+                // Subtitle + time
+                if (subtitle != null || event.createdAt != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      [
+                        if (subtitle != null) subtitle,
+                        _formatTime(event.createdAt),
+                      ].join(' • '),
+                      style: TextStyle(
+                        fontSize: _FontSize.caption2,
+                        color:
+                            CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  if (_getEventSubtitle(context) != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        _getEventSubtitle(context)!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: CupertinoColors.secondaryLabel
-                              .resolveFrom(context),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
-            // Timestamp
-            Text(
-              _formatTime(event.createdAt),
-              style: TextStyle(
-                fontSize: 11,
-                color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-              ),
-            ),
-          ],
-        ),
+          ),
         ),
       ),
     );
+  }
+
+  /// Returns verb form for event (used with author name)
+  String _getEventVerb(BuildContext context) {
+    switch (event.type) {
+      case 'status_change':
+        return context.l10n.changedStatus;
+      case 'photos_added':
+        final count = event.data?.photoUrls?.length ?? 1;
+        return count == 1
+            ? context.l10n.addedPhoto
+            : context.l10n.addedPhotosVerb(count);
+      case 'service_added':
+        return context.l10n.addedService;
+      case 'service_updated':
+        return context.l10n.updatedService;
+      case 'service_removed':
+        return context.l10n.removedService;
+      case 'product_added':
+        return context.l10n.addedProduct;
+      case 'product_updated':
+        return context.l10n.updatedProduct;
+      case 'product_removed':
+        return context.l10n.removedProduct;
+      case 'form_added':
+        return context.l10n.addedChecklist;
+      case 'form_updated':
+        return context.l10n.updatedChecklist;
+      case 'form_completed':
+        return context.l10n.completedChecklist;
+      case 'payment_received':
+        return context.l10n.receivedPayment;
+      case 'payment_removed':
+        return context.l10n.removedPayment;
+      case 'discount_applied':
+        return context.l10n.appliedDiscount;
+      case 'discount_removed':
+        return context.l10n.removedDiscount;
+      case 'payment_status_change':
+        return event.data?.newStatus == 'paid'
+            ? context.l10n.markedPaid
+            : context.l10n.markedUnpaid;
+      case 'assignment_change':
+        return context.l10n.assignedOrder;
+      case 'order_created':
+        return context.l10n.createdOrder;
+      case 'device_change':
+        return context.l10n.changedDevice;
+      case 'customer_change':
+        return context.l10n.changedCustomer;
+      case 'due_date_change':
+        return context.l10n.changedDueDate;
+      default:
+        return context.l10n.madeChange;
+    }
   }
 
   /// Photo card with image grid
@@ -254,7 +321,7 @@ class EventCard extends StatelessWidget {
                 Text(
                   '$authorName • ${_formatTime(event.createdAt)}',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: _FontSize.caption1,
                     color: CupertinoColors.secondaryLabel.resolveFrom(context),
                   ),
                 ),
@@ -278,7 +345,7 @@ class EventCard extends StatelessWidget {
               child: Text(
                 event.data!.caption!,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: _FontSize.subhead,
                   color: CupertinoColors.label.resolveFrom(context),
                 ),
               ),
@@ -464,7 +531,7 @@ class EventCard extends StatelessWidget {
         child: Text(
           initial,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: _FontSize.caption1,
             fontWeight: FontWeight.w600,
             color: isCustomer
                 ? CupertinoColors.white
@@ -597,51 +664,6 @@ class EventCard extends StatelessWidget {
         return event.data?.customerName;
       default:
         return event.author?.name;
-    }
-  }
-
-  Color _getEventColor(String? type) {
-    switch (type) {
-      case 'status_change':
-        return CupertinoColors.activeBlue;
-      case 'photos_added':
-        return CupertinoColors.systemPurple;
-      case 'service_added':
-      case 'service_updated':
-      case 'service_removed':
-        return CupertinoColors.systemOrange;
-      case 'product_added':
-      case 'product_updated':
-      case 'product_removed':
-        return CupertinoColors.systemTeal;
-      case 'form_added':
-      case 'form_updated':
-      case 'form_completed':
-        return CupertinoColors.systemIndigo;
-      case 'payment_received':
-        return CupertinoColors.systemGreen;
-      case 'payment_removed':
-        return CupertinoColors.systemRed;
-      case 'discount_applied':
-        return CupertinoColors.systemOrange;
-      case 'discount_removed':
-        return CupertinoColors.systemRed;
-      case 'payment_status_change':
-        return event.data?.newStatus == 'paid'
-            ? CupertinoColors.systemGreen
-            : CupertinoColors.systemOrange;
-      case 'assignment_change':
-        return CupertinoColors.systemPink;
-      case 'order_created':
-        return CupertinoColors.activeBlue;
-      case 'device_change':
-        return CupertinoColors.systemTeal;
-      case 'customer_change':
-        return CupertinoColors.systemOrange;
-      case 'due_date_change':
-        return CupertinoColors.systemIndigo;
-      default:
-        return CupertinoColors.systemGrey;
     }
   }
 

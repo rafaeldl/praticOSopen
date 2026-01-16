@@ -5031,6 +5031,150 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Anexos'**
   String get attachments;
+
+  /// No description provided for @addedPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'adicionou foto'**
+  String get addedPhoto;
+
+  /// No description provided for @addedPhotosVerb.
+  ///
+  /// In pt, this message translates to:
+  /// **'adicionou {count} fotos'**
+  String addedPhotosVerb(int count);
+
+  /// No description provided for @changedStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'alterou o status'**
+  String get changedStatus;
+
+  /// No description provided for @addedService.
+  ///
+  /// In pt, this message translates to:
+  /// **'adicionou serviço'**
+  String get addedService;
+
+  /// No description provided for @updatedService.
+  ///
+  /// In pt, this message translates to:
+  /// **'atualizou serviço'**
+  String get updatedService;
+
+  /// No description provided for @removedService.
+  ///
+  /// In pt, this message translates to:
+  /// **'removeu serviço'**
+  String get removedService;
+
+  /// No description provided for @addedProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'adicionou produto'**
+  String get addedProduct;
+
+  /// No description provided for @updatedProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'atualizou produto'**
+  String get updatedProduct;
+
+  /// No description provided for @removedProduct.
+  ///
+  /// In pt, this message translates to:
+  /// **'removeu produto'**
+  String get removedProduct;
+
+  /// No description provided for @addedChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'adicionou checklist'**
+  String get addedChecklist;
+
+  /// No description provided for @updatedChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'atualizou checklist'**
+  String get updatedChecklist;
+
+  /// No description provided for @completedChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'completou checklist'**
+  String get completedChecklist;
+
+  /// No description provided for @receivedPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'registrou pagamento'**
+  String get receivedPayment;
+
+  /// No description provided for @removedPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'removeu pagamento'**
+  String get removedPayment;
+
+  /// No description provided for @appliedDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'aplicou desconto'**
+  String get appliedDiscount;
+
+  /// No description provided for @removedDiscount.
+  ///
+  /// In pt, this message translates to:
+  /// **'removeu desconto'**
+  String get removedDiscount;
+
+  /// No description provided for @markedPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'marcou como pago'**
+  String get markedPaid;
+
+  /// No description provided for @markedUnpaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'marcou como pendente'**
+  String get markedUnpaid;
+
+  /// No description provided for @assignedOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'atribuiu a OS'**
+  String get assignedOrder;
+
+  /// No description provided for @createdOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'criou a OS'**
+  String get createdOrder;
+
+  /// No description provided for @changedDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'alterou o dispositivo'**
+  String get changedDevice;
+
+  /// No description provided for @changedCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'alterou o cliente'**
+  String get changedCustomer;
+
+  /// No description provided for @changedDueDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'alterou a data de entrega'**
+  String get changedDueDate;
+
+  /// No description provided for @madeChange.
+  ///
+  /// In pt, this message translates to:
+  /// **'fez uma alteração'**
+  String get madeChange;
 }
 
 class _AppLocalizationsDelegate

@@ -2641,4 +2641,78 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get attachments => 'Anexos';
+
+  @override
+  String get addedPhoto => 'agregó foto';
+
+  @override
+  String addedPhotosVerb(int count) {
+    return 'agregó $count fotos';
+  }
+
+  @override
+  String get changedStatus => 'cambió el estado';
+
+  @override
+  String get addedService => 'agregó servicio';
+
+  @override
+  String get updatedService => 'actualizó servicio';
+
+  @override
+  String get removedService => 'eliminó servicio';
+
+  @override
+  String get addedProduct => 'agregó producto';
+
+  @override
+  String get updatedProduct => 'actualizó producto';
+
+  @override
+  String get removedProduct => 'eliminó producto';
+
+  @override
+  String get addedChecklist => 'agregó checklist';
+
+  @override
+  String get updatedChecklist => 'actualizó checklist';
+
+  @override
+  String get completedChecklist => 'completó checklist';
+
+  @override
+  String get receivedPayment => 'registró pago';
+
+  @override
+  String get removedPayment => 'eliminó pago';
+
+  @override
+  String get appliedDiscount => 'aplicó descuento';
+
+  @override
+  String get removedDiscount => 'eliminó descuento';
+
+  @override
+  String get markedPaid => 'marcó como pagado';
+
+  @override
+  String get markedUnpaid => 'marcó como pendiente';
+
+  @override
+  String get assignedOrder => 'asignó la orden';
+
+  @override
+  String get createdOrder => 'creó la orden';
+
+  @override
+  String get changedDevice => 'cambió el dispositivo';
+
+  @override
+  String get changedCustomer => 'cambió el cliente';
+
+  @override
+  String get changedDueDate => 'cambió la fecha de entrega';
+
+  @override
+  String get madeChange => 'hizo un cambio';
 }

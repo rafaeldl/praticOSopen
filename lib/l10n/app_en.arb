@@ -1094,5 +1094,37 @@
   "addPayment": "Add payment",
   "addNote": "Add note",
   "addDueDate": "Set due date",
-  "attachments": "Attachments"
+  "attachments": "Attachments",
+
+  "addedPhoto": "added photo",
+  "addedPhotosVerb": "added {count} photos",
+  "@addedPhotosVerb": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "changedStatus": "changed status",
+  "addedService": "added service",
+  "updatedService": "updated service",
+  "removedService": "removed service",
+  "addedProduct": "added product",
+  "updatedProduct": "updated product",
+  "removedProduct": "removed product",
+  "addedChecklist": "added checklist",
+  "updatedChecklist": "updated checklist",
+  "completedChecklist": "completed checklist",
+  "receivedPayment": "received payment",
+  "removedPayment": "removed payment",
+  "appliedDiscount": "applied discount",
+  "removedDiscount": "removed discount",
+  "markedPaid": "marked as paid",
+  "markedUnpaid": "marked as unpaid",
+  "assignedOrder": "assigned order",
+  "createdOrder": "created order",
+  "changedDevice": "changed device",
+  "changedCustomer": "changed customer",
+  "changedDueDate": "changed due date",
+  "madeChange": "made a change"
 }

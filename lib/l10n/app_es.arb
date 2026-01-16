@@ -1094,5 +1094,37 @@
   "addPayment": "Agregar pago",
   "addNote": "Agregar nota",
   "addDueDate": "Definir fecha de entrega",
-  "attachments": "Anexos"
+  "attachments": "Anexos",
+
+  "addedPhoto": "agregó foto",
+  "addedPhotosVerb": "agregó {count} fotos",
+  "@addedPhotosVerb": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "changedStatus": "cambió el estado",
+  "addedService": "agregó servicio",
+  "updatedService": "actualizó servicio",
+  "removedService": "eliminó servicio",
+  "addedProduct": "agregó producto",
+  "updatedProduct": "actualizó producto",
+  "removedProduct": "eliminó producto",
+  "addedChecklist": "agregó checklist",
+  "updatedChecklist": "actualizó checklist",
+  "completedChecklist": "completó checklist",
+  "receivedPayment": "registró pago",
+  "removedPayment": "eliminó pago",
+  "appliedDiscount": "aplicó descuento",
+  "removedDiscount": "eliminó descuento",
+  "markedPaid": "marcó como pagado",
+  "markedUnpaid": "marcó como pendiente",
+  "assignedOrder": "asignó la orden",
+  "createdOrder": "creó la orden",
+  "changedDevice": "cambió el dispositivo",
+  "changedCustomer": "cambió el cliente",
+  "changedDueDate": "cambió la fecha de entrega",
+  "madeChange": "hizo un cambio"
 }

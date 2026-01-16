@@ -2627,4 +2627,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get attachments => 'Attachments';
+
+  @override
+  String get addedPhoto => 'added photo';
+
+  @override
+  String addedPhotosVerb(int count) {
+    return 'added $count photos';
+  }
+
+  @override
+  String get changedStatus => 'changed status';
+
+  @override
+  String get addedService => 'added service';
+
+  @override
+  String get updatedService => 'updated service';
+
+  @override
+  String get removedService => 'removed service';
+
+  @override
+  String get addedProduct => 'added product';
+
+  @override
+  String get updatedProduct => 'updated product';
+
+  @override
+  String get removedProduct => 'removed product';
+
+  @override
+  String get addedChecklist => 'added checklist';
+
+  @override
+  String get updatedChecklist => 'updated checklist';
+
+  @override
+  String get completedChecklist => 'completed checklist';
+
+  @override
+  String get receivedPayment => 'received payment';
+
+  @override
+  String get removedPayment => 'removed payment';
+
+  @override
+  String get appliedDiscount => 'applied discount';
+
+  @override
+  String get removedDiscount => 'removed discount';
+
+  @override
+  String get markedPaid => 'marked as paid';
+
+  @override
+  String get markedUnpaid => 'marked as unpaid';
+
+  @override
+  String get assignedOrder => 'assigned order';
+
+  @override
+  String get createdOrder => 'created order';
+
+  @override
+  String get changedDevice => 'changed device';
+
+  @override
+  String get changedCustomer => 'changed customer';
+
+  @override
+  String get changedDueDate => 'changed due date';
+
+  @override
+  String get madeChange => 'made a change';
 }
