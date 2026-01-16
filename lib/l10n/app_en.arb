@@ -1077,5 +1077,13 @@
   },
   "today": "Today",
   "yesterday": "Yesterday",
-  "unknown": "Unknown"
+  "unknown": "Unknown",
+
+  "addPhoto": "Add photo",
+  "addService": "Add service",
+  "addProduct": "Add product",
+  "addChecklist": "Add checklist",
+  "addPayment": "Add payment",
+  "addNote": "Add note",
+  "attachments": "Attachments"
 }

@@ -1122,5 +1122,13 @@
   },
   "today": "Hoje",
   "yesterday": "Ontem",
-  "unknown": "Desconhecido"
+  "unknown": "Desconhecido",
+
+  "addPhoto": "Adicionar foto",
+  "addService": "Adicionar serviço",
+  "addProduct": "Adicionar produto",
+  "addChecklist": "Adicionar checklist",
+  "addPayment": "Adicionar pagamento",
+  "addNote": "Adicionar anotação",
+  "attachments": "Anexos"
 }

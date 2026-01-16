@@ -1077,5 +1077,13 @@
   },
   "today": "Hoy",
   "yesterday": "Ayer",
-  "unknown": "Desconocido"
+  "unknown": "Desconocido",
+
+  "addPhoto": "Agregar foto",
+  "addService": "Agregar servicio",
+  "addProduct": "Agregar producto",
+  "addChecklist": "Agregar checklist",
+  "addPayment": "Agregar pago",
+  "addNote": "Agregar nota",
+  "attachments": "Anexos"
 }

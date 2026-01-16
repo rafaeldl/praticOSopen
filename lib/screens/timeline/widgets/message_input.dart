@@ -6,12 +6,14 @@ class MessageInput extends StatefulWidget {
   final Future<void> Function(String text, bool isPublic) onSend;
   final bool isSending;
   final String? customerName;
+  final VoidCallback? onAttachmentTap;
 
   const MessageInput({
     super.key,
     required this.onSend,
     required this.isSending,
     this.customerName,
+    this.onAttachmentTap,
   });
 
   @override
@@ -94,6 +96,29 @@ class _MessageInputState extends State<MessageInput> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
+                  // Attachment Button (+)
+                  if (widget.onAttachmentTap != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(36, 36),
+                        onPressed: widget.onAttachmentTap,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemGrey5.resolveFrom(context),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            CupertinoIcons.plus,
+                            size: 20,
+                            color: CupertinoColors.activeBlue.resolveFrom(context),
+                          ),
+                        ),
+                      ),
+                    ),
                   // Text Field
                   Expanded(
                     child: Container(

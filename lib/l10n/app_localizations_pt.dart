@@ -401,7 +401,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get removePhoto => 'Remover Foto';
 
   @override
-  String get addPhoto => 'Adicionar Foto';
+  String get addPhoto => 'Adicionar foto';
 
   @override
   String get photos => 'Fotos';
@@ -830,7 +830,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noServices => 'Nenhum serviço cadastrado';
 
   @override
-  String get addService => 'Adicionar Serviço';
+  String get addService => 'Adicionar serviço';
 
   @override
   String get serviceValue => 'Valor do Serviço';
@@ -863,7 +863,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noProducts => 'Nenhum produto cadastrado';
 
   @override
-  String get addProduct => 'Adicionar Produto';
+  String get addProduct => 'Adicionar produto';
 
   @override
   String get sku => 'Código';
@@ -2599,4 +2599,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get unknown => 'Desconhecido';
+
+  @override
+  String get addChecklist => 'Adicionar checklist';
+
+  @override
+  String get addPayment => 'Adicionar pagamento';
+
+  @override
+  String get addNote => 'Adicionar anotação';
+
+  @override
+  String get attachments => 'Anexos';
 }

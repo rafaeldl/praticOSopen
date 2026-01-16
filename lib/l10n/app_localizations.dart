@@ -871,7 +871,7 @@ abstract class AppLocalizations {
   /// No description provided for @addPhoto.
   ///
   /// In pt, this message translates to:
-  /// **'Adicionar Foto'**
+  /// **'Adicionar foto'**
   String get addPhoto;
 
   /// No description provided for @photos.
@@ -1723,7 +1723,7 @@ abstract class AppLocalizations {
   /// No description provided for @addService.
   ///
   /// In pt, this message translates to:
-  /// **'Adicionar Serviço'**
+  /// **'Adicionar serviço'**
   String get addService;
 
   /// No description provided for @serviceValue.
@@ -1789,7 +1789,7 @@ abstract class AppLocalizations {
   /// No description provided for @addProduct.
   ///
   /// In pt, this message translates to:
-  /// **'Adicionar Produto'**
+  /// **'Adicionar produto'**
   String get addProduct;
 
   /// No description provided for @sku.
@@ -4953,6 +4953,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Desconhecido'**
   String get unknown;
+
+  /// No description provided for @addChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar checklist'**
+  String get addChecklist;
+
+  /// No description provided for @addPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar pagamento'**
+  String get addPayment;
+
+  /// No description provided for @addNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar anotação'**
+  String get addNote;
+
+  /// No description provided for @attachments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anexos'**
+  String get attachments;
 }
 
 class _AppLocalizationsDelegate
