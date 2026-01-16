@@ -23,7 +23,7 @@ enum TimelineEventType {
 }
 
 /// Timeline event for an order
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class TimelineEvent {
   String? id;
   String? type;
@@ -112,7 +112,7 @@ class TimelineEvent {
 }
 
 /// Author of a timeline event
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class TimelineAuthor {
   String? id;
   String? name;
@@ -139,7 +139,7 @@ class TimelineAuthor {
 }
 
 /// Data specific to each event type
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, includeIfNull: false)
 class TimelineEventData {
   // --- Comment ---
   String? text;
@@ -259,7 +259,7 @@ class TimelineEventData {
 }
 
 /// Attachment (photo/file) in a comment
-@JsonSerializable()
+@JsonSerializable(includeIfNull: false)
 class TimelineAttachment {
   String? id;
   String? type; // 'image' | 'file'
