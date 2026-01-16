@@ -838,6 +838,54 @@ mixin _$OrderStore on _OrderStore, Store {
     return _$addProductAsyncAction.run(() => super.addProduct(orderProduct));
   }
 
+  late final _$updateServiceWithLogAsyncAction = AsyncAction(
+    '_OrderStore.updateServiceWithLog',
+    context: context,
+  );
+
+  @override
+  Future<void> updateServiceWithLog(int index, double? oldValue) {
+    return _$updateServiceWithLogAsyncAction.run(
+      () => super.updateServiceWithLog(index, oldValue),
+    );
+  }
+
+  late final _$updateProductWithLogAsyncAction = AsyncAction(
+    '_OrderStore.updateProductWithLog',
+    context: context,
+  );
+
+  @override
+  Future<void> updateProductWithLog(
+    int index,
+    int? oldQuantity,
+    double? oldTotal,
+  ) {
+    return _$updateProductWithLogAsyncAction.run(
+      () => super.updateProductWithLog(index, oldQuantity, oldTotal),
+    );
+  }
+
+  late final _$deleteServiceAsyncAction = AsyncAction(
+    '_OrderStore.deleteService',
+    context: context,
+  );
+
+  @override
+  Future<void> deleteService(int index) {
+    return _$deleteServiceAsyncAction.run(() => super.deleteService(index));
+  }
+
+  late final _$deleteProductAsyncAction = AsyncAction(
+    '_OrderStore.deleteProduct',
+    context: context,
+  );
+
+  @override
+  Future<void> deleteProduct(int index) {
+    return _$deleteProductAsyncAction.run(() => super.deleteProduct(index));
+  }
+
   late final _$addPhotoFromGalleryAsyncAction = AsyncAction(
     '_OrderStore.addPhotoFromGallery',
     context: context,
@@ -1016,30 +1064,6 @@ mixin _$OrderStore on _OrderStore, Store {
     );
     try {
       return super.deleteOrder();
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  dynamic deleteService(int index) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.deleteService',
-    );
-    try {
-      return super.deleteService(index);
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  dynamic deleteProduct(int index) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.deleteProduct',
-    );
-    try {
-      return super.deleteProduct(index);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }

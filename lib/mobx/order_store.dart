@@ -506,20 +506,100 @@ abstract class _OrderStore with Store {
     }
   }
 
+  /// Updates a service and logs the change to timeline
   @action
-  deleteService(int index) {
+  Future<void> updateServiceWithLog(int index, double? oldValue) async {
+    final service = order!.services![index];
+    final newValue = service.value;
+
+    updateTotal();
+    createItem();
+
+    // Only log if value changed
+    if (order?.id != null && companyId != null && oldValue != newValue) {
+      await _timelineRepository.logServiceUpdated(
+        companyId!,
+        order!.id!,
+        service.service?.name ?? '',
+        oldValue,
+        newValue,
+      );
+    }
+  }
+
+  /// Updates a product and logs the change to timeline
+  @action
+  Future<void> updateProductWithLog(
+      int index, int? oldQuantity, double? oldTotal) async {
+    final product = order!.products![index];
+    final newQuantity = product.quantity;
+    final newTotal = product.total;
+
+    updateTotal();
+    createItem();
+
+    // Only log if quantity or total changed
+    if (order?.id != null &&
+        companyId != null &&
+        (oldQuantity != newQuantity || oldTotal != newTotal)) {
+      await _timelineRepository.logProductUpdated(
+        companyId!,
+        order!.id!,
+        product.product?.name ?? '',
+        oldQuantity,
+        newQuantity,
+        oldTotal,
+        newTotal,
+      );
+    }
+  }
+
+  @action
+  Future<void> deleteService(int index) async {
+    // Capture service info before removing
+    final service = order!.services![index];
+    final serviceName = service.service?.name ?? '';
+    final serviceValue = service.value;
+
     order!.services!.removeAt(index);
     services = order?.services?.asObservable();
     updateTotal();
     createItem();
+
+    // Log service removed to timeline
+    if (order?.id != null && companyId != null) {
+      await _timelineRepository.logServiceRemoved(
+        companyId!,
+        order!.id!,
+        serviceName,
+        serviceValue,
+      );
+    }
   }
 
   @action
-  deleteProduct(int index) {
+  Future<void> deleteProduct(int index) async {
+    // Capture product info before removing
+    final product = order!.products![index];
+    final productName = product.product?.name ?? '';
+    final quantity = product.quantity ?? 0;
+    final total = product.total ?? 0.0;
+
     order!.products!.removeAt(index);
     products = order?.products?.asObservable();
     updateTotal();
     createItem();
+
+    // Log product removed to timeline
+    if (order?.id != null && companyId != null) {
+      await _timelineRepository.logProductRemoved(
+        companyId!,
+        order!.id!,
+        productName,
+        quantity,
+        total,
+      );
+    }
   }
 
   /// Adiciona uma ou mais fotos da galeria

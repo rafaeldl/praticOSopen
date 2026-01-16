@@ -115,6 +115,15 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
   Future<void> _saveProduct() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
+
+      // Capture old values before saving for update logging
+      final oldQuantity = orderProductIndex != null
+          ? _orderStore!.order!.products![orderProductIndex!].quantity
+          : null;
+      final oldTotal = orderProductIndex != null
+          ? _orderStore!.order!.products![orderProductIndex!].total
+          : null;
+
       _formKey.currentState!.save();
 
       _orderProduct.total = _orderProduct.quantity! * _orderProduct.value!;
@@ -123,7 +132,9 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
         _orderStore!.addProduct(_orderProduct);
         Navigator.popUntil(context, ModalRoute.withName(_returnRoute ?? '/order'));
       } else {
-        _orderStore!.updateOrder();
+        // Use the new method that logs the update
+        await _orderStore!.updateProductWithLog(
+            orderProductIndex!, oldQuantity, oldTotal);
         Navigator.pop(context);
       }
     }

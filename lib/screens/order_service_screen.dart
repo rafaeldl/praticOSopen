@@ -68,13 +68,20 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   Future<void> _saveService() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
+
+      // Capture old value before saving for update logging
+      final oldValue = orderServiceIndex != null
+          ? _orderStore!.order!.services![orderServiceIndex!].value
+          : null;
+
       _formKey.currentState!.save();
 
       if (orderServiceIndex == null) {
         _orderStore!.addService(_orderService);
         Navigator.popUntil(context, ModalRoute.withName(_returnRoute ?? '/order'));
       } else {
-        _orderStore!.updateOrder();
+        // Use the new method that logs the update
+        await _orderStore!.updateServiceWithLog(orderServiceIndex!, oldValue);
         Navigator.pop(context);
       }
     }

@@ -231,6 +231,70 @@ class TimelineRepository {
     await createEvent(companyId, orderId, event);
   }
 
+  /// Log: Service updated (internal)
+  Future<void> logServiceUpdated(
+    String companyId,
+    String orderId,
+    String serviceName,
+    double? oldValue,
+    double? newValue, {
+    bool isPublic = false,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'service_updated',
+      visibility: isPublic ? 'customer' : 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        serviceName: serviceName,
+        oldValue: oldValue,
+        newValue: newValue,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
+  /// Log: Service removed (internal)
+  Future<void> logServiceRemoved(
+    String companyId,
+    String orderId,
+    String serviceName,
+    double? value, {
+    bool isPublic = false,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'service_removed',
+      visibility: isPublic ? 'customer' : 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        serviceName: serviceName,
+        serviceValue: value,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
   /// Log: Product added (internal, visible after approval)
   Future<void> logProductAdded(
     String companyId,
@@ -255,6 +319,76 @@ class TimelineRepository {
         quantity: quantity,
         unitPrice: unitPrice,
         totalPrice: quantity * unitPrice,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
+  /// Log: Product updated (internal)
+  Future<void> logProductUpdated(
+    String companyId,
+    String orderId,
+    String productName,
+    int? oldQuantity,
+    int? newQuantity,
+    double? oldTotal,
+    double? newTotal, {
+    bool isPublic = false,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'product_updated',
+      visibility: isPublic ? 'customer' : 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        productName: productName,
+        oldQuantity: oldQuantity,
+        newQuantity: newQuantity,
+        oldTotal: oldTotal,
+        newTotal: newTotal,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
+  /// Log: Product removed (internal)
+  Future<void> logProductRemoved(
+    String companyId,
+    String orderId,
+    String productName,
+    int quantity,
+    double total, {
+    bool isPublic = false,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'product_removed',
+      visibility: isPublic ? 'customer' : 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        productName: productName,
+        quantity: quantity,
+        totalPrice: total,
       ),
       readBy: [currentUser?.id ?? ''],
       mentions: [],

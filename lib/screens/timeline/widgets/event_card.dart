@@ -539,7 +539,31 @@ class EventCard extends StatelessWidget {
       case 'service_added':
         final value = event.data?.serviceValue;
         return '${event.data?.serviceName}${value != null ? ' • R\$ ${value.toStringAsFixed(2)}' : ''}';
+      case 'service_updated':
+        final oldVal = event.data?.oldValue;
+        final newVal = event.data?.newValue;
+        if (oldVal != null && newVal != null) {
+          return '${event.data?.serviceName} • R\$ ${oldVal.toStringAsFixed(2)} → R\$ ${newVal.toStringAsFixed(2)}';
+        }
+        return event.data?.serviceName;
+      case 'service_removed':
+        final sValue = event.data?.serviceValue;
+        return '${event.data?.serviceName}${sValue != null ? ' • R\$ ${sValue.toStringAsFixed(2)}' : ''}';
       case 'product_added':
+        return '${event.data?.productName} (${event.data?.quantity}x)';
+      case 'product_updated':
+        final oldQty = event.data?.oldQuantity;
+        final newQty = event.data?.newQuantity;
+        if (oldQty != null && newQty != null && oldQty != newQty) {
+          return '${event.data?.productName} • ${oldQty}x → ${newQty}x';
+        }
+        final oldT = event.data?.oldTotal;
+        final newT = event.data?.newTotal;
+        if (oldT != null && newT != null) {
+          return '${event.data?.productName} • R\$ ${oldT.toStringAsFixed(2)} → R\$ ${newT.toStringAsFixed(2)}';
+        }
+        return event.data?.productName;
+      case 'product_removed':
         return '${event.data?.productName} (${event.data?.quantity}x)';
       case 'form_added':
         return event.data?.formName;
