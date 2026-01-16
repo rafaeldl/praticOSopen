@@ -23,6 +23,7 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
   Product? _product;
   OrderProduct _orderProduct = OrderProduct();
   int? orderProductIndex;
+  String? _returnRoute;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _initialized = false;
@@ -59,6 +60,10 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
         if (args.containsKey('orderProductIndex')) {
           orderProductIndex = args['orderProductIndex'];
           _orderProduct = _orderStore!.order!.products![orderProductIndex!];
+        }
+
+        if (args.containsKey('returnRoute')) {
+          _returnRoute = args['returnRoute'];
         }
       }
 
@@ -116,7 +121,7 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
 
       if (orderProductIndex == null) {
         _orderStore!.addProduct(_orderProduct);
-        Navigator.popUntil(context, ModalRoute.withName('/order'));
+        Navigator.popUntil(context, ModalRoute.withName(_returnRoute ?? '/order'));
       } else {
         _orderStore!.updateOrder();
         Navigator.pop(context);

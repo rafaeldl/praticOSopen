@@ -234,7 +234,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
             if (isSelectionMode) {
               Navigator.pushNamed(context, '/order_product', arguments: {
                 'product': product,
-                'orderStore': args!['orderStore']
+                'orderStore': args!['orderStore'],
+                if (args!['returnRoute'] != null) 'returnRoute': args!['returnRoute'],
               });
             } else {
               Navigator.pushNamed(

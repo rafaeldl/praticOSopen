@@ -234,7 +234,8 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             if (isSelectionMode) {
               Navigator.pushNamed(context, '/order_service', arguments: {
                 'service': service,
-                'orderStore': args!['orderStore']
+                'orderStore': args!['orderStore'],
+                if (args!['returnRoute'] != null) 'returnRoute': args!['returnRoute'],
               });
             } else {
               Navigator.pushNamed(

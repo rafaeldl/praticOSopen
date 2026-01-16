@@ -23,6 +23,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
   Service? _service;
   OrderService _orderService = OrderService();
   int? orderServiceIndex;
+  String? _returnRoute;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _initialized = false;
@@ -55,6 +56,10 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
           orderServiceIndex = args['orderServiceIndex'];
           _orderService = _orderStore!.order!.services![orderServiceIndex!];
         }
+
+        if (args.containsKey('returnRoute')) {
+          _returnRoute = args['returnRoute'];
+        }
       }
       _initialized = true;
     }
@@ -67,7 +72,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
 
       if (orderServiceIndex == null) {
         _orderStore!.addService(_orderService);
-        Navigator.popUntil(context, ModalRoute.withName('/order'));
+        Navigator.popUntil(context, ModalRoute.withName(_returnRoute ?? '/order'));
       } else {
         _orderStore!.updateOrder();
         Navigator.pop(context);

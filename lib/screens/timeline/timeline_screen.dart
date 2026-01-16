@@ -264,7 +264,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
     Navigator.pushNamed(
       context,
       '/service_list',
-      arguments: {'orderStore': _orderStore},
+      arguments: {'orderStore': _orderStore, 'returnRoute': '/timeline'},
     );
   }
 
@@ -280,7 +280,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
     Navigator.pushNamed(
       context,
       '/product_list',
-      arguments: {'orderStore': _orderStore},
+      arguments: {'orderStore': _orderStore, 'returnRoute': '/timeline'},
     );
   }
 
