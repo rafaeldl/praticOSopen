@@ -686,6 +686,19 @@ abstract class _OrderStore with Store {
     }
   }
 
+  /// Log order creation to timeline
+  void _logOrderCreated() {
+    if (order?.id == null || companyId == null) return;
+
+    _timelineRepository.logOrderCreated(
+      companyId!,
+      order!.id!,
+      customerName: order!.customer?.name,
+      customerPhone: order!.customer?.phone,
+      deviceName: order!.device?.name,
+    );
+  }
+
   /// Adiciona um desconto como transação
   @action
   void addDiscountTransaction(double amount, {String? description}) {
@@ -821,6 +834,7 @@ abstract class _OrderStore with Store {
               if (order!.id != null) {
                 orderStream =
                     repository.streamSingle(companyId!, order!.id).asObservable();
+                _logOrderCreated();
               }
             });
           }
@@ -831,6 +845,7 @@ abstract class _OrderStore with Store {
           if (order!.id != null) {
             orderStream =
                 repository.streamSingle(companyId!, order!.id).asObservable();
+            _logOrderCreated();
           }
         });
       }
