@@ -52,6 +52,13 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..transactions = (json['transactions'] as List<dynamic>?)
       ?.map((e) => PaymentTransaction.fromJson(e as Map<String, dynamic>))
       .toList()
+  ..lastActivity = json['lastActivity'] == null
+      ? null
+      : OrderLastActivity.fromJson(json['lastActivity'] as Map<String, dynamic>)
+  ..unreadCounts = (json['unreadCounts'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as int),
+  )
+  ..customerToken = json['customerToken'] as String?
   ..assignedTo = json['assignedTo'] == null
       ? null
       : UserAggr.fromJson(json['assignedTo'] as Map<String, dynamic>);
@@ -78,6 +85,9 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'number': instance.number,
   'paidAmount': instance.paidAmount,
   'transactions': instance.transactions?.map((e) => e.toJson()).toList(),
+  'lastActivity': instance.lastActivity?.toJson(),
+  'unreadCounts': instance.unreadCounts,
+  'customerToken': instance.customerToken,
   'assignedTo': instance.assignedTo?.toJson(),
 };
 
