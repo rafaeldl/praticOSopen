@@ -1027,6 +1027,10 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   void _selectDueDate() {
+    // Capture original date before opening picker
+    final originalDate = _store.order?.dueDate;
+    DateTime? selectedDate;
+
     showCupertinoModalPopup(
       context: context,
       builder: (_) => Container(
@@ -1039,16 +1043,28 @@ class _OrderFormState extends State<OrderForm> {
         child: SafeArea(
           top: false,
           child: CupertinoDatePicker(
-            initialDateTime: (_store.order?.dueDate != null) ? _store.order!.dueDate! : DateTime.now(),
+            initialDateTime: originalDate ?? DateTime.now(),
             mode: CupertinoDatePickerMode.date,
             use24hFormat: true,
             onDateTimeChanged: (DateTime newDate) {
+              selectedDate = newDate;
               _store.setDueDate(newDate);
             },
           ),
         ),
       ),
-    );
+    ).then((_) {
+      // Log to timeline only when picker closes and date actually changed
+      if (selectedDate != null) {
+        final dateChanged = originalDate == null ||
+            selectedDate!.year != originalDate.year ||
+            selectedDate!.month != originalDate.month ||
+            selectedDate!.day != originalDate.day;
+        if (dateChanged) {
+          _store.setDueDate(selectedDate!, logToTimeline: true, originalDate: originalDate);
+        }
+      }
+    });
   }
 
   void _selectStatus(SegmentConfigProvider config) {

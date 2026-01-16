@@ -355,18 +355,17 @@ abstract class _OrderStore with Store {
     }
   }
 
-  setDueDate(DateTime date) {
-    final oldDate = order!.dueDate;
+  setDueDate(DateTime date, {bool logToTimeline = false, DateTime? originalDate}) {
     order!.dueDate = date;
     dueDate = dateToString(date);
     createItem();
 
-    // Log due date change to timeline
-    if (order?.id != null && companyId != null) {
+    // Log due date change to timeline only when explicitly requested
+    if (logToTimeline && order?.id != null && companyId != null) {
       _timelineRepository.logDueDateChange(
         companyId!,
         order!.id!,
-        oldDate: oldDate,
+        oldDate: originalDate,
         newDate: date,
       );
     }
