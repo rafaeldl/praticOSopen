@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/timeline_store.dart';
@@ -13,6 +14,8 @@ import 'package:praticos/screens/timeline/widgets/event_card.dart';
 import 'package:praticos/screens/timeline/widgets/message_input.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
+import 'package:praticos/widgets/cached_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TimelineScreen extends StatefulWidget {
   const TimelineScreen({super.key});
@@ -31,6 +34,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
   Order? _order;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _formatService.setLocale(context.l10n.localeName);
@@ -44,7 +52,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
         _store.init(Global.companyAggr!.id!, _order!.id!);
       }
 
-      // Initialize OrderStore for attachment actions
       if (_order != null) {
         _orderStore.setOrder(_order!);
       }
@@ -80,10 +87,19 @@ class _TimelineScreenState extends State<TimelineScreen> {
     }
   }
 
-  /// Handles tap on timeline event - opens specific screen when available
+  Future<void> _openWhatsApp() async {
+    final phone = _order?.customer?.phone;
+    if (phone != null && phone.isNotEmpty) {
+      final cleanPhone = phone.replaceAll(RegExp(r'[^\d]'), '');
+      final uri = Uri.parse('https://wa.me/$cleanPhone');
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
+  }
+
   Future<void> _handleEventTap(TimelineEvent event) async {
     switch (event.type) {
-      // Payment/Discount → Payment management screen
       case 'payment_received':
       case 'discount_applied':
         Navigator.pushNamed(
@@ -93,12 +109,13 @@ class _TimelineScreenState extends State<TimelineScreen> {
         );
         break;
 
-      // Forms → Open specific form for editing
       case 'form_added':
       case 'form_updated':
       case 'form_completed':
         final formId = event.data?.formId;
-        if (formId != null && _order?.id != null && _orderStore.companyId != null) {
+        if (formId != null &&
+            _order?.id != null &&
+            _orderStore.companyId != null) {
           final orderForm = await _formsService.getOrderFormById(
             _orderStore.companyId!,
             _order!.id!,
@@ -120,7 +137,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
         }
         break;
 
-      // Services → Service list (no specific ID available)
       case 'service_added':
       case 'service_updated':
       case 'service_removed':
@@ -131,7 +147,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
         );
         break;
 
-      // Products → Product list (no specific ID available)
       case 'product_added':
       case 'product_updated':
       case 'product_removed':
@@ -142,12 +157,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
         );
         break;
 
-      // Photos → Order screen with photos anchor
       case 'photos_added':
         _navigateToOrder(anchor: 'photos');
         break;
 
-      // Other events → Order screen
       default:
         _navigateToOrder();
         break;
@@ -163,119 +176,50 @@ class _TimelineScreenState extends State<TimelineScreen> {
       context: context,
       builder: (actionContext) => CupertinoActionSheet(
         actions: [
-          // Photos
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.camera,
-                    color: CupertinoColors.activeBlue),
-                const SizedBox(width: 8),
-                Text(context.l10n.addPhoto),
-              ],
-            ),
+            child: Text(context.l10n.addPhoto),
             onPressed: () {
               Navigator.pop(actionContext);
               _showPhotoOptions();
             },
           ),
-
-          // Services
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.wrench,
-                    color: CupertinoColors.systemOrange),
-                const SizedBox(width: 8),
-                Text(context.l10n.addService),
-              ],
-            ),
+            child: Text(context.l10n.addService),
             onPressed: () {
               Navigator.pop(actionContext);
               _addService();
             },
           ),
-
-          // Products
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.cube_box,
-                    color: CupertinoColors.systemPurple),
-                const SizedBox(width: 8),
-                Text(context.l10n.addProduct),
-              ],
-            ),
+            child: Text(context.l10n.addProduct),
             onPressed: () {
               Navigator.pop(actionContext);
               _addProduct();
             },
           ),
-
-          // Checklists
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.doc_checkmark,
-                    color: CupertinoColors.systemGreen),
-                const SizedBox(width: 8),
-                Text(context.l10n.addChecklist),
-              ],
-            ),
+            child: Text(context.l10n.addChecklist),
             onPressed: () {
               Navigator.pop(actionContext);
               _addChecklist();
             },
           ),
-
-          // Payments
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.creditcard,
-                    color: CupertinoColors.systemTeal),
-                const SizedBox(width: 8),
-                Text(context.l10n.addPayment),
-              ],
-            ),
+            child: Text(context.l10n.addPayment),
             onPressed: () {
               Navigator.pop(actionContext);
               _addPayment();
             },
           ),
-
-          // Due Date
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(CupertinoIcons.calendar,
-                    color: CupertinoColors.systemIndigo),
-                const SizedBox(width: 8),
-                Text(context.l10n.addDueDate),
-              ],
-            ),
+            child: Text(context.l10n.addDueDate),
             onPressed: () {
               Navigator.pop(actionContext);
               _addDueDate();
             },
           ),
-
-          // Change Status
           CupertinoActionSheetAction(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(CupertinoIcons.flag,
-                    color: _getStatusColor(_order?.status)),
-                const SizedBox(width: 8),
-                Text(context.l10n.changeStatus),
-              ],
-            ),
+            child: Text(context.l10n.changeStatus),
             onPressed: () {
               Navigator.pop(actionContext);
               _changeStatus();
@@ -323,14 +267,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 
   Future<void> _addService() async {
-    // Ensure order is saved
     if (_order?.id == null) {
       await _orderStore.repository.createItem(_orderStore.companyId!, _order!);
     }
-
     if (!mounted) return;
-
-    // Navigate to service list in selection mode
     Navigator.pushNamed(
       context,
       '/service_list',
@@ -339,14 +279,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 
   Future<void> _addProduct() async {
-    // Ensure order is saved
     if (_order?.id == null) {
       await _orderStore.repository.createItem(_orderStore.companyId!, _order!);
     }
-
     if (!mounted) return;
-
-    // Navigate to product list in selection mode
     Navigator.pushNamed(
       context,
       '/product_list',
@@ -355,14 +291,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 
   Future<void> _addChecklist() async {
-    // Ensure order is saved
     if (_order?.id == null) {
       await _orderStore.repository.createItem(_orderStore.companyId!, _order!);
     }
-
     if (!mounted) return;
 
-    // Open form template selector
     final template = await Navigator.push(
       context,
       CupertinoPageRoute(
@@ -371,7 +304,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
     );
 
     if (template != null && mounted) {
-      // Create form instance and open for filling
       final newForm = await _formsService.addFormToOrder(
         _orderStore.companyId!,
         _order!.id!,
@@ -392,14 +324,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
         ),
       );
 
-      // If form was not completed, log appropriately
-      // (If completed, form_fill_screen already logs "form_completed")
       if (result?['completed'] != true && mounted) {
         final responsesCount = result?['responsesCount'] ?? 0;
         final totalItems = newForm.items.length;
 
         if (responsesCount > 0) {
-          // Has responses - log as "updated" with progress
           await _timelineRepository.logFormUpdated(
             _orderStore.companyId!,
             _order!.id!,
@@ -409,7 +338,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
             totalItems,
           );
         } else {
-          // No responses - log as "added"
           await _timelineRepository.logFormAdded(
             _orderStore.companyId!,
             _order!.id!,
@@ -423,14 +351,10 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 
   Future<void> _addPayment() async {
-    // Ensure order is saved
     if (_order?.id == null) {
       await _orderStore.repository.createItem(_orderStore.companyId!, _order!);
     }
-
     if (!mounted) return;
-
-    // Navigate to payment management screen
     Navigator.pushNamed(
       context,
       '/payment_management',
@@ -449,7 +373,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
         color: CupertinoColors.systemBackground.resolveFrom(context),
         child: Column(
           children: [
-            // Header with done button
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
@@ -483,7 +406,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
                     ),
                     onPressed: () {
                       Navigator.pop(ctx);
-                      // Only log if date actually changed
                       final shouldLog = originalDate == null ||
                           selectedDate.day != originalDate.day ||
                           selectedDate.month != originalDate.month ||
@@ -498,7 +420,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
                 ],
               ),
             ),
-            // Date picker
             Expanded(
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.date,
@@ -524,91 +445,42 @@ class _TimelineScreenState extends State<TimelineScreen> {
       builder: (ctx) => CupertinoActionSheet(
         title: Text(context.l10n.changeStatus),
         actions: [
-          // Quote
           if (currentStatus != 'quote')
             CupertinoActionSheetAction(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(CupertinoIcons.doc_text,
-                      color: CupertinoColors.systemOrange),
-                  const SizedBox(width: 8),
-                  Text(context.l10n.statusQuote),
-                ],
-              ),
+              child: Text(context.l10n.statusQuote),
               onPressed: () {
                 Navigator.pop(ctx);
                 _orderStore.setStatus('quote');
               },
             ),
-
-          // Approved
           if (currentStatus != 'approved')
             CupertinoActionSheetAction(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(CupertinoIcons.checkmark_circle,
-                      color: CupertinoColors.activeBlue),
-                  const SizedBox(width: 8),
-                  Text(context.l10n.statusApproved),
-                ],
-              ),
+              child: Text(context.l10n.statusApproved),
               onPressed: () {
                 Navigator.pop(ctx);
                 _orderStore.setStatus('approved');
               },
             ),
-
-          // In Progress
           if (currentStatus != 'progress')
             CupertinoActionSheetAction(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(CupertinoIcons.hammer,
-                      color: CupertinoColors.systemPurple),
-                  const SizedBox(width: 8),
-                  Text(context.l10n.statusInProgress),
-                ],
-              ),
+              child: Text(context.l10n.statusInProgress),
               onPressed: () {
                 Navigator.pop(ctx);
                 _orderStore.setStatus('progress');
               },
             ),
-
-          // Done
           if (currentStatus != 'done')
             CupertinoActionSheetAction(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(CupertinoIcons.checkmark_seal,
-                      color: CupertinoColors.systemGreen),
-                  const SizedBox(width: 8),
-                  Text(context.l10n.statusCompleted),
-                ],
-              ),
+              child: Text(context.l10n.statusCompleted),
               onPressed: () {
                 Navigator.pop(ctx);
                 _orderStore.setStatus('done');
               },
             ),
-
-          // Canceled
           if (currentStatus != 'canceled')
             CupertinoActionSheetAction(
               isDestructiveAction: true,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(CupertinoIcons.xmark_circle,
-                      color: CupertinoColors.systemRed),
-                  const SizedBox(width: 8),
-                  Text(context.l10n.statusCancelled),
-                ],
-              ),
+              child: Text(context.l10n.statusCancelled),
               onPressed: () {
                 Navigator.pop(ctx);
                 _confirmCancelOrder();
@@ -650,73 +522,38 @@ class _TimelineScreenState extends State<TimelineScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              _order?.customer?.name ?? context.l10n.timeline,
-              style: const TextStyle(fontSize: 17),
-            ),
-            if (_order?.device?.name != null)
-              Text(
-                _order!.device!.name!,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-              ),
-          ],
-        ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.info),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true)
-                .pushNamed('/order', arguments: {'order': _order});
-          },
-        ),
-      ),
+      navigationBar: _buildNavigationBar(),
       child: SafeArea(
         child: Column(
           children: [
-            // Order Status Header (wrapped in Observer to update on status change)
-            Observer(builder: (_) => _buildOrderHeader()),
-            // Timeline Events List
+            // Timeline Events
             Expanded(
               child: Observer(
                 builder: (_) {
                   if (_store.isLoading) {
-                    return const Center(
-                      child: CupertinoActivityIndicator(),
-                    );
+                    return const Center(child: CupertinoActivityIndicator());
                   }
 
                   if (_store.error != null) {
                     return Center(
                       child: Text(
                         _store.error!,
-                        style: TextStyle(
-                          color: CupertinoColors.systemRed,
-                        ),
+                        style: TextStyle(color: CupertinoColors.systemRed),
                       ),
                     );
                   }
 
                   final events = _store.events;
-
                   if (events.isEmpty) {
                     return _buildEmptyState();
                   }
 
-                  // Scroll to bottom when new events arrive
                   _scrollToBottom();
-
                   return _buildEventsList(events);
                 },
               ),
             ),
-            // Message Input
+            // Input
             MessageInput(
               onSend: (text, isPublic) async {
                 await _store.sendMessage(text, isPublic: isPublic);
@@ -732,65 +569,161 @@ class _TimelineScreenState extends State<TimelineScreen> {
     );
   }
 
-  Widget _buildOrderHeader() {
-    // Use orderStore.status to react to changes
-    final currentStatus = _orderStore.status ?? _order?.status;
-    final statusColor = _getStatusColor(currentStatus);
+  /// Standard iOS Navigation Bar
+  CupertinoNavigationBar _buildNavigationBar() {
+    final hasPhone = _order?.customer?.phone?.isNotEmpty == true;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
-        border: Border(
-          bottom: BorderSide(
-            color: CupertinoColors.separator.resolveFrom(context),
-            width: 0.5,
-          ),
-        ),
+    return CupertinoNavigationBar(
+      automaticallyImplyLeading: false,
+      leading: CupertinoButton(
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Icon(CupertinoIcons.back, size: 28),
       ),
-      child: Row(
-        children: [
-          // Status Badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(4),
+      middle: Observer(
+        builder: (_) {
+          final currentStatus = _orderStore.status ?? _order?.status;
+          final total = _orderStore.order?.total ?? _order?.total ?? 0;
+          final paidAmount =
+              _orderStore.order?.paidAmount ?? _order?.paidAmount ?? 0;
+          final isPaid = total > 0 && paidAmount >= total;
+
+          return GestureDetector(
+            onTap: () => _navigateToOrder(),
+            child: Row(
+              children: [
+                // Avatar
+                if (_order?.coverPhotoUrl != null)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: CachedImage(
+                        imageUrl: _order!.coverPhotoUrl!,
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                // Nome e dispositivo (expansível, trunca)
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _order?.customer?.name ?? context.l10n.timeline,
+                        style: const TextStyle(fontSize: 17),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                      Row(
+                        children: [
+                          // Status dot
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(currentStatus),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          // Device e serial
+                          if (_order?.device?.name != null ||
+                              _order?.device?.serial != null)
+                            Expanded(
+                              child: Text(
+                                [
+                                  _order?.device?.name,
+                                  _order?.device?.serial,
+                                ]
+                                    .where((e) => e != null && e.isNotEmpty)
+                                    .join(' · '),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.normal,
+                                  color: CupertinoColors.secondaryLabel
+                                      .resolveFrom(context),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Valor e data
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    // Total
+                    Text(
+                      _formatService.formatCurrency(total, decimalDigits: 0),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: isPaid
+                            ? CupertinoColors.systemGreen
+                            : CupertinoColors.label.resolveFrom(context),
+                      ),
+                    ),
+                    // Data de entrega
+                    if (_orderStore.order?.dueDate != null ||
+                        _order?.dueDate != null)
+                      Builder(builder: (_) {
+                        final dueDate =
+                            _orderStore.order?.dueDate ?? _order!.dueDate!;
+                        return Text(
+                          '${dueDate.day.toString().padLeft(2, '0')}/${dueDate.month.toString().padLeft(2, '0')}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.normal,
+                            color: CupertinoColors.secondaryLabel
+                                .resolveFrom(context),
+                          ),
+                        );
+                      }),
+                  ],
+                ),
+              ],
             ),
-            child: Text(
-              Order.statusMap[currentStatus] ?? currentStatus ?? '',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: statusColor,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Order Number
-          if (_order?.number != null)
-            Text(
-              '#${_order!.number}',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: CupertinoColors.label.resolveFrom(context),
-              ),
-            ),
-          const Spacer(),
-          // Due Date
-          if (_order?.dueDate != null)
-            Text(
-              _formatService.formatDate(_order!.dueDate!),
-              style: TextStyle(
-                fontSize: 12,
-                color: CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-            ),
-        ],
+          );
+        },
       ),
+      trailing: hasPhone
+          ? CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: _openWhatsApp,
+              child: const FaIcon(FontAwesomeIcons.whatsapp, size: 22),
+            )
+          : null,
     );
   }
+
+  // ============================================================
+  // iOS TEXT STYLES (Dynamic Type)
+  // ============================================================
+
+  /// Subhead: 15pt regular - secondary content
+  TextStyle _subheadStyle({Color? color}) => TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.normal,
+        color: color ?? CupertinoColors.label.resolveFrom(context),
+      );
+
+  /// Caption 1: 12pt regular - smallest readable
+  TextStyle _caption1Style({Color? color}) => TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.normal,
+        color: color ?? CupertinoColors.secondaryLabel.resolveFrom(context),
+      );
 
   Widget _buildEmptyState() {
     return Center(
@@ -799,17 +732,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
         children: [
           Icon(
             CupertinoIcons.chat_bubble_2,
-            size: 64,
+            size: 48,
             color: CupertinoColors.systemGrey3.resolveFrom(context),
           ),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.timelineEmpty,
-            style: TextStyle(
-              fontSize: 16,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-          ),
+          const SizedBox(height: 12),
+          Text(context.l10n.timelineEmpty, style: _subheadStyle()),
         ],
       ),
     );
@@ -829,9 +756,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Date Separator
             _buildDateSeparator(dateKey),
-            // Events for this date
             ...dateEvents.map((event) => EventCard(
                   event: event,
                   isFromMe: event.author?.id == Global.userAggr?.id,
@@ -853,13 +778,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
             color: CupertinoColors.systemGrey5.resolveFrom(context),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Text(
-            dateKey,
-            style: TextStyle(
-              fontSize: 12,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
-          ),
+          child: Text(dateKey, style: _caption1Style()),
         ),
       ),
     );
@@ -878,8 +797,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
       case 'canceled':
         return CupertinoColors.systemRed;
       default:
-        return CupertinoColors.systemGrey;
+        return CupertinoColors.secondaryLabel;
     }
   }
 }
-
