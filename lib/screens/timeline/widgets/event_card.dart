@@ -224,7 +224,8 @@ class EventCard extends StatelessWidget {
   }
 
   Widget _buildAvatar(BuildContext context) {
-    final initial = (event.author?.name ?? '?')[0].toUpperCase();
+    final name = event.author?.name;
+    final initial = (name != null && name.isNotEmpty) ? name[0].toUpperCase() : '?';
     final isCustomer = event.isFromCustomer;
 
     return Container(
