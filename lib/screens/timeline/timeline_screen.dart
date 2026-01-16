@@ -57,6 +57,13 @@ class _TimelineScreenState extends State<TimelineScreen> {
     });
   }
 
+  void _navigateToOrder() {
+    if (_order != null) {
+      Navigator.of(context, rootNavigator: true)
+          .pushNamed('/order', arguments: {'order': _order});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -242,6 +249,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
             ...dateEvents.map((event) => EventCard(
                   event: event,
                   isFromMe: event.author?.id == Global.userAggr?.id,
+                  onTap: event.isComment ? null : () => _navigateToOrder(),
                 )),
           ],
         );

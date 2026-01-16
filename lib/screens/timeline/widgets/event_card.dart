@@ -5,11 +5,13 @@ import 'package:praticos/extensions/context_extensions.dart';
 class EventCard extends StatelessWidget {
   final TimelineEvent event;
   final bool isFromMe;
+  final VoidCallback? onTap;
 
   const EventCard({
     super.key,
     required this.event,
     required this.isFromMe,
+    this.onTap,
   });
 
   @override
@@ -155,17 +157,19 @@ class EventCard extends StatelessWidget {
   Widget _buildSystemEventCard(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: CupertinoColors.systemGrey6.resolveFrom(context),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: CupertinoColors.separator.resolveFrom(context),
-            width: 0.5,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: CupertinoColors.systemGrey6.resolveFrom(context),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: CupertinoColors.separator.resolveFrom(context),
+              width: 0.5,
+            ),
           ),
-        ),
-        child: Row(
+          child: Row(
           children: [
             // Event Icon
             Container(
@@ -220,6 +224,7 @@ class EventCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
