@@ -88,8 +88,14 @@ class TimelineEvent {
         return '📋';
       case 'payment_received':
         return '💰';
+      case 'payment_removed':
+        return '💸';
       case 'discount_applied':
         return '🏷️';
+      case 'discount_removed':
+        return '🏷️';
+      case 'payment_status_change':
+        return data?.newStatus == 'paid' ? '✅' : '⚠️';
       case 'assignment_change':
         return '👤';
       case 'due_date_alert':

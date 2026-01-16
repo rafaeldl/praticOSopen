@@ -2516,6 +2516,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paymentReceived => 'Payment received';
 
   @override
+  String get paymentRemoved => 'Payment removed';
+
+  @override
+  String get discountRemoved => 'Discount removed';
+
+  @override
+  String get markedAsPaid => 'Marked as paid';
+
+  @override
+  String get markedAsUnpaid => 'Marked as unpaid';
+
+  @override
   String assignedTo(String name) {
     return 'Assigned to $name';
   }

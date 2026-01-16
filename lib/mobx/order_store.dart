@@ -803,7 +803,7 @@ abstract class _OrderStore with Store {
     paidAmount = order!.paidAmount;
 
     // Atualiza status de pagamento
-    _updatePaymentStatus();
+    await _updatePaymentStatus();
 
     createItem();
 
@@ -862,7 +862,7 @@ abstract class _OrderStore with Store {
     updateTotal();
 
     // Atualiza status de pagamento
-    _updatePaymentStatus();
+    await _updatePaymentStatus();
 
     createItem();
 
@@ -895,9 +895,10 @@ abstract class _OrderStore with Store {
   }
 
   /// Atualiza o status de pagamento baseado nos valores
-  void _updatePaymentStatus() {
+  Future<void> _updatePaymentStatus() async {
     if (order == null) return;
 
+    final oldStatus = order!.payment;
     final totalValue = order!.total ?? 0.0;
     final paid = order!.paidAmount ?? 0.0;
 
@@ -911,11 +912,26 @@ abstract class _OrderStore with Store {
       // Se tem pagamento parcial, mostrar "Parcial" na UI
       payment = paid > 0 ? 'Parcial' : 'A receber';
     }
+
+    // Log payment status change to timeline (only if actually changed)
+    if (order?.id != null &&
+        companyId != null &&
+        oldStatus != null &&
+        oldStatus != order!.payment) {
+      await _timelineRepository.logPaymentStatusChange(
+        companyId!,
+        order!.id!,
+        oldStatus,
+        order!.payment!,
+        totalValue,
+        paid,
+      );
+    }
   }
 
   /// Remove uma transação pelo índice
   @action
-  void removeTransaction(int index) {
+  Future<void> removeTransaction(int index) async {
     if (order == null ||
         order!.transactions == null ||
         index >= order!.transactions!.length) {
@@ -933,14 +949,34 @@ abstract class _OrderStore with Store {
       order!.paidAmount = (order!.paidAmount ?? 0) - transaction.amount;
       if (order!.paidAmount! < 0) order!.paidAmount = 0;
       paidAmount = order!.paidAmount;
+
+      // Log payment removed to timeline
+      if (order?.id != null && companyId != null) {
+        await _timelineRepository.logPaymentRemoved(
+          companyId!,
+          order!.id!,
+          transaction.amount,
+          description: transaction.description,
+        );
+      }
     } else if (transaction.type == PaymentTransactionType.discount) {
       order!.discount = (order!.discount ?? 0) - transaction.amount;
       if (order!.discount! < 0) order!.discount = 0;
       discount = order!.discount;
       updateTotal();
+
+      // Log discount removed to timeline
+      if (order?.id != null && companyId != null) {
+        await _timelineRepository.logDiscountRemoved(
+          companyId!,
+          order!.id!,
+          transaction.amount,
+          description: transaction.description,
+        );
+      }
     }
 
-    _updatePaymentStatus();
+    await _updatePaymentStatus();
     createItem();
   }
 

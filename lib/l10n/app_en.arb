@@ -1009,6 +1009,10 @@
   "checklistUpdated": "Checklist updated",
   "checklistCompleted": "Checklist completed",
   "paymentReceived": "Payment received",
+  "paymentRemoved": "Payment removed",
+  "discountRemoved": "Discount removed",
+  "markedAsPaid": "Marked as paid",
+  "markedAsUnpaid": "Marked as unpaid",
   "assignedTo": "Assigned to {name}",
   "@assignedTo": {
     "placeholders": {

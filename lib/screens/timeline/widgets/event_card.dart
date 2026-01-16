@@ -502,8 +502,16 @@ class EventCard extends StatelessWidget {
         return context.l10n.checklistCompleted;
       case 'payment_received':
         return context.l10n.paymentReceived;
+      case 'payment_removed':
+        return context.l10n.paymentRemoved;
       case 'discount_applied':
         return context.l10n.discountApplied;
+      case 'discount_removed':
+        return context.l10n.discountRemoved;
+      case 'payment_status_change':
+        return event.data?.newStatus == 'paid'
+            ? context.l10n.markedAsPaid
+            : context.l10n.markedAsUnpaid;
       case 'assignment_change':
         return context.l10n
             .assignedTo(event.data?.newAssignee?.name ?? '');
@@ -575,8 +583,16 @@ class EventCard extends StatelessWidget {
         return event.data?.formName;
       case 'payment_received':
         return 'R\$ ${event.data?.amount?.toStringAsFixed(2)} • ${event.data?.method}';
+      case 'payment_removed':
+        return 'R\$ ${event.data?.amount?.toStringAsFixed(2)}${event.data?.description != null ? ' • ${event.data!.description}' : ''}';
       case 'discount_applied':
         return 'R\$ ${event.data?.amount?.toStringAsFixed(2)}${event.data?.description != null ? ' • ${event.data!.description}' : ''}';
+      case 'discount_removed':
+        return 'R\$ ${event.data?.amount?.toStringAsFixed(2)}${event.data?.description != null ? ' • ${event.data!.description}' : ''}';
+      case 'payment_status_change':
+        final total = event.data?.orderTotal ?? 0;
+        final paid = event.data?.totalPaid ?? 0;
+        return 'R\$ ${paid.toStringAsFixed(2)} / R\$ ${total.toStringAsFixed(2)}';
       case 'order_created':
         return event.data?.customerName;
       default:
@@ -604,8 +620,16 @@ class EventCard extends StatelessWidget {
         return CupertinoColors.systemIndigo;
       case 'payment_received':
         return CupertinoColors.systemGreen;
+      case 'payment_removed':
+        return CupertinoColors.systemRed;
       case 'discount_applied':
         return CupertinoColors.systemOrange;
+      case 'discount_removed':
+        return CupertinoColors.systemRed;
+      case 'payment_status_change':
+        return event.data?.newStatus == 'paid'
+            ? CupertinoColors.systemGreen
+            : CupertinoColors.systemOrange;
       case 'assignment_change':
         return CupertinoColors.systemPink;
       case 'order_created':

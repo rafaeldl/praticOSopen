@@ -567,6 +567,100 @@ class TimelineRepository {
     await createEvent(companyId, orderId, event);
   }
 
+  /// Log: Payment removed (internal)
+  Future<void> logPaymentRemoved(
+    String companyId,
+    String orderId,
+    double amount, {
+    String? description,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'payment_removed',
+      visibility: 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        amount: amount,
+        description: description,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
+  /// Log: Discount removed (internal)
+  Future<void> logDiscountRemoved(
+    String companyId,
+    String orderId,
+    double amount, {
+    String? description,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'discount_removed',
+      visibility: 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        amount: amount,
+        description: description,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
+  /// Log: Payment status changed (paid/unpaid)
+  Future<void> logPaymentStatusChange(
+    String companyId,
+    String orderId,
+    String oldStatus,
+    String newStatus,
+    double orderTotal,
+    double paidAmount,
+  ) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'payment_status_change',
+      visibility: 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        oldStatus: oldStatus,
+        newStatus: newStatus,
+        orderTotal: orderTotal,
+        totalPaid: paidAmount,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
   /// Log: Order created (public)
   Future<void> logOrderCreated(
     String companyId,

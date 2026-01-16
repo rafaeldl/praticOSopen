@@ -4876,6 +4876,30 @@ abstract class AppLocalizations {
   /// **'Pagamento recebido'**
   String get paymentReceived;
 
+  /// No description provided for @paymentRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento removido'**
+  String get paymentRemoved;
+
+  /// No description provided for @discountRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconto removido'**
+  String get discountRemoved;
+
+  /// No description provided for @markedAsPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcado como pago'**
+  String get markedAsPaid;
+
+  /// No description provided for @markedAsUnpaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcado como em aberto'**
+  String get markedAsUnpaid;
+
   /// No description provided for @assignedTo.
   ///
   /// In pt, this message translates to:

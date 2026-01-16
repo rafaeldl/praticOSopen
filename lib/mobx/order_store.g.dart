@@ -944,6 +944,18 @@ mixin _$OrderStore on _OrderStore, Store {
     );
   }
 
+  late final _$removeTransactionAsyncAction = AsyncAction(
+    '_OrderStore.removeTransaction',
+    context: context,
+  );
+
+  @override
+  Future<void> removeTransaction(int index) {
+    return _$removeTransactionAsyncAction.run(
+      () => super.removeTransaction(index),
+    );
+  }
+
   late final _$loadOrdersForDashboardCustomRangeAsyncAction = AsyncAction(
     '_OrderStore.loadOrdersForDashboardCustomRange',
     context: context,
@@ -1100,18 +1112,6 @@ mixin _$OrderStore on _OrderStore, Store {
     );
     try {
       return super.markAsFullyPaid(description: description);
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void removeTransaction(int index) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.removeTransaction',
-    );
-    try {
-      return super.removeTransaction(index);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }

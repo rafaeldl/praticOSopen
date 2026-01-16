@@ -2528,6 +2528,18 @@ class AppLocalizationsPt extends AppLocalizations {
   String get paymentReceived => 'Pagamento recebido';
 
   @override
+  String get paymentRemoved => 'Pagamento removido';
+
+  @override
+  String get discountRemoved => 'Desconto removido';
+
+  @override
+  String get markedAsPaid => 'Marcado como pago';
+
+  @override
+  String get markedAsUnpaid => 'Marcado como em aberto';
+
+  @override
   String assignedTo(String name) {
     return 'Atribuído a $name';
   }
