@@ -103,6 +103,15 @@ class FormsService {
             .toList());
   }
 
+  /// Busca um formulário específico por ID
+  Future<OrderForm?> getOrderFormById(
+      String companyId, String orderId, String formId) async {
+    final doc =
+        await _getFormsCollection(companyId, orderId).doc(formId).get();
+    if (!doc.exists) return null;
+    return _orderFormFromJson(doc.id, doc.data()!);
+  }
+
   /// Adiciona um novo formulário à OS baseado em um template e retorna a instância criada
   Future<OrderForm> addFormToOrder(
       String companyId, String orderId, FormDefinition template) async {

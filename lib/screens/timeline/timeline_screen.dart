@@ -80,28 +80,77 @@ class _TimelineScreenState extends State<TimelineScreen> {
     }
   }
 
-  String? _getAnchorForEvent(String? eventType) {
-    switch (eventType) {
-      case 'service_added':
-      case 'service_updated':
-      case 'service_removed':
-        return 'services';
-      case 'product_added':
-      case 'product_updated':
-      case 'product_removed':
-        return 'products';
-      case 'photos_added':
-        return 'photos';
+  /// Handles tap on timeline event - opens specific screen when available
+  Future<void> _handleEventTap(TimelineEvent event) async {
+    switch (event.type) {
+      // Payment/Discount → Payment management screen
       case 'payment_received':
-        return 'summary';
+      case 'discount_applied':
+        Navigator.pushNamed(
+          context,
+          '/payment_management',
+          arguments: {'orderStore': _orderStore},
+        );
+        break;
+
+      // Forms → Open specific form for editing
       case 'form_added':
       case 'form_updated':
       case 'form_completed':
-        return 'forms';
-      case 'status_change':
-        return 'summary';
+        final formId = event.data?.formId;
+        if (formId != null && _order?.id != null && _orderStore.companyId != null) {
+          final orderForm = await _formsService.getOrderFormById(
+            _orderStore.companyId!,
+            _order!.id!,
+            formId,
+          );
+          if (orderForm != null && mounted) {
+            Navigator.push(
+              context,
+              CupertinoPageRoute(
+                fullscreenDialog: true,
+                builder: (_) => FormFillScreen(
+                  orderId: _order!.id!,
+                  companyId: _orderStore.companyId!,
+                  orderForm: orderForm,
+                ),
+              ),
+            );
+          }
+        }
+        break;
+
+      // Services → Service list (no specific ID available)
+      case 'service_added':
+      case 'service_updated':
+      case 'service_removed':
+        Navigator.pushNamed(
+          context,
+          '/service_list',
+          arguments: {'orderStore': _orderStore, 'returnRoute': '/timeline'},
+        );
+        break;
+
+      // Products → Product list (no specific ID available)
+      case 'product_added':
+      case 'product_updated':
+      case 'product_removed':
+        Navigator.pushNamed(
+          context,
+          '/product_list',
+          arguments: {'orderStore': _orderStore, 'returnRoute': '/timeline'},
+        );
+        break;
+
+      // Photos → Order screen with photos anchor
+      case 'photos_added':
+        _navigateToOrder(anchor: 'photos');
+        break;
+
+      // Other events → Order screen
       default:
-        return null;
+        _navigateToOrder();
+        break;
     }
   }
 
@@ -636,9 +685,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
             ...dateEvents.map((event) => EventCard(
                   event: event,
                   isFromMe: event.author?.id == Global.userAggr?.id,
-                  onTap: event.isComment
-                      ? null
-                      : () => _navigateToOrder(anchor: _getAnchorForEvent(event.type)),
+                  onTap: event.isComment ? null : () => _handleEventTap(event),
                 )),
           ],
         );
