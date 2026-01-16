@@ -264,6 +264,23 @@ class _TimelineScreenState extends State<TimelineScreen> {
               _addDueDate();
             },
           ),
+
+          // Change Status
+          CupertinoActionSheetAction(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(CupertinoIcons.flag,
+                    color: _getStatusColor(_order?.status)),
+                const SizedBox(width: 8),
+                Text(context.l10n.changeStatus),
+              ],
+            ),
+            onPressed: () {
+              Navigator.pop(actionContext);
+              _changeStatus();
+            },
+          ),
         ],
         cancelButton: CupertinoActionSheetAction(
           child: Text(context.l10n.cancel),
@@ -499,6 +516,137 @@ class _TimelineScreenState extends State<TimelineScreen> {
     );
   }
 
+  void _changeStatus() {
+    final currentStatus = _order?.status;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(context.l10n.changeStatus),
+        actions: [
+          // Quote
+          if (currentStatus != 'quote')
+            CupertinoActionSheetAction(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(CupertinoIcons.doc_text,
+                      color: CupertinoColors.systemOrange),
+                  const SizedBox(width: 8),
+                  Text(context.l10n.statusQuote),
+                ],
+              ),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _orderStore.setStatus('quote');
+              },
+            ),
+
+          // Approved
+          if (currentStatus != 'approved')
+            CupertinoActionSheetAction(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(CupertinoIcons.checkmark_circle,
+                      color: CupertinoColors.activeBlue),
+                  const SizedBox(width: 8),
+                  Text(context.l10n.statusApproved),
+                ],
+              ),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _orderStore.setStatus('approved');
+              },
+            ),
+
+          // In Progress
+          if (currentStatus != 'progress')
+            CupertinoActionSheetAction(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(CupertinoIcons.hammer,
+                      color: CupertinoColors.systemPurple),
+                  const SizedBox(width: 8),
+                  Text(context.l10n.statusInProgress),
+                ],
+              ),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _orderStore.setStatus('progress');
+              },
+            ),
+
+          // Done
+          if (currentStatus != 'done')
+            CupertinoActionSheetAction(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(CupertinoIcons.checkmark_seal,
+                      color: CupertinoColors.systemGreen),
+                  const SizedBox(width: 8),
+                  Text(context.l10n.statusCompleted),
+                ],
+              ),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _orderStore.setStatus('done');
+              },
+            ),
+
+          // Canceled
+          if (currentStatus != 'canceled')
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(CupertinoIcons.xmark_circle,
+                      color: CupertinoColors.systemRed),
+                  const SizedBox(width: 8),
+                  Text(context.l10n.statusCancelled),
+                ],
+              ),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _confirmCancelOrder();
+              },
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
+  void _confirmCancelOrder() {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(context.l10n.cancelOrder),
+        content: Text(context.l10n.cancelOrderConfirmation),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.no),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text(context.l10n.yes),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _orderStore.setStatus('canceled');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
@@ -532,8 +680,8 @@ class _TimelineScreenState extends State<TimelineScreen> {
       child: SafeArea(
         child: Column(
           children: [
-            // Order Status Header
-            _buildOrderHeader(),
+            // Order Status Header (wrapped in Observer to update on status change)
+            Observer(builder: (_) => _buildOrderHeader()),
             // Timeline Events List
             Expanded(
               child: Observer(
@@ -585,7 +733,9 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 
   Widget _buildOrderHeader() {
-    final statusColor = _getStatusColor(_order?.status);
+    // Use orderStore.status to react to changes
+    final currentStatus = _orderStore.status ?? _order?.status;
+    final statusColor = _getStatusColor(currentStatus);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -608,7 +758,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              Order.statusMap[_order?.status] ?? _order?.status ?? '',
+              Order.statusMap[currentStatus] ?? currentStatus ?? '',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,

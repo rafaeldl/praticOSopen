@@ -514,6 +514,18 @@ abstract class AppLocalizations {
   /// **'Fechado'**
   String get statusClosed;
 
+  /// No description provided for @cancelOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar OS'**
+  String get cancelOrder;
+
+  /// No description provided for @cancelOrderConfirmation.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja cancelar esta OS?'**
+  String get cancelOrderConfirmation;
+
   /// No description provided for @payments.
   ///
   /// In pt, this message translates to:

@@ -216,6 +216,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get statusClosed => 'Cerrado';
 
   @override
+  String get cancelOrder => 'Cancelar Orden';
+
+  @override
+  String get cancelOrderConfirmation =>
+      '¿Está seguro que desea cancelar esta orden?';
+
+  @override
   String get payments => 'Pagos';
 
   @override

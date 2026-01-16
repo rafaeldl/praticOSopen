@@ -73,6 +73,8 @@
   "statusRejected": "Rechazado",
   "statusOpen": "Abierto",
   "statusClosed": "Cerrado",
+  "cancelOrder": "Cancelar Orden",
+  "cancelOrderConfirmation": "¿Está seguro que desea cancelar esta orden?",
 
   "payments": "Pagos",
   "payment": "Pago",

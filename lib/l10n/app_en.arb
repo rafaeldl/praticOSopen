@@ -73,6 +73,8 @@
   "statusRejected": "Rejected",
   "statusOpen": "Open",
   "statusClosed": "Closed",
+  "cancelOrder": "Cancel Order",
+  "cancelOrderConfirmation": "Are you sure you want to cancel this order?",
 
   "payments": "Payments",
   "payment": "Payment",

@@ -76,6 +76,8 @@
   "statusRejected": "Rejeitado",
   "statusOpen": "Aberto",
   "statusClosed": "Fechado",
+  "cancelOrder": "Cancelar OS",
+  "cancelOrderConfirmation": "Tem certeza que deseja cancelar esta OS?",
 
   "payments": "Pagamentos",
   "payment": "Pagamento",
