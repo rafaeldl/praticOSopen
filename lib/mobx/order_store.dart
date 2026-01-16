@@ -540,6 +540,16 @@ abstract class _OrderStore with Store {
         order!.photos!.add(photo);
         photos.add(photo);
         createItem();
+
+        // Log photo to timeline
+        if (photo.url != null) {
+          _timelineRepository.logPhotosAdded(
+            companyId!,
+            order!.id!,
+            [photo.url!],
+          );
+        }
+
         return true;
       }
       return false;
@@ -562,7 +572,7 @@ abstract class _OrderStore with Store {
     if (order!.id == null || order!.company?.id == null) return false;
 
     isUploadingPhoto = true;
-    int successCount = 0;
+    final uploadedUrls = <String>[];
 
     try {
       if (order!.photos == null) {
@@ -580,7 +590,9 @@ abstract class _OrderStore with Store {
           if (photo != null) {
             order!.photos!.add(photo);
             photos.add(photo);
-            successCount++;
+            if (photo.url != null) {
+              uploadedUrls.add(photo.url!);
+            }
           }
         } catch (e) {
           print('Erro no upload de uma foto: $e');
@@ -589,8 +601,16 @@ abstract class _OrderStore with Store {
 
       isUploadingPhoto = false;
 
-      if (successCount > 0) {
+      if (uploadedUrls.isNotEmpty) {
         createItem();
+
+        // Log photos to timeline
+        _timelineRepository.logPhotosAdded(
+          companyId!,
+          order!.id!,
+          uploadedUrls,
+        );
+
         return true;
       }
       return false;
