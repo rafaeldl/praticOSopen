@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/models/timeline_event.dart';
 import 'package:praticos/models/membership.dart';
@@ -427,26 +428,21 @@ class EventCard extends StatelessWidget {
       {double? aspectRatio, int? index}) {
     final widget = GestureDetector(
       onTap: () => _openPhotoViewer(context, url, index ?? 0),
-      child: Image.network(
-        url,
+      child: CachedNetworkImage(
+        imageUrl: url,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            color: CupertinoColors.systemGrey5.resolveFrom(context),
-            child: const Center(
-              child: CupertinoActivityIndicator(),
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            color: CupertinoColors.systemGrey5.resolveFrom(context),
-            child: const Center(
-              child: Icon(CupertinoIcons.photo, size: 32),
-            ),
-          );
-        },
+        placeholder: (context, url) => Container(
+          color: CupertinoColors.systemGrey5.resolveFrom(context),
+          child: const Center(
+            child: CupertinoActivityIndicator(),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: CupertinoColors.systemGrey5.resolveFrom(context),
+          child: const Center(
+            child: Icon(CupertinoIcons.photo, size: 32),
+          ),
+        ),
       ),
     );
 
@@ -483,17 +479,15 @@ class EventCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(
-              url,
+            CachedNetworkImage(
+              imageUrl: url,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: CupertinoColors.systemGrey5.resolveFrom(context),
-                  child: const Center(
-                    child: Icon(CupertinoIcons.photo, size: 32),
-                  ),
-                );
-              },
+              errorWidget: (context, url, error) => Container(
+                color: CupertinoColors.systemGrey5.resolveFrom(context),
+                child: const Center(
+                  child: Icon(CupertinoIcons.photo, size: 32),
+                ),
+              ),
             ),
             Container(
               color: CupertinoColors.black.withValues(alpha: 0.5),
@@ -881,26 +875,21 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
               minScale: 0.5,
               maxScale: 4.0,
               child: Center(
-                child: Image.network(
-                  widget.photos[index],
+                child: CachedNetworkImage(
+                  imageUrl: widget.photos[index],
                   fit: BoxFit.contain,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Center(
-                      child: CupertinoActivityIndicator(
-                        color: CupertinoColors.white,
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(
-                        CupertinoIcons.photo,
-                        size: 64,
-                        color: CupertinoColors.systemGrey,
-                      ),
-                    );
-                  },
+                  placeholder: (context, url) => const Center(
+                    child: CupertinoActivityIndicator(
+                      color: CupertinoColors.white,
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => const Center(
+                    child: Icon(
+                      CupertinoIcons.photo,
+                      size: 64,
+                      color: CupertinoColors.systemGrey,
+                    ),
+                  ),
                 ),
               ),
             );

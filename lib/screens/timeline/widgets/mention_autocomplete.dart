@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/models/membership.dart';
 
@@ -77,12 +78,12 @@ class MentionAutocomplete extends StatelessWidget {
                       ),
                       child: user?.photo != null
                           ? ClipOval(
-                              child: Image.network(
-                                user!.photo!,
+                              child: CachedNetworkImage(
+                                imageUrl: user!.photo!,
                                 width: 36,
                                 height: 36,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Center(
+                                errorWidget: (_, __, ___) => Center(
                                   child: Text(
                                     initials,
                                     style: TextStyle(
