@@ -17,6 +17,8 @@ class EventCard extends StatelessWidget {
     // Route to specific card type
     if (event.isComment) {
       return _buildCommentBubble(context);
+    } else if (event.type == 'photos_added') {
+      return _buildPhotoCard(context);
     } else {
       return _buildSystemEventCard(context);
     }
@@ -219,6 +221,191 @@ class EventCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Photo card with image grid
+  Widget _buildPhotoCard(BuildContext context) {
+    final photos = event.data?.photoUrls ?? [];
+    final authorName = isFromMe ? context.l10n.you : event.author?.name;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment:
+            isFromMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          // Author and time header
+          Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (!isFromMe) ...[
+                  _buildAvatar(context),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  '$authorName • ${_formatTime(event.createdAt)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Photo grid
+          Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.75,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _buildPhotoGrid(context, photos),
+            ),
+          ),
+          // Caption if exists
+          if (event.data?.caption != null && event.data!.caption!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                event.data!.caption!,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: CupertinoColors.label.resolveFrom(context),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoGrid(BuildContext context, List<String> photos) {
+    if (photos.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    if (photos.length == 1) {
+      return _buildPhotoTile(context, photos[0]);
+    }
+
+    if (photos.length == 2) {
+      return Row(
+        children: [
+          Expanded(child: _buildPhotoTile(context, photos[0], aspectRatio: 1)),
+          const SizedBox(width: 2),
+          Expanded(child: _buildPhotoTile(context, photos[1], aspectRatio: 1)),
+        ],
+      );
+    }
+
+    if (photos.length == 3) {
+      return Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: _buildPhotoTile(context, photos[0], aspectRatio: 0.75),
+          ),
+          const SizedBox(width: 2),
+          Expanded(
+            child: Column(
+              children: [
+                _buildPhotoTile(context, photos[1], aspectRatio: 1),
+                const SizedBox(height: 2),
+                _buildPhotoTile(context, photos[2], aspectRatio: 1),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    // 4+ photos: 2x2 grid with overflow indicator
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(child: _buildPhotoTile(context, photos[0], aspectRatio: 1)),
+            const SizedBox(width: 2),
+            Expanded(child: _buildPhotoTile(context, photos[1], aspectRatio: 1)),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Row(
+          children: [
+            Expanded(child: _buildPhotoTile(context, photos[2], aspectRatio: 1)),
+            const SizedBox(width: 2),
+            Expanded(
+              child: photos.length > 4
+                  ? _buildPhotoTileWithOverlay(
+                      context, photos[3], photos.length - 4)
+                  : _buildPhotoTile(context, photos[3], aspectRatio: 1),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhotoTile(BuildContext context, String url,
+      {double? aspectRatio}) {
+    final widget = Image.network(
+      url,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          color: CupertinoColors.systemGrey5.resolveFrom(context),
+          child: const Center(
+            child: CupertinoActivityIndicator(),
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        return Container(
+          color: CupertinoColors.systemGrey5.resolveFrom(context),
+          child: const Center(
+            child: Icon(CupertinoIcons.photo, size: 32),
+          ),
+        );
+      },
+    );
+
+    if (aspectRatio != null) {
+      return AspectRatio(
+        aspectRatio: aspectRatio,
+        child: widget,
+      );
+    }
+
+    return widget;
+  }
+
+  Widget _buildPhotoTileWithOverlay(
+      BuildContext context, String url, int moreCount) {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildPhotoTile(context, url, aspectRatio: 1),
+          Container(
+            color: CupertinoColors.black.withValues(alpha: 0.5),
+            child: Center(
+              child: Text(
+                '+$moreCount',
+                style: const TextStyle(
+                  color: CupertinoColors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
