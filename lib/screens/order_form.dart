@@ -41,6 +41,16 @@ class _OrderFormState extends State<OrderForm> {
   late OrderStore _store;
   final FormsService _formsService = FormsService();
   final AuthorizationService _authService = AuthorizationService.instance;
+  final ScrollController _scrollController = ScrollController();
+
+  // Keys for anchor navigation
+  final GlobalKey _photosKey = GlobalKey();
+  final GlobalKey _summaryKey = GlobalKey();
+  final GlobalKey _servicesKey = GlobalKey();
+  final GlobalKey _productsKey = GlobalKey();
+  final GlobalKey _formsKey = GlobalKey();
+
+  String? _pendingAnchor;
 
   /// Gets the current locale code for i18n (e.g., 'pt', 'en', 'es')
   String? get _localeCode => context.l10n.localeName;
@@ -54,25 +64,74 @@ class _OrderFormState extends State<OrderForm> {
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
+      // Check for anchor navigation
+      _pendingAnchor = args?['anchor'] as String?;
+
       if (args != null && args.containsKey('order')) {
         Order orderArg = args['order'];
 
         if (orderArg.id != null) {
           _store.repository.getSingle(_store.companyId!, orderArg.id!).then((updatedOrder) {
             _store.setOrder(updatedOrder ?? orderArg);
+            _scrollToAnchorIfNeeded();
           });
         } else if (orderArg.number != null) {
           _store.repository.getOrderByNumber(_store.companyId!, orderArg.number!).then((
             existingOrder,
           ) {
             _store.setOrder(existingOrder ?? orderArg);
+            _scrollToAnchorIfNeeded();
           });
         } else {
           _store.setOrder(orderArg);
+          _scrollToAnchorIfNeeded();
         }
       } else {
         _store.loadOrder();
       }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToAnchorIfNeeded() {
+    if (_pendingAnchor == null) return;
+
+    // Wait for the widget to be built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      GlobalKey? targetKey;
+
+      switch (_pendingAnchor) {
+        case 'photos':
+          targetKey = _photosKey;
+          break;
+        case 'summary':
+          targetKey = _summaryKey;
+          break;
+        case 'services':
+          targetKey = _servicesKey;
+          break;
+        case 'products':
+          targetKey = _productsKey;
+          break;
+        case 'forms':
+          targetKey = _formsKey;
+          break;
+      }
+
+      if (targetKey?.currentContext != null) {
+        Scrollable.ensureVisible(
+          targetKey!.currentContext!,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+
+      _pendingAnchor = null;
     });
   }
 
@@ -91,12 +150,12 @@ class _OrderFormState extends State<OrderForm> {
               top: false,
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildPhotosSection(context),
+                  Container(key: _photosKey, child: _buildPhotosSection(context)),
                   _buildClientDeviceSection(context, config),
-                  _buildSummarySection(context, config),
-                  _buildServicesSection(context, config),
-                  _buildProductsSection(context, config),
-                  _buildFormsSection(context, config),
+                  Container(key: _summaryKey, child: _buildSummarySection(context, config)),
+                  Container(key: _servicesKey, child: _buildServicesSection(context, config)),
+                  Container(key: _productsKey, child: _buildProductsSection(context, config)),
+                  Container(key: _formsKey, child: _buildFormsSection(context, config)),
                   const SizedBox(height: 40),
                 ]),
               ),

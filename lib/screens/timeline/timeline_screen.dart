@@ -57,10 +57,36 @@ class _TimelineScreenState extends State<TimelineScreen> {
     });
   }
 
-  void _navigateToOrder() {
+  void _navigateToOrder({String? anchor}) {
     if (_order != null) {
       Navigator.of(context, rootNavigator: true)
-          .pushNamed('/order', arguments: {'order': _order});
+          .pushNamed('/order', arguments: {
+        'order': _order,
+        if (anchor != null) 'anchor': anchor,
+      });
+    }
+  }
+
+  String? _getAnchorForEvent(String? eventType) {
+    switch (eventType) {
+      case 'service_added':
+      case 'service_updated':
+      case 'service_removed':
+        return 'services';
+      case 'product_added':
+      case 'product_updated':
+      case 'product_removed':
+        return 'products';
+      case 'photos_added':
+        return 'photos';
+      case 'payment_received':
+        return 'summary';
+      case 'form_completed':
+        return 'forms';
+      case 'status_change':
+        return 'summary';
+      default:
+        return null;
     }
   }
 
@@ -249,7 +275,9 @@ class _TimelineScreenState extends State<TimelineScreen> {
             ...dateEvents.map((event) => EventCard(
                   event: event,
                   isFromMe: event.author?.id == Global.userAggr?.id,
-                  onTap: event.isComment ? null : () => _navigateToOrder(),
+                  onTap: event.isComment
+                      ? null
+                      : () => _navigateToOrder(anchor: _getAnchorForEvent(event.type)),
                 )),
           ],
         );
