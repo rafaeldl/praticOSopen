@@ -2604,7 +2604,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNote => 'Add note';
 
   @override
-  String get addDueDate => 'Add due date';
+  String get addDueDate => 'Set due date';
 
   @override
   String get attachments => 'Attachments';

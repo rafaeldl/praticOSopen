@@ -4987,7 +4987,7 @@ abstract class AppLocalizations {
   /// No description provided for @addDueDate.
   ///
   /// In pt, this message translates to:
-  /// **'Adicionar data de entrega'**
+  /// **'Definir data de entrega'**
   String get addDueDate;
 
   /// No description provided for @attachments.

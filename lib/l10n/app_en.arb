@@ -1087,6 +1087,6 @@
   "addChecklist": "Add checklist",
   "addPayment": "Add payment",
   "addNote": "Add note",
-  "addDueDate": "Add due date",
+  "addDueDate": "Set due date",
   "attachments": "Attachments"
 }

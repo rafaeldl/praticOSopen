@@ -2616,7 +2616,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addNote => 'Adicionar anotação';
 
   @override
-  String get addDueDate => 'Adicionar data de entrega';
+  String get addDueDate => 'Definir data de entrega';
 
   @override
   String get attachments => 'Anexos';

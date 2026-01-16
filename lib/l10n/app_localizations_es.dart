@@ -2618,7 +2618,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addNote => 'Agregar nota';
 
   @override
-  String get addDueDate => 'Agregar fecha de entrega';
+  String get addDueDate => 'Definir fecha de entrega';
 
   @override
   String get attachments => 'Anexos';
