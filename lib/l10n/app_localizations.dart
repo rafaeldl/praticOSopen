@@ -4984,6 +4984,12 @@ abstract class AppLocalizations {
   /// **'Adicionar anotação'**
   String get addNote;
 
+  /// No description provided for @addDueDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar data de entrega'**
+  String get addDueDate;
+
   /// No description provided for @attachments.
   ///
   /// In pt, this message translates to:

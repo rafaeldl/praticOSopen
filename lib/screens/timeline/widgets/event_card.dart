@@ -502,6 +502,8 @@ class EventCard extends StatelessWidget {
         return context.l10n.checklistCompleted;
       case 'payment_received':
         return context.l10n.paymentReceived;
+      case 'discount_applied':
+        return context.l10n.discountApplied;
       case 'assignment_change':
         return context.l10n
             .assignedTo(event.data?.newAssignee?.name ?? '');
@@ -549,6 +551,8 @@ class EventCard extends StatelessWidget {
         return event.data?.formName;
       case 'payment_received':
         return 'R\$ ${event.data?.amount?.toStringAsFixed(2)} • ${event.data?.method}';
+      case 'discount_applied':
+        return 'R\$ ${event.data?.amount?.toStringAsFixed(2)}${event.data?.description != null ? ' • ${event.data!.description}' : ''}';
       case 'order_created':
         return event.data?.customerName;
       default:
@@ -576,6 +580,8 @@ class EventCard extends StatelessWidget {
         return CupertinoColors.systemIndigo;
       case 'payment_received':
         return CupertinoColors.systemGreen;
+      case 'discount_applied':
+        return CupertinoColors.systemOrange;
       case 'assignment_change':
         return CupertinoColors.systemPink;
       case 'order_created':

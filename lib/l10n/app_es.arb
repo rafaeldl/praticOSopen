@@ -1087,5 +1087,6 @@
   "addChecklist": "Agregar checklist",
   "addPayment": "Agregar pago",
   "addNote": "Agregar nota",
+  "addDueDate": "Agregar fecha de entrega",
   "attachments": "Anexos"
 }

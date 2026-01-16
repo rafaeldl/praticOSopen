@@ -199,20 +199,20 @@ class _TimelineScreenState extends State<TimelineScreen> {
             },
           ),
 
-          // Note
+          // Due Date
           CupertinoActionSheetAction(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.doc_text,
+                const Icon(CupertinoIcons.calendar,
                     color: CupertinoColors.systemIndigo),
                 const SizedBox(width: 8),
-                Text(context.l10n.addNote),
+                Text(context.l10n.addDueDate),
               ],
             ),
             onPressed: () {
               Navigator.pop(actionContext);
-              _addNote();
+              _addDueDate();
             },
           ),
         ],
@@ -372,15 +372,80 @@ class _TimelineScreenState extends State<TimelineScreen> {
     );
   }
 
-  void _addNote() {
+  void _addDueDate() {
+    final originalDate = _order?.dueDate;
+    DateTime selectedDate = _order?.dueDate ?? DateTime.now();
+
     showCupertinoModalPopup(
       context: context,
-      builder: (ctx) => _NoteInputModal(
-        onSend: (text, isPublic) async {
-          await _store.sendMessage(text, isPublic: isPublic);
-          _scrollToBottom();
-        },
-        customerName: _order?.customer?.name,
+      builder: (ctx) => Container(
+        height: 300,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            // Header with done button
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: CupertinoColors.separator.resolveFrom(context),
+                    width: 0.5,
+                  ),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    child: Text(context.l10n.cancel),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                  Text(
+                    context.l10n.dueDate,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    child: Text(
+                      context.l10n.done,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      // Only log if date actually changed
+                      final shouldLog = originalDate == null ||
+                          selectedDate.day != originalDate.day ||
+                          selectedDate.month != originalDate.month ||
+                          selectedDate.year != originalDate.year;
+                      _orderStore.setDueDate(
+                        selectedDate,
+                        logToTimeline: shouldLog,
+                        originalDate: originalDate,
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            // Date picker
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: selectedDate,
+                minimumDate: DateTime.now().subtract(const Duration(days: 365)),
+                maximumDate: DateTime.now().add(const Duration(days: 365 * 2)),
+                onDateTimeChanged: (DateTime date) {
+                  selectedDate = date;
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -621,231 +686,3 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 }
 
-// ============================================================
-// NOTE INPUT MODAL
-// ============================================================
-
-class _NoteInputModal extends StatefulWidget {
-  final Future<void> Function(String text, bool isPublic) onSend;
-  final String? customerName;
-
-  const _NoteInputModal({
-    required this.onSend,
-    this.customerName,
-  });
-
-  @override
-  State<_NoteInputModal> createState() => _NoteInputModalState();
-}
-
-class _NoteInputModalState extends State<_NoteInputModal> {
-  final TextEditingController _controller = TextEditingController();
-  bool _isPublic = false;
-  bool _isSending = false;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleSend() async {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-
-    // Confirm if sending to customer
-    if (_isPublic && widget.customerName != null) {
-      final confirmed = await _showPublicConfirmation();
-      if (confirmed != true) return;
-    }
-
-    setState(() => _isSending = true);
-
-    try {
-      await widget.onSend(text, _isPublic);
-      if (mounted) {
-        Navigator.pop(context);
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSending = false);
-      }
-    }
-  }
-
-  Future<bool?> _showPublicConfirmation() {
-    return showCupertinoDialog<bool>(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: Text(context.l10n.sendToCustomer),
-        content: Text(
-            context.l10n.sendToCustomerDescription(widget.customerName ?? '')),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          CupertinoDialogAction(
-            child: Text(context.l10n.send),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      decoration: BoxDecoration(
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    child: Text(context.l10n.cancel),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Text(
-                    context.l10n.addNote,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: _isSending ? null : _handleSend,
-                    child: _isSending
-                        ? const CupertinoActivityIndicator()
-                        : Text(
-                            context.l10n.send,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: _isPublic
-                                  ? CupertinoColors.systemGreen
-                                  : CupertinoColors.activeBlue,
-                            ),
-                          ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              // Visibility Toggle
-              _buildVisibilityToggle(),
-              const SizedBox(height: 12),
-              // Text Field
-              Container(
-                constraints: const BoxConstraints(maxHeight: 150),
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6.resolveFrom(context),
-                  borderRadius: BorderRadius.circular(12),
-                  border: _isPublic
-                      ? Border.all(
-                          color: CupertinoColors.systemGreen,
-                          width: 2,
-                        )
-                      : null,
-                ),
-                child: CupertinoTextField(
-                  controller: _controller,
-                  placeholder: context.l10n.typeMessage,
-                  maxLines: 5,
-                  minLines: 3,
-                  keyboardType: TextInputType.multiline,
-                  textInputAction: TextInputAction.newline,
-                  decoration: const BoxDecoration(),
-                  padding: const EdgeInsets.all(12),
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: CupertinoColors.label.resolveFrom(context),
-                  ),
-                  autofocus: true,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVisibilityToggle() {
-    return CupertinoSlidingSegmentedControl<bool>(
-      groupValue: _isPublic,
-      children: {
-        false: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                CupertinoIcons.lock_fill,
-                size: 14,
-                color: !_isPublic
-                    ? CupertinoColors.activeBlue
-                    : CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                context.l10n.internalOnly,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: !_isPublic
-                      ? CupertinoColors.activeBlue
-                      : CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-        true: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                CupertinoIcons.globe,
-                size: 14,
-                color: _isPublic
-                    ? CupertinoColors.systemGreen
-                    : CupertinoColors.secondaryLabel.resolveFrom(context),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                context.l10n.customerCanSee,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: _isPublic
-                      ? CupertinoColors.systemGreen
-                      : CupertinoColors.secondaryLabel.resolveFrom(context),
-                ),
-              ),
-            ],
-          ),
-        ),
-      },
-      onValueChanged: (value) {
-        if (value != null) {
-          setState(() => _isPublic = value);
-        }
-      },
-    );
-  }
-}

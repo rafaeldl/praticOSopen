@@ -756,7 +756,8 @@ abstract class _OrderStore with Store {
 
   /// Adiciona um desconto como transação
   @action
-  void addDiscountTransaction(double amount, {String? description}) {
+  Future<void> addDiscountTransaction(double amount,
+      {String? description}) async {
     if (order == null || amount <= 0) return;
 
     final transaction = PaymentTransaction.discount(
@@ -784,6 +785,18 @@ abstract class _OrderStore with Store {
     _updatePaymentStatus();
 
     createItem();
+
+    // Log discount to timeline
+    if (order?.id != null && companyId != null) {
+      await _timelineRepository.logDiscountApplied(
+        companyId!,
+        order!.id!,
+        amount,
+        order!.total ?? 0,
+        order!.discount ?? 0,
+        description: description,
+      );
+    }
   }
 
   /// Marca como totalmente pago

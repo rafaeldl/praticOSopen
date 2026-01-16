@@ -884,6 +884,18 @@ mixin _$OrderStore on _OrderStore, Store {
     );
   }
 
+  late final _$addDiscountTransactionAsyncAction = AsyncAction(
+    '_OrderStore.addDiscountTransaction',
+    context: context,
+  );
+
+  @override
+  Future<void> addDiscountTransaction(double amount, {String? description}) {
+    return _$addDiscountTransactionAsyncAction.run(
+      () => super.addDiscountTransaction(amount, description: description),
+    );
+  }
+
   late final _$loadOrdersForDashboardCustomRangeAsyncAction = AsyncAction(
     '_OrderStore.loadOrdersForDashboardCustomRange',
     context: context,
@@ -1052,18 +1064,6 @@ mixin _$OrderStore on _OrderStore, Store {
     );
     try {
       return super.setDiscount(value);
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void addDiscountTransaction(double amount, {String? description}) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.addDiscountTransaction',
-    );
-    try {
-      return super.addDiscountTransaction(amount, description: description);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }

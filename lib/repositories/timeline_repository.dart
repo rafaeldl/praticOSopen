@@ -399,6 +399,40 @@ class TimelineRepository {
     await createEvent(companyId, orderId, event);
   }
 
+  /// Log: Discount applied (internal)
+  Future<void> logDiscountApplied(
+    String companyId,
+    String orderId,
+    double amount,
+    double orderTotal,
+    double totalDiscount, {
+    String? description,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'discount_applied',
+      visibility: 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        amount: amount,
+        orderTotal: orderTotal,
+        totalPaid: totalDiscount,
+        description: description,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
   /// Log: Order created (public)
   Future<void> logOrderCreated(
     String companyId,
