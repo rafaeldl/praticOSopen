@@ -2428,4 +2428,168 @@ class AppLocalizationsEs extends AppLocalizations {
   String formLabelWithTitle(String title) {
     return 'Formulario: $title';
   }
+
+  @override
+  String get timeline => 'Conversación';
+
+  @override
+  String get timelineEmpty => 'Sin actividad todavía';
+
+  @override
+  String get typeMessage => 'Escribe un mensaje...';
+
+  @override
+  String get sendMessage => 'Enviar';
+
+  @override
+  String get unread => 'No leídos';
+
+  @override
+  String get viewDetails => 'Ver detalles';
+
+  @override
+  String get addPhotos => 'Agregar fotos';
+
+  @override
+  String get fillChecklist => 'Llenar checklist';
+
+  @override
+  String get muteNotifications => 'Silenciar notificaciones';
+
+  @override
+  String get shareWithCustomer => 'Compartir con cliente';
+
+  @override
+  String get internalOnly => 'Solo equipo';
+
+  @override
+  String get customerCanSee => 'Cliente ve';
+
+  @override
+  String get sendToCustomer => '¿Enviar al cliente?';
+
+  @override
+  String sendToCustomerDescription(String customerName) {
+    return 'Este mensaje será visible para $customerName.';
+  }
+
+  @override
+  String get osCreated => 'Orden creada';
+
+  @override
+  String get statusChanged => 'Estado cambiado';
+
+  @override
+  String photosAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count fotos agregadas',
+      one: '1 foto agregada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get serviceAdded => 'Servicio agregado';
+
+  @override
+  String get serviceUpdated => 'Servicio actualizado';
+
+  @override
+  String get serviceRemoved => 'Servicio eliminado';
+
+  @override
+  String get productAdded => 'Producto agregado';
+
+  @override
+  String get productUpdated => 'Producto actualizado';
+
+  @override
+  String get productRemoved => 'Producto eliminado';
+
+  @override
+  String get checklistCompleted => 'Checklist completado';
+
+  @override
+  String get paymentReceived => 'Pago recibido';
+
+  @override
+  String assignedTo(String name) {
+    return 'Asignado a $name';
+  }
+
+  @override
+  String get dueTodayAlert => '¡Vence hoy!';
+
+  @override
+  String dueInDaysAlert(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'días',
+      one: 'día',
+    );
+    return 'Vence en $count $_temp0';
+  }
+
+  @override
+  String overdueAlert(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'días',
+      one: 'día',
+    );
+    return '¡Vencido hace $count $_temp0!';
+  }
+
+  @override
+  String get you => 'Tú';
+
+  @override
+  String get system => 'Sistema';
+
+  @override
+  String get customerLabel => 'Cliente';
+
+  @override
+  String get copyLink => 'Copiar enlace';
+
+  @override
+  String get sendViaWhatsapp => 'Enviar por WhatsApp';
+
+  @override
+  String get trackingLink => 'Enlace de seguimiento';
+
+  @override
+  String get newActivity => 'Nueva actividad';
+
+  @override
+  String statusChangedFromTo(
+    String author,
+    String oldStatus,
+    String newStatus,
+  ) {
+    return '$author: $oldStatus → $newStatus';
+  }
+
+  @override
+  String addedPhotos(String author, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 's',
+      one: '',
+    );
+    return '$author agregó $count foto$_temp0';
+  }
+
+  @override
+  String completedForm(String author, String formName) {
+    return '$author completó $formName';
+  }
+
+  @override
+  String get unknown => 'Desconocido';
 }

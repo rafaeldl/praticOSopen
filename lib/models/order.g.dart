@@ -54,7 +54,14 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
       .toList()
   ..assignedTo = json['assignedTo'] == null
       ? null
-      : UserAggr.fromJson(json['assignedTo'] as Map<String, dynamic>);
+      : UserAggr.fromJson(json['assignedTo'] as Map<String, dynamic>)
+  ..customerToken = json['customerToken'] as String?
+  ..lastActivity = json['lastActivity'] == null
+      ? null
+      : LastActivity.fromJson(json['lastActivity'] as Map<String, dynamic>)
+  ..unreadCounts = (json['unreadCounts'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  );
 
 Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'id': instance.id,
@@ -79,6 +86,9 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'paidAmount': instance.paidAmount,
   'transactions': instance.transactions?.map((e) => e.toJson()).toList(),
   'assignedTo': instance.assignedTo?.toJson(),
+  'customerToken': instance.customerToken,
+  'lastActivity': instance.lastActivity?.toJson(),
+  'unreadCounts': instance.unreadCounts,
 };
 
 OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()

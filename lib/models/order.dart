@@ -2,6 +2,7 @@ import 'package:praticos/models/base_audit_company.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/models/last_activity.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/product.dart';
@@ -35,6 +36,21 @@ class Order extends BaseAuditCompany {
 
   /// Técnico atribuído à OS (para controle de acesso RBAC)
   UserAggr? assignedTo;
+
+  /// Unique token for customer magic link
+  String? customerToken;
+
+  /// Last activity preview for list display
+  LastActivity? lastActivity;
+
+  /// Unread counts per user
+  Map<String, int>? unreadCounts;
+
+  /// Get unread count for a specific user
+  int getUnreadCount(String userId) => unreadCounts?[userId] ?? 0;
+
+  /// Check if order has unread messages for a user
+  bool hasUnread(String userId) => getUnreadCount(userId) > 0;
 
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;

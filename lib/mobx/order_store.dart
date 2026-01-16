@@ -11,6 +11,7 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
+import 'package:praticos/repositories/timeline_repository.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
@@ -22,6 +23,7 @@ class OrderStore = _OrderStore with _$OrderStore;
 
 abstract class _OrderStore with Store {
   final OrderRepositoryV2 repository = OrderRepositoryV2();
+  final TimelineRepository _timelineRepository = TimelineRepository();
   final PhotoService photoService = PhotoService();
   final FormsService formsService = FormsService();
   final AuthorizationService _authService = AuthorizationService.instance;
@@ -336,12 +338,23 @@ abstract class _OrderStore with Store {
   }
 
   @action
-  setStatus(String? status) {
+  setStatus(String? status) async {
     if (status == null) return;
+    final oldStatus = order!.status;
     order!.status = status;
     this.status = status;
     updatePayment();
     createItem();
+
+    // Log status change to timeline
+    if (order?.id != null && companyId != null && oldStatus != status) {
+      await _timelineRepository.logStatusChange(
+        companyId!,
+        order!.id!,
+        oldStatus ?? '',
+        status,
+      );
+    }
   }
 
   String dateToString(DateTime? date) {
@@ -414,7 +427,7 @@ abstract class _OrderStore with Store {
   }
 
   @action
-  addService(OrderService orderService) {
+  addService(OrderService orderService) async {
     // Copia a foto do serviço se existir
     if (orderService.service?.photo != null) {
       orderService.photo = orderService.service?.photo;
@@ -423,10 +436,21 @@ abstract class _OrderStore with Store {
     services!.add(orderService);
     updateTotal();
     createItem();
+
+    // Log service added to timeline
+    if (order?.id != null && companyId != null) {
+      await _timelineRepository.logServiceAdded(
+        companyId!,
+        order!.id!,
+        orderService.service?.name ?? '',
+        orderService.value ?? 0,
+        description: orderService.description,
+      );
+    }
   }
 
   @action
-  addProduct(OrderProduct orderProduct) {
+  addProduct(OrderProduct orderProduct) async {
     // Copia a foto do produto se existir
     if (orderProduct.product?.photo != null) {
       orderProduct.photo = orderProduct.product?.photo;
@@ -435,6 +459,17 @@ abstract class _OrderStore with Store {
     products!.add(orderProduct);
     updateTotal();
     createItem();
+
+    // Log product added to timeline
+    if (order?.id != null && companyId != null) {
+      await _timelineRepository.logProductAdded(
+        companyId!,
+        order!.id!,
+        orderProduct.product?.name ?? '',
+        orderProduct.quantity ?? 1,
+        orderProduct.value ?? 0,
+      );
+    }
   }
 
   @action
@@ -612,7 +647,7 @@ abstract class _OrderStore with Store {
 
   /// Adiciona um pagamento parcial
   @action
-  void addPayment(double amount, {String? description}) {
+  Future<void> addPayment(double amount, {String? description}) async {
     if (order == null || amount <= 0) return;
 
     final transaction = PaymentTransaction.payment(
@@ -637,6 +672,18 @@ abstract class _OrderStore with Store {
     _updatePaymentStatus();
 
     createItem();
+
+    // Log payment to timeline
+    if (order?.id != null && companyId != null) {
+      await _timelineRepository.logPaymentReceived(
+        companyId!,
+        order!.id!,
+        amount,
+        description ?? 'Pagamento',
+        order!.total ?? 0,
+        order!.paidAmount ?? amount,
+      );
+    }
   }
 
   /// Adiciona um desconto como transação

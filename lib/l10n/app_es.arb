@@ -963,5 +963,116 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "timeline": "Conversación",
+  "timelineEmpty": "Sin actividad todavía",
+  "typeMessage": "Escribe un mensaje...",
+  "sendMessage": "Enviar",
+  "unread": "No leídos",
+  "viewDetails": "Ver detalles",
+  "addPhotos": "Agregar fotos",
+  "fillChecklist": "Llenar checklist",
+  "muteNotifications": "Silenciar notificaciones",
+  "shareWithCustomer": "Compartir con cliente",
+  "internalOnly": "Solo equipo",
+  "customerCanSee": "Cliente ve",
+  "sendToCustomer": "¿Enviar al cliente?",
+  "sendToCustomerDescription": "Este mensaje será visible para {customerName}.",
+  "@sendToCustomerDescription": {
+    "placeholders": {
+      "customerName": {
+        "type": "String"
+      }
+    }
+  },
+  "osCreated": "Orden creada",
+  "statusChanged": "Estado cambiado",
+  "photosAdded": "{count, plural, =1{1 foto agregada} other{{count} fotos agregadas}}",
+  "@photosAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "serviceAdded": "Servicio agregado",
+  "serviceUpdated": "Servicio actualizado",
+  "serviceRemoved": "Servicio eliminado",
+  "productAdded": "Producto agregado",
+  "productUpdated": "Producto actualizado",
+  "productRemoved": "Producto eliminado",
+  "checklistCompleted": "Checklist completado",
+  "paymentReceived": "Pago recibido",
+  "assignedTo": "Asignado a {name}",
+  "@assignedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dueTodayAlert": "¡Vence hoy!",
+  "dueInDaysAlert": "Vence en {count} {count, plural, =1{día} other{días}}",
+  "@dueInDaysAlert": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "overdueAlert": "¡Vencido hace {count} {count, plural, =1{día} other{días}}!",
+  "@overdueAlert": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "you": "Tú",
+  "system": "Sistema",
+  "customerLabel": "Cliente",
+  "copyLink": "Copiar enlace",
+  "sendViaWhatsapp": "Enviar por WhatsApp",
+  "trackingLink": "Enlace de seguimiento",
+  "newActivity": "Nueva actividad",
+  "statusChangedFromTo": "{author}: {oldStatus} → {newStatus}",
+  "@statusChangedFromTo": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "oldStatus": {
+        "type": "String"
+      },
+      "newStatus": {
+        "type": "String"
+      }
+    }
+  },
+  "addedPhotos": "{author} agregó {count} foto{count, plural, =1{} other{s}}",
+  "@addedPhotos": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "completedForm": "{author} completó {formName}",
+  "@completedForm": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "formName": {
+        "type": "String"
+      }
+    }
+  },
+  "today": "Hoy",
+  "yesterday": "Ayer",
+  "unknown": "Desconocido"
 }

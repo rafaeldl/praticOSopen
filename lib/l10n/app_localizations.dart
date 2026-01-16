@@ -4695,6 +4695,246 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Formulario: {title}'**
   String formLabelWithTitle(String title);
+
+  /// No description provided for @timeline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conversa'**
+  String get timeline;
+
+  /// No description provided for @timelineEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma atividade ainda'**
+  String get timelineEmpty;
+
+  /// No description provided for @typeMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite uma mensagem...'**
+  String get typeMessage;
+
+  /// No description provided for @sendMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar'**
+  String get sendMessage;
+
+  /// No description provided for @unread.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não lidas'**
+  String get unread;
+
+  /// No description provided for @viewDetails.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver detalhes'**
+  String get viewDetails;
+
+  /// No description provided for @addPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar fotos'**
+  String get addPhotos;
+
+  /// No description provided for @fillChecklist.
+  ///
+  /// In pt, this message translates to:
+  /// **'Preencher checklist'**
+  String get fillChecklist;
+
+  /// No description provided for @muteNotifications.
+  ///
+  /// In pt, this message translates to:
+  /// **'Silenciar notificações'**
+  String get muteNotifications;
+
+  /// No description provided for @shareWithCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar com cliente'**
+  String get shareWithCustomer;
+
+  /// No description provided for @internalOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Só equipe'**
+  String get internalOnly;
+
+  /// No description provided for @customerCanSee.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente vê'**
+  String get customerCanSee;
+
+  /// No description provided for @sendToCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar para cliente?'**
+  String get sendToCustomer;
+
+  /// No description provided for @sendToCustomerDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta mensagem será visível para {customerName}.'**
+  String sendToCustomerDescription(String customerName);
+
+  /// No description provided for @osCreated.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS criada'**
+  String get osCreated;
+
+  /// No description provided for @statusChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'Status alterado'**
+  String get statusChanged;
+
+  /// No description provided for @photosAdded.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{1 foto adicionada} other{{count} fotos adicionadas}}'**
+  String photosAdded(int count);
+
+  /// No description provided for @serviceAdded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço adicionado'**
+  String get serviceAdded;
+
+  /// No description provided for @serviceUpdated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço atualizado'**
+  String get serviceUpdated;
+
+  /// No description provided for @serviceRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço removido'**
+  String get serviceRemoved;
+
+  /// No description provided for @productAdded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto adicionado'**
+  String get productAdded;
+
+  /// No description provided for @productUpdated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto atualizado'**
+  String get productUpdated;
+
+  /// No description provided for @productRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Produto removido'**
+  String get productRemoved;
+
+  /// No description provided for @checklistCompleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist concluído'**
+  String get checklistCompleted;
+
+  /// No description provided for @paymentReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento recebido'**
+  String get paymentReceived;
+
+  /// No description provided for @assignedTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atribuído a {name}'**
+  String assignedTo(String name);
+
+  /// No description provided for @dueTodayAlert.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prazo vence hoje!'**
+  String get dueTodayAlert;
+
+  /// No description provided for @dueInDaysAlert.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prazo vence em {count} {count, plural, =1{dia} other{dias}}'**
+  String dueInDaysAlert(int count);
+
+  /// No description provided for @overdueAlert.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prazo vencido há {count} {count, plural, =1{dia} other{dias}}!'**
+  String overdueAlert(int count);
+
+  /// No description provided for @you.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você'**
+  String get you;
+
+  /// No description provided for @system.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sistema'**
+  String get system;
+
+  /// No description provided for @customerLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente'**
+  String get customerLabel;
+
+  /// No description provided for @copyLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar link'**
+  String get copyLink;
+
+  /// No description provided for @sendViaWhatsapp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar via WhatsApp'**
+  String get sendViaWhatsapp;
+
+  /// No description provided for @trackingLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link de acompanhamento'**
+  String get trackingLink;
+
+  /// No description provided for @newActivity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova atividade'**
+  String get newActivity;
+
+  /// No description provided for @statusChangedFromTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'{author}: {oldStatus} → {newStatus}'**
+  String statusChangedFromTo(String author, String oldStatus, String newStatus);
+
+  /// No description provided for @addedPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'{author} adicionou {count} foto{count, plural, =1{} other{s}}'**
+  String addedPhotos(String author, int count);
+
+  /// No description provided for @completedForm.
+  ///
+  /// In pt, this message translates to:
+  /// **'{author} concluiu {formName}'**
+  String completedForm(String author, String formName);
+
+  /// No description provided for @unknown.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desconhecido'**
+  String get unknown;
 }
 
 class _AppLocalizationsDelegate

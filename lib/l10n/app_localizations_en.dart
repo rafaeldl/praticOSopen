@@ -2414,4 +2414,168 @@ class AppLocalizationsEn extends AppLocalizations {
   String formLabelWithTitle(String title) {
     return 'Form: $title';
   }
+
+  @override
+  String get timeline => 'Conversation';
+
+  @override
+  String get timelineEmpty => 'No activity yet';
+
+  @override
+  String get typeMessage => 'Type a message...';
+
+  @override
+  String get sendMessage => 'Send';
+
+  @override
+  String get unread => 'Unread';
+
+  @override
+  String get viewDetails => 'View details';
+
+  @override
+  String get addPhotos => 'Add photos';
+
+  @override
+  String get fillChecklist => 'Fill checklist';
+
+  @override
+  String get muteNotifications => 'Mute notifications';
+
+  @override
+  String get shareWithCustomer => 'Share with customer';
+
+  @override
+  String get internalOnly => 'Team only';
+
+  @override
+  String get customerCanSee => 'Customer sees';
+
+  @override
+  String get sendToCustomer => 'Send to customer?';
+
+  @override
+  String sendToCustomerDescription(String customerName) {
+    return 'This message will be visible to $customerName.';
+  }
+
+  @override
+  String get osCreated => 'Order created';
+
+  @override
+  String get statusChanged => 'Status changed';
+
+  @override
+  String photosAdded(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count photos added',
+      one: '1 photo added',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get serviceAdded => 'Service added';
+
+  @override
+  String get serviceUpdated => 'Service updated';
+
+  @override
+  String get serviceRemoved => 'Service removed';
+
+  @override
+  String get productAdded => 'Product added';
+
+  @override
+  String get productUpdated => 'Product updated';
+
+  @override
+  String get productRemoved => 'Product removed';
+
+  @override
+  String get checklistCompleted => 'Checklist completed';
+
+  @override
+  String get paymentReceived => 'Payment received';
+
+  @override
+  String assignedTo(String name) {
+    return 'Assigned to $name';
+  }
+
+  @override
+  String get dueTodayAlert => 'Due today!';
+
+  @override
+  String dueInDaysAlert(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return 'Due in $count $_temp0';
+  }
+
+  @override
+  String overdueAlert(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return 'Overdue by $count $_temp0!';
+  }
+
+  @override
+  String get you => 'You';
+
+  @override
+  String get system => 'System';
+
+  @override
+  String get customerLabel => 'Customer';
+
+  @override
+  String get copyLink => 'Copy link';
+
+  @override
+  String get sendViaWhatsapp => 'Send via WhatsApp';
+
+  @override
+  String get trackingLink => 'Tracking link';
+
+  @override
+  String get newActivity => 'New activity';
+
+  @override
+  String statusChangedFromTo(
+    String author,
+    String oldStatus,
+    String newStatus,
+  ) {
+    return '$author: $oldStatus → $newStatus';
+  }
+
+  @override
+  String addedPhotos(String author, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 's',
+      one: '',
+    );
+    return '$author added $count photo$_temp0';
+  }
+
+  @override
+  String completedForm(String author, String formName) {
+    return '$author completed $formName';
+  }
+
+  @override
+  String get unknown => 'Unknown';
 }

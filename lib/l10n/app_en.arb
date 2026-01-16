@@ -963,5 +963,116 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "timeline": "Conversation",
+  "timelineEmpty": "No activity yet",
+  "typeMessage": "Type a message...",
+  "sendMessage": "Send",
+  "unread": "Unread",
+  "viewDetails": "View details",
+  "addPhotos": "Add photos",
+  "fillChecklist": "Fill checklist",
+  "muteNotifications": "Mute notifications",
+  "shareWithCustomer": "Share with customer",
+  "internalOnly": "Team only",
+  "customerCanSee": "Customer sees",
+  "sendToCustomer": "Send to customer?",
+  "sendToCustomerDescription": "This message will be visible to {customerName}.",
+  "@sendToCustomerDescription": {
+    "placeholders": {
+      "customerName": {
+        "type": "String"
+      }
+    }
+  },
+  "osCreated": "Order created",
+  "statusChanged": "Status changed",
+  "photosAdded": "{count, plural, =1{1 photo added} other{{count} photos added}}",
+  "@photosAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "serviceAdded": "Service added",
+  "serviceUpdated": "Service updated",
+  "serviceRemoved": "Service removed",
+  "productAdded": "Product added",
+  "productUpdated": "Product updated",
+  "productRemoved": "Product removed",
+  "checklistCompleted": "Checklist completed",
+  "paymentReceived": "Payment received",
+  "assignedTo": "Assigned to {name}",
+  "@assignedTo": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dueTodayAlert": "Due today!",
+  "dueInDaysAlert": "Due in {count} {count, plural, =1{day} other{days}}",
+  "@dueInDaysAlert": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "overdueAlert": "Overdue by {count} {count, plural, =1{day} other{days}}!",
+  "@overdueAlert": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "you": "You",
+  "system": "System",
+  "customerLabel": "Customer",
+  "copyLink": "Copy link",
+  "sendViaWhatsapp": "Send via WhatsApp",
+  "trackingLink": "Tracking link",
+  "newActivity": "New activity",
+  "statusChangedFromTo": "{author}: {oldStatus} → {newStatus}",
+  "@statusChangedFromTo": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "oldStatus": {
+        "type": "String"
+      },
+      "newStatus": {
+        "type": "String"
+      }
+    }
+  },
+  "addedPhotos": "{author} added {count} photo{count, plural, =1{} other{s}}",
+  "@addedPhotos": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "completedForm": "{author} completed {formName}",
+  "@completedForm": {
+    "placeholders": {
+      "author": {
+        "type": "String"
+      },
+      "formName": {
+        "type": "String"
+      }
+    }
+  },
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "unknown": "Unknown"
 }

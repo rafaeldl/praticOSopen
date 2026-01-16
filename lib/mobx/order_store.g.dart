@@ -798,6 +798,16 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$setStatusAsyncAction = AsyncAction(
+    '_OrderStore.setStatus',
+    context: context,
+  );
+
+  @override
+  Future setStatus(String? status) {
+    return _$setStatusAsyncAction.run(() => super.setStatus(status));
+  }
+
   late final _$loadOrdersAsyncAction = AsyncAction(
     '_OrderStore.loadOrders',
     context: context,
@@ -806,6 +816,26 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   Future loadOrders(String? status) {
     return _$loadOrdersAsyncAction.run(() => super.loadOrders(status));
+  }
+
+  late final _$addServiceAsyncAction = AsyncAction(
+    '_OrderStore.addService',
+    context: context,
+  );
+
+  @override
+  Future addService(OrderService orderService) {
+    return _$addServiceAsyncAction.run(() => super.addService(orderService));
+  }
+
+  late final _$addProductAsyncAction = AsyncAction(
+    '_OrderStore.addProduct',
+    context: context,
+  );
+
+  @override
+  Future addProduct(OrderProduct orderProduct) {
+    return _$addProductAsyncAction.run(() => super.addProduct(orderProduct));
   }
 
   late final _$addPhotoFromGalleryAsyncAction = AsyncAction(
@@ -840,6 +870,18 @@ mixin _$OrderStore on _OrderStore, Store {
   @override
   Future<bool> deletePhoto(int index) {
     return _$deletePhotoAsyncAction.run(() => super.deletePhoto(index));
+  }
+
+  late final _$addPaymentAsyncAction = AsyncAction(
+    '_OrderStore.addPayment',
+    context: context,
+  );
+
+  @override
+  Future<void> addPayment(double amount, {String? description}) {
+    return _$addPaymentAsyncAction.run(
+      () => super.addPayment(amount, description: description),
+    );
   }
 
   late final _$loadOrdersForDashboardCustomRangeAsyncAction = AsyncAction(
@@ -944,18 +986,6 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
-  dynamic setStatus(String? status) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.setStatus',
-    );
-    try {
-      return super.setStatus(status);
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   dynamic updateOrder() {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.updateOrder',
@@ -974,30 +1004,6 @@ mixin _$OrderStore on _OrderStore, Store {
     );
     try {
       return super.deleteOrder();
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  dynamic addService(OrderService orderService) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.addService',
-    );
-    try {
-      return super.addService(orderService);
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  dynamic addProduct(OrderProduct orderProduct) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.addProduct',
-    );
-    try {
-      return super.addProduct(orderProduct);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }
@@ -1046,18 +1052,6 @@ mixin _$OrderStore on _OrderStore, Store {
     );
     try {
       return super.setDiscount(value);
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
-  void addPayment(double amount, {String? description}) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.addPayment',
-    );
-    try {
-      return super.addPayment(amount, description: description);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }

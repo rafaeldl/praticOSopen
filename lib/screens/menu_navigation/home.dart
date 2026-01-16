@@ -615,7 +615,7 @@ class _HomeState extends State<Home> {
         padding: EdgeInsets.zero,
         onPressed: () {
           Navigator.of(context, rootNavigator: true)
-              .pushNamed('/order', arguments: {'order': order})
+              .pushNamed('/timeline', arguments: {'order': order})
               .then((_) {
             final configInner = Provider.of<SegmentConfigProvider>(context, listen: false);
             _loadOrders(_getFilters(configInner));
@@ -669,15 +669,25 @@ class _HomeState extends State<Home> {
                         ),
                         const SizedBox(height: 2),
 
-                        // Line 2: Services + Price
+                        // Line 2: Last Activity or Services + Price
                         Row(
                           children: [
+                            // Show lastActivity preview if available, otherwise services
+                            if (order.lastActivity?.preview != null) ...[
+                              Text(
+                                order.lastActivity!.icon ?? '',
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                              const SizedBox(width: 4),
+                            ],
                             Expanded(
                               child: Text(
-                                servicesText.isNotEmpty ? servicesText : '-',
+                                order.lastActivity?.preview ?? (servicesText.isNotEmpty ? servicesText : '-'),
                                 style: TextStyle(
                                   fontSize: 15,
-                                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                  color: order.lastActivity?.visibility == 'customer'
+                                      ? CupertinoColors.systemGreen
+                                      : CupertinoColors.secondaryLabel.resolveFrom(context),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -801,6 +811,24 @@ class _HomeState extends State<Home> {
                   ],
                 ),
                 child: _buildOrderNumberText(order.number!),
+              ),
+            ),
+          // Unread badge at top-right
+          if (order.hasUnread(Global.userAggr?.id ?? ''))
+            Positioned(
+              top: -4,
+              right: -4,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemRed,
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: CupertinoColors.systemBackground.resolveFrom(context),
+                    width: 2,
+                  ),
+                ),
               ),
             ),
         ],
