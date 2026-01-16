@@ -82,6 +82,7 @@ class TimelineEvent {
       case 'product_updated':
       case 'product_removed':
         return '📦';
+      case 'form_added':
       case 'form_completed':
         return '📋';
       case 'payment_received':

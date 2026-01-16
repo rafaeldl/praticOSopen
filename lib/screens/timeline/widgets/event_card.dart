@@ -494,6 +494,8 @@ class EventCard extends StatelessWidget {
         return context.l10n.productUpdated;
       case 'product_removed':
         return context.l10n.productRemoved;
+      case 'form_added':
+        return context.l10n.checklistAdded;
       case 'form_completed':
         return context.l10n.checklistCompleted;
       case 'payment_received':
@@ -535,6 +537,7 @@ class EventCard extends StatelessWidget {
         return '${event.data?.serviceName}${value != null ? ' • R\$ ${value.toStringAsFixed(2)}' : ''}';
       case 'product_added':
         return '${event.data?.productName} (${event.data?.quantity}x)';
+      case 'form_added':
       case 'form_completed':
         return event.data?.formName;
       case 'payment_received':
@@ -560,6 +563,7 @@ class EventCard extends StatelessWidget {
       case 'product_updated':
       case 'product_removed':
         return CupertinoColors.systemTeal;
+      case 'form_added':
       case 'form_completed':
         return CupertinoColors.systemIndigo;
       case 'payment_received':

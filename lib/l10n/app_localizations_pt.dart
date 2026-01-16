@@ -2516,6 +2516,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get productRemoved => 'Produto removido';
 
   @override
+  String get checklistAdded => 'Checklist adicionado';
+
+  @override
   String get checklistCompleted => 'Checklist concluído';
 
   @override

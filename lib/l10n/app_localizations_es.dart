@@ -2518,6 +2518,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get productRemoved => 'Producto eliminado';
 
   @override
+  String get checklistAdded => 'Checklist agregado';
+
+  @override
   String get checklistCompleted => 'Checklist completado';
 
   @override

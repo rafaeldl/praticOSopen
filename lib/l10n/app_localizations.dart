@@ -4852,6 +4852,12 @@ abstract class AppLocalizations {
   /// **'Produto removido'**
   String get productRemoved;
 
+  /// No description provided for @checklistAdded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist adicionado'**
+  String get checklistAdded;
+
   /// No description provided for @checklistCompleted.
   ///
   /// In pt, this message translates to:

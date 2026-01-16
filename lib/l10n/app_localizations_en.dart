@@ -2504,6 +2504,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productRemoved => 'Product removed';
 
   @override
+  String get checklistAdded => 'Checklist added';
+
+  @override
   String get checklistCompleted => 'Checklist completed';
 
   @override

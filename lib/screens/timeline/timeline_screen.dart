@@ -8,6 +8,7 @@ import 'package:praticos/models/timeline_event.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/forms_service.dart';
+import 'package:praticos/repositories/timeline_repository.dart';
 import 'package:praticos/screens/timeline/widgets/event_card.dart';
 import 'package:praticos/screens/timeline/widgets/message_input.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
@@ -26,6 +27,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
   final FormatService _formatService = FormatService();
   final OrderStore _orderStore = OrderStore();
   final FormsService _formsService = FormsService();
+  final TimelineRepository _timelineRepository = TimelineRepository();
   Order? _order;
 
   @override
@@ -92,6 +94,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
         return 'photos';
       case 'payment_received':
         return 'summary';
+      case 'form_added':
       case 'form_completed':
         return 'forms';
       case 'status_change':
@@ -310,7 +313,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
       if (!mounted) return;
 
-      Navigator.push(
+      final completed = await Navigator.push<bool>(
         context,
         CupertinoPageRoute(
           fullscreenDialog: true,
@@ -321,6 +324,18 @@ class _TimelineScreenState extends State<TimelineScreen> {
           ),
         ),
       );
+
+      // If form was not completed, log "form_added"
+      // (If completed, form_fill_screen already logs "form_completed")
+      if (completed != true && mounted) {
+        await _timelineRepository.logFormAdded(
+          _orderStore.companyId!,
+          _order!.id!,
+          newForm.getLocalizedTitle(context.l10n.localeName),
+          newForm.id,
+          newForm.items.length,
+        );
+      }
     }
   }
 
