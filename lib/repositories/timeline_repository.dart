@@ -555,17 +555,17 @@ class TimelineRepository {
     String orderId,
     String? authorId,
   ) async {
-    final collaborators = await _firestore
+    final memberships = await _firestore
         .collection('companies')
         .doc(companyId)
-        .collection('collaborators')
+        .collection('memberships')
         .get();
 
     final updates = <String, dynamic>{};
 
-    for (final collab in collaborators.docs) {
-      if (collab.id != authorId) {
-        updates['unreadCounts.${collab.id}'] = FieldValue.increment(1);
+    for (final member in memberships.docs) {
+      if (member.id != authorId) {
+        updates['unreadCounts.${member.id}'] = FieldValue.increment(1);
       }
     }
 
