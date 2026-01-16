@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/models/base_audit_company.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
@@ -11,8 +12,65 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'order.g.dart';
 
+class OrderLastActivity {
+  final String type;
+  final String icon;
+  final String preview;
+  final String? authorId;
+  final String? authorName;
+  final DateTime createdAt;
+  final String visibility;
+
+  OrderLastActivity({
+    required this.type,
+    required this.icon,
+    required this.preview,
+    this.authorId,
+    this.authorName,
+    required this.createdAt,
+    required this.visibility,
+  });
+
+  factory OrderLastActivity.fromJson(Map<String, dynamic> json) {
+    DateTime createdDate;
+    if (json['createdAt'] is Timestamp) {
+      createdDate = (json['createdAt'] as Timestamp).toDate();
+    } else if (json['createdAt'] is String) {
+      createdDate = DateTime.parse(json['createdAt'] as String);
+    } else {
+      createdDate = DateTime.now();
+    }
+
+    return OrderLastActivity(
+      type: json['type'] as String,
+      icon: json['icon'] as String,
+      preview: json['preview'] as String,
+      authorId: json['authorId'] as String?,
+      authorName: json['authorName'] as String?,
+      createdAt: createdDate,
+      visibility: json['visibility'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type,
+      'icon': icon,
+      'preview': preview,
+      'authorId': authorId,
+      'authorName': authorName,
+      'createdAt': Timestamp.fromDate(createdAt),
+      'visibility': visibility,
+    };
+  }
+}
+
 @JsonSerializable(explicitToJson: true)
 class Order extends BaseAuditCompany {
+  OrderLastActivity? lastActivity;
+  Map<String, int>? unreadCounts;
+  String? customerToken;
+
   CustomerAggr? customer;
   DeviceAggr? device;
   List<OrderService>? services = [];
