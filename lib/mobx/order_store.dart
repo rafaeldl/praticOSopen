@@ -326,9 +326,22 @@ abstract class _OrderStore with Store {
   @action
   setDevice(Device? d) {
     if (d == null) return;
+    final oldDevice = order!.device;
     order!.device = d.toAggr();
     device = order!.device;
     createItem();
+
+    // Log device change to timeline
+    if (order?.id != null && companyId != null) {
+      _timelineRepository.logDeviceChange(
+        companyId!,
+        order!.id!,
+        oldDeviceName: oldDevice?.name,
+        oldDeviceSerial: oldDevice?.serial,
+        newDeviceName: d.name,
+        newDeviceSerial: d.serial,
+      );
+    }
   }
 
   setDueDate(DateTime date) {

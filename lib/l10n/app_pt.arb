@@ -1032,6 +1032,7 @@
     }
   },
   "osCreated": "OS criada",
+  "deviceChanged": "Dispositivo alterado",
   "statusChanged": "Status alterado",
   "photosAdded": "{count, plural, =1{1 foto adicionada} other{{count} fotos adicionadas}}",
   "@photosAdded": {

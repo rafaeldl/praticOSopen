@@ -2475,6 +2475,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get osCreated => 'OS criada';
 
   @override
+  String get deviceChanged => 'Dispositivo alterado';
+
+  @override
   String get statusChanged => 'Status alterado';
 
   @override

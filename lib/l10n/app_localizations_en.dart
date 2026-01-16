@@ -2463,6 +2463,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get osCreated => 'Order created';
 
   @override
+  String get deviceChanged => 'Device changed';
+
+  @override
   String get statusChanged => 'Status changed';
 
   @override

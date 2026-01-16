@@ -4786,6 +4786,12 @@ abstract class AppLocalizations {
   /// **'OS criada'**
   String get osCreated;
 
+  /// No description provided for @deviceChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dispositivo alterado'**
+  String get deviceChanged;
+
   /// No description provided for @statusChanged.
   ///
   /// In pt, this message translates to:

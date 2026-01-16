@@ -2477,6 +2477,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get osCreated => 'Orden creada';
 
   @override
+  String get deviceChanged => 'Dispositivo cambiado';
+
+  @override
   String get statusChanged => 'Estado cambiado';
 
   @override

@@ -503,6 +503,8 @@ class EventCard extends StatelessWidget {
             .assignedTo(event.data?.newAssignee?.name ?? '');
       case 'order_created':
         return context.l10n.osCreated;
+      case 'device_change':
+        return context.l10n.deviceChanged;
       default:
         return context.l10n.newActivity;
     }
@@ -512,6 +514,10 @@ class EventCard extends StatelessWidget {
     switch (event.type) {
       case 'status_change':
         return '${event.data?.oldStatus ?? ''} → ${event.data?.newStatus ?? ''}';
+      case 'device_change':
+        final oldName = event.data?.oldDeviceName ?? '?';
+        final newName = event.data?.newDeviceName ?? '?';
+        return '$oldName → $newName';
       case 'service_added':
         final value = event.data?.serviceValue;
         return '${event.data?.serviceName}${value != null ? ' • R\$ ${value.toStringAsFixed(2)}' : ''}';
@@ -550,6 +556,8 @@ class EventCard extends StatelessWidget {
         return CupertinoColors.systemPink;
       case 'order_created':
         return CupertinoColors.activeBlue;
+      case 'device_change':
+        return CupertinoColors.systemTeal;
       default:
         return CupertinoColors.systemGrey;
     }

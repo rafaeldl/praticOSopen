@@ -403,6 +403,40 @@ class TimelineRepository {
     await createEvent(companyId, orderId, event);
   }
 
+  /// Log: Device change (internal)
+  Future<void> logDeviceChange(
+    String companyId,
+    String orderId, {
+    String? oldDeviceName,
+    String? oldDeviceSerial,
+    String? newDeviceName,
+    String? newDeviceSerial,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'device_change',
+      visibility: 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        oldDeviceName: oldDeviceName,
+        oldDeviceSerial: oldDeviceSerial,
+        newDeviceName: newDeviceName,
+        newDeviceSerial: newDeviceSerial,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
   // --- Read Status ---
 
   /// Mark all as read for a user

@@ -94,6 +94,8 @@ class TimelineEvent {
         return '📅';
       case 'order_created':
         return '📋';
+      case 'device_change':
+        return '🔄';
       default:
         return '🔵';
     }
@@ -210,6 +212,12 @@ class TimelineEventData {
   String? deviceName;
   String? deviceSerial;
 
+  // --- Device Change ---
+  String? oldDeviceName;
+  String? oldDeviceSerial;
+  String? newDeviceName;
+  String? newDeviceSerial;
+
   TimelineEventData({
     this.text,
     this.attachments,
@@ -251,6 +259,10 @@ class TimelineEventData {
     this.customerPhone,
     this.deviceName,
     this.deviceSerial,
+    this.oldDeviceName,
+    this.oldDeviceSerial,
+    this.newDeviceName,
+    this.newDeviceSerial,
   });
 
   factory TimelineEventData.fromJson(Map<String, dynamic> json) =>
