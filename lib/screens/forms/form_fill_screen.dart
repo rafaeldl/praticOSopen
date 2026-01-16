@@ -294,7 +294,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
       if (mounted) {
         HapticFeedback.mediumImpact();
         setState(() => _isSaving = false);
-        Navigator.pop(context, true);
+        Navigator.pop(context, {'completed': true});
       }
     } catch (e) {
       if (mounted) {
@@ -319,9 +319,15 @@ class _FormFillScreenState extends State<FormFillScreen> {
   }
 
   /// Lida com o fechamento da tela (não auto-finaliza o formulário)
+  /// Returns a Map with form state info for timeline logging
   void _handleClose() {
     if (mounted) {
-      Navigator.pop(context);
+      // Return form state info for caller to log appropriately
+      Navigator.pop(context, {
+        'completed': false,
+        'responsesCount': _currentForm.responses.length,
+        'totalItems': _currentForm.items.length,
+      });
     }
   }
 

@@ -4858,6 +4858,12 @@ abstract class AppLocalizations {
   /// **'Checklist adicionado'**
   String get checklistAdded;
 
+  /// No description provided for @checklistUpdated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist atualizado'**
+  String get checklistUpdated;
+
   /// No description provided for @checklistCompleted.
   ///
   /// In pt, this message translates to:

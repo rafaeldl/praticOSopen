@@ -297,6 +297,40 @@ class TimelineRepository {
     await createEvent(companyId, orderId, event);
   }
 
+  /// Log: Form/Checklist updated (internal) - shows progress
+  Future<void> logFormUpdated(
+    String companyId,
+    String orderId,
+    String formName,
+    String formId,
+    int completedItems,
+    int totalItems,
+  ) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'form_updated',
+      visibility: 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        formName: formName,
+        formId: formId,
+        completedItems: completedItems,
+        totalItems: totalItems,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
   /// Log: Form/Checklist completed (internal)
   Future<void> logFormCompleted(
     String companyId,

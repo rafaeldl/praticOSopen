@@ -2521,6 +2521,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get checklistAdded => 'Checklist agregado';
 
   @override
+  String get checklistUpdated => 'Checklist actualizado';
+
+  @override
   String get checklistCompleted => 'Checklist completado';
 
   @override

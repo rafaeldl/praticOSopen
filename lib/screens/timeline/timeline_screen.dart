@@ -95,6 +95,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
       case 'payment_received':
         return 'summary';
       case 'form_added':
+      case 'form_updated':
       case 'form_completed':
         return 'forms';
       case 'status_change':
@@ -313,7 +314,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
       if (!mounted) return;
 
-      final completed = await Navigator.push<bool>(
+      final result = await Navigator.push<Map<String, dynamic>>(
         context,
         CupertinoPageRoute(
           fullscreenDialog: true,
@@ -325,16 +326,32 @@ class _TimelineScreenState extends State<TimelineScreen> {
         ),
       );
 
-      // If form was not completed, log "form_added"
+      // If form was not completed, log appropriately
       // (If completed, form_fill_screen already logs "form_completed")
-      if (completed != true && mounted) {
-        await _timelineRepository.logFormAdded(
-          _orderStore.companyId!,
-          _order!.id!,
-          newForm.getLocalizedTitle(context.l10n.localeName),
-          newForm.id,
-          newForm.items.length,
-        );
+      if (result?['completed'] != true && mounted) {
+        final responsesCount = result?['responsesCount'] ?? 0;
+        final totalItems = newForm.items.length;
+
+        if (responsesCount > 0) {
+          // Has responses - log as "updated" with progress
+          await _timelineRepository.logFormUpdated(
+            _orderStore.companyId!,
+            _order!.id!,
+            newForm.getLocalizedTitle(context.l10n.localeName),
+            newForm.id,
+            responsesCount,
+            totalItems,
+          );
+        } else {
+          // No responses - log as "added"
+          await _timelineRepository.logFormAdded(
+            _orderStore.companyId!,
+            _order!.id!,
+            newForm.getLocalizedTitle(context.l10n.localeName),
+            newForm.id,
+            totalItems,
+          );
+        }
       }
     }
   }

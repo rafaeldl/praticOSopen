@@ -1006,6 +1006,7 @@
   "productUpdated": "Producto actualizado",
   "productRemoved": "Producto eliminado",
   "checklistAdded": "Checklist agregado",
+  "checklistUpdated": "Checklist actualizado",
   "checklistCompleted": "Checklist completado",
   "paymentReceived": "Pago recibido",
   "assignedTo": "Asignado a {name}",
