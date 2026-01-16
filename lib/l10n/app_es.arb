@@ -614,6 +614,7 @@
   "roleConsultant": "Consultor",
   "roleDescTechnician": "Ejecuta servicios. No ve precios y tiene edición limitada tras la aprobación de la OS.",
   "roleTechnician": "Técnico",
+  "noRole": "Sin perfil",
 
   "no": "Ningún",
   "noFeminine": "Ninguna",

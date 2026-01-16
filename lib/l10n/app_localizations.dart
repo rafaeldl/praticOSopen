@@ -3532,6 +3532,12 @@ abstract class AppLocalizations {
   /// **'Técnico'**
   String get roleTechnician;
 
+  /// No description provided for @noRole.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem perfil'**
+  String get noRole;
+
   /// No description provided for @noFeminine.
   ///
   /// In pt, this message translates to:

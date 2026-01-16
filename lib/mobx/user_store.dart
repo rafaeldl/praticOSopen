@@ -106,7 +106,7 @@ abstract class _UserStore with Store {
     return newUser;
   }
 
-  /// Updates user profile data
+  /// Updates user profile data and syncs to all company memberships.
   @action
   Future<void> updateUserProfile(User user) async {
     user.updatedAt = DateTime.now();
@@ -116,6 +116,39 @@ abstract class _UserStore with Store {
     // Update global userAggr if it's the current user
     if (Global.currentUser?.uid == user.id) {
       Global.userAggr = user.toAggr();
+    }
+
+    // Sync user data to all company memberships
+    await _syncUserToMemberships(user);
+  }
+
+  /// Syncs user data (name, email, photo) to all company memberships.
+  /// This ensures denormalized UserAggr in memberships stays up-to-date.
+  Future<void> _syncUserToMemberships(User user) async {
+    if (user.id == null || user.companies == null) return;
+
+    final userAggr = user.toAggr();
+    final batch = _db.batch();
+
+    for (final companyRole in user.companies!) {
+      final companyId = companyRole.company?.id;
+      if (companyId == null) continue;
+
+      final membershipRef = _db
+          .collection('companies')
+          .doc(companyId)
+          .collection('memberships')
+          .doc(user.id);
+
+      batch.update(membershipRef, {
+        'user': userAggr.toJson(),
+      });
+    }
+
+    try {
+      await batch.commit();
+    } catch (e) {
+      print('[UserStore] Error syncing user to memberships: $e');
     }
   }
 

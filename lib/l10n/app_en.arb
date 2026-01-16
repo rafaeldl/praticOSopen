@@ -614,6 +614,7 @@
   "roleConsultant": "Consultant",
   "roleDescTechnician": "Executes services. Does not view prices and has limited editing after SO approval.",
   "roleTechnician": "Technician",
+  "noRole": "No role",
 
   "no": "No",
   "noFeminine": "No",

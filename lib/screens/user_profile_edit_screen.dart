@@ -41,10 +41,9 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
       setState(() => _isLoading = true);
       _formKey.currentState!.save();
       await _userStore.updateUserProfile(_user!);
+      if (!mounted) return;
       setState(() => _isLoading = false);
-      if (mounted) {
-        Navigator.pop(context, _user);
-      }
+      Navigator.pop(context, _user);
     }
   }
 

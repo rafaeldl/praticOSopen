@@ -331,8 +331,19 @@ service cloud.firestore {
             request.auth.uid == memberId  // Self-membership (signup)
             || isCompanyAdmin(companyId)
           );
-        // Update/delete apenas owner ou admin
-        allow update, delete: if request.auth != null
+        // Update: owner/admin pode tudo, usuário pode atualizar apenas seu próprio campo 'user'
+        allow update: if request.auth != null
+          && (
+            get(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid
+            || isCompanyAdmin(companyId)
+            // Usuário pode atualizar apenas o campo 'user' do próprio membership (sync de perfil)
+            || (
+              request.auth.uid == memberId
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['user'])
+            )
+          );
+        // Delete apenas owner ou admin
+        allow delete: if request.auth != null
           && (
             get(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid
             || isCompanyAdmin(companyId)

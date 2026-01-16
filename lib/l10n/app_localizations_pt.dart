@@ -1761,6 +1761,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get roleTechnician => 'Técnico';
 
   @override
+  String get noRole => 'Sem perfil';
+
+  @override
   String get noFeminine => 'Nenhuma';
 
   @override
