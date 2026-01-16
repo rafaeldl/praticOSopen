@@ -106,7 +106,7 @@ TimelineEventData _$TimelineEventDataFromJson(
   customerName: json['customerName'] as String?,
   customerPhone: json['customerPhone'] as String?,
   deviceName: json['deviceName'] as String?,
-  devicePlate: json['devicePlate'] as String?,
+  deviceSerial: json['deviceSerial'] as String?,
 );
 
 Map<String, dynamic> _$TimelineEventDataToJson(TimelineEventData instance) =>
@@ -150,7 +150,7 @@ Map<String, dynamic> _$TimelineEventDataToJson(TimelineEventData instance) =>
       'customerName': ?instance.customerName,
       'customerPhone': ?instance.customerPhone,
       'deviceName': ?instance.deviceName,
-      'devicePlate': ?instance.devicePlate,
+      'deviceSerial': ?instance.deviceSerial,
     };
 
 TimelineAttachment _$TimelineAttachmentFromJson(Map<String, dynamic> json) =>

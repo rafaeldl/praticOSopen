@@ -696,6 +696,7 @@ abstract class _OrderStore with Store {
       customerName: order!.customer?.name,
       customerPhone: order!.customer?.phone,
       deviceName: order!.device?.name,
+      deviceSerial: order!.device?.serial,
     );
   }
 

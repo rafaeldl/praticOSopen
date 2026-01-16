@@ -340,7 +340,7 @@ class TimelineRepository {
     String? customerName,
     String? customerPhone,
     String? deviceName,
-    String? devicePlate,
+    String? deviceSerial,
   }) async {
     final currentUser = Global.userAggr;
 
@@ -356,7 +356,7 @@ class TimelineRepository {
         customerName: customerName,
         customerPhone: customerPhone,
         deviceName: deviceName,
-        devicePlate: devicePlate,
+        deviceSerial: deviceSerial,
       ),
       readBy: [currentUser?.id ?? ''],
       mentions: [],

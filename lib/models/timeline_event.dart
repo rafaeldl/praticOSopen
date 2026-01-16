@@ -208,7 +208,7 @@ class TimelineEventData {
   String? customerName;
   String? customerPhone;
   String? deviceName;
-  String? devicePlate;
+  String? deviceSerial;
 
   TimelineEventData({
     this.text,
@@ -250,7 +250,7 @@ class TimelineEventData {
     this.customerName,
     this.customerPhone,
     this.deviceName,
-    this.devicePlate,
+    this.deviceSerial,
   });
 
   factory TimelineEventData.fromJson(Map<String, dynamic> json) =>
