@@ -104,10 +104,15 @@ mixin _$TimelineStore on _TimelineStore, Store {
     String text, {
     List<TimelineAttachment>? attachments,
     bool isPublic = false,
+    List<String>? mentions,
   }) {
     return _$sendMessageAsyncAction.run(
-      () =>
-          super.sendMessage(text, attachments: attachments, isPublic: isPublic),
+      () => super.sendMessage(
+        text,
+        attachments: attachments,
+        isPublic: isPublic,
+        mentions: mentions,
+      ),
     );
   }
 

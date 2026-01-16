@@ -85,6 +85,7 @@ abstract class _TimelineStore with Store {
     String text, {
     List<TimelineAttachment>? attachments,
     bool isPublic = false,
+    List<String>? mentions,
   }) async {
     if (_companyId == null || _orderId == null) return;
     if (text.trim().isEmpty && (attachments?.isEmpty ?? true)) return;
@@ -99,6 +100,7 @@ abstract class _TimelineStore with Store {
         text.trim(),
         attachments: attachments,
         isPublic: isPublic,
+        mentions: mentions,
       );
     } catch (e) {
       error = e.toString();

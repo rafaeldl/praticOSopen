@@ -85,6 +85,7 @@ class TimelineRepository {
     String text, {
     List<TimelineAttachment>? attachments,
     bool isPublic = false,
+    List<String>? mentions,
   }) async {
     final currentUser = Global.userAggr;
 
@@ -102,7 +103,7 @@ class TimelineRepository {
         attachments: attachments,
       ),
       readBy: [currentUser?.id ?? ''],
-      mentions: _parseMentions(text),
+      mentions: mentions ?? _parseMentions(text),
       createdAt: DateTime.now(),
       isDeleted: false,
     );

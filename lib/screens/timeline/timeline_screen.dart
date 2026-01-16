@@ -4,6 +4,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/timeline_store.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/timeline_event.dart';
 import 'package:praticos/global.dart';
@@ -54,6 +55,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
       if (_order != null) {
         _orderStore.setOrder(_order!);
+      }
+
+      // Load collaborators for mentions autocomplete
+      if (CollaboratorStore.instance.collaborators.isEmpty) {
+        CollaboratorStore.instance.loadCollaborators();
       }
     }
   }
@@ -554,15 +560,22 @@ class _TimelineScreenState extends State<TimelineScreen> {
               ),
             ),
             // Input
-            MessageInput(
-              onSend: (text, isPublic) async {
-                await _store.sendMessage(text, isPublic: isPublic);
-                _scrollToBottom();
-              },
-              isSending: _store.isSending,
-              customerName: _order?.customer?.name,
-              onAttachmentTap: _showAttachmentMenu,
-              onCameraTap: () => _orderStore.addPhotoFromCamera(),
+            Observer(
+              builder: (_) => MessageInput(
+                onSend: (text, isPublic, mentionIds) async {
+                  await _store.sendMessage(
+                    text,
+                    isPublic: isPublic,
+                    mentions: mentionIds.isNotEmpty ? mentionIds : null,
+                  );
+                  _scrollToBottom();
+                },
+                isSending: _store.isSending,
+                customerName: _order?.customer?.name,
+                onAttachmentTap: _showAttachmentMenu,
+                onCameraTap: () => _orderStore.addPhotoFromCamera(),
+                collaborators: CollaboratorStore.instance.collaborators.toList(),
+              ),
             ),
           ],
         ),
