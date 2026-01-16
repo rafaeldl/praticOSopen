@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:mobx/mobx.dart';
 import 'package:praticos/models/timeline_event.dart';
 import 'package:praticos/repositories/timeline_repository.dart';
@@ -10,8 +12,13 @@ class TimelineStore = _TimelineStore with _$TimelineStore;
 abstract class _TimelineStore with Store {
   final TimelineRepository _repository = TimelineRepository();
 
+  StreamSubscription<List<TimelineEvent>>? _subscription;
+
   @observable
-  ObservableStream<List<TimelineEvent>>? timelineStream;
+  ObservableList<TimelineEvent> events = ObservableList<TimelineEvent>();
+
+  @observable
+  bool isLoading = true;
 
   @observable
   bool isSending = false;
@@ -21,9 +28,6 @@ abstract class _TimelineStore with Store {
 
   String? _companyId;
   String? _orderId;
-
-  @computed
-  List<TimelineEvent> get events => timelineStream?.value ?? [];
 
   @computed
   int get unreadCount {
@@ -49,13 +53,31 @@ abstract class _TimelineStore with Store {
   void init(String companyId, String orderId) {
     _companyId = companyId;
     _orderId = orderId;
+    isLoading = true;
 
-    timelineStream = ObservableStream(
-      _repository.getTimeline(companyId, orderId),
+    // Cancel previous subscription if any
+    _subscription?.cancel();
+
+    // Listen to stream and update observable list
+    _subscription = _repository.getTimeline(companyId, orderId).listen(
+      (newEvents) {
+        _updateEvents(newEvents);
+      },
+      onError: (e) {
+        error = e.toString();
+        isLoading = false;
+      },
     );
 
     // Mark as read when opening
     _markAllAsRead();
+  }
+
+  @action
+  void _updateEvents(List<TimelineEvent> newEvents) {
+    events.clear();
+    events.addAll(newEvents);
+    isLoading = false;
   }
 
   @action
@@ -97,7 +119,9 @@ abstract class _TimelineStore with Store {
 
   @action
   void dispose() {
-    timelineStream = null;
+    _subscription?.cancel();
+    _subscription = null;
+    events.clear();
     _companyId = null;
     _orderId = null;
   }

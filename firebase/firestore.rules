@@ -277,6 +277,14 @@ service cloud.firestore {
           allow read: if belongsToCompany(companyId);
           allow write: if belongsToCompany(companyId);
         }
+
+        // Subcollection de timeline (chat/atividades) dentro de orders
+        match /timeline/{eventId} {
+          allow read: if belongsToCompany(companyId);
+          allow create: if belongsToCompany(companyId);
+          allow update: if belongsToCompany(companyId);
+          allow delete: if isCompanyAdmin(companyId);
+        }
       }
 
       // ──────────────────────────────────────────────────────────────────────

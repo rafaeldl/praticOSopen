@@ -96,13 +96,24 @@ class _TimelineScreenState extends State<TimelineScreen> {
             Expanded(
               child: Observer(
                 builder: (_) {
-                  final events = _store.events;
-
-                  if (_store.timelineStream == null) {
+                  if (_store.isLoading) {
                     return const Center(
                       child: CupertinoActivityIndicator(),
                     );
                   }
+
+                  if (_store.error != null) {
+                    return Center(
+                      child: Text(
+                        _store.error!,
+                        style: TextStyle(
+                          color: CupertinoColors.systemRed,
+                        ),
+                      ),
+                    );
+                  }
+
+                  final events = _store.events;
 
                   if (events.isEmpty) {
                     return _buildEmptyState();
