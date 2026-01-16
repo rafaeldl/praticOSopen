@@ -505,6 +505,10 @@ class EventCard extends StatelessWidget {
         return context.l10n.osCreated;
       case 'device_change':
         return context.l10n.deviceChanged;
+      case 'customer_change':
+        return context.l10n.customerChanged;
+      case 'due_date_change':
+        return context.l10n.dueDateChanged;
       default:
         return context.l10n.newActivity;
     }
@@ -518,6 +522,14 @@ class EventCard extends StatelessWidget {
         final oldName = event.data?.oldDeviceName ?? '?';
         final newName = event.data?.newDeviceName ?? '?';
         return '$oldName → $newName';
+      case 'customer_change':
+        final oldName = event.data?.oldCustomerName ?? '?';
+        final newName = event.data?.newCustomerName ?? '?';
+        return '$oldName → $newName';
+      case 'due_date_change':
+        final oldDate = _formatDate(event.data?.oldDate);
+        final newDate = _formatDate(event.data?.newDate);
+        return '$oldDate → $newDate';
       case 'service_added':
         final value = event.data?.serviceValue;
         return '${event.data?.serviceName}${value != null ? ' • R\$ ${value.toStringAsFixed(2)}' : ''}';
@@ -558,6 +570,10 @@ class EventCard extends StatelessWidget {
         return CupertinoColors.activeBlue;
       case 'device_change':
         return CupertinoColors.systemTeal;
+      case 'customer_change':
+        return CupertinoColors.systemOrange;
+      case 'due_date_change':
+        return CupertinoColors.systemIndigo;
       default:
         return CupertinoColors.systemGrey;
     }
@@ -568,6 +584,11 @@ class EventCard extends StatelessWidget {
     final hour = date.hour.toString().padLeft(2, '0');
     final minute = date.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '?';
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}';
   }
 }
 

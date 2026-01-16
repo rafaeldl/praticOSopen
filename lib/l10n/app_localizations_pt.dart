@@ -2478,6 +2478,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get deviceChanged => 'Dispositivo alterado';
 
   @override
+  String get customerChanged => 'Cliente alterado';
+
+  @override
+  String get dueDateChanged => 'Data de entrega alterada';
+
+  @override
   String get statusChanged => 'Status alterado';
 
   @override

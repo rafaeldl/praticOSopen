@@ -4792,6 +4792,18 @@ abstract class AppLocalizations {
   /// **'Dispositivo alterado'**
   String get deviceChanged;
 
+  /// No description provided for @customerChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente alterado'**
+  String get customerChanged;
+
+  /// No description provided for @dueDateChanged.
+  ///
+  /// In pt, this message translates to:
+  /// **'Data de entrega alterada'**
+  String get dueDateChanged;
+
   /// No description provided for @statusChanged.
   ///
   /// In pt, this message translates to:

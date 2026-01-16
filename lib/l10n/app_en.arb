@@ -988,6 +988,8 @@
   },
   "osCreated": "Order created",
   "deviceChanged": "Device changed",
+  "customerChanged": "Customer changed",
+  "dueDateChanged": "Due date changed",
   "statusChanged": "Status changed",
   "photosAdded": "{count, plural, =1{1 photo added} other{{count} photos added}}",
   "@photosAdded": {

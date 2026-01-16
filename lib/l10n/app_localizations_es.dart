@@ -2480,6 +2480,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deviceChanged => 'Dispositivo cambiado';
 
   @override
+  String get customerChanged => 'Cliente cambiado';
+
+  @override
+  String get dueDateChanged => 'Fecha de entrega cambiada';
+
+  @override
   String get statusChanged => 'Estado cambiado';
 
   @override

@@ -1033,6 +1033,8 @@
   },
   "osCreated": "OS criada",
   "deviceChanged": "Dispositivo alterado",
+  "customerChanged": "Cliente alterado",
+  "dueDateChanged": "Data de entrega alterada",
   "statusChanged": "Status alterado",
   "photosAdded": "{count, plural, =1{1 foto adicionada} other{{count} fotos adicionadas}}",
   "@photosAdded": {

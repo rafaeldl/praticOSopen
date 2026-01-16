@@ -437,6 +437,66 @@ class TimelineRepository {
     await createEvent(companyId, orderId, event);
   }
 
+  /// Log: Customer change (internal)
+  Future<void> logCustomerChange(
+    String companyId,
+    String orderId, {
+    String? oldCustomerName,
+    String? newCustomerName,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'customer_change',
+      visibility: 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        oldCustomerName: oldCustomerName,
+        newCustomerName: newCustomerName,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
+  /// Log: Due date change (internal)
+  Future<void> logDueDateChange(
+    String companyId,
+    String orderId, {
+    DateTime? oldDate,
+    DateTime? newDate,
+  }) async {
+    final currentUser = Global.userAggr;
+
+    final event = TimelineEvent(
+      type: 'due_date_change',
+      visibility: 'internal',
+      author: TimelineAuthor(
+        id: currentUser?.id,
+        name: currentUser?.name,
+        type: 'collaborator',
+      ),
+      data: TimelineEventData(
+        oldDate: oldDate,
+        newDate: newDate,
+      ),
+      readBy: [currentUser?.id ?? ''],
+      mentions: [],
+      createdAt: DateTime.now(),
+      isDeleted: false,
+    );
+
+    await createEvent(companyId, orderId, event);
+  }
+
   // --- Read Status ---
 
   /// Mark all as read for a user

@@ -318,9 +318,20 @@ abstract class _OrderStore with Store {
     // Evita operações desnecessárias para o mesmo cliente
     if (customer?.id == c.id) return;
 
+    final oldCustomer = order!.customer;
     order!.customer = c.toAggr();
     customer = order!.customer;
     createItem();
+
+    // Log customer change to timeline
+    if (order?.id != null && companyId != null && oldCustomer != null) {
+      _timelineRepository.logCustomerChange(
+        companyId!,
+        order!.id!,
+        oldCustomerName: oldCustomer.name,
+        newCustomerName: c.name,
+      );
+    }
   }
 
   @action
@@ -345,9 +356,20 @@ abstract class _OrderStore with Store {
   }
 
   setDueDate(DateTime date) {
+    final oldDate = order!.dueDate;
     order!.dueDate = date;
     dueDate = dateToString(date);
     createItem();
+
+    // Log due date change to timeline
+    if (order?.id != null && companyId != null) {
+      _timelineRepository.logDueDateChange(
+        companyId!,
+        order!.id!,
+        oldDate: oldDate,
+        newDate: date,
+      );
+    }
   }
 
   @action

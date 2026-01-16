@@ -988,6 +988,8 @@
   },
   "osCreated": "Orden creada",
   "deviceChanged": "Dispositivo cambiado",
+  "customerChanged": "Cliente cambiado",
+  "dueDateChanged": "Fecha de entrega cambiada",
   "statusChanged": "Estado cambiado",
   "photosAdded": "{count, plural, =1{1 foto agregada} other{{count} fotos agregadas}}",
   "@photosAdded": {
