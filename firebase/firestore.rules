@@ -360,6 +360,20 @@ service cloud.firestore {
         allow read: if belongsToCompany(companyId);
         allow write: if canManageTemplates(companyId);
       }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // ACCUMULATED FIELDS (valores acumulados de campos)
+      // Usado para autocomplete de categorias, marcas, modelos, etc.
+      // Todos podem ler e escrever (registrar uso)
+      // ──────────────────────────────────────────────────────────────────────
+      match /accumulatedFields/{fieldType} {
+        allow read: if belongsToCompany(companyId);
+
+        match /values/{valueId} {
+          allow read: if belongsToCompany(companyId);
+          allow write: if belongsToCompany(companyId);
+        }
+      }
     }
   }
 }
