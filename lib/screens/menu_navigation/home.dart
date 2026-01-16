@@ -41,6 +41,7 @@ class _HomeState extends State<Home> {
 
     final baseFilters = [
       {'status': l10n.all, 'icon': CupertinoIcons.square_grid_2x2, 'field': null},
+      {'status': l10n.unread, 'icon': CupertinoIcons.bubble_left_fill, 'field': 'unread'},
       {'status': l10n.delivery, 'field': 'due_date', 'icon': CupertinoIcons.clock},
       {'status': config.getStatus('approved'), 'field': 'approved', 'icon': CupertinoIcons.hand_thumbsup},
       {'status': config.getStatus('progress'), 'field': 'progress', 'icon': CupertinoIcons.arrow_2_circlepath},
@@ -405,6 +406,8 @@ class _HomeState extends State<Home> {
 
   Color _getFilterChipColor(String? field) {
     switch (field) {
+      case 'unread':
+        return CupertinoColors.systemRed;
       case 'approved':
         return CupertinoColors.systemBlue;
       case 'progress':
@@ -923,6 +926,7 @@ class _HomeState extends State<Home> {
 // Helper classes for filter labels (used outside BuildContext)
 abstract class _FilterLabels {
   String get all;
+  String get unread;
   String get delivery;
   String get toReceive;
   String get paid;
@@ -930,6 +934,7 @@ abstract class _FilterLabels {
 
 class _PtLabels implements _FilterLabels {
   @override String get all => 'Todos';
+  @override String get unread => 'Não lidas';
   @override String get delivery => 'Entrega';
   @override String get toReceive => 'A receber';
   @override String get paid => 'Pago';
@@ -937,6 +942,7 @@ class _PtLabels implements _FilterLabels {
 
 class _EnLabels implements _FilterLabels {
   @override String get all => 'All';
+  @override String get unread => 'Unread';
   @override String get delivery => 'Delivery';
   @override String get toReceive => 'Receivable';
   @override String get paid => 'Paid';
@@ -944,6 +950,7 @@ class _EnLabels implements _FilterLabels {
 
 class _EsLabels implements _FilterLabels {
   @override String get all => 'Todos';
+  @override String get unread => 'No leídos';
   @override String get delivery => 'Entrega';
   @override String get toReceive => 'Por cobrar';
   @override String get paid => 'Pagado';

@@ -1416,12 +1416,16 @@ abstract class _OrderStore with Store {
   Future<void> _fetchOrdersInfinite(String? status) async {
     if (companyId == null) return;
 
+    // Para filtro "unread", buscamos todas e filtramos em memória
+    final isUnreadFilter = status == 'unread';
+    final queryStatus = isUnreadFilter ? null : status;
+
     try {
       final snapshot = await repository.getOrdersWithPagination(
         companyId!,
-        status: status,
+        status: queryStatus,
         customerId: customerFilter?.id,
-        limit: _limit,
+        limit: isUnreadFilter ? 50 : _limit, // Busca mais para filtrar
         startAfterDocument: _lastDocument,
       );
 
@@ -1432,8 +1436,8 @@ abstract class _OrderStore with Store {
 
       _lastDocument = snapshot.docs.last;
 
-      // Converter para objetos Order e adicionar à lista
-      final newOrders = snapshot.docs
+      // Converter para objetos Order
+      var newOrders = snapshot.docs
           .map((doc) {
             final data = doc.data();
             data['id'] = doc.id;
@@ -1441,10 +1445,18 @@ abstract class _OrderStore with Store {
           })
           .toList();
 
+      // Filtrar por unread em memória se necessário
+      if (isUnreadFilter) {
+        final userId = Global.userAggr?.id ?? '';
+        newOrders = newOrders
+            .where((order) => order.hasUnread(userId))
+            .toList();
+      }
+
       orders.addAll(newOrders);
 
       // Verificar se há mais resultados
-      if (snapshot.docs.length < _limit) {
+      if (snapshot.docs.length < (isUnreadFilter ? 50 : _limit)) {
         hasMoreOrders = false;
       }
     } catch (e) {

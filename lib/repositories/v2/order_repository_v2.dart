@@ -98,9 +98,10 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
       query = query.where('customer.id', isEqualTo: customerId);
     }
 
-    // Ordenação padrão (se não for due_date)
+    // Ordenação padrão: por última atividade (estilo WhatsApp)
+    // Se não for due_date, ordenar por lastActivity.createdAt
     if (status != 'due_date') {
-      query = query.orderBy('createdAt', descending: true);
+      query = query.orderBy('lastActivity.createdAt', descending: true);
     }
 
     // Paginação
