@@ -8,6 +8,7 @@ import 'package:praticos/models/order_form.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/repositories/timeline_repository.dart';
 
 class FormFillScreen extends StatefulWidget {
   final String orderId;
@@ -29,6 +30,7 @@ class _FormFillScreenState extends State<FormFillScreen> {
   final FormsService _formsService = FormsService();
   final PhotoService _photoService = PhotoService();
   final AuthorizationService _authService = AuthorizationService.instance;
+  final TimelineRepository _timelineRepository = TimelineRepository();
   late OrderForm _currentForm;
   bool _isUploading = false;
   bool _isSaving = false;
@@ -279,6 +281,15 @@ class _FormFillScreenState extends State<FormFillScreen> {
 
     try {
       await _formsService.updateStatus(widget.companyId, widget.orderId, _currentForm.id, FormStatus.completed);
+
+      // Log to timeline
+      await _timelineRepository.logFormCompleted(
+        widget.companyId,
+        widget.orderId,
+        _currentForm.getLocalizedTitle(_localeCode),
+        _currentForm.id,
+        _currentForm.items.length,
+      );
 
       if (mounted) {
         HapticFeedback.mediumImpact();
