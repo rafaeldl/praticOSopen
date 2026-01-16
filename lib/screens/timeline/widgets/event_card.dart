@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/models/timeline_event.dart';
+import 'package:praticos/models/membership.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
 /// iOS Dynamic Type font sizes
@@ -15,12 +16,14 @@ class EventCard extends StatelessWidget {
   final TimelineEvent event;
   final bool isFromMe;
   final VoidCallback? onTap;
+  final List<Membership> collaborators;
 
   const EventCard({
     super.key,
     required this.event,
     required this.isFromMe,
     this.onTap,
+    this.collaborators = const [],
   });
 
   @override
@@ -125,13 +128,11 @@ class EventCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                  // Message text
-                  Text(
+                  // Message text with highlighted mentions
+                  _buildMessageText(
                     event.data?.text ?? '',
-                    style: TextStyle(
-                      fontSize: _FontSize.body,
-                      color: textColor,
-                    ),
+                    textColor,
+                    isFromMe || isCustomer,
                   ),
                   // Timestamp and visibility indicator
                   const SizedBox(height: 4),
@@ -665,6 +666,139 @@ class EventCard extends StatelessWidget {
       default:
         return event.author?.name;
     }
+  }
+
+  /// Builds message text with highlighted @mentions
+  Widget _buildMessageText(String text, Color textColor, bool isColoredBubble) {
+    // Get mentioned names from IDs
+    final mentionedNames = _getMentionedNames();
+
+    if (mentionedNames.isEmpty) {
+      // Fallback: highlight any @word pattern
+      return _buildTextWithSimpleMentions(text, textColor, isColoredBubble);
+    }
+
+    // Build regex to match full names after @
+    final namesPattern = mentionedNames
+        .map((name) => RegExp.escape(name))
+        .join('|');
+    final mentionRegex = RegExp('@($namesPattern)', caseSensitive: false);
+    final matches = mentionRegex.allMatches(text);
+
+    if (matches.isEmpty) {
+      return Text(
+        text,
+        style: TextStyle(
+          fontSize: _FontSize.body,
+          color: textColor,
+        ),
+      );
+    }
+
+    final spans = <TextSpan>[];
+    int lastEnd = 0;
+
+    for (final match in matches) {
+      // Add text before mention
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(text: text.substring(lastEnd, match.start)));
+      }
+
+      // Add highlighted mention
+      spans.add(TextSpan(
+        text: match.group(0),
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: isColoredBubble
+              ? CupertinoColors.white
+              : CupertinoColors.activeBlue,
+        ),
+      ));
+
+      lastEnd = match.end;
+    }
+
+    // Add remaining text
+    if (lastEnd < text.length) {
+      spans.add(TextSpan(text: text.substring(lastEnd)));
+    }
+
+    return Text.rich(
+      TextSpan(
+        style: TextStyle(
+          fontSize: _FontSize.body,
+          color: textColor,
+        ),
+        children: spans,
+      ),
+    );
+  }
+
+  /// Gets the names of mentioned users from their IDs
+  List<String> _getMentionedNames() {
+    final mentionIds = event.mentions ?? [];
+    if (mentionIds.isEmpty || collaborators.isEmpty) return [];
+
+    final names = <String>[];
+    for (final id in mentionIds) {
+      final collab = collaborators.cast<Membership?>().firstWhere(
+        (c) => c?.userId == id,
+        orElse: () => null,
+      );
+      if (collab?.user?.name != null) {
+        names.add(collab!.user!.name!);
+      }
+    }
+    return names;
+  }
+
+  /// Fallback: highlight simple @word patterns
+  Widget _buildTextWithSimpleMentions(String text, Color textColor, bool isColoredBubble) {
+    final mentionRegex = RegExp(r'@(\S+)');
+    final matches = mentionRegex.allMatches(text);
+
+    if (matches.isEmpty) {
+      return Text(
+        text,
+        style: TextStyle(
+          fontSize: _FontSize.body,
+          color: textColor,
+        ),
+      );
+    }
+
+    final spans = <TextSpan>[];
+    int lastEnd = 0;
+
+    for (final match in matches) {
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(text: text.substring(lastEnd, match.start)));
+      }
+      spans.add(TextSpan(
+        text: match.group(0),
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: isColoredBubble
+              ? CupertinoColors.white
+              : CupertinoColors.activeBlue,
+        ),
+      ));
+      lastEnd = match.end;
+    }
+
+    if (lastEnd < text.length) {
+      spans.add(TextSpan(text: text.substring(lastEnd)));
+    }
+
+    return Text.rich(
+      TextSpan(
+        style: TextStyle(
+          fontSize: _FontSize.body,
+          color: textColor,
+        ),
+        children: spans,
+      ),
+    );
   }
 
   String _formatTime(DateTime? date) {

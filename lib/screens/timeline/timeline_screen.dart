@@ -775,6 +775,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
                   event: event,
                   isFromMe: event.author?.id == Global.userAggr?.id,
                   onTap: event.isComment ? null : () => _handleEventTap(event),
+                  collaborators: CollaboratorStore.instance.collaborators.toList(),
                 )),
           ],
         );
