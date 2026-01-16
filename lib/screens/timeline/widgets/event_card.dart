@@ -289,15 +289,15 @@ class EventCard extends StatelessWidget {
     }
 
     if (photos.length == 1) {
-      return _buildPhotoTile(context, photos[0]);
+      return _buildPhotoTile(context, photos[0], index: 0);
     }
 
     if (photos.length == 2) {
       return Row(
         children: [
-          Expanded(child: _buildPhotoTile(context, photos[0], aspectRatio: 1)),
+          Expanded(child: _buildPhotoTile(context, photos[0], aspectRatio: 1, index: 0)),
           const SizedBox(width: 2),
-          Expanded(child: _buildPhotoTile(context, photos[1], aspectRatio: 1)),
+          Expanded(child: _buildPhotoTile(context, photos[1], aspectRatio: 1, index: 1)),
         ],
       );
     }
@@ -307,15 +307,15 @@ class EventCard extends StatelessWidget {
         children: [
           Expanded(
             flex: 2,
-            child: _buildPhotoTile(context, photos[0], aspectRatio: 0.75),
+            child: _buildPhotoTile(context, photos[0], aspectRatio: 0.75, index: 0),
           ),
           const SizedBox(width: 2),
           Expanded(
             child: Column(
               children: [
-                _buildPhotoTile(context, photos[1], aspectRatio: 1),
+                _buildPhotoTile(context, photos[1], aspectRatio: 1, index: 1),
                 const SizedBox(height: 2),
-                _buildPhotoTile(context, photos[2], aspectRatio: 1),
+                _buildPhotoTile(context, photos[2], aspectRatio: 1, index: 2),
               ],
             ),
           ),
@@ -328,21 +328,21 @@ class EventCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: _buildPhotoTile(context, photos[0], aspectRatio: 1)),
+            Expanded(child: _buildPhotoTile(context, photos[0], aspectRatio: 1, index: 0)),
             const SizedBox(width: 2),
-            Expanded(child: _buildPhotoTile(context, photos[1], aspectRatio: 1)),
+            Expanded(child: _buildPhotoTile(context, photos[1], aspectRatio: 1, index: 1)),
           ],
         ),
         const SizedBox(height: 2),
         Row(
           children: [
-            Expanded(child: _buildPhotoTile(context, photos[2], aspectRatio: 1)),
+            Expanded(child: _buildPhotoTile(context, photos[2], aspectRatio: 1, index: 2)),
             const SizedBox(width: 2),
             Expanded(
               child: photos.length > 4
                   ? _buildPhotoTileWithOverlay(
-                      context, photos[3], photos.length - 4)
-                  : _buildPhotoTile(context, photos[3], aspectRatio: 1),
+                      context, photos[3], photos.length - 4, 3)
+                  : _buildPhotoTile(context, photos[3], aspectRatio: 1, index: 3),
             ),
           ],
         ),
@@ -351,27 +351,30 @@ class EventCard extends StatelessWidget {
   }
 
   Widget _buildPhotoTile(BuildContext context, String url,
-      {double? aspectRatio}) {
-    final widget = Image.network(
-      url,
-      fit: BoxFit.cover,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Container(
-          color: CupertinoColors.systemGrey5.resolveFrom(context),
-          child: const Center(
-            child: CupertinoActivityIndicator(),
-          ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          color: CupertinoColors.systemGrey5.resolveFrom(context),
-          child: const Center(
-            child: Icon(CupertinoIcons.photo, size: 32),
-          ),
-        );
-      },
+      {double? aspectRatio, int? index}) {
+    final widget = GestureDetector(
+      onTap: () => _openPhotoViewer(context, url, index ?? 0),
+      child: Image.network(
+        url,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            color: CupertinoColors.systemGrey5.resolveFrom(context),
+            child: const Center(
+              child: CupertinoActivityIndicator(),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            color: CupertinoColors.systemGrey5.resolveFrom(context),
+            child: const Center(
+              child: Icon(CupertinoIcons.photo, size: 32),
+            ),
+          );
+        },
+      ),
     );
 
     if (aspectRatio != null) {
@@ -384,28 +387,56 @@ class EventCard extends StatelessWidget {
     return widget;
   }
 
+  void _openPhotoViewer(BuildContext context, String initialUrl, int initialIndex) {
+    final photos = event.data?.photoUrls ?? [];
+
+    Navigator.of(context, rootNavigator: true).push(
+      CupertinoPageRoute(
+        fullscreenDialog: true,
+        builder: (context) => _FullscreenPhotoViewer(
+          photos: photos,
+          initialIndex: initialIndex,
+        ),
+      ),
+    );
+  }
+
   Widget _buildPhotoTileWithOverlay(
-      BuildContext context, String url, int moreCount) {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          _buildPhotoTile(context, url, aspectRatio: 1),
-          Container(
-            color: CupertinoColors.black.withValues(alpha: 0.5),
-            child: Center(
-              child: Text(
-                '+$moreCount',
-                style: const TextStyle(
-                  color: CupertinoColors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+      BuildContext context, String url, int moreCount, int index) {
+    return GestureDetector(
+      onTap: () => _openPhotoViewer(context, url, index),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.network(
+              url,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
+                  child: const Center(
+                    child: Icon(CupertinoIcons.photo, size: 32),
+                  ),
+                );
+              },
+            ),
+            Container(
+              color: CupertinoColors.black.withValues(alpha: 0.5),
+              child: Center(
+                child: Text(
+                  '+$moreCount',
+                  style: const TextStyle(
+                    color: CupertinoColors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -524,5 +555,102 @@ class EventCard extends StatelessWidget {
     final hour = date.hour.toString().padLeft(2, '0');
     final minute = date.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
+  }
+}
+
+/// Fullscreen photo viewer with swipe navigation
+class _FullscreenPhotoViewer extends StatefulWidget {
+  final List<String> photos;
+  final int initialIndex;
+
+  const _FullscreenPhotoViewer({
+    required this.photos,
+    required this.initialIndex,
+  });
+
+  @override
+  State<_FullscreenPhotoViewer> createState() => _FullscreenPhotoViewerState();
+}
+
+class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
+  late PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.black,
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.black.withValues(alpha: 0.8),
+        border: null,
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(
+            CupertinoIcons.xmark,
+            color: CupertinoColors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        middle: widget.photos.length > 1
+            ? Text(
+                '${_currentIndex + 1} / ${widget.photos.length}',
+                style: const TextStyle(color: CupertinoColors.white),
+              )
+            : null,
+      ),
+      child: SafeArea(
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: widget.photos.length,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          itemBuilder: (context, index) {
+            return InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Center(
+                child: Image.network(
+                  widget.photos[index],
+                  fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CupertinoActivityIndicator(
+                        color: CupertinoColors.white,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Icon(
+                        CupertinoIcons.photo,
+                        size: 64,
+                        color: CupertinoColors.systemGrey,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 }
