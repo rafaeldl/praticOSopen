@@ -7,6 +7,7 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/services/claims_service.dart';
 import 'company_info_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -127,6 +128,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
       // IMPORTANTE: Recarrega o AuthStore para que ele busque os dados atualizados do Firestore
       await widget.authStore.reloadUserAndCompany();
+
+      // Wait for Cloud Function to update custom claims
+      // This prevents "permission denied" errors on first access
+      await ClaimsService.instance.waitForCompanyClaim(companyId);
 
       if (mounted) {
         // Navega E força rebuild completo removendo todas as rotas

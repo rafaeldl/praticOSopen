@@ -7,6 +7,7 @@ import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/repositories/user_repository.dart';
+import 'package:praticos/services/claims_service.dart';
 
 part 'invite_store.g.dart';
 
@@ -127,7 +128,11 @@ abstract class _InviteStore with Store {
       // 4. Commit atômico
       await batch.commit();
 
-      // 5. Recarrega convites
+      // 5. Wait for Cloud Function to update custom claims
+      // This prevents "permission denied" errors on first access
+      await ClaimsService.instance.waitForCompanyClaim(companyId);
+
+      // 6. Recarrega convites
       await loadPendingInvites();
 
     } catch (e) {
