@@ -126,6 +126,14 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         await companyStore.updateCompany(existingCompany);
 
+        // Wait for Cloud Function to update custom claims BEFORE any other operations
+        // This prevents "permission denied" errors when creating sample data
+        setState(() => _statusMessage = context.l10n.preparing);
+        final claimsUpdated = await ClaimsService.instance.waitForCompanyClaim(targetCompanyId);
+        if (!claimsUpdated) {
+          debugPrint('⚠️ Claims not updated within timeout, proceeding anyway');
+        }
+
         setState(() => _statusMessage = context.l10n.importingForms);
         final bootstrapService = BootstrapService();
         await bootstrapService.syncCompanyFormsFromSegment(
