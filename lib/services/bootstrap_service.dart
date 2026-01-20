@@ -512,7 +512,50 @@ class BootstrapService {
       skippedOrders: skippedOrders,
     );
 
+    await _saveMetadata(companyId, segmentId, subspecialties, result);
+
     return result;
+  }
+
+  /// Salva metadata do bootstrap executado
+  /// Tenta salvar a metadata, mas não falha o bootstrap se houver erro de permissão
+  Future<void> _saveMetadata(
+    String companyId,
+    String segmentId,
+    List<String> subspecialties,
+    BootstrapResult result,
+  ) async {
+    try {
+      await _db
+          .collection('companies')
+          .doc(companyId)
+          .collection('metadata')
+          .doc('bootstrap')
+          .set({
+        'executedAt': FieldValue.serverTimestamp(),
+        'userOptedIn': true,
+        'segment': segmentId,
+        'subspecialties': subspecialties,
+        'created': {
+          'services': result.createdServices,
+          'products': result.createdProducts,
+          'devices': result.createdDevices,
+          'customers': result.createdCustomers,
+          'orders': result.createdOrders,
+        },
+        'skipped': {
+          'services': result.skippedServices,
+          'products': result.skippedProducts,
+          'devices': result.skippedDevices,
+          'customers': result.skippedCustomers,
+          'orders': result.skippedOrders,
+        },
+      });
+    } catch (e) {
+      // Não falha o bootstrap se houver erro ao salvar metadata
+      // Isso pode acontecer se as claims ainda não foram propagadas
+      print('⚠️ Could not save bootstrap metadata: $e');
+    }
   }
 
   /// Cria OSs de exemplo com dados localizados

@@ -385,6 +385,15 @@ service cloud.firestore {
           allow write: if belongsToCompany(companyId);
         }
       }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // METADATA (dados de configuração e histórico)
+      // Usado para armazenar metadata do bootstrap, configurações, etc.
+      // Membros podem ler e escrever
+      // ──────────────────────────────────────────────────────────────────────
+      match /metadata/{metadataId} {
+        allow read, write: if belongsToCompany(companyId);
+      }
     }
   }
 }
