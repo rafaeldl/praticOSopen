@@ -178,6 +178,14 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         await userStore.createCompanyForUser(company);
 
+        // Wait for Cloud Function to update custom claims BEFORE any other operations
+        // This prevents "permission denied" errors when creating sample data
+        setState(() => _statusMessage = context.l10n.preparing);
+        final claimsUpdated = await ClaimsService.instance.waitForCompanyClaim(targetCompanyId);
+        if (!claimsUpdated) {
+          debugPrint('⚠️ Claims not updated within timeout, proceeding anyway');
+        }
+
         setState(() => _statusMessage = context.l10n.importingForms);
         final bootstrapService = BootstrapService();
         await bootstrapService.syncCompanyFormsFromSegment(
@@ -205,15 +213,6 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
       if (mounted) {
         // Reload AuthStore BEFORE navigating to update companyAggr
         await widget.authStore.reloadUserAndCompany();
-
-        // Wait for claims only when creating a new company
-        // Existing companies already have claims set
-        if (widget.companyId == null) {
-          final claimsUpdated = await ClaimsService.instance.waitForCompanyClaim(targetCompanyId);
-          if (!claimsUpdated) {
-            debugPrint('⚠️ Claims not updated within timeout, proceeding anyway');
-          }
-        }
 
         // Navigate to home
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
