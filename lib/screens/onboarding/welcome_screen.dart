@@ -131,10 +131,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
       // Wait for Cloud Function to update custom claims
       // This prevents "permission denied" errors on first access
-      final claimsUpdated = await ClaimsService.instance.waitForCompanyClaim(companyId);
-      if (!claimsUpdated) {
-        debugPrint('⚠️ Claims not updated within timeout, proceeding anyway');
-      }
+      await ClaimsService.instance.waitForCompanyClaim(companyId);
 
       if (mounted) {
         // Navega E força rebuild completo removendo todas as rotas

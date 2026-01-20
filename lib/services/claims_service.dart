@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
 /// Service for handling Firebase custom claims operations.
 ///
@@ -61,10 +60,6 @@ class ClaimsService {
       final hasAccess = await _checkCompanyAccess(companyId);
       if (hasAccess) {
         stopwatch.stop();
-        debugPrint(
-          '[ClaimsService] Claims updated for company $companyId '
-          'after ${stopwatch.elapsedMilliseconds}ms',
-        );
         return true;
       }
 
@@ -72,10 +67,6 @@ class ClaimsService {
     }
 
     stopwatch.stop();
-    debugPrint(
-      '[ClaimsService] Timeout waiting for claims for company $companyId '
-      'after ${stopwatch.elapsedMilliseconds}ms',
-    );
     return false;
   }
 
@@ -97,15 +88,8 @@ class ClaimsService {
       final roles = claims['roles'];
       if (roles == null || roles is! Map) return false;
 
-      final hasCompany = roles.containsKey(companyId);
-      debugPrint(
-        '[ClaimsService] Checking claims - roles: $roles, '
-        'hasCompany($companyId): $hasCompany',
-      );
-
-      return hasCompany;
+      return roles.containsKey(companyId);
     } catch (e) {
-      debugPrint('[ClaimsService] Error checking claims: $e');
       return false;
     }
   }
@@ -122,7 +106,6 @@ class ClaimsService {
       final tokenResult = await user.getIdTokenResult(true);
       return tokenResult.claims;
     } catch (e) {
-      debugPrint('[ClaimsService] Error getting claims: $e');
       return null;
     }
   }
@@ -134,9 +117,8 @@ class ClaimsService {
   Future<void> forceTokenRefresh() async {
     try {
       await FirebaseAuth.instance.currentUser?.getIdToken(true);
-      debugPrint('[ClaimsService] Token refreshed');
     } catch (e) {
-      debugPrint('[ClaimsService] Error refreshing token: $e');
+      // Silently ignore refresh errors
     }
   }
 }

@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/invite.dart';
@@ -131,10 +130,7 @@ abstract class _InviteStore with Store {
 
       // 5. Wait for Cloud Function to update custom claims
       // This prevents "permission denied" errors on first access
-      final claimsUpdated = await ClaimsService.instance.waitForCompanyClaim(companyId);
-      if (!claimsUpdated) {
-        debugPrint('⚠️ Claims not updated within timeout after accepting invite');
-      }
+      await ClaimsService.instance.waitForCompanyClaim(companyId);
 
       // 6. Recarrega convites
       await loadPendingInvites();

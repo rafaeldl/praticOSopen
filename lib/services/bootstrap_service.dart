@@ -512,43 +512,7 @@ class BootstrapService {
       skippedOrders: skippedOrders,
     );
 
-    await _saveMetadata(companyId, segmentId, subspecialties, result);
-
     return result;
-  }
-
-  /// Salva metadata do bootstrap executado
-  Future<void> _saveMetadata(
-    String companyId,
-    String segmentId,
-    List<String> subspecialties,
-    BootstrapResult result,
-  ) async {
-    await _db
-        .collection('companies')
-        .doc(companyId)
-        .collection('metadata')
-        .doc('bootstrap')
-        .set({
-      'executedAt': FieldValue.serverTimestamp(),
-      'userOptedIn': true,
-      'segment': segmentId,
-      'subspecialties': subspecialties,
-      'created': {
-        'services': result.createdServices,
-        'products': result.createdProducts,
-        'devices': result.createdDevices,
-        'customers': result.createdCustomers,
-        'orders': result.createdOrders,
-      },
-      'skipped': {
-        'services': result.skippedServices,
-        'products': result.skippedProducts,
-        'devices': result.skippedDevices,
-        'customers': result.skippedCustomers,
-        'orders': result.skippedOrders,
-      },
-    });
   }
 
   /// Cria OSs de exemplo com dados localizados
