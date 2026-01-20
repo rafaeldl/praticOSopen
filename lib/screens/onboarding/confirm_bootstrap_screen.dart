@@ -10,6 +10,7 @@ import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/services/bootstrap_service.dart';
+import 'package:praticos/services/claims_service.dart';
 
 class ConfirmBootstrapScreen extends StatefulWidget {
   final AuthStore authStore;
@@ -204,6 +205,15 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
       if (mounted) {
         // Reload AuthStore BEFORE navigating to update companyAggr
         await widget.authStore.reloadUserAndCompany();
+
+        // Wait for claims only when creating a new company
+        // Existing companies already have claims set
+        if (widget.companyId == null) {
+          final claimsUpdated = await ClaimsService.instance.waitForCompanyClaim(targetCompanyId);
+          if (!claimsUpdated) {
+            debugPrint('⚠️ Claims not updated within timeout, proceeding anyway');
+          }
+        }
 
         // Navigate to home
         Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
