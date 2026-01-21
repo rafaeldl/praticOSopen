@@ -98,10 +98,16 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
       query = query.where('customer.id', isEqualTo: customerId);
     }
 
-    // Ordenação padrão: por data de atualização (updatedAt sempre existe)
-    // Se não for due_date, ordenar por updatedAt
+    // Ordenação baseada no filtro:
+    // - Todos (null) e Não lidas ('unread'): updatedAt (atividade recente)
+    // - Entrega ('due_date'): dueDate (já tratado acima)
+    // - Demais filtros: createdAt (data de criação)
     if (status != 'due_date') {
-      query = query.orderBy('updatedAt', descending: true);
+      if (status == null || status == 'unread') {
+        query = query.orderBy('updatedAt', descending: true);
+      } else {
+        query = query.orderBy('createdAt', descending: true);
+      }
     }
 
     // Paginação
