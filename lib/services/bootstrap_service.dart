@@ -6,6 +6,7 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/order.dart' as models;
+import 'package:praticos/models/last_activity.dart';
 import 'package:praticos/repositories/v2/service_repository_v2.dart';
 import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
@@ -99,6 +100,9 @@ class BootstrapService {
     String subspecialtyId,
   ) async {
     try {
+      final path = 'segments/$segmentId/bootstrap/$subspecialtyId';
+      print('🔍 [BOOTSTRAP DEBUG] getBootstrapData - path: $path');
+      
       final doc = await _db
           .collection('segments')
           .doc(segmentId)
@@ -106,8 +110,21 @@ class BootstrapService {
           .doc(subspecialtyId)
           .get();
 
-      return doc.data();
+      if (!doc.exists) {
+        print('⚠️ [BOOTSTRAP DEBUG] Document does not exist: $path');
+        return null;
+      }
+      
+      final data = doc.data();
+      if (data == null) {
+        print('⚠️ [BOOTSTRAP DEBUG] Document exists but has no data: $path');
+        return null;
+      }
+      
+      print('✅ [BOOTSTRAP DEBUG] getBootstrapData success - path: $path, hasServices: ${data['services'] != null}, hasProducts: ${data['products'] != null}');
+      return data;
     } catch (e) {
+      print('❌ [BOOTSTRAP DEBUG] getBootstrapData error - segmentId: $segmentId, subspecialtyId: $subspecialtyId, error: $e');
       return null;
     }
   }
@@ -278,9 +295,10 @@ class BootstrapService {
 
     // Se não tem subspecialties, usa _default
     final keys = subspecialties.isEmpty ? ['_default'] : subspecialties;
-
+    
     for (final subspecialtyId in keys) {
       final data = await getBootstrapData(segmentId, subspecialtyId);
+      
       if (data == null) continue;
 
       // Merge services (evita duplicatas por nome)
@@ -315,12 +333,15 @@ class BootstrapService {
       }
     }
 
-    return {
+    final result = {
       'services': servicesSet,
       'products': productsSet,
       'devices': devicesSet,
       'customer': customer,
     };
+    
+    
+    return result;
   }
 
   /// Busca nomes existentes de uma collection
@@ -349,6 +370,7 @@ class BootstrapService {
     required CompanyAggr companyAggr,
     String locale = 'pt-BR',
   }) async {
+
     // Resultado
     final List<String> createdServices = [];
     final List<String> createdProducts = [];
@@ -363,12 +385,14 @@ class BootstrapService {
 
     // 1. Fazer merge dos dados de bootstrap
     final mergedData = await _mergeBootstrapData(segmentId, subspecialties);
+    
 
     // 2. Buscar itens existentes
     final existingServices = await _getExistingNames(companyId, 'services');
     final existingProducts = await _getExistingNames(companyId, 'products');
     final existingDevices = await _getExistingNames(companyId, 'devices');
     final existingCustomers = await _getExistingNames(companyId, 'customers');
+    
 
     // 3. Criar serviços
     final services = (mergedData['services'] as List?) ?? [];
@@ -390,8 +414,12 @@ class BootstrapService {
         ..updatedAt = DateTime.now()
         ..updatedBy = userAggr;
 
-      await _serviceRepo.createItem(companyId, service);
-      createdServices.add(name);
+      try {
+        await _serviceRepo.createItem(companyId, service);
+        createdServices.add(name);
+      } catch (e) {
+        rethrow;
+      }
     }
 
     // 4. Criar produtos
@@ -476,29 +504,55 @@ class BootstrapService {
     }
 
     // 7. Criar OSs de exemplo (usando customers, devices e services criados)
-    // Verificar se já existem OSs criadas para evitar duplicação
-    final existingOrders = await _orderRepo.getQueryList(
-      companyId,
-      limit: 1,
-    );
+    // Verificar se já existem OSs de exemplo criadas para evitar duplicação
+    // Verifica diretamente na collection orders da company procurando por OSs com customer de exemplo
+    final allOrdersSnapshot = await _db
+        .collection('companies')
+        .doc(companyId)
+        .collection('orders')
+        .get();
+    
+    // Conta apenas OSs que têm customer de exemplo (identificadas pelo nome do customer)
+    int exampleOrdersCount = 0;
+    for (final doc in allOrdersSnapshot.docs) {
+      final data = doc.data();
+      final customer = data['customer'] as Map<String, dynamic>?;
+      final customerName = customer?['name'] as String?;
+      if (customerName != null && 
+          (customerName.contains('(Exemplo)') || 
+           customerName.contains('(Example)') || 
+           customerName.contains('(Ejemplo)'))) {
+        exampleOrdersCount++;
+      }
+    }
+    
+    final hasExampleOrders = exampleOrdersCount > 0;
+    final expectedExampleOrdersCount = 4; // Número esperado de OSs de exemplo
+    
 
-    if (existingOrders.isEmpty) {
+    // Cria OSs de exemplo se não houver nenhuma ou se houver menos que o esperado
+    // Nota: Se o usuário excluiu algumas OSs de exemplo, pode executar o bootstrap novamente para recriá-las
+    if (!hasExampleOrders || exampleOrdersCount < expectedExampleOrdersCount) {
       // Primeira vez executando o bootstrap, criar OSs demo
+      
       final orderResults = await _createSampleOrders(
         companyId: companyId,
         locale: locale,
         userAggr: userAggr,
         companyAggr: companyAggr,
       );
+      
+      
       createdOrders.addAll(orderResults['created'] as List<String>);
       skippedOrders.addAll(orderResults['skipped'] as List<String>);
     } else {
-      // Bootstrap já foi executado antes, não criar OSs duplicadas
-      skippedOrders.add('Orders already exist, skipping demo orders creation');
-      print('⏭️ Skipping demo orders creation - company already has orders');
+      // Já existem OSs de exemplo suficientes, não criar duplicadas
+      skippedOrders.add('Example orders already exist ($exampleOrdersCount/$expectedExampleOrdersCount), skipping demo orders creation');
+      print('⏭️ Skipping demo orders creation - company already has $exampleOrdersCount example orders (expected: $expectedExampleOrdersCount)');
+      
     }
 
-    // 8. Salvar metadata do bootstrap
+    // 9. Salvar metadata do bootstrap
     final result = BootstrapResult(
       createdServices: createdServices,
       createdProducts: createdProducts,
@@ -513,6 +567,7 @@ class BootstrapService {
     );
 
     await _saveMetadata(companyId, segmentId, subspecialties, result);
+    
 
     return result;
   }
@@ -573,11 +628,13 @@ class BootstrapService {
       final customers = await _customerRepo.getQueryList(companyId, limit: 10);
       final devices = await _deviceRepo.getQueryList(companyId, limit: 10);
       final services = await _serviceRepo.getQueryList(companyId, limit: 10);
+      
 
       // Filtrar nulls
       final validCustomers = customers.where((c) => c != null).cast<Customer>().toList();
       final validDevices = devices.where((d) => d != null).cast<Device>().toList();
       final validServices = services.where((s) => s != null).cast<Service>().toList();
+      
 
       // Se não houver dados suficientes, pular criação
       if (validCustomers.isEmpty || validDevices.isEmpty || validServices.isEmpty) {
@@ -600,6 +657,18 @@ class BootstrapService {
           ..service = service.toAggr()
           ..value = service.value;
 
+        // Criar lastActivity inicial para preview na UI (ícone, preview, tempo)
+        // Nota: A ordenação agora usa updatedAt, então lastActivity não é obrigatório para listagem
+        final lastActivity = LastActivity(
+          type: 'order_created',
+          icon: '📋',
+          preview: 'OS criada',
+          authorId: userAggr.id,
+          authorName: userAggr.name,
+          createdAt: DateTime.now().subtract(Duration(days: 11 - (i * 2))),
+          visibility: 'internal',
+        );
+
         final order = models.Order()
           ..customer = customer.toAggr()
           ..device = device.toAggr()
@@ -611,10 +680,19 @@ class BootstrapService {
           ..createdAt = DateTime.now().subtract(Duration(days: 11 - (i * 2)))
           ..createdBy = userAggr
           ..updatedAt = DateTime.now().subtract(Duration(days: 10 - (i * 2)))
-          ..updatedBy = userAggr;
+          ..updatedBy = userAggr
+          ..lastActivity = lastActivity;
 
-        await _orderRepo.createItem(companyId, order);
-        created.add('OS #${i + 1} - ${customer.name} - $status');
+        try {
+          await _orderRepo.createItem(companyId, order);
+          final orderId = order.id;
+          print('✅ [BOOTSTRAP DEBUG] Order created - index: $i, id: $orderId, status: $status, customer: ${customer.name}');
+          created.add('OS #${i + 1} - ${customer.name} - $status');
+          
+        } catch (e) {
+          print('❌ [BOOTSTRAP DEBUG] Error creating order $i: $e');
+          skipped.add('Error creating order $i: $e');
+        }
 
         // Add a form to the first order (for screenshots)
         if (i == 0 && order.id != null) {
@@ -667,5 +745,82 @@ class BootstrapService {
         .get();
 
     return doc.exists;
+  }
+
+  /// Atualiza OSs antigas que não têm lastActivity
+  /// 
+  /// NOTA: Esta função não é mais necessária para ordenação (agora usa updatedAt),
+  /// mas pode ser útil para popular lastActivity em OSs antigas para melhor UX na UI
+  /// (preview de última atividade, ícones, etc.)
+  Future<int> fixMissingLastActivity(String companyId) async {
+    try {
+      // Buscar TODAS as OSs (isNull só retorna documentos onde o campo existe e é null,
+      // não documentos onde o campo não existe. Precisamos filtrar em memória)
+      final allOrdersSnapshot = await _db
+          .collection('companies')
+          .doc(companyId)
+          .collection('orders')
+          .get();
+      
+      // Filtrar em memória: OSs sem lastActivity (campo ausente ou null)
+      final ordersWithoutLastActivity = allOrdersSnapshot.docs.where((doc) {
+        final data = doc.data();
+        final lastActivity = data['lastActivity'];
+        // Campo não existe ou é null
+        return lastActivity == null;
+      }).toList();
+
+      if (ordersWithoutLastActivity.isEmpty) {
+        return 0;
+      }
+
+      int updated = 0;
+      const batchLimit = 500; // Firestore batch limit
+      WriteBatch? batch;
+      int batchCount = 0;
+
+      for (int i = 0; i < ordersWithoutLastActivity.length; i++) {
+        final doc = ordersWithoutLastActivity[i];
+        final data = doc.data();
+        
+        // Criar novo batch se necessário
+        if (batch == null || batchCount >= batchLimit) {
+          if (batch != null) {
+            await batch.commit();
+          }
+          batch = _db.batch();
+          batchCount = 0;
+        }
+        
+        // Criar lastActivity baseado no createdAt da OS
+        final createdAt = data['createdAt'];
+        final createdBy = data['createdBy'] as Map<String, dynamic>?;
+        
+        final lastActivity = {
+          'type': 'order_created',
+          'icon': '📋',
+          'preview': 'OS criada',
+          'authorId': createdBy?['id'],
+          'authorName': createdBy?['name'],
+          'createdAt': createdAt ?? FieldValue.serverTimestamp(),
+          'visibility': 'internal',
+        };
+
+        batch.update(doc.reference, {'lastActivity': lastActivity});
+        batchCount++;
+        updated++;
+      }
+
+      // Commit do último batch se houver
+      if (batch != null && batchCount > 0) {
+        await batch.commit();
+      }
+
+      return updated;
+    } catch (e, stackTrace) {
+      print('❌ [BOOTSTRAP DEBUG] Error fixing lastActivity: $e');
+      print(stackTrace);
+      return 0;
+    }
   }
 }
