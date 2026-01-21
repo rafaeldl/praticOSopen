@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "Dart": {
+      "command": "fvm",
+      "args": ["dart", "mcp-server"],
+      "env": {}
+    },
+    "Apple HIG": {
+      "command": "node",
+      "args": ["/Users/rafaeldl/.volta/tools/image/packages/apple-dev-mcp/lib/node_modules/apple-dev-mcp/dist/server.js"]
+    }
+  }
+}
