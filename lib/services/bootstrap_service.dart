@@ -12,6 +12,7 @@ import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
+import 'package:praticos/repositories/timeline_repository.dart';
 import 'package:praticos/services/forms_service.dart';
 
 /// Resultado da execução do bootstrap
@@ -77,6 +78,7 @@ class BootstrapService {
   final DeviceRepositoryV2 _deviceRepo = DeviceRepositoryV2();
   final CustomerRepositoryV2 _customerRepo = CustomerRepositoryV2();
   final OrderRepositoryV2 _orderRepo = OrderRepositoryV2();
+  final TimelineRepository _timelineRepo = TimelineRepository();
   final FormsService _formsService = FormsService();
 
   /// Extrai string localizada de um valor que pode ser:
@@ -633,6 +635,18 @@ class BootstrapService {
         try {
           await _orderRepo.createItem(companyId, order);
           created.add('OS #${i + 1} - ${customer.name} - $status');
+
+          // Log order creation to timeline
+          if (order.id != null) {
+            await _timelineRepo.logOrderCreated(
+              companyId,
+              order.id!,
+              customerName: customer.name,
+              customerPhone: customer.phone,
+              deviceName: device.name,
+              deviceSerial: device.serial,
+            );
+          }
         } catch (e) {
           skipped.add('Error creating order $i: $e');
         }

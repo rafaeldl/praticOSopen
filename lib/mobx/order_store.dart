@@ -821,10 +821,10 @@ abstract class _OrderStore with Store {
   }
 
   /// Log order creation to timeline
-  void _logOrderCreated() {
+  Future<void> _logOrderCreated() async {
     if (order?.id == null || companyId == null) return;
 
-    _timelineRepository.logOrderCreated(
+    await _timelineRepository.logOrderCreated(
       companyId!,
       order!.id!,
       customerName: order!.customer?.name,
@@ -998,49 +998,45 @@ abstract class _OrderStore with Store {
     total = temp;
   }
 
-  createItem() {
+  Future<void> createItem() async {
     if (order == null || companyId == null) return;
 
     if (order!.id == null) {
       // Para nova OS, verifica duplicação pelo número
       if (order!.number != null) {
         // Verifica se existe OS com o mesmo número
-        repository.getOrderByNumber(companyId!, order!.number!).then((existingOrder) {
-          if (existingOrder != null) {
-            // Se encontrou, usa o ID da existente
-            order!.id = existingOrder.id;
-            repository.updateItem(companyId!, order);
-            orderStream =
-                repository.streamSingle(companyId!, order!.id).asObservable();
-          } else {
-            // Cria nova se não encontrou
-            repository.createItem(companyId!, order).then((_) {
-              if (order!.id != null) {
-                orderStream =
-                    repository.streamSingle(companyId!, order!.id).asObservable();
-                _logOrderCreated();
-              }
-            });
-          }
-        });
-      } else {
-        // Cria nova OS sem número
-        repository.createItem(companyId!, order).then((_) {
+        final existingOrder = await repository.getOrderByNumber(companyId!, order!.number!);
+        if (existingOrder != null) {
+          // Se encontrou, usa o ID da existente
+          order!.id = existingOrder.id;
+          await repository.updateItem(companyId!, order);
+          orderStream =
+              repository.streamSingle(companyId!, order!.id).asObservable();
+        } else {
+          // Cria nova se não encontrou
+          await repository.createItem(companyId!, order);
           if (order!.id != null) {
             orderStream =
                 repository.streamSingle(companyId!, order!.id).asObservable();
-            _logOrderCreated();
+            await _logOrderCreated();
           }
-        });
+        }
+      } else {
+        // Cria nova OS sem número
+        await repository.createItem(companyId!, order);
+        if (order!.id != null) {
+          orderStream =
+              repository.streamSingle(companyId!, order!.id).asObservable();
+          await _logOrderCreated();
+        }
       }
     } else {
       // Atualiza OS existente
-      repository.updateItem(companyId!, order).then((_) {
-        if (orderStream == null ||
-            orderStream!.value?.id != order!.id) {
-          orderStream = repository.streamSingle(companyId!, order!.id).asObservable();
-        }
-      });
+      await repository.updateItem(companyId!, order);
+      if (orderStream == null ||
+          orderStream!.value?.id != order!.id) {
+        orderStream = repository.streamSingle(companyId!, order!.id).asObservable();
+      }
     }
   }
 
