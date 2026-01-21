@@ -100,9 +100,6 @@ class BootstrapService {
     String subspecialtyId,
   ) async {
     try {
-      final path = 'segments/$segmentId/bootstrap/$subspecialtyId';
-      print('🔍 [BOOTSTRAP DEBUG] getBootstrapData - path: $path');
-      
       final doc = await _db
           .collection('segments')
           .doc(segmentId)
@@ -111,20 +108,11 @@ class BootstrapService {
           .get();
 
       if (!doc.exists) {
-        print('⚠️ [BOOTSTRAP DEBUG] Document does not exist: $path');
         return null;
       }
-      
-      final data = doc.data();
-      if (data == null) {
-        print('⚠️ [BOOTSTRAP DEBUG] Document exists but has no data: $path');
-        return null;
-      }
-      
-      print('✅ [BOOTSTRAP DEBUG] getBootstrapData success - path: $path, hasServices: ${data['services'] != null}, hasProducts: ${data['products'] != null}');
-      return data;
+
+      return doc.data();
     } catch (e) {
-      print('❌ [BOOTSTRAP DEBUG] getBootstrapData error - segmentId: $segmentId, subspecialtyId: $subspecialtyId, error: $e');
       return null;
     }
   }
@@ -333,15 +321,12 @@ class BootstrapService {
       }
     }
 
-    final result = {
+    return {
       'services': servicesSet,
       'products': productsSet,
       'devices': devicesSet,
       'customer': customer,
     };
-    
-    
-    return result;
   }
 
   /// Busca nomes existentes de uma collection
@@ -370,7 +355,6 @@ class BootstrapService {
     required CompanyAggr companyAggr,
     String locale = 'pt-BR',
   }) async {
-
     // Resultado
     final List<String> createdServices = [];
     final List<String> createdProducts = [];
@@ -385,14 +369,12 @@ class BootstrapService {
 
     // 1. Fazer merge dos dados de bootstrap
     final mergedData = await _mergeBootstrapData(segmentId, subspecialties);
-    
 
     // 2. Buscar itens existentes
     final existingServices = await _getExistingNames(companyId, 'services');
     final existingProducts = await _getExistingNames(companyId, 'products');
     final existingDevices = await _getExistingNames(companyId, 'devices');
     final existingCustomers = await _getExistingNames(companyId, 'customers');
-    
 
     // 3. Criar serviços
     final services = (mergedData['services'] as List?) ?? [];
@@ -504,52 +486,21 @@ class BootstrapService {
     }
 
     // 7. Criar OSs de exemplo (usando customers, devices e services criados)
-    // Verificar se já existem OSs de exemplo criadas para evitar duplicação
-    // Verifica diretamente na collection orders da company procurando por OSs com customer de exemplo
-    final allOrdersSnapshot = await _db
-        .collection('companies')
-        .doc(companyId)
-        .collection('orders')
-        .get();
-    
-    // Conta apenas OSs que têm customer de exemplo (identificadas pelo nome do customer)
-    int exampleOrdersCount = 0;
-    for (final doc in allOrdersSnapshot.docs) {
-      final data = doc.data();
-      final customer = data['customer'] as Map<String, dynamic>?;
-      final customerName = customer?['name'] as String?;
-      if (customerName != null && 
-          (customerName.contains('(Exemplo)') || 
-           customerName.contains('(Example)') || 
-           customerName.contains('(Ejemplo)'))) {
-        exampleOrdersCount++;
-      }
-    }
-    
-    final hasExampleOrders = exampleOrdersCount > 0;
-    final expectedExampleOrdersCount = 4; // Número esperado de OSs de exemplo
-    
+    // Verificar se já existem OSs para evitar duplicação
+    final existingOrders = await _orderRepo.getQueryList(companyId, limit: 1);
+    final hasOrders = existingOrders.isNotEmpty;
 
-    // Cria OSs de exemplo se não houver nenhuma ou se houver menos que o esperado
-    // Nota: Se o usuário excluiu algumas OSs de exemplo, pode executar o bootstrap novamente para recriá-las
-    if (!hasExampleOrders || exampleOrdersCount < expectedExampleOrdersCount) {
-      // Primeira vez executando o bootstrap, criar OSs demo
-      
+    if (!hasOrders) {
       final orderResults = await _createSampleOrders(
         companyId: companyId,
         locale: locale,
         userAggr: userAggr,
         companyAggr: companyAggr,
       );
-      
-      
       createdOrders.addAll(orderResults['created'] as List<String>);
       skippedOrders.addAll(orderResults['skipped'] as List<String>);
     } else {
-      // Já existem OSs de exemplo suficientes, não criar duplicadas
-      skippedOrders.add('Example orders already exist ($exampleOrdersCount/$expectedExampleOrdersCount), skipping demo orders creation');
-      print('⏭️ Skipping demo orders creation - company already has $exampleOrdersCount example orders (expected: $expectedExampleOrdersCount)');
-      
+      skippedOrders.add('Orders already exist, skipping demo orders creation');
     }
 
     // 9. Salvar metadata do bootstrap
@@ -567,7 +518,6 @@ class BootstrapService {
     );
 
     await _saveMetadata(companyId, segmentId, subspecialties, result);
-    
 
     return result;
   }
@@ -609,7 +559,6 @@ class BootstrapService {
     } catch (e) {
       // Não falha o bootstrap se houver erro ao salvar metadata
       // Isso pode acontecer se as claims ainda não foram propagadas
-      print('⚠️ Could not save bootstrap metadata: $e');
     }
   }
 
@@ -628,13 +577,11 @@ class BootstrapService {
       final customers = await _customerRepo.getQueryList(companyId, limit: 10);
       final devices = await _deviceRepo.getQueryList(companyId, limit: 10);
       final services = await _serviceRepo.getQueryList(companyId, limit: 10);
-      
 
       // Filtrar nulls
       final validCustomers = customers.where((c) => c != null).cast<Customer>().toList();
       final validDevices = devices.where((d) => d != null).cast<Device>().toList();
       final validServices = services.where((s) => s != null).cast<Service>().toList();
-      
 
       // Se não houver dados suficientes, pular criação
       if (validCustomers.isEmpty || validDevices.isEmpty || validServices.isEmpty) {
@@ -685,12 +632,8 @@ class BootstrapService {
 
         try {
           await _orderRepo.createItem(companyId, order);
-          final orderId = order.id;
-          print('✅ [BOOTSTRAP DEBUG] Order created - index: $i, id: $orderId, status: $status, customer: ${customer.name}');
           created.add('OS #${i + 1} - ${customer.name} - $status');
-          
         } catch (e) {
-          print('❌ [BOOTSTRAP DEBUG] Error creating order $i: $e');
           skipped.add('Error creating order $i: $e');
         }
 
@@ -704,15 +647,13 @@ class BootstrapService {
                 order.id!,
                 templates.first,
               );
-              print('✅ Added form "${templates.first.title}" to order #1');
             }
           } catch (e) {
-            print('⚠️ Could not add form to order: $e');
+            // Silently ignore form errors - not critical for bootstrap
           }
         }
       }
     } catch (e) {
-      print('Error creating sample orders: $e');
       skipped.add('Error: $e');
     }
 
@@ -745,82 +686,5 @@ class BootstrapService {
         .get();
 
     return doc.exists;
-  }
-
-  /// Atualiza OSs antigas que não têm lastActivity
-  /// 
-  /// NOTA: Esta função não é mais necessária para ordenação (agora usa updatedAt),
-  /// mas pode ser útil para popular lastActivity em OSs antigas para melhor UX na UI
-  /// (preview de última atividade, ícones, etc.)
-  Future<int> fixMissingLastActivity(String companyId) async {
-    try {
-      // Buscar TODAS as OSs (isNull só retorna documentos onde o campo existe e é null,
-      // não documentos onde o campo não existe. Precisamos filtrar em memória)
-      final allOrdersSnapshot = await _db
-          .collection('companies')
-          .doc(companyId)
-          .collection('orders')
-          .get();
-      
-      // Filtrar em memória: OSs sem lastActivity (campo ausente ou null)
-      final ordersWithoutLastActivity = allOrdersSnapshot.docs.where((doc) {
-        final data = doc.data();
-        final lastActivity = data['lastActivity'];
-        // Campo não existe ou é null
-        return lastActivity == null;
-      }).toList();
-
-      if (ordersWithoutLastActivity.isEmpty) {
-        return 0;
-      }
-
-      int updated = 0;
-      const batchLimit = 500; // Firestore batch limit
-      WriteBatch? batch;
-      int batchCount = 0;
-
-      for (int i = 0; i < ordersWithoutLastActivity.length; i++) {
-        final doc = ordersWithoutLastActivity[i];
-        final data = doc.data();
-        
-        // Criar novo batch se necessário
-        if (batch == null || batchCount >= batchLimit) {
-          if (batch != null) {
-            await batch.commit();
-          }
-          batch = _db.batch();
-          batchCount = 0;
-        }
-        
-        // Criar lastActivity baseado no createdAt da OS
-        final createdAt = data['createdAt'];
-        final createdBy = data['createdBy'] as Map<String, dynamic>?;
-        
-        final lastActivity = {
-          'type': 'order_created',
-          'icon': '📋',
-          'preview': 'OS criada',
-          'authorId': createdBy?['id'],
-          'authorName': createdBy?['name'],
-          'createdAt': createdAt ?? FieldValue.serverTimestamp(),
-          'visibility': 'internal',
-        };
-
-        batch.update(doc.reference, {'lastActivity': lastActivity});
-        batchCount++;
-        updated++;
-      }
-
-      // Commit do último batch se houver
-      if (batch != null && batchCount > 0) {
-        await batch.commit();
-      }
-
-      return updated;
-    } catch (e, stackTrace) {
-      print('❌ [BOOTSTRAP DEBUG] Error fixing lastActivity: $e');
-      print(stackTrace);
-      return 0;
-    }
   }
 }

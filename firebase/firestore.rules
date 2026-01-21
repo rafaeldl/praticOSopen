@@ -151,6 +151,12 @@ service cloud.firestore {
         allow read: if request.auth != null;
         allow write: if false; // Apenas via Admin SDK (script de seed)
       }
+
+      // Dados de bootstrap do segmento (read-only)
+      match /bootstrap/{subspecialtyId} {
+        allow read: if request.auth != null;
+        allow write: if false; // Apenas via Admin SDK (script de seed)
+      }
     }
 
     // ════════════════════════════════════════════════════════════════════════
