@@ -960,6 +960,8 @@ class TimelineRepository {
         preview = 'Nova atividade';
     }
 
+    final currentUser = Global.userAggr;
+
     await _orderRef(companyId, orderId).update({
       'lastActivity': {
         'type': event.type,
@@ -970,6 +972,9 @@ class TimelineRepository {
         'createdAt': FieldValue.serverTimestamp(),
         'visibility': event.visibility,
       },
+      // Atualiza campos de audit da OS
+      'updatedAt': DateTime.now().toIso8601String(),
+      'updatedBy': currentUser?.toJson(),
     });
   }
 

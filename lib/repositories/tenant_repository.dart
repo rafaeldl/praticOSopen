@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/models/base_audit_company.dart';
 import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/global.dart';
 
 /// Repository base para entidades com isolamento por tenant usando subcollections.
 ///
@@ -190,11 +191,27 @@ abstract class TenantRepository<T extends BaseAuditCompany?> {
   // CRUD Operations
   // ═══════════════════════════════════════════════════════════════════
 
+  /// Aplica campos de audit antes de persistir.
+  /// - createdAt/createdBy: só seta se null (preserva criador original)
+  /// - updatedAt/updatedBy: sempre seta (última modificação)
+  void _applyAuditFields(T item) {
+    if (item == null) return;
+
+    final now = DateTime.now();
+    final currentUser = Global.userAggr;
+
+    item.createdAt ??= now;
+    item.createdBy ??= currentUser;
+    item.updatedAt = now;
+    item.updatedBy = currentUser;
+  }
+
   /// Cria ou atualiza um documento.
   ///
   /// Se o item já tiver um ID, atualiza o documento existente.
   /// Caso contrário, cria um novo documento.
   Future<void> createItem(String companyId, T item, {String? id}) async {
+    _applyAuditFields(item);
     if (item?.id != null) {
       final json = toJson(item);
       json.remove('number'); // Compatibilidade com Order
@@ -214,6 +231,8 @@ abstract class TenantRepository<T extends BaseAuditCompany?> {
 
   /// Atualiza um documento existente.
   Future<void> updateItem(String companyId, T item) {
+    _applyAuditFields(item);
+
     return _getCollection(companyId)
         .doc(item?.id)
         .set(toJson(item), SetOptions(merge: true));

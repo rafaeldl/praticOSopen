@@ -3,6 +3,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:praticos/global.dart';
 
 abstract class Repository<T extends BaseAudit?> {
   final String collection;
@@ -165,7 +166,24 @@ abstract class Repository<T extends BaseAudit?> {
         }).toList());
   }
 
+  /// Aplica campos de audit antes de persistir.
+  /// - createdAt/createdBy: só seta se null (preserva criador original)
+  /// - updatedAt/updatedBy: sempre seta (última modificação)
+  void _applyAuditFields(T item) {
+    if (item == null) return;
+
+    final now = DateTime.now();
+    final currentUser = Global.userAggr;
+
+    item.createdAt ??= now;
+    item.createdBy ??= currentUser;
+    item.updatedAt = now;
+    item.updatedBy = currentUser;
+  }
+
   Future<dynamic> createItem(T item, {String? id}) {
+    _applyAuditFields(item);
+
     if (item?.id != null) {
       var json = toJson(item);
       json.remove("number");
@@ -197,6 +215,8 @@ abstract class Repository<T extends BaseAudit?> {
   }
 
   Future<void> updateItem(T item) {
+    _applyAuditFields(item);
+
     return _db
         .collection(collection)
         .doc(item?.id)
