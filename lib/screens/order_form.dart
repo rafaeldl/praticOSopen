@@ -186,10 +186,13 @@ class _OrderFormState extends State<OrderForm> {
             child: const Icon(CupertinoIcons.camera),
             onPressed: () => _showAddPhotoOptions(config),
           ),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: const Icon(CupertinoIcons.ellipsis_circle),
-            onPressed: () => _showActionSheet(context, config),
+          Semantics(
+            identifier: 'order_options_button',
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(CupertinoIcons.ellipsis_circle),
+              onPressed: () => _showActionSheet(context, config),
+            ),
           ),
         ],
       ),
@@ -990,15 +993,18 @@ class _OrderFormState extends State<OrderForm> {
             },
           ),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          isDestructiveAction: canDelete,
-          child: Text(canDelete ? '${context.l10n.delete} ${config.serviceOrder}' : context.l10n.cancel),
-          onPressed: () {
-            Navigator.pop(context);
-            if (canDelete) {
-              _showDeleteConfirmation(config);
-            }
-          },
+        cancelButton: Semantics(
+          identifier: 'order_delete_button',
+          child: CupertinoActionSheetAction(
+            isDestructiveAction: canDelete,
+            child: Text(canDelete ? '${context.l10n.delete} ${config.serviceOrder}' : context.l10n.cancel),
+            onPressed: () {
+              Navigator.pop(context);
+              if (canDelete) {
+                _showDeleteConfirmation(config);
+              }
+            },
+          ),
         ),
       ),
     );
@@ -1286,16 +1292,19 @@ class _OrderFormState extends State<OrderForm> {
             child: Text(config.label(LabelKeys.cancel)),
             onPressed: () => Navigator.pop(context),
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: Text(config.label(LabelKeys.delete)),
-            onPressed: () {
-              _store.deleteOrder().then((_) {
-                if (mounted) {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                }
-              });
-            },
+          Semantics(
+            identifier: 'order_delete_confirm_button',
+            child: CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: Text(config.label(LabelKeys.delete)),
+              onPressed: () {
+                _store.deleteOrder().then((_) {
+                  if (mounted) {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  }
+                });
+              },
+            ),
           ),
         ],
       ),

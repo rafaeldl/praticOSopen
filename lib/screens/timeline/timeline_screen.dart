@@ -624,10 +624,12 @@ class _TimelineScreenState extends State<TimelineScreen> {
               _orderStore.order?.paidAmount ?? _order?.paidAmount ?? 0;
           final isPaid = total > 0 && paidAmount >= total;
 
-          return GestureDetector(
-            onTap: () => _navigateToOrder(),
-            child: Row(
-              children: [
+          return Semantics(
+            identifier: 'timeline_order_header',
+            child: GestureDetector(
+              onTap: () => _navigateToOrder(),
+              child: Row(
+                children: [
                 // Avatar
                 if (_order?.coverPhotoUrl != null)
                   Padding(
@@ -728,6 +730,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
                   ],
                 ),
               ],
+              ),
             ),
           );
         },
