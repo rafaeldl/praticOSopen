@@ -14,6 +14,19 @@ class Device extends BaseAuditCompany {
   String? description;
   String? photo;
 
+  String get displayName {
+    final parts = <String>[];
+    if (category != null && category!.isNotEmpty) parts.add(category!);
+    if (manufacturer != null && manufacturer!.isNotEmpty) parts.add(manufacturer!);
+    if (name != null && name!.isNotEmpty) parts.add(name!);
+
+    final base = parts.join(' - ');
+    if (serial != null && serial!.isNotEmpty) {
+      return base.isNotEmpty ? '$base ($serial)' : serial!;
+    }
+    return base.isNotEmpty ? base : '';
+  }
+
   Device();
   factory Device.fromJson(Map<String, dynamic> json) => _$DeviceFromJson(json);
   @override

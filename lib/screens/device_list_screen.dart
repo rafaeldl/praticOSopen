@@ -252,7 +252,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: Text(config.label(LabelKeys.confirmDeletion)),
-              content: Text('${context.l10n.doYouWantToRemoveThe} ${config.device.toLowerCase()} "${device.name}"?'),
+              content: Text('${context.l10n.doYouWantToRemoveThe} ${config.device.toLowerCase()} "${device.displayName}"?'),
               actions: [
                 CupertinoDialogAction(
                   child: Text(config.label(LabelKeys.cancel)),
