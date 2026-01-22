@@ -53,6 +53,9 @@ void main() {
       await _verifyTimelineEventExists(tester, 'OS criada');
 
       print('\n Order creation timeline test passed');
+
+      // Cleanup: Delete the test order
+      await _deleteCurrentOrder(tester);
     });
 
     testWidgets('Status change logs correctly', (WidgetTester tester) async {
@@ -68,6 +71,13 @@ void main() {
 
       // Login with demo account
       await _performLogin(tester, locale);
+
+      // Create own order for this test (test independence)
+      print('Creating new order for test...');
+      await _createNewOrder(tester);
+      await _goBack(tester);
+      await Future.delayed(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
 
       // Tap on first order (opens timeline directly)
       print('Opening order timeline...');
@@ -87,6 +97,9 @@ void main() {
       expect(hasStatusEvent, isTrue, reason: 'Status change event should appear in timeline');
 
       print('\n Status change timeline test passed');
+
+      // Cleanup: Delete the test order
+      await _deleteCurrentOrder(tester);
     });
 
     testWidgets('Service operations log correctly', (WidgetTester tester) async {
@@ -102,6 +115,13 @@ void main() {
 
       // Login with demo account
       await _performLogin(tester, locale);
+
+      // Create own order for this test (test independence)
+      print('Creating new order for test...');
+      await _createNewOrder(tester);
+      await _goBack(tester);
+      await Future.delayed(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
 
       // Tap on first order (opens timeline directly)
       print('Opening order timeline...');
@@ -121,6 +141,9 @@ void main() {
       expect(hasServiceEvent, isTrue, reason: 'Service added event should appear in timeline');
 
       print('\n Service operations timeline test passed');
+
+      // Cleanup: Delete the test order
+      await _deleteCurrentOrder(tester);
     });
 
     testWidgets('Product operations log correctly', (WidgetTester tester) async {
@@ -136,6 +159,13 @@ void main() {
 
       // Login with demo account
       await _performLogin(tester, locale);
+
+      // Create own order for this test (test independence)
+      print('Creating new order for test...');
+      await _createNewOrder(tester);
+      await _goBack(tester);
+      await Future.delayed(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
 
       // Tap on first order (opens timeline directly)
       print('Opening order timeline...');
@@ -155,6 +185,9 @@ void main() {
       expect(hasProductEvent, isTrue, reason: 'Product added event should appear in timeline');
 
       print('\n Product operations timeline test passed');
+
+      // Cleanup: Delete the test order
+      await _deleteCurrentOrder(tester);
     });
 
     testWidgets('Payment logs correctly', (WidgetTester tester) async {
@@ -171,11 +204,30 @@ void main() {
       // Login with demo account
       await _performLogin(tester, locale);
 
+      // Create own order for this test (test independence)
+      print('Creating new order for test...');
+      await _createNewOrder(tester);
+      await _goBack(tester);
+      await Future.delayed(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+
       // Tap on first order (opens timeline directly)
       print('Opening order timeline...');
       await _openOrderTimeline(tester);
 
-      // Add a payment via timeline attachment menu
+      // STEP 1: Change status to approved (required for payments)
+      print('Changing status to approved (required for payments)...');
+      await _changeStatusViaTimeline(tester, 'approved');
+      await Future.delayed(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+
+      // STEP 2: Add a service (required to have a value to pay)
+      print('Adding service (required to have payment value)...');
+      await _addServiceViaTimeline(tester);
+      await Future.delayed(const Duration(seconds: 2));
+      await tester.pumpAndSettle();
+
+      // STEP 3: Add payment via timeline attachment menu
       print('Adding payment via timeline...');
       await _addPaymentViaTimeline(tester);
 
@@ -189,6 +241,9 @@ void main() {
       expect(hasPaymentEvent, isTrue, reason: 'Payment received event should appear in timeline');
 
       print('\n Payment timeline test passed');
+
+      // Cleanup: Delete the test order
+      await _deleteCurrentOrder(tester);
     });
 
     testWidgets('Full flow: create order, add items, change status, add payment', (WidgetTester tester) async {
@@ -255,6 +310,9 @@ void main() {
       expect(hasOrderCreated, isTrue, reason: 'Order created event should exist');
 
       print('\n Full flow timeline test passed');
+
+      // Cleanup: Delete the test order
+      await _deleteCurrentOrder(tester);
     });
   });
 }
@@ -718,4 +776,62 @@ Future<bool> _hasTimelineEventWithPattern(WidgetTester tester, List<String> patt
     }
   }
   return false;
+}
+
+/// Delete the current order via order form options menu
+/// Flow: Timeline → Order Form → Options (⋯) → Delete → Confirm
+Future<void> _deleteCurrentOrder(WidgetTester tester) async {
+  print('Cleaning up: Deleting test order...');
+
+  // 1. Navigate to order form from timeline (tap the header)
+  final orderHeader = await _findBySemantic(tester, 'timeline_order_header');
+  if (orderHeader != null) {
+    await tester.tap(orderHeader);
+    await tester.pumpAndSettle();
+    await Future.delayed(const Duration(seconds: 2));
+    print('Navigated to order form');
+
+    // 2. Tap options button (ellipsis)
+    final optionsButton = await _findBySemantic(tester, 'order_options_button');
+    if (optionsButton != null) {
+      await tester.tap(optionsButton);
+      await tester.pumpAndSettle();
+      await Future.delayed(const Duration(seconds: 1));
+      print('Options menu opened');
+
+      // 3. Tap delete button in action sheet
+      final deleteButton = await _findBySemantic(tester, 'order_delete_button');
+      if (deleteButton != null) {
+        await tester.tap(deleteButton);
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(seconds: 1));
+        print('Delete option tapped');
+
+        // 4. Confirm deletion
+        final confirmButton = await _findBySemantic(tester, 'order_delete_confirm_button');
+        if (confirmButton != null) {
+          await tester.tap(confirmButton);
+          await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 2));
+          print('Order deleted successfully');
+          return;
+        } else {
+          print('Warning: Delete confirm button not found');
+        }
+      } else {
+        print('Warning: Delete button not found');
+        // Close action sheet
+        await tester.tapAt(const Offset(200, 100));
+        await tester.pumpAndSettle();
+      }
+    } else {
+      print('Warning: Options button not found');
+      // Go back to timeline
+      await _goBack(tester);
+      await tester.pumpAndSettle();
+    }
+  } else {
+    print('Warning: Timeline order header not found');
+  }
+  print('Warning: Could not delete order');
 }
