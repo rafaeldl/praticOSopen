@@ -182,54 +182,75 @@ class _TimelineScreenState extends State<TimelineScreen> {
       context: context,
       builder: (actionContext) => CupertinoActionSheet(
         actions: [
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.addPhoto),
-            onPressed: () {
-              Navigator.pop(actionContext);
-              _showPhotoOptions();
-            },
+          Semantics(
+            identifier: 'timeline_action_add_photo',
+            child: CupertinoActionSheetAction(
+              child: Text(context.l10n.addPhoto),
+              onPressed: () {
+                Navigator.pop(actionContext);
+                _showPhotoOptions();
+              },
+            ),
           ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.addService),
-            onPressed: () {
-              Navigator.pop(actionContext);
-              _addService();
-            },
+          Semantics(
+            identifier: 'timeline_action_add_service',
+            child: CupertinoActionSheetAction(
+              child: Text(context.l10n.addService),
+              onPressed: () {
+                Navigator.pop(actionContext);
+                _addService();
+              },
+            ),
           ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.addProduct),
-            onPressed: () {
-              Navigator.pop(actionContext);
-              _addProduct();
-            },
+          Semantics(
+            identifier: 'timeline_action_add_product',
+            child: CupertinoActionSheetAction(
+              child: Text(context.l10n.addProduct),
+              onPressed: () {
+                Navigator.pop(actionContext);
+                _addProduct();
+              },
+            ),
           ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.addChecklist),
-            onPressed: () {
-              Navigator.pop(actionContext);
-              _addChecklist();
-            },
+          Semantics(
+            identifier: 'timeline_action_add_checklist',
+            child: CupertinoActionSheetAction(
+              child: Text(context.l10n.addChecklist),
+              onPressed: () {
+                Navigator.pop(actionContext);
+                _addChecklist();
+              },
+            ),
           ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.addPayment),
-            onPressed: () {
-              Navigator.pop(actionContext);
-              _addPayment();
-            },
+          Semantics(
+            identifier: 'timeline_action_add_payment',
+            child: CupertinoActionSheetAction(
+              child: Text(context.l10n.addPayment),
+              onPressed: () {
+                Navigator.pop(actionContext);
+                _addPayment();
+              },
+            ),
           ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.addDueDate),
-            onPressed: () {
-              Navigator.pop(actionContext);
-              _addDueDate();
-            },
+          Semantics(
+            identifier: 'timeline_action_add_due_date',
+            child: CupertinoActionSheetAction(
+              child: Text(context.l10n.addDueDate),
+              onPressed: () {
+                Navigator.pop(actionContext);
+                _addDueDate();
+              },
+            ),
           ),
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.changeStatus),
-            onPressed: () {
-              Navigator.pop(actionContext);
-              _changeStatus();
-            },
+          Semantics(
+            identifier: 'timeline_action_change_status',
+            child: CupertinoActionSheetAction(
+              child: Text(context.l10n.changeStatus),
+              onPressed: () {
+                Navigator.pop(actionContext);
+                _changeStatus();
+              },
+            ),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(

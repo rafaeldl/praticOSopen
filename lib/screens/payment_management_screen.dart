@@ -483,9 +483,12 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: SizedBox(
             width: double.infinity,
-            child: CupertinoButton.filled(
-              onPressed: _registerTransaction,
-              child: Text(isPayment ? context.l10n.registerPayment : context.l10n.applyDiscount),
+            child: Semantics(
+              identifier: 'register_payment_button',
+              child: CupertinoButton.filled(
+                onPressed: _registerTransaction,
+                child: Text(isPayment ? context.l10n.registerPayment : context.l10n.applyDiscount),
+              ),
             ),
           ),
         ),

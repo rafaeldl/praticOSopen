@@ -170,15 +170,17 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         (context, index) {
           if (index >= filteredList.length) return null;
           final service = filteredList[index];
-          return _buildServiceItem(service, isSelectionMode, index == filteredList.length - 1);
+          return _buildServiceItem(service, isSelectionMode, index == filteredList.length - 1, index);
         },
         childCount: filteredList.length,
       ),
     );
   }
 
-  Widget _buildServiceItem(Service service, bool isSelectionMode, bool isLast) {
-    return Dismissible(
+  Widget _buildServiceItem(Service service, bool isSelectionMode, bool isLast, int index) {
+    return Semantics(
+      identifier: 'service_item_$index',
+      child: Dismissible(
       key: Key(service.id!),
       direction: DismissDirection.horizontal,
       background: Container(
@@ -294,6 +296,7 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -262,14 +262,17 @@ class _MessageInputState extends State<MessageInput> {
                 children: [
                   // Attachment Button (+)
                   if (widget.onAttachmentTap != null)
-                    CupertinoButton(
-                      padding: const EdgeInsets.all(6),
-                      minimumSize: Size.zero,
-                      onPressed: widget.onAttachmentTap,
-                      child: Icon(
-                        CupertinoIcons.plus_circle_fill,
-                        size: 28,
-                        color: CupertinoColors.activeBlue,
+                    Semantics(
+                      identifier: 'timeline_attachment_button',
+                      child: CupertinoButton(
+                        padding: const EdgeInsets.all(6),
+                        minimumSize: Size.zero,
+                        onPressed: widget.onAttachmentTap,
+                        child: Icon(
+                          CupertinoIcons.plus_circle_fill,
+                          size: 28,
+                          color: CupertinoColors.activeBlue,
+                        ),
                       ),
                     ),
                   const SizedBox(width: 4),
@@ -308,45 +311,51 @@ class _MessageInputState extends State<MessageInput> {
                   const SizedBox(width: 4),
                   // Camera Button
                   if (widget.onCameraTap != null && !hasText)
-                    CupertinoButton(
-                      padding: const EdgeInsets.all(6),
-                      minimumSize: Size.zero,
-                      onPressed: widget.onCameraTap,
-                      child: Icon(
-                        CupertinoIcons.camera_fill,
-                        size: 24,
-                        color: CupertinoColors.activeBlue,
+                    Semantics(
+                      identifier: 'timeline_camera_button',
+                      child: CupertinoButton(
+                        padding: const EdgeInsets.all(6),
+                        minimumSize: Size.zero,
+                        onPressed: widget.onCameraTap,
+                        child: Icon(
+                          CupertinoIcons.camera_fill,
+                          size: 24,
+                          color: CupertinoColors.activeBlue,
+                        ),
                       ),
                     ),
                   // Send Button
                   if (hasText || widget.onCameraTap == null)
-                    GestureDetector(
-                      onTap: widget.isSending ? null : () => _handleSend(),
-                      onLongPressStart: _onLongPressStart,
-                      onLongPressEnd: _onLongPressEnd,
-                      onLongPressCancel: _onLongPressCancel,
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: 36,
-                        height: 36,
-                        margin: const EdgeInsets.only(left: 2),
-                        decoration: BoxDecoration(
-                          color: _isHoldingForPublic
-                              ? CupertinoColors.systemGreen
-                              : CupertinoColors.activeBlue,
-                          shape: BoxShape.circle,
+                    Semantics(
+                      identifier: 'timeline_send_button',
+                      child: GestureDetector(
+                        onTap: widget.isSending ? null : () => _handleSend(),
+                        onLongPressStart: _onLongPressStart,
+                        onLongPressEnd: _onLongPressEnd,
+                        onLongPressCancel: _onLongPressCancel,
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          width: 36,
+                          height: 36,
+                          margin: const EdgeInsets.only(left: 2),
+                          decoration: BoxDecoration(
+                            color: _isHoldingForPublic
+                                ? CupertinoColors.systemGreen
+                                : CupertinoColors.activeBlue,
+                            shape: BoxShape.circle,
+                          ),
+                          child: widget.isSending
+                              ? const CupertinoActivityIndicator(
+                                  color: CupertinoColors.white,
+                                )
+                              : Icon(
+                                  _isHoldingForPublic
+                                      ? CupertinoIcons.paperplane_fill
+                                      : CupertinoIcons.arrow_up,
+                                  color: CupertinoColors.white,
+                                  size: 18,
+                                ),
                         ),
-                        child: widget.isSending
-                            ? const CupertinoActivityIndicator(
-                                color: CupertinoColors.white,
-                              )
-                            : Icon(
-                                _isHoldingForPublic
-                                    ? CupertinoIcons.paperplane_fill
-                                    : CupertinoIcons.arrow_up,
-                                color: CupertinoColors.white,
-                                size: 18,
-                              ),
                       ),
                     ),
                 ],

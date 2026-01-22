@@ -307,6 +307,7 @@ class _OrderFormState extends State<OrderForm> {
               onTap: _selectCustomer,
               showChevron: true,
               enabled: canEditFields,
+              identifier: 'order_customer_button',
             ),
             _buildListTile(
               context: context,
@@ -318,6 +319,7 @@ class _OrderFormState extends State<OrderForm> {
               showChevron: true,
               isLast: true,
               enabled: canEditFields,
+              identifier: 'order_device_button',
             ),
           ],
         );

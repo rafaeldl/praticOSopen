@@ -170,15 +170,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
         (context, index) {
           if (index >= filteredList.length) return null;
           final product = filteredList[index];
-          return _buildProductItem(product, isSelectionMode, index == filteredList.length - 1);
+          return _buildProductItem(product, isSelectionMode, index == filteredList.length - 1, index);
         },
         childCount: filteredList.length,
       ),
     );
   }
 
-  Widget _buildProductItem(Product product, bool isSelectionMode, bool isLast) {
-    return Dismissible(
+  Widget _buildProductItem(Product product, bool isSelectionMode, bool isLast, int index) {
+    return Semantics(
+      identifier: 'product_item_$index',
+      child: Dismissible(
       key: Key(product.id!),
       direction: DismissDirection.horizontal,
       background: Container(
@@ -294,6 +296,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

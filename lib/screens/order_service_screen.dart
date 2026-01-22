@@ -108,15 +108,18 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
         middle: Text(_isEditing
             ? config.label(LabelKeys.editService)
             : config.label(LabelKeys.createService)),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _saveService,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : Text(
-                  config.label(LabelKeys.save),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+        trailing: Semantics(
+          identifier: 'save_service_button',
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: _isLoading ? null : _saveService,
+            child: _isLoading
+                ? const CupertinoActivityIndicator()
+                : Text(
+                    config.label(LabelKeys.save),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+          ),
         ),
       ),
       child: SafeArea(

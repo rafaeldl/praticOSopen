@@ -173,14 +173,14 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         (context, index) {
           if (index >= filteredList.length) return null;
           final customer = filteredList[index];
-          return _buildCustomerItem(customer, isSelectionMode, index == filteredList.length - 1, config);
+          return _buildCustomerItem(customer, isSelectionMode, index == filteredList.length - 1, config, index);
         },
         childCount: filteredList.length,
       ),
     );
   }
 
-  Widget _buildCustomerItem(Customer customer, bool isSelectionMode, bool isLast, SegmentConfigProvider config) {
+  Widget _buildCustomerItem(Customer customer, bool isSelectionMode, bool isLast, SegmentConfigProvider config, int index) {
     // Generate initials
     String initials = '';
     if (customer.name != null && customer.name!.isNotEmpty) {
@@ -192,7 +192,9 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       }
     }
 
-    return Dismissible(
+    return Semantics(
+      identifier: 'customer_item_$index',
+      child: Dismissible(
       key: Key(customer.id!),
       direction: DismissDirection.horizontal,
       background: Container(
@@ -321,6 +323,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
           ),
         ),
       ),
+    ),
     );
   }
 

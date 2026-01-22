@@ -159,15 +159,18 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
         middle: Text(_isEditing ? config.label(LabelKeys.editProduct) : config.label(LabelKeys.createProduct)),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _saveProduct,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : Text(
-                  config.label(LabelKeys.save),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+        trailing: Semantics(
+          identifier: 'save_product_button',
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: _isLoading ? null : _saveProduct,
+            child: _isLoading
+                ? const CupertinoActivityIndicator()
+                : Text(
+                    config.label(LabelKeys.save),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+          ),
         ),
       ),
       child: SafeArea(
