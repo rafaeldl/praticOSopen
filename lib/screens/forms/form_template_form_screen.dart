@@ -145,12 +145,15 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
           onPressed: () => Navigator.pop(context),
           child: Text(context.l10n.cancel),
         ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _saveTemplate,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : Text(context.l10n.save, style: const TextStyle(fontWeight: FontWeight.bold)),
+        trailing: Semantics(
+          identifier: 'form_form_save_button',
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: _isLoading ? null : _saveTemplate,
+            child: _isLoading
+                ? const CupertinoActivityIndicator()
+                : Text(context.l10n.save, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ),
       ),
       child: SafeArea(
@@ -182,25 +185,31 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.formInformation),
                 children: [
-                  CupertinoTextFormFieldRow(
-                    prefix: Text(context.l10n.title, style: const TextStyle(fontSize: 16)),
-                    initialValue: _template?.title,
-                    placeholder: context.l10n.companyName,
-                    textCapitalization: TextCapitalization.sentences,
-                    textAlign: TextAlign.right,
-                    onSaved: (val) => _template?.title = val ?? '',
-                    validator: (val) =>
-                        val == null || val.trim().isEmpty ? context.l10n.required : null,
+                  Semantics(
+                    identifier: 'form_form_title_field',
+                    child: CupertinoTextFormFieldRow(
+                      prefix: Text(context.l10n.title, style: const TextStyle(fontSize: 16)),
+                      initialValue: _template?.title,
+                      placeholder: context.l10n.companyName,
+                      textCapitalization: TextCapitalization.sentences,
+                      textAlign: TextAlign.right,
+                      onSaved: (val) => _template?.title = val ?? '',
+                      validator: (val) =>
+                          val == null || val.trim().isEmpty ? context.l10n.required : null,
+                    ),
                   ),
-                  CupertinoTextFormFieldRow(
-                    prefix: Text(context.l10n.description, style: const TextStyle(fontSize: 16)),
-                    initialValue: _template?.description,
-                    placeholder: context.l10n.optional,
-                    textCapitalization: TextCapitalization.sentences,
-                    textAlign: TextAlign.right,
-                    maxLines: 2,
-                    onSaved: (val) => _template?.description =
-                        val?.trim().isEmpty == true ? null : val?.trim(),
+                  Semantics(
+                    identifier: 'form_form_description_field',
+                    child: CupertinoTextFormFieldRow(
+                      prefix: Text(context.l10n.description, style: const TextStyle(fontSize: 16)),
+                      initialValue: _template?.description,
+                      placeholder: context.l10n.optional,
+                      textCapitalization: TextCapitalization.sentences,
+                      textAlign: TextAlign.right,
+                      maxLines: 2,
+                      onSaved: (val) => _template?.description =
+                          val?.trim().isEmpty == true ? null : val?.trim(),
+                    ),
                   ),
                 ],
               ),
@@ -675,10 +684,13 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  CupertinoButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancelar'),
+                  Semantics(
+                    identifier: 'form_item_sheet_cancel_button',
+                    child: CupertinoButton(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancelar'),
+                    ),
                   ),
                   Text(
                     widget.existingItem == null ? 'Novo Item' : 'Editar Item',
@@ -689,12 +701,15 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
                       decoration: TextDecoration.none,
                     ),
                   ),
-                  CupertinoButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    onPressed: _save,
-                    child: const Text(
-                      'Salvar',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                  Semantics(
+                    identifier: 'form_item_sheet_save_button',
+                    child: CupertinoButton(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      onPressed: _save,
+                      child: const Text(
+                        'Salvar',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 ],
@@ -714,15 +729,18 @@ class _ItemFormSheetState extends State<_ItemFormSheet> {
                   CupertinoListSection.insetGrouped(
                     header: Text(context.l10n.itemConfiguration),
                     children: [
-                      CupertinoTextFormFieldRow(
-                        prefix: Text(context.l10n.label, style: const TextStyle(fontSize: 16)),
-                        initialValue: _label,
-                        placeholder: context.l10n.itemType,
-                        textCapitalization: TextCapitalization.sentences,
-                        textAlign: TextAlign.right,
-                        onSaved: (val) => _label = val ?? '',
-                        validator: (val) =>
-                            val == null || val.trim().isEmpty ? context.l10n.required : null,
+                      Semantics(
+                        identifier: 'form_item_sheet_label_field',
+                        child: CupertinoTextFormFieldRow(
+                          prefix: Text(context.l10n.label, style: const TextStyle(fontSize: 16)),
+                          initialValue: _label,
+                          placeholder: context.l10n.itemType,
+                          textCapitalization: TextCapitalization.sentences,
+                          textAlign: TextAlign.right,
+                          onSaved: (val) => _label = val ?? '',
+                          validator: (val) =>
+                              val == null || val.trim().isEmpty ? context.l10n.required : null,
+                        ),
                       ),
                       CupertinoListTile(
                         title: Text(context.l10n.itemType),

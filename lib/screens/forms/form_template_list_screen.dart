@@ -41,25 +41,31 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: Text(context.l10n.procedures),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.add),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/form_template_form')
-                      .then((_) => templateStore.retrieveTemplates());
-                },
+              trailing: Semantics(
+                identifier: 'form_list_add_button',
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: const Icon(CupertinoIcons.add),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/form_template_form')
+                        .then((_) => templateStore.retrieveTemplates());
+                  },
+                ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: CupertinoSearchTextField(
-                  controller: _searchController,
-                  placeholder: context.l10n.searchProcedure,
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value.toLowerCase());
-                  },
+                child: Semantics(
+                  identifier: 'form_list_search_field',
+                  child: CupertinoSearchTextField(
+                    controller: _searchController,
+                    placeholder: context.l10n.searchProcedure,
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value.toLowerCase());
+                    },
+                  ),
                 ),
               ),
             ),
@@ -260,7 +266,9 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
     final localizedTitle = template.getLocalizedTitle(_localeCode);
     final localizedDescription = template.getLocalizedDescription(_localeCode);
 
-    return Dismissible(
+    return Semantics(
+      identifier: 'form_item_${template.id}',
+      child: Dismissible(
       key: Key(template.id!),
       direction: DismissDirection.horizontal,
       background: Container(
@@ -409,6 +417,7 @@ class _FormTemplateListScreenState extends State<FormTemplateListScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

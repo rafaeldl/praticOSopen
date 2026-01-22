@@ -46,23 +46,29 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: Text(context.l10n.services),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.add),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/service_form').then((_) => serviceStore.retrieveServices());
-                },
+              trailing: Semantics(
+                identifier: 'service_list_add_button',
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: const Icon(CupertinoIcons.add),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/service_form').then((_) => serviceStore.retrieveServices());
+                  },
+                ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: CupertinoSearchTextField(
-                  controller: _searchController,
-                  placeholder: context.l10n.searchService,
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value.toLowerCase());
-                  },
+                child: Semantics(
+                  identifier: 'service_list_search_field',
+                  child: CupertinoSearchTextField(
+                    controller: _searchController,
+                    placeholder: context.l10n.searchService,
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value.toLowerCase());
+                    },
+                  ),
                 ),
               ),
             ),
@@ -170,16 +176,16 @@ class _ServiceListScreenState extends State<ServiceListScreen> {
         (context, index) {
           if (index >= filteredList.length) return null;
           final service = filteredList[index];
-          return _buildServiceItem(service, isSelectionMode, index == filteredList.length - 1, index);
+          return _buildServiceItem(service, isSelectionMode, index == filteredList.length - 1);
         },
         childCount: filteredList.length,
       ),
     );
   }
 
-  Widget _buildServiceItem(Service service, bool isSelectionMode, bool isLast, int index) {
+  Widget _buildServiceItem(Service service, bool isSelectionMode, bool isLast) {
     return Semantics(
-      identifier: 'service_item_$index',
+      identifier: 'service_item_${service.id}',
       child: Dismissible(
       key: Key(service.id!),
       direction: DismissDirection.horizontal,

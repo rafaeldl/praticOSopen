@@ -192,24 +192,30 @@ class _AccumulatedValueListScreenState
       navigationBar: CupertinoNavigationBar(
         middle: Text(_title ?? context.l10n.select),
         leading: showClearButton
-            ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _clearSelection,
-                child: Text(
-                  context.l10n.clear,
-                  style: const TextStyle(
-                    color: CupertinoColors.destructiveRed,
+            ? Semantics(
+                identifier: 'accumulated_value_clear_button',
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _clearSelection,
+                  child: Text(
+                    context.l10n.clear,
+                    style: const TextStyle(
+                      color: CupertinoColors.destructiveRed,
+                    ),
                   ),
                 ),
               )
             : null,
         trailing: _multiSelect
-            ? CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _confirmSelection,
-                child: Text(
-                  context.l10n.done,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+            ? Semantics(
+                identifier: 'accumulated_value_done_button',
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _confirmSelection,
+                  child: Text(
+                    context.l10n.done,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               )
             : null,
@@ -220,9 +226,12 @@ class _AccumulatedValueListScreenState
             // Search bar
             Padding(
               padding: const EdgeInsets.all(16),
-              child: CupertinoSearchTextField(
-                controller: _searchController,
-                placeholder: context.l10n.searchOrAddNew,
+              child: Semantics(
+                identifier: 'accumulated_value_search_field',
+                child: CupertinoSearchTextField(
+                  controller: _searchController,
+                  placeholder: context.l10n.searchOrAddNew,
+                ),
               ),
             ),
 
@@ -246,44 +255,47 @@ class _AccumulatedValueListScreenState
     if (_filteredValues.isEmpty && hasSearchQuery) {
       return ListView(
         children: [
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => _selectValue(searchQuery),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              color: CupertinoColors.systemBackground.resolveFrom(context),
-              child: Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.add_circled_solid,
-                    color: CupertinoTheme.of(context).primaryColor,
-                    size: 28,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${context.l10n.add} "$searchQuery"',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: CupertinoTheme.of(context).primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          context.l10n.addNewValue,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                          ),
-                        ),
-                      ],
+          Semantics(
+            identifier: 'accumulated_value_add_button',
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => _selectValue(searchQuery),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                color: CupertinoColors.systemBackground.resolveFrom(context),
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.add_circled_solid,
+                      color: CupertinoTheme.of(context).primaryColor,
+                      size: 28,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${context.l10n.add} "$searchQuery"',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: CupertinoTheme.of(context).primaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            context.l10n.addNewValue,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -397,30 +409,33 @@ class _AccumulatedValueListScreenState
       itemBuilder: (context, index) {
         // Show "Add new" option at the bottom
         if (showAddOption && index == _filteredValues.length) {
-          return CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => _selectValue(valueToAdd),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              color: CupertinoColors.systemBackground.resolveFrom(context),
-              child: Row(
-                children: [
-                  Icon(
-                    CupertinoIcons.add_circled,
-                    color: CupertinoTheme.of(context).primaryColor,
-                    size: 24,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '${context.l10n.add} "$valueToAdd"',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: CupertinoTheme.of(context).primaryColor,
+          return Semantics(
+            identifier: 'accumulated_value_add_button',
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => _selectValue(valueToAdd),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                color: CupertinoColors.systemBackground.resolveFrom(context),
+                child: Row(
+                  children: [
+                    Icon(
+                      CupertinoIcons.add_circled,
+                      color: CupertinoTheme.of(context).primaryColor,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        '${context.l10n.add} "$valueToAdd"',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: CupertinoTheme.of(context).primaryColor,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -431,7 +446,9 @@ class _AccumulatedValueListScreenState
             ? _selectedValues.contains(value.value)
             : value.value == _currentValue;
 
-        return Dismissible(
+        return Semantics(
+          identifier: 'accumulated_value_item_$index',
+          child: Dismissible(
           key: Key(value.id ?? value.value),
           direction: DismissDirection.endToStart,
           background: Container(
@@ -550,6 +567,7 @@ class _AccumulatedValueListScreenState
               ],
             ),
           ),
+        ),
         ),
         );
       },

@@ -49,27 +49,33 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: Text(config.devicePlural),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.add),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/device_form').then((device) {
-                    if (isSelectionMode && device != null) {
-                      Navigator.pop(context, device);
-                    }
-                  });
-                },
+              trailing: Semantics(
+                identifier: 'device_list_add_button',
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: const Icon(CupertinoIcons.add),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/device_form').then((device) {
+                      if (isSelectionMode && device != null) {
+                        Navigator.pop(context, device);
+                      }
+                    });
+                  },
+                ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: CupertinoSearchTextField(
-                  controller: _searchController,
-                  placeholder: '${context.l10n.search} ${config.device.toLowerCase()}',
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value.toLowerCase());
-                  },
+                child: Semantics(
+                  identifier: 'device_list_search_field',
+                  child: CupertinoSearchTextField(
+                    controller: _searchController,
+                    placeholder: '${context.l10n.search} ${config.device.toLowerCase()}',
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value.toLowerCase());
+                    },
+                  ),
                 ),
               ),
             ),
@@ -194,7 +200,9 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
   }
 
   Widget _buildDeviceItem(Device device, bool isSelectionMode, bool isLast, SegmentConfigProvider config) {
-    return Dismissible(
+    return Semantics(
+      identifier: 'device_item_${device.id}',
+      child: Dismissible(
       key: Key(device.id!),
       direction: DismissDirection.horizontal,
       background: Container(
@@ -324,6 +332,7 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

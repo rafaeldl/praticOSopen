@@ -46,23 +46,29 @@ class _ProductListScreenState extends State<ProductListScreen> {
           slivers: [
             CupertinoSliverNavigationBar(
               largeTitle: Text(context.l10n.products),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Icon(CupertinoIcons.add),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/product_form').then((_) => productStore.retrieveProducts());
-                },
+              trailing: Semantics(
+                identifier: 'product_list_add_button',
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: const Icon(CupertinoIcons.add),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/product_form').then((_) => productStore.retrieveProducts());
+                  },
+                ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: CupertinoSearchTextField(
-                  controller: _searchController,
-                  placeholder: context.l10n.searchProduct,
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value.toLowerCase());
-                  },
+                child: Semantics(
+                  identifier: 'product_list_search_field',
+                  child: CupertinoSearchTextField(
+                    controller: _searchController,
+                    placeholder: context.l10n.searchProduct,
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value.toLowerCase());
+                    },
+                  ),
                 ),
               ),
             ),
@@ -170,16 +176,16 @@ class _ProductListScreenState extends State<ProductListScreen> {
         (context, index) {
           if (index >= filteredList.length) return null;
           final product = filteredList[index];
-          return _buildProductItem(product, isSelectionMode, index == filteredList.length - 1, index);
+          return _buildProductItem(product, isSelectionMode, index == filteredList.length - 1);
         },
         childCount: filteredList.length,
       ),
     );
   }
 
-  Widget _buildProductItem(Product product, bool isSelectionMode, bool isLast, int index) {
+  Widget _buildProductItem(Product product, bool isSelectionMode, bool isLast) {
     return Semantics(
-      identifier: 'product_item_$index',
+      identifier: 'product_item_${product.id}',
       child: Dismissible(
       key: Key(product.id!),
       direction: DismissDirection.horizontal,
