@@ -1127,5 +1127,11 @@
   "changedDevice": "changed device",
   "changedCustomer": "changed customer",
   "changedDueDate": "changed due date",
-  "madeChange": "made a change"
+  "madeChange": "made a change",
+
+  "dueDateNotDefined": "Not defined",
+  "noItemsYet": "No items • Tap to add",
+  "copySummary": "Copy summary",
+  "pendingAbbrev": "pend.",
+  "deliveryLabel": "Due"
 }

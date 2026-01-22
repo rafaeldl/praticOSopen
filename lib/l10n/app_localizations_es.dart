@@ -2718,4 +2718,19 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get madeChange => 'hizo un cambio';
+
+  @override
+  String get dueDateNotDefined => 'No definida';
+
+  @override
+  String get noItemsYet => 'Sin ítems • Toque para agregar';
+
+  @override
+  String get copySummary => 'Copiar resumen';
+
+  @override
+  String get pendingAbbrev => 'pend.';
+
+  @override
+  String get deliveryLabel => 'Entrega';
 }

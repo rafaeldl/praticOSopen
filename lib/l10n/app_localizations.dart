@@ -5181,6 +5181,36 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'fez uma alteração'**
   String get madeChange;
+
+  /// No description provided for @dueDateNotDefined.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não definida'**
+  String get dueDateNotDefined;
+
+  /// No description provided for @noItemsYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem itens • Toque para adicionar'**
+  String get noItemsYet;
+
+  /// No description provided for @copySummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar resumo'**
+  String get copySummary;
+
+  /// No description provided for @pendingAbbrev.
+  ///
+  /// In pt, this message translates to:
+  /// **'pend.'**
+  String get pendingAbbrev;
+
+  /// No description provided for @deliveryLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrega'**
+  String get deliveryLabel;
 }
 
 class _AppLocalizationsDelegate

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -13,8 +15,10 @@ import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/timeline_repository.dart';
 import 'package:praticos/screens/timeline/widgets/event_card.dart';
 import 'package:praticos/screens/timeline/widgets/message_input.dart';
+import 'package:praticos/screens/timeline/widgets/pinned_summary.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
+import 'package:praticos/models/order_form.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -33,6 +37,11 @@ class _TimelineScreenState extends State<TimelineScreen> {
   final FormsService _formsService = FormsService();
   final TimelineRepository _timelineRepository = TimelineRepository();
   Order? _order;
+
+  // Forms state
+  StreamSubscription<List<OrderForm>>? _formsSubscription;
+  int _formsCount = 0;
+  int _pendingFormsCount = 0;
 
   @override
   void initState() {
@@ -61,6 +70,22 @@ class _TimelineScreenState extends State<TimelineScreen> {
       if (CollaboratorStore.instance.collaborators.isEmpty) {
         CollaboratorStore.instance.loadCollaborators();
       }
+
+      // Subscribe to forms for pinned summary
+      if (_order?.id != null && Global.companyAggr?.id != null) {
+        _formsSubscription = _formsService
+            .getOrderForms(Global.companyAggr!.id!, _order!.id!)
+            .listen((forms) {
+          if (mounted) {
+            setState(() {
+              _formsCount = forms.length;
+              _pendingFormsCount = forms
+                  .where((f) => f.status != FormStatus.completed)
+                  .length;
+            });
+          }
+        });
+      }
     }
   }
 
@@ -68,6 +93,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
   void dispose() {
     _store.dispose();
     _scrollController.dispose();
+    _formsSubscription?.cancel();
     super.dispose();
   }
 
@@ -553,6 +579,26 @@ class _TimelineScreenState extends State<TimelineScreen> {
       child: SafeArea(
         child: Column(
           children: [
+            // Pinned Summary (always visible at top)
+            Observer(
+              builder: (_) {
+                final order = _orderStore.order ?? _order;
+                if (order == null) return const SizedBox.shrink();
+
+                final hasItems = (order.services?.isNotEmpty ?? false) ||
+                    (order.products?.isNotEmpty ?? false);
+
+                return PinnedSummary(
+                  order: order,
+                  formsCount: _formsCount,
+                  pendingFormsCount: _pendingFormsCount,
+                  onTap: hasItems
+                      ? () => _navigateToOrder()
+                      : () => _addService(),
+                  onLongPress: () {},
+                );
+              },
+            ),
             // Timeline Events
             Expanded(
               child: Observer(
@@ -618,12 +664,6 @@ class _TimelineScreenState extends State<TimelineScreen> {
       ),
       middle: Observer(
         builder: (_) {
-          final currentStatus = _orderStore.status ?? _order?.status;
-          final total = _orderStore.order?.total ?? _order?.total ?? 0;
-          final paidAmount =
-              _orderStore.order?.paidAmount ?? _order?.paidAmount ?? 0;
-          final isPaid = total > 0 && paidAmount >= total;
-
           return Semantics(
             identifier: 'timeline_order_header',
             child: GestureDetector(
@@ -656,78 +696,27 @@ class _TimelineScreenState extends State<TimelineScreen> {
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
-                      Row(
-                        children: [
-                          // Status dot
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(currentStatus),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          // Device e serial
-                          if (_order?.device?.name != null ||
-                              _order?.device?.serial != null)
-                            Expanded(
-                              child: Text(
-                                [
-                                  _order?.device?.name,
-                                  _order?.device?.serial,
-                                ]
-                                    .where((e) => e != null && e.isNotEmpty)
-                                    .join(' · '),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.normal,
-                                  color: CupertinoColors.secondaryLabel
-                                      .resolveFrom(context),
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 12),
-                // Valor e data
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    // Total
-                    Text(
-                      _formatService.formatCurrency(total, decimalDigits: 0),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: isPaid
-                            ? CupertinoColors.systemGreen
-                            : CupertinoColors.label.resolveFrom(context),
-                      ),
-                    ),
-                    // Data de entrega
-                    if (_orderStore.order?.dueDate != null ||
-                        _order?.dueDate != null)
-                      Builder(builder: (_) {
-                        final dueDate =
-                            _orderStore.order?.dueDate ?? _order!.dueDate!;
-                        return Text(
-                          '${dueDate.day.toString().padLeft(2, '0')}/${dueDate.month.toString().padLeft(2, '0')}',
+                      // Device e serial
+                      if (_order?.device?.name != null ||
+                          _order?.device?.serial != null)
+                        Text(
+                          [
+                            _order?.device?.name,
+                            _order?.device?.serial,
+                          ]
+                              .where((e) => e != null && e.isNotEmpty)
+                              .join(' · '),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.normal,
                             color: CupertinoColors.secondaryLabel
                                 .resolveFrom(context),
                           ),
-                        );
-                      }),
-                  ],
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                    ],
+                  ),
                 ),
               ],
               ),
@@ -823,20 +812,4 @@ class _TimelineScreenState extends State<TimelineScreen> {
     );
   }
 
-  Color _getStatusColor(String? status) {
-    switch (status) {
-      case 'quote':
-        return CupertinoColors.systemOrange;
-      case 'approved':
-        return CupertinoColors.activeBlue;
-      case 'progress':
-        return CupertinoColors.systemPurple;
-      case 'done':
-        return CupertinoColors.systemGreen;
-      case 'canceled':
-        return CupertinoColors.systemRed;
-      default:
-        return CupertinoColors.secondaryLabel;
-    }
-  }
 }

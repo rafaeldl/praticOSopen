@@ -2716,4 +2716,19 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get madeChange => 'fez uma alteração';
+
+  @override
+  String get dueDateNotDefined => 'Não definida';
+
+  @override
+  String get noItemsYet => 'Sem itens • Toque para adicionar';
+
+  @override
+  String get copySummary => 'Copiar resumo';
+
+  @override
+  String get pendingAbbrev => 'pend.';
+
+  @override
+  String get deliveryLabel => 'Entrega';
 }

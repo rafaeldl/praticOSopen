@@ -2704,4 +2704,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get madeChange => 'made a change';
+
+  @override
+  String get dueDateNotDefined => 'Not defined';
+
+  @override
+  String get noItemsYet => 'No items • Tap to add';
+
+  @override
+  String get copySummary => 'Copy summary';
+
+  @override
+  String get pendingAbbrev => 'pend.';
+
+  @override
+  String get deliveryLabel => 'Due';
 }
