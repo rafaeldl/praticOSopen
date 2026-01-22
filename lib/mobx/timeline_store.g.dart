@@ -16,6 +16,14 @@ mixin _$TimelineStore on _TimelineStore, Store {
     () => super.unreadCount,
     name: '_TimelineStore.unreadCount',
   )).value;
+  Computed<List<TimelineEvent>>? _$chatEventsComputed;
+
+  @override
+  List<TimelineEvent> get chatEvents =>
+      (_$chatEventsComputed ??= Computed<List<TimelineEvent>>(
+        () => super.chatEvents,
+        name: '_TimelineStore.chatEvents',
+      )).value;
   Computed<Map<String, List<TimelineEvent>>>? _$eventsByDateComputed;
 
   @override
@@ -23,6 +31,22 @@ mixin _$TimelineStore on _TimelineStore, Store {
       (_$eventsByDateComputed ??= Computed<Map<String, List<TimelineEvent>>>(
         () => super.eventsByDate,
         name: '_TimelineStore.eventsByDate',
+      )).value;
+  Computed<Map<String, List<dynamic>>>? _$chatEventsGroupedComputed;
+
+  @override
+  Map<String, List<dynamic>> get chatEventsGrouped =>
+      (_$chatEventsGroupedComputed ??= Computed<Map<String, List<dynamic>>>(
+        () => super.chatEventsGrouped,
+        name: '_TimelineStore.chatEventsGrouped',
+      )).value;
+  Computed<Map<String, List<TimelineEvent>>>? _$allEventsByDateComputed;
+
+  @override
+  Map<String, List<TimelineEvent>> get allEventsByDate =>
+      (_$allEventsByDateComputed ??= Computed<Map<String, List<TimelineEvent>>>(
+        () => super.allEventsByDate,
+        name: '_TimelineStore.allEventsByDate',
       )).value;
 
   late final _$eventsAtom = Atom(
@@ -175,7 +199,10 @@ isLoading: ${isLoading},
 isSending: ${isSending},
 error: ${error},
 unreadCount: ${unreadCount},
-eventsByDate: ${eventsByDate}
+chatEvents: ${chatEvents},
+eventsByDate: ${eventsByDate},
+chatEventsGrouped: ${chatEventsGrouped},
+allEventsByDate: ${allEventsByDate}
     ''';
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/models/timeline_event.dart';
 import 'package:praticos/models/membership.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/services/segment_config_service.dart';
 
 /// iOS Dynamic Type font sizes
 class _FontSize {
@@ -45,9 +46,35 @@ class EventCard extends StatelessWidget {
       return _buildCommentBubble(context);
     } else if (event.type == 'photos_added') {
       return _buildPhotoCard(context);
+    } else if (event.type == 'status_change') {
+      // Status changes are rendered as separators (not balloons)
+      return _buildStatusSeparator(context);
     } else {
       return _buildSystemEventCard(context);
     }
+  }
+
+  /// Status separator (centered text line, not a bubble)
+  /// Similar to date separators, status changes are displayed as simple text lines
+  Widget _buildStatusSeparator(BuildContext context) {
+    final content = _getStatusContent(context);
+    final textColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Center(
+          child: Text(
+            '${content.icon} ${content.text} · ${_formatTime(event.createdAt)}',
+            style: TextStyle(
+              fontSize: _FontSize.caption1,
+              color: textColor,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   /// Chat bubble for comments (WhatsApp style)
@@ -67,7 +94,7 @@ class EventCard extends StatelessWidget {
         : CupertinoColors.label.resolveFrom(context);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment:
             isFromMe ? MainAxisAlignment.end : MainAxisAlignment.start,
@@ -175,10 +202,10 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  /// System event card (WhatsApp style - centered)
+  /// System event card (WhatsApp style - centered, compact, single line)
   Widget _buildSystemEventCard(BuildContext context) {
-    final authorName = isFromMe ? context.l10n.you : event.author?.name;
-    final subtitle = _getEventSubtitle(context);
+    final chatContent = _getChatEventContent(context);
+    final textColor = CupertinoColors.secondaryLabel.resolveFrom(context);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -187,56 +214,20 @@ class EventCard extends StatelessWidget {
         child: Center(
           child: Container(
             constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.85,
+              maxWidth: MediaQuery.of(context).size.width * 0.9,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: CupertinoColors.systemGrey6.resolveFrom(context),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Column(
-              children: [
-                // Main line: emoji + author + action
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: '${event.icon} '),
-                      if (authorName != null)
-                        TextSpan(
-                          text: authorName,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      TextSpan(
-                        text: authorName != null
-                            ? ' ${_getEventVerb(context)}'
-                            : _getEventTitle(context),
-                      ),
-                    ],
-                  ),
-                  style: TextStyle(
-                    fontSize: _FontSize.footnote,
-                    color: CupertinoColors.label.resolveFrom(context),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                // Subtitle + time
-                if (subtitle != null || event.createdAt != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      [
-                        if (subtitle != null) subtitle,
-                        _formatTime(event.createdAt),
-                      ].join(' • '),
-                      style: TextStyle(
-                        fontSize: _FontSize.caption2,
-                        color:
-                            CupertinoColors.secondaryLabel.resolveFrom(context),
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-              ],
+            child: Text(
+              '${chatContent.icon} ${chatContent.text}${chatContent.detail ?? ''} · ${_formatTime(event.createdAt)}',
+              style: TextStyle(
+                fontSize: _FontSize.caption1,
+                color: textColor,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
         ),
@@ -244,68 +235,134 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  /// Returns verb form for event (used with author name)
-  String _getEventVerb(BuildContext context) {
+  /// Get compact chat event content (icon, text, detail, color)
+  _ChatEventContent _getChatEventContent(BuildContext context) {
     switch (event.type) {
       case 'status_change':
-        return context.l10n.changedStatus;
-      case 'photos_added':
-        final count = event.data?.photoUrls?.length ?? 1;
-        return count == 1
-            ? context.l10n.addedPhoto
-            : context.l10n.addedPhotosVerb(count);
-      case 'service_added':
-        return context.l10n.addedService;
-      case 'service_updated':
-        return context.l10n.updatedService;
-      case 'service_removed':
-        return context.l10n.removedService;
-      case 'product_added':
-        return context.l10n.addedProduct;
-      case 'product_updated':
-        return context.l10n.updatedProduct;
-      case 'product_removed':
-        return context.l10n.removedProduct;
-      case 'form_added':
-        return context.l10n.addedChecklist;
-      case 'form_updated':
-        return context.l10n.updatedChecklist;
-      case 'form_completed':
-        return context.l10n.completedChecklist;
-      case 'payment_received':
-        return context.l10n.receivedPayment;
-      case 'payment_removed':
-        return context.l10n.removedPayment;
-      case 'discount_applied':
-        return context.l10n.appliedDiscount;
-      case 'discount_removed':
-        return context.l10n.removedDiscount;
-      case 'payment_status_change':
-        return event.data?.newStatus == 'paid'
-            ? context.l10n.markedPaid
-            : context.l10n.markedUnpaid;
-      case 'assignment_change':
-        return context.l10n.assignedOrder;
-      case 'order_created':
-        return context.l10n.createdOrder;
-      case 'device_change':
-        return context.l10n.changedDevice;
-      case 'customer_change':
-        return context.l10n.changedCustomer;
+        return _getStatusContent(context);
       case 'due_date_change':
-        return context.l10n.changedDueDate;
+        return _getDueDateContent(context);
+      case 'payment_received':
+        return _getPaymentContent(context);
+      case 'payment_status_change':
+        return _getPaymentStatusContent(context);
+      case 'form_completed':
+        return _ChatEventContent(
+          icon: '✅',
+          text: context.l10n.checklistCompletedChat,
+        );
       default:
-        return context.l10n.madeChange;
+        // Fallback for any other event types
+        return _ChatEventContent(
+          icon: event.icon,
+          text: _getEventTitle(context),
+          detail: _getEventSubtitle(context) != null
+              ? ': ${_getEventSubtitle(context)}'
+              : null,
+        );
     }
   }
 
-  /// Photo card with image grid
+  /// Get status change content with system colors (uses SegmentConfigService)
+  _ChatEventContent _getStatusContent(BuildContext context) {
+    final newStatus = event.data?.newStatus;
+    final config = SegmentConfigService();
+    final statusText = config.getStatus(newStatus);
+
+    // Get icon based on status
+    String icon;
+    switch (newStatus) {
+      case 'quote':
+        icon = '🟠';
+        break;
+      case 'approved':
+        icon = '🔵';
+        break;
+      case 'progress':
+        icon = '🟣';
+        break;
+      case 'done':
+        icon = '🟢';
+        break;
+      case 'canceled':
+        icon = '🔴';
+        break;
+      default:
+        icon = '⚪';
+    }
+
+    return _ChatEventContent(
+      icon: icon,
+      text: statusText,
+    );
+  }
+
+  /// Get due date change content
+  _ChatEventContent _getDueDateContent(BuildContext context) {
+    final oldDate = event.data?.oldDate;
+    final newDate = event.data?.newDate;
+
+    if (newDate == null && oldDate != null) {
+      // Delivery removed
+      return _ChatEventContent(
+        icon: '📅',
+        text: context.l10n.deliveryRemoved,
+      );
+    }
+
+    if (oldDate == null && newDate != null) {
+      // Delivery defined
+      return _ChatEventContent(
+        icon: '📅',
+        text: context.l10n.deliveryDefined,
+        detail: ': ${_formatDate(newDate)}',
+      );
+    }
+
+    // Delivery rescheduled
+    return _ChatEventContent(
+      icon: '📅',
+      text: context.l10n.deliveryRescheduled,
+      detail: ': ${_formatDate(oldDate)} → ${_formatDate(newDate)}',
+    );
+  }
+
+  /// Get payment received content
+  _ChatEventContent _getPaymentContent(BuildContext context) {
+    final amount = event.data?.amount ?? 0;
+    final orderTotal = event.data?.orderTotal ?? 0;
+    final isPartial = orderTotal > 0 && amount < orderTotal;
+
+    return _ChatEventContent(
+      icon: '💳',
+      text: context.l10n.paymentReceivedChat,
+      detail: ': R\$ ${amount.toStringAsFixed(2)}${isPartial ? ' (${context.l10n.paymentPartial})' : ''}',
+    );
+  }
+
+  /// Get payment status change content
+  _ChatEventContent _getPaymentStatusContent(BuildContext context) {
+    final newStatus = event.data?.newStatus;
+
+    if (newStatus == 'paid') {
+      return _ChatEventContent(
+        icon: '✅',
+        text: context.l10n.markedAsPaid,
+      );
+    }
+
+    return _ChatEventContent(
+      icon: '⚠️',
+      text: context.l10n.markedAsUnpaid,
+    );
+  }
+
+  /// Photo card with image grid (aligned by author)
   Widget _buildPhotoCard(BuildContext context) {
     final photos = event.data?.photoUrls ?? [];
-    final authorName = isFromMe ? context.l10n.you : event.author?.name;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Column(
         crossAxisAlignment:
             isFromMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
@@ -321,7 +378,7 @@ class EventCard extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
                 Text(
-                  '$authorName • ${_formatTime(event.createdAt)}',
+                  '📷 ${_formatTime(event.createdAt)}',
                   style: TextStyle(
                     fontSize: _FontSize.caption1,
                     color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -340,18 +397,6 @@ class EventCard extends StatelessWidget {
               child: _buildPhotoGrid(context, photos),
             ),
           ),
-          // Caption if exists
-          if (event.data?.caption != null && event.data!.caption!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                event.data!.caption!,
-                style: TextStyle(
-                  fontSize: _FontSize.subhead,
-                  color: CupertinoColors.label.resolveFrom(context),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -820,6 +865,19 @@ class _FullscreenPhotoViewer extends StatefulWidget {
 
   @override
   State<_FullscreenPhotoViewer> createState() => _FullscreenPhotoViewerState();
+}
+
+/// Helper class for chat event content
+class _ChatEventContent {
+  final String icon;
+  final String text;
+  final String? detail;
+
+  const _ChatEventContent({
+    required this.icon,
+    required this.text,
+    this.detail,
+  });
 }
 
 class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {

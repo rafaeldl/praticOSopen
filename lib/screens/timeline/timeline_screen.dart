@@ -16,6 +16,7 @@ import 'package:praticos/repositories/timeline_repository.dart';
 import 'package:praticos/screens/timeline/widgets/event_card.dart';
 import 'package:praticos/screens/timeline/widgets/message_input.dart';
 import 'package:praticos/screens/timeline/widgets/pinned_summary.dart';
+import 'package:praticos/screens/timeline/widgets/collapsed_events_group.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/models/order_form.dart';
@@ -770,7 +771,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
   }
 
   Widget _buildEventsList(List<TimelineEvent> events) {
-    final eventsByDate = _store.eventsByDate;
+    final eventsByDate = _store.chatEventsGrouped;
 
     return ListView.builder(
       controller: _scrollController,
@@ -784,12 +785,30 @@ class _TimelineScreenState extends State<TimelineScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildDateSeparator(dateKey),
-            ...dateEvents.map((event) => EventCard(
+            ...dateEvents.map((item) {
+              if (item is CollapsedGroup) {
+                return CollapsedEventsGroup(
+                  events: item.events,
+                  eventBuilder: (event) => EventCard(
+                    event: event,
+                    isFromMe: event.author?.id == Global.userAggr?.id,
+                    onTap:
+                        event.isComment ? null : () => _handleEventTap(event),
+                    collaborators:
+                        CollaboratorStore.instance.collaborators.toList(),
+                  ),
+                );
+              } else {
+                final event = item as TimelineEvent;
+                return EventCard(
                   event: event,
                   isFromMe: event.author?.id == Global.userAggr?.id,
                   onTap: event.isComment ? null : () => _handleEventTap(event),
-                  collaborators: CollaboratorStore.instance.collaborators.toList(),
-                )),
+                  collaborators:
+                      CollaboratorStore.instance.collaborators.toList(),
+                );
+              }
+            }),
           ],
         );
       },

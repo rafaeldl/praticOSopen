@@ -2731,4 +2731,49 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deliveryLabel => 'Entrega';
+
+  @override
+  String get servicesShort => 'Serv';
+
+  @override
+  String get productsShort => 'Prod';
+
+  @override
+  String get checklistsShort => 'Chk';
+
+  @override
+  String get deliveryDefined => 'Entrega definida';
+
+  @override
+  String get deliveryRescheduled => 'Entrega reagendada';
+
+  @override
+  String get deliveryRemoved => 'Entrega removida';
+
+  @override
+  String get paymentReceivedChat => 'Pagamento recebido';
+
+  @override
+  String get paymentUpdatedChat => 'Pagamento atualizado';
+
+  @override
+  String get paymentPartial => 'parcial';
+
+  @override
+  String get allChecklistsCompleted => 'Todos os checklists concluídos';
+
+  @override
+  String get checklistCompletedChat => 'Checklist concluído';
+
+  @override
+  String get orderUpdates => 'Atualizações da OS';
+
+  @override
+  String get photoBefore => 'Antes';
+
+  @override
+  String get photoAfter => 'Depois';
+
+  @override
+  String get photoAttachment => 'Foto';
 }

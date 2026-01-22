@@ -5211,6 +5211,96 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Entrega'**
   String get deliveryLabel;
+
+  /// No description provided for @servicesShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serv'**
+  String get servicesShort;
+
+  /// No description provided for @productsShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Prod'**
+  String get productsShort;
+
+  /// No description provided for @checklistsShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'Chk'**
+  String get checklistsShort;
+
+  /// No description provided for @deliveryDefined.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrega definida'**
+  String get deliveryDefined;
+
+  /// No description provided for @deliveryRescheduled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrega reagendada'**
+  String get deliveryRescheduled;
+
+  /// No description provided for @deliveryRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrega removida'**
+  String get deliveryRemoved;
+
+  /// No description provided for @paymentReceivedChat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento recebido'**
+  String get paymentReceivedChat;
+
+  /// No description provided for @paymentUpdatedChat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento atualizado'**
+  String get paymentUpdatedChat;
+
+  /// No description provided for @paymentPartial.
+  ///
+  /// In pt, this message translates to:
+  /// **'parcial'**
+  String get paymentPartial;
+
+  /// No description provided for @allChecklistsCompleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os checklists concluídos'**
+  String get allChecklistsCompleted;
+
+  /// No description provided for @checklistCompletedChat.
+  ///
+  /// In pt, this message translates to:
+  /// **'Checklist concluído'**
+  String get checklistCompletedChat;
+
+  /// No description provided for @orderUpdates.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atualizações da OS'**
+  String get orderUpdates;
+
+  /// No description provided for @photoBefore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Antes'**
+  String get photoBefore;
+
+  /// No description provided for @photoAfter.
+  ///
+  /// In pt, this message translates to:
+  /// **'Depois'**
+  String get photoAfter;
+
+  /// No description provided for @photoAttachment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto'**
+  String get photoAttachment;
 }
 
 class _AppLocalizationsDelegate

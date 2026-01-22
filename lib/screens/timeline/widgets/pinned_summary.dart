@@ -190,19 +190,19 @@ class PinnedSummary extends StatelessWidget {
     final parts = <String>[];
 
     if (servicesCount > 0) {
-      parts.add('${l10n.services} $servicesCount');
+      parts.add('${l10n.servicesShort} $servicesCount');
     }
 
     if (productsCount > 0) {
-      parts.add('${l10n.products} $productsCount');
+      parts.add('${l10n.productsShort} $productsCount');
     }
 
     if (checklistsCount > 0) {
       if (pendingCount > 0) {
         parts.add(
-            '${l10n.checklists} $checklistsCount ($pendingCount ${l10n.pendingAbbrev})');
+            '${l10n.checklistsShort} $checklistsCount (\u26a0\ufe0f $pendingCount ${l10n.pendingAbbrev})');
       } else {
-        parts.add('${l10n.checklists} $checklistsCount');
+        parts.add('${l10n.checklistsShort} $checklistsCount');
       }
     }
 

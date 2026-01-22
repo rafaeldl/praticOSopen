@@ -1133,5 +1133,26 @@
   "noItemsYet": "No items • Tap to add",
   "copySummary": "Copy summary",
   "pendingAbbrev": "pend.",
-  "deliveryLabel": "Due"
+  "deliveryLabel": "Due",
+
+  "servicesShort": "Serv",
+  "productsShort": "Prod",
+  "checklistsShort": "Chk",
+
+  "deliveryDefined": "Delivery defined",
+  "deliveryRescheduled": "Delivery rescheduled",
+  "deliveryRemoved": "Delivery removed",
+
+  "paymentReceivedChat": "Payment received",
+  "paymentUpdatedChat": "Payment updated",
+  "paymentPartial": "partial",
+
+  "allChecklistsCompleted": "All checklists completed",
+  "checklistCompletedChat": "Checklist completed",
+
+  "orderUpdates": "Order updates",
+
+  "photoBefore": "Before",
+  "photoAfter": "After",
+  "photoAttachment": "Photo"
 }
