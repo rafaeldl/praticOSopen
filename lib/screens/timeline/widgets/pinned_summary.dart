@@ -25,8 +25,7 @@ class PinnedSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final total = order.total ?? 0;
-    final paidAmount = order.paidAmount ?? 0;
-    final isPaid = total > 0 && paidAmount >= total;
+    final isPaid = order.isFullyPaid;
 
     return GestureDetector(
       onTap: onTap,
@@ -57,46 +56,17 @@ class PinnedSummary extends StatelessWidget {
                 color: CupertinoColors.systemGrey.resolveFrom(context),
               ),
               const SizedBox(width: 8),
-              // Content
+              // Content (value/date now in lines)
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    _buildLine1(context),
+                    _buildLine1(context, total: total, isPaid: isPaid),
                     const SizedBox(height: 2),
                     _buildLine2(context),
                   ],
                 ),
-              ),
-              const SizedBox(width: 8),
-              // Value and date column
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Total value
-                  Text(
-                    FormatService().formatCurrency(total, decimalDigits: 0),
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: isPaid
-                          ? CupertinoColors.systemGreen
-                          : CupertinoColors.label.resolveFrom(context),
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                  // Due date
-                  Text(
-                    _getDeliveryDateText(context),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                ],
               ),
               const SizedBox(width: 4),
               // Chevron
@@ -112,44 +82,69 @@ class PinnedSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildLine1(BuildContext context) {
+  Widget _buildLine1(BuildContext context, {required double total, required bool isPaid}) {
     final l10n = context.l10n;
     final config = SegmentConfigService();
     final statusText = config.getStatus(order.status);
-
     final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
 
     return Row(
       children: [
-        // OS number
+        // Conteúdo esquerdo (expandido)
+        Expanded(
+          child: Row(
+            children: [
+              // OS number - secondary (não destaque)
+              Text(
+                '${l10n.orderShort} #${order.number ?? ''}',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: secondaryColor,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+              Text(
+                ' · ',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: secondaryColor,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+              // Status - único elemento colorido
+              Flexible(
+                child: Text(
+                  statusText,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: _getStatusColor(context, order.status),
+                    decoration: TextDecoration.none,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        // Ícone de pagamento (se pago)
+        if (isPaid)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Icon(
+              CupertinoIcons.checkmark_circle,
+              size: 14,
+              color: CupertinoColors.systemGreen.resolveFrom(context),
+            ),
+          ),
         Text(
-          '${l10n.orderShort} #${order.number ?? ''}',
+          FormatService().formatCurrency(total, decimalDigits: 0),
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
             color: CupertinoColors.label.resolveFrom(context),
             decoration: TextDecoration.none,
-          ),
-        ),
-        Text(
-          ' · ',
-          style: TextStyle(
-            fontSize: 13,
-            color: secondaryColor,
-            decoration: TextDecoration.none,
-          ),
-        ),
-        // Status
-        Expanded(
-          child: Text(
-            statusText,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: _getStatusColor(context, order.status),
-              decoration: TextDecoration.none,
-            ),
-            overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
@@ -158,16 +153,39 @@ class PinnedSummary extends StatelessWidget {
 
   Widget _buildLine2(BuildContext context) {
     final summaryText = _getSummaryText(context);
+    final dateText = _getDeliveryDateText(context);
+    final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
 
-    return Text(
-      summaryText,
-      style: TextStyle(
-        fontSize: 12,
-        color: CupertinoColors.secondaryLabel.resolveFrom(context),
-        decoration: TextDecoration.none,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            summaryText,
+            style: TextStyle(
+              fontSize: 12,
+              color: secondaryColor,
+              decoration: TextDecoration.none,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Icon(
+          CupertinoIcons.clock,
+          size: 12,
+          color: CupertinoColors.systemRed.resolveFrom(context),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          dateText,
+          style: TextStyle(
+            fontSize: 12,
+            color: secondaryColor,
+            decoration: TextDecoration.none,
+          ),
+        ),
+      ],
     );
   }
 
@@ -190,19 +208,18 @@ class PinnedSummary extends StatelessWidget {
     final parts = <String>[];
 
     if (servicesCount > 0) {
-      parts.add('${l10n.servicesShort} $servicesCount');
+      parts.add('${l10n.services} $servicesCount');
     }
 
     if (productsCount > 0) {
-      parts.add('${l10n.productsShort} $productsCount');
+      parts.add('${l10n.products} $productsCount');
     }
 
     if (checklistsCount > 0) {
       if (pendingCount > 0) {
-        parts.add(
-            '${l10n.checklistsShort} $checklistsCount (\u26a0\ufe0f $pendingCount ${l10n.pendingAbbrev})');
+        parts.add('${l10n.checklists} $checklistsCount (⚠️$pendingCount)');
       } else {
-        parts.add('${l10n.checklistsShort} $checklistsCount');
+        parts.add('${l10n.checklists} $checklistsCount');
       }
     }
 
