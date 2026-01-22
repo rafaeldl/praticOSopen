@@ -99,12 +99,15 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
         middle: Text(_isEditing
             ? config.label(LabelKeys.editDevice)
             : config.label(LabelKeys.createDevice)),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _saveDevice,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : Text(config.label(LabelKeys.save), style: const TextStyle(fontWeight: FontWeight.bold)),
+        trailing: Semantics(
+          identifier: 'device_form_save_button',
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: _isLoading ? null : _saveDevice,
+            child: _isLoading
+                ? const CupertinoActivityIndicator()
+                : Text(config.label(LabelKeys.save), style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ),
       ),
       child: SafeArea(
@@ -182,89 +185,101 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                 header: Text(context.l10n.basicInfo.toUpperCase()),
                 children: [
                   // Category Field
-                  CupertinoListTile(
-                    title: SizedBox(
-                      width: 100,
-                      child: Text(
-                        context.l10n.deviceCategory,
-                        style: const TextStyle(fontSize: 16),
+                  Semantics(
+                    identifier: 'device_form_category_field',
+                    child: CupertinoListTile(
+                      title: SizedBox(
+                        width: 100,
+                        child: Text(
+                          context.l10n.deviceCategory,
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
-                    ),
-                    additionalInfo: Text(
-                      _device?.category ?? context.l10n.select,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _device?.category != null
-                            ? CupertinoColors.label.resolveFrom(context)
-                            : CupertinoColors.placeholderText.resolveFrom(context),
+                      additionalInfo: Text(
+                        _device?.category ?? context.l10n.select,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: _device?.category != null
+                              ? CupertinoColors.label.resolveFrom(context)
+                              : CupertinoColors.placeholderText.resolveFrom(context),
+                        ),
                       ),
+                      trailing: Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 20,
+                        color: CupertinoColors.systemGrey.resolveFrom(context),
+                      ),
+                      onTap: () => _selectCategory(context),
                     ),
-                    trailing: Icon(
-                      CupertinoIcons.chevron_right,
-                      size: 20,
-                      color: CupertinoColors.systemGrey.resolveFrom(context),
-                    ),
-                    onTap: () => _selectCategory(context),
                   ),
 
                   // Brand/Manufacturer Field
-                  CupertinoListTile(
-                    title: SizedBox(
-                      width: 100,
-                      child: Text(
-                        config.label(LabelKeys.deviceBrand),
-                        style: const TextStyle(fontSize: 16),
+                  Semantics(
+                    identifier: 'device_form_brand_field',
+                    child: CupertinoListTile(
+                      title: SizedBox(
+                        width: 100,
+                        child: Text(
+                          config.label(LabelKeys.deviceBrand),
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
-                    ),
-                    additionalInfo: Text(
-                      _device?.manufacturer ?? context.l10n.select,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _device?.manufacturer != null
-                            ? CupertinoColors.label.resolveFrom(context)
-                            : CupertinoColors.placeholderText.resolveFrom(context),
+                      additionalInfo: Text(
+                        _device?.manufacturer ?? context.l10n.select,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: _device?.manufacturer != null
+                              ? CupertinoColors.label.resolveFrom(context)
+                              : CupertinoColors.placeholderText.resolveFrom(context),
+                        ),
                       ),
+                      trailing: Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 20,
+                        color: CupertinoColors.systemGrey.resolveFrom(context),
+                      ),
+                      onTap: () => _selectBrand(context, config),
                     ),
-                    trailing: Icon(
-                      CupertinoIcons.chevron_right,
-                      size: 20,
-                      color: CupertinoColors.systemGrey.resolveFrom(context),
-                    ),
-                    onTap: () => _selectBrand(context, config),
                   ),
 
                   // Model Field
-                  CupertinoListTile(
-                    title: SizedBox(
-                      width: 100,
-                      child: Text(
-                        config.label(LabelKeys.deviceModel),
-                        style: const TextStyle(fontSize: 16),
+                  Semantics(
+                    identifier: 'device_form_name_field',
+                    child: CupertinoListTile(
+                      title: SizedBox(
+                        width: 100,
+                        child: Text(
+                          config.label(LabelKeys.deviceModel),
+                          style: const TextStyle(fontSize: 16),
+                        ),
                       ),
-                    ),
-                    additionalInfo: Text(
-                      _device?.name ?? context.l10n.select,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _device?.name != null
-                            ? CupertinoColors.label.resolveFrom(context)
-                            : CupertinoColors.placeholderText.resolveFrom(context),
+                      additionalInfo: Text(
+                        _device?.name ?? context.l10n.select,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: _device?.name != null
+                              ? CupertinoColors.label.resolveFrom(context)
+                              : CupertinoColors.placeholderText.resolveFrom(context),
+                        ),
                       ),
+                      trailing: Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 20,
+                        color: CupertinoColors.systemGrey.resolveFrom(context),
+                      ),
+                      onTap: () => _selectModel(context, config),
                     ),
-                    trailing: Icon(
-                      CupertinoIcons.chevron_right,
-                      size: 20,
-                      color: CupertinoColors.systemGrey.resolveFrom(context),
-                    ),
-                    onTap: () => _selectModel(context, config),
                   ),
 
                   // Serial Number Field
-                  DynamicTextField(
-                    fieldKey: 'device.serial',
-                    initialValue: _device?.serial,
-                    onSaved: (val) => _device?.serial = val?.toUpperCase(),
-                    required: true,
+                  Semantics(
+                    identifier: 'device_form_serial_field',
+                    child: DynamicTextField(
+                      fieldKey: 'device.serial',
+                      initialValue: _device?.serial,
+                      onSaved: (val) => _device?.serial = val?.toUpperCase(),
+                      required: true,
+                    ),
                   ),
                 ],
               ),

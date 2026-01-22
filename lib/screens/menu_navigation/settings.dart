@@ -171,6 +171,7 @@ class _SettingsState extends State<Settings> {
                         color: CupertinoColors.systemGreen,
                         title: config.devicePlural,
                         onTap: () => Navigator.pushNamed(context, '/device_list'),
+                        semanticIdentifier: 'settings_menu_devices',
                       ),
 
                     // Serviços - Admin/Supervisor podem gerenciar
@@ -180,6 +181,7 @@ class _SettingsState extends State<Settings> {
                         color: CupertinoColors.systemIndigo,
                         title: context.l10n.services,
                         onTap: () => Navigator.pushNamed(context, '/service_list'),
+                        semanticIdentifier: 'settings_menu_services',
                       ),
 
                     // Produtos - Admin/Supervisor podem gerenciar
@@ -189,6 +191,7 @@ class _SettingsState extends State<Settings> {
                         color: CupertinoColors.systemPink,
                         title: context.l10n.products,
                         onTap: () => Navigator.pushNamed(context, '/product_list'),
+                        semanticIdentifier: 'settings_menu_products',
                       ),
 
                     // Formulários - Admin/Supervisor podem gerenciar
@@ -198,6 +201,7 @@ class _SettingsState extends State<Settings> {
                         color: CupertinoColors.systemTeal,
                         title: context.l10n.procedures,
                         onTap: () => Navigator.pushNamed(context, '/form_template_list'),
+                        semanticIdentifier: 'settings_menu_forms',
                       ),
                   ],
                 );
@@ -304,8 +308,9 @@ class _SettingsState extends State<Settings> {
     required Color color,
     required String title,
     required VoidCallback onTap,
+    String? semanticIdentifier,
   }) {
-    return CupertinoListTile(
+    final tile = CupertinoListTile(
       leading: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
@@ -318,6 +323,14 @@ class _SettingsState extends State<Settings> {
       trailing: const CupertinoListTileChevron(),
       onTap: onTap,
     );
+
+    if (semanticIdentifier != null) {
+      return Semantics(
+        identifier: semanticIdentifier,
+        child: tile,
+      );
+    }
+    return tile;
   }
 
   String _getThemeModeText(BuildContext context, ThemeMode mode) {

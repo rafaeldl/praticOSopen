@@ -111,12 +111,15 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
         middle: Text(_isEditing ? "Editar Produto" : "Novo Produto"),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _isLoading ? null : _saveProduct,
-          child: _isLoading
-              ? const CupertinoActivityIndicator()
-              : const Text("Salvar", style: TextStyle(fontWeight: FontWeight.bold)),
+        trailing: Semantics(
+          identifier: 'product_form_save_button',
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: _isLoading ? null : _saveProduct,
+            child: _isLoading
+                ? const CupertinoActivityIndicator()
+                : const Text("Salvar", style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
         ),
       ),
       child: SafeArea(
@@ -192,33 +195,39 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               // Form Fields
               CupertinoListSection.insetGrouped(
                 children: [
-                  CupertinoTextFormFieldRow(
-                    prefix: const Text("Nome", style: TextStyle(fontSize: 16)),
-                    initialValue: _product?.name,
-                    placeholder: "Nome do produto",
-                    textCapitalization: TextCapitalization.sentences,
-                    textAlign: TextAlign.right,
-                    onSaved: (val) => _product?.name = val,
-                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                  Semantics(
+                    identifier: 'product_form_name_field',
+                    child: CupertinoTextFormFieldRow(
+                      prefix: const Text("Nome", style: TextStyle(fontSize: 16)),
+                      initialValue: _product?.name,
+                      placeholder: "Nome do produto",
+                      textCapitalization: TextCapitalization.sentences,
+                      textAlign: TextAlign.right,
+                      onSaved: (val) => _product?.name = val,
+                      validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                    ),
                   ),
-                  CupertinoTextFormFieldRow(
-                    prefix: const Text("Valor", style: TextStyle(fontSize: 16)),
-                    controller: _valueController,
-                    placeholder: "0,00",
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.right,
-                    inputFormatters: [_currencyFormatter],
-                    onSaved: (String? value) {
-                      if (value != null) {
-                        value = value
-                            .replaceAll(RegExp(r'R\$'), '')
-                            .replaceAll(RegExp(r'\.'), '')
-                            .replaceAll(RegExp(r','), '.')
-                            .trim();
-                        _product!.value = double.tryParse(value) ?? 0;
-                      }
-                    },
-                    validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                  Semantics(
+                    identifier: 'product_form_value_field',
+                    child: CupertinoTextFormFieldRow(
+                      prefix: const Text("Valor", style: TextStyle(fontSize: 16)),
+                      controller: _valueController,
+                      placeholder: "0,00",
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.right,
+                      inputFormatters: [_currencyFormatter],
+                      onSaved: (String? value) {
+                        if (value != null) {
+                          value = value
+                              .replaceAll(RegExp(r'R\$'), '')
+                              .replaceAll(RegExp(r'\.'), '')
+                              .replaceAll(RegExp(r','), '.')
+                              .trim();
+                          _product!.value = double.tryParse(value) ?? 0;
+                        }
+                      },
+                      validator: (val) => val == null || val.isEmpty ? "Obrigatório" : null,
+                    ),
                   ),
                 ],
               ),
