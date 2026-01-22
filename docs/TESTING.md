@@ -443,6 +443,205 @@ jobs:
 
 ---
 
+## Testes CRUD de Integração
+
+### Visão Geral
+
+O sistema possui testes automatizados de integração que validam operações CRUD (Create, Read, Update, Delete) para as principais entidades:
+
+| Entidade | Arquivo de Teste | Operações |
+|----------|------------------|-----------|
+| Device | `crud_integration_test.dart` | Create, Update, Delete |
+| Service | `crud_integration_test.dart` | Create, Update, Delete |
+| Product | `crud_integration_test.dart` | Create, Update, Delete |
+| Form | `crud_integration_test.dart` | Create, Update, Delete |
+
+**Total:** 12 testes
+
+### Comando para Executar
+
+```bash
+fvm flutter test integration_test/crud_integration_test.dart --dart-define=TEST_LOCALE=pt-BR
+```
+
+---
+
+### Convenção de Semantic Identifiers
+
+Os testes usam **Semantic Identifiers** para localizar e interagir com widgets de forma confiável, independente de mudanças na UI.
+
+#### Padrão de Nomenclatura
+
+```
+{contexto}_{tipo}_{identificador}
+```
+
+**Exemplos:**
+- `device_list_add_button` - Botão adicionar na lista de devices
+- `device_form_save_button` - Botão salvar no form de device
+- `device_item_{id}` - Item específico na lista (usa ID real)
+- `tab_settings` - Tab de configurações
+
+#### Tabela de Semantic Identifiers por Tela
+
+**Telas de Lista:**
+| Identifier | Descrição |
+|------------|-----------|
+| `{entity}_list_add_button` | Botão de adicionar |
+| `{entity}_item_{id}` | Item na lista (usa ID da entidade) |
+
+**Telas de Formulário:**
+| Identifier | Descrição |
+|------------|-----------|
+| `{entity}_form_save_button` | Botão salvar |
+| `{entity}_form_name_field` | Campo nome |
+| `{entity}_form_value_field` | Campo valor |
+
+**Picker de Valores Acumulados:**
+| Identifier | Descrição |
+|------------|-----------|
+| `accumulated_value_search_field` | Campo de busca |
+| `accumulated_value_item_{index}` | Item na lista |
+| `accumulated_value_add_button` | Botão adicionar novo valor |
+
+**Menu de Configurações:**
+| Identifier | Descrição |
+|------------|-----------|
+| `tab_settings` | Tab de configurações |
+| `settings_menu_devices` | Menu Equipamentos |
+| `settings_menu_services` | Menu Serviços |
+| `settings_menu_products` | Menu Produtos |
+| `settings_menu_forms` | Menu Procedimentos |
+
+---
+
+### Helper Functions
+
+O arquivo de teste inclui funções auxiliares para interação via Semantics:
+
+#### `_findBySemantic(tester, identifier)`
+Localiza um widget pelo seu semantic identifier.
+
+```dart
+final widget = await _findBySemantic(tester, 'device_list_add_button');
+```
+
+#### `_tapSemantic(tester, identifier)`
+Clica em um widget pelo seu semantic identifier.
+
+```dart
+await _tapSemantic(tester, 'device_form_save_button');
+```
+
+#### `_enterTextInSemantic(tester, identifier, text)`
+Preenche um campo de texto identificado por Semantics.
+
+```dart
+await _enterTextInSemantic(tester, 'service_form_name_field', 'Meu Serviço');
+```
+
+#### `_findFirstEntityId(tester, entityType)`
+Encontra o ID da primeira entidade na lista.
+
+```dart
+final deviceId = await _findFirstEntityId(tester, 'device');
+// Retorna: "abc123" (ID real do Firebase)
+```
+
+#### `_selectOrCreateAccumulatedValue(tester, value)`
+Seleciona ou cria um valor no picker de campos acumulativos.
+
+```dart
+await _selectOrCreateAccumulatedValue(tester, 'Nova Categoria');
+```
+
+---
+
+### Como Adicionar Semantic Identifier a um Widget
+
+1. **Wrap o widget com `Semantics`:**
+
+```dart
+Semantics(
+  identifier: 'meu_componente_tipo',
+  child: CupertinoButton(
+    onPressed: _minhaAcao,
+    child: Text('Meu Botão'),
+  ),
+)
+```
+
+2. **Para itens de lista, use o ID real:**
+
+```dart
+// ✅ CORRETO - ID estável
+Semantics(
+  identifier: 'device_item_${device.id}',
+  child: _buildDeviceCard(device),
+)
+
+// ❌ ERRADO - Index muda com ordenação
+Semantics(
+  identifier: 'device_item_$index',
+  child: _buildDeviceCard(device),
+)
+```
+
+---
+
+### Como Criar Novo Teste CRUD
+
+1. **Seguir o padrão existente:**
+
+```dart
+testWidgets('Create {entity}', (WidgetTester tester) async {
+  // 1. Inicializar app
+  await _initializeApp(tester);
+
+  // 2. Login
+  await _performLogin(tester, locale);
+
+  // 3. Navegar para lista
+  await _navigateToMenu(tester, 'Menu Label');
+
+  // 4. Clicar em adicionar
+  await _tapSemantic(tester, '{entity}_list_add_button');
+
+  // 5. Preencher formulário
+  await _enterTextInSemantic(tester, '{entity}_form_name_field', 'Test');
+
+  // 6. Salvar
+  await _tapSemantic(tester, '{entity}_form_save_button');
+
+  // 7. Verificar
+  final id = await _findFirstEntityId(tester, '{entity}');
+  expect(id, isNotNull);
+});
+```
+
+2. **Adicionar semantic identifiers necessários nas telas**
+
+3. **Rodar e iterar até passar**
+
+---
+
+### Boas Práticas para Testes CRUD
+
+#### ✅ DO
+- Use `await tester.pumpAndSettle()` após cada interação
+- Use `await Future.delayed()` para aguardar Firebase
+- Use `FocusManager.instance.primaryFocus?.unfocus()` para fechar teclado
+- Use IDs reais em `{entity}_item_{id}` para estabilidade
+- Verifique null antes de interagir com widgets
+
+#### ❌ DON'T
+- Não use `find.text()` diretamente (frágil com i18n)
+- Não use index para identificar items de lista
+- Não assuma ordem de elementos
+- Não pule verificações de null
+
+---
+
 ## Changelog
 
 ### v1.2.0 (2026-01-13)

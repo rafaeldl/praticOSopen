@@ -120,4 +120,5 @@ feat!: breaking change        # Major
 | Deploy | `docs/DEPLOYMENT.md` |
 | Versionamento | `docs/AUTO_VERSIONING.md` |
 | Formulários dinâmicos | `docs/formularios_dinamicos.md` |
+| Testes e screenshots | `docs/TESTING.md` |
 | Guia de documentação | `docs/DOCUMENTATION_GUIDE.md` |
