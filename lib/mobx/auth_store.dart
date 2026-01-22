@@ -1,6 +1,7 @@
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
+import 'package:praticos/models/user.dart' show UserAggr;
 import 'package:praticos/repositories/auth_repository.dart';
 import 'package:praticos/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -72,6 +73,12 @@ abstract class _AuthStore with Store {
       if (user.photoURL != null) {
         prefs.setString('userPhoto', user.photoURL!);
       }
+
+      // Set Global.userAggr for audit fields (createdBy/updatedBy)
+      Global.userAggr = UserAggr();
+      Global.userAggr!.id = user.uid;
+      Global.userAggr!.name = dbUser?.name ?? user.displayName;
+      Global.userAggr!.email = dbUser?.email ?? user.email;
 
       // Se não encontrou empresa, usuário vai para onboarding
       if (company == null) {
@@ -185,6 +192,7 @@ abstract class _AuthStore with Store {
     await prefs.remove("companyName");
     Global.currentUser = null;
     Global.companyAggr = null;
+    Global.userAggr = null;
     _auth.signOutGoogle();
   }
 
@@ -232,6 +240,7 @@ abstract class _AuthStore with Store {
       // 4. Clear global state
       Global.currentUser = null;
       Global.companyAggr = null;
+      Global.userAggr = null;
 
       logout = true;
     } catch (e) {

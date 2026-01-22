@@ -80,6 +80,7 @@ class MyApp extends StatelessWidget {
       Global.userAggr = UserAggr();
       Global.userAggr!.id = value.getString('userId');
       Global.userAggr!.name = value.getString('userDisplayName');
+      Global.userAggr!.email = value.getString('userEmail');
       // Global.orderStore = OrderStore();
     });
 
