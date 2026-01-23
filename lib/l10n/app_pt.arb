@@ -1199,5 +1199,7 @@
 
   "photoBefore": "Antes",
   "photoAfter": "Depois",
-  "photoAttachment": "Foto"
+  "photoAttachment": "Foto",
+
+  "uploadingPhoto": "Enviando foto..."
 }

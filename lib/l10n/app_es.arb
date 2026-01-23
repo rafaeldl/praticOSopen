@@ -1154,5 +1154,7 @@
 
   "photoBefore": "Antes",
   "photoAfter": "Después",
-  "photoAttachment": "Foto"
+  "photoAttachment": "Foto",
+
+  "uploadingPhoto": "Enviando foto..."
 }

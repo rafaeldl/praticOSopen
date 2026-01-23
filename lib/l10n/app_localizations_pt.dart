@@ -2776,4 +2776,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get photoAttachment => 'Foto';
+
+  @override
+  String get uploadingPhoto => 'Enviando foto...';
 }

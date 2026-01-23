@@ -1154,5 +1154,7 @@
 
   "photoBefore": "Before",
   "photoAfter": "After",
-  "photoAttachment": "Photo"
+  "photoAttachment": "Photo",
+
+  "uploadingPhoto": "Sending photo..."
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/timeline_store.dart';
 import 'package:praticos/mobx/order_store.dart';
@@ -17,6 +18,7 @@ import 'package:praticos/screens/timeline/widgets/event_card.dart';
 import 'package:praticos/screens/timeline/widgets/message_input.dart';
 import 'package:praticos/screens/timeline/widgets/pinned_summary.dart';
 import 'package:praticos/screens/timeline/widgets/collapsed_events_group.dart';
+import 'package:praticos/screens/timeline/widgets/uploading_photo_placeholder.dart';
 import 'package:praticos/screens/forms/form_selection_screen.dart';
 import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/models/order_form.dart';
@@ -43,6 +45,9 @@ class _TimelineScreenState extends State<TimelineScreen> {
   StreamSubscription<List<OrderForm>>? _formsSubscription;
   int _formsCount = 0;
   int _pendingFormsCount = 0;
+
+  // Upload reaction
+  ReactionDisposer? _uploadReaction;
 
   @override
   void initState() {
@@ -87,6 +92,16 @@ class _TimelineScreenState extends State<TimelineScreen> {
           }
         });
       }
+
+      // Scroll to bottom when photo upload starts
+      _uploadReaction = reaction(
+        (_) => _orderStore.isUploadingPhoto,
+        (isUploading) {
+          if (isUploading) {
+            _scrollToBottom();
+          }
+        },
+      );
     }
   }
 
@@ -95,6 +110,7 @@ class _TimelineScreenState extends State<TimelineScreen> {
     _store.dispose();
     _scrollController.dispose();
     _formsSubscription?.cancel();
+    _uploadReaction?.call();
     super.dispose();
   }
 
@@ -772,46 +788,47 @@ class _TimelineScreenState extends State<TimelineScreen> {
 
   Widget _buildEventsList(List<TimelineEvent> events) {
     final eventsByDate = _store.chatEventsGrouped;
+    final isUploading = _orderStore.isUploadingPhoto;
 
-    return ListView.builder(
+    final children = <Widget>[];
+
+    for (final entry in eventsByDate.entries) {
+      final dateKey = entry.key;
+      final dateEvents = entry.value;
+
+      children.add(_buildDateSeparator(dateKey));
+
+      for (final item in dateEvents) {
+        if (item is CollapsedGroup) {
+          children.add(CollapsedEventsGroup(
+            events: item.events,
+            eventBuilder: (event) => EventCard(
+              event: event,
+              isFromMe: event.author?.id == Global.userAggr?.id,
+              onTap: event.isComment ? null : () => _handleEventTap(event),
+              collaborators: CollaboratorStore.instance.collaborators.toList(),
+            ),
+          ));
+        } else {
+          final event = item as TimelineEvent;
+          children.add(EventCard(
+            event: event,
+            isFromMe: event.author?.id == Global.userAggr?.id,
+            onTap: event.isComment ? null : () => _handleEventTap(event),
+            collaborators: CollaboratorStore.instance.collaborators.toList(),
+          ));
+        }
+      }
+    }
+
+    if (isUploading) {
+      children.add(const UploadingPhotoPlaceholder());
+    }
+
+    return ListView(
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: eventsByDate.length,
-      itemBuilder: (context, index) {
-        final dateKey = eventsByDate.keys.elementAt(index);
-        final dateEvents = eventsByDate[dateKey]!;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildDateSeparator(dateKey),
-            ...dateEvents.map((item) {
-              if (item is CollapsedGroup) {
-                return CollapsedEventsGroup(
-                  events: item.events,
-                  eventBuilder: (event) => EventCard(
-                    event: event,
-                    isFromMe: event.author?.id == Global.userAggr?.id,
-                    onTap:
-                        event.isComment ? null : () => _handleEventTap(event),
-                    collaborators:
-                        CollaboratorStore.instance.collaborators.toList(),
-                  ),
-                );
-              } else {
-                final event = item as TimelineEvent;
-                return EventCard(
-                  event: event,
-                  isFromMe: event.author?.id == Global.userAggr?.id,
-                  onTap: event.isComment ? null : () => _handleEventTap(event),
-                  collaborators:
-                      CollaboratorStore.instance.collaborators.toList(),
-                );
-              }
-            }),
-          ],
-        );
-      },
+      children: children,
     );
   }
 

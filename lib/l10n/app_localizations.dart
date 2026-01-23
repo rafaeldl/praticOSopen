@@ -5301,6 +5301,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Foto'**
   String get photoAttachment;
+
+  /// No description provided for @uploadingPhoto.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviando foto...'**
+  String get uploadingPhoto;
 }
 
 class _AppLocalizationsDelegate
