@@ -128,22 +128,20 @@ class PinnedSummary extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        // Ícone de pagamento (se pago)
         if (isPaid)
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: Icon(
-              CupertinoIcons.checkmark_circle,
-              size: 14,
-              color: CupertinoColors.systemGreen.resolveFrom(context),
+          Text(
+            '${l10n.paid} · ',
+            style: TextStyle(
+              fontSize: 13,
+              color: secondaryColor,
+              decoration: TextDecoration.none,
             ),
           ),
         Text(
           FormatService().formatCurrency(total, decimalDigits: 0),
           style: TextStyle(
             fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: CupertinoColors.label.resolveFrom(context),
+            color: secondaryColor,
             decoration: TextDecoration.none,
           ),
         ),
@@ -155,6 +153,7 @@ class PinnedSummary extends StatelessWidget {
     final summaryText = _getSummaryText(context);
     final dateText = _getDeliveryDateText(context);
     final secondaryColor = CupertinoColors.secondaryLabel.resolveFrom(context);
+    final isOverdue = _isOverdue();
 
     return Row(
       children: [
@@ -171,12 +170,14 @@ class PinnedSummary extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Icon(
-          CupertinoIcons.clock,
-          size: 12,
-          color: CupertinoColors.systemRed.resolveFrom(context),
-        ),
-        const SizedBox(width: 4),
+        if (isOverdue) ...[
+          Icon(
+            CupertinoIcons.clock,
+            size: 12,
+            color: CupertinoColors.systemRed.resolveFrom(context),
+          ),
+          const SizedBox(width: 4),
+        ],
         Text(
           dateText,
           style: TextStyle(
@@ -187,6 +188,21 @@ class PinnedSummary extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  bool _isOverdue() {
+    if (order.dueDate == null) return false;
+    if (order.status == 'done' || order.status == 'canceled') return false;
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dueDay = DateTime(
+      order.dueDate!.year,
+      order.dueDate!.month,
+      order.dueDate!.day,
+    );
+
+    return dueDay.isBefore(today);
   }
 
   String _getDeliveryDateText(BuildContext context) {
