@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PraticOS - Gestao de Ordens de Servico Simplificada</title>
+<meta name="description" content="Sistema completo para gestao de ordens de servico, clientes e financas. Controle seu negocio de forma pratica e eficiente.">
+<meta name="keywords" content="ordem de servico, gestao, clientes, oficina, prestador de servico, app">
+
+<!-- Open Graph -->
+<meta property="og:title" content="PraticOS - Gestao de Ordens de Servico">
+<meta property="og:description" content="Sistema completo para gestao de ordens de servico, clientes e financas.">
+<meta property="og:image" content="assets/images/logo.png">
+<meta property="og:type" content="website">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="assets/images/logo.png">
+
+<!-- Stylesheets -->
+<link rel="stylesheet" href="style.css">
+
+
+
+
+</head>
+
+<body>
+    
+
+
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="index.html" class="nav-logo">
+            <img src="assets/images/logo.png" alt="PraticOS" class="logo-img">
+            <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+        </a>
+        <div class="nav-links">
+            
+            <a href="#features">Funcionalidades</a>
+            
+            <a href="#screenshots">Screenshots</a>
+            
+            <a href="#pricing">Planos</a>
+            
+            <a href="faq.html">FAQ</a>
+            
+            <a href="#contact">Contato</a>
+            
+        </div>
+        <div class="nav-actions">
+            <div class="lang-switch">
+                
+                <a href="index.html" class="active">PT</a>
+                
+                <a href="index-en.html">EN</a>
+                
+                <a href="index-es.html">ES</a>
+                
+            </div>
+            <a href="#download" class="btn btn-primary">Baixar App</a>
+        </div>
+        <button class="nav-toggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</nav>
+
+
+    
+
+
+
+
+
+
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="badge">Novo v2.0 com Multi-Tenancy</div>
+            <h1>Gerencie suas <span class="gradient-text">Ordens de Servico</span> de forma simples e eficiente</h1>
+            <p class="hero-subtitle">Sistema completo para prestadores de servico. Controle clientes, ordens de servico e financas em um so lugar.</p>
+            <div class="hero-cta">
+                <a href="#download" class="btn btn-primary btn-large">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Baixar Gratis
+                </a>
+                <a href="#screenshots" class="btn btn-secondary btn-large">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Ver Demo
+                </a>
+            </div>
+            <div class="hero-stats">
+                
+                
+                <div class="stat">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Usuarios ativos</span>
+                </div>
+                
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">10k+</span>
+                    <span class="stat-label">OS criadas</span>
+                </div>
+                
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">4.8</span>
+                    <span class="stat-label">Avaliacao</span>
+                </div>
+                
+            </div>
+        </div>
+        <div class="hero-phones">
+            <div class="phone phone-back">
+                <div class="phone-frame">
+                    <img src="assets/screenshots/dashboard.png" alt="Dashboard PraticOS" loading="lazy">
+                </div>
+            </div>
+            <div class="phone phone-front">
+                <div class="phone-frame">
+                    <img src="assets/screenshots/home.png" alt="Lista de Ordens de Servico" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <span>Scroll</span>
+        <div class="scroll-indicator"></div>
+    </div>
+</section>
+
+
+
+
+
+
+
+
+
+<!-- Features Section -->
+<section id="features" class="features">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Funcionalidades</span>
+            <h2>Tudo que voce precisa para <span class="gradient-text">gerenciar seu negocio</span></h2>
+            <p>Ferramentas poderosas e intuitivas para aumentar sua produtividade</p>
+        </div>
+        <div class="features-grid">
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    
+
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+    <polyline points="14 2 14 8 20 8"></polyline>
+    <line x1="16" y1="13" x2="8" y2="13"></line>
+    <line x1="16" y1="17" x2="8" y2="17"></line>
+    <polyline points="10 9 9 9 8 9"></polyline>
+</svg>
+
+
+                </div>
+                <h3>Ordens de Servico</h3>
+                <p>Crie, edite e acompanhe todas as suas ordens de servico. Adicione fotos, descricoes detalhadas e valores.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-yellow">
+                    
+
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+    <circle cx="9" cy="7" r="4"></circle>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+</svg>
+
+
+                </div>
+                <h3>Gestao de Clientes</h3>
+                <p>Cadastre e organize seus clientes. Historico completo de servicos, contatos e valores pendentes.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-orange">
+                    
+
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <line x1="12" y1="20" x2="12" y2="10"></line>
+    <line x1="18" y1="20" x2="18" y2="4"></line>
+    <line x1="6" y1="20" x2="6" y2="16"></line>
+</svg>
+
+
+                </div>
+                <h3>Dashboard Financeiro</h3>
+                <p>Visualize faturamento, valores recebidos e a receber. Graficos e relatorios por periodo.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-green">
+                    
+
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+</svg>
+
+
+                </div>
+                <h3>Multi-Tenancy</h3>
+                <p>Suporte a multiplas organizacoes com isolamento completo de dados. Ideal para franquias.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-purple">
+                    
+
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="12" cy="12" r="3"></circle>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+</svg>
+
+
+                </div>
+                <h3>Temas Claro/Escuro</h3>
+                <p>Interface adaptavel ao seu estilo. Suporte nativo a modo claro e escuro com design Material e Cupertino.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-cyan">
+                    
+
+<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+</svg>
+
+
+                </div>
+                <h3>Autenticacao Segura</h3>
+                <p>Login com Google, Apple ou Email. Seus dados protegidos com as melhores praticas de seguranca.</p>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+<!-- Screenshots Section -->
+<section id="screenshots" class="screenshots">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Screenshots</span>
+            <h2>Conheca a <span class="gradient-text">interface do app</span></h2>
+            <p>Design moderno e intuitivo para a melhor experiencia</p>
+        </div>
+        <div class="screenshots-showcase">
+            
+            <div class="screenshot-item">
+                <div class="phone-mockup">
+                    <img src="assets/screenshots/login.png" alt="Tela de Login" loading="lazy">
+                </div>
+                <span class="screenshot-label">Login</span>
+            </div>
+            
+            <div class="screenshot-item">
+                <div class="phone-mockup">
+                    <img src="assets/screenshots/home.png" alt="Ordens de Servico" loading="lazy">
+                </div>
+                <span class="screenshot-label">Ordens de Servico</span>
+            </div>
+            
+            <div class="screenshot-item featured">
+                <div class="phone-mockup">
+                    <img src="assets/screenshots/dashboard.png" alt="Dashboard" loading="lazy">
+                </div>
+                <span class="screenshot-label">Dashboard</span>
+            </div>
+            
+            <div class="screenshot-item">
+                <div class="phone-mockup">
+                    <img src="assets/screenshots/customers.png" alt="Clientes" loading="lazy">
+                </div>
+                <span class="screenshot-label">Clientes</span>
+            </div>
+            
+            <div class="screenshot-item">
+                <div class="phone-mockup">
+                    <img src="assets/screenshots/settings.png" alt="Configuracoes" loading="lazy">
+                </div>
+                <span class="screenshot-label">Configuracoes</span>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+<!-- Pricing Section -->
+<section id="pricing" class="pricing pricing-component">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Planos</span>
+            <h2>Comece grátis. <span class="gradient-text">Pague só quando crescer.</span></h2>
+            <div class="pricing-subtitle-inline">
+                
+                
+                <span>Sem cartão de crédito</span>
+                
+                <span class="dot"></span>
+                <span>Sem limite de tempo</span>
+                
+                <span class="dot"></span>
+                <span>Upgrade quando quiser</span>
+                
+            </div>
+        </div>
+
+        <div class="pricing-grid">
+            
+            <div class="pricing-card">
+                
+                <div class="pricing-header">
+                    <h3>Free</h3>
+                    <div class="price">
+                        <span class="currency">R$</span>
+                        <span class="amount">0</span>
+                        <span class="period">/mês</span>
+                    </div>
+                    <span class="pricing-tagline">Grátis para sempre</span>
+                </div>
+                <ul class="pricing-features">
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>OS e Clientes ilimitados</strong></span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>1 usuário</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>30 fotos/mês</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>1 checklist</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Financeiro e link de acompanhamento</span>
+                    </li>
+                    
+                </ul>
+                <a href="#download" class="btn btn-outline btn-full">Começar Grátis</a>
+            </div>
+            
+            <div class="pricing-card featured">
+                
+                <div class="pricing-badge">Mais Popular</div>
+                
+                <div class="pricing-header">
+                    <h3>Starter</h3>
+                    <div class="price">
+                        <span class="currency">R$</span>
+                        <span class="amount">59</span>
+                        <span class="period">/mês</span>
+                    </div>
+                    <span class="pricing-tagline">Ideal para crescer</span>
+                </div>
+                <ul class="pricing-features">
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Tudo do Free, mais:</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>2 usuários</strong> inclusos</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>200 fotos</strong>/mês</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>3 checklists personalizados</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>PDF profissional</strong> sem marca</span>
+                    </li>
+                    
+                </ul>
+                <a href="#download" class="btn btn-primary btn-full">Começar com Starter</a>
+            </div>
+            
+            <div class="pricing-card">
+                
+                <div class="pricing-header">
+                    <h3>Pro</h3>
+                    <div class="price">
+                        <span class="currency">R$</span>
+                        <span class="amount">119</span>
+                        <span class="period">/mês</span>
+                    </div>
+                    <span class="pricing-tagline">Para equipes maiores</span>
+                </div>
+                <ul class="pricing-features">
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Tudo do Starter, mais:</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>3 usuários</strong> inclusos</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>1.000 fotos</strong>/mês</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>10 checklists personalizados</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Relatórios avançados</span>
+                    </li>
+                    
+                </ul>
+                <a href="#download" class="btn btn-outline btn-full">Começar com Pro</a>
+            </div>
+            
+        </div>
+
+        <!-- Footer with single CTA -->
+        <div class="pricing-footer">
+            <a href="pricing.html" class="pricing-details-link">
+                Precisa de mais? API, multi-empresa e fotos ilimitadas → Compare todos os planos
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+<!-- Download Section -->
+<section id="download" class="download">
+    <div class="container">
+        <div class="download-content">
+            <h2>Baixe agora e comece a <span class="gradient-text">organizar seu negocio</span></h2>
+            <p>Disponivel para iOS e Android. Comece gratuitamente!</p>
+            <div class="download-buttons">
+                <a href="https://apps.apple.com/br/app/praticos/id1534604555" target="_blank" rel="noopener" class="store-button" title="Disponivel na App Store">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                    </svg>
+                    <div class="store-info">
+                        <span class="store-label">Disponivel na</span>
+                        <span class="store-name">App Store</span>
+                    </div>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos" target="_blank" rel="noopener" class="store-button">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                        <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/>
+                    </svg>
+                    <div class="store-info">
+                        <span class="store-label">Disponivel no</span>
+                        <span class="store-name">Google Play</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="download-phone">
+            <div class="phone-glow"></div>
+            <div class="phone-mockup large">
+                <img src="assets/screenshots/login.png" alt="PraticOS App" loading="lazy">
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
+<!-- Contact Section -->
+<section id="contact" class="contact">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Contato</span>
+            <h2>Precisa de <span class="gradient-text">ajuda?</span></h2>
+            <p>Nossa equipe esta pronta para te atender</p>
+        </div>
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4>Email</h4>
+                        <a href="mailto:praticos@rafsoft.com.br">praticos@rafsoft.com.br</a>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4>FAQ</h4>
+                        <a href="faq.html">Perguntas frequentes</a>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4>Privacidade</h4>
+                        <a href="privacy.html">Politica de privacidade</a>
+                    </div>
+                </div>
+            </div>
+            <form class="contact-form" action="mailto:praticos@rafsoft.com.br" method="POST" enctype="text/plain">
+                <div class="form-group">
+                    <label for="name">Nome</label>
+                    <input type="text" id="name" name="Name" required placeholder="Seu nome">
+                </div>
+                <div class="form-group">
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="Email" required placeholder="seu@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="message">Mensagem</label>
+                    <textarea id="message" name="Message" rows="4" required placeholder="Como podemos ajudar?"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Enviar Mensagem</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+
+
+    
+    
+
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="index.html" class="nav-logo">
+                    <img src="assets/images/logo.png" alt="PraticOS" class="logo-img">
+                    <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                </a>
+                <p>Sistema completo para gestão de ordens de serviço. Simplifique seu negócio.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Produto</h4>
+                
+                <a href="#features">Funcionalidades</a>
+                
+                <a href="#pricing">Planos</a>
+                
+                <a href="#download">Download</a>
+                
+            </div>
+            <div class="footer-links">
+                <h4>Suporte</h4>
+                
+                <a href="docs/">Documentação</a>
+                
+                <a href="support.html">Central de Suporte</a>
+                
+                <a href="faq.html">FAQ</a>
+                
+                <a href="#contact">Contato</a>
+                
+                <a href="privacy.html">Privacidade</a>
+                
+                <a href="terms.html">Termos de Uso</a>
+                
+            </div>
+            <div class="footer-links">
+                <h4>Empresa</h4>
+                <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 PraticOS. Todos os direitos reservados.</p>
+            <p>Desenvolvido com ❤️ por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+        </div>
+    </div>
+</footer>
+
+    
+    
+
+
+<!-- Mobile Menu -->
+<div class="mobile-menu">
+    <div class="mobile-menu-content">
+        
+        <a href="#features">Funcionalidades</a>
+        
+        <a href="#screenshots">Screenshots</a>
+        
+        <a href="#pricing">Planos</a>
+        
+        <a href="faq.html">FAQ</a>
+        
+        <a href="support.html">Suporte</a>
+        
+        <a href="#contact">Contato</a>
+        
+        <div class="mobile-lang">
+            
+            <a href="index.html" class="active">PT</a>
+            
+            <a href="index-en.html">EN</a>
+            
+            <a href="index-es.html">ES</a>
+            
+        </div>
+        <a href="#download" class="btn btn-primary">Baixar App</a>
+    </div>
+</div>
+
+    <script>
+    // Mobile menu toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const body = document.body;
+
+    navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+        body.classList.toggle('menu-open');
+    });
+
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('menu-open');
+        });
+    });
+
+    // Navbar scroll effect
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
+        observer.observe(el);
+    });
+</script>
+
+</body>
+
+</html>
