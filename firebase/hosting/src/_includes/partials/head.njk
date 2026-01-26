@@ -29,3 +29,12 @@
 {% if docsStyles %}
 <link rel="stylesheet" href="{{ relPath }}css/docs.css">
 {% endif %}
+
+<!-- Firebase Analytics (Google Analytics 4) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-5L7Z0GSM2W"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-5L7Z0GSM2W');
+</script>
