@@ -1,0 +1,59 @@
+{# Hero Section Component #}
+{% set hero = data.hero %}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="badge">{{ hero.badge }}</div>
+            <h1>{{ hero.title }} <span class="gradient-text">{{ hero.titleHighlight }}</span> {{ hero.subtitle }}</h1>
+            <p class="hero-subtitle">{{ hero.text }}</p>
+            <div class="hero-cta">
+                <a href="{{ hero.ctaPrimary.href }}" class="btn btn-primary btn-large">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    {{ hero.ctaPrimary.text }}
+                </a>
+                <a href="{{ hero.ctaSecondary.href }}" class="btn btn-secondary btn-large">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    {{ hero.ctaSecondary.text }}
+                </a>
+            </div>
+            <div class="hero-stats">
+                {% for stat in hero.stats %}
+                {% if not loop.first %}<div class="stat-divider"></div>{% endif %}
+                <div class="stat">
+                    <span class="stat-number">{{ stat.value }}</span>
+                    <span class="stat-label">{{ stat.label }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="hero-phones">
+            <div class="phone phone-back">
+                <div class="phone-frame">
+                    <img src="{{ relPath }}assets/screenshots/{{ hero.phones.back.image }}" alt="{{ hero.phones.back.alt }}" loading="lazy">
+                </div>
+            </div>
+            <div class="phone phone-front">
+                <div class="phone-frame">
+                    <img src="{{ relPath }}assets/screenshots/{{ hero.phones.front.image }}" alt="{{ hero.phones.front.alt }}" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <span>{{ hero.scroll }}</span>
+        <div class="scroll-indicator"></div>
+    </div>
+</section>

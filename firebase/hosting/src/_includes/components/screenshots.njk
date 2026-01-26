@@ -1,0 +1,23 @@
+{# Screenshots Section Component #}
+{% set ss = data.screenshots %}
+
+<!-- Screenshots Section -->
+<section id="screenshots" class="screenshots">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">{{ ss.tag }}</span>
+            <h2>{{ ss.title }} <span class="gradient-text">{{ ss.titleHighlight }}</span></h2>
+            <p>{{ ss.subtitle }}</p>
+        </div>
+        <div class="screenshots-showcase">
+            {% for item in ss.items %}
+            <div class="screenshot-item{% if item.featured %} featured{% endif %}">
+                <div class="phone-mockup">
+                    <img src="{{ relPath }}assets/screenshots/{{ item.image }}" alt="{{ item.alt }}" loading="lazy">
+                </div>
+                <span class="screenshot-label">{{ item.label }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
