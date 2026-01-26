@@ -1,0 +1,381 @@
+{
+  "slug": "limpeza",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Empresa de Limpeza | PraticOS",
+    "description": "Chega de funcionário fantasma! Sistema para empresa de limpeza com check-in por geolocalização, checklist digital e fotos antes/depois. Controle sua equipe em tempo real.",
+    "keywords": "sistema para empresa de limpeza, software limpeza comercial, app limpeza profissional, gestão equipe limpeza, controle funcionários limpeza, ordem de serviço limpeza",
+    "ogTitle": "Sistema para Empresa de Limpeza | PraticOS",
+    "ogDescription": "Chega de funcionário fantasma! Sistema com check-in por geolocalização, checklist digital e fotos antes/depois. Controle sua equipe em tempo real.",
+    "hero": {
+      "badge": "🧹 Empresas de Limpeza",
+      "title": "Chega de funcionário fantasma:",
+      "titleHighlight": "saiba onde sua equipe está em tempo real",
+      "subtitle": "Check-in por geolocalização, checklist digital para cada tipo de serviço e fotos antes/depois para provar ao cliente. Relatórios automáticos sem esforço.",
+      "ctaPrimary": "Testar Grátis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "300+", "label": "Equipes ativas" },
+        "orders": { "value": "8k+", "label": "Serviços realizados" },
+        "rating": { "value": "4.8", "label": "Avaliação" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Você enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem gerencia empresa de limpeza",
+      "items": [
+        { "icon": "👻", "title": "Funcionário fantasma", "text": "Colaborador marca ponto mas não está no local. Você paga por serviço que não foi feito e perde a confiança do cliente." },
+        { "icon": "📍", "title": "Não sabe onde a equipe está", "text": "Precisa ligar para cada funcionário para saber se chegou no cliente. Perde tempo e não tem controle real." },
+        { "icon": "😤", "title": "Cliente reclama da qualidade", "text": "Reclamações constantes sobre limpeza mal feita. Sem padrão definido, cada funcionário faz de um jeito." },
+        { "icon": "📝", "title": "Ordem de serviço no papel", "text": "Fichas de papel se perdem, rasgam ou ficam ilegíveis. No final do mês, não sabe quantos serviços foram feitos." },
+        { "icon": "📸", "title": "Não consegue provar o serviço", "text": "Cliente diz que a limpeza não foi feita, mas você não tem fotos antes/depois para comprovar." },
+        { "icon": "📱", "title": "WhatsApp caótico", "text": "Mensagens perdidas em grupos, informações desencontradas e muito tempo gasto coordenando pelo celular." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluções",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para o dia a dia da empresa de limpeza",
+      "items": [
+        { "icon": "📍", "title": "Check-in por geolocalização", "text": "Funcionário só marca presença quando está no local.", "highlight": "Acabou o funcionário fantasma." },
+        { "icon": "📋", "title": "Checklist digital por ambiente", "text": "Lista de tarefas para cada cômodo ou área. Funcionário marca o que fez e você acompanha em tempo real." },
+        { "icon": "📸", "title": "Fotos antes e depois", "text": "Documentação visual obrigatória. Prove ao cliente que o serviço foi bem feito." },
+        { "icon": "📊", "title": "Relatório automático para cliente", "text": "Cliente recebe relatório com fotos e checklist preenchido.", "highlight": "Profissionalismo que fideliza." },
+        { "icon": "🗺️", "title": "Acompanhamento em tempo real", "text": "Veja onde cada funcionário está e o status de cada serviço no mapa." },
+        { "icon": "💰", "title": "Controle financeiro completo", "text": "Saiba quanto faturou, custos por serviço e lucro real. Dashboard completo." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulário",
+      "title": "Checklist de",
+      "titleHighlight": "limpeza por ambiente",
+      "text": "Padronize a qualidade do serviço com checklists específicos para cada tipo de ambiente. Funcionário marca cada tarefa concluída.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Checklist de Limpeza",
+      "items": [
+        { "icon": "📸", "text": "Fotos antes de iniciar" },
+        { "icon": "🧹", "text": "Varrer e aspirar todos os ambientes" },
+        { "icon": "🧽", "text": "Limpar superfícies e móveis" },
+        { "icon": "🚿", "text": "Higienizar banheiros" },
+        { "icon": "🍳", "text": "Limpar cozinha e eletrodomésticos" },
+        { "icon": "📸", "text": "Fotos depois de finalizar" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar sua empresa de limpeza",
+      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço com endereço, checklist e instruções específicas para cada cliente." },
+        { "icon": "image", "title": "Fotos Antes/Depois", "text": "Documente o estado do local antes e depois da limpeza. Prove a qualidade do serviço.", "color": "yellow" },
+        { "icon": "location", "title": "Geolocalização", "text": "Saiba exatamente onde sua equipe está. Check-in/check-out com localização comprovada.", "color": "orange" },
+        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestão de Equipe", "text": "Acompanhe a produtividade de cada funcionário. Histórico completo de serviços.", "color": "purple" },
+        { "icon": "pdf", "title": "Relatório para Cliente", "text": "Envie relatórios profissionais com fotos e checklist preenchido automaticamente.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes eu tinha problemas com funcionários que marcavam ponto mas não iam no cliente. Agora com o check-in por geolocalização acabou esse problema. E os clientes adoram receber o relatório com fotos.",
+      "name": "Carla Mendes",
+      "role": "Dona de empresa de limpeza há 8 anos",
+      "metric": "Redução de 90% nas reclamações"
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas dúvidas antes de começar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
+        { "question": "Como funciona o check-in por geolocalização?", "answer": "O funcionário abre o app quando chega no local do serviço. O sistema registra a localização automaticamente, garantindo que ele realmente está no endereço do cliente." },
+        { "question": "Posso criar checklists diferentes para cada tipo de limpeza?", "answer": "Sim! Você pode criar checklists específicos para limpeza residencial, comercial, pós-obra, etc. Cada um com as tarefas adequadas para aquele tipo de serviço." },
+        { "question": "Meus funcionários vão conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tão simples quanto usar WhatsApp. Se sabe usar o celular, sabe usar o PraticOS." },
+        { "question": "O cliente consegue ver o relatório?", "answer": "Sim! Você pode enviar um relatório automático com todas as fotos e o checklist preenchido. O cliente recebe por email ou WhatsApp." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "controlar sua equipe",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe está pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Cleaning Company Management System | PraticOS",
+    "description": "Stop ghost employees! Cleaning business software with geolocation check-in, digital checklists and before/after photos. Track your team in real time.",
+    "keywords": "cleaning company software, cleaning business management, janitorial service app, cleaning crew tracking, maid service software, cleaning service scheduling",
+    "ogTitle": "Cleaning Company Management System | PraticOS",
+    "ogDescription": "Stop ghost employees! System with geolocation check-in, digital checklists and before/after photos. Track your team in real time.",
+    "hero": {
+      "badge": "🧹 Cleaning Companies",
+      "title": "Stop ghost employees:",
+      "titleHighlight": "know where your team is in real time",
+      "subtitle": "Geolocation check-in, digital checklists for each service type and before/after photos to prove to the client. Automatic reports effortlessly.",
+      "ctaPrimary": "Try Free",
+      "ctaSecondary": "Watch Demo",
+      "stats": {
+        "users": { "value": "300+", "label": "Active teams" },
+        "orders": { "value": "8k+", "label": "Services completed" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for cleaning business owners",
+      "items": [
+        { "icon": "👻", "title": "Ghost employees", "text": "Employee clocks in but isn't at the location. You pay for work that wasn't done and lose client trust." },
+        { "icon": "📍", "title": "Don't know where the team is", "text": "Need to call each employee to know if they arrived at the client. Waste time and have no real control." },
+        { "icon": "😤", "title": "Client complaints about quality", "text": "Constant complaints about poor cleaning. Without defined standards, each employee does it differently." },
+        { "icon": "📝", "title": "Paper work orders", "text": "Paper forms get lost, torn or become illegible. At month's end, don't know how many services were done." },
+        { "icon": "📸", "title": "Can't prove the service", "text": "Client says cleaning wasn't done, but you don't have before/after photos to prove it." },
+        { "icon": "📱", "title": "Chaotic WhatsApp", "text": "Lost messages in groups, conflicting information and too much time spent coordinating via phone." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for daily cleaning business operations",
+      "items": [
+        { "icon": "📍", "title": "Geolocation check-in", "text": "Employee can only clock in when at the location.", "highlight": "No more ghost employees." },
+        { "icon": "📋", "title": "Digital checklist by room", "text": "Task list for each room or area. Employee marks what was done and you track in real time." },
+        { "icon": "📸", "title": "Before and after photos", "text": "Mandatory visual documentation. Prove to the client the service was well done." },
+        { "icon": "📊", "title": "Automatic report for client", "text": "Client receives report with photos and filled checklist.", "highlight": "Professionalism that retains clients." },
+        { "icon": "🗺️", "title": "Real-time tracking", "text": "See where each employee is and the status of each service on the map." },
+        { "icon": "💰", "title": "Complete financial control", "text": "Know how much you billed, costs per service and real profit. Complete dashboard." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Cleaning checklist",
+      "titleHighlight": "by room",
+      "text": "Standardize service quality with specific checklists for each type of environment. Employee marks each completed task.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Cleaning Checklist",
+      "items": [
+        { "icon": "📸", "text": "Photos before starting" },
+        { "icon": "🧹", "text": "Sweep and vacuum all areas" },
+        { "icon": "🧽", "text": "Clean surfaces and furniture" },
+        { "icon": "🚿", "text": "Sanitize bathrooms" },
+        { "icon": "🍳", "text": "Clean kitchen and appliances" },
+        { "icon": "📸", "text": "Photos after finishing" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your cleaning company",
+      "subtitle": "Powerful and intuitive tools to boost your productivity",
+      "items": [
+        { "icon": "document", "title": "Digital WO", "text": "Create work orders with address, checklist and specific instructions for each client." },
+        { "icon": "image", "title": "Before/After Photos", "text": "Document the location condition before and after cleaning. Prove service quality.", "color": "yellow" },
+        { "icon": "location", "title": "Geolocation", "text": "Know exactly where your team is. Check-in/check-out with verified location.", "color": "orange" },
+        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
+        { "icon": "users", "title": "Team Management", "text": "Track each employee's productivity. Complete service history.", "color": "purple" },
+        { "icon": "pdf", "title": "Client Report", "text": "Send professional reports with photos and automatically filled checklist.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Before I had problems with employees clocking in but not going to the client. Now with geolocation check-in that problem is gone. And clients love receiving the report with photos.",
+      "name": "Carla Mendes",
+      "role": "Cleaning business owner for 8 years",
+      "metric": "90% reduction in complaints"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
+        { "question": "How does geolocation check-in work?", "answer": "The employee opens the app when arriving at the service location. The system automatically records the location, ensuring they are actually at the client's address." },
+        { "question": "Can I create different checklists for each type of cleaning?", "answer": "Yes! You can create specific checklists for residential, commercial, post-construction cleaning, etc. Each with tasks appropriate for that type of service." },
+        { "question": "Will my employees be able to use it?", "answer": "Absolutely! PraticOS was made to be as simple as using WhatsApp. If you know how to use a phone, you know how to use PraticOS." },
+        { "question": "Can the client see the report?", "answer": "Yes! You can send an automatic report with all photos and the filled checklist. The client receives it by email or WhatsApp." }
+      ]
+    },
+    "download": {
+      "title": "Download now and start",
+      "titleHighlight": "controlling your team",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Empresa de Limpieza | PraticOS",
+    "description": "¡Basta de empleados fantasma! Sistema para empresa de limpieza con check-in por geolocalización, checklist digital y fotos antes/después. Controla tu equipo en tiempo real.",
+    "keywords": "sistema para empresa de limpieza, software limpieza comercial, app limpieza profesional, gestión equipo limpieza, control empleados limpieza, orden de servicio limpieza",
+    "ogTitle": "Sistema para Empresa de Limpieza | PraticOS",
+    "ogDescription": "¡Basta de empleados fantasma! Sistema con check-in por geolocalización, checklist digital y fotos antes/después. Controla tu equipo en tiempo real.",
+    "hero": {
+      "badge": "🧹 Empresas de Limpieza",
+      "title": "Basta de empleados fantasma:",
+      "titleHighlight": "sabe dónde está tu equipo en tiempo real",
+      "subtitle": "Check-in por geolocalización, checklist digital para cada tipo de servicio y fotos antes/después para probar al cliente. Informes automáticos sin esfuerzo.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "300+", "label": "Equipos activos" },
+        "orders": { "value": "8k+", "label": "Servicios realizados" },
+        "rating": { "value": "4.8", "label": "Calificación" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien gestiona empresa de limpieza",
+      "items": [
+        { "icon": "👻", "title": "Empleado fantasma", "text": "Colaborador marca entrada pero no está en el lugar. Pagas por servicio que no fue hecho y pierdes la confianza del cliente." },
+        { "icon": "📍", "title": "No sabe dónde está el equipo", "text": "Necesita llamar a cada empleado para saber si llegó al cliente. Pierdes tiempo y no tienes control real." },
+        { "icon": "😤", "title": "Cliente reclama de la calidad", "text": "Reclamos constantes sobre limpieza mal hecha. Sin estándar definido, cada empleado hace de una manera." },
+        { "icon": "📝", "title": "Orden de servicio en papel", "text": "Fichas de papel se pierden, se rompen o quedan ilegibles. Al final del mes, no sabes cuántos servicios fueron hechos." },
+        { "icon": "📸", "title": "No puede probar el servicio", "text": "Cliente dice que la limpieza no fue hecha, pero no tienes fotos antes/después para comprobar." },
+        { "icon": "📱", "title": "WhatsApp caótico", "text": "Mensajes perdidos en grupos, información contradictoria y mucho tiempo gastado coordinando por celular." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Cómo",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para el día a día de la empresa de limpieza",
+      "items": [
+        { "icon": "📍", "title": "Check-in por geolocalización", "text": "Empleado solo marca presencia cuando está en el lugar.", "highlight": "Se acabó el empleado fantasma." },
+        { "icon": "📋", "title": "Checklist digital por ambiente", "text": "Lista de tareas para cada habitación o área. Empleado marca lo que hizo y tú acompañas en tiempo real." },
+        { "icon": "📸", "title": "Fotos antes y después", "text": "Documentación visual obligatoria. Prueba al cliente que el servicio fue bien hecho." },
+        { "icon": "📊", "title": "Informe automático para cliente", "text": "Cliente recibe informe con fotos y checklist completado.", "highlight": "Profesionalismo que fideliza." },
+        { "icon": "🗺️", "title": "Seguimiento en tiempo real", "text": "Mira dónde está cada empleado y el estado de cada servicio en el mapa." },
+        { "icon": "💰", "title": "Control financiero completo", "text": "Sabe cuánto facturaste, costos por servicio y ganancia real. Dashboard completo." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "limpieza por ambiente",
+      "text": "Estandariza la calidad del servicio con checklists específicos para cada tipo de ambiente. Empleado marca cada tarea completada.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Limpieza",
+      "items": [
+        { "icon": "📸", "text": "Fotos antes de iniciar" },
+        { "icon": "🧹", "text": "Barrer y aspirar todos los ambientes" },
+        { "icon": "🧽", "text": "Limpiar superficies y muebles" },
+        { "icon": "🚿", "text": "Higienizar baños" },
+        { "icon": "🍳", "text": "Limpiar cocina y electrodomésticos" },
+        { "icon": "📸", "text": "Fotos después de finalizar" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tu empresa de limpieza",
+      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio con dirección, checklist e instrucciones específicas para cada cliente." },
+        { "icon": "image", "title": "Fotos Antes/Después", "text": "Documenta el estado del lugar antes y después de la limpieza. Prueba la calidad del servicio.", "color": "yellow" },
+        { "icon": "location", "title": "Geolocalización", "text": "Sabe exactamente dónde está tu equipo. Check-in/check-out con ubicación comprobada.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestión de Equipo", "text": "Acompaña la productividad de cada empleado. Historial completo de servicios.", "color": "purple" },
+        { "icon": "pdf", "title": "Informe para Cliente", "text": "Envía informes profesionales con fotos y checklist completado automáticamente.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes tenía problemas con empleados que marcaban entrada pero no iban al cliente. Ahora con el check-in por geolocalización se acabó ese problema. Y los clientes adoran recibir el informe con fotos.",
+      "name": "Carla Mendes",
+      "role": "Dueña de empresa de limpieza hace 8 años",
+      "metric": "Reducción de 90% en reclamos"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "¿Cómo funciona el check-in por geolocalización?", "answer": "El empleado abre el app cuando llega al lugar del servicio. El sistema registra la ubicación automáticamente, garantizando que realmente está en la dirección del cliente." },
+        { "question": "¿Puedo crear checklists diferentes para cada tipo de limpieza?", "answer": "¡Sí! Puedes crear checklists específicos para limpieza residencial, comercial, post-obra, etc. Cada uno con las tareas adecuadas para ese tipo de servicio." },
+        { "question": "¿Mis empleados van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
+        { "question": "¿El cliente puede ver el informe?", "answer": "¡Sí! Puedes enviar un informe automático con todas las fotos y el checklist completado. El cliente lo recibe por email o WhatsApp." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "controlar tu equipo",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo está listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}

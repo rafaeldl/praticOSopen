@@ -1,0 +1,381 @@
+{
+  "slug": "dedetizacao",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Dedetizadora | PraticOS",
+    "description": "Chega de OS em papel e técnicos perdidos! Sistema de gestão para dedetizadora com rastreamento em tempo real, certificados automáticos e controle de produtos químicos. Organize sua empresa em 5 minutos.",
+    "keywords": "sistema para dedetizadora, programa para dedetizadora, software dedetização, ordem de serviço dedetizadora, app controle de pragas, gestão de dedetizadora",
+    "ogTitle": "Sistema para Dedetizadora | PraticOS",
+    "ogDescription": "Chega de OS em papel! Sistema com rastreamento de técnicos, certificados automáticos e controle de produtos químicos. Organize sua dedetizadora em 5 minutos.",
+    "hero": {
+      "badge": "🪲 Dedetizadoras",
+      "title": "Chega de OS em papel:",
+      "titleHighlight": "organize sua dedetizadora em 5 minutos",
+      "subtitle": "Acabe com as fichas de papel e saiba onde estão seus técnicos em tempo real. Emita certificados automaticamente, controle produtos químicos e impressione clientes corporativos.",
+      "ctaPrimary": "Testar Grátis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "200+", "label": "Dedetizadoras ativas" },
+        "orders": { "value": "5k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliação" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Você enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem trabalha com dedetização",
+      "items": [
+        { "icon": "📝", "title": "OS em papel que some", "text": "Fichas de serviço que molham, rasgam ou se perdem. Informações importantes que nunca chegam ao escritório." },
+        { "icon": "📍", "title": "Não sabe onde está o técnico", "text": "Cliente liga perguntando e você não sabe se o técnico já saiu, se está no caminho ou se já atendeu." },
+        { "icon": "🔄", "title": "Retrabalho por falta de informação", "text": "Técnico chega no local sem saber o histórico. Faz o serviço errado ou esquece de tratar áreas específicas." },
+        { "icon": "📋", "title": "Certificados manuais demoram", "text": "Emitir certificados e laudos no Word é lento. Clientes corporativos cobram e você atrasa as entregas." },
+        { "icon": "📅", "title": "Agenda desorganizada", "text": "Roteirização manual, técnicos cruzando a cidade sem necessidade. Combustível e tempo desperdiçados." },
+        { "icon": "🏢", "title": "Clientes corporativos exigentes", "text": "Auditorias pedem relatórios detalhados, histórico de aplicações e fichas de segurança. Você não tem como comprovar." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluções",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para o dia a dia da dedetizadora",
+      "items": [
+        { "icon": "📍", "title": "Rastreamento em tempo real", "text": "Saiba onde cada técnico está agora mesmo.", "highlight": "Cliente perguntou? Você responde na hora." },
+        { "icon": "📸", "title": "OS digital com fotos", "text": "Técnico documenta tudo pelo celular. Fotos do local, áreas tratadas, produtos utilizados." },
+        { "icon": "✅", "title": "Checklist por tipo de praga", "text": "Formulários específicos para cada serviço: baratas, ratos, cupins, mosquitos. Nada fica esquecido." },
+        { "icon": "📜", "title": "Certificados automáticos", "text": "Gere certificados e laudos em 2 cliques. PDF profissional com logo da empresa.", "highlight": "Impressione clientes corporativos." },
+        { "icon": "📚", "title": "Histórico completo do cliente", "text": "Veja todos os serviços anteriores, produtos aplicados, áreas tratadas. Auditoria passou? Relatório pronto." },
+        { "icon": "🧪", "title": "Controle de produtos químicos", "text": "Registre cada aplicação: produto, dosagem, lote. Atenda normas da ANVISA com facilidade." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulário",
+      "title": "Checklist de",
+      "titleHighlight": "aplicação de serviço",
+      "text": "Documente cada aplicação com fotos e informações técnicas. O cliente assina digitalmente e recebe o certificado na hora.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Checklist de Dedetização",
+      "items": [
+        { "icon": "📸", "text": "Fotos do local (antes e depois)" },
+        { "icon": "🪲", "text": "Tipo de praga identificada" },
+        { "icon": "🧪", "text": "Produtos aplicados com dosagem" },
+        { "icon": "📍", "text": "Áreas tratadas mapeadas" },
+        { "icon": "⚠️", "text": "Recomendações de segurança" },
+        { "icon": "✍️", "text": "Assinatura digital do cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar sua dedetizadora",
+      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, histórico do cliente e produtos utilizados. Tudo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Documente áreas tratadas, focos de infestação e estado do local. Comprove o serviço realizado.", "color": "yellow" },
+        { "icon": "pdf", "title": "Certificados em PDF", "text": "Gere certificados e laudos profissionais automaticamente. Atenda exigências de clientes corporativos.", "color": "orange" },
+        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestão de Clientes", "text": "Histórico completo de cada cliente: serviços, produtos, garantias. Pronto para auditorias.", "color": "purple" },
+        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status do serviço pelo celular. Recebe certificado automaticamente.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes eu perdia fichas de serviço e demorava dias para emitir certificados. Agora o técnico finaliza no celular e o cliente já recebe tudo na hora. Ganhamos contratos corporativos por causa do profissionalismo.",
+      "name": "Carlos Mendes",
+      "role": "Dono de dedetizadora há 8 anos",
+      "metric": "40% mais contratos corporativos"
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas dúvidas antes de começar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
+        { "question": "Funciona para qualquer tipo de praga?", "answer": "Sim! PraticOS funciona para dedetização em geral, descupinização, desratização, controle de mosquitos e muito mais. Você pode criar checklists específicos para cada tipo de serviço." },
+        { "question": "Consigo emitir certificados pelo sistema?", "answer": "Sim! O sistema gera certificados e laudos em PDF automaticamente. Basta o técnico finalizar a OS e o documento fica pronto com logo da empresa." },
+        { "question": "Meus técnicos vão conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tão simples quanto usar WhatsApp. Se você sabe usar o celular, sabe usar o PraticOS." },
+        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da dedetizadora." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar sua dedetizadora",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe está pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Pest Control Company Management System | PraticOS",
+    "description": "Stop losing paper work orders and tracking technicians! Pest control management system with real-time tracking, automatic certificates and chemical product control. Get organized in 5 minutes.",
+    "keywords": "pest control software, exterminator management system, pest control work order, pest control app, extermination company software",
+    "ogTitle": "Pest Control Company Management System | PraticOS",
+    "ogDescription": "Stop losing paper work orders! System with technician tracking, automatic certificates and chemical control. Organize your pest control company in 5 minutes.",
+    "hero": {
+      "badge": "🪲 Pest Control",
+      "title": "Stop using paper work orders:",
+      "titleHighlight": "organize your company in 5 minutes",
+      "subtitle": "Ditch the paper forms and know where your technicians are in real-time. Issue certificates automatically, control chemical products and impress corporate clients.",
+      "ctaPrimary": "Try Free",
+      "ctaSecondary": "Watch Demo",
+      "stats": {
+        "users": { "value": "200+", "label": "Active companies" },
+        "orders": { "value": "5k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for pest control companies",
+      "items": [
+        { "icon": "📝", "title": "Paper work orders that disappear", "text": "Service forms that get wet, torn or lost. Important information that never reaches the office." },
+        { "icon": "📍", "title": "Don't know where the technician is", "text": "Customer calls asking and you don't know if the tech left, is on the way, or already finished." },
+        { "icon": "🔄", "title": "Rework due to missing information", "text": "Technician arrives without knowing the history. Does the wrong service or forgets specific areas." },
+        { "icon": "📋", "title": "Manual certificates take forever", "text": "Issuing certificates in Word is slow. Corporate clients demand them and you delay deliveries." },
+        { "icon": "📅", "title": "Disorganized scheduling", "text": "Manual route planning, technicians crossing the city unnecessarily. Wasted fuel and time." },
+        { "icon": "🏢", "title": "Demanding corporate clients", "text": "Audits require detailed reports, application history and safety sheets. You can't prove anything." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for daily pest control operations",
+      "items": [
+        { "icon": "📍", "title": "Real-time tracking", "text": "Know where each technician is right now.", "highlight": "Customer asked? You answer instantly." },
+        { "icon": "📸", "title": "Digital WO with photos", "text": "Technician documents everything on their phone. Photos of the location, treated areas, products used." },
+        { "icon": "✅", "title": "Checklist by pest type", "text": "Specific forms for each service: roaches, rats, termites, mosquitoes. Nothing gets forgotten." },
+        { "icon": "📜", "title": "Automatic certificates", "text": "Generate certificates and reports in 2 clicks. Professional PDF with company logo.", "highlight": "Impress corporate clients." },
+        { "icon": "📚", "title": "Complete customer history", "text": "See all previous services, products applied, treated areas. Audit coming? Report ready." },
+        { "icon": "🧪", "title": "Chemical product control", "text": "Record each application: product, dosage, batch. Meet regulatory requirements easily." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Service",
+      "titleHighlight": "application checklist",
+      "text": "Document each application with photos and technical information. Customer signs digitally and receives the certificate instantly.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Pest Control Checklist",
+      "items": [
+        { "icon": "📸", "text": "Location photos (before and after)" },
+        { "icon": "🪲", "text": "Type of pest identified" },
+        { "icon": "🧪", "text": "Products applied with dosage" },
+        { "icon": "📍", "text": "Treated areas mapped" },
+        { "icon": "⚠️", "text": "Safety recommendations" },
+        { "icon": "✍️", "text": "Customer digital signature" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your company",
+      "subtitle": "Powerful and intuitive tools to boost your productivity",
+      "items": [
+        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, customer history and products used. All organized." },
+        { "icon": "image", "title": "Unlimited Photos", "text": "Document treated areas, infestation spots and location condition. Prove the service performed.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Certificates", "text": "Generate professional certificates and reports automatically. Meet corporate client requirements.", "color": "orange" },
+        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
+        { "icon": "users", "title": "Customer Management", "text": "Complete history of each customer: services, products, warranties. Ready for audits.", "color": "purple" },
+        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks service status on their phone. Receives certificate automatically.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Before I was losing service forms and it took days to issue certificates. Now the technician finishes on their phone and the customer receives everything instantly. We won corporate contracts because of our professionalism.",
+      "name": "Carlos Mendes",
+      "role": "Pest control company owner for 8 years",
+      "metric": "40% more corporate contracts"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
+        { "question": "Does it work for any type of pest?", "answer": "Yes! PraticOS works for general pest control, termite treatment, rodent control, mosquito control and more. You can create specific checklists for each service type." },
+        { "question": "Can I issue certificates through the system?", "answer": "Yes! The system generates certificates and reports in PDF automatically. Just have the technician complete the WO and the document is ready with company logo." },
+        { "question": "Will my technicians be able to use it?", "answer": "Absolutely! PraticOS was made to be as simple as using WhatsApp. If you know how to use a phone, you know how to use PraticOS." },
+        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of pest control companies." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "organize your company",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Empresa de Control de Plagas | PraticOS",
+    "description": "¡Basta de OS en papel y técnicos perdidos! Sistema de gestión para empresa de control de plagas con rastreo en tiempo real, certificados automáticos y control de productos químicos. Organiza tu empresa en 5 minutos.",
+    "keywords": "sistema para control de plagas, programa para fumigadora, software control de plagas, orden de servicio fumigación, app control de plagas, gestión de empresa fumigadora",
+    "ogTitle": "Sistema para Empresa de Control de Plagas | PraticOS",
+    "ogDescription": "¡Basta de OS en papel! Sistema con rastreo de técnicos, certificados automáticos y control de productos químicos. Organiza tu empresa en 5 minutos.",
+    "hero": {
+      "badge": "🪲 Control de Plagas",
+      "title": "Basta de OS en papel:",
+      "titleHighlight": "organiza tu empresa en 5 minutos",
+      "subtitle": "Acaba con las fichas de papel y sabe dónde están tus técnicos en tiempo real. Emite certificados automáticamente, controla productos químicos e impresiona clientes corporativos.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "200+", "label": "Empresas activas" },
+        "orders": { "value": "5k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificación" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien trabaja con control de plagas",
+      "items": [
+        { "icon": "📝", "title": "OS en papel que desaparecen", "text": "Fichas de servicio que se mojan, rompen o pierden. Información importante que nunca llega a la oficina." },
+        { "icon": "📍", "title": "No sabe dónde está el técnico", "text": "Cliente llama preguntando y no sabes si el técnico ya salió, si está en camino o si ya atendió." },
+        { "icon": "🔄", "title": "Retrabajo por falta de información", "text": "Técnico llega al lugar sin saber el historial. Hace el servicio equivocado u olvida tratar áreas específicas." },
+        { "icon": "📋", "title": "Certificados manuales demoran", "text": "Emitir certificados en Word es lento. Clientes corporativos cobran y atrasas las entregas." },
+        { "icon": "📅", "title": "Agenda desorganizada", "text": "Ruteo manual, técnicos cruzando la ciudad sin necesidad. Combustible y tiempo desperdiciados." },
+        { "icon": "🏢", "title": "Clientes corporativos exigentes", "text": "Auditorías piden informes detallados, historial de aplicaciones y fichas de seguridad. No tienes cómo comprobar." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Cómo",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para el día a día del control de plagas",
+      "items": [
+        { "icon": "📍", "title": "Rastreo en tiempo real", "text": "Sabe dónde está cada técnico ahora mismo.", "highlight": "¿Cliente preguntó? Respondes al instante." },
+        { "icon": "📸", "title": "OS digital con fotos", "text": "Técnico documenta todo por el celular. Fotos del lugar, áreas tratadas, productos utilizados." },
+        { "icon": "✅", "title": "Checklist por tipo de plaga", "text": "Formularios específicos para cada servicio: cucarachas, ratas, termitas, mosquitos. Nada queda olvidado." },
+        { "icon": "📜", "title": "Certificados automáticos", "text": "Genera certificados e informes en 2 clics. PDF profesional con logo de la empresa.", "highlight": "Impresiona clientes corporativos." },
+        { "icon": "📚", "title": "Historial completo del cliente", "text": "Mira todos los servicios anteriores, productos aplicados, áreas tratadas. ¿Auditoría vino? Informe listo." },
+        { "icon": "🧪", "title": "Control de productos químicos", "text": "Registra cada aplicación: producto, dosis, lote. Cumple normas regulatorias con facilidad." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "aplicación de servicio",
+      "text": "Documenta cada aplicación con fotos e información técnica. El cliente firma digitalmente y recibe el certificado al instante.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Fumigación",
+      "items": [
+        { "icon": "📸", "text": "Fotos del lugar (antes y después)" },
+        { "icon": "🪲", "text": "Tipo de plaga identificada" },
+        { "icon": "🧪", "text": "Productos aplicados con dosis" },
+        { "icon": "📍", "text": "Áreas tratadas mapeadas" },
+        { "icon": "⚠️", "text": "Recomendaciones de seguridad" },
+        { "icon": "✍️", "text": "Firma digital del cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tu empresa",
+      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, historial del cliente y productos utilizados. Todo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Documenta áreas tratadas, focos de infestación y estado del lugar. Comprueba el servicio realizado.", "color": "yellow" },
+        { "icon": "pdf", "title": "Certificados en PDF", "text": "Genera certificados e informes profesionales automáticamente. Cumple exigencias de clientes corporativos.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestión de Clientes", "text": "Historial completo de cada cliente: servicios, productos, garantías. Listo para auditorías.", "color": "purple" },
+        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado del servicio por el celular. Recibe certificado automáticamente.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes perdía fichas de servicio y demoraba días para emitir certificados. Ahora el técnico finaliza en el celular y el cliente ya recibe todo al instante. Ganamos contratos corporativos por el profesionalismo.",
+      "name": "Carlos Mendes",
+      "role": "Dueño de empresa de control de plagas hace 8 años",
+      "metric": "40% más contratos corporativos"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "¿Funciona para cualquier tipo de plaga?", "answer": "¡Sí! PraticOS funciona para control de plagas en general, tratamiento de termitas, control de roedores, control de mosquitos y más. Puedes crear checklists específicos para cada tipo de servicio." },
+        { "question": "¿Puedo emitir certificados por el sistema?", "answer": "¡Sí! El sistema genera certificados e informes en PDF automáticamente. Basta que el técnico finalice la OS y el documento queda listo con logo de la empresa." },
+        { "question": "¿Mis técnicos van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
+        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día del control de plagas." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "organizar tu empresa",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo está listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}

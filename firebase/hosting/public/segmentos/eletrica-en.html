@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electrician Management System | PraticOS</title>
+<meta name="description" content="Stop losing quotes and undercharging! Work order system for electricians with price calculator, scheduling and financial control. Professionalize your service in 5 minutes.">
+<meta name="keywords" content="electrician software, electrician management system, work order system electrician, electrician app, electrical service management">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Electrician Management System | PraticOS">
+<meta property="og:description" content="Stop losing quotes and undercharging! WO system with price calculator, scheduling and financial control. Professionalize your service.">
+<meta property="og:image" content="../assets/images/logo.png">
+<meta property="og:type" content="website">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="../assets/images/logo.png">
+
+<!-- Stylesheets -->
+<link rel="stylesheet" href="../style.css">
+
+<link rel="stylesheet" href="../css/segments.css">
+
+
+
+
+</head>
+
+<body>
+    
+
+
+<!-- Navigation -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="../index-en.html" class="nav-logo">
+            <img src="../assets/images/logo.png" alt="PraticOS" class="logo-img">
+            <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+        </a>
+        <div class="nav-links">
+            
+            <a href="../index-en.html#features">Features</a>
+            
+            <a href="../index-en.html#screenshots">Screenshots</a>
+            
+            <a href="../index-en.html#pricing">Pricing</a>
+            
+            <a href="../faq-en.html">FAQ</a>
+            
+            <a href="../index-en.html#contact">Contact</a>
+            
+        </div>
+        <div class="nav-actions">
+            <div class="lang-switch">
+                
+                <a href="eletrica.html">PT</a>
+                
+                <a href="eletrica-en.html" class="active">EN</a>
+                
+                <a href="eletrica-es.html">ES</a>
+                
+            </div>
+            <a href="../index-en.html#download" class="btn btn-primary">Download App</a>
+        </div>
+        <button class="nav-toggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</nav>
+
+
+    
+
+
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="badge">⚡ Electricians</div>
+            <h1>Stop undercharging: <span class="gradient-text">know your exact profit</span></h1>
+            <p class="hero-subtitle">Stop guessing prices and losing money. Professional quotes in seconds, cost calculator to ensure profit and customer tracking on their phone.</p>
+            <div class="hero-cta">
+                <a href="#download" class="btn btn-primary btn-large">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Try Free
+                </a>
+                <a href="#demo" class="btn btn-secondary btn-large">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Watch Demo
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">300+</span>
+                    <span class="stat-label">Active electricians</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">5k+</span>
+                    <span class="stat-label">WOs created</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">4.8</span>
+                    <span class="stat-label">Rating</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-phones">
+            <div class="phone phone-back">
+                <div class="phone-frame">
+                    <img src="../assets/screenshots/dashboard.png" alt="Dashboard PraticOS" loading="lazy">
+                </div>
+            </div>
+            <div class="phone phone-front">
+                <div class="phone-frame">
+                    <img src="../assets/screenshots/home.png" alt="Work Orders List" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <span>Scroll</span>
+        <div class="scroll-indicator"></div>
+    </div>
+</section>
+
+<!-- Problems Section -->
+<section class="segment-problems">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Problems</span>
+            <h2>Do you face <span class="gradient-text">these problems?</span></h2>
+            <p>Common pain points for electrical service professionals</p>
+        </div>
+        <div class="segment-problems-grid">
+            
+            <div class="segment-problem-card">
+                <div class="segment-problem-icon">💸</div>
+                <h3>Don&#39;t know how to price</h3>
+                <p>Guess prices and later find out you worked for free. Don&#39;t know how to calculate materials + labor + profit.</p>
+            </div>
+            
+            <div class="segment-problem-card">
+                <div class="segment-problem-icon">📝</div>
+                <h3>Quotes take too long</h3>
+                <p>Customer asks for a quote and you take hours to make it. Meanwhile, they already hired another electrician.</p>
+            </div>
+            
+            <div class="segment-problem-card">
+                <div class="segment-problem-icon">💰</div>
+                <h3>Mixing personal money</h3>
+                <p>Income and expenses all together. At month&#39;s end you don&#39;t know if you made profit or loss.</p>
+            </div>
+            
+            <div class="segment-problem-card">
+                <div class="segment-problem-icon">📅</div>
+                <h3>No schedule control</h3>
+                <p>Forget appointments, double-book services. Lose customers due to lack of organization.</p>
+            </div>
+            
+            <div class="segment-problem-card">
+                <div class="segment-problem-icon">📞</div>
+                <h3>Customer disappears after quote</h3>
+                <p>Make detailed quotes but less than 50% close. No time to follow up.</p>
+            </div>
+            
+            <div class="segment-problem-card">
+                <div class="segment-problem-icon">🔧</div>
+                <h3>Competition from handymen</h3>
+                <p>Lose jobs to unqualified workers charging cheap. Can&#39;t show your differential.</p>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+<!-- Solutions Section -->
+<section class="segment-solutions">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Solutions</span>
+            <h2>How <span class="gradient-text">PraticOS solves it</span></h2>
+            <p>Features designed for daily electrician operations</p>
+        </div>
+        <div class="segment-solutions-grid">
+            
+            <div class="segment-solution-card">
+                <div class="segment-solution-icon">🧮</div>
+                <h3>Price calculator</h3>
+                <p>Automatically calculate materials + labor + profit margin. <strong>Never work at a loss again.</strong></p>
+            </div>
+            
+            <div class="segment-solution-card">
+                <div class="segment-solution-icon">⚡</div>
+                <h3>Quote in 2 minutes</h3>
+                <p>Create professional quotes quickly. Customer receives on WhatsApp and approves instantly.</p>
+            </div>
+            
+            <div class="segment-solution-card">
+                <div class="segment-solution-icon">📅</div>
+                <h3>Schedule with reminders</h3>
+                <p>Organize your jobs and receive automatic reminders. Never miss an appointment again.</p>
+            </div>
+            
+            <div class="segment-solution-card">
+                <div class="segment-solution-icon">📦</div>
+                <h3>Materials list</h3>
+                <p>Record all materials used. Inventory and cost control in one place.</p>
+            </div>
+            
+            <div class="segment-solution-card">
+                <div class="segment-solution-icon">💰</div>
+                <h3>Separate financial control</h3>
+                <p>See exactly what came in and out of the business. <strong>Separate from personal money.</strong></p>
+            </div>
+            
+            <div class="segment-solution-card">
+                <div class="segment-solution-icon">🔗</div>
+                <h3>Link for customer tracking</h3>
+                <p>Customer tracks service status on their phone. Professionalism that impresses.</p>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+<!-- Checklist Section -->
+<section id="checklist" class="segment-checklist">
+    <div class="container">
+        <div class="segment-checklist-container">
+            <div class="segment-checklist-content">
+                <span class="section-tag">Quote</span>
+                <h2>Complete <span class="gradient-text">professional quote</span></h2>
+                <p>Create detailed quotes that impress customers and increase your conversion rate. All organized and professional.</p>
+                <a href="#download" class="btn btn-primary">Try Free — No Credit Card</a>
+            </div>
+            <div class="segment-checklist-preview">
+                <h4>⚡ Electrical Service Quote</h4>
+                
+                <div class="segment-checklist-item">
+                    <span class="icon">📋</span>
+                    <span>Detailed service description</span>
+                </div>
+                
+                <div class="segment-checklist-item">
+                    <span class="icon">📦</span>
+                    <span>Materials list with prices</span>
+                </div>
+                
+                <div class="segment-checklist-item">
+                    <span class="icon">🔧</span>
+                    <span>Itemized labor</span>
+                </div>
+                
+                <div class="segment-checklist-item">
+                    <span class="icon">💰</span>
+                    <span>Total with profit margin</span>
+                </div>
+                
+                <div class="segment-checklist-item">
+                    <span class="icon">📅</span>
+                    <span>Execution timeline</span>
+                </div>
+                
+                <div class="segment-checklist-item">
+                    <span class="icon">✍️</span>
+                    <span>Customer digital acceptance</span>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+
+
+
+<!-- Features Section -->
+<section id="features" class="features">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Features</span>
+            <h2>Everything you need to <span class="gradient-text">professionalize your service</span></h2>
+            <p>Powerful and intuitive tools to boost your revenue</p>
+        </div>
+        <div class="features-grid">
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    
+                </div>
+                <h3>Digital WO</h3>
+                <p>Create complete work orders with photos, materials and values. All organized.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-yellow">
+                    
+                </div>
+                <h3>Cost Calculator</h3>
+                <p>Calculate the right price considering materials, time and desired profit.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-orange">
+                    
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    
+                </div>
+                <h3>Professional PDF</h3>
+                <p>Generate quotes and receipts in PDF. Professionalism that closes more jobs.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-green">
+                    
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    
+                </div>
+                <h3>Financial Control</h3>
+                <p>See how much you billed, received and have to receive. Complete dashboard.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-purple">
+                    
+                </div>
+                <h3>Smart Schedule</h3>
+                <p>Organize your schedule and receive reminders. Never miss an appointment.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon icon-cyan">
+                    
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                    </svg>
+                    
+                </div>
+                <h3>Tracking Link</h3>
+                <p>Customer tracks service status on their phone. No need to call.</p>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+
+<!-- Testimonial Section -->
+<section class="segment-testimonial">
+    <div class="container">
+        <div class="testimonial-card">
+            <p class="testimonial-quote">"Before I was guessing prices and many times worked at a loss. Now I calculate everything correctly and know exactly my profit. Customers praise the professionalism of the quotes."</p>
+            <div class="testimonial-author">
+                <span class="testimonial-name">Carlos Eduardo</span>
+                <span class="testimonial-role">Electrician for 8 years</span>
+            </div>
+            <div class="testimonial-metric">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                40% increase in profit
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section id="faq-section" class="segment-faq">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">FAQ</span>
+            <h2>Frequently asked <span class="gradient-text">questions</span></h2>
+            <p>Get your questions answered before you start</p>
+        </div>
+        <div class="faq-grid">
+            
+            <div class="faq-item">
+                <h4>Do I need to pay to use it?</h4>
+                <p>No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don&#39;t need to talk to a salesperson.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h4>How does the price calculator work?</h4>
+                <p>You register your costs (materials, travel) and set your profit margin. The system automatically calculates the final price ensuring you don&#39;t work at a loss.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h4>Can I control my schedule?</h4>
+                <p>Yes! PraticOS has an integrated schedule with reminders. You organize all jobs and receive notifications so you never forget an appointment.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h4>Does it work for freelancers and companies?</h4>
+                <p>Yes! The system adapts for both freelance electricians and electrical service companies with teams.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h4>What if I need help?</h4>
+                <p>We have email support and complete documentation. We respond within 24 business hours. Our team understands the electrician&#39;s reality.</p>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+
+
+
+<!-- Pricing Section -->
+<section id="pricing" class="pricing pricing-component">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Pricing</span>
+            <h2>Start free. <span class="gradient-text">Pay only when you grow.</span></h2>
+            <div class="pricing-subtitle-inline">
+                
+                
+                <span>No credit card</span>
+                
+                <span class="dot"></span>
+                <span>No time limit</span>
+                
+                <span class="dot"></span>
+                <span>Upgrade anytime</span>
+                
+            </div>
+        </div>
+
+        <div class="pricing-grid">
+            
+            <div class="pricing-card">
+                
+                <div class="pricing-header">
+                    <h3>Free</h3>
+                    <div class="price">
+                        <span class="currency">$</span>
+                        <span class="amount">0</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <span class="pricing-tagline">Free forever</span>
+                </div>
+                <ul class="pricing-features">
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>Unlimited WOs and Customers</strong></span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>1 user</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>30 photos/month</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>1 checklist</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Financials and tracking link</span>
+                    </li>
+                    
+                </ul>
+                <a href="#download" class="btn btn-outline btn-full">Start Free</a>
+            </div>
+            
+            <div class="pricing-card featured">
+                
+                <div class="pricing-badge">Most Popular</div>
+                
+                <div class="pricing-header">
+                    <h3>Starter</h3>
+                    <div class="price">
+                        <span class="currency">$</span>
+                        <span class="amount">12</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <span class="pricing-tagline">Ideal to grow</span>
+                </div>
+                <ul class="pricing-features">
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Everything in Free, plus:</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>2 users</strong> included</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>200 photos</strong>/month</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>3 custom checklists</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>Professional PDF</strong> no watermark</span>
+                    </li>
+                    
+                </ul>
+                <a href="#download" class="btn btn-primary btn-full">Start with Starter</a>
+            </div>
+            
+            <div class="pricing-card">
+                
+                <div class="pricing-header">
+                    <h3>Pro</h3>
+                    <div class="price">
+                        <span class="currency">$</span>
+                        <span class="amount">24</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <span class="pricing-tagline">For larger teams</span>
+                </div>
+                <ul class="pricing-features">
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Everything in Starter, plus:</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>3 users</strong> included</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span><strong>1,000 photos</strong>/month</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>10 custom checklists</span>
+                    </li>
+                    
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Advanced reports</span>
+                    </li>
+                    
+                </ul>
+                <a href="#download" class="btn btn-outline btn-full">Start with Pro</a>
+            </div>
+            
+        </div>
+
+        <!-- Footer with single CTA -->
+        <div class="pricing-footer">
+            <a href="../pricing-en.html" class="pricing-details-link">
+                Need more? API, multi-company and unlimited photos → Compare all plans
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- Download Section -->
+
+
+
+<!-- Download Section -->
+<section id="download" class="download">
+    <div class="container">
+        <div class="download-content">
+            <h2>Download now and start <span class="gradient-text">earning more</span></h2>
+            <p>Available for iOS and Android. Start free!</p>
+            <div class="download-buttons">
+                <a href="https://apps.apple.com/br/app/praticos/id1534604555" target="_blank" rel="noopener" class="store-button" title="Download on the App Store">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                    </svg>
+                    <div class="store-info">
+                        <span class="store-label">Download on the</span>
+                        <span class="store-name">App Store</span>
+                    </div>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos" target="_blank" rel="noopener" class="store-button">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                        <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/>
+                    </svg>
+                    <div class="store-info">
+                        <span class="store-label">Get it on</span>
+                        <span class="store-name">Google Play</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="download-phone">
+            <div class="phone-glow"></div>
+            <div class="phone-mockup large">
+                <img src="../assets/screenshots/login.png" alt="PraticOS App" loading="lazy">
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Contact Section -->
+
+
+
+<!-- Contact Section -->
+<section id="contact" class="contact">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Contact</span>
+            <h2>Need <span class="gradient-text">help?</span></h2>
+            <p>Our team is ready to assist you</p>
+        </div>
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4>Email</h4>
+                        <a href="mailto:praticos@rafsoft.com.br">praticos@rafsoft.com.br</a>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4>FAQ</h4>
+                        <a href="../faq-en.html">Frequently asked questions</a>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4>Privacy</h4>
+                        <a href="../privacy-en.html">Privacy policy</a>
+                    </div>
+                </div>
+            </div>
+            <form class="contact-form" action="mailto:praticos@rafsoft.com.br" method="POST" enctype="text/plain">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="Name" required placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="Email" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="Message" rows="4" required placeholder="How can we help?"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Send Message</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+
+
+    
+    
+
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="../index-en.html" class="nav-logo">
+                    <img src="../assets/images/logo.png" alt="PraticOS" class="logo-img">
+                    <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                </a>
+                <p>Complete system for work order management. Simplify your business.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Product</h4>
+                
+                <a href="../index-en.html#features">Features</a>
+                
+                <a href="../index-en.html#pricing">Pricing</a>
+                
+                <a href="../index-en.html#download">Download</a>
+                
+                <h4 class="footer-subtitle">Company</h4>
+                <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
+            </div>
+            <div class="footer-links">
+                <h4>Segments</h4>
+                
+                <a href="../segmentos/assistencia-celular-en.html">Phone Repair Shop</a>
+                
+            </div>
+            <div class="footer-links">
+                <h4>Support</h4>
+                
+                <a href="../docs/">Documentation</a>
+                
+                <a href="../support-en.html">Support Center</a>
+                
+                <a href="../faq-en.html">FAQ</a>
+                
+                <a href="../index-en.html#contact">Contact</a>
+                
+                <a href="../privacy-en.html">Privacy</a>
+                
+                <a href="../terms-en.html">Terms of Use</a>
+                
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 PraticOS. All rights reserved.</p>
+            <p>Made with ❤️ by <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+        </div>
+    </div>
+</footer>
+
+    
+    
+
+
+<!-- Mobile Menu -->
+<div class="mobile-menu">
+    <div class="mobile-menu-content">
+        
+        <a href="../index-en.html#features">Features</a>
+        
+        <a href="../index-en.html#screenshots">Screenshots</a>
+        
+        <a href="../index-en.html#pricing">Pricing</a>
+        
+        <a href="../faq-en.html">FAQ</a>
+        
+        <a href="../support-en.html">Support</a>
+        
+        <a href="../index-en.html#contact">Contact</a>
+        
+        <div class="mobile-lang">
+            
+            <a href="eletrica.html">PT</a>
+            
+            <a href="eletrica-en.html" class="active">EN</a>
+            
+            <a href="eletrica-es.html">ES</a>
+            
+        </div>
+        <a href="../index-en.html#download" class="btn btn-primary">Download App</a>
+    </div>
+</div>
+
+    <script>
+    // Mobile menu toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const body = document.body;
+
+    navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+        body.classList.toggle('menu-open');
+    });
+
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('menu-open');
+        });
+    });
+
+    // Navbar scroll effect
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
+        observer.observe(el);
+    });
+</script>
+
+</body>
+
+</html>

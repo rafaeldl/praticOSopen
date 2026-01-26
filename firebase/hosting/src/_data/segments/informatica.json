@@ -1,0 +1,381 @@
+{
+  "slug": "informatica",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Assistencia Tecnica de Informatica | PraticOS",
+    "description": "Chega de perder equipamentos e prazos! Sistema de OS para assistencia tecnica de informatica com fotos, numero de serie e link de acompanhamento. Organize sua loja em 5 minutos. Gratis para comecar.",
+    "keywords": "sistema para assistencia tecnica informatica, app para tecnico de informatica, programa ordem de servico computador, controle de OS informatica, software assistencia tecnica gratis, sistema para loja de informatica",
+    "ogTitle": "Sistema para Assistencia Tecnica de Informatica | PraticOS",
+    "ogDescription": "Chega de perder equipamentos! Sistema de OS com fotos, numero de serie e link de acompanhamento. Organize sua assistencia em 5 minutos.",
+    "hero": {
+      "badge": "💻 Assistencia Tecnica de Informatica",
+      "title": "Chega de perder equipamentos:",
+      "titleHighlight": "organize sua assistencia em 5 minutos",
+      "subtitle": "Acabe com o caderninho e com as ligacoes de \"ja ficou pronto?\". Documente cada equipamento com foto e numero de serie, e deixe o cliente acompanhar sozinho pelo link magico.",
+      "ctaPrimary": "Testar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Tecnicos ativos" },
+        "orders": { "value": "10k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliacao" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Voce enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem trabalha com assistencia tecnica de informatica",
+      "items": [
+        { "icon": "📋", "title": "Perde controle das OS", "text": "Equipamentos acumulam na bancada e voce esquece qual e de quem. Prazos passam e cliente reclama." },
+        { "icon": "📞", "title": "Cliente liga toda hora", "text": "Cliente liga 5x por dia perguntando se o computador ficou pronto. Voce perde tempo e paciencia." },
+        { "icon": "📝", "title": "Anota tudo no caderno", "text": "Informacoes em papel ou WhatsApp. Perde historico, esquece detalhes e nao encontra quando precisa." },
+        { "icon": "💬", "title": "WhatsApp para tudo", "text": "Orcamentos, fotos, conversas... tudo misturado no WhatsApp. Impossivel encontrar depois." },
+        { "icon": "🔍", "title": "Sem historico do cliente", "text": "Cliente volta e voce nao lembra o que ja fez no equipamento dele. Comeca do zero toda vez." },
+        { "icon": "💸", "title": "Nao sabe quanto lucrou", "text": "Trabalha o mes inteiro mas no final nao sabe quanto sobrou. Sem controle de custos e margem real." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solucoes",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para o dia a dia da assistencia tecnica",
+      "items": [
+        { "icon": "🔗", "title": "Link magico para o cliente", "text": "Cliente recebe um link e acompanha o status em tempo real.", "highlight": "Reduz ligacoes em ate 70%." },
+        { "icon": "📸", "title": "OS com foto e numero de serie", "text": "Cada OS tem foto do equipamento, numero de serie e dados completos. Nunca mais confunda equipamentos." },
+        { "icon": "📋", "title": "Checklist de entrada completo", "text": "Documente o estado do equipamento na entrada com fotos.", "highlight": "Reduz disputas de garantia em 85%." },
+        { "icon": "🗂️", "title": "Historico completo do cliente", "text": "Veja todos os servicos anteriores do cliente em segundos. Atendimento mais rapido e personalizado." },
+        { "icon": "💰", "title": "Dashboard financeiro completo", "text": "Saiba exatamente quanto lucrou no mes.", "highlight": "Controle total de custos e margem." },
+        { "icon": "📱", "title": "Orcamento profissional", "text": "Envie orcamentos em PDF pelo WhatsApp. Cliente aprova direto no celular." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "entrada do equipamento",
+      "text": "Documente o estado do equipamento na entrada e evite problemas na hora da entrega. O cliente assina digitalmente.",
+      "cta": "Testar Gratis — Sem Cartao",
+      "previewTitle": "📋 Checklist de Recebimento",
+      "items": [
+        { "icon": "📸", "text": "Fotos do equipamento (frente/traseira)" },
+        { "icon": "🔢", "text": "Numero de serie / Service Tag" },
+        { "icon": "💻", "text": "Modelo e especificacoes" },
+        { "icon": "✅", "text": "Estado: Tela, Teclado, Bateria, Portas" },
+        { "icon": "🔐", "text": "Senha de acesso (se necessario)" },
+        { "icon": "📦", "text": "Acessorios deixados (carregador, mouse)" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que voce precisa para",
+      "titleHighlight": "gerenciar sua assistencia",
+      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de servico completas com fotos, numero de serie, descricao do defeito e valores. Tudo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe o estado do equipamento na entrada. Proteja-se de reclamacoes indevidas.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profissional", "text": "Gere orcamentos e recibos em PDF para o cliente. Profissionalismo que impressiona.", "color": "orange" },
+        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestao de Clientes", "text": "Historico completo de cada cliente. Todos os equipamentos e servicos anteriores em um so lugar.", "color": "purple" },
+        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status do reparo pelo celular. Sem precisar ligar para voce.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes eu perdia 2 horas por dia procurando equipamentos e atendendo ligacoes de clientes. Agora tudo esta organizado e os clientes acompanham pelo link. Minha produtividade triplicou.",
+      "name": "Marcos Oliveira",
+      "role": "Dono de assistencia tecnica ha 10 anos",
+      "metric": "70% menos ligacoes de clientes"
+    },
+    "faq": {
+      "tag": "Duvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas duvidas antes de comecar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Nao! O plano gratuito e real e nao tem limite de tempo. Voce pode usar para sempre com ate 30 fotos/mes. Diferente de 90% dos concorrentes, nossos precos sao transparentes e voce nao precisa falar com vendedor." },
+        { "question": "Ja tentei outros apps e nao gostei", "answer": "PraticOS foi criado por quem trabalha com assistencia tecnica. Nao e um app generico adaptado — foi feito especificamente para voce. Por isso tem checklist de entrada, link de acompanhamento e tudo que voce precisa." },
+        { "question": "Funciona sem internet?", "answer": "Voce precisa de internet para sincronizar os dados, mas pode visualizar OS ja carregadas mesmo offline. Na pratica, com o Wi-Fi da loja voce nao vai ter problemas." },
+        { "question": "Consigo importar meus clientes?", "answer": "Sim! Voce pode importar sua lista de clientes via planilha. E so entrar em contato pelo suporte que ajudamos voce a migrar seus dados." },
+        { "question": "Tem suporte se eu precisar de ajuda?", "answer": "Sim! Temos suporte por email e uma documentacao completa. Respondemos em ate 24 horas uteis. Nosso time conhece o dia a dia da assistencia tecnica e vai te ajudar de verdade." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar sua assistencia",
+      "text": "Disponivel para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponivel na", "name": "App Store" },
+      "playStore": { "label": "Disponivel no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe esta pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Politica de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "IT Services Management System | PraticOS",
+    "description": "Stop losing equipment and missing deadlines! Work order system for IT services with photos, serial numbers and customer status link. Get organized in 5 minutes. Free to start.",
+    "keywords": "IT services software, computer repair shop management, work order system IT, tech support app, computer technician software, IT service desk",
+    "ogTitle": "IT Services Management System | PraticOS",
+    "ogDescription": "Stop losing equipment! Work order system with photos, serial numbers and customer status link. Get organized in 5 minutes.",
+    "hero": {
+      "badge": "💻 IT Services & Computer Repair",
+      "title": "Stop losing equipment:",
+      "titleHighlight": "organize your shop in 5 minutes",
+      "subtitle": "End the notebook chaos and the \"is it ready yet?\" calls. Document every device with photos and serial numbers, and let customers track status themselves with the magic link.",
+      "ctaPrimary": "Try Free",
+      "ctaSecondary": "Watch Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Active technicians" },
+        "orders": { "value": "10k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for IT service technicians",
+      "items": [
+        { "icon": "📋", "title": "Losing track of work orders", "text": "Equipment piles up on your bench and you forget whose is which. Deadlines pass and customers complain." },
+        { "icon": "📞", "title": "Customer calls all day", "text": "Customer calls 5x a day asking if the computer is ready. You lose time and patience." },
+        { "icon": "📝", "title": "Writing everything in a notebook", "text": "Information on paper or WhatsApp. Lose history, forget details and can't find it when you need it." },
+        { "icon": "💬", "title": "WhatsApp for everything", "text": "Quotes, photos, conversations... all mixed in WhatsApp. Impossible to find later." },
+        { "icon": "🔍", "title": "No customer history", "text": "Customer returns and you don't remember what you already did on their equipment. Start from zero every time." },
+        { "icon": "💸", "title": "Don't know your profit", "text": "Work all month but don't know how much you actually made. No control over costs and real margins." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for daily IT service operations",
+      "items": [
+        { "icon": "🔗", "title": "Magic link for customers", "text": "Customer receives a link and tracks status in real time.", "highlight": "Reduces calls by up to 70%." },
+        { "icon": "📸", "title": "WO with photo and serial number", "text": "Each WO has device photo, serial number and complete data. Never mix up equipment again." },
+        { "icon": "📋", "title": "Complete intake checklist", "text": "Document equipment condition at intake with photos.", "highlight": "Reduces warranty disputes by 85%." },
+        { "icon": "🗂️", "title": "Complete customer history", "text": "See all previous services for any customer in seconds. Faster, personalized service." },
+        { "icon": "💰", "title": "Complete financial dashboard", "text": "Know exactly how much you made this month.", "highlight": "Full control over costs and margins." },
+        { "icon": "📱", "title": "Professional quotes", "text": "Send PDF quotes via WhatsApp. Customer approves right on their phone." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Equipment",
+      "titleHighlight": "intake checklist",
+      "text": "Document the equipment condition at intake and avoid problems at delivery. Customer signs digitally.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Intake Checklist",
+      "items": [
+        { "icon": "📸", "text": "Equipment photos (front/back)" },
+        { "icon": "🔢", "text": "Serial number / Service Tag" },
+        { "icon": "💻", "text": "Model and specifications" },
+        { "icon": "✅", "text": "Condition: Screen, Keyboard, Battery, Ports" },
+        { "icon": "🔐", "text": "Access password (if needed)" },
+        { "icon": "📦", "text": "Accessories left (charger, mouse)" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your shop",
+      "subtitle": "Powerful and intuitive tools to boost your productivity",
+      "items": [
+        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, serial numbers, defect description and values. All organized." },
+        { "icon": "image", "title": "Unlimited Photos", "text": "Photograph equipment condition at intake. Protect yourself from undue complaints.", "color": "yellow" },
+        { "icon": "pdf", "title": "Professional PDF", "text": "Generate quotes and receipts in PDF for the customer. Professionalism that impresses.", "color": "orange" },
+        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
+        { "icon": "users", "title": "Customer Management", "text": "Complete history of each customer. All equipment and previous services in one place.", "color": "purple" },
+        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks repair status on their phone. No need to call you.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "I used to lose 2 hours a day looking for equipment and answering customer calls. Now everything is organized and customers track via the link. My productivity tripled.",
+      "name": "Marcos Oliveira",
+      "role": "IT shop owner for 10 years",
+      "metric": "70% fewer customer calls"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Unlike 90% of competitors, our pricing is transparent and you don't need to talk to a salesperson." },
+        { "question": "I've tried other apps and didn't like them", "answer": "PraticOS was created by people who work in IT services. It's not a generic app adapted for your use — it was built specifically for you. That's why it has intake checklist, status tracking link and everything you need." },
+        { "question": "Does it work offline?", "answer": "You need internet to sync data, but you can view already loaded work orders offline. In practice, with your shop's Wi-Fi you won't have any issues." },
+        { "question": "Can I import my customers?", "answer": "Yes! You can import your customer list via spreadsheet. Just contact our support and we'll help you migrate your data." },
+        { "question": "Is there support if I need help?", "answer": "Yes! We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of IT services and will truly help you." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "organize your shop",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Asistencia Tecnica de Informatica | PraticOS",
+    "description": "¡Basta de perder equipos y plazos! Sistema de OS para asistencia tecnica de informatica con fotos, numero de serie y link de seguimiento. Organiza tu tienda en 5 minutos. Gratis para empezar.",
+    "keywords": "sistema asistencia tecnica informatica, app tecnico informatica, programa orden servicio computador, control OS informatica, software asistencia tecnica gratis, sistema para tienda informatica",
+    "ogTitle": "Sistema para Asistencia Tecnica de Informatica | PraticOS",
+    "ogDescription": "¡Basta de perder equipos! Sistema de OS con fotos, numero de serie y link de seguimiento. Organiza tu asistencia en 5 minutos.",
+    "hero": {
+      "badge": "💻 Asistencia Tecnica de Informatica",
+      "title": "Basta de perder equipos:",
+      "titleHighlight": "organiza tu asistencia en 5 minutos",
+      "subtitle": "Acaba con el cuaderno y con las llamadas de \"¿ya esta listo?\". Documenta cada equipo con foto y numero de serie, y deja que el cliente lo siga solo por el link magico.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Tecnicos activos" },
+        "orders": { "value": "10k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificacion" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien trabaja con asistencia tecnica de informatica",
+      "items": [
+        { "icon": "📋", "title": "Pierde control de las OS", "text": "Equipos se acumulan en la mesa y olvidas cual es de quien. Plazos pasan y cliente reclama." },
+        { "icon": "📞", "title": "Cliente llama todo el dia", "text": "Cliente llama 5x al dia preguntando si la computadora esta lista. Pierdes tiempo y paciencia." },
+        { "icon": "📝", "title": "Anota todo en el cuaderno", "text": "Informaciones en papel o WhatsApp. Pierde historial, olvida detalles y no encuentra cuando necesita." },
+        { "icon": "💬", "title": "WhatsApp para todo", "text": "Presupuestos, fotos, conversaciones... todo mezclado en WhatsApp. Imposible encontrar despues." },
+        { "icon": "🔍", "title": "Sin historial del cliente", "text": "Cliente vuelve y no recuerdas que ya hiciste en su equipo. Empiezas de cero cada vez." },
+        { "icon": "💸", "title": "No sabe cuanto gano", "text": "Trabaja todo el mes pero al final no sabe cuanto sobro. Sin control de costos y margen real." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Como",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para el dia a dia de la asistencia tecnica",
+      "items": [
+        { "icon": "🔗", "title": "Link magico para el cliente", "text": "Cliente recibe un link y sigue el estado en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
+        { "icon": "📸", "title": "OS con foto y numero de serie", "text": "Cada OS tiene foto del equipo, numero de serie y datos completos. Nunca mas confundas equipos." },
+        { "icon": "📋", "title": "Checklist de entrada completo", "text": "Documenta el estado del equipo en la entrada con fotos.", "highlight": "Reduce disputas de garantia en 85%." },
+        { "icon": "🗂️", "title": "Historial completo del cliente", "text": "Ve todos los servicios anteriores del cliente en segundos. Atencion mas rapida y personalizada." },
+        { "icon": "💰", "title": "Dashboard financiero completo", "text": "Sabe exactamente cuanto ganaste en el mes.", "highlight": "Control total de costos y margen." },
+        { "icon": "📱", "title": "Presupuesto profesional", "text": "Envia presupuestos en PDF por WhatsApp. Cliente aprueba directo en el celular." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "entrada del equipo",
+      "text": "Documenta el estado del equipo en la entrada y evita problemas a la hora de entregar. El cliente firma digitalmente.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Recepcion",
+      "items": [
+        { "icon": "📸", "text": "Fotos del equipo (frente/atras)" },
+        { "icon": "🔢", "text": "Numero de serie / Service Tag" },
+        { "icon": "💻", "text": "Modelo y especificaciones" },
+        { "icon": "✅", "text": "Estado: Pantalla, Teclado, Bateria, Puertos" },
+        { "icon": "🔐", "text": "Contrasena de acceso (si es necesario)" },
+        { "icon": "📦", "text": "Accesorios dejados (cargador, mouse)" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tu asistencia",
+      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crea ordenes de servicio completas con fotos, numero de serie, descripcion del defecto y valores. Todo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografia el estado del equipo en la entrada. Protegete de reclamaciones indebidas.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profesional", "text": "Genera presupuestos y recibos en PDF para el cliente. Profesionalismo que impresiona.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Mira cuanto facturaste, cuanto recibiste y cuanto tienes por recibir. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestion de Clientes", "text": "Historial completo de cada cliente. Todos los equipos y servicios anteriores en un solo lugar.", "color": "purple" },
+        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado de la reparacion por el celular. Sin necesidad de llamarte.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes perdia 2 horas al dia buscando equipos y atendiendo llamadas de clientes. Ahora todo esta organizado y los clientes siguen por el link. Mi productividad se triplico.",
+      "name": "Marcos Oliveira",
+      "role": "Dueno de asistencia tecnica hace 10 anos",
+      "metric": "70% menos llamadas de clientes"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene limite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. A diferencia del 90% de la competencia, nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "Ya probe otras apps y no me gustaron", "answer": "PraticOS fue creado por quienes trabajan con asistencia tecnica. No es una app generica adaptada — fue hecha especificamente para ti. Por eso tiene checklist de entrada, link de seguimiento y todo lo que necesitas." },
+        { "question": "¿Funciona sin internet?", "answer": "Necesitas internet para sincronizar los datos, pero puedes ver OS ya cargadas sin conexion. En la practica, con el Wi-Fi de la tienda no tendras problemas." },
+        { "question": "¿Puedo importar mis clientes?", "answer": "¡Si! Puedes importar tu lista de clientes via planilla. Solo contacta nuestro soporte y te ayudamos a migrar tus datos." },
+        { "question": "¿Hay soporte si necesito ayuda?", "answer": "¡Si! Tenemos soporte por email y documentacion completa. Respondemos en hasta 24 horas habiles. Nuestro equipo conoce el dia a dia de la asistencia tecnica y te va a ayudar de verdad." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "organizar tu asistencia",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo esta listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Politica de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Como podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}

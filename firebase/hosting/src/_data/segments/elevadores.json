@@ -1,0 +1,381 @@
+{
+  "slug": "elevadores",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Manutenção de Elevadores | PraticOS",
+    "description": "Chega de perder prazos de contrato! Sistema de OS para manutenção de elevadores com agendamento automático, histórico por equipamento e checklist conforme ABNT NBR 16083. Organize sua empresa em 5 minutos.",
+    "keywords": "sistema para manutenção de elevadores, programa para empresa de elevadores, software manutenção elevadores, ordem de serviço elevadores, app manutenção elevadores, gestão de elevadores",
+    "ogTitle": "Sistema para Manutenção de Elevadores | PraticOS",
+    "ogDescription": "Chega de perder prazos! Sistema de OS com agendamento automático, histórico por equipamento e checklist conforme ABNT. Organize sua empresa em 5 minutos.",
+    "hero": {
+      "badge": "🛗 Manutenção de Elevadores",
+      "title": "Chega de perder prazo de contrato:",
+      "titleHighlight": "organize sua empresa em 5 minutos",
+      "subtitle": "Acabe com a planilha e nunca mais esqueça uma manutenção preventiva. Histórico completo por elevador, checklist conforme ABNT NBR 16083 e alertas de vencimento de contrato.",
+      "ctaPrimary": "Testar Grátis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "200+", "label": "Técnicos ativos" },
+        "orders": { "value": "5k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliação" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Você enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem trabalha com manutenção de elevadores",
+      "items": [
+        { "icon": "📋", "title": "Contratos vencendo sem aviso", "text": "Contratos de manutenção vencem e você só descobre quando o cliente reclama. Perda de receita recorrente." },
+        { "icon": "📅", "title": "Agenda manual em planilha", "text": "Agenda de manutenções preventivas em planilha ou papel. Esquece visitas e perde a confiança do cliente." },
+        { "icon": "🔧", "title": "Não sabe histórico do elevador", "text": "Técnico chega no local e não sabe o que já foi feito. Perde tempo pedindo informações ao cliente." },
+        { "icon": "📝", "title": "RIA em papel", "text": "Relatório de Inspeção Anual feito em papel. Difícil organizar e encontrar quando a fiscalização pede." },
+        { "icon": "🚨", "title": "Chamados fora do horário", "text": "Emergências de madrugada e fim de semana. Sem controle de qual técnico está mais perto." },
+        { "icon": "💸", "title": "Esquece de cobrar chamados extras", "text": "Atende chamados fora do contrato mas esquece de faturar. Prejuízo todo mês." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluções",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para o dia a dia da manutenção de elevadores",
+      "items": [
+        { "icon": "🔔", "title": "Alertas de vencimento de contrato", "text": "Receba notificações antes do contrato vencer.", "highlight": "Nunca mais perca uma renovação." },
+        { "icon": "📅", "title": "Agenda automática de preventivas", "text": "Sistema agenda automaticamente as manutenções preventivas. Técnico recebe no celular." },
+        { "icon": "📋", "title": "Histórico completo por elevador", "text": "Busque pelo número do equipamento e veja todo o histórico. Manutenções, peças trocadas, ocorrências." },
+        { "icon": "✅", "title": "Checklist conforme ABNT NBR 16083", "text": "Checklists digitais seguindo as normas técnicas. Pronto para fiscalização." },
+        { "icon": "📸", "title": "Fotos com data, hora e localização", "text": "Comprove o serviço realizado com fotos geolocalizadas.", "highlight": "Documentação completa." },
+        { "icon": "💰", "title": "Controle de chamados extras", "text": "Registre e fature chamados fora do contrato. Sem perder receita." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulário",
+      "title": "Checklist de",
+      "titleHighlight": "manutenção preventiva",
+      "text": "Checklist digital conforme ABNT NBR 16083. Técnico preenche no celular e síndico assina digitalmente.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Checklist de Manutenção",
+      "items": [
+        { "icon": "🛗", "text": "Identificação do elevador" },
+        { "icon": "🔧", "text": "Verificação de cabos e polias" },
+        { "icon": "⚡", "text": "Teste de dispositivos de segurança" },
+        { "icon": "🚪", "text": "Verificação de portas e travas" },
+        { "icon": "📸", "text": "Fotos do serviço realizado" },
+        { "icon": "✍️", "text": "Assinatura digital do responsável" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar suas manutenções",
+      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, histórico do elevador e valores. Tudo organizado." },
+        { "icon": "image", "title": "Fotos Geolocalizadas", "text": "Fotografe o serviço com data, hora e localização GPS. Prova irrefutável do atendimento.", "color": "yellow" },
+        { "icon": "pdf", "title": "Relatórios em PDF", "text": "Gere relatórios de manutenção e RIA em PDF. Pronto para enviar ao síndico.", "color": "orange" },
+        { "icon": "money", "title": "Controle Financeiro", "text": "Veja contratos ativos, chamados extras faturados e a receber. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestão de Condomínios", "text": "Histórico completo de cada condomínio e elevador. Todos os atendimentos anteriores.", "color": "purple" },
+        { "icon": "link", "title": "Link de Acompanhamento", "text": "Síndico acompanha o status do chamado pelo celular. Sem precisar ligar.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes eu controlava os contratos em planilha e sempre perdia renovações. Com o PraticOS, recebo alerta antes de vencer e os síndicos elogiam a organização dos relatórios.",
+      "name": "Carlos Mendes",
+      "role": "Dono de empresa de elevadores há 15 anos",
+      "metric": "Redução de 80% em contratos perdidos"
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas dúvidas antes de começar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
+        { "question": "Funciona para qualquer tipo de elevador?", "answer": "Sim! PraticOS funciona para elevadores de passageiros, cargas, monta-cargas, plataformas e escadas rolantes. O sistema se adapta ao seu negócio." },
+        { "question": "O checklist segue a ABNT NBR 16083?", "answer": "Sim! Nossos checklists foram desenvolvidos seguindo as normas técnicas brasileiras. Você pode personalizar conforme sua necessidade." },
+        { "question": "Meus técnicos vão conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tão simples quanto usar WhatsApp. Se você sabe usar o celular, sabe usar o PraticOS." },
+        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da manutenção de elevadores." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar sua empresa",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe está pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Elevator Maintenance Management System | PraticOS",
+    "description": "Stop missing contract deadlines! Work order system for elevator maintenance with automatic scheduling, equipment history and compliance checklists. Get organized in 5 minutes.",
+    "keywords": "elevator maintenance software, lift maintenance management, elevator service system, elevator work order app, lift maintenance software, elevator management system",
+    "ogTitle": "Elevator Maintenance Management System | PraticOS",
+    "ogDescription": "Stop missing deadlines! WO system with automatic scheduling, equipment history and compliance checklists. Get organized in 5 minutes.",
+    "hero": {
+      "badge": "🛗 Elevator Maintenance",
+      "title": "Stop missing contract deadlines:",
+      "titleHighlight": "organize your company in 5 minutes",
+      "subtitle": "Ditch the spreadsheet and never miss a preventive maintenance. Complete history by elevator, compliance checklists and contract expiration alerts.",
+      "ctaPrimary": "Try Free",
+      "ctaSecondary": "Watch Demo",
+      "stats": {
+        "users": { "value": "200+", "label": "Active technicians" },
+        "orders": { "value": "5k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for elevator maintenance companies",
+      "items": [
+        { "icon": "📋", "title": "Contracts expiring without notice", "text": "Maintenance contracts expire and you only find out when the customer complains. Lost recurring revenue." },
+        { "icon": "📅", "title": "Manual scheduling in spreadsheets", "text": "Preventive maintenance schedule in spreadsheet or paper. Miss visits and lose customer trust." },
+        { "icon": "🔧", "title": "Don't know elevator history", "text": "Technician arrives on site and doesn't know what was done before. Wastes time asking the customer for information." },
+        { "icon": "📝", "title": "Paper inspection reports", "text": "Annual Inspection Reports done on paper. Hard to organize and find when inspection is required." },
+        { "icon": "🚨", "title": "After-hours emergency calls", "text": "Late night and weekend emergencies. No control over which technician is closest." },
+        { "icon": "💸", "title": "Forget to bill extra calls", "text": "Handle calls outside the contract but forget to invoice. Lost revenue every month." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for daily elevator maintenance operations",
+      "items": [
+        { "icon": "🔔", "title": "Contract expiration alerts", "text": "Receive notifications before contracts expire.", "highlight": "Never miss a renewal again." },
+        { "icon": "📅", "title": "Automatic preventive scheduling", "text": "System automatically schedules preventive maintenance. Technician receives on their phone." },
+        { "icon": "📋", "title": "Complete history by elevator", "text": "Search by equipment number and see the full history. Maintenance, parts replaced, incidents." },
+        { "icon": "✅", "title": "Compliance checklists", "text": "Digital checklists following technical standards. Ready for inspection." },
+        { "icon": "📸", "title": "Photos with date, time and location", "text": "Prove the service performed with geolocated photos.", "highlight": "Complete documentation." },
+        { "icon": "💰", "title": "Extra call tracking", "text": "Record and invoice calls outside the contract. No lost revenue." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Preventive",
+      "titleHighlight": "maintenance checklist",
+      "text": "Digital checklist following technical standards. Technician fills on phone and building manager signs digitally.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Maintenance Checklist",
+      "items": [
+        { "icon": "🛗", "text": "Elevator identification" },
+        { "icon": "🔧", "text": "Cables and pulleys inspection" },
+        { "icon": "⚡", "text": "Safety devices test" },
+        { "icon": "🚪", "text": "Doors and locks verification" },
+        { "icon": "📸", "text": "Service photos" },
+        { "icon": "✍️", "text": "Manager digital signature" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your maintenance",
+      "subtitle": "Powerful and intuitive tools to boost your productivity",
+      "items": [
+        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, elevator history and values. All organized." },
+        { "icon": "image", "title": "Geolocated Photos", "text": "Photograph the service with date, time and GPS location. Irrefutable proof of service.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Reports", "text": "Generate maintenance reports and annual inspections in PDF. Ready to send to the manager.", "color": "orange" },
+        { "icon": "money", "title": "Financial Control", "text": "See active contracts, billed extra calls and receivables. Complete dashboard.", "color": "green" },
+        { "icon": "users", "title": "Building Management", "text": "Complete history of each building and elevator. All previous services.", "color": "purple" },
+        { "icon": "link", "title": "Tracking Link", "text": "Building manager tracks call status on their phone. No need to call.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Before I tracked contracts in a spreadsheet and always missed renewals. With PraticOS, I get alerts before expiration and building managers praise the organization of reports.",
+      "name": "Carlos Mendes",
+      "role": "Elevator company owner for 15 years",
+      "metric": "80% reduction in lost contracts"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
+        { "question": "Does it work for any type of elevator?", "answer": "Yes! PraticOS works for passenger elevators, freight elevators, dumbwaiters, platforms and escalators. The system adapts to your business." },
+        { "question": "Do the checklists follow technical standards?", "answer": "Yes! Our checklists were developed following technical standards. You can customize them according to your needs." },
+        { "question": "Will my technicians be able to use it?", "answer": "Absolutely! PraticOS was made to be as simple as using WhatsApp. If you know how to use a phone, you know how to use PraticOS." },
+        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of elevator maintenance." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "organize your company",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Mantenimiento de Ascensores | PraticOS",
+    "description": "¡Basta de perder plazos de contrato! Sistema de OS para mantenimiento de ascensores con programación automática, historial por equipo y checklist según normas técnicas. Organiza tu empresa en 5 minutos.",
+    "keywords": "sistema para mantenimiento de ascensores, programa para empresa de ascensores, software mantenimiento ascensores, orden de servicio ascensores, app mantenimiento ascensores, gestión de ascensores",
+    "ogTitle": "Sistema para Mantenimiento de Ascensores | PraticOS",
+    "ogDescription": "¡Basta de perder plazos! Sistema de OS con programación automática, historial por equipo y checklist según normas. Organiza tu empresa en 5 minutos.",
+    "hero": {
+      "badge": "🛗 Mantenimiento de Ascensores",
+      "title": "Basta de perder plazos de contrato:",
+      "titleHighlight": "organiza tu empresa en 5 minutos",
+      "subtitle": "Acaba con la planilla y nunca más olvides un mantenimiento preventivo. Historial completo por ascensor, checklist según normas técnicas y alertas de vencimiento de contrato.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "200+", "label": "Técnicos activos" },
+        "orders": { "value": "5k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificación" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien trabaja con mantenimiento de ascensores",
+      "items": [
+        { "icon": "📋", "title": "Contratos venciendo sin aviso", "text": "Contratos de mantenimiento vencen y solo te enteras cuando el cliente reclama. Pérdida de ingresos recurrentes." },
+        { "icon": "📅", "title": "Agenda manual en planilla", "text": "Agenda de mantenimientos preventivos en planilla o papel. Olvidas visitas y pierdes la confianza del cliente." },
+        { "icon": "🔧", "title": "No sabe historial del ascensor", "text": "Técnico llega al lugar y no sabe qué ya se hizo. Pierde tiempo pidiendo información al cliente." },
+        { "icon": "📝", "title": "Informes en papel", "text": "Informe de Inspección Anual hecho en papel. Difícil organizar y encontrar cuando la fiscalización pide." },
+        { "icon": "🚨", "title": "Llamados fuera de horario", "text": "Emergencias de madrugada y fin de semana. Sin control de cuál técnico está más cerca." },
+        { "icon": "💸", "title": "Olvida cobrar llamados extras", "text": "Atiende llamados fuera del contrato pero olvida facturar. Pérdida todos los meses." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Cómo",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para el día a día del mantenimiento de ascensores",
+      "items": [
+        { "icon": "🔔", "title": "Alertas de vencimiento de contrato", "text": "Recibe notificaciones antes de que venza el contrato.", "highlight": "Nunca más pierdas una renovación." },
+        { "icon": "📅", "title": "Agenda automática de preventivos", "text": "Sistema agenda automáticamente los mantenimientos preventivos. Técnico recibe en el celular." },
+        { "icon": "📋", "title": "Historial completo por ascensor", "text": "Busca por número de equipo y ve todo el historial. Mantenimientos, piezas cambiadas, ocurrencias." },
+        { "icon": "✅", "title": "Checklist según normas técnicas", "text": "Checklists digitales siguiendo las normas técnicas. Listo para fiscalización." },
+        { "icon": "📸", "title": "Fotos con fecha, hora y ubicación", "text": "Comprueba el servicio realizado con fotos geolocalizadas.", "highlight": "Documentación completa." },
+        { "icon": "💰", "title": "Control de llamados extras", "text": "Registra y factura llamados fuera del contrato. Sin perder ingresos." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "mantenimiento preventivo",
+      "text": "Checklist digital según normas técnicas. Técnico llena en el celular y administrador firma digitalmente.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Mantenimiento",
+      "items": [
+        { "icon": "🛗", "text": "Identificación del ascensor" },
+        { "icon": "🔧", "text": "Verificación de cables y poleas" },
+        { "icon": "⚡", "text": "Prueba de dispositivos de seguridad" },
+        { "icon": "🚪", "text": "Verificación de puertas y cerraduras" },
+        { "icon": "📸", "text": "Fotos del servicio realizado" },
+        { "icon": "✍️", "text": "Firma digital del responsable" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tus mantenimientos",
+      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, historial del ascensor y valores. Todo organizado." },
+        { "icon": "image", "title": "Fotos Geolocalizadas", "text": "Fotografía el servicio con fecha, hora y ubicación GPS. Prueba irrefutable del servicio.", "color": "yellow" },
+        { "icon": "pdf", "title": "Informes en PDF", "text": "Genera informes de mantenimiento e inspección anual en PDF. Listo para enviar al administrador.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Mira contratos activos, llamados extras facturados y por cobrar. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestión de Edificios", "text": "Historial completo de cada edificio y ascensor. Todos los servicios anteriores.", "color": "purple" },
+        { "icon": "link", "title": "Link de Seguimiento", "text": "Administrador sigue el estado del llamado por el celular. Sin necesidad de llamar.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes controlaba los contratos en planilla y siempre perdía renovaciones. Con PraticOS, recibo alerta antes de vencer y los administradores elogian la organización de los informes.",
+      "name": "Carlos Mendes",
+      "role": "Dueño de empresa de ascensores hace 15 años",
+      "metric": "Reducción de 80% en contratos perdidos"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "¿Funciona para cualquier tipo de ascensor?", "answer": "¡Sí! PraticOS funciona para ascensores de pasajeros, cargas, montacargas, plataformas y escaleras mecánicas. El sistema se adapta a tu negocio." },
+        { "question": "¿El checklist sigue normas técnicas?", "answer": "¡Sí! Nuestros checklists fueron desarrollados siguiendo las normas técnicas. Puedes personalizarlos según tu necesidad." },
+        { "question": "¿Mis técnicos van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
+        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día del mantenimiento de ascensores." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "organizar tu empresa",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo está listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}

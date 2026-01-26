@@ -1,0 +1,381 @@
+{
+  "slug": "energia-solar",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Integrador Solar | PraticOS",
+    "description": "Chega de perder leads no WhatsApp! Sistema para integrador solar com documentacao de projetos, historico de instalacoes e controle financeiro. Organize sua empresa em 5 minutos.",
+    "keywords": "sistema para energia solar, software integrador solar, programa instalador fotovoltaico, app energia solar, gestao empresa solar, ordem de servico solar",
+    "ogTitle": "Sistema para Integrador Solar | PraticOS",
+    "ogDescription": "Chega de perder leads! Sistema com documentacao de projetos, historico de instalacoes e controle financeiro. Organize sua empresa em 5 minutos.",
+    "hero": {
+      "badge": "☀️ Integradores Solares",
+      "title": "Chega de perder leads:",
+      "titleHighlight": "organize sua empresa em 5 minutos",
+      "subtitle": "Acabe com o caos do WhatsApp e saiba exatamente quanto voce lucrou. Documentacao completa de projetos, checklist de instalacao com fotos e cliente acompanhando pelo celular.",
+      "ctaPrimary": "Testar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Integradores ativos" },
+        "orders": { "value": "10k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliacao" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Voce enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem trabalha com energia solar",
+      "items": [
+        { "icon": "📱", "title": "Leads perdidos no WhatsApp", "text": "Cliente interessado manda mensagem e voce esquece de responder. Quando lembra, ja fechou com o concorrente." },
+        { "icon": "📊", "title": "Multiplas plataformas de monitoramento", "text": "Cada inversor tem seu app. Voce perde tempo alternando entre plataformas para acompanhar as instalacoes." },
+        { "icon": "📝", "title": "Propostas lentas e inconsistentes", "text": "Cada vendedor faz proposta de um jeito. Demora para montar e o cliente desiste enquanto espera." },
+        { "icon": "💰", "title": "Precos instáveis de equipamentos", "text": "Preco de painel e inversor muda toda semana. Voce faz proposta e quando fecha, ja perdeu margem." },
+        { "icon": "🔄", "title": "Sem controle do funil de vendas", "text": "Nao sabe quantos leads tem, quantas propostas enviou, nem taxa de conversao. Vende no escuro." },
+        { "icon": "👤", "title": "Negocio depende so de voce", "text": "Se voce para, a empresa para. Nao consegue delegar porque nao tem processo documentado." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solucoes",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para o dia a dia do integrador solar",
+      "items": [
+        { "icon": "🔗", "title": "Link para o cliente acompanhar", "text": "Cliente recebe um link e acompanha o status da instalacao em tempo real.", "highlight": "Reduz ligacoes em ate 70%." },
+        { "icon": "📋", "title": "Historico completo de instalacoes", "text": "Busque pelo cliente e veja todo o historico. Equipamentos instalados, potencia, data de ativacao." },
+        { "icon": "📸", "title": "Checklist de instalacao com fotos", "text": "Documente cada etapa: telhado antes, estrutura, modulos, inversor, quadro. Tudo com fotos." },
+        { "icon": "🧮", "title": "Calculo automatico do total", "text": "Adiciona equipamentos e mao de obra, o sistema calcula tudo automaticamente. Sem erro." },
+        { "icon": "💰", "title": "Dashboard financeiro completo", "text": "Saiba exatamente quanto lucrou no mes.", "highlight": "Controle total de custos e margem." },
+        { "icon": "📱", "title": "Orcamento pelo WhatsApp", "text": "Envie propostas profissionais em 2 cliques. Cliente aprova direto no celular." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "instalacao solar",
+      "text": "Documente cada etapa da instalacao e tenha um registro completo do projeto. O cliente assina digitalmente.",
+      "cta": "Testar Gratis — Sem Cartao",
+      "previewTitle": "📋 Checklist de Instalacao",
+      "items": [
+        { "icon": "📸", "text": "Fotos do telhado (antes da instalacao)" },
+        { "icon": "🔧", "text": "Estrutura de fixacao instalada" },
+        { "icon": "☀️", "text": "Modulos fotovoltaicos posicionados" },
+        { "icon": "⚡", "text": "Inversor e quadro de protecao" },
+        { "icon": "📊", "text": "Teste de geracao e configuracao" },
+        { "icon": "✍️", "text": "Assinatura digital do cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que voce precisa para",
+      "titleHighlight": "gerenciar sua empresa solar",
+      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de servico completas com fotos, documentacao do projeto e valores. Tudo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe cada etapa da instalacao. Documente o antes, durante e depois do projeto.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profissional", "text": "Gere propostas e relatorios em PDF. Profissionalismo que impressiona o cliente.", "color": "orange" },
+        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestao de Clientes", "text": "Historico completo de cada cliente e instalacao. Todas as manutencoes anteriores.", "color": "purple" },
+        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status da instalacao pelo celular. Sem precisar ligar.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes eu perdia leads no WhatsApp e nao tinha controle das propostas enviadas. Agora tenho todo o funil organizado e consigo acompanhar cada projeto do inicio ao fim.",
+      "name": "Carlos Mendes",
+      "role": "Integrador solar ha 5 anos",
+      "metric": "Aumento de 40% na taxa de conversao"
+    },
+    "faq": {
+      "tag": "Duvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas duvidas antes de comecar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Nao! O plano gratuito e real e nao tem limite de tempo. Voce pode usar para sempre com ate 30 fotos/mes. Nossos precos sao transparentes e voce nao precisa falar com vendedor." },
+        { "question": "Funciona para qualquer porte de empresa?", "answer": "Sim! PraticOS funciona desde o instalador autonomo ate empresas com equipe de tecnicos. O sistema se adapta ao seu negocio." },
+        { "question": "Consigo documentar as instalacoes com fotos?", "answer": "Sim! O checklist de instalacao permite fotografar cada etapa: telhado, estrutura, modulos, inversor, quadro. Tudo fica salvo no historico do cliente." },
+        { "question": "Meus tecnicos vao conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tao simples quanto usar WhatsApp. Se sabe usar o celular, sabe usar o PraticOS." },
+        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentacao completa. Respondemos em ate 24 horas uteis. Nosso time conhece o dia a dia do integrador solar." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar sua empresa",
+      "text": "Disponivel para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponivel na", "name": "App Store" },
+      "playStore": { "label": "Disponivel no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe esta pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Politica de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Solar Installer Management System | PraticOS",
+    "description": "Stop losing leads on WhatsApp! System for solar installers with project documentation, installation history and financial control. Get organized in 5 minutes.",
+    "keywords": "solar installer software, solar energy management system, photovoltaic installer app, solar business software, solar work order system",
+    "ogTitle": "Solar Installer Management System | PraticOS",
+    "ogDescription": "Stop losing leads! System with project documentation, installation history and financial control. Get organized in 5 minutes.",
+    "hero": {
+      "badge": "☀️ Solar Installers",
+      "title": "Stop losing leads:",
+      "titleHighlight": "organize your business in 5 minutes",
+      "subtitle": "End the WhatsApp chaos and know exactly how much you made. Complete project documentation, installation checklist with photos and customer tracking on their phone.",
+      "ctaPrimary": "Try Free",
+      "ctaSecondary": "Watch Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Active installers" },
+        "orders": { "value": "10k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for solar energy professionals",
+      "items": [
+        { "icon": "📱", "title": "Leads lost in WhatsApp", "text": "Interested customer sends a message and you forget to reply. When you remember, they already closed with a competitor." },
+        { "icon": "📊", "title": "Multiple monitoring platforms", "text": "Each inverter has its own app. You waste time switching between platforms to track installations." },
+        { "icon": "📝", "title": "Slow and inconsistent proposals", "text": "Each salesperson makes proposals differently. Takes too long to prepare and the customer gives up while waiting." },
+        { "icon": "💰", "title": "Unstable equipment prices", "text": "Panel and inverter prices change every week. You make a proposal and by closing time, you've lost margin." },
+        { "icon": "🔄", "title": "No sales funnel control", "text": "You don't know how many leads you have, how many proposals were sent, or conversion rate. Selling blind." },
+        { "icon": "👤", "title": "Business depends only on you", "text": "If you stop, the company stops. You can't delegate because there's no documented process." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for daily solar installer operations",
+      "items": [
+        { "icon": "🔗", "title": "Link for customer tracking", "text": "Customer receives a link and tracks installation status in real time.", "highlight": "Reduces calls by up to 70%." },
+        { "icon": "📋", "title": "Complete installation history", "text": "Search by customer and see the complete history. Equipment installed, power rating, activation date." },
+        { "icon": "📸", "title": "Installation checklist with photos", "text": "Document each step: roof before, mounting structure, modules, inverter, panel. All with photos." },
+        { "icon": "🧮", "title": "Automatic total calculation", "text": "Add equipment and labor, the system calculates everything automatically. No errors." },
+        { "icon": "💰", "title": "Complete financial dashboard", "text": "Know exactly how much you made this month.", "highlight": "Full control over costs and margins." },
+        { "icon": "📱", "title": "Quote via WhatsApp", "text": "Send professional proposals in 2 clicks. Customer approves right on their phone." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Solar",
+      "titleHighlight": "installation checklist",
+      "text": "Document each installation step and have a complete project record. Customer signs digitally.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Installation Checklist",
+      "items": [
+        { "icon": "📸", "text": "Roof photos (before installation)" },
+        { "icon": "🔧", "text": "Mounting structure installed" },
+        { "icon": "☀️", "text": "Photovoltaic modules positioned" },
+        { "icon": "⚡", "text": "Inverter and protection panel" },
+        { "icon": "📊", "text": "Generation test and configuration" },
+        { "icon": "✍️", "text": "Customer digital signature" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your solar business",
+      "subtitle": "Powerful and intuitive tools to boost your productivity",
+      "items": [
+        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, project documentation and values. All organized." },
+        { "icon": "image", "title": "Unlimited Photos", "text": "Photograph each installation step. Document the before, during and after of every project.", "color": "yellow" },
+        { "icon": "pdf", "title": "Professional PDF", "text": "Generate proposals and reports in PDF. Professionalism that impresses customers.", "color": "orange" },
+        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
+        { "icon": "users", "title": "Customer Management", "text": "Complete history of each customer and installation. All previous maintenance.", "color": "purple" },
+        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks installation status on their phone. No need to call.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Before I was losing leads on WhatsApp and had no control over proposals sent. Now I have the entire funnel organized and can track each project from start to finish.",
+      "name": "Carlos Mendes",
+      "role": "Solar installer for 5 years",
+      "metric": "40% increase in conversion rate"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
+        { "question": "Does it work for any company size?", "answer": "Yes! PraticOS works from individual installers to companies with technician teams. The system adapts to your business." },
+        { "question": "Can I document installations with photos?", "answer": "Yes! The installation checklist allows you to photograph each step: roof, structure, modules, inverter, panel. Everything is saved in the customer history." },
+        { "question": "Will my technicians be able to use it?", "answer": "Absolutely! PraticOS was made to be as simple as using WhatsApp. If you know how to use a phone, you know how to use PraticOS." },
+        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of solar installers." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "organize your business",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Instalador de Energia Solar | PraticOS",
+    "description": "Basta de perder leads en WhatsApp! Sistema para instalador solar con documentacion de proyectos, historial de instalaciones y control financiero. Organiza tu empresa en 5 minutos.",
+    "keywords": "sistema para energia solar, software instalador solar, programa instalador fotovoltaico, app energia solar, gestion empresa solar, orden de servicio solar",
+    "ogTitle": "Sistema para Instalador de Energia Solar | PraticOS",
+    "ogDescription": "Basta de perder leads! Sistema con documentacion de proyectos, historial de instalaciones y control financiero. Organiza tu empresa en 5 minutos.",
+    "hero": {
+      "badge": "☀️ Instaladores Solares",
+      "title": "Basta de perder leads:",
+      "titleHighlight": "organiza tu empresa en 5 minutos",
+      "subtitle": "Acaba con el caos del WhatsApp y sabe exactamente cuanto ganaste. Documentacion completa de proyectos, checklist de instalacion con fotos y cliente siguiendo por el celular.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Instaladores activos" },
+        "orders": { "value": "10k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificacion" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien trabaja con energia solar",
+      "items": [
+        { "icon": "📱", "title": "Leads perdidos en WhatsApp", "text": "Cliente interesado manda mensaje y olvidas responder. Cuando recuerdas, ya cerro con la competencia." },
+        { "icon": "📊", "title": "Multiples plataformas de monitoreo", "text": "Cada inversor tiene su app. Pierdes tiempo alternando entre plataformas para seguir las instalaciones." },
+        { "icon": "📝", "title": "Propuestas lentas e inconsistentes", "text": "Cada vendedor hace propuesta de una forma. Demora para armar y el cliente desiste mientras espera." },
+        { "icon": "💰", "title": "Precios inestables de equipos", "text": "Precio de panel e inversor cambia cada semana. Haces propuesta y cuando cierras, ya perdiste margen." },
+        { "icon": "🔄", "title": "Sin control del embudo de ventas", "text": "No sabes cuantos leads tienes, cuantas propuestas enviaste, ni tasa de conversion. Vendes a ciegas." },
+        { "icon": "👤", "title": "Negocio depende solo de ti", "text": "Si paras, la empresa para. No puedes delegar porque no tienes proceso documentado." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Como",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para el dia a dia del instalador solar",
+      "items": [
+        { "icon": "🔗", "title": "Link para el cliente seguir", "text": "Cliente recibe un link y sigue el estado de la instalacion en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
+        { "icon": "📋", "title": "Historial completo de instalaciones", "text": "Busca por cliente y ve todo el historial. Equipos instalados, potencia, fecha de activacion." },
+        { "icon": "📸", "title": "Checklist de instalacion con fotos", "text": "Documenta cada etapa: techo antes, estructura, modulos, inversor, cuadro. Todo con fotos." },
+        { "icon": "🧮", "title": "Calculo automatico del total", "text": "Agrega equipos y mano de obra, el sistema calcula todo automaticamente. Sin error." },
+        { "icon": "💰", "title": "Dashboard financiero completo", "text": "Sabe exactamente cuanto ganaste en el mes.", "highlight": "Control total de costos y margen." },
+        { "icon": "📱", "title": "Presupuesto por WhatsApp", "text": "Envia propuestas profesionales en 2 clics. Cliente aprueba directo en el celular." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "instalacion solar",
+      "text": "Documenta cada etapa de la instalacion y ten un registro completo del proyecto. El cliente firma digitalmente.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Instalacion",
+      "items": [
+        { "icon": "📸", "text": "Fotos del techo (antes de la instalacion)" },
+        { "icon": "🔧", "text": "Estructura de fijacion instalada" },
+        { "icon": "☀️", "text": "Modulos fotovoltaicos posicionados" },
+        { "icon": "⚡", "text": "Inversor y cuadro de proteccion" },
+        { "icon": "📊", "text": "Prueba de generacion y configuracion" },
+        { "icon": "✍️", "text": "Firma digital del cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tu empresa solar",
+      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crea ordenes de servicio completas con fotos, documentacion del proyecto y valores. Todo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografía cada etapa de la instalacion. Documenta el antes, durante y despues del proyecto.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profesional", "text": "Genera propuestas e informes en PDF. Profesionalismo que impresiona al cliente.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Mira cuanto facturaste, cuanto recibiste y cuanto tienes por recibir. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestion de Clientes", "text": "Historial completo de cada cliente e instalacion. Todos los mantenimientos anteriores.", "color": "purple" },
+        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado de la instalacion por el celular. Sin necesidad de llamar.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes perdia leads en WhatsApp y no tenia control de las propuestas enviadas. Ahora tengo todo el embudo organizado y puedo seguir cada proyecto de inicio a fin.",
+      "name": "Carlos Mendes",
+      "role": "Instalador solar hace 5 anos",
+      "metric": "Aumento de 40% en tasa de conversion"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "Necesito pagar para usar?", "answer": "No! El plan gratuito es real y no tiene limite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "Funciona para cualquier tamano de empresa?", "answer": "Si! PraticOS funciona desde el instalador autonomo hasta empresas con equipo de tecnicos. El sistema se adapta a tu negocio." },
+        { "question": "Puedo documentar las instalaciones con fotos?", "answer": "Si! El checklist de instalacion permite fotografiar cada etapa: techo, estructura, modulos, inversor, cuadro. Todo queda guardado en el historial del cliente." },
+        { "question": "Mis tecnicos van a poder usarlo?", "answer": "Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
+        { "question": "Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentacion completa. Respondemos en hasta 24 horas habiles. Nuestro equipo conoce el dia a dia del instalador solar." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "organizar tu empresa",
+      "text": "Disponible para iOS y Android. Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo esta listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Politica de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "Como podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}
