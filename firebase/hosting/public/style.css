@@ -832,13 +832,38 @@ h4 { font-size: 1.125rem; }
     font-size: 1.125rem;
 }
 
+.pricing-subtitle-inline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    margin-top: 12px;
+}
+
+.pricing-subtitle-inline .dot {
+    width: 4px;
+    height: 4px;
+    background: var(--text-tertiary);
+    border-radius: 50%;
+}
+
 /* Pricing Grid */
 .pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
     align-items: stretch;
     margin-bottom: 48px;
+}
+
+.pricing-grid .pricing-card {
+    flex: 0 1 calc(25% - 15px);
+    min-width: 260px;
+    max-width: 320px;
 }
 
 /* Pricing Card */
@@ -1343,6 +1368,10 @@ h4 { font-size: 1.125rem; }
     transform: translateX(4px);
 }
 
+.footer-links .footer-subtitle {
+    margin-top: 24px;
+}
+
 .footer-bottom {
     display: flex;
     justify-content: space-between;
@@ -1436,9 +1465,13 @@ h4 { font-size: 1.125rem; }
     }
 
     .pricing-grid {
-        grid-template-columns: repeat(2, 1fr);
         gap: 16px;
         margin-bottom: 40px;
+    }
+
+    .pricing-grid .pricing-card {
+        flex: 0 1 calc(50% - 8px);
+        min-width: 240px;
     }
 
     .pricing-card.featured {
@@ -1536,9 +1569,14 @@ h4 { font-size: 1.125rem; }
     }
 
     .pricing-grid {
-        grid-template-columns: 1fr;
         max-width: 400px;
         margin: 0 auto 40px;
+    }
+
+    .pricing-grid .pricing-card {
+        flex: 1 1 100%;
+        min-width: unset;
+        max-width: unset;
     }
 
     .screenshots-showcase {

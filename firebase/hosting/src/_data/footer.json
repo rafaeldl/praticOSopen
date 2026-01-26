@@ -9,6 +9,12 @@
         { "href": "#download", "label": "Download" }
       ]
     },
+    "segments": {
+      "title": "Segmentos",
+      "links": [
+        { "href": "segmentos/assistencia-celular.html", "label": "Assistência de Celular" }
+      ]
+    },
     "support": {
       "title": "Suporte",
       "links": [
@@ -36,6 +42,12 @@
         { "href": "#download", "label": "Download" }
       ]
     },
+    "segments": {
+      "title": "Segments",
+      "links": [
+        { "href": "segmentos/assistencia-celular-en.html", "label": "Phone Repair Shop" }
+      ]
+    },
     "support": {
       "title": "Support",
       "links": [
@@ -61,6 +73,12 @@
         { "href": "#features", "label": "Funciones" },
         { "href": "#pricing", "label": "Planes" },
         { "href": "#download", "label": "Descargar" }
+      ]
+    },
+    "segments": {
+      "title": "Segmentos",
+      "links": [
+        { "href": "segmentos/assistencia-celular-es.html", "label": "Asistencia de Celular" }
       ]
     },
     "support": {
