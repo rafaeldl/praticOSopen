@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App para Servicio Técnico de Celulares | PraticOS</title>
+    <meta name="description" content="Sistema de gestión de órdenes para reparación de celulares. Controla reparaciones, piezas y clientes. Gratis para empezar.">
+    <meta name="keywords" content="servicio técnico celulares, app reparación celular, orden de servicio celular, sistema para tienda de celulares">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="App para Servicio Técnico de Celulares | PraticOS">
+    <meta property="og:description" content="Sistema de gestión de órdenes para reparación de celulares. Controla reparaciones, piezas y clientes.">
+    <meta property="og:image" content="../assets/images/logo.png">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+
+    <link rel="stylesheet" href="../style.css">
+    
+    <style>
+        .segment-problems {
+            padding: var(--section-padding) 0;
+            background: var(--bg-primary);
+        }
+        
+        .segment-solutions {
+            padding: var(--section-padding) 0;
+            background: var(--bg-secondary);
+        }
+        
+        .problems-grid, .solutions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        
+        .problem-card, .solution-card {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            transition: var(--transition-normal);
+        }
+        
+        .problem-card:hover, .solution-card:hover {
+            border-color: var(--border-color-hover);
+            transform: translateY(-4px);
+        }
+        
+        .problem-card .icon, .solution-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        
+        .problem-card h3, .solution-card h3 {
+            margin-bottom: 12px;
+            font-size: 1.25rem;
+        }
+        
+        .problem-card p, .solution-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        
+        .segment-checklist {
+            padding: var(--section-padding) 0;
+            background: var(--bg-primary);
+        }
+        
+        .checklist-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .checklist-preview {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist-item .emoji {
+            font-size: 1.5rem;
+        }
+        
+        .checklist-item span {
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 1024px) {
+            .problems-grid, .solutions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .checklist-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index-es.html" class="nav-logo">
+                <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
+                <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+            </a>
+            <div class="nav-links">
+                <a href="#problems">Problemas</a>
+                <a href="#solutions">Soluciones</a>
+                <a href="#checklist">Checklist</a>
+                <a href="#pricing">Precios</a>
+                <a href="../faq-es.html">FAQ</a>
+            </div>
+            <div class="nav-actions">
+                <div class="lang-switch">
+                    <a href="assistencia-celular.html">PT</a>
+                    <a href="assistencia-celular-en.html">EN</a>
+                    <a href="assistencia-celular-es.html" class="active">ES</a>
+                </div>
+                <a href="#download" class="btn btn-primary">Descargar App</a>
+            </div>
+            <button class="nav-toggle" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+            <div class="gradient-orb orb-3"></div>
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="badge">📱 Hecho para Técnicos de Celulares</div>
+                <h1>Gestión de Órdenes de Servicio para <span class="gradient-text">Servicio Técnico de Celulares</span></h1>
+                <p class="hero-subtitle">Deja de perder órdenes en papel. Controla tus reparaciones profesionalmente. Sabe exactamente el estado de cada equipo.</p>
+                <div class="hero-cta">
+                    <a href="#download" class="btn btn-primary btn-large">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Descargar Gratis
+                    </a>
+                    <a href="#demo" class="btn btn-secondary btn-large">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                        Ver Demo
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">Técnicos usando</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-number">10k+</span>
+                        <span class="stat-label">Equipos gestionados</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat">
+                        <span class="stat-number">4.8</span>
+                        <span class="stat-label">Calificación</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-phones">
+                <div class="phone phone-back">
+                    <div class="phone-frame">
+                        <img src="../assets/screenshots/dashboard.png" alt="Dashboard PráticOS" loading="lazy">
+                    </div>
+                </div>
+                <div class="phone phone-front">
+                    <div class="phone-frame">
+                        <img src="../assets/screenshots/home.png" alt="Lista de Órdenes de Servicio" loading="lazy">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problems Section -->
+    <section id="problems" class="segment-problems">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">🔴 Problemas</span>
+                <h2>¿Te identificas con alguno de <span class="gradient-text">estos dolores</span>?</h2>
+                <p>La mayoría de los técnicos de celulares enfrentan estos problemas a diario</p>
+            </div>
+            <div class="problems-grid">
+                <div class="problem-card">
+                    <div class="icon">📞</div>
+                    <h3>"El cliente llama 5 veces al día preguntando si está listo"</h3>
+                    <p>Pierdes tiempo respondiendo las mismas preguntas. El cliente se pone ansioso y tú interrumpes tu trabajo constantemente.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">🔀</div>
+                    <h3>"Equipos mezclados, no sé de quién es cuál"</h3>
+                    <p>En tu mesa de trabajo, varios celulares parecidos. Necesitas revisar etiquetas o confiar en tu memoria. Riesgo de intercambiar equipos.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="icon">💸</div>
+                    <h3>"Olvido cobrar las piezas que usé"</h3>
+                    <p>Usaste una pieza en la reparación pero olvidaste anotarlo. Al final del mes, no sabes tu ganancia real. Pérdida silenciosa.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solutions Section -->
+    <section id="solutions" class="segment-solutions">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">✅ Soluciones</span>
+                <h2>Cómo PraticOS <span class="gradient-text">resuelve tus problemas</span></h2>
+                <p>Funcionalidades pensadas para el día a día del servicio técnico</p>
+            </div>
+            <div class="solutions-grid">
+                <div class="solution-card">
+                    <div class="icon">🔗</div>
+                    <h3>Link mágico: el cliente sigue el estado en tiempo real</h3>
+                    <p>Envía un link por WhatsApp. El cliente ve el estado de la reparación solo, sin llamar. Tú trabajas en paz.</p>
+                </div>
+                <div class="solution-card">
+                    <div class="icon">📸</div>
+                    <h3>Vincula OS al equipo con foto e IMEI</h3>
+                    <p>Registra el IMEI, toma foto del equipo, anota estado y accesorios. Nunca más confundas equipos en la mesa.</p>
+                </div>
+                <div class="solution-card">
+                    <div class="icon">🧮</div>
+                    <h3>Agrega piezas a la OS y calcula total automático</h3>
+                    <p>Registra piezas con costo y precio de venta. Al agregar a la OS, el sistema calcula el total y tu margen real.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checklist Section -->
+    <section id="checklist" class="segment-checklist">
+        <div class="container">
+            <div class="checklist-container">
+                <div class="checklist-content">
+                    <span class="section-tag">📋 Checklist Incluido</span>
+                    <h2>Checklist de recepción <span class="gradient-text">listo para usar</span></h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">Documenta el estado del equipo en la entrada. Protégete de reclamos y comprueba lo que se hizo.</p>
+                    <a href="#download" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Empezar Gratis
+                    </a>
+                </div>
+                <div class="checklist-preview">
+                    <h4 style="margin-bottom: 16px; color: var(--text-primary);">Checklist de Entrada del Celular</h4>
+                    <div class="checklist-item">
+                        <span class="emoji">📸</span>
+                        <span>Fotos del equipo (frente/reverso)</span>
+                    </div>
+                    <div class="checklist-item">
+                        <span class="emoji">📱</span>
+                        <span>IMEI (15 dígitos)</span>
+                    </div>
+                    <div class="checklist-item">
+                        <span class="emoji">🔋</span>
+                        <span>Salud de la batería (%)</span>
+                    </div>
+                    <div class="checklist-item">
+                        <span class="emoji">✅</span>
+                        <span>Estado: Pantalla, Touch, Cámaras, Botones</span>
+                    </div>
+                    <div class="checklist-item">
+                        <span class="emoji">🔐</span>
+                        <span>Contraseña de desbloqueo</span>
+                    </div>
+                    <div class="checklist-item">
+                        <span class="emoji">📦</span>
+                        <span>Accesorios dejados</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Funcionalidades</span>
+                <h2>Todo lo que necesitas para <span class="gradient-text">gestionar tu servicio técnico</span></h2>
+                <p>Herramientas potentes e intuitivas para aumentar tu productividad</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card visible">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h3>Órdenes de Servicio</h3>
+                    <p>Crea, edita y sigue todas tus OS. Agrega fotos, IMEI y estado de cada equipo.</p>
+                </div>
+                <div class="feature-card visible">
+                    <div class="feature-icon icon-yellow">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Fotos del Equipo</h3>
+                    <p>Documenta el estado del celular en entrada y salida. Protégete de reclamos indebidos.</p>
+                </div>
+                <div class="feature-card visible">
+                    <div class="feature-icon icon-orange">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                    </div>
+                    <h3>PDF Profesional</h3>
+                    <p>Genera comprobantes y términos de garantía en PDF. Envía directo por WhatsApp al cliente.</p>
+                </div>
+                <div class="feature-card visible">
+                    <div class="feature-icon icon-green">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <h3>Control Financiero</h3>
+                    <p>Sabe cuánto facturaste, cuánto gastaste en piezas y cuál es tu ganancia real por servicio.</p>
+                </div>
+                <div class="feature-card visible">
+                    <div class="feature-icon icon-purple">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3>Registro de Clientes</h3>
+                    <p>Historial completo de cada cliente. Ve todos los equipos y servicios anteriores.</p>
+                </div>
+                <div class="feature-card visible">
+                    <div class="feature-icon icon-cyan">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                        </svg>
+                    </div>
+                    <h3>Link para Cliente</h3>
+                    <p>Comparte link de seguimiento. El cliente ve el estado sin necesitar llamarte.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Precios</span>
+                <h2>Elige el plan ideal para <span class="gradient-text">tu servicio técnico</span></h2>
+                <p>Empieza gratis y haz upgrade cuando lo necesites</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card visible">
+                    <div class="pricing-header">
+                        <h3>Free</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">0</span>
+                            <span class="period">/mes</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Hasta 30 OS por mes
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            1 usuario
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Checklist básico
+                        </li>
+                    </ul>
+                    <a href="#download" class="btn btn-outline btn-full">Empezar Gratis</a>
+                </div>
+                <div class="pricing-card featured visible">
+                    <div class="pricing-badge">Más Popular</div>
+                    <div class="pricing-header">
+                        <h3>Starter</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">9</span>
+                            <span class="period">/mes</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            OS ilimitadas
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            3 usuarios
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Todos los checklists
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Link para cliente
+                        </li>
+                    </ul>
+                    <a href="#download" class="btn btn-primary btn-full">Obtener Starter</a>
+                </div>
+                <div class="pricing-card visible">
+                    <div class="pricing-header">
+                        <h3>Pro</h3>
+                        <div class="price">
+                            <span class="currency">$</span>
+                            <span class="amount">19</span>
+                            <span class="period">/mes</span>
+                        </div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Todo de Starter
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Usuarios ilimitados
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Reportes avanzados
+                        </li>
+                        <li>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Soporte prioritario
+                        </li>
+                    </ul>
+                    <a href="#download" class="btn btn-outline btn-full">Obtener Pro</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download" class="download">
+        <div class="container">
+            <div class="download-content">
+                <h2>Descarga ahora y <span class="gradient-text">organiza tu servicio técnico</span></h2>
+                <p>Disponible para Android e iOS. Empieza gratis, sin tarjeta de crédito.</p>
+                <div class="download-buttons">
+                    <a href="https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos" class="store-button" target="_blank">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                        </svg>
+                        <div class="store-info">
+                            <span class="store-label">Disponible en</span>
+                            <span class="store-name">Google Play</span>
+                        </div>
+                    </a>
+                    <a href="https://apps.apple.com/app/praticos" class="store-button" target="_blank">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.71,19.5C17.88,20.74 17,21.95 15.66,21.97C14.32,22 13.89,21.18 12.37,21.18C10.84,21.18 10.37,21.95 9.1,22C7.79,22.05 6.8,20.68 5.96,19.47C4.25,17 2.94,12.45 4.7,9.39C5.57,7.87 7.13,6.91 8.82,6.88C10.1,6.86 11.32,7.75 12.11,7.75C12.89,7.75 14.37,6.68 15.92,6.84C16.57,6.87 18.39,7.1 19.56,8.82C19.47,8.88 17.39,10.1 17.41,12.63C17.44,15.65 20.06,16.66 20.09,16.67C20.06,16.74 19.67,18.11 18.71,19.5M13,3.5C13.73,2.67 14.94,2.04 15.94,2C16.07,3.17 15.6,4.35 14.9,5.19C14.21,6.04 13.07,6.7 11.95,6.61C11.8,5.46 12.36,4.26 13,3.5Z"/>
+                        </svg>
+                        <div class="store-info">
+                            <span class="store-label">Disponible en</span>
+                            <span class="store-name">App Store</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            <div class="download-phone">
+                <div class="phone-glow"></div>
+                <div class="phone-mockup large">
+                    <img src="../assets/screenshots/home.png" alt="PráticOS App" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="../index-es.html" class="nav-logo">
+                        <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
+                        <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                    </a>
+                    <p>Sistema de gestión de órdenes de servicio hecho para técnicos de celulares. Simple, práctico y eficiente.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Segmentos</h4>
+                    <a href="assistencia-celular-es.html">Celulares</a>
+                    <a href="refrigeracao-es.html">Refrigeración</a>
+                    <a href="informatica-es.html">Informática</a>
+                    <a href="eletrica-es.html">Eléctrica</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Producto</h4>
+                    <a href="#features">Funcionalidades</a>
+                    <a href="#pricing">Precios</a>
+                    <a href="../faq-es.html">FAQ</a>
+                    <a href="../support-es.html">Soporte</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="../privacy-es.html">Privacidad</a>
+                    <a href="../terms-es.html">Términos de Uso</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 PráticOS. Todos los derechos reservados.</p>
+                <p>Hecho con ❤️ por <a href="https://rafsoft.com.br" target="_blank">Rafsoft</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        
+        navToggle.addEventListener('click', () => {
+            navToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            document.body.classList.toggle('menu-open');
+        });
+    </script>
+</body>
+</html>
