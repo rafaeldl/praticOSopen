@@ -1,0 +1,167 @@
+/* Support Page Styles */
+.support-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin: 48px 0;
+}
+
+.support-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 32px;
+    transition: all 0.3s ease;
+}
+
+.support-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 111, 15, 0.3);
+    box-shadow: 0 8px 24px rgba(255, 111, 15, 0.2);
+}
+
+.support-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.support-card h3 {
+    margin-bottom: 12px;
+    color: #fff;
+}
+
+.support-card p {
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.support-card a {
+    color: #FF6F0F;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.support-card a:hover {
+    color: #FFD43A;
+}
+
+.contact-methods {
+    background: linear-gradient(135deg, rgba(255, 111, 15, 0.1), rgba(255, 212, 58, 0.1));
+    border: 1px solid rgba(255, 111, 15, 0.2);
+    border-radius: 16px;
+    padding: 32px;
+    margin: 32px 0;
+}
+
+.contact-methods h3 {
+    margin-bottom: 24px;
+    color: #fff;
+}
+
+.contact-item {
+    display: flex;
+    align-items: start;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.contact-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.contact-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(255, 111, 15, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.contact-item-content h4 {
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+.contact-item-content p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 8px;
+}
+
+.contact-item-content a {
+    color: #FF6F0F;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.contact-item-content a:hover {
+    color: #FFD43A;
+}
+
+.faq-preview {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 32px;
+    margin: 32px 0;
+}
+
+.faq-preview h3 {
+    margin-bottom: 24px;
+    color: #fff;
+}
+
+.faq-quick-item {
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.faq-quick-item:last-child {
+    border-bottom: none;
+}
+
+.faq-quick-item h4 {
+    margin-bottom: 8px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.faq-quick-item p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.need-help-section {
+    text-align: center;
+    margin: 48px 0;
+    padding: 32px;
+    background: linear-gradient(135deg, rgba(255, 111, 15, 0.1), rgba(255, 212, 58, 0.1));
+    border-radius: 16px;
+}
+
+.need-help-section h3 {
+    margin-bottom: 16px;
+    color: #fff;
+}
+
+.need-help-section p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 24px;
+}

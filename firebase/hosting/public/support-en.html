@@ -3,444 +3,442 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support - PráticOS</title>
-    <meta name="description" content="PráticOS support center. Get help, send feedback and get your questions answered.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Support - PraticOS</title>
+<meta name="description" content="PraticOS support center. Get help, send feedback and get your questions answered.">
+<meta name="keywords" content="">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<!-- Open Graph -->
+<meta property="og:title" content="Support - PraticOS">
+<meta property="og:description" content="PraticOS support center. Get help, send feedback and get your questions answered.">
+<meta property="og:image" content="./assets/images/logo.png">
+<meta property="og:type" content="website">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="assets/images/logo.png">
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .support-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
-            margin: 48px 0;
-        }
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="./assets/images/logo.png">
 
-        .support-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 32px;
-            transition: all 0.3s ease;
-        }
+<!-- Stylesheets -->
+<link rel="stylesheet" href="./style.css">
 
-        .support-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(255, 111, 15, 0.3);
-            box-shadow: 0 8px 24px rgba(255, 111, 15, 0.2);
-        }
 
-        .support-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-        }
+<link rel="stylesheet" href="./css/support.css">
 
-        .support-card h3 {
-            margin-bottom: 12px;
-            color: #fff;
-        }
 
-        .support-card p {
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.6;
-            margin-bottom: 16px;
-        }
 
-        .support-card a {
-            color: #FF6F0F;
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .support-card a:hover {
-            color: #FFD43A;
-        }
-
-        .contact-methods {
-            background: linear-gradient(135deg, rgba(255, 111, 15, 0.1), rgba(255, 212, 58, 0.1));
-            border: 1px solid rgba(255, 111, 15, 0.2);
-            border-radius: 16px;
-            padding: 32px;
-            margin: 32px 0;
-        }
-
-        .contact-methods h3 {
-            margin-bottom: 24px;
-            color: #fff;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: start;
-            gap: 16px;
-            margin-bottom: 24px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .contact-item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        .contact-item-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: rgba(255, 111, 15, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .contact-item-content h4 {
-            margin-bottom: 8px;
-            color: #fff;
-        }
-
-        .contact-item-content p {
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 8px;
-        }
-
-        .contact-item-content a {
-            color: #FF6F0F;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .contact-item-content a:hover {
-            color: #FFD43A;
-        }
-
-        .faq-preview {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 32px;
-            margin: 32px 0;
-        }
-
-        .faq-preview h3 {
-            margin-bottom: 24px;
-            color: #fff;
-        }
-
-        .faq-quick-item {
-            padding: 16px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .faq-quick-item:last-child {
-            border-bottom: none;
-        }
-
-        .faq-quick-item h4 {
-            margin-bottom: 8px;
-            color: #fff;
-            font-size: 16px;
-        }
-
-        .faq-quick-item p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-    </style>
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar scrolled">
-        <div class="nav-container">
-            <a href="index-en.html" class="nav-logo">
-                <img src="assets/images/logo.png" alt="PráticOS" class="logo-img">
-                <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
-            </a>
-            <div class="nav-links">
-                <a href="index-en.html#features">Features</a>
-                <a href="index-en.html#screenshots">Screenshots</a>
-                <a href="index-en.html#pricing">Pricing</a>
-                <a href="faq-en.html">FAQ</a>
-                <a href="index-en.html#contact">Contact</a>
-            </div>
-            <div class="nav-actions">
-                <div class="lang-switch">
-                    <a href="support.html">PT</a>
-                    <a href="support-en.html" class="active">EN</a>
-                    <a href="support-es.html">ES</a>
-                </div>
-                <a href="index-en.html#download" class="btn btn-primary">Download App</a>
-            </div>
-            <button class="nav-toggle" aria-label="Menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+    
+
+
+<!-- Navigation -->
+<nav class="navbar scrolled">
+    <div class="nav-container">
+        <a href="./index-en.html" class="nav-logo">
+            <img src="./assets/images/logo.png" alt="PraticOS" class="logo-img">
+            <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+        </a>
+        <div class="nav-links">
+            
+            <a href="#features">Features</a>
+            
+            <a href="#screenshots">Screenshots</a>
+            
+            <a href="#pricing">Pricing</a>
+            
+            <a href="./faq-en.html">FAQ</a>
+            
+            <a href="#contact">Contact</a>
+            
         </div>
-    </nav>
-
-    <!-- Page Header -->
-    <header class="page-header">
-        <div class="container">
-            <h1>Support <span class="gradient-text">Center</span></h1>
-            <p>We're here to help you get the most out of PráticOS</p>
-        </div>
-    </header>
-
-    <!-- Support Content -->
-    <main class="page-content">
-        <div class="container">
-            <!-- Support Options -->
-            <div class="support-grid">
-                <div class="support-card">
-                    <div class="support-icon" style="background: rgba(255, 111, 15, 0.2);">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                            <polyline points="22,6 12,13 2,6"></polyline>
-                        </svg>
-                    </div>
-                    <h3>Support Email</h3>
-                    <p>Contact our support team. We respond within 24 business hours.</p>
-                    <a href="mailto:praticos@rafsoft.com.br">
-                        praticos@rafsoft.com.br
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="7" y1="17" x2="17" y2="7"></line>
-                            <polyline points="7 7 17 7 17 17"></polyline>
-                        </svg>
-                    </a>
-                </div>
-
-                <div class="support-card">
-                    <div class="support-icon" style="background: rgba(255, 212, 58, 0.2);">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43A" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                    </div>
-                    <h3>Frequently Asked Questions</h3>
-                    <p>Find quick answers to the most common questions about PráticOS.</p>
-                    <a href="faq-en.html">
-                        View full FAQ
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
-                    </a>
-                </div>
-
-                <div class="support-card">
-                    <div class="support-icon" style="background: rgba(59, 130, 246, 0.2);">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                    </div>
-                    <h3>Documentation</h3>
-                    <p>Complete guides and tutorials to get the most out of all features.</p>
-                    <a href="docs/index-en.html">
-                        Access documentation
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Contact Methods -->
-            <div class="contact-methods">
-                <h3>How can we help?</h3>
-
-                <div class="contact-item">
-                    <div class="contact-item-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                    </div>
-                    <div class="contact-item-content">
-                        <h4>Questions about the app</h4>
-                        <p>If you have questions about how to use any PráticOS feature, check our FAQ first. If you can't find the answer, send an email to our team.</p>
-                        <a href="faq-en.html">View FAQ</a> | <a href="mailto:praticos@rafsoft.com.br">Send email</a>
-                    </div>
-                </div>
-
-                <div class="contact-item">
-                    <div class="contact-item-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
-                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                            <line x1="12" y1="9" x2="12" y2="13"></line>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                    </div>
-                    <div class="contact-item-content">
-                        <h4>Report an issue</h4>
-                        <p>Found a bug or unexpected behavior? Help us improve! Send an email describing the issue, including screenshots if possible.</p>
-                        <a href="mailto:praticos@rafsoft.com.br">Report issue</a>
-                    </div>
-                </div>
-
-                <div class="contact-item">
-                    <div class="contact-item-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
-                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-                        </svg>
-                    </div>
-                    <div class="contact-item-content">
-                        <h4>Suggest improvements</h4>
-                        <p>Have an idea to improve PráticOS? We love feedback! Send your suggestions and help make the app even better.</p>
-                        <a href="mailto:praticos@rafsoft.com.br">Send suggestion</a>
-                    </div>
-                </div>
-
-                <div class="contact-item">
-                    <div class="contact-item-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </div>
-                    <div class="contact-item-content">
-                        <h4>Manage my account</h4>
-                        <p>For account, subscription, privacy, or data deletion questions, you can manage everything directly in the app or contact us.</p>
-                        <a href="privacy-en.html">Privacy Policy</a> | <a href="mailto:praticos@rafsoft.com.br">Contact</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Preview -->
-            <div class="faq-preview">
-                <h3>Frequently Asked Questions</h3>
-
-                <div class="faq-quick-item">
-                    <h4>How do I create an account on PráticOS?</h4>
-                    <p>Download the app from App Store or Google Play, open the app and choose one of the login options: Google, Apple or Email.</p>
-                </div>
-
-                <div class="faq-quick-item">
-                    <h4>How do I delete my account?</h4>
-                    <p>You can delete your account directly in the app: go to Settings > Account > Delete Account. This action is permanent and removes all your data.</p>
-                </div>
-
-                <div class="faq-quick-item">
-                    <h4>Is my data secure?</h4>
-                    <p>Yes! We use Firebase for storage, with encryption in transit and at rest. We follow security best practices.</p>
-                </div>
-
-                <div class="faq-quick-item">
-                    <h4>How do I contact support?</h4>
-                    <p>Send an email to praticos@rafsoft.com.br. We respond within 24 business hours.</p>
-                </div>
-
-                <div style="margin-top: 24px; text-align: center;">
-                    <a href="faq-en.html" class="btn btn-outline">View all questions</a>
-                </div>
-            </div>
-
-            <!-- Additional Resources -->
-            <div style="text-align: center; margin: 48px 0; padding: 32px; background: linear-gradient(135deg, rgba(255, 111, 15, 0.1), rgba(255, 212, 58, 0.1)); border-radius: 16px;">
-                <h3 style="margin-bottom: 16px; color: #fff;">Need more help?</h3>
-                <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 24px;">Our team is ready to assist you</p>
-                <a href="mailto:praticos@rafsoft.com.br" class="btn btn-primary">Contact Us</a>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="index-en.html" class="nav-logo">
-                        <img src="assets/images/logo.png" alt="PráticOS" class="logo-img">
-                        <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
-                    </a>
-                    <p>Complete service order management system. Simplify your business.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Product</h4>
-                    <a href="index-en.html#features">Features</a>
-                    <a href="index-en.html#pricing">Pricing</a>
-                    <a href="index-en.html#download">Download</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Support</h4>
-                    <a href="faq-en.html">FAQ</a>
-                    <a href="support-en.html">Support</a>
-                    <a href="privacy-en.html">Privacy</a>
-                    <a href="terms-en.html">Terms</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Company</h4>
-                    <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 PráticOS. All rights reserved.</p>
-                <p>Developed by <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu">
-        <div class="mobile-menu-content">
-            <a href="index-en.html#features">Features</a>
-            <a href="index-en.html#screenshots">Screenshots</a>
-            <a href="index-en.html#pricing">Pricing</a>
-            <a href="faq-en.html">FAQ</a>
-            <a href="support-en.html">Support</a>
-            <div class="mobile-lang">
+        <div class="nav-actions">
+            <div class="lang-switch">
+                
                 <a href="support.html">PT</a>
+                
                 <a href="support-en.html" class="active">EN</a>
+                
                 <a href="support-es.html">ES</a>
+                
             </div>
-            <a href="index-en.html#download" class="btn btn-primary">Download App</a>
+            <a href="#download" class="btn btn-primary">Download App</a>
+        </div>
+        <button class="nav-toggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</nav>
+
+
+    
+
+
+<!-- Page Header -->
+<header class="page-header">
+    <div class="container">
+        <h1>Support <span class="gradient-text">Center</span></h1>
+        <p>We&#39;re here to help you get the most out of PráticOS</p>
+    </div>
+</header>
+
+<!-- Support Content -->
+<main class="page-content">
+    <div class="container">
+        <!-- Support Options -->
+        <div class="support-grid">
+            
+            <div class="support-card">
+                <div class="support-icon" style="background: rgba(255, 111, 15, 0.2);">
+                    
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    
+                </div>
+                <h3>Support Email</h3>
+                <p>Contact our support team. We respond within 24 business hours.</p>
+                <a href="mailto:praticos@rafsoft.com.br" target="_blank" rel="noopener">
+                    praticos@rafsoft.com.br
+                    
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="7" y1="17" x2="17" y2="7"></line>
+                        <polyline points="7 7 17 7 17 17"></polyline>
+                    </svg>
+                    
+                </a>
+            </div>
+            
+            <div class="support-card">
+                <div class="support-icon" style="background: rgba(255, 212, 58, 0.2);">
+                    
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFD43A" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    
+                </div>
+                <h3>Frequently Asked Questions</h3>
+                <p>Find quick answers to the most common questions about PráticOS.</p>
+                <a href="faq-en.html">
+                    View full FAQ
+                    
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                    
+                </a>
+            </div>
+            
+            <div class="support-card">
+                <div class="support-icon" style="background: rgba(59, 130, 246, 0.2);">
+                    
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    
+                </div>
+                <h3>Documentation</h3>
+                <p>Complete guides and tutorials to get the most out of all features.</p>
+                <a href="docs/index-en.html">
+                    Access documentation
+                    
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                    
+                </a>
+            </div>
+            
+        </div>
+
+        <!-- Contact Methods -->
+        <div class="contact-methods">
+            <h3>How can we help?</h3>
+
+            
+            <div class="contact-item">
+                <div class="contact-item-icon">
+                    
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    
+                </div>
+                <div class="contact-item-content">
+                    <h4>Questions about the app</h4>
+                    <p>If you have questions about how to use any PráticOS feature, check our FAQ first. If you can&#39;t find the answer, send an email to our team.</p>
+                    
+                    <a href="faq-en.html">View FAQ</a> | 
+                    
+                    <a href="mailto:praticos@rafsoft.com.br">Send email</a>
+                    
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-item-icon">
+                    
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    
+                </div>
+                <div class="contact-item-content">
+                    <h4>Report an issue</h4>
+                    <p>Found a bug or unexpected behavior? Help us improve! Send an email describing the issue, including screenshots if possible.</p>
+                    
+                    <a href="mailto:praticos@rafsoft.com.br">Report issue</a>
+                    
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-item-icon">
+                    
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                    </svg>
+                    
+                </div>
+                <div class="contact-item-content">
+                    <h4>Suggest improvements</h4>
+                    <p>Have an idea to improve PráticOS? We love feedback! Send your suggestions and help make the app even better.</p>
+                    
+                    <a href="mailto:praticos@rafsoft.com.br">Send suggestion</a>
+                    
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-item-icon">
+                    
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6F0F" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    
+                </div>
+                <div class="contact-item-content">
+                    <h4>Manage my account</h4>
+                    <p>For account, subscription, privacy, or data deletion questions, you can manage everything directly in the app or contact us.</p>
+                    
+                    <a href="privacy-en.html">Privacy Policy</a> | 
+                    
+                    <a href="mailto:praticos@rafsoft.com.br">Contact</a>
+                    
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- FAQ Preview -->
+        <div class="faq-preview">
+            <h3>Frequently Asked Questions</h3>
+
+            
+            <div class="faq-quick-item">
+                <h4>How do I create an account on PráticOS?</h4>
+                <p>Download the app from App Store or Google Play, open the app and choose one of the login options: Google, Apple or Email.</p>
+            </div>
+            
+            <div class="faq-quick-item">
+                <h4>How do I delete my account?</h4>
+                <p>You can delete your account directly in the app: go to Settings &gt; Account &gt; Delete Account. This action is permanent and removes all your data.</p>
+            </div>
+            
+            <div class="faq-quick-item">
+                <h4>Is my data secure?</h4>
+                <p>Yes! We use Firebase for storage, with encryption in transit and at rest. We follow security best practices.</p>
+            </div>
+            
+            <div class="faq-quick-item">
+                <h4>How do I contact support?</h4>
+                <p>Send an email to praticos@rafsoft.com.br. We respond within 24 business hours.</p>
+            </div>
+            
+
+            <div style="margin-top: 24px; text-align: center;">
+                <a href="faq-en.html" class="btn btn-outline">View all questions</a>
+            </div>
+        </div>
+
+        <!-- Additional Resources -->
+        <div class="need-help-section">
+            <h3>Need more help?</h3>
+            <p>Our team is ready to assist you</p>
+            <a href="mailto:praticos@rafsoft.com.br" class="btn btn-primary">Contact Us</a>
         </div>
     </div>
+</main>
+
+
+    
+    
+
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="./index-en.html" class="nav-logo">
+                    <img src="./assets/images/logo.png" alt="PraticOS" class="logo-img">
+                    <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                </a>
+                <p>Complete system for work order management. Simplify your business.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Product</h4>
+                
+                <a href="#features">Features</a>
+                
+                <a href="#pricing">Pricing</a>
+                
+                <a href="#download">Download</a>
+                
+            </div>
+            <div class="footer-links">
+                <h4>Support</h4>
+                
+                <a href="./docs/">Documentation</a>
+                
+                <a href="./support-en.html">Support Center</a>
+                
+                <a href="./faq-en.html">FAQ</a>
+                
+                <a href="#contact">Contact</a>
+                
+                <a href="./privacy-en.html">Privacy</a>
+                
+                <a href="./terms-en.html">Terms of Use</a>
+                
+            </div>
+            <div class="footer-links">
+                <h4>Company</h4>
+                <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 PraticOS. All rights reserved.</p>
+            <p>Made with ❤️ by <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+        </div>
+    </div>
+</footer>
+
+    
+    
+
+
+<!-- Mobile Menu -->
+<div class="mobile-menu">
+    <div class="mobile-menu-content">
+        
+        <a href="#features">Features</a>
+        
+        <a href="#screenshots">Screenshots</a>
+        
+        <a href="#pricing">Pricing</a>
+        
+        <a href="./faq-en.html">FAQ</a>
+        
+        <a href="./support-en.html">Support</a>
+        
+        <a href="#contact">Contact</a>
+        
+        <div class="mobile-lang">
+            
+            <a href="support.html">PT</a>
+            
+            <a href="support-en.html" class="active">EN</a>
+            
+            <a href="support-es.html">ES</a>
+            
+        </div>
+        <a href="#download" class="btn btn-primary">Download App</a>
+    </div>
+</div>
 
     <script>
-        const navToggle = document.querySelector('.nav-toggle');
-        const mobileMenu = document.querySelector('.mobile-menu');
-        const body = document.body;
+    // Mobile menu toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const body = document.body;
 
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            body.classList.toggle('menu-open');
-        });
+    navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+        body.classList.toggle('menu-open');
+    });
 
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navToggle.classList.remove('active');
-                mobileMenu.classList.remove('active');
-                body.classList.remove('menu-open');
-            });
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('menu-open');
         });
-    </script>
+    });
+
+    // Navbar scroll effect
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
+        observer.observe(el);
+    });
+</script>
+
 </body>
 
 </html>

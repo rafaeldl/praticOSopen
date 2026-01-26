@@ -1,0 +1,184 @@
+---
+layout: layouts/base.njk
+---
+{# Get segment data based on language #}
+{% set segmentData = segments[segmentSlug] %}
+{% set data = segmentData[langCode] %}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+    </div>
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="badge">{{ data.hero.badge }}</div>
+            <h1>{{ data.hero.title }} <span class="gradient-text">{{ data.hero.titleHighlight }}</span></h1>
+            <p class="hero-subtitle">{{ data.hero.subtitle }}</p>
+            <div class="hero-cta">
+                <a href="#download" class="btn btn-primary btn-large">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    {{ data.hero.ctaPrimary }}
+                </a>
+                <a href="#demo" class="btn btn-secondary btn-large">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    {{ data.hero.ctaSecondary }}
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-number">{{ data.hero.stats.users.value }}</span>
+                    <span class="stat-label">{{ data.hero.stats.users.label }}</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">{{ data.hero.stats.orders.value }}</span>
+                    <span class="stat-label">{{ data.hero.stats.orders.label }}</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-number">{{ data.hero.stats.rating.value }}</span>
+                    <span class="stat-label">{{ data.hero.stats.rating.label }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-phones">
+            <div class="phone phone-back">
+                <div class="phone-frame">
+                    <img src="{{ relPath }}assets/screenshots/dashboard.png" alt="Dashboard PraticOS" loading="lazy">
+                </div>
+            </div>
+            <div class="phone phone-front">
+                <div class="phone-frame">
+                    <img src="{{ relPath }}assets/screenshots/home.png" alt="Work Orders List" loading="lazy">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <span>Scroll</span>
+        <div class="scroll-indicator"></div>
+    </div>
+</section>
+
+<!-- Problems Section -->
+<section class="segment-problems">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">{{ data.problems.tag }}</span>
+            <h2>{{ data.problems.title }} <span class="gradient-text">{{ data.problems.titleHighlight }}</span></h2>
+            <p>{{ data.problems.subtitle }}</p>
+        </div>
+        <div class="segment-problems-grid">
+            {% for item in data.problems.items %}
+            <div class="segment-problem-card">
+                <div class="segment-problem-icon">{{ item.icon }}</div>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.text }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Solutions Section -->
+<section class="segment-solutions">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">{{ data.solutions.tag }}</span>
+            <h2>{{ data.solutions.title }} <span class="gradient-text">{{ data.solutions.titleHighlight }}</span></h2>
+            <p>{{ data.solutions.subtitle }}</p>
+        </div>
+        <div class="segment-solutions-grid">
+            {% for item in data.solutions.items %}
+            <div class="segment-solution-card">
+                <div class="segment-solution-icon">{{ item.icon }}</div>
+                <h3>{{ item.title }}</h3>
+                <p>{{ item.text }}{% if item.highlight %} <strong>{{ item.highlight }}</strong>{% endif %}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Checklist Section -->
+<section id="checklist" class="segment-checklist">
+    <div class="container">
+        <div class="segment-checklist-container">
+            <div class="segment-checklist-content">
+                <span class="section-tag">{{ data.checklist.tag }}</span>
+                <h2>{{ data.checklist.title }} <span class="gradient-text">{{ data.checklist.titleHighlight }}</span></h2>
+                <p>{{ data.checklist.text }}</p>
+                <a href="#download" class="btn btn-primary">{{ data.checklist.cta }}</a>
+            </div>
+            <div class="segment-checklist-preview">
+                <h4>{{ data.checklist.previewTitle }}</h4>
+                {% for item in data.checklist.items %}
+                <div class="segment-checklist-item">
+                    <span class="icon">{{ item.icon }}</span>
+                    <span>{{ item.text }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+{% include "components/features-segment.njk" %}
+
+<!-- Testimonial Section -->
+<section class="segment-testimonial">
+    <div class="container">
+        <div class="testimonial-card">
+            <p class="testimonial-quote">"{{ data.testimonial.quote }}"</p>
+            <div class="testimonial-author">
+                <span class="testimonial-name">{{ data.testimonial.name }}</span>
+                <span class="testimonial-role">{{ data.testimonial.role }}</span>
+            </div>
+            <div class="testimonial-metric">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                {{ data.testimonial.metric }}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section id="faq-section" class="segment-faq">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">{{ data.faq.tag }}</span>
+            <h2>{{ data.faq.title }} <span class="gradient-text">{{ data.faq.titleHighlight }}</span></h2>
+            <p>{{ data.faq.subtitle }}</p>
+        </div>
+        <div class="faq-grid">
+            {% for item in data.faq.items %}
+            <div class="faq-item">
+                <h4>{{ item.question }}</h4>
+                <p>{{ item.answer }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+{% include "components/pricing.njk" %}
+
+<!-- Download Section -->
+{% include "components/download.njk" %}
+
+<!-- Contact Section -->
+{% include "components/contact.njk" %}

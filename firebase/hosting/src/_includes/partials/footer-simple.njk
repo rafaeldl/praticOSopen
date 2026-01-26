@@ -1,0 +1,12 @@
+{# Get footer data based on language #}
+{% set foot = footer[langCode] | default(footer.pt) %}
+
+<!-- Simple Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+            <p>&copy; {{ site.year }} {{ site.name }}. {{ foot.copyright }}</p>
+            <p>{{ foot.madeWith }} <a href="{{ site.companyUrl }}" target="_blank" rel="noopener">{{ site.company }}</a></p>
+        </div>
+    </div>
+</footer>

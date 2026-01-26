@@ -1,0 +1,31 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ title }}</title>
+<meta name="description" content="{{ description }}">
+<meta name="keywords" content="{{ keywords }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ ogTitle | default(title) }}">
+<meta property="og:description" content="{{ ogDescription | default(description) }}">
+<meta property="og:image" content="{{ relPath }}assets/images/logo.png">
+<meta property="og:type" content="website">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="{{ relPath }}assets/images/logo.png">
+
+<!-- Stylesheets -->
+<link rel="stylesheet" href="{{ relPath }}style.css">
+{% if segmentStyles %}
+<link rel="stylesheet" href="{{ relPath }}css/segments.css">
+{% endif %}
+{% if supportStyles %}
+<link rel="stylesheet" href="{{ relPath }}css/support.css">
+{% endif %}
+{% if docsStyles %}
+<link rel="stylesheet" href="{{ relPath }}css/docs.css">
+{% endif %}

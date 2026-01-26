@@ -3,1094 +3,1996 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfis de Usuários - PráticOS Documentação</title>
-    <meta name="description" content="Documentação completa sobre os perfis de usuários e permissões do sistema PráticOS. Conheça as funcionalidades de cada perfil.">
-    <meta name="keywords" content="praticos, documentação, perfis, permissões, RBAC, usuários, administrador, gerente, supervisor, técnico">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfis de Usuarios - PraticOS Documentacao</title>
+<meta name="description" content="Documentacao completa sobre os perfis de usuarios e permissoes do sistema PraticOS. Conheca as funcionalidades de cada perfil.">
+<meta name="keywords" content="praticos, documentacao, perfis, permissoes, RBAC, usuarios, administrador, gerente, supervisor, tecnico">
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="Perfis de Usuários - PráticOS">
-    <meta property="og:description" content="Documentação completa sobre os perfis de usuários e permissões do sistema PráticOS.">
-    <meta property="og:image" content="../assets/images/logo.png">
-    <meta property="og:type" content="article">
+<!-- Open Graph -->
+<meta property="og:title" content="Perfis de Usuarios - PraticOS Documentacao">
+<meta property="og:description" content="Documentacao completa sobre os perfis de usuarios e permissoes do sistema PraticOS. Conheca as funcionalidades de cada perfil.">
+<meta property="og:image" content="../assets/images/logo.png">
+<meta property="og:type" content="website">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="../assets/images/logo.png">
 
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="docs.css">
+<!-- Stylesheets -->
+<link rel="stylesheet" href="../style.css">
+
+
+
+<link rel="stylesheet" href="../css/docs.css">
+
+
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar scrolled">
-        <div class="nav-container">
-            <a href="../index.html" class="nav-logo">
-                <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
-                <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
-            </a>
-            <div class="nav-links">
-                <a href="../index.html">Início</a>
-                <a href="../index.html#features">Funcionalidades</a>
-                <a href="../faq.html">FAQ</a>
-                <a href="../support.html">Suporte</a>
-            </div>
-            <div class="nav-actions">
-                <div class="lang-switch">
-                    <a href="perfis.html" class="active">PT</a>
-                    <a href="perfis-en.html">EN</a>
-                    <a href="perfis-es.html">ES</a>
-                </div>
-                <a href="../index.html#download" class="btn btn-primary">Baixar App</a>
-            </div>
-            <button class="nav-toggle" aria-label="Menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
+    
 
-    <!-- Page Header -->
-    <section class="docs-hero compact">
-        <div class="hero-bg">
-            <div class="gradient-orb orb-1"></div>
-            <div class="gradient-orb orb-2"></div>
-        </div>
-        <div class="container">
-            <div class="docs-breadcrumb">
-                <a href="index.html">Documentação</a>
-                <span>/</span>
-                <span>Perfis de Usuários</span>
-            </div>
-            <div class="docs-hero-content">
-                <h1>Perfis de <span class="gradient-text">Usuários</span></h1>
-                <p class="hero-subtitle">Conheça os diferentes perfis disponíveis no PráticOS e suas permissões específicas para cada função na sua empresa.</p>
-            </div>
-        </div>
-    </section>
 
-    <!-- Docs Content -->
-    <section class="docs-content">
-        <div class="container docs-container">
-            <!-- Sidebar Navigation -->
-            <aside class="docs-sidebar">
-                <div class="sidebar-sticky">
-                    <h4>Nesta página</h4>
-                    <nav class="docs-nav">
-                        <a href="#visao-geral" class="active">Visão Geral</a>
-                        <a href="#perfis">Perfis Disponíveis</a>
-                        <a href="#admin">Administrador</a>
-                        <a href="#gerente">Gerente</a>
-                        <a href="#supervisor">Supervisor</a>
-                        <a href="#consultor">Consultor</a>
-                        <a href="#tecnico">Técnico</a>
-                        <a href="#matriz">Matriz de Permissões</a>
-                        <a href="#status">Regras por Status</a>
-                        <a href="#faq">Perguntas Frequentes</a>
-                    </nav>
-                </div>
-            </aside>
-
-            <!-- Main Content -->
-            <main class="docs-main">
-                <!-- Visão Geral -->
-                <section id="visao-geral" class="docs-section">
-                    <h2>Visão Geral do Sistema RBAC</h2>
-                    <p>O PráticOS utiliza um sistema de controle de acesso baseado em perfis (<strong>RBAC - Role-Based Access Control</strong>) para gerenciar as permissões dos colaboradores de cada empresa.</p>
-
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="16" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                            </svg>
-                        </div>
-                        <div class="info-content">
-                            <h4>Multi-Tenancy</h4>
-                            <p>Um usuário pode ter perfis diferentes em empresas diferentes. Por exemplo, ser Administrador em uma empresa e Técnico em outra.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Perfis Disponíveis -->
-                <section id="perfis" class="docs-section">
-                    <h2>Perfis Disponíveis</h2>
-                    <p>O sistema conta com 5 perfis distintos, cada um projetado para atender diferentes funções dentro da organização:</p>
-
-                    <div class="profiles-grid">
-                        <a href="#admin" class="profile-card profile-admin">
-                            <div class="profile-icon">
-                                <span class="profile-emoji">&#128104;&#8205;&#128188;</span>
-                            </div>
-                            <h3>Administrador</h3>
-                            <p>Acesso total. Configura a empresa, gerencia usuários e acessa todos os dados.</p>
-                            <span class="profile-tag">Gestão Completa</span>
-                        </a>
-
-                        <a href="#gerente" class="profile-card profile-manager">
-                            <div class="profile-icon">
-                                <span class="profile-emoji">&#128176;</span>
-                            </div>
-                            <h3>Gerente</h3>
-                            <p>Foco em resultados. Visualiza faturamento e custos, mas não executa serviços.</p>
-                            <span class="profile-tag">Financeiro</span>
-                        </a>
-
-                        <a href="#supervisor" class="profile-card profile-supervisor">
-                            <div class="profile-icon">
-                                <span class="profile-emoji">&#129489;&#8205;&#128295;</span>
-                            </div>
-                            <h3>Supervisor</h3>
-                            <p>Coordena equipes e equipamentos. Não visualiza valores financeiros.</p>
-                            <span class="profile-tag">Operacional</span>
-                        </a>
-
-                        <a href="#consultor" class="profile-card profile-consultant">
-                            <div class="profile-icon">
-                                <span class="profile-emoji">&#129489;&#8205;&#128188;</span>
-                            </div>
-                            <h3>Consultor</h3>
-                            <p>Cria orçamentos. Vê preços, mas acessa apenas suas próprias Ordens de Serviço.</p>
-                            <span class="profile-tag">Comercial</span>
-                        </a>
-
-                        <a href="#tecnico" class="profile-card profile-technician">
-                            <div class="profile-icon">
-                                <span class="profile-emoji">&#128119;</span>
-                            </div>
-                            <h3>Técnico</h3>
-                            <p>Executa serviços. Não vê preços e tem edição limitada após aprovação da OS.</p>
-                            <span class="profile-tag">Execução</span>
-                        </a>
-                    </div>
-                </section>
-
-                <!-- Administrador -->
-                <section id="admin" class="docs-section">
-                    <div class="section-header-inline">
-                        <span class="profile-badge admin">&#128104;&#8205;&#128188;</span>
-                        <div>
-                            <h2>Administrador</h2>
-                            <p class="section-subtitle">Acesso total. Configura a empresa, gerencia usuários e acessa todos os dados.</p>
-                        </div>
-                    </div>
-
-                    <div class="permissions-grid">
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                </svg>
-                                Ordens de Serviço
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar todas as OS da empresa</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Criar novas OS</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Editar qualquer OS</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Atribuir/reatribuir técnicos</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Executar serviços</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Deletar OS</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                Dados Financeiros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar valores e preços</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar faturamento</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Acessar relatórios financeiros</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Editar valores e preços</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="9" cy="7" r="4"></circle>
-                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                                </svg>
-                                Cadastros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar clientes</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar produtos</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar serviços</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar dispositivos</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                                </svg>
-                                Administração
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar usuários e colaboradores</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar perfis e permissões</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Configurar dados da empresa</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Configurar parâmetros globais</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Gerente -->
-                <section id="gerente" class="docs-section">
-                    <div class="section-header-inline">
-                        <span class="profile-badge manager">&#128176;</span>
-                        <div>
-                            <h2>Gerente (Financeiro)</h2>
-                            <p class="section-subtitle">Foco em resultados. Visualiza faturamento e custos, mas não executa serviços.</p>
-                        </div>
-                    </div>
-
-                    <div class="permissions-grid">
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                </svg>
-                                Ordens de Serviço
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar todas as OS</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Criar novas OS</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Editar OS (ajustes fiscais/financeiros)</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Atribuir técnicos</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Executar serviços</li>
-                                <li class="partial"><span class="icon">&#9888;</span> Deletar OS (apenas status 'Orçamento')</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                Dados Financeiros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar valores e preços</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar faturamento</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Acessar relatórios financeiros</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Editar valores e preços</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="9" cy="7" r="4"></circle>
-                                </svg>
-                                Cadastros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar clientes</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar produtos</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar serviços</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar dispositivos</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Gerenciar outros cadastros</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                                </svg>
-                                Relatórios
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Relatórios operacionais</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Dashboard geral</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Reabrir procedimentos concluídos</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Supervisor -->
-                <section id="supervisor" class="docs-section">
-                    <div class="section-header-inline">
-                        <span class="profile-badge supervisor">&#129489;&#8205;&#128295;</span>
-                        <div>
-                            <h2>Supervisor</h2>
-                            <p class="section-subtitle">Coordena equipes e equipamentos. Não visualiza valores financeiros.</p>
-                        </div>
-                    </div>
-
-                    <div class="warning-card">
-                        <div class="warning-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                        </div>
-                        <div class="warning-content">
-                            <h4>Sem Acesso Financeiro</h4>
-                            <p>Este perfil não visualiza valores, preços, faturamento ou relatórios financeiros. Ideal para colaboradores que focam na operação.</p>
-                        </div>
-                    </div>
-
-                    <div class="permissions-grid">
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                </svg>
-                                Ordens de Serviço
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar todas as OS (sem valores)</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Criar novas OS</li>
-                                <li class="partial"><span class="icon">&#9888;</span> Editar OS completa (apenas status 'Orçamento')</li>
-                                <li class="partial"><span class="icon">&#9888;</span> Editar observações (após 'Orçamento')</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Atribuir/reatribuir técnicos</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Executar serviços</li>
-                                <li class="partial"><span class="icon">&#9888;</span> Deletar OS (apenas status 'Orçamento')</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                Dados Financeiros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="denied"><span class="icon">&#10007;</span> Visualizar valores e preços</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Visualizar faturamento</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Acessar relatórios financeiros</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Gerar PDF de OS</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Filtros de pagamento ocultos</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="9" cy="7" r="4"></circle>
-                                </svg>
-                                Cadastros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar clientes</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar produtos (sem ver preços)</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar serviços (sem ver preços)</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar dispositivos</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 11l3 3L22 4"></path>
-                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                </svg>
-                                Formulários/Procedimentos
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Preencher formulários</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar templates de formulários</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Reabrir procedimentos concluídos</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Adicionar/remover procedimentos em OS ativa</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Consultor -->
-                <section id="consultor" class="docs-section">
-                    <div class="section-header-inline">
-                        <span class="profile-badge consultant">&#129489;&#8205;&#128188;</span>
-                        <div>
-                            <h2>Consultor (Vendedor)</h2>
-                            <p class="section-subtitle">Cria orçamentos. Vê preços, mas acessa apenas suas próprias Ordens de Serviço.</p>
-                        </div>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="16" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                            </svg>
-                        </div>
-                        <div class="info-content">
-                            <h4>Visibilidade Limitada</h4>
-                            <p>O Consultor só visualiza as OS que ele mesmo criou. Em caso de férias ou ausência, o Administrador pode reatribuir OS para outro consultor.</p>
-                        </div>
-                    </div>
-
-                    <div class="permissions-grid">
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                </svg>
-                                Ordens de Serviço
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="partial"><span class="icon">&#9888;</span> Visualizar apenas OS que criou</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Criar novas OS</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Editar suas próprias OS</li>
-                                <li class="partial"><span class="icon">&#9888;</span> Deletar OS que criou (status 'Orçamento')</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Atribuir técnicos</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Executar serviços</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                Dados Financeiros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar valores e preços (para orçamentos)</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Visualizar faturamento geral</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Acessar relatórios financeiros</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Editar valores e preços</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="9" cy="7" r="4"></circle>
-                                </svg>
-                                Cadastros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Gerenciar clientes</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar produtos</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar serviços</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar dispositivos</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 11l3 3L22 4"></path>
-                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                </svg>
-                                Formulários/Procedimentos
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Preencher formulários</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Gerenciar templates</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Reabrir procedimentos concluídos</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Técnico -->
-                <section id="tecnico" class="docs-section">
-                    <div class="section-header-inline">
-                        <span class="profile-badge technician">&#128119;</span>
-                        <div>
-                            <h2>Técnico</h2>
-                            <p class="section-subtitle">Executa serviços. Não vê preços e tem edição limitada após aprovação da OS.</p>
-                        </div>
-                    </div>
-
-                    <div class="warning-card">
-                        <div class="warning-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                        </div>
-                        <div class="warning-content">
-                            <h4>Perfil Operacional</h4>
-                            <p>Foco na execução. Não visualiza valores financeiros e tem edição limitada em OS após aprovação.</p>
-                        </div>
-                    </div>
-
-                    <div class="permissions-grid">
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                </svg>
-                                Ordens de Serviço
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar todas as OS (sem valores)</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Criar novas OS (inicia em 'Orçamento')</li>
-                                <li class="partial"><span class="icon">&#9888;</span> Editar OS completa (apenas status 'Orçamento')</li>
-                                <li class="partial"><span class="icon">&#9888;</span> Editar observações (após 'Orçamento')</li>
-                                <li class="partial"><span class="icon">&#9888;</span> Deletar OS que criou (status 'Orçamento')</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Atribuir técnicos</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Executar serviços</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                Dados Financeiros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="denied"><span class="icon">&#10007;</span> Visualizar valores e preços</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Visualizar faturamento</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Acessar relatórios financeiros</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Gerar PDF de OS</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                    <circle cx="9" cy="7" r="4"></circle>
-                                </svg>
-                                Cadastros
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar clientes (para contato)</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Gerenciar clientes</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Visualizar produtos (valores ocultos)</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Visualizar serviços (valores ocultos)</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Visualizar dispositivos</li>
-                            </ul>
-                        </div>
-
-                        <div class="permission-category">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M9 11l3 3L22 4"></path>
-                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                </svg>
-                                Formulários/Procedimentos
-                            </h4>
-                            <ul class="permission-list">
-                                <li class="allowed"><span class="icon">&#10003;</span> Preencher formulários e checklists</li>
-                                <li class="allowed"><span class="icon">&#10003;</span> Anexar fotos às OS</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Gerenciar templates</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Reabrir procedimentos concluídos</li>
-                                <li class="denied"><span class="icon">&#10007;</span> Adicionar/remover procedimentos (após 'Orçamento')</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Matriz de Permissões -->
-                <section id="matriz" class="docs-section">
-                    <h2>Matriz de Permissões</h2>
-                    <p>Visão consolidada de todas as permissões por perfil:</p>
-
-                    <div class="table-wrapper">
-                        <h4>Ordens de Serviço</h4>
-                        <table class="permissions-table">
-                            <thead>
-                                <tr>
-                                    <th>Permissão</th>
-                                    <th>Admin</th>
-                                    <th>Gerente</th>
-                                    <th>Supervisor</th>
-                                    <th>Consultor</th>
-                                    <th>Técnico</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Ver todas as OS</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                </tr>
-                                <tr>
-                                    <td>Criar OS</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                </tr>
-                                <tr>
-                                    <td>Editar OS</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="partial">*</td>
-                                    <td class="partial">*</td>
-                                    <td class="partial">*</td>
-                                </tr>
-                                <tr>
-                                    <td>Atribuir técnicos</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Executar OS</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                </tr>
-                                <tr>
-                                    <td>Deletar OS</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="partial">*</td>
-                                    <td class="partial">*</td>
-                                    <td class="partial">*</td>
-                                    <td class="partial">*</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <p class="table-note">* Restrições baseadas em status e propriedade da OS. Veja detalhes nas seções de cada perfil.</p>
-                    </div>
-
-                    <div class="table-wrapper">
-                        <h4>Dados Financeiros</h4>
-                        <table class="permissions-table">
-                            <thead>
-                                <tr>
-                                    <th>Permissão</th>
-                                    <th>Admin</th>
-                                    <th>Gerente</th>
-                                    <th>Supervisor</th>
-                                    <th>Consultor</th>
-                                    <th>Técnico</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Ver preços</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Ver faturamento</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Relatórios financeiros</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Editar preços</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="table-wrapper">
-                        <h4>Cadastros</h4>
-                        <table class="permissions-table">
-                            <thead>
-                                <tr>
-                                    <th>Permissão</th>
-                                    <th>Admin</th>
-                                    <th>Gerente</th>
-                                    <th>Supervisor</th>
-                                    <th>Consultor</th>
-                                    <th>Técnico</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Gerenciar clientes</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Gerenciar produtos</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Gerenciar serviços</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Gerenciar dispositivos</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="table-wrapper">
-                        <h4>Formulários e Procedimentos</h4>
-                        <table class="permissions-table">
-                            <thead>
-                                <tr>
-                                    <th>Permissão</th>
-                                    <th>Admin</th>
-                                    <th>Gerente</th>
-                                    <th>Supervisor</th>
-                                    <th>Consultor</th>
-                                    <th>Técnico</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Preencher procedimentos</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                </tr>
-                                <tr>
-                                    <td>Gerenciar templates</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Reabrir concluídos</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- Regras por Status -->
-                <section id="status" class="docs-section">
-                    <h2>Regras Baseadas em Status da OS</h2>
-                    <p>As permissões de edição variam conforme o status atual da OS:</p>
-
-                    <div class="status-flow">
-                        <div class="status-item status-quote">
-                            <span class="status-dot"></span>
-                            <span class="status-name">Orçamento</span>
-                        </div>
-                        <div class="status-arrow">&#8594;</div>
-                        <div class="status-item status-approved">
-                            <span class="status-dot"></span>
-                            <span class="status-name">Aprovado</span>
-                        </div>
-                        <div class="status-arrow">&#8594;</div>
-                        <div class="status-item status-progress">
-                            <span class="status-dot"></span>
-                            <span class="status-name">Em Andamento</span>
-                        </div>
-                        <div class="status-arrow">&#8594;</div>
-                        <div class="status-item status-done">
-                            <span class="status-dot"></span>
-                            <span class="status-name">Concluído</span>
-                        </div>
-                    </div>
-
-                    <div class="status-details">
-                        <div class="status-card">
-                            <h4>
-                                <span class="status-indicator quote"></span>
-                                Status 'Orçamento'
-                            </h4>
-                            <p>Supervisor e Técnico têm permissões completas de edição:</p>
-                            <ul>
-                                <li>Adicionar/editar/remover serviços e produtos</li>
-                                <li>Adicionar/remover procedimentos</li>
-                                <li>Alterar cliente e dispositivo</li>
-                                <li>Alterar data de entrega</li>
-                                <li>Adicionar fotos</li>
-                            </ul>
-                            <p class="note"><strong>Nota:</strong> Valores financeiros permanecem ocultos para perfis sem acesso financeiro.</p>
-                        </div>
-
-                        <div class="status-card">
-                            <h4>
-                                <span class="status-indicator approved"></span>
-                                Após Aprovação
-                            </h4>
-                            <p>Restrições se aplicam para Supervisor e Técnico:</p>
-
-                            <div class="status-permissions">
-                                <div class="can-do">
-                                    <h5>&#10003; Pode</h5>
-                                    <ul>
-                                        <li>Editar descrição/observações de serviços</li>
-                                        <li>Preencher procedimentos existentes</li>
-                                        <li>Adicionar fotos</li>
-                                        <li>Supervisor: Adicionar/remover procedimentos</li>
-                                        <li>Supervisor: Atribuir/reatribuir técnicos</li>
-                                    </ul>
-                                </div>
-                                <div class="cannot-do">
-                                    <h5>&#10007; Não Pode</h5>
-                                    <ul>
-                                        <li>Adicionar novos serviços ou produtos</li>
-                                        <li>Remover serviços ou produtos</li>
-                                        <li>Editar valores ou quantidades</li>
-                                        <li>Alterar cliente ou dispositivo</li>
-                                        <li>Alterar data de entrega</li>
-                                        <li>Gerar PDF da OS</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="status-card">
-                            <h4>
-                                <span class="status-indicator done"></span>
-                                Status 'Concluído'
-                            </h4>
-                            <p>Apenas <strong>Admin</strong> e <strong>Gerente</strong> podem alterar o status de uma OS concluída.</p>
-                            <p>Consultor, Supervisor e Técnico não podem fazer alterações em OS concluídas, garantindo integridade do histórico.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- FAQ -->
-                <section id="faq" class="docs-section">
-                    <h2>Perguntas Frequentes</h2>
-
-                    <div class="faq-grid">
-                        <div class="faq-item">
-                            <h4>Um usuário pode ter perfis diferentes em empresas diferentes?</h4>
-                            <p>Sim. O sistema suporta multi-tenancy, onde um usuário pode ser Admin em uma empresa e Técnico em outra.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>O que acontece se um perfil não for reconhecido?</h4>
-                            <p>O sistema normaliza para "técnico" (menor privilégio) por segurança.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>Como adicionar um novo colaborador?</h4>
-                            <p>Apenas Administradores podem adicionar colaboradores através de <strong>Ajustes > Colaboradores > Adicionar</strong>.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>Os valores financeiros ficam realmente ocultos para técnicos?</h4>
-                            <p>Sim. A proteção é feita em múltiplas camadas: UI (widgets), lógica (filtros) e backend (security rules).</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>Um Técnico pode aprovar sua própria OS?</h4>
-                            <p>Sim. Se o Técnico (ou Supervisor) criar uma OS, ele pode avançar o status de "Orçamento" para "Aprovado" ou "Em Andamento" diretamente.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>Quem pode reabrir um procedimento concluído?</h4>
-                            <p>Apenas <strong>Admin</strong>, <strong>Gerente</strong> e <strong>Supervisor</strong>. Consultor e Técnico não têm essa permissão.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>Admin pode reverter o status de uma OS concluída?</h4>
-                            <p>Sim. Admin e Gerente são os únicos perfis que podem alterar o status de uma OS concluída, permitindo reabrir ou corrigir quando necessário.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>Por que Supervisor e Técnico têm restrições similares?</h4>
-                            <p>Ambos são perfis operacionais sem acesso financeiro. A diferença é que Supervisor pode gerenciar dispositivos, reabrir formulários e adicionar procedimentos em OS ativas.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Navigation -->
-                <div class="docs-navigation">
-                    <a href="index.html" class="nav-link prev">
-                        <span class="nav-direction">&#8592; Voltar</span>
-                        <span class="nav-title">Documentação</span>
-                    </a>
-                    <a href="../support.html" class="nav-link next">
-                        <span class="nav-direction">Próximo &#8594;</span>
-                        <span class="nav-title">Suporte</span>
-                    </a>
-                </div>
-            </main>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="../index.html" class="nav-logo">
-                        <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
-                        <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
-                    </a>
-                    <p>Sistema completo para gestão de ordens de serviço. Simplifique seu negócio.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Produto</h4>
-                    <a href="../index.html#features">Funcionalidades</a>
-                    <a href="../index.html#pricing">Planos</a>
-                    <a href="../index.html#download">Download</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Documentação</h4>
-                    <a href="perfis.html">Perfis de Usuários</a>
-                    <a href="../faq.html">FAQ</a>
-                    <a href="../support.html">Suporte</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Legal</h4>
-                    <a href="../privacy.html">Privacidade</a>
-                    <a href="../terms.html">Termos de Uso</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 PráticOS. Todos os direitos reservados.</p>
-                <p>Desenvolvido por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu">
-        <div class="mobile-menu-content">
-            <a href="../index.html">Início</a>
-            <a href="../index.html#features">Funcionalidades</a>
-            <a href="index.html">Documentação</a>
+<!-- Navigation -->
+<nav class="navbar scrolled">
+    <div class="nav-container">
+        <a href="../../index.html" class="nav-logo">
+            <img src="../assets/images/logo.png" alt="PraticOS" class="logo-img">
+            <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+        </a>
+        <div class="nav-links">
+            
+            <a href="#features">Funcionalidades</a>
+            
+            <a href="#screenshots">Screenshots</a>
+            
+            <a href="#pricing">Planos</a>
+            
             <a href="../faq.html">FAQ</a>
-            <a href="../support.html">Suporte</a>
-            <div class="mobile-lang">
+            
+            <a href="#contact">Contato</a>
+            
+        </div>
+        <div class="nav-actions">
+            <div class="lang-switch">
+                
                 <a href="perfis.html" class="active">PT</a>
+                
                 <a href="perfis-en.html">EN</a>
+                
                 <a href="perfis-es.html">ES</a>
+                
             </div>
-            <a href="../index.html#download" class="btn btn-primary">Baixar App</a>
+            <a href="#download" class="btn btn-primary">Baixar App</a>
+        </div>
+        <button class="nav-toggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</nav>
+
+
+    
+<!-- Page Header -->
+<section class="docs-hero compact">
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+    </div>
+    <div class="container">
+        <div class="docs-breadcrumb">
+            <a href="index.html">Documentacao</a>
+            <span>/</span>
+            <span>Perfis de Usuarios</span>
+        </div>
+        <div class="docs-hero-content">
+            <h1>Perfis de <span class="gradient-text">Usuarios</span></h1>
+            <p class="hero-subtitle">Conheca os diferentes perfis disponiveis no PraticOS e suas permissoes especificas para cada funcao na sua empresa.</p>
         </div>
     </div>
+</section>
+
+<!-- Docs Content -->
+<section class="docs-content">
+    <div class="container docs-container">
+        <!-- Sidebar Navigation -->
+        <aside class="docs-sidebar">
+            <div class="sidebar-sticky">
+                <h4>Nesta pagina</h4>
+                <nav class="docs-nav">
+                    
+                    <a href="#visao-geral" class="active">Visao Geral</a>
+                    
+                    <a href="#perfis">Perfis Disponiveis</a>
+                    
+                    <a href="#admin">Administrador</a>
+                    
+                    <a href="#gerente">Gerente</a>
+                    
+                    <a href="#supervisor">Supervisor</a>
+                    
+                    <a href="#consultor">Consultor</a>
+                    
+                    <a href="#tecnico">Tecnico</a>
+                    
+                    <a href="#matriz">Matriz de Permissoes</a>
+                    
+                    <a href="#status">Regras por Status</a>
+                    
+                    <a href="#faq">Perguntas Frequentes</a>
+                    
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="docs-main">
+            
+            
+                
+                
+                
+                
+                    
+                        
+                        
+
+
+<section id="visao-geral" class="docs-section">
+    
+    <h2>Visao Geral do Sistema RBAC</h2>
+    
+
+    <p>O PraticOS utiliza um sistema de controle de acesso baseado em perfis (<strong>RBAC - Role-Based Access Control</strong>) para gerenciar as permissoes dos colaboradores de cada empresa.</p>
+
+    
+    
+    
+    
+    
+
+<div class="info-card">
+    <div class="info-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+    </div>
+    <div class="info-content">
+        <h4>Multi-Tenancy</h4>
+        <p>Um usuario pode ter perfis diferentes em empresas diferentes. Por exemplo, ser Administrador em uma empresa e Tecnico em outra.</p>
+    </div>
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="perfis" class="docs-section">
+    
+    <h2>Perfis Disponiveis</h2>
+    
+
+    <p>O sistema conta com 5 perfis distintos, cada um projetado para atender diferentes funcoes dentro da organizacao:</p>
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="profiles-grid">
+    
+    <a href="#admin" class="profile-card profile-admin">
+        <div class="profile-icon">
+            <span class="profile-emoji">&#128104;&#8205;&#128188;</span>
+        </div>
+        <h3>Administrador</h3>
+        <p>Acesso total. Configura a empresa, gerencia usuarios e acessa todos os dados.</p>
+        <span class="profile-tag">Gestao Completa</span>
+    </a>
+    
+    <a href="#gerente" class="profile-card profile-manager">
+        <div class="profile-icon">
+            <span class="profile-emoji">&#128176;</span>
+        </div>
+        <h3>Gerente</h3>
+        <p>Foco em resultados. Visualiza faturamento e custos, mas nao executa servicos.</p>
+        <span class="profile-tag">Financeiro</span>
+    </a>
+    
+    <a href="#supervisor" class="profile-card profile-supervisor">
+        <div class="profile-icon">
+            <span class="profile-emoji">&#129489;&#8205;&#128295;</span>
+        </div>
+        <h3>Supervisor</h3>
+        <p>Coordena equipes e equipamentos. Nao visualiza valores financeiros.</p>
+        <span class="profile-tag">Operacional</span>
+    </a>
+    
+    <a href="#consultor" class="profile-card profile-consultant">
+        <div class="profile-icon">
+            <span class="profile-emoji">&#129489;&#8205;&#128188;</span>
+        </div>
+        <h3>Consultor</h3>
+        <p>Cria orcamentos. Ve precos, mas acessa apenas suas proprias Ordens de Servico.</p>
+        <span class="profile-tag">Comercial</span>
+    </a>
+    
+    <a href="#tecnico" class="profile-card profile-technician">
+        <div class="profile-icon">
+            <span class="profile-emoji">&#128119;</span>
+        </div>
+        <h3>Tecnico</h3>
+        <p>Executa servicos. Nao ve precos e tem edicao limitada apos aprovacao da OS.</p>
+        <span class="profile-tag">Execucao</span>
+    </a>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="admin" class="docs-section">
+    
+    <div class="section-header-inline">
+        <span class="profile-badge admin">&#128104;&#8205;&#128188;</span>
+        <div>
+            <h2>Administrador</h2>
+            <p class="section-subtitle">Acesso total. Configura a empresa, gerencia usuarios e acessa todos os dados.</p>
+        </div>
+    </div>
+    
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="permissions-grid">
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            Ordens de Servico
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar todas as OS da empresa</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Criar novas OS</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Editar qualquer OS</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Atribuir/reatribuir tecnicos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Executar servicos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Deletar OS</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            Dados Financeiros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar valores e precos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar faturamento</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Acessar relatorios financeiros</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Editar valores e precos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            Cadastros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar clientes</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar produtos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar servicos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar dispositivos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            Administracao
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar usuarios e colaboradores</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar perfis e permissoes</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Configurar dados da empresa</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Configurar parametros globais</li>
+            
+        </ul>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="gerente" class="docs-section">
+    
+    <div class="section-header-inline">
+        <span class="profile-badge manager">&#128176;</span>
+        <div>
+            <h2>Gerente (Financeiro)</h2>
+            <p class="section-subtitle">Foco em resultados. Visualiza faturamento e custos, mas nao executa servicos.</p>
+        </div>
+    </div>
+    
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="permissions-grid">
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            Ordens de Servico
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar todas as OS</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Criar novas OS</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Editar OS (ajustes fiscais/financeiros)</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Atribuir tecnicos</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Executar servicos</li>
+            
+            <li class="partial"><span class="icon">&#9888;</span> Deletar OS (apenas status &#39;Orcamento&#39;)</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            Dados Financeiros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar valores e precos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar faturamento</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Acessar relatorios financeiros</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Editar valores e precos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            Cadastros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar clientes</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar produtos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar servicos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar dispositivos</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Gerenciar outros cadastros</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Relatorios
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Relatorios operacionais</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Dashboard geral</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Reabrir procedimentos concluidos</li>
+            
+        </ul>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="supervisor" class="docs-section">
+    
+    <div class="section-header-inline">
+        <span class="profile-badge supervisor">&#129489;&#8205;&#128295;</span>
+        <div>
+            <h2>Supervisor</h2>
+            <p class="section-subtitle">Coordena equipes e equipamentos. Nao visualiza valores financeiros.</p>
+        </div>
+    </div>
+    
+
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+
+<div class="warning-card">
+    <div class="warning-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+    </div>
+    <div class="warning-content">
+        <h4>Sem Acesso Financeiro</h4>
+        <p>Este perfil nao visualiza valores, precos, faturamento ou relatorios financeiros. Ideal para colaboradores que focam na operacao.</p>
+    </div>
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="permissions-grid">
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            Ordens de Servico
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar todas as OS (sem valores)</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Criar novas OS</li>
+            
+            <li class="partial"><span class="icon">&#9888;</span> Editar OS completa (apenas status &#39;Orcamento&#39;)</li>
+            
+            <li class="partial"><span class="icon">&#9888;</span> Editar observacoes (apos &#39;Orcamento&#39;)</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Atribuir/reatribuir tecnicos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Executar servicos</li>
+            
+            <li class="partial"><span class="icon">&#9888;</span> Deletar OS (apenas status &#39;Orcamento&#39;)</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            Dados Financeiros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="denied"><span class="icon">&#10007;</span> Visualizar valores e precos</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Visualizar faturamento</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Acessar relatorios financeiros</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Gerar PDF de OS</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Filtros de pagamento ocultos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            Cadastros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar clientes</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar produtos (sem ver precos)</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar servicos (sem ver precos)</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar dispositivos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Formularios/Procedimentos
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Preencher formularios</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar templates de formularios</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Reabrir procedimentos concluidos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Adicionar/remover procedimentos em OS ativa</li>
+            
+        </ul>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="consultor" class="docs-section">
+    
+    <div class="section-header-inline">
+        <span class="profile-badge consultant">&#129489;&#8205;&#128188;</span>
+        <div>
+            <h2>Consultor (Vendedor)</h2>
+            <p class="section-subtitle">Cria orcamentos. Ve precos, mas acessa apenas suas proprias Ordens de Servico.</p>
+        </div>
+    </div>
+    
+
+    
+
+    
+    
+    
+    
+    
+
+<div class="info-card">
+    <div class="info-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+    </div>
+    <div class="info-content">
+        <h4>Visibilidade Limitada</h4>
+        <p>O Consultor so visualiza as OS que ele mesmo criou. Em caso de ferias ou ausencia, o Administrador pode reatribuir OS para outro consultor.</p>
+    </div>
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="permissions-grid">
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            Ordens de Servico
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="partial"><span class="icon">&#9888;</span> Visualizar apenas OS que criou</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Criar novas OS</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Editar suas proprias OS</li>
+            
+            <li class="partial"><span class="icon">&#9888;</span> Deletar OS que criou (status &#39;Orcamento&#39;)</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Atribuir tecnicos</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Executar servicos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            Dados Financeiros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar valores e precos (para orcamentos)</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Visualizar faturamento geral</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Acessar relatorios financeiros</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Editar valores e precos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            Cadastros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Gerenciar clientes</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar produtos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar servicos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar dispositivos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Formularios/Procedimentos
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Preencher formularios</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Gerenciar templates</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Reabrir procedimentos concluidos</li>
+            
+        </ul>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="tecnico" class="docs-section">
+    
+    <div class="section-header-inline">
+        <span class="profile-badge technician">&#128119;</span>
+        <div>
+            <h2>Tecnico</h2>
+            <p class="section-subtitle">Executa servicos. Nao ve precos e tem edicao limitada apos aprovacao da OS.</p>
+        </div>
+    </div>
+    
+
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+
+<div class="warning-card">
+    <div class="warning-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+    </div>
+    <div class="warning-content">
+        <h4>Perfil Operacional</h4>
+        <p>Foco na execucao. Nao visualiza valores financeiros e tem edicao limitada em OS apos aprovacao.</p>
+    </div>
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="permissions-grid">
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            Ordens de Servico
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar todas as OS (sem valores)</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Criar novas OS (inicia em &#39;Orcamento&#39;)</li>
+            
+            <li class="partial"><span class="icon">&#9888;</span> Editar OS completa (apenas status &#39;Orcamento&#39;)</li>
+            
+            <li class="partial"><span class="icon">&#9888;</span> Editar observacoes (apos &#39;Orcamento&#39;)</li>
+            
+            <li class="partial"><span class="icon">&#9888;</span> Deletar OS que criou (status &#39;Orcamento&#39;)</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Atribuir tecnicos</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Executar servicos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            Dados Financeiros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="denied"><span class="icon">&#10007;</span> Visualizar valores e precos</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Visualizar faturamento</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Acessar relatorios financeiros</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Gerar PDF de OS</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            Cadastros
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar clientes (para contato)</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Gerenciar clientes</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Visualizar produtos (valores ocultos)</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Visualizar servicos (valores ocultos)</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Visualizar dispositivos</li>
+            
+        </ul>
+    </div>
+    
+    <div class="permission-category">
+        <h4>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Formularios/Procedimentos
+        </h4>
+        <ul class="permission-list">
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Preencher formularios e checklists</li>
+            
+            <li class="allowed"><span class="icon">&#10003;</span> Anexar fotos as OS</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Gerenciar templates</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Reabrir procedimentos concluidos</li>
+            
+            <li class="denied"><span class="icon">&#10007;</span> Adicionar/remover procedimentos (apos &#39;Orcamento&#39;)</li>
+            
+        </ul>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="matriz" class="docs-section">
+    
+    <h2>Matriz de Permissoes</h2>
+    
+
+    <p>Visao consolidada de todas as permissoes por perfil:</p>
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+
+<div class="table-wrapper">
+    <h4>Ordens de Servico</h4>
+    <table class="permissions-table">
+        <thead>
+            <tr>
+                
+                <th>Permissao</th>
+                
+                <th>Admin</th>
+                
+                <th>Gerente</th>
+                
+                <th>Supervisor</th>
+                
+                <th>Consultor</th>
+                
+                <th>Tecnico</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>Ver todas as OS</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Criar OS</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Editar OS</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="partial">*</td>
+                
+                <td class="partial">*</td>
+                
+                <td class="partial">*</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Atribuir tecnicos</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Executar OS</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Deletar OS</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="partial">*</td>
+                
+                <td class="partial">*</td>
+                
+                <td class="partial">*</td>
+                
+                <td class="partial">*</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+    <p class="table-note">* Restricoes baseadas em status e propriedade da OS. Veja detalhes nas secoes de cada perfil.</p>
+</div>
+
+    
+    
+    
+    
+    
+    
+
+<div class="table-wrapper">
+    <h4>Dados Financeiros</h4>
+    <table class="permissions-table">
+        <thead>
+            <tr>
+                
+                <th>Permissao</th>
+                
+                <th>Admin</th>
+                
+                <th>Gerente</th>
+                
+                <th>Supervisor</th>
+                
+                <th>Consultor</th>
+                
+                <th>Tecnico</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>Ver precos</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Ver faturamento</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Relatorios financeiros</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Editar precos</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+    
+</div>
+
+    
+    
+    
+    
+    
+    
+
+<div class="table-wrapper">
+    <h4>Cadastros</h4>
+    <table class="permissions-table">
+        <thead>
+            <tr>
+                
+                <th>Permissao</th>
+                
+                <th>Admin</th>
+                
+                <th>Gerente</th>
+                
+                <th>Supervisor</th>
+                
+                <th>Consultor</th>
+                
+                <th>Tecnico</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>Gerenciar clientes</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Gerenciar produtos</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Gerenciar servicos</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Gerenciar dispositivos</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+    
+</div>
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="status" class="docs-section">
+    
+    <h2>Regras Baseadas em Status da OS</h2>
+    
+
+    <p>As permissoes de edicao variam conforme o status atual da OS:</p>
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="status-flow">
+    
+    
+    <div class="status-item status-quote">
+        <span class="status-dot"></span>
+        <span class="status-name">Orcamento</span>
+    </div>
+    
+    
+    <div class="status-arrow">&#8594;</div>
+    
+    <div class="status-item status-approved">
+        <span class="status-dot"></span>
+        <span class="status-name">Aprovado</span>
+    </div>
+    
+    
+    <div class="status-arrow">&#8594;</div>
+    
+    <div class="status-item status-progress">
+        <span class="status-dot"></span>
+        <span class="status-name">Em Andamento</span>
+    </div>
+    
+    
+    <div class="status-arrow">&#8594;</div>
+    
+    <div class="status-item status-done">
+        <span class="status-dot"></span>
+        <span class="status-name">Concluido</span>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+    
+    
+
+<div class="status-details">
+    
+    <div class="status-card">
+        <h4>
+            <span class="status-indicator quote"></span>
+            Status &#39;Orcamento&#39;
+        </h4>
+        <p>Supervisor e Tecnico tem permissoes completas de edicao:</p>
+
+        
+        <ul>
+            
+            <li>Adicionar/editar/remover servicos e produtos</li>
+            
+            <li>Adicionar/remover procedimentos</li>
+            
+            <li>Alterar cliente e dispositivo</li>
+            
+            <li>Alterar data de entrega</li>
+            
+            <li>Adicionar fotos</li>
+            
+        </ul>
+        
+
+        <p class="note"><strong>Nota:</strong> Valores financeiros permanecem ocultos para perfis sem acesso financeiro.</p>
+
+        
+    </div>
+    
+    <div class="status-card">
+        <h4>
+            <span class="status-indicator approved"></span>
+            Apos Aprovacao
+        </h4>
+        <p>Restricoes se aplicam para Supervisor e Tecnico:</p>
+
+        
+
+        
+
+        
+        <div class="status-permissions">
+            
+            <div class="can-do">
+                <h5>&#10003; Pode</h5>
+                <ul>
+                    
+                    <li>Editar descricao/observacoes de servicos</li>
+                    
+                    <li>Preencher procedimentos existentes</li>
+                    
+                    <li>Adicionar fotos</li>
+                    
+                    <li>Supervisor: Adicionar/remover procedimentos</li>
+                    
+                    <li>Supervisor: Atribuir/reatribuir tecnicos</li>
+                    
+                </ul>
+            </div>
+            
+            
+            <div class="cannot-do">
+                <h5>&#10007; Nao Pode</h5>
+                <ul>
+                    
+                    <li>Adicionar novos servicos ou produtos</li>
+                    
+                    <li>Remover servicos ou produtos</li>
+                    
+                    <li>Editar valores ou quantidades</li>
+                    
+                    <li>Alterar cliente ou dispositivo</li>
+                    
+                    <li>Alterar data de entrega</li>
+                    
+                    <li>Gerar PDF da OS</li>
+                    
+                </ul>
+            </div>
+            
+        </div>
+        
+    </div>
+    
+    <div class="status-card">
+        <h4>
+            <span class="status-indicator done"></span>
+            Status &#39;Concluido&#39;
+        </h4>
+        <p>Apenas <strong>Admin</strong> e <strong>Gerente</strong> podem alterar o status de uma OS concluida.</p>
+
+        
+
+        
+
+        
+    </div>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="faq" class="docs-section">
+    
+    <h2>Perguntas Frequentes</h2>
+    
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="faq-grid">
+    
+    <div class="faq-item">
+        <h4>Um usuario pode ter perfis diferentes em empresas diferentes?</h4>
+        <p>Sim. O sistema suporta multi-tenancy, onde um usuario pode ser Admin em uma empresa e Tecnico em outra.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>O que acontece se um perfil nao for reconhecido?</h4>
+        <p>O sistema normaliza para "tecnico" (menor privilegio) por seguranca.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>Como adicionar um novo colaborador?</h4>
+        <p>Apenas Administradores podem adicionar colaboradores atraves de <strong>Ajustes > Colaboradores > Adicionar</strong>.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>Os valores financeiros ficam realmente ocultos para tecnicos?</h4>
+        <p>Sim. A protecao e feita em multiplas camadas: UI (widgets), logica (filtros) e backend (security rules).</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>Um Tecnico pode aprovar sua propria OS?</h4>
+        <p>Sim. Se o Tecnico (ou Supervisor) criar uma OS, ele pode avancar o status de "Orcamento" para "Aprovado" ou "Em Andamento" diretamente.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>Quem pode reabrir um procedimento concluido?</h4>
+        <p>Apenas <strong>Admin</strong>, <strong>Gerente</strong> e <strong>Supervisor</strong>. Consultor e Tecnico nao tem essa permissao.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>Admin pode reverter o status de uma OS concluida?</h4>
+        <p>Sim. Admin e Gerente sao os unicos perfis que podem alterar o status de uma OS concluida, permitindo reabrir ou corrigir quando necessario.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>Por que Supervisor e Tecnico tem restricoes similares?</h4>
+        <p>Ambos sao perfis operacionais sem acesso financeiro. A diferenca e que Supervisor pode gerenciar dispositivos, reabrir formularios e adicionar procedimentos em OS ativas.</p>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+</section>
+
+                    
+                
+            
+
+            <!-- Navigation -->
+            <div class="docs-navigation">
+                
+                <a href="index.html" class="nav-link prev">
+                    <span class="nav-direction">&#8592; Voltar</span>
+                    <span class="nav-title">Documentacao</span>
+                </a>
+                
+                
+                <a href="financeiro.html" class="nav-link next">
+                    <span class="nav-direction">Proximo &#8594;</span>
+                    <span class="nav-title">Sistema Financeiro</span>
+                </a>
+                
+            </div>
+        </main>
+    </div>
+</section>
+
+<script>
+    // Sidebar navigation active state
+    const sections = document.querySelectorAll('.docs-section');
+    const navLinks = document.querySelectorAll('.docs-nav a');
+
+    const observerOptions = {
+        rootMargin: '-100px 0px -70% 0px',
+        threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.docs-nav a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                const offset = 100;
+                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+</script>
+
+
+    
+    
+
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="../../index.html" class="nav-logo">
+                    <img src="../assets/images/logo.png" alt="PraticOS" class="logo-img">
+                    <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                </a>
+                <p>Sistema completo para gestão de ordens de serviço. Simplifique seu negócio.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Produto</h4>
+                
+                <a href="#features">Funcionalidades</a>
+                
+                <a href="#pricing">Planos</a>
+                
+                <a href="#download">Download</a>
+                
+            </div>
+            <div class="footer-links">
+                <h4>Suporte</h4>
+                
+                <a href="../docs/">Documentação</a>
+                
+                <a href="../support.html">Central de Suporte</a>
+                
+                <a href="../faq.html">FAQ</a>
+                
+                <a href="#contact">Contato</a>
+                
+                <a href="../privacy.html">Privacidade</a>
+                
+                <a href="../terms.html">Termos de Uso</a>
+                
+            </div>
+            <div class="footer-links">
+                <h4>Empresa</h4>
+                <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 PraticOS. Todos os direitos reservados.</p>
+            <p>Desenvolvido com ❤️ por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+        </div>
+    </div>
+</footer>
+
+    
+    
+
+
+<!-- Mobile Menu -->
+<div class="mobile-menu">
+    <div class="mobile-menu-content">
+        
+        <a href="#features">Funcionalidades</a>
+        
+        <a href="#screenshots">Screenshots</a>
+        
+        <a href="#pricing">Planos</a>
+        
+        <a href="../faq.html">FAQ</a>
+        
+        <a href="../support.html">Suporte</a>
+        
+        <a href="#contact">Contato</a>
+        
+        <div class="mobile-lang">
+            
+            <a href="perfis.html" class="active">PT</a>
+            
+            <a href="perfis-en.html">EN</a>
+            
+            <a href="perfis-es.html">ES</a>
+            
+        </div>
+        <a href="#download" class="btn btn-primary">Baixar App</a>
+    </div>
+</div>
 
     <script>
-        // Mobile menu toggle
-        const navToggle = document.querySelector('.nav-toggle');
-        const mobileMenu = document.querySelector('.mobile-menu');
-        const body = document.body;
+    // Mobile menu toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const body = document.body;
 
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            body.classList.toggle('menu-open');
+    navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+        body.classList.toggle('menu-open');
+    });
+
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('menu-open');
         });
+    });
 
-        // Close mobile menu on link click
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navToggle.classList.remove('active');
-                mobileMenu.classList.remove('active');
-                body.classList.remove('menu-open');
-            });
+    // Navbar scroll effect
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         });
+    });
 
-        // Sidebar navigation active state
-        const sections = document.querySelectorAll('.docs-section');
-        const navLinks = document.querySelectorAll('.docs-nav a');
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
 
-        const observerOptions = {
-            rootMargin: '-100px 0px -70% 0px',
-            threshold: 0
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    navLinks.forEach(link => link.classList.remove('active'));
-                    const activeLink = document.querySelector(`.docs-nav a[href="#${entry.target.id}"]`);
-                    if (activeLink) activeLink.classList.add('active');
-                }
-            });
-        }, observerOptions);
-
-        sections.forEach(section => observer.observe(section));
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    const offset = 100;
-                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            });
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
         });
-    </script>
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
+        observer.observe(el);
+    });
+</script>
+
 </body>
 
 </html>

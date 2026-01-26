@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{{ lang | default('pt-BR') }}">
+
+<head>
+    {% include "partials/head.njk" %}
+</head>
+
+<body>
+    {% include "partials/navbar.njk" %}
+
+    {{ content | safe }}
+
+    {% if simpleFooter %}
+    {% include "partials/footer-simple.njk" %}
+    {% else %}
+    {% include "partials/footer.njk" %}
+    {% endif %}
+    {% include "partials/mobile-menu.njk" %}
+    {% include "partials/scripts.njk" %}
+</body>
+
+</html>

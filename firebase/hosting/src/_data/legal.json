@@ -1,0 +1,419 @@
+{
+  "privacy": {
+    "pt": {
+      "title": "Política de",
+      "titleHighlight": "Privacidade",
+      "subtitle": "Saiba como coletamos, usamos e protegemos seus dados",
+      "lastUpdated": "Última atualização: Janeiro de 2025",
+      "sections": [
+        {
+          "title": "Introdução",
+          "paragraphs": [
+            "O PráticOS valoriza a sua privacidade. Esta política descreve como coletamos, usamos e protegemos suas informações pessoais quando você utiliza nosso aplicativo.",
+            "Ao utilizar o PráticOS, você concorda com as práticas descritas nesta política."
+          ]
+        },
+        {
+          "title": "Dados que Coletamos",
+          "paragraphs": ["Coletamos apenas as informações necessárias para o funcionamento do aplicativo:"],
+          "list": [
+            "<strong>Dados de cadastro:</strong> Nome, email e foto de perfil (quando usando login social)",
+            "<strong>Dados de uso:</strong> Informações sobre ordens de serviço, clientes e transações que você cria no app",
+            "<strong>Dados técnicos:</strong> Tipo de dispositivo, versão do sistema operacional e logs de erro para melhorar o app"
+          ]
+        },
+        {
+          "title": "Como Usamos seus Dados",
+          "paragraphs": ["Utilizamos suas informações para:"],
+          "list": [
+            "Autenticar e identificar você no aplicativo",
+            "Sincronizar seus dados entre dispositivos",
+            "Fornecer suporte técnico quando solicitado",
+            "Enviar notificações importantes sobre o serviço",
+            "Melhorar e desenvolver novas funcionalidades"
+          ]
+        },
+        {
+          "title": "Compartilhamento de Dados",
+          "paragraphs": [
+            "Não vendemos, alugamos ou compartilhamos suas informações pessoais com terceiros para fins de marketing.",
+            "Podemos compartilhar dados apenas nas seguintes situações:"
+          ],
+          "list": [
+            "Com provedores de serviço (Firebase/Google) para processamento e armazenamento",
+            "Quando exigido por lei ou ordem judicial",
+            "Para proteger nossos direitos legais"
+          ]
+        },
+        {
+          "title": "Segurança dos Dados",
+          "paragraphs": ["Implementamos medidas de segurança robustas para proteger suas informações:"],
+          "list": [
+            "Criptografia de dados em trânsito (HTTPS/TLS)",
+            "Criptografia de dados em repouso",
+            "Autenticação segura via Firebase Authentication",
+            "Regras de segurança no banco de dados",
+            "Backups regulares e redundância"
+          ]
+        },
+        {
+          "title": "Seus Direitos",
+          "paragraphs": ["De acordo com a Lei Geral de Proteção de Dados (LGPD), você tem direito a:"],
+          "list": [
+            "Acessar seus dados pessoais",
+            "Corrigir dados incompletos ou incorretos",
+            "Solicitar a exclusão de seus dados",
+            "Revogar o consentimento a qualquer momento",
+            "Solicitar a portabilidade dos dados"
+          ]
+        },
+        {
+          "title": "Retenção de Dados",
+          "paragraphs": [
+            "Mantemos seus dados enquanto sua conta estiver ativa. Você pode solicitar a exclusão da sua conta e dados a qualquer momento.",
+            "Após a exclusão, seus dados serão removidos em até 30 dias, exceto quando houver obrigação legal de retenção."
+          ]
+        },
+        {
+          "title": "Alterações nesta Política",
+          "paragraphs": [
+            "Podemos atualizar esta política periodicamente. Notificaremos sobre mudanças significativas através do aplicativo ou por email.",
+            "Recomendamos revisar esta página periodicamente."
+          ]
+        },
+        {
+          "title": "Contato",
+          "paragraphs": [
+            "Para dúvidas, sugestões ou solicitações relacionadas à privacidade, entre em contato:",
+            "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>",
+            "<strong>Empresa:</strong> Rafsoft"
+          ]
+        }
+      ]
+    },
+    "en": {
+      "title": "Privacy",
+      "titleHighlight": "Policy",
+      "subtitle": "Learn how we collect, use, and protect your data",
+      "lastUpdated": "Last updated: January 2025",
+      "sections": [
+        {
+          "title": "Introduction",
+          "paragraphs": [
+            "PraticOS values your privacy. This policy describes how we collect, use, and protect your personal information when you use our app.",
+            "By using PraticOS, you agree to the practices described in this policy."
+          ]
+        },
+        {
+          "title": "Data We Collect",
+          "paragraphs": ["We only collect information necessary for the app to function:"],
+          "list": [
+            "<strong>Registration data:</strong> Name, email, and profile picture (when using social login)",
+            "<strong>Usage data:</strong> Information about service orders, customers, and transactions you create in the app",
+            "<strong>Technical data:</strong> Device type, OS version, and error logs to improve the app"
+          ]
+        },
+        {
+          "title": "How We Use Your Data",
+          "paragraphs": ["We use your information to:"],
+          "list": [
+            "Authenticate and identify you in the app",
+            "Sync your data across devices",
+            "Provide technical support when requested",
+            "Send important notifications about the service",
+            "Improve and develop new features"
+          ]
+        },
+        {
+          "title": "Data Sharing",
+          "paragraphs": [
+            "We do not sell, rent, or share your personal information with third parties for marketing purposes.",
+            "We may share data only in the following situations:"
+          ],
+          "list": [
+            "With service providers (Firebase/Google) for processing and storage",
+            "When required by law or court order",
+            "To protect our legal rights"
+          ]
+        },
+        {
+          "title": "Data Security",
+          "paragraphs": ["We implement robust security measures to protect your information:"],
+          "list": [
+            "Data encryption in transit (HTTPS/TLS)",
+            "Data encryption at rest",
+            "Secure authentication via Firebase Authentication",
+            "Database security rules",
+            "Regular backups and redundancy"
+          ]
+        },
+        {
+          "title": "Contact",
+          "paragraphs": [
+            "For questions, suggestions, or privacy-related requests, contact us:",
+            "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>"
+          ]
+        }
+      ]
+    },
+    "es": {
+      "title": "Política de",
+      "titleHighlight": "Privacidad",
+      "subtitle": "Conozca cómo recopilamos, usamos y protegemos sus datos",
+      "lastUpdated": "Última actualización: Enero 2025",
+      "sections": [
+        {
+          "title": "Introducción",
+          "paragraphs": [
+            "PraticOS valora su privacidad. Esta política describe cómo recopilamos, usamos y protegemos su información personal cuando utiliza nuestra aplicación.",
+            "Al utilizar PraticOS, usted acepta las prácticas descritas en esta política."
+          ]
+        },
+        {
+          "title": "Datos que Recopilamos",
+          "paragraphs": ["Solo recopilamos la información necesaria para el funcionamiento de la aplicación:"],
+          "list": [
+            "<strong>Datos de registro:</strong> Nombre, correo electrónico y foto de perfil (al usar inicio de sesión social)",
+            "<strong>Datos de uso:</strong> Información sobre órdenes de servicio, clientes y transacciones que crea en la app",
+            "<strong>Datos técnicos:</strong> Tipo de dispositivo, versión del SO y registros de errores para mejorar la app"
+          ]
+        },
+        {
+          "title": "Cómo Usamos sus Datos",
+          "paragraphs": ["Utilizamos su información para:"],
+          "list": [
+            "Autenticar e identificarlo en la aplicación",
+            "Sincronizar sus datos entre dispositivos",
+            "Proporcionar soporte técnico cuando se solicite",
+            "Enviar notificaciones importantes sobre el servicio",
+            "Mejorar y desarrollar nuevas funcionalidades"
+          ]
+        },
+        {
+          "title": "Compartir Datos",
+          "paragraphs": [
+            "No vendemos, alquilamos ni compartimos su información personal con terceros para fines de marketing.",
+            "Podemos compartir datos solo en las siguientes situaciones:"
+          ],
+          "list": [
+            "Con proveedores de servicios (Firebase/Google) para procesamiento y almacenamiento",
+            "Cuando lo exija la ley u orden judicial",
+            "Para proteger nuestros derechos legales"
+          ]
+        },
+        {
+          "title": "Seguridad de los Datos",
+          "paragraphs": ["Implementamos medidas de seguridad robustas para proteger su información:"],
+          "list": [
+            "Cifrado de datos en tránsito (HTTPS/TLS)",
+            "Cifrado de datos en reposo",
+            "Autenticación segura via Firebase Authentication",
+            "Reglas de seguridad en la base de datos",
+            "Copias de seguridad regulares y redundancia"
+          ]
+        },
+        {
+          "title": "Contacto",
+          "paragraphs": [
+            "Para preguntas, sugerencias o solicitudes relacionadas con la privacidad, contáctenos:",
+            "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>"
+          ]
+        }
+      ]
+    }
+  },
+  "terms": {
+    "pt": {
+      "title": "Termos de",
+      "titleHighlight": "Uso",
+      "subtitle": "Condições para utilização do PráticOS",
+      "lastUpdated": "Última atualização: Janeiro de 2025",
+      "sections": [
+        {
+          "title": "1. Termos",
+          "paragraphs": [
+            "Ao acessar o aplicativo PráticOS, você concorda em cumprir estes termos de serviço, todas as leis e regulamentos aplicáveis, e concorda que é responsável pelo cumprimento de todas as leis locais aplicáveis. Se você não concordar com algum desses termos, está proibido de usar ou acessar este aplicativo."
+          ]
+        },
+        {
+          "title": "2. Uso de Licença",
+          "paragraphs": [
+            "É concedida permissão para usar o aplicativo PráticOS para fins pessoais e comerciais, de acordo com o plano contratado. Esta é a concessão de uma licença, não uma transferência de título e, sob esta licença, você não pode:"
+          ],
+          "list": [
+            "Modificar ou copiar o software",
+            "Tentar descompilar ou fazer engenharia reversa de qualquer software contido no PráticOS",
+            "Remover quaisquer direitos autorais ou outras notações de propriedade",
+            "Transferir a licença para outra pessoa ou conta"
+          ]
+        },
+        {
+          "title": "3. Isenção de Responsabilidade",
+          "paragraphs": [
+            "Os serviços do PráticOS são fornecidos \"como estão\". O PráticOS não oferece garantias, expressas ou implícitas, e, por este meio, isenta e nega todas as outras garantias, incluindo, sem limitação, garantias implícitas de comercialização, adequação a um fim específico ou não violação de propriedade intelectual.",
+            "O PráticOS não garante que o serviço será ininterrupto, livre de erros ou completamente seguro."
+          ]
+        },
+        {
+          "title": "4. Limitações",
+          "paragraphs": [
+            "Em nenhum caso o PráticOS ou seus fornecedores serão responsáveis por quaisquer danos (incluindo, sem limitação, danos por perda de dados ou lucro ou devido a interrupção dos negócios) decorrentes do uso ou da incapacidade de usar os serviços do PráticOS."
+          ]
+        },
+        {
+          "title": "5. Dados e Privacidade",
+          "paragraphs": [
+            "Ao utilizar o PráticOS, você concorda com nossa <a href=\"privacy.html\">Política de Privacidade</a>. Seus dados são armazenados de forma segura e tratados de acordo com a Lei Geral de Proteção de Dados (LGPD)."
+          ]
+        },
+        {
+          "title": "6. Modificações",
+          "paragraphs": [
+            "O PráticOS pode revisar estes termos de serviço a qualquer momento, sem aviso prévio. Ao usar este aplicativo, você concorda em ficar vinculado à versão atual desses termos de serviço."
+          ]
+        },
+        {
+          "title": "7. Lei Aplicável",
+          "paragraphs": [
+            "Estes termos e condições são regidos e interpretados de acordo com as leis brasileiras e você se submete irrevogavelmente à jurisdição exclusiva dos tribunais do Brasil."
+          ]
+        },
+        {
+          "title": "8. Contato",
+          "paragraphs": [
+            "Para dúvidas sobre estes termos, entre em contato:",
+            "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>"
+          ]
+        }
+      ]
+    },
+    "en": {
+      "title": "Terms of",
+      "titleHighlight": "Use",
+      "subtitle": "Conditions for using PraticOS",
+      "lastUpdated": "Last updated: January 2025",
+      "sections": [
+        {
+          "title": "1. Terms",
+          "paragraphs": [
+            "By accessing the PraticOS app, you agree to comply with these terms of service, all applicable laws and regulations, and agree that you are responsible for compliance with all applicable local laws. If you do not agree with any of these terms, you are prohibited from using or accessing this app."
+          ]
+        },
+        {
+          "title": "2. License Use",
+          "paragraphs": [
+            "Permission is granted to use the PraticOS app for personal and commercial purposes, according to your subscription plan. This is the grant of a license, not a transfer of title, and under this license you may not:"
+          ],
+          "list": [
+            "Modify or copy the software",
+            "Attempt to decompile or reverse engineer any software contained in PraticOS",
+            "Remove any copyright or other proprietary notations",
+            "Transfer the license to another person or account"
+          ]
+        },
+        {
+          "title": "3. Disclaimer",
+          "paragraphs": [
+            "PraticOS services are provided \"as is\". PraticOS makes no warranties, express or implied, and hereby disclaims and negates all other warranties, including without limitation, implied warranties of merchantability, fitness for a particular purpose, or non-infringement of intellectual property.",
+            "PraticOS does not guarantee that the service will be uninterrupted, error-free, or completely secure."
+          ]
+        },
+        {
+          "title": "4. Limitations",
+          "paragraphs": [
+            "In no event shall PraticOS or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use PraticOS services."
+          ]
+        },
+        {
+          "title": "5. Data and Privacy",
+          "paragraphs": [
+            "By using PraticOS, you agree to our <a href=\"privacy-en.html\">Privacy Policy</a>. Your data is stored securely and processed in accordance with applicable data protection laws."
+          ]
+        },
+        {
+          "title": "6. Modifications",
+          "paragraphs": [
+            "PraticOS may revise these terms of service at any time without prior notice. By using this app, you agree to be bound by the current version of these terms of service."
+          ]
+        },
+        {
+          "title": "7. Applicable Law",
+          "paragraphs": [
+            "These terms and conditions are governed by and construed in accordance with Brazilian laws and you irrevocably submit to the exclusive jurisdiction of the courts in Brazil."
+          ]
+        },
+        {
+          "title": "8. Contact",
+          "paragraphs": [
+            "For questions about these terms, please contact:",
+            "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>"
+          ]
+        }
+      ]
+    },
+    "es": {
+      "title": "Términos de",
+      "titleHighlight": "Uso",
+      "subtitle": "Condiciones para el uso de PraticOS",
+      "lastUpdated": "Última actualización: Enero 2025",
+      "sections": [
+        {
+          "title": "1. Términos",
+          "paragraphs": [
+            "Al acceder a la aplicación PraticOS, usted acepta cumplir con estos términos de servicio, todas las leyes y regulaciones aplicables, y acepta que es responsable del cumplimiento de todas las leyes locales aplicables. Si no está de acuerdo con alguno de estos términos, tiene prohibido usar o acceder a esta aplicación."
+          ]
+        },
+        {
+          "title": "2. Uso de Licencia",
+          "paragraphs": [
+            "Se concede permiso para usar la aplicación PraticOS para fines personales y comerciales, de acuerdo con el plan contratado. Esta es la concesión de una licencia, no una transferencia de título y, bajo esta licencia, usted no puede:"
+          ],
+          "list": [
+            "Modificar o copiar el software",
+            "Intentar descompilar o realizar ingeniería inversa de cualquier software contenido en PraticOS",
+            "Eliminar cualquier derecho de autor u otras notaciones de propiedad",
+            "Transferir la licencia a otra persona o cuenta"
+          ]
+        },
+        {
+          "title": "3. Exención de Responsabilidad",
+          "paragraphs": [
+            "Los servicios de PraticOS se proporcionan \"tal cual\". PraticOS no ofrece garantías, expresas o implícitas, y por la presente exime y niega todas las demás garantías, incluyendo, sin limitación, garantías implícitas de comerciabilidad, adecuación para un propósito particular o no infracción de propiedad intelectual.",
+            "PraticOS no garantiza que el servicio será ininterrumpido, libre de errores o completamente seguro."
+          ]
+        },
+        {
+          "title": "4. Limitaciones",
+          "paragraphs": [
+            "En ningún caso PraticOS o sus proveedores serán responsables de ningún daño (incluyendo, sin limitación, daños por pérdida de datos o ganancias, o debido a la interrupción del negocio) que surjan del uso o la incapacidad de usar los servicios de PraticOS."
+          ]
+        },
+        {
+          "title": "5. Datos y Privacidad",
+          "paragraphs": [
+            "Al utilizar PraticOS, usted acepta nuestra <a href=\"privacy-es.html\">Política de Privacidad</a>. Sus datos se almacenan de forma segura y se tratan de acuerdo con las leyes de protección de datos aplicables."
+          ]
+        },
+        {
+          "title": "6. Modificaciones",
+          "paragraphs": [
+            "PraticOS puede revisar estos términos de servicio en cualquier momento, sin previo aviso. Al usar esta aplicación, usted acepta estar vinculado a la versión actual de estos términos de servicio."
+          ]
+        },
+        {
+          "title": "7. Ley Aplicable",
+          "paragraphs": [
+            "Estos términos y condiciones se rigen e interpretan de acuerdo con las leyes brasileñas y usted se somete irrevocablemente a la jurisdicción exclusiva de los tribunales de Brasil."
+          ]
+        },
+        {
+          "title": "8. Contacto",
+          "paragraphs": [
+            "Para preguntas sobre estos términos, contáctenos:",
+            "<strong>Email:</strong> <a href=\"mailto:praticos@rafsoft.com.br\">praticos@rafsoft.com.br</a>"
+          ]
+        }
+      ]
+    }
+  }
+}

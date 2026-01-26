@@ -1,0 +1,30 @@
+{# Get navigation data based on language #}
+{% set nav = navigation[langCode] | default(navigation.pt) %}
+
+<!-- Navigation -->
+<nav class="navbar{% if navbarScrolled %} scrolled{% endif %}">
+    <div class="nav-container">
+        <a href="{{ relPath }}{{ indexPage | default('index.html') }}" class="nav-logo">
+            <img src="{{ relPath }}assets/images/logo.png" alt="PraticOS" class="logo-img">
+            <span class="logo-text">{{ site.logoText | safe }}</span>
+        </a>
+        <div class="nav-links">
+            {% for link in nav.links %}
+            <a href="{% if link.external %}{{ relPath }}{{ link.href }}{% else %}{{ link.href }}{% endif %}">{{ link.label }}</a>
+            {% endfor %}
+        </div>
+        <div class="nav-actions">
+            <div class="lang-switch">
+                {% for langItem in langSwitch %}
+                <a href="{{ langItem.href }}"{% if langItem.active %} class="active"{% endif %}>{{ langItem.code }}</a>
+                {% endfor %}
+            </div>
+            <a href="#download" class="btn btn-primary">{{ nav.cta }}</a>
+        </div>
+        <button class="nav-toggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</nav>

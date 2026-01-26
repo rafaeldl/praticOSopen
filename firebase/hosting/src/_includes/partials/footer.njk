@@ -1,0 +1,37 @@
+{# Get footer data based on language #}
+{% set foot = footer[langCode] | default(footer.pt) %}
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="{{ relPath }}{{ indexPage | default('index.html') }}" class="nav-logo">
+                    <img src="{{ relPath }}assets/images/logo.png" alt="PraticOS" class="logo-img">
+                    <span class="logo-text">{{ site.logoText | safe }}</span>
+                </a>
+                <p>{{ foot.brand }}</p>
+            </div>
+            <div class="footer-links">
+                <h4>{{ foot.product.title }}</h4>
+                {% for link in foot.product.links %}
+                <a href="{% if link.href | first == '#' %}{{ link.href }}{% else %}{{ relPath }}{{ link.href }}{% endif %}">{{ link.label }}</a>
+                {% endfor %}
+            </div>
+            <div class="footer-links">
+                <h4>{{ foot.support.title }}</h4>
+                {% for link in foot.support.links %}
+                <a href="{% if link.href | first == '#' %}{{ link.href }}{% else %}{{ relPath }}{{ link.href }}{% endif %}">{{ link.label }}</a>
+                {% endfor %}
+            </div>
+            <div class="footer-links">
+                <h4>{{ foot.company.title }}</h4>
+                <a href="{{ site.companyUrl }}" target="_blank" rel="noopener">{{ site.company }}</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {{ site.year }} {{ site.name }}. {{ foot.copyright }}</p>
+            <p>{{ foot.madeWith }} <a href="{{ site.companyUrl }}" target="_blank" rel="noopener">{{ site.company }}</a></p>
+        </div>
+    </div>
+</footer>

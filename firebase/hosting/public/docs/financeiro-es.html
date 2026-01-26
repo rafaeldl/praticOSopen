@@ -3,687 +3,1095 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Financiero - PráticOS Documentación</title>
-    <meta name="description" content="Documentación completa sobre el sistema financiero de PráticOS. Pagos parciales, descuentos, historial de transacciones y panel de control.">
-    <meta name="keywords" content="praticos, documentación, financiero, pagos, descuentos, facturación, dashboard">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Financiero - Documentacion PraticOS</title>
+<meta name="description" content="Documentacion completa sobre el sistema financiero de PraticOS. Pagos parciales, descuentos, historial de transacciones y dashboard.">
+<meta name="keywords" content="praticos, documentacion, financiero, pagos, descuentos, facturacion, dashboard">
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="Sistema Financiero - PráticOS">
-    <meta property="og:description" content="Documentación completa sobre el sistema financiero de PráticOS.">
-    <meta property="og:image" content="../assets/images/logo.png">
-    <meta property="og:type" content="article">
+<!-- Open Graph -->
+<meta property="og:title" content="Sistema Financiero - Documentacion PraticOS">
+<meta property="og:description" content="Documentacion completa sobre el sistema financiero de PraticOS. Pagos parciales, descuentos, historial de transacciones y dashboard.">
+<meta property="og:image" content="../assets/images/logo.png">
+<meta property="og:type" content="website">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../assets/images/logo.png">
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="../assets/images/logo.png">
 
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="docs.css">
+<!-- Stylesheets -->
+<link rel="stylesheet" href="../style.css">
+
+
+
+<link rel="stylesheet" href="../css/docs.css">
+
+
 </head>
 
 <body>
-    <!-- Navigation -->
-    <nav class="navbar scrolled">
-        <div class="nav-container">
-            <a href="../index.html" class="nav-logo">
-                <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
-                <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
-            </a>
-            <div class="nav-links">
-                <a href="../index.html">Inicio</a>
-                <a href="../index.html#features">Funcionalidades</a>
-                <a href="../faq.html">FAQ</a>
-                <a href="../support.html">Soporte</a>
-            </div>
-            <div class="nav-actions">
-                <div class="lang-switch">
-                    <a href="financeiro.html">PT</a>
-                    <a href="financeiro-en.html">EN</a>
-                    <a href="financeiro-es.html" class="active">ES</a>
-                </div>
-                <a href="../index.html#download" class="btn btn-primary">Descargar App</a>
-            </div>
-            <button class="nav-toggle" aria-label="Menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+    
+
+
+<!-- Navigation -->
+<nav class="navbar scrolled">
+    <div class="nav-container">
+        <a href="../../index-es.html" class="nav-logo">
+            <img src="../assets/images/logo.png" alt="PraticOS" class="logo-img">
+            <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+        </a>
+        <div class="nav-links">
+            
+            <a href="#features">Funciones</a>
+            
+            <a href="#screenshots">Capturas</a>
+            
+            <a href="#pricing">Planes</a>
+            
+            <a href="../faq-es.html">FAQ</a>
+            
+            <a href="#contact">Contacto</a>
+            
         </div>
-    </nav>
-
-    <!-- Page Header -->
-    <section class="docs-hero compact">
-        <div class="hero-bg">
-            <div class="gradient-orb orb-1"></div>
-            <div class="gradient-orb orb-2"></div>
-        </div>
-        <div class="container">
-            <div class="docs-breadcrumb">
-                <a href="index-es.html">Documentación</a>
-                <span>/</span>
-                <span>Sistema Financiero</span>
-            </div>
-            <div class="docs-hero-content">
-                <h1>Sistema <span class="gradient-text">Financiero</span></h1>
-                <p class="hero-subtitle">Gestiona pagos, descuentos y controla la facturación de tu empresa con control total sobre cada transacción.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Docs Content -->
-    <section class="docs-content">
-        <div class="container docs-container">
-            <!-- Sidebar Navigation -->
-            <aside class="docs-sidebar">
-                <div class="sidebar-sticky">
-                    <h4>En esta página</h4>
-                    <nav class="docs-nav">
-                        <a href="#vision-general" class="active">Visión General</a>
-                        <a href="#estado">Estado de Pago</a>
-                        <a href="#pagos">Gestión de Pagos</a>
-                        <a href="#reglas">Reglas de Negocio</a>
-                        <a href="#dashboard">Panel Financiero</a>
-                        <a href="#pdf">Impresión (PDF)</a>
-                        <a href="#permisos">Permisos</a>
-                        <a href="#faq">Preguntas Frecuentes</a>
-                    </nav>
-                </div>
-            </aside>
-
-            <!-- Main Content -->
-            <main class="docs-main">
-                <!-- Visión General -->
-                <section id="vision-general" class="docs-section">
-                    <h2>Visión General del Sistema Financiero</h2>
-                    <p>PráticOS ofrece un sistema financiero completo e integrado para control de pagos, descuentos y seguimiento de facturación. Todas las transacciones se registran con historial detallado y están vinculadas a las Órdenes de Servicio.</p>
-
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="16" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                            </svg>
-                        </div>
-                        <div class="info-content">
-                            <h4>Integración con RBAC</h4>
-                            <p>El acceso a los datos financieros está controlado por perfil. Los Técnicos y Supervisores no pueden ver valores, garantizando la seguridad de la información.</p>
-                        </div>
-                    </div>
-
-                    <div class="features-highlight">
-                        <div class="feature-item">
-                            <div class="feature-icon green">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                            </div>
-                            <h4>Pagos Parciales</h4>
-                            <p>Registra múltiples pagos con historial completo de transacciones</p>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon orange">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                                </svg>
-                            </div>
-                            <h4>Descuentos</h4>
-                            <p>Aplica descuentos con descripción y trazabilidad completa</p>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon blue">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="12" y1="20" x2="12" y2="10"></line>
-                                    <line x1="18" y1="20" x2="18" y2="4"></line>
-                                    <line x1="6" y1="20" x2="6" y2="16"></line>
-                                </svg>
-                            </div>
-                            <h4>Dashboard</h4>
-                            <p>Controla facturación y cuentas por cobrar en tiempo real</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Estado de Pago -->
-                <section id="estado" class="docs-section">
-                    <h2>Estado de Pago</h2>
-                    <p>El sistema utiliza tres estados para indicar la situación financiera de cada Orden de Servicio:</p>
-
-                    <div class="status-cards">
-                        <div class="status-card-item">
-                            <div class="status-indicator orange"></div>
-                            <div class="status-info">
-                                <h4>Por Cobrar</h4>
-                                <p>Ningún pago registrado. El valor total de la OS está pendiente.</p>
-                            </div>
-                        </div>
-                        <div class="status-card-item">
-                            <div class="status-indicator blue"></div>
-                            <div class="status-info">
-                                <h4>Parcial</h4>
-                                <p>Pago parcial registrado. Todavía hay saldo por cobrar del cliente.</p>
-                            </div>
-                        </div>
-                        <div class="status-card-item">
-                            <div class="status-indicator green"></div>
-                            <div class="status-info">
-                                <h4>Pagado</h4>
-                                <p>Totalmente pagado. No hay saldo pendiente para esta OS.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-card">
-                        <div class="info-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" y1="16" x2="12" y2="12"></line>
-                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                            </svg>
-                        </div>
-                        <div class="info-content">
-                            <h4>Nota Técnica</h4>
-                            <p>El estado "Parcial" se calcula automáticamente según el valor pagado. En la base de datos, solo se almacenan "Pagado" y "Por Cobrar" para mantener compatibilidad con los filtros existentes.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Gestión de Pagos -->
-                <section id="pagos" class="docs-section">
-                    <h2>Gestión de Pagos</h2>
-                    <p>La pantalla de pagos centraliza todas las operaciones financieras de una OS, permitiendo registrar pagos, aplicar descuentos y ver el historial completo.</p>
-
-                    <h3>Cómo Acceder</h3>
-                    <ol class="step-list">
-                        <li>Abre una Orden de Servicio existente</li>
-                        <li>En la sección <strong>Resumen</strong>, haz clic en <strong>Total</strong> o en el estado de <strong>Pago</strong></li>
-                        <li>La pantalla de gestión de pagos se abrirá automáticamente</li>
-                    </ol>
-
-                    <h3>Funcionalidades Disponibles</h3>
-
-                    <div class="feature-blocks">
-                        <div class="feature-block">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                                    <line x1="1" y1="10" x2="23" y2="10"></line>
-                                </svg>
-                                Resumen Financiero
-                            </h4>
-                            <ul>
-                                <li>Total de la OS</li>
-                                <li>Descuentos aplicados</li>
-                                <li>Valor ya pagado</li>
-                                <li>Saldo restante</li>
-                            </ul>
-                        </div>
-
-                        <div class="feature-block">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                                Registrar Transacción
-                            </h4>
-                            <ul>
-                                <li>Alternar entre Pago y Descuento</li>
-                                <li>Valor pre-llenado con saldo</li>
-                                <li>Campo de observación opcional</li>
-                                <li>Acción rápida "Pagar total"</li>
-                            </ul>
-                        </div>
-
-                        <div class="feature-block">
-                            <h4>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                                </svg>
-                                Historial
-                            </h4>
-                            <ul>
-                                <li>Lista de pagos y descuentos</li>
-                                <li>Ordenado por fecha</li>
-                                <li>Desliza para eliminar</li>
-                                <li>Descripción y responsable</li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Reglas de Negocio -->
-                <section id="reglas" class="docs-section">
-                    <h2>Reglas de Negocio</h2>
-                    <p>El sistema aplica validaciones para garantizar la integridad de los datos financieros y el flujo correcto de pagos.</p>
-
-                    <h3>Pagos por Estado de la OS</h3>
-                    <p>La posibilidad de registrar pagos depende del estado actual de la Orden de Servicio:</p>
-
-                    <div class="table-wrapper">
-                        <table class="permissions-table">
-                            <thead>
-                                <tr>
-                                    <th>Estado de la OS</th>
-                                    <th>¿Puede Registrar Pago?</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Presupuesto</td>
-                                    <td class="no">&#10007; No</td>
-                                </tr>
-                                <tr>
-                                    <td>Aprobado</td>
-                                    <td class="yes">&#10003; Sí</td>
-                                </tr>
-                                <tr>
-                                    <td>En Progreso</td>
-                                    <td class="yes">&#10003; Sí</td>
-                                </tr>
-                                <tr>
-                                    <td>Completado</td>
-                                    <td class="yes">&#10003; Sí</td>
-                                </tr>
-                                <tr>
-                                    <td>Cancelado</td>
-                                    <td class="no">&#10007; No</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="warning-card">
-                        <div class="warning-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                        </div>
-                        <div class="warning-content">
-                            <h4>Los Presupuestos no Aceptan Pagos</h4>
-                            <p>Los pagos solo están permitidos a partir del estado <strong>Aprobado</strong>. Primero aprueba el presupuesto para habilitar el registro de pagos.</p>
-                        </div>
-                    </div>
-
-                    <h3>Validaciones Aplicadas</h3>
-                    <ul class="validation-list">
-                        <li><strong>Valor mínimo:</strong> El valor del pago o descuento debe ser mayor que cero</li>
-                        <li><strong>Valor máximo:</strong> El valor no puede exceder el saldo restante de la OS</li>
-                        <li><strong>Estado válido:</strong> La OS debe estar aprobada, en progreso o completada</li>
-                    </ul>
-                </section>
-
-                <!-- Panel Financiero -->
-                <section id="dashboard" class="docs-section">
-                    <h2>Panel Financiero</h2>
-                    <p>El panel ofrece una visión consolidada de la facturación de la empresa, con indicadores en tiempo real y ranking de clientes.</p>
-
-                    <h3>Cómo Acceder</h3>
-                    <p>Accede a través del <strong>Menú lateral &#8594; Dashboard</strong>. Requiere el permiso <code>viewFinancialReports</code> (disponible para Admin y Gerente).</p>
-
-                    <h3>Indicadores Disponibles</h3>
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-icon blue">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="12" y1="1" x2="12" y2="23"></line>
-                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                </svg>
-                            </div>
-                            <div class="metric-info">
-                                <h4>Facturación Total</h4>
-                                <p>Suma de los valores totales de todas las OS en el período seleccionado</p>
-                            </div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-icon green">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            </div>
-                            <div class="metric-info">
-                                <h4>Valor Recibido</h4>
-                                <p>Suma de todos los pagos registrados, incluyendo los parciales</p>
-                            </div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-icon orange">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <polyline points="12 6 12 12 16 14"></polyline>
-                                </svg>
-                            </div>
-                            <div class="metric-info">
-                                <h4>Por Cobrar</h4>
-                                <p>Saldo pendiente de las OS no totalmente pagadas</p>
-                            </div>
-                        </div>
-
-                        <div class="metric-card">
-                            <div class="metric-icon purple">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                </svg>
-                            </div>
-                            <div class="metric-info">
-                                <h4>OS Pagadas</h4>
-                                <p>Cantidad de OS con pago completo</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3>Ranking de Clientes</h3>
-                    <p>El panel muestra los clientes ordenados por valor, permitiendo identificar:</p>
-                    <ul class="validation-list">
-                        <li><strong>Mejores clientes:</strong> Ordenados por valor total de OS</li>
-                        <li><strong>Mayores deudores:</strong> Ordenados por valor pendiente por cobrar</li>
-                    </ul>
-                </section>
-
-                <!-- PDF -->
-                <section id="pdf" class="docs-section">
-                    <h2>Impresión (PDF)</h2>
-                    <p>El PDF de la Orden de Servicio incluye el resumen financiero completo, adaptándose automáticamente al estado del pago.</p>
-
-                    <h3>Información en el PDF</h3>
-                    <div class="pdf-preview">
-                        <div class="pdf-section">
-                            <h4>Resumen de Totales</h4>
-                            <ul>
-                                <li>Servicios (cuando aplique)</li>
-                                <li>Productos (cuando aplique)</li>
-                                <li>Subtotal</li>
-                                <li>Descuento (cuando esté aplicado)</li>
-                                <li><strong>Total</strong></li>
-                                <li><strong>Ya pagado</strong> (en pagos parciales)</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <h3>Pie del Resumen</h3>
-                    <p>El pie de página muestra el estado financiero con colores diferenciados:</p>
-
-                    <div class="table-wrapper">
-                        <table class="permissions-table">
-                            <thead>
-                                <tr>
-                                    <th>Situación</th>
-                                    <th>Texto Mostrado</th>
-                                    <th>Color</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Totalmente pagado</td>
-                                    <td>TOTAL PAGADO</td>
-                                    <td><span class="color-badge green">Verde</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Pago parcial</td>
-                                    <td>SALDO RESTANTE</td>
-                                    <td><span class="color-badge orange">Naranja</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Sin pago</td>
-                                    <td>TOTAL A PAGAR</td>
-                                    <td><span class="color-badge blue">Azul</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- Permisos -->
-                <section id="permisos" class="docs-section">
-                    <h2>Permisos por Perfil</h2>
-                    <p>El acceso a las funcionalidades financieras está controlado por el sistema de perfiles (RBAC). Cada perfil tiene permisos específicos:</p>
-
-                    <div class="table-wrapper">
-                        <table class="permissions-table">
-                            <thead>
-                                <tr>
-                                    <th>Perfil</th>
-                                    <th>Ver Precios</th>
-                                    <th>Ver Dashboard</th>
-                                    <th>Registrar Pagos</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Administrador</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                </tr>
-                                <tr>
-                                    <td>Gerente</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                    <td class="yes">&#10003;</td>
-                                </tr>
-                                <tr>
-                                    <td>Supervisor</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Consultor</td>
-                                    <td class="partial">*</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                                <tr>
-                                    <td>Técnico</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                    <td class="no">&#10007;</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <p class="table-note">* Consultor visualiza precios solo de las OS que él mismo creó</p>
-                    </div>
-
-                    <div class="warning-card">
-                        <div class="warning-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                        </div>
-                        <div class="warning-content">
-                            <h4>Protección de Datos Financieros</h4>
-                            <p>Para usuarios sin permiso <code>viewPrices</code>, los siguientes elementos están ocultos: valores de la OS, estado de pago, precios de servicios/productos, generación de PDF y filtros de pago.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- FAQ -->
-                <section id="faq" class="docs-section">
-                    <h2>Preguntas Frecuentes</h2>
-
-                    <div class="faq-grid">
-                        <div class="faq-item">
-                            <h4>¿Puedo registrar pago en un presupuesto?</h4>
-                            <p>No. Los pagos solo se habilitan a partir del estado "Aprobado". Primero aprueba el presupuesto, luego registra el pago.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>¿Cómo aplico un descuento?</h4>
-                            <p>En la pantalla de pagos, cambia a "Descuento" en el selector superior, ingresa el valor y añade una descripción (ej: "Descuento fidelidad").</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>¿Puedo eliminar un pago registrado?</h4>
-                            <p>Sí. En el historial de transacciones, desliza el ítem hacia la izquierda y confirma la eliminación. La acción se registra en el historial.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>¿Qué significa estado "Parcial"?</h4>
-                            <p>Indica que existen pagos registrados, pero el valor total aún no ha sido saldado. El saldo restante se muestra en el resumen.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>¿Cómo marco una OS como totalmente pagada?</h4>
-                            <p>Usa la acción rápida "Pagar total" en la pantalla de pagos, o registra un pago con el valor exacto del saldo restante.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>¿Los pagos parciales aparecen en el PDF?</h4>
-                            <p>Sí. El PDF muestra "Ya pagado" con el valor recibido y "SALDO RESTANTE" destacado en naranja en el pie de página.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>¿Los técnicos pueden ver valores financieros?</h4>
-                            <p>No. Técnicos y Supervisores no tienen acceso a datos financieros. Solo Admin, Gerente y Consultor (OS propias) visualizan valores.</p>
-                        </div>
-
-                        <div class="faq-item">
-                            <h4>¿El dashboard considera pagos parciales?</h4>
-                            <p>Sí. El indicador "Valor Recibido" suma todos los pagos registrados, y "Por Cobrar" muestra solo el saldo pendiente.</p>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Navigation -->
-                <div class="docs-navigation">
-                    <a href="perfis-es.html" class="nav-link prev">
-                        <span class="nav-direction">&#8592; Anterior</span>
-                        <span class="nav-title">Perfiles de Usuarios</span>
-                    </a>
-                    <a href="index-es.html" class="nav-link next">
-                        <span class="nav-direction">Siguiente &#8594;</span>
-                        <span class="nav-title">Documentación</span>
-                    </a>
-                </div>
-            </main>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-brand">
-                    <a href="../index.html" class="nav-logo">
-                        <img src="../assets/images/logo.png" alt="PráticOS" class="logo-img">
-                        <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
-                    </a>
-                    <p>Sistema completo para gestión de órdenes de servicio. Simplifica tu negocio.</p>
-                </div>
-                <div class="footer-links">
-                    <h4>Producto</h4>
-                    <a href="../index.html#features">Funcionalidades</a>
-                    <a href="../index.html#pricing">Planes</a>
-                    <a href="../index.html#download">Descarga</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Documentación</h4>
-                    <a href="perfis-es.html">Perfiles de Usuarios</a>
-                    <a href="financeiro-es.html">Sistema Financiero</a>
-                    <a href="../faq.html">FAQ</a>
-                    <a href="../support.html">Soporte</a>
-                </div>
-                <div class="footer-links">
-                    <h4>Legal</h4>
-                    <a href="../privacy.html">Privacidad</a>
-                    <a href="../terms.html">Términos de Uso</a>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 PráticOS. Todos los derechos reservados.</p>
-                <p>Desarrollado por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu">
-        <div class="mobile-menu-content">
-            <a href="../index.html">Inicio</a>
-            <a href="../index.html#features">Funcionalidades</a>
-            <a href="index-es.html">Documentación</a>
-            <a href="../faq.html">FAQ</a>
-            <a href="../support.html">Soporte</a>
-            <div class="mobile-lang">
+        <div class="nav-actions">
+            <div class="lang-switch">
+                
                 <a href="financeiro.html">PT</a>
+                
                 <a href="financeiro-en.html">EN</a>
+                
                 <a href="financeiro-es.html" class="active">ES</a>
+                
             </div>
-            <a href="../index.html#download" class="btn btn-primary">Descargar App</a>
+            <a href="#download" class="btn btn-primary">Descargar App</a>
+        </div>
+        <button class="nav-toggle" aria-label="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</nav>
+
+
+    
+<!-- Page Header -->
+<section class="docs-hero compact">
+    <div class="hero-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+    </div>
+    <div class="container">
+        <div class="docs-breadcrumb">
+            <a href="index-es.html">Documentacion</a>
+            <span>/</span>
+            <span>Sistema Financiero</span>
+        </div>
+        <div class="docs-hero-content">
+            <h1>Sistema <span class="gradient-text">Financiero</span></h1>
+            <p class="hero-subtitle">Gestiona pagos, descuentos y acompana la facturacion de tu empresa con control total sobre cada transaccion.</p>
         </div>
     </div>
+</section>
+
+<!-- Docs Content -->
+<section class="docs-content">
+    <div class="container docs-container">
+        <!-- Sidebar Navigation -->
+        <aside class="docs-sidebar">
+            <div class="sidebar-sticky">
+                <h4>En esta pagina</h4>
+                <nav class="docs-nav">
+                    
+                    <a href="#vision-general" class="active">Vision General</a>
+                    
+                    <a href="#status">Estado de Pago</a>
+                    
+                    <a href="#pagos">Gestion de Pagos</a>
+                    
+                    <a href="#reglas">Reglas de Negocio</a>
+                    
+                    <a href="#dashboard">Dashboard Financiero</a>
+                    
+                    <a href="#pdf">Impresion (PDF)</a>
+                    
+                    <a href="#permisos">Permisos</a>
+                    
+                    <a href="#faq">Preguntas Frecuentes</a>
+                    
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="docs-main">
+            
+            
+                
+                
+                
+                
+                    
+                        
+                        
+
+
+<section id="vision-general" class="docs-section">
+    
+    <h2>Vision General del Sistema Financiero</h2>
+    
+
+    <p>PraticOS ofrece un sistema financiero completo e integrado para control de pagos, descuentos y seguimiento de facturacion. Todas las transacciones se registran con historial detallado y vinculadas a las Ordenes de Servicio.</p>
+
+    
+    
+    
+    
+    
+
+<div class="info-card">
+    <div class="info-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+    </div>
+    <div class="info-content">
+        <h4>Integracion con RBAC</h4>
+        <p>El acceso a los datos financieros esta controlado por perfil. Tecnicos y Supervisores no visualizan valores, garantizando la seguridad de la informacion.</p>
+    </div>
+</div>
+
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="features-highlight">
+    
+    <div class="feature-item">
+        <div class="feature-icon green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
+        <h4>Pagos Parciales</h4>
+        <p>Registre multiples pagos con historial completo de transacciones</p>
+    </div>
+    
+    <div class="feature-item">
+        <div class="feature-icon orange">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+        </div>
+        <h4>Descuentos</h4>
+        <p>Aplique descuentos con descripcion y trazabilidad completa</p>
+    </div>
+    
+    <div class="feature-item">
+        <div class="feature-icon blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+        </div>
+        <h4>Dashboard</h4>
+        <p>Acompane facturacion y valores a cobrar en tiempo real</p>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="status" class="docs-section">
+    
+    <h2>Estado de Pago</h2>
+    
+
+    <p>El sistema utiliza tres estados para indicar la situacion financiera de cada Orden de Servicio:</p>
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="status-cards">
+    
+    <div class="status-card-item">
+        <div class="status-indicator orange"></div>
+        <div class="status-info">
+            <h4>Por Cobrar</h4>
+            <p>Ningun pago registrado. El valor total de la OS esta pendiente.</p>
+        </div>
+    </div>
+    
+    <div class="status-card-item">
+        <div class="status-indicator blue"></div>
+        <div class="status-info">
+            <h4>Parcial</h4>
+            <p>Pago parcial registrado. Aun hay saldo a cobrar del cliente.</p>
+        </div>
+    </div>
+    
+    <div class="status-card-item">
+        <div class="status-indicator green"></div>
+        <div class="status-info">
+            <h4>Pagado</h4>
+            <p>Totalmente pagado. No hay saldo pendiente para esta OS.</p>
+        </div>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="pagos" class="docs-section">
+    
+    <h2>Gestion de Pagos</h2>
+    
+
+    <p>La pantalla de pagos centraliza todas las operaciones financieras de una OS, permitiendo registrar pagos, aplicar descuentos y visualizar el historial completo.</p>
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    <h3>Como Acceder</h3>
+    
+    
+    
+    
+
+<ol class="step-list">
+    
+    <li>Abra una Orden de Servicio existente</li>
+    
+    <li>En la seccion <strong>Resumen</strong>, haga clic en <strong>Total</strong> o en el estado de <strong>Pago</strong></li>
+    
+    <li>La pantalla de gestion de pagos se abrira automaticamente</li>
+    
+</ol>
+
+    
+    
+    
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="reglas" class="docs-section">
+    
+    <h2>Reglas de Negocio</h2>
+    
+
+    <p>El sistema aplica validaciones para garantizar la integridad de los datos financieros y el flujo correcto de pagos.</p>
+
+    
+    
+
+    
+    
+    
+    
+    
+
+<div class="warning-card">
+    <div class="warning-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+    </div>
+    <div class="warning-content">
+        <h4>Los Presupuestos No Aceptan Pagos</h4>
+        <p>Los pagos solo se permiten a partir del estado Aprobado. Primero apruebe el presupuesto para habilitar el registro de pagos.</p>
+    </div>
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    <h3>Validaciones Aplicadas</h3>
+    
+    
+    
+    
+    
+
+<ul class="validation-list">
+    
+    <li><strong>Valor minimo:</strong> El valor del pago o descuento debe ser mayor que cero</li>
+    
+    <li><strong>Valor maximo:</strong> El valor no puede exceder el saldo restante de la OS</li>
+    
+    <li><strong>Estado valido:</strong> La OS debe estar aprobada, en progreso o completada</li>
+    
+</ul>
+
+    
+    
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="dashboard" class="docs-section">
+    
+    <h2>Dashboard Financiero</h2>
+    
+
+    <p>El dashboard ofrece una vision consolidada de la facturacion de la empresa, con indicadores en tiempo real y ranking de clientes.</p>
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    <h3>Indicadores Disponibles</h3>
+    
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+
+<div class="metrics-grid">
+    
+    <div class="metric-card">
+        <div class="metric-icon blue">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
+        <div class="metric-info">
+            <h4>Facturacion Total</h4>
+            <p>Suma de los valores totales de todas las OS en el periodo seleccionado</p>
+        </div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon green">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <div class="metric-info">
+            <h4>Valor Recibido</h4>
+            <p>Suma de todos los pagos registrados, incluyendo parciales</p>
+        </div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-icon orange">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="metric-info">
+            <h4>Por Cobrar</h4>
+            <p>Saldo pendiente de las OS no totalmente pagadas</p>
+        </div>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="pdf" class="docs-section">
+    
+    <h2>Impresion (PDF)</h2>
+    
+
+    <p>El PDF de la Orden de Servicio incluye el resumen financiero completo, adaptandose automaticamente al estado de pago.</p>
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="permisos" class="docs-section">
+    
+    <h2>Permisos por Perfil</h2>
+    
+
+    <p>El acceso a las funcionalidades financieras esta controlado por el sistema de perfiles (RBAC). Cada perfil tiene permisos especificos.</p>
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+<div class="table-wrapper">
+    
+    <table class="permissions-table">
+        <thead>
+            <tr>
+                
+                <th>Perfil</th>
+                
+                <th>Ver Precios</th>
+                
+                <th>Ver Dashboard</th>
+                
+                <th>Registrar Pagos</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <td>Administrador</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Gerente</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+                <td class="yes">&#10003;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Supervisor</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Consultor</td>
+                
+                <td class="partial">*</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Tecnico</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+                <td class="no">&#10007;</td>
+                
+            </tr>
+            
+        </tbody>
+    </table>
+    <p class="table-note">* Consultor visualiza precios solo de las OS que el mismo creo</p>
+</div>
+
+    
+
+    
+    
+
+    
+    
+</section>
+
+                    
+                        
+                        
+
+
+<section id="faq" class="docs-section">
+    
+    <h2>Preguntas Frecuentes</h2>
+    
+
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+
+<div class="faq-grid">
+    
+    <div class="faq-item">
+        <h4>Puedo registrar un pago en un presupuesto?</h4>
+        <p>No. Los pagos solo se liberan a partir del estado "Aprobado". Primero apruebe el presupuesto, despues registre el pago.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>Como aplicar un descuento?</h4>
+        <p>En la pantalla de pagos, cambie a "Descuento" en el selector superior, ingrese el valor y agregue una descripcion (ej: "Descuento fidelidad").</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>Puedo eliminar un pago registrado?</h4>
+        <p>Si. En el historial de transacciones, deslice el item hacia la izquierda y confirme la eliminacion. La accion queda registrada en el historial.</p>
+    </div>
+    
+    <div class="faq-item">
+        <h4>Los tecnicos pueden ver valores financieros?</h4>
+        <p>No. Tecnicos y Supervisores no tienen acceso a datos financieros. Solo Admin, Gerente y Consultor (propias OS) visualizan valores.</p>
+    </div>
+    
+</div>
+
+    
+
+    
+    
+</section>
+
+                    
+                
+            
+
+            <!-- Navigation -->
+            <div class="docs-navigation">
+                
+                <a href="perfis-es.html" class="nav-link prev">
+                    <span class="nav-direction">&#8592; Anterior</span>
+                    <span class="nav-title">Perfiles de Usuario</span>
+                </a>
+                
+                
+                <a href="procedimentos-es.html" class="nav-link next">
+                    <span class="nav-direction">Siguiente &#8594;</span>
+                    <span class="nav-title">Procedimientos</span>
+                </a>
+                
+            </div>
+        </main>
+    </div>
+</section>
+
+<script>
+    // Sidebar navigation active state
+    const sections = document.querySelectorAll('.docs-section');
+    const navLinks = document.querySelectorAll('.docs-nav a');
+
+    const observerOptions = {
+        rootMargin: '-100px 0px -70% 0px',
+        threshold: 0
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.docs-nav a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                const offset = 100;
+                const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+</script>
+
+
+    
+    
+
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="../../index-es.html" class="nav-logo">
+                    <img src="../assets/images/logo.png" alt="PraticOS" class="logo-img">
+                    <span class="logo-text">Prát<span class="yellow">ic</span><span class="accent">OS</span></span>
+                </a>
+                <p>Sistema completo para gestión de órdenes de servicio. Simplifique su negocio.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Producto</h4>
+                
+                <a href="#features">Funciones</a>
+                
+                <a href="#pricing">Planes</a>
+                
+                <a href="#download">Descargar</a>
+                
+            </div>
+            <div class="footer-links">
+                <h4>Soporte</h4>
+                
+                <a href="../docs/">Documentación</a>
+                
+                <a href="../support-es.html">Centro de Soporte</a>
+                
+                <a href="../faq-es.html">FAQ</a>
+                
+                <a href="#contact">Contacto</a>
+                
+                <a href="../privacy-es.html">Privacidad</a>
+                
+                <a href="../terms-es.html">Términos de Uso</a>
+                
+            </div>
+            <div class="footer-links">
+                <h4>Empresa</h4>
+                <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 PraticOS. Todos los derechos reservados.</p>
+            <p>Desarrollado con ❤️ por <a href="https://www.rafsoft.com.br" target="_blank" rel="noopener">Rafsoft</a></p>
+        </div>
+    </div>
+</footer>
+
+    
+    
+
+
+<!-- Mobile Menu -->
+<div class="mobile-menu">
+    <div class="mobile-menu-content">
+        
+        <a href="#features">Funciones</a>
+        
+        <a href="#screenshots">Capturas</a>
+        
+        <a href="#pricing">Planes</a>
+        
+        <a href="../faq-es.html">FAQ</a>
+        
+        <a href="../support-es.html">Soporte</a>
+        
+        <a href="#contact">Contacto</a>
+        
+        <div class="mobile-lang">
+            
+            <a href="financeiro.html">PT</a>
+            
+            <a href="financeiro-en.html">EN</a>
+            
+            <a href="financeiro-es.html" class="active">ES</a>
+            
+        </div>
+        <a href="#download" class="btn btn-primary">Descargar App</a>
+    </div>
+</div>
 
     <script>
-        // Mobile menu toggle
-        const navToggle = document.querySelector('.nav-toggle');
-        const mobileMenu = document.querySelector('.mobile-menu');
-        const body = document.body;
+    // Mobile menu toggle
+    const navToggle = document.querySelector('.nav-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const body = document.body;
 
-        navToggle.addEventListener('click', () => {
-            navToggle.classList.toggle('active');
-            mobileMenu.classList.toggle('active');
-            body.classList.toggle('menu-open');
+    navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('active');
+        mobileMenu.classList.toggle('active');
+        body.classList.toggle('menu-open');
+    });
+
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            navToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+            body.classList.remove('menu-open');
         });
+    });
 
-        // Close mobile menu on link click
-        mobileMenu.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => {
-                navToggle.classList.remove('active');
-                mobileMenu.classList.remove('active');
-                body.classList.remove('menu-open');
-            });
+    // Navbar scroll effect
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
         });
+    });
 
-        // Sidebar navigation active state
-        const sections = document.querySelectorAll('.docs-section');
-        const navLinks = document.querySelectorAll('.docs-nav a');
+    // Intersection Observer for animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
 
-        const observerOptions = {
-            rootMargin: '-100px 0px -70% 0px',
-            threshold: 0
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    navLinks.forEach(link => link.classList.remove('active'));
-                    const activeLink = document.querySelector(`.docs-nav a[href="#${entry.target.id}"]`);
-                    if (activeLink) activeLink.classList.add('active');
-                }
-            });
-        }, observerOptions);
-
-        sections.forEach(section => observer.observe(section));
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    const offset = 100;
-                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'smooth'
-                    });
-                }
-            });
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
         });
-    </script>
+    }, observerOptions);
+
+    document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
+        observer.observe(el);
+    });
+</script>
+
 </body>
 
 </html>
