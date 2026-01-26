@@ -257,60 +257,35 @@
             background: var(--bg-primary);
         }
 
-        .faq-grid {
+        .segment-faq .faq-grid {
             max-width: 800px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 24px;
         }
 
-        .faq-item {
+        .segment-faq .faq-item {
             background: var(--gradient-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            overflow: hidden;
+            padding: 24px 32px;
             transition: var(--transition-normal);
         }
 
-        .faq-item:hover {
+        .segment-faq .faq-item:hover {
             border-color: var(--border-color-hover);
+            box-shadow: var(--shadow-md);
         }
 
-        .faq-item[open] {
-            border-color: var(--accent-primary);
-        }
-
-        .faq-item summary {
-            padding: 24px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1.1rem;
+        .segment-faq .faq-item h4 {
             color: var(--text-primary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            list-style: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
         }
 
-        .faq-item summary::-webkit-details-marker {
-            display: none;
-        }
-
-        .faq-item summary::after {
-            content: '+';
-            font-size: 1.5rem;
-            font-weight: 300;
-            color: var(--accent-primary);
-            transition: transform 0.3s ease;
-        }
-
-        .faq-item[open] summary::after {
-            transform: rotate(45deg);
-        }
-
-        .faq-item p {
-            padding: 0 24px 24px;
+        .segment-faq .faq-item p {
             color: var(--text-secondary);
             line-height: 1.7;
             margin: 0;
@@ -670,26 +645,26 @@
                 <p>Get your questions answered before you start</p>
             </div>
             <div class="faq-grid">
-                <details class="faq-item">
-                    <summary>Do I need to pay to use it?</summary>
+                <div class="faq-item">
+                    <h4>Do I need to pay to use it?</h4>
                     <p>No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Unlike 90% of competitors, our pricing is transparent and you don't need to talk to a salesperson.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>I've tried other apps and didn't like them</summary>
+                </div>
+                <div class="faq-item">
+                    <h4>I've tried other apps and didn't like them</h4>
                     <p>PraticOS was created by people who work in phone repair shops. It's not a generic app adapted for your use — it was built specifically for you. That's why it has IMEI tracking, intake checklist, status tracking link and everything you need.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Does it work offline?</summary>
+                </div>
+                <div class="faq-item">
+                    <h4>Does it work offline?</h4>
                     <p>You need internet to sync data, but you can view already loaded work orders offline. In practice, with your shop's Wi-Fi you won't have any issues.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Can I import my data?</summary>
+                </div>
+                <div class="faq-item">
+                    <h4>Can I import my data?</h4>
                     <p>Yes! You can import your customer list via spreadsheet. Just contact our support and we'll help you migrate your data.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Is there support if I need help?</summary>
+                </div>
+                <div class="faq-item">
+                    <h4>Is there support if I need help?</h4>
                     <p>Yes! We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of repair shops and will truly help you.</p>
-                </details>
+                </div>
             </div>
         </div>
     </section>
@@ -912,7 +887,7 @@
             });
         }, observerOptions);
 
-        document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card, .faq-item').forEach(el => {
+        document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
             observer.observe(el);
         });
     </script>

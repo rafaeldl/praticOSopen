@@ -257,60 +257,35 @@
             background: var(--bg-primary);
         }
 
-        .faq-grid {
+        .segment-faq .faq-grid {
             max-width: 800px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 24px;
         }
 
-        .faq-item {
+        .segment-faq .faq-item {
             background: var(--gradient-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            overflow: hidden;
+            padding: 24px 32px;
             transition: var(--transition-normal);
         }
 
-        .faq-item:hover {
+        .segment-faq .faq-item:hover {
             border-color: var(--border-color-hover);
+            box-shadow: var(--shadow-md);
         }
 
-        .faq-item[open] {
-            border-color: var(--accent-primary);
-        }
-
-        .faq-item summary {
-            padding: 24px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1.1rem;
+        .segment-faq .faq-item h4 {
             color: var(--text-primary);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            list-style: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
         }
 
-        .faq-item summary::-webkit-details-marker {
-            display: none;
-        }
-
-        .faq-item summary::after {
-            content: '+';
-            font-size: 1.5rem;
-            font-weight: 300;
-            color: var(--accent-primary);
-            transition: transform 0.3s ease;
-        }
-
-        .faq-item[open] summary::after {
-            transform: rotate(45deg);
-        }
-
-        .faq-item p {
-            padding: 0 24px 24px;
+        .segment-faq .faq-item p {
             color: var(--text-secondary);
             line-height: 1.7;
             margin: 0;
@@ -670,26 +645,26 @@
                 <p>Tire suas dúvidas antes de começar</p>
             </div>
             <div class="faq-grid">
-                <details class="faq-item">
-                    <summary>Preciso pagar para usar?</summary>
+                <div class="faq-item">
+                    <h4>Preciso pagar para usar?</h4>
                     <p>Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Diferente de 90% dos concorrentes, nossos preços são transparentes e você não precisa falar com vendedor.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Já tentei outros apps e não gostei</summary>
+                </div>
+                <div class="faq-item">
+                    <h4>Já tentei outros apps e não gostei</h4>
                     <p>PraticOS foi criado por quem trabalha com assistência técnica de celular. Não é um app genérico adaptado — foi feito especificamente para você. Por isso tem IMEI, checklist de entrada, link de acompanhamento e tudo que você precisa.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Funciona sem internet?</summary>
+                </div>
+                <div class="faq-item">
+                    <h4>Funciona sem internet?</h4>
                     <p>Você precisa de internet para sincronizar os dados, mas pode visualizar OS já carregadas mesmo offline. Na prática, com o Wi-Fi da loja você não vai ter problemas.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Consigo importar meus dados?</summary>
+                </div>
+                <div class="faq-item">
+                    <h4>Consigo importar meus dados?</h4>
                     <p>Sim! Você pode importar sua lista de clientes via planilha. É só entrar em contato pelo suporte que ajudamos você a migrar seus dados.</p>
-                </details>
-                <details class="faq-item">
-                    <summary>Tem suporte se eu precisar de ajuda?</summary>
+                </div>
+                <div class="faq-item">
+                    <h4>Tem suporte se eu precisar de ajuda?</h4>
                     <p>Sim! Temos suporte por email e uma documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da assistência técnica e vai te ajudar de verdade.</p>
-                </details>
+                </div>
             </div>
         </div>
     </section>
@@ -912,7 +887,7 @@
             });
         }, observerOptions);
 
-        document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card, .faq-item').forEach(el => {
+        document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
             observer.observe(el);
         });
     </script>
