@@ -10,7 +10,7 @@
         </a>
         <div class="nav-links">
             {% for link in nav.links %}
-            <a href="{% if link.external %}{{ relPath }}{{ link.href }}{% else %}{{ link.href }}{% endif %}">{{ link.label }}</a>
+            <a href="{% if link.external %}{{ relPath }}{{ link.href }}{% elif (link.href | first) == '#' and not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') }}{{ link.href }}{% else %}{{ link.href }}{% endif %}">{{ link.label }}</a>
             {% endfor %}
         </div>
         <div class="nav-actions">
@@ -19,7 +19,7 @@
                 <a href="{{ langItem.href }}"{% if langItem.active %} class="active"{% endif %}>{{ langItem.code }}</a>
                 {% endfor %}
             </div>
-            <a href="#download" class="btn btn-primary">{{ nav.cta }}</a>
+            <a href="{% if not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') }}{% endif %}#download" class="btn btn-primary">{{ nav.cta }}</a>
         </div>
         <button class="nav-toggle" aria-label="Menu">
             <span></span>
