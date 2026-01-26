@@ -1,0 +1,13 @@
+{# Features Highlight Component - Grid of feature cards with icons #}
+{# Usage: {% include "components/docs/features-highlight.njk" with {features: [...]} %} #}
+<div class="features-highlight">
+    {% for feature in features %}
+    <div class="feature-item">
+        <div class="feature-icon {{ feature.color }}">
+            {{ feature.icon | safe }}
+        </div>
+        <h4>{{ feature.title }}</h4>
+        <p>{{ feature.description }}</p>
+    </div>
+    {% endfor %}
+</div>

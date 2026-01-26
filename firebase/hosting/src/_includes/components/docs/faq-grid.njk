@@ -1,0 +1,10 @@
+{# FAQ Grid Component - Grid of FAQ items #}
+{# Usage: {% include "components/docs/faq-grid.njk" with {items: [...]} %} #}
+<div class="faq-grid">
+    {% for item in items %}
+    <div class="faq-item">
+        <h4>{{ item.question }}</h4>
+        <p>{{ item.answer | safe }}</p>
+    </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,24 @@
+{# Profile Detail Component - Detailed section for a single profile #}
+{# Usage: {% include "components/docs/profile-detail.njk" with {profile: {...}, categories: [...]} %} #}
+<div class="section-header-inline">
+    <span class="profile-badge {{ profile.badgeClass }}">{{ profile.emoji | safe }}</span>
+    <div>
+        <h2>{{ profile.name }}</h2>
+        <p class="section-subtitle">{{ profile.subtitle }}</p>
+    </div>
+</div>
+
+{% if profile.warningCard %}
+{% set title = profile.warningCard.title %}
+{% set content = profile.warningCard.content %}
+{% include "components/docs/warning-card.njk" %}
+{% endif %}
+
+{% if profile.infoCard %}
+{% set title = profile.infoCard.title %}
+{% set content = profile.infoCard.content %}
+{% include "components/docs/info-card.njk" %}
+{% endif %}
+
+{% set categories = categories %}
+{% include "components/docs/permissions-grid.njk" %}

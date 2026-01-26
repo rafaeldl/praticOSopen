@@ -1,0 +1,17 @@
+{# Permissions Grid Component - Grid of permission categories #}
+{# Usage: {% include "components/docs/permissions-grid.njk" with {categories: [...]} %} #}
+<div class="permissions-grid">
+    {% for category in categories %}
+    <div class="permission-category">
+        <h4>
+            {{ category.icon | safe }}
+            {{ category.title }}
+        </h4>
+        <ul class="permission-list">
+            {% for permission in category.permissions %}
+            <li class="{{ permission.status }}"><span class="icon">{% if permission.status == 'allowed' %}&#10003;{% elif permission.status == 'denied' %}&#10007;{% else %}&#9888;{% endif %}</span> {{ permission.text }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+</div>
