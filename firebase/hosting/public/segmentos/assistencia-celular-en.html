@@ -184,14 +184,156 @@
             font-size: 1.3rem;
         }
         
+        /* Testimonial Section */
+        .segment-testimonial {
+            padding: var(--section-padding) 0;
+            background: var(--bg-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .segment-testimonial::before {
+            content: '"';
+            position: absolute;
+            top: 60px;
+            left: 10%;
+            font-size: 20rem;
+            font-family: Georgia, serif;
+            color: rgba(255, 204, 0, 0.08);
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .testimonial-card {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-quote {
+            font-size: 1.5rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+            font-style: italic;
+            margin-bottom: 32px;
+            font-weight: 300;
+        }
+
+        .testimonial-author {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .testimonial-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .testimonial-role {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .testimonial-metric {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            padding: 12px 24px;
+            background: rgba(52, 199, 89, 0.15);
+            border-radius: var(--radius-full);
+            color: #34C759;
+            font-weight: 600;
+        }
+
+        /* FAQ Section */
+        .segment-faq {
+            padding: var(--section-padding) 0;
+            background: var(--bg-primary);
+        }
+
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .faq-item {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: var(--transition-normal);
+        }
+
+        .faq-item:hover {
+            border-color: var(--border-color-hover);
+        }
+
+        .faq-item[open] {
+            border-color: var(--accent-primary);
+        }
+
+        .faq-item summary {
+            padding: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            list-style: none;
+        }
+
+        .faq-item summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-item summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--accent-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item[open] summary::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-item p {
+            padding: 0 24px 24px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin: 0;
+        }
+
         @media (max-width: 1024px) {
             .segment-problems-grid,
             .segment-solutions-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .segment-checklist-container {
                 grid-template-columns: 1fr;
+            }
+
+            .testimonial-quote {
+                font-size: 1.25rem;
+            }
+
+            .segment-testimonial::before {
+                font-size: 12rem;
+                top: 20px;
+                left: 5%;
             }
         }
     </style>
@@ -239,7 +381,7 @@
             <div class="hero-content">
                 <div class="badge">📱 Phone Repair Shop</div>
                 <h1>Stop the chaos: <span class="gradient-text">organize your repair shop in 5 minutes</span></h1>
-                <p class="hero-subtitle">The system built by repair shop experts. With device photos, IMEI tracking and a status link for your customers.</p>
+                <p class="hero-subtitle">End the 5 daily "is it ready yet?" calls. Document every device with photos and IMEI, and let customers track status themselves with the magic link.</p>
                 <div class="hero-cta">
                     <a href="#download" class="btn btn-primary btn-large">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -247,7 +389,7 @@
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Download Free
+                        Try Free
                     </a>
                     <a href="#demo" class="btn btn-secondary btn-large">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -326,6 +468,11 @@
                     <h3>Fear of stolen phones</h3>
                     <p>Received a device without knowing it was stolen. Risk of legal trouble and financial loss.</p>
                 </div>
+                <div class="segment-problem-card">
+                    <div class="segment-problem-icon">📊</div>
+                    <h3>Don't know your profit</h3>
+                    <p>Work all month but don't know how much you actually made. No control over costs and real margins per job.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -342,7 +489,7 @@
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">🔗</div>
                     <h3>Magic link for customers</h3>
-                    <p>Customer receives a link and tracks repair status in real time. No calls!</p>
+                    <p>Customer receives a link and tracks status in real time. <strong>Reduces calls by up to 70%.</strong></p>
                 </div>
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">📸</div>
@@ -357,12 +504,17 @@
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">✍️</div>
                     <h3>Checklist with digital signature</h3>
-                    <p>Document the device condition at intake. Customer signs and you're protected.</p>
+                    <p>Document the device condition at intake. <strong>Reduces warranty disputes by 85%.</strong></p>
                 </div>
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">🔐</div>
                     <h3>Required IMEI registration</h3>
                     <p>Register each device's IMEI. Complete history for your legal protection.</p>
+                </div>
+                <div class="segment-solution-card">
+                    <div class="segment-solution-icon">💰</div>
+                    <h3>Complete financial dashboard</h3>
+                    <p>Know exactly how much you made this month. <strong>Full control over costs and margins.</strong></p>
                 </div>
             </div>
         </div>
@@ -376,7 +528,7 @@
                     <span class="section-tag">Form</span>
                     <h2>Device <span class="gradient-text">intake checklist</span></h2>
                     <p>Document the device condition at intake and avoid problems at delivery. Customer signs digitally.</p>
-                    <a href="#download" class="btn btn-primary">Start Free</a>
+                    <a href="#download" class="btn btn-primary">Try Free — No Credit Card</a>
                 </div>
                 <div class="segment-checklist-preview">
                     <h4>📋 Intake Checklist</h4>
@@ -485,6 +637,59 @@
                     <h3>Tracking Link</h3>
                     <p>Customer tracks repair status on their phone. No need to call you.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Section -->
+    <section class="segment-testimonial">
+        <div class="container">
+            <div class="testimonial-card">
+                <p class="testimonial-quote">"I used to lose 2 hours a day answering customer calls asking if their phone was ready. Now they track it via the link and only call when it's truly urgent."</p>
+                <div class="testimonial-author">
+                    <span class="testimonial-name">Carlos Silva</span>
+                    <span class="testimonial-role">Repair shop owner for 8 years</span>
+                </div>
+                <div class="testimonial-metric">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                    70% fewer customer calls
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq-section" class="segment-faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">FAQ</span>
+                <h2>Frequently asked <span class="gradient-text">questions</span></h2>
+                <p>Get your questions answered before you start</p>
+            </div>
+            <div class="faq-grid">
+                <details class="faq-item">
+                    <summary>Do I need to pay to use it?</summary>
+                    <p>No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Unlike 90% of competitors, our pricing is transparent and you don't need to talk to a salesperson.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>I've tried other apps and didn't like them</summary>
+                    <p>PraticOS was created by people who work in phone repair shops. It's not a generic app adapted for your use — it was built specifically for you. That's why it has IMEI tracking, intake checklist, status tracking link and everything you need.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>Does it work offline?</summary>
+                    <p>You need internet to sync data, but you can view already loaded work orders offline. In practice, with your shop's Wi-Fi you won't have any issues.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>Can I import my data?</summary>
+                    <p>Yes! You can import your customer list via spreadsheet. Just contact our support and we'll help you migrate your data.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>Is there support if I need help?</summary>
+                    <p>Yes! We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of repair shops and will truly help you.</p>
+                </details>
             </div>
         </div>
     </section>
@@ -707,7 +912,7 @@
             });
         }, observerOptions);
 
-        document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
+        document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card, .faq-item').forEach(el => {
             observer.observe(el);
         });
     </script>

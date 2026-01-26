@@ -184,6 +184,138 @@
             font-size: 1.3rem;
         }
 
+        /* Testimonial Section */
+        .segment-testimonial {
+            padding: var(--section-padding) 0;
+            background: var(--bg-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .segment-testimonial::before {
+            content: '"';
+            position: absolute;
+            top: 60px;
+            left: 10%;
+            font-size: 20rem;
+            font-family: Georgia, serif;
+            color: rgba(255, 204, 0, 0.08);
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .testimonial-card {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-quote {
+            font-size: 1.5rem;
+            line-height: 1.8;
+            color: var(--text-primary);
+            font-style: italic;
+            margin-bottom: 32px;
+            font-weight: 300;
+        }
+
+        .testimonial-author {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .testimonial-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .testimonial-role {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .testimonial-metric {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 24px;
+            padding: 12px 24px;
+            background: rgba(52, 199, 89, 0.15);
+            border-radius: var(--radius-full);
+            color: #34C759;
+            font-weight: 600;
+        }
+
+        /* FAQ Section */
+        .segment-faq {
+            padding: var(--section-padding) 0;
+            background: var(--bg-primary);
+        }
+
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .faq-item {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: var(--transition-normal);
+        }
+
+        .faq-item:hover {
+            border-color: var(--border-color-hover);
+        }
+
+        .faq-item[open] {
+            border-color: var(--accent-primary);
+        }
+
+        .faq-item summary {
+            padding: 24px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            list-style: none;
+        }
+
+        .faq-item summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq-item summary::after {
+            content: '+';
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--accent-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item[open] summary::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-item p {
+            padding: 0 24px 24px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin: 0;
+        }
+
         @media (max-width: 1024px) {
             .segment-problems-grid,
             .segment-solutions-grid {
@@ -192,6 +324,16 @@
 
             .segment-checklist-container {
                 grid-template-columns: 1fr;
+            }
+
+            .testimonial-quote {
+                font-size: 1.25rem;
+            }
+
+            .segment-testimonial::before {
+                font-size: 12rem;
+                top: 20px;
+                left: 5%;
             }
         }
     </style>
@@ -239,7 +381,7 @@
             <div class="hero-content">
                 <div class="badge">📱 Servicio Técnico de Celulares</div>
                 <h1>Basta de desorden: <span class="gradient-text">organiza tu servicio técnico en 5 minutos</span></h1>
-                <p class="hero-subtitle">El sistema creado por expertos en servicio técnico. Con fotos del equipo, IMEI registrado y link de seguimiento para tus clientes.</p>
+                <p class="hero-subtitle">Termina con las 5 llamadas diarias de "¿ya está listo?". Documenta cada equipo con foto e IMEI, y deja que el cliente haga seguimiento solo con el link mágico.</p>
                 <div class="hero-cta">
                     <a href="#download" class="btn btn-primary btn-large">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -247,7 +389,7 @@
                             <polyline points="7 10 12 15 17 10"></polyline>
                             <line x1="12" y1="15" x2="12" y2="3"></line>
                         </svg>
-                        Descargar Gratis
+                        Probar Gratis
                     </a>
                     <a href="#demo" class="btn btn-secondary btn-large">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -326,6 +468,11 @@
                     <h3>Miedo a equipos robados</h3>
                     <p>Recibir un equipo sin saber que es robado. Riesgo de problemas legales y pérdida de dinero.</p>
                 </div>
+                <div class="segment-problem-card">
+                    <div class="segment-problem-icon">📊</div>
+                    <h3>No sabes cuánto ganaste</h3>
+                    <p>Trabajas todo el mes pero al final no sabes cuánto quedó. Sin control de costos ni margen real por servicio.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -342,7 +489,7 @@
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">🔗</div>
                     <h3>Link mágico para el cliente</h3>
-                    <p>El cliente recibe un link y sigue el estado de la reparación en tiempo real. ¡Sin llamadas!</p>
+                    <p>El cliente recibe un link y sigue el estado en tiempo real. <strong>Reduce llamadas hasta en 70%.</strong></p>
                 </div>
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">📸</div>
@@ -357,12 +504,17 @@
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">✍️</div>
                     <h3>Checklist con firma digital</h3>
-                    <p>Documenta el estado del equipo al entrar. El cliente firma y tú quedas protegido.</p>
+                    <p>Documenta el estado del equipo al entrar. <strong>Reduce disputas de garantía en 85%.</strong></p>
                 </div>
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">🔐</div>
                     <h3>Registro de IMEI obligatorio</h3>
                     <p>Registra el IMEI de cada equipo. Historial completo para tu seguridad jurídica.</p>
+                </div>
+                <div class="segment-solution-card">
+                    <div class="segment-solution-icon">💰</div>
+                    <h3>Dashboard financiero completo</h3>
+                    <p>Sabe exactamente cuánto ganaste este mes. <strong>Control total de costos y márgenes.</strong></p>
                 </div>
             </div>
         </div>
@@ -376,7 +528,7 @@
                     <span class="section-tag">Formulario</span>
                     <h2>Checklist de <span class="gradient-text">entrada del equipo</span></h2>
                     <p>Documenta el estado del celular en la entrada y evita problemas en la entrega. El cliente firma digitalmente.</p>
-                    <a href="#download" class="btn btn-primary">Empezar Gratis</a>
+                    <a href="#download" class="btn btn-primary">Probar Gratis — Sin Tarjeta</a>
                 </div>
                 <div class="segment-checklist-preview">
                     <h4>📋 Checklist de Recepción</h4>
@@ -485,6 +637,59 @@
                     <h3>Link de Seguimiento</h3>
                     <p>El cliente sigue el estado de la reparación en su celular. Sin necesitar llamarte.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial Section -->
+    <section class="segment-testimonial">
+        <div class="container">
+            <div class="testimonial-card">
+                <p class="testimonial-quote">"Antes perdía 2 horas al día atendiendo llamadas de clientes preguntando si el celular estaba listo. Ahora hacen seguimiento por el link y solo me llaman cuando es realmente urgente."</p>
+                <div class="testimonial-author">
+                    <span class="testimonial-name">Carlos Silva</span>
+                    <span class="testimonial-role">Dueño de servicio técnico hace 8 años</span>
+                </div>
+                <div class="testimonial-metric">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                        <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
+                    70% menos llamadas de clientes
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq-section" class="segment-faq">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Dudas</span>
+                <h2>Preguntas <span class="gradient-text">frecuentes</span></h2>
+                <p>Resuelve tus dudas antes de empezar</p>
+            </div>
+            <div class="faq-grid">
+                <details class="faq-item">
+                    <summary>¿Necesito pagar para usarlo?</summary>
+                    <p>¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. A diferencia del 90% de los competidores, nuestros precios son transparentes y no necesitas hablar con un vendedor.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>Ya probé otras apps y no me gustaron</summary>
+                    <p>PraticOS fue creado por personas que trabajan en servicio técnico de celulares. No es una app genérica adaptada — fue hecha específicamente para ti. Por eso tiene IMEI, checklist de entrada, link de seguimiento y todo lo que necesitas.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>¿Funciona sin internet?</summary>
+                    <p>Necesitas internet para sincronizar los datos, pero puedes ver las OS ya cargadas sin conexión. En la práctica, con el Wi-Fi del local no tendrás problemas.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>¿Puedo importar mis datos?</summary>
+                    <p>¡Sí! Puedes importar tu lista de clientes por planilla. Solo contacta a nuestro soporte y te ayudamos a migrar tus datos.</p>
+                </details>
+                <details class="faq-item">
+                    <summary>¿Hay soporte si necesito ayuda?</summary>
+                    <p>¡Sí! Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día del servicio técnico y te ayudará de verdad.</p>
+                </details>
             </div>
         </div>
     </section>
@@ -707,7 +912,7 @@
             });
         }, observerOptions);
 
-        document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
+        document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card, .faq-item').forEach(el => {
             observer.observe(el);
         });
     </script>
