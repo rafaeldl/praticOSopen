@@ -1,12 +1,12 @@
 module.exports = function(eleventyConfig) {
-  // Passthrough copy for CSS from src/
+  // Passthrough copy for static assets
   eleventyConfig.addPassthroughCopy("src/css");
+  eleventyConfig.addPassthroughCopy("src/assets");
+  eleventyConfig.addPassthroughCopy("src/style.css");
 
-  // Watch CSS for changes
+  // Watch for changes
   eleventyConfig.addWatchTarget("src/css/");
-
-  // Note: Static assets (style.css, assets/, components/) are already in public/
-  // No passthrough copy needed since output dir is also public/
+  eleventyConfig.addWatchTarget("src/assets/");
 
   // Custom filter to get localized data
   eleventyConfig.addFilter("localize", function(obj, lang) {
