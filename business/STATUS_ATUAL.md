@@ -94,6 +94,21 @@
 | Relatórios exportáveis | ⚠️ Só PDF de OS | Média |
 | Pesquisa de satisfação | ❌ Não existe | Média |
 
+### Portal do Cliente (Futuro - Alta Prioridade)
+
+Expandir o link mágico existente para um portal completo do cliente:
+
+| Funcionalidade | Status | Impacto |
+|----------------|--------|---------|
+| Visualizar OS | ✅ Já existe (link mágico) | - |
+| Aprovar orçamento/OS | ❌ | Alto |
+| Acompanhar status em tempo real | ❌ | Alto |
+| Enviar mensagens/fotos | ❌ | Alto |
+| Avaliar serviço (NPS) | ❌ | Alto |
+| Histórico de serviços | ❌ | Médio |
+
+> **Diferencial competitivo:** Poucos concorrentes oferecem portal do cliente completo. Field Control cobra extra por isso.
+
 ### Nice-to-have (Futuro)
 | Item | Status |
 |------|--------|

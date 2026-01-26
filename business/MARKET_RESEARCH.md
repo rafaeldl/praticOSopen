@@ -362,7 +362,22 @@ Climatização e Refrigeração, Segurança Eletrônica, Energia Solar, Gerador 
 **Importante (diferencial competitivo):**
 - [ ] QR Code funcional para equipamentos
 - [ ] Agendamento de OS recorrentes
-- [ ] Portal do cliente melhorado
+- [ ] Portal do cliente completo (ver abaixo)
+
+### 🌟 Portal do Cliente (Roadmap)
+
+Expandir o link mágico existente para um portal completo:
+
+| Funcionalidade | Descrição | Concorrência |
+|----------------|-----------|--------------|
+| ✅ Visualizar OS | Já existe via link mágico | Todos têm |
+| 🔜 Aprovar orçamento | Cliente aprova pelo link, sem ligar | Field Control (pago) |
+| 🔜 Acompanhar status | Tempo real, sem ligar perguntando | Produttivo tem |
+| 🔜 Chat/mensagens | Cliente envia fotos e mensagens | Poucos têm |
+| 🔜 Avaliar serviço (NPS) | Pesquisa automática pós-conclusão | Maioria tem |
+| 🔜 Histórico de serviços | Cliente vê todos os atendimentos | Diferencial |
+
+**Impacto:** Reduz ligações de "já ficou pronto?", aumenta profissionalismo, coleta feedback automático.
 
 **Nice-to-have (futuro):**
 - [ ] Rastreamento GPS
