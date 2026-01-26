@@ -30,80 +30,106 @@
             padding: var(--section-padding) 0;
             background: var(--bg-primary);
         }
-        
+
         .segment-problems-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 24px;
         }
-        
+
         .segment-problem-card {
             background: var(--gradient-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             padding: 32px;
-            text-align: center;
             transition: var(--transition-normal);
+            opacity: 0;
+            transform: translateY(30px);
         }
-        
+
+        .segment-problem-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         .segment-problem-card:hover {
-            border-color: var(--color-error);
+            border-color: var(--border-color-hover);
             transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
         }
-        
+
         .segment-problem-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 59, 48, 0.15);
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+            font-size: 1.75rem;
         }
-        
+
         .segment-problem-card h3 {
-            color: var(--color-error);
             margin-bottom: 12px;
-            font-size: 1.1rem;
         }
-        
+
         .segment-problem-card p {
             color: var(--text-secondary);
+            line-height: 1.7;
         }
-        
+
         .segment-solutions {
             padding: var(--section-padding) 0;
             background: var(--bg-secondary);
         }
-        
+
         .segment-solutions-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 24px;
         }
-        
+
         .segment-solution-card {
             background: var(--gradient-card);
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
             padding: 32px;
-            text-align: center;
             transition: var(--transition-normal);
+            opacity: 0;
+            transform: translateY(30px);
         }
-        
+
+        .segment-solution-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
         .segment-solution-card:hover {
-            border-color: var(--color-success);
+            border-color: var(--border-color-hover);
             transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
         }
-        
+
         .segment-solution-icon {
-            font-size: 3rem;
-            margin-bottom: 16px;
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(52, 199, 89, 0.15);
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+            font-size: 1.75rem;
         }
-        
+
         .segment-solution-card h3 {
-            color: var(--color-success);
             margin-bottom: 12px;
-            font-size: 1.1rem;
         }
-        
+
         .segment-solution-card p {
             color: var(--text-secondary);
+            line-height: 1.7;
         }
         
         .segment-checklist {
@@ -277,17 +303,17 @@
             <div class="segment-problems-grid">
                 <div class="segment-problem-card">
                     <div class="segment-problem-icon">📞</div>
-                    <h3>🔴 Cliente liga toda hora</h3>
+                    <h3>Cliente liga toda hora</h3>
                     <p>Cliente liga 5x por dia perguntando se o aparelho ficou pronto. Você perde tempo e paciência.</p>
                 </div>
                 <div class="segment-problem-card">
                     <div class="segment-problem-icon">🔀</div>
-                    <h3>🔴 Aparelhos misturados</h3>
+                    <h3>Aparelhos misturados</h3>
                     <p>Vários celulares na bancada e você não sabe de quem é qual. Confusão na hora de entregar.</p>
                 </div>
                 <div class="segment-problem-card">
                     <div class="segment-problem-icon">💸</div>
-                    <h3>🔴 Esquece de cobrar peças</h3>
+                    <h3>Esquece de cobrar peças</h3>
                     <p>Usa peças no reparo mas esquece de anotar. No final, perde dinheiro sem perceber.</p>
                 </div>
             </div>
@@ -305,17 +331,17 @@
             <div class="segment-solutions-grid">
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">🔗</div>
-                    <h3>✅ Link mágico para o cliente</h3>
+                    <h3>Link mágico para o cliente</h3>
                     <p>Cliente recebe um link e acompanha o status do reparo em tempo real. Sem ligações!</p>
                 </div>
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">📸</div>
-                    <h3>✅ OS vinculada com foto e IMEI</h3>
+                    <h3>OS vinculada com foto e IMEI</h3>
                     <p>Cada OS tem foto do aparelho, IMEI e dados completos. Nunca mais confunda equipamentos.</p>
                 </div>
                 <div class="segment-solution-card">
                     <div class="segment-solution-icon">🧮</div>
-                    <h3>✅ Cálculo automático do total</h3>
+                    <h3>Cálculo automático do total</h3>
                     <p>Adiciona peças e mão de obra, o sistema calcula tudo automaticamente. Sem erro.</p>
                 </div>
             </div>
