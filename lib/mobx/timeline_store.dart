@@ -46,15 +46,15 @@ abstract class _TimelineStore with Store {
     // payment_status_change moved to audit-only (redundant with payment_received)
     'form_completed',
     'photos_added',
+    'service_added',
+    'service_updated',
+    'service_removed',
   };
 
   /// Event types that go to audit only (not shown in chat)
   // ignore: unused_field
   static const _auditOnlyEventTypes = {
     'order_created',
-    'service_added',
-    'service_updated',
-    'service_removed',
     'product_added',
     'product_updated',
     'product_removed',
