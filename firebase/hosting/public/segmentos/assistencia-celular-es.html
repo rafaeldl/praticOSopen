@@ -392,130 +392,8 @@
         </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section id="pricing" class="pricing">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-tag">Precios</span>
-                <h2>Elige el plan ideal para <span class="gradient-text">tu servicio técnico</span></h2>
-                <p>Empieza gratis y haz upgrade cuando lo necesites</p>
-            </div>
-            <div class="pricing-grid">
-                <div class="pricing-card visible">
-                    <div class="pricing-header">
-                        <h3>Free</h3>
-                        <div class="price">
-                            <span class="currency">R$</span>
-                            <span class="amount">0</span>
-                            <span class="period">/mes</span>
-                        </div>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            1 usuario
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            30 fotos/mes
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            1 formulario
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            OS y clientes ilimitados
-                        </li>
-                    </ul>
-                    <a href="#download" class="btn btn-outline btn-full">Empezar Gratis</a>
-                </div>
-                <div class="pricing-card featured visible">
-                    <div class="pricing-badge">Más Popular</div>
-                    <div class="pricing-header">
-                        <h3>Starter</h3>
-                        <div class="price">
-                            <span class="currency">R$</span>
-                            <span class="amount">59</span>
-                            <span class="period">/mes</span>
-                        </div>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            2 usuarios incluidos
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            200 fotos/mes
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            3 formularios
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            PDF sin marca de agua
-                        </li>
-                    </ul>
-                    <a href="#download" class="btn btn-primary btn-full">Suscribir Starter</a>
-                </div>
-                <div class="pricing-card visible">
-                    <div class="pricing-header">
-                        <h3>Pro</h3>
-                        <div class="price">
-                            <span class="currency">R$</span>
-                            <span class="amount">119</span>
-                            <span class="period">/mes</span>
-                        </div>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            3 usuarios incluidos
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            1.000 fotos/mes
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            10 formularios
-                        </li>
-                        <li>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                            +R$ 29/usuario extra
-                        </li>
-                    </ul>
-                    <a href="#download" class="btn btn-outline btn-full">Suscribir Pro</a>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Pricing Section (loaded dynamically) -->
+    <div data-include="../components/pricing-es.html"></div>
 
     <!-- Download Section -->
     <section id="download" class="download">
@@ -610,5 +488,6 @@
             document.body.classList.toggle('menu-open');
         });
     </script>
+    <script src="../components/include.js"></script>
 </body>
 </html>
