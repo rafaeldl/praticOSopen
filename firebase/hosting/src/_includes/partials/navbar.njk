@@ -38,7 +38,7 @@
                 <a href="{{ langItem.href }}"{% if langItem.active %} class="active"{% endif %}>{{ langItem.code }}</a>
                 {% endfor %}
             </div>
-            <a href="{% if not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') }}{% endif %}#download" class="btn btn-primary">{{ nav.cta }}</a>
+            <a href="{% if not isHomepage and not segmentSlug %}{{ relPath }}{{ indexPage | default('index.html') }}{% endif %}#download" class="btn btn-primary">{{ nav.cta }}</a>
         </div>
         <button class="nav-toggle" aria-label="Menu">
             <span></span>
