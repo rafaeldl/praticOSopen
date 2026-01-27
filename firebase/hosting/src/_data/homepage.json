@@ -8,7 +8,7 @@
     "ogTitle": "PraticOS - Gestao de Ordens de Servico",
     "ogDescription": "Sistema completo para gestao de ordens de servico, clientes e financas.",
     "hero": {
-      "badge": "Novo v2.0 com Multi-Tenancy",
+      "badge": "Novidade! Múltiplas empresas",
       "title": "Gerencie suas",
       "titleHighlight": "Ordens de Servico",
       "subtitle": "de forma simples e eficiente",
@@ -51,8 +51,8 @@
         },
         {
           "icon": "lock",
-          "title": "Multi-Tenancy",
-          "text": "Suporte a multiplas organizacoes com isolamento completo de dados. Ideal para franquias.",
+          "title": "Múltiplas Empresas",
+          "text": "Gerencie várias empresas ou filiais em uma única conta. Ideal para franquias e grupos.",
           "color": "green"
         },
         {
@@ -119,7 +119,7 @@
     "ogTitle": "PraticOS - Service Order Management",
     "ogDescription": "Complete system for service order, customer, and financial management.",
     "hero": {
-      "badge": "New v2.0 with Multi-Tenancy",
+      "badge": "New! Multiple companies",
       "title": "Manage your",
       "titleHighlight": "Service Orders",
       "subtitle": "simply and efficiently",
@@ -162,8 +162,8 @@
         },
         {
           "icon": "lock",
-          "title": "Multi-Tenancy",
-          "text": "Support for multiple organizations with complete data isolation. Ideal for franchises.",
+          "title": "Multiple Companies",
+          "text": "Manage multiple companies or branches in a single account. Ideal for franchises and groups.",
           "color": "green"
         },
         {
@@ -230,7 +230,7 @@
     "ogTitle": "PraticOS - Gestion de Ordenes de Servicio",
     "ogDescription": "Sistema completo para gestion de ordenes de servicio, clientes y finanzas.",
     "hero": {
-      "badge": "Nuevo v2.0 con Multi-Tenancy",
+      "badge": "¡Novedad! Múltiples empresas",
       "title": "Gestione sus",
       "titleHighlight": "Ordenes de Servicio",
       "subtitle": "de forma simple y eficiente",
@@ -273,8 +273,8 @@
         },
         {
           "icon": "lock",
-          "title": "Multi-Tenancy",
-          "text": "Soporte para multiples organizaciones con aislamiento completo de datos. Ideal para franquicias.",
+          "title": "Múltiples Empresas",
+          "text": "Gestione varias empresas o sucursales en una sola cuenta. Ideal para franquicias y grupos.",
           "color": "green"
         },
         {

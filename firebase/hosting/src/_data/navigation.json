@@ -2,14 +2,14 @@
   "pt": {
     "links": [
       { "href": "#features", "label": "Funcionalidades" },
-      { "href": "#screenshots", "label": "Screenshots" },
+      { "href": "#screenshots", "label": "Telas" },
       { "href": "#pricing", "label": "Planos" },
       { "href": "#contact", "label": "Contato" }
     ],
     "cta": "Baixar App",
     "mobileLinks": [
       { "href": "#features", "label": "Funcionalidades" },
-      { "href": "#screenshots", "label": "Screenshots" },
+      { "href": "#screenshots", "label": "Telas" },
       { "href": "#pricing", "label": "Planos" },
       { "href": "support.html", "label": "Suporte", "external": true },
       { "href": "#contact", "label": "Contato" }
