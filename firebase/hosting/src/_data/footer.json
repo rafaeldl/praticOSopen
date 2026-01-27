@@ -9,24 +9,6 @@
         { "href": "#download", "label": "Download" }
       ]
     },
-    "segments": {
-      "title": "Segmentos",
-      "links": [
-        { "href": "segmentos/assistencia-celular.html", "label": "Assistência de Celular" },
-        { "href": "segmentos/automacao.html", "label": "Automação Residencial" },
-        { "href": "segmentos/dedetizacao.html", "label": "Dedetização" },
-        { "href": "segmentos/eletrica.html", "label": "Elétrica" },
-        { "href": "segmentos/eletrodomesticos.html", "label": "Eletrodomésticos" },
-        { "href": "segmentos/eletronica.html", "label": "Eletrônica" },
-        { "href": "segmentos/elevadores.html", "label": "Elevadores" },
-        { "href": "segmentos/energia-solar.html", "label": "Energia Solar" },
-        { "href": "segmentos/informatica.html", "label": "Informática" },
-        { "href": "segmentos/limpeza.html", "label": "Limpeza" },
-        { "href": "segmentos/automotivo.html", "label": "Oficina Mecânica" },
-        { "href": "segmentos/refrigeracao.html", "label": "Refrigeração" },
-        { "href": "segmentos/seguranca-cftv.html", "label": "Segurança CFTV" }
-      ]
-    },
     "support": {
       "title": "Suporte",
       "links": [
@@ -54,24 +36,6 @@
         { "href": "#download", "label": "Download" }
       ]
     },
-    "segments": {
-      "title": "Segments",
-      "links": [
-        { "href": "segmentos/assistencia-celular-en.html", "label": "Phone Repair Shop" },
-        { "href": "segmentos/automacao-en.html", "label": "Home Automation" },
-        { "href": "segmentos/dedetizacao-en.html", "label": "Pest Control" },
-        { "href": "segmentos/eletrica-en.html", "label": "Electrician" },
-        { "href": "segmentos/eletrodomesticos-en.html", "label": "Appliance Repair" },
-        { "href": "segmentos/eletronica-en.html", "label": "Electronics Repair" },
-        { "href": "segmentos/elevadores-en.html", "label": "Elevator Maintenance" },
-        { "href": "segmentos/energia-solar-en.html", "label": "Solar Installer" },
-        { "href": "segmentos/informatica-en.html", "label": "IT Services" },
-        { "href": "segmentos/limpeza-en.html", "label": "Cleaning Company" },
-        { "href": "segmentos/automotivo-en.html", "label": "Auto Repair Shop" },
-        { "href": "segmentos/refrigeracao-en.html", "label": "HVAC Technician" },
-        { "href": "segmentos/seguranca-cftv-en.html", "label": "CCTV & Security" }
-      ]
-    },
     "support": {
       "title": "Support",
       "links": [
@@ -97,24 +61,6 @@
         { "href": "#features", "label": "Funciones" },
         { "href": "#pricing", "label": "Planes" },
         { "href": "#download", "label": "Descargar" }
-      ]
-    },
-    "segments": {
-      "title": "Segmentos",
-      "links": [
-        { "href": "segmentos/assistencia-celular-es.html", "label": "Asistencia de Celular" },
-        { "href": "segmentos/automacao-es.html", "label": "Automatización Residencial" },
-        { "href": "segmentos/dedetizacao-es.html", "label": "Control de Plagas" },
-        { "href": "segmentos/eletrica-es.html", "label": "Electricista" },
-        { "href": "segmentos/eletrodomesticos-es.html", "label": "Electrodomésticos" },
-        { "href": "segmentos/eletronica-es.html", "label": "Electrónica" },
-        { "href": "segmentos/elevadores-es.html", "label": "Ascensores" },
-        { "href": "segmentos/energia-solar-es.html", "label": "Energía Solar" },
-        { "href": "segmentos/informatica-es.html", "label": "Informática" },
-        { "href": "segmentos/limpeza-es.html", "label": "Limpieza" },
-        { "href": "segmentos/automotivo-es.html", "label": "Taller Mecánico" },
-        { "href": "segmentos/refrigeracao-es.html", "label": "Refrigeración" },
-        { "href": "segmentos/seguranca-cftv-es.html", "label": "CFTV y Seguridad" }
       ]
     },
     "support": {

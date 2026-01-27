@@ -10,7 +10,7 @@
         body.classList.toggle('menu-open');
     });
 
-    // Close mobile menu on link click
+    // Close mobile menu on link click (except segments trigger)
     mobileMenu.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
             navToggle.classList.remove('active');
@@ -18,6 +18,36 @@
             body.classList.remove('menu-open');
         });
     });
+
+    // Desktop dropdown - keep open on hover
+    const navDropdown = document.querySelector('.nav-dropdown');
+    if (navDropdown) {
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!navDropdown.contains(e.target)) {
+                navDropdown.classList.remove('active');
+            }
+        });
+
+        // Toggle on click for touch devices
+        const dropdownTrigger = navDropdown.querySelector('.nav-dropdown-trigger');
+        dropdownTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            navDropdown.classList.toggle('active');
+        });
+    }
+
+    // Mobile segments accordion
+    const mobileSegments = document.querySelector('.mobile-segments');
+    if (mobileSegments) {
+        const segmentsTrigger = mobileSegments.querySelector('.mobile-segments-trigger');
+        segmentsTrigger.addEventListener('click', (e) => {
+            e.preventDefault();
+            mobileSegments.classList.toggle('active');
+            const expanded = mobileSegments.classList.contains('active');
+            segmentsTrigger.setAttribute('aria-expanded', expanded);
+        });
+    }
 
     // Navbar scroll effect
     const navbar = document.querySelector('.navbar');
