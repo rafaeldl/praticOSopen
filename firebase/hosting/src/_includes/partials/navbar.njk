@@ -11,7 +11,7 @@
         </a>
         <div class="nav-links">
             {% for link in nav.links %}
-            <a href="{% if link.external %}{{ relPath }}{{ link.href }}{% elif link.href == '#screenshots' and segmentSlug %}{{ relPath }}{{ indexPage | default('index.html') }}#screenshots{% elif (link.href | first) == '#' and not isHomepage and not segmentSlug %}{{ relPath }}{{ indexPage | default('index.html') }}{{ link.href }}{% else %}{{ link.href }}{% endif %}">{{ link.label }}</a>
+            <a href="{% if link.external %}{{ relPath }}{{ link.href }}{% elif link.href == '#screenshots' and segmentSlug %}#{% elif (link.href | first) == '#' and not isHomepage and not segmentSlug %}{{ relPath }}{{ indexPage | default('index.html') }}{{ link.href }}{% else %}{{ link.href }}{% endif %}">{{ link.label }}</a>
             {# Segments Dropdown - After Screenshots #}
             {% if loop.index == 2 and seg.links %}
             <div class="nav-dropdown">
