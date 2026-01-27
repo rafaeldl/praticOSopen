@@ -246,10 +246,41 @@ color: CupertinoColors.label
 
 ### Web (Dark Premium Theme)
 
+O site institucional usa **Eleventy (11ty)** como Static Site Generator com templates Nunjucks.
+
+**Stack:**
+- **Eleventy 2.0.1**: SSG com templates Nunjucks
+- **Dados JSON**: Conteúdo separado dos templates
+- **Multi-idioma**: pt, en, es
+- **Firebase Hosting**: Deploy
+
+**Estrutura:**
+```
+firebase/hosting/
+├── src/                      # FONTES (editar aqui)
+│   ├── _data/               # Dados JSON
+│   ├── _includes/           # Layouts, componentes, partials
+│   ├── css/                 # Estilos
+│   └── *.njk                # Templates de páginas
+├── public/                  # OUTPUT (NÃO editar)
+└── .eleventy.js             # Configuração
+```
+
+**Comandos:**
+```bash
+cd firebase/hosting
+npm run build                # Gerar site
+npm run dev                  # Servidor local com hot reload
+npm run watch               # Watch mode
+```
+
+**Design System:**
 - Background: `#0A0E17` (deep blue/black)
 - Gradients para CTAs
 - Glassmorphism para navegação
 - Fonte: `Outfit` (headings), `DM Sans` (body)
+
+Ver `docs/WEBSITE_STRUCTURE.md` para documentação completa.
 
 ## Formulários Dinâmicos
 
@@ -526,6 +557,7 @@ bundle exec fastlane beta               # TestFlight (manual)
 10. **Cupertino-first**: App deve parecer nativo iOS
 11. **Dark Mode**: Sempre usar `.resolveFrom(context)` para cores dinâmicas
 12. **Documentação Obrigatória**: Documentar toda nova funcionalidade (ver seção abaixo)
+13. **Site Eleventy**: Editar APENAS em `src/`, nunca em `public/`. Executar `npm run build` após alterações
 
 ---
 
@@ -560,43 +592,70 @@ Código de exemplo quando aplicável.
 
 **Nomenclatura:** `FEATURE_NAME.md` (em inglês, UPPER_SNAKE_CASE)
 
-### 2. Documentação Pública (`firebase/hosting/public/docs/`)
+### 2. Documentação Pública (Site Eleventy)
 
-Atualizar/criar documentação para usuários finais:
+O site usa **Eleventy** com templates Nunjucks e dados JSON. **NÃO edite arquivos em `public/`** - eles são gerados automaticamente.
 
 **Estrutura de arquivos:**
 ```
-firebase/hosting/public/docs/
-├── feature.html         # Português (principal)
-├── feature-en.html      # Inglês
-├── feature-es.html      # Espanhol
-└── docs.css             # Estilos compartilhados
+firebase/hosting/src/
+├── _data/docs/          # Dados JSON por artigo
+│   ├── perfis.json
+│   ├── financeiro.json
+│   └── novo-artigo.json # Criar para novo artigo
+├── docs/                # Templates Nunjucks
+│   ├── index.njk        # Hub de docs (pt)
+│   ├── index-en.njk     # Hub de docs (en)
+│   ├── index-es.njk     # Hub de docs (es)
+│   ├── perfis.njk       # Artigo (pt)
+│   ├── perfis-en.njk    # Artigo (en)
+│   └── perfis-es.njk    # Artigo (es)
+└── css/docs.css         # Estilos de documentação
 ```
 
-**Template HTML:**
-```html
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Nome da Feature - PraticOS</title>
-  <link rel="stylesheet" href="docs.css">
-</head>
-<body>
-  <header>
-    <h1>Nome da Feature</h1>
-    <nav>
-      <a href="feature.html" class="active">PT</a>
-      <a href="feature-en.html">EN</a>
-      <a href="feature-es.html">ES</a>
-    </nav>
-  </header>
-  <main>
-    <!-- Conteúdo da documentação -->
-  </main>
-</body>
-</html>
+**Para criar novo artigo de documentação:**
+
+1. Criar dados em `src/_data/docs/novo-artigo.json`:
+```json
+{
+  "pt": {
+    "sections": [
+      {
+        "id": "visao-geral",
+        "title": "Visão Geral",
+        "intro": "Texto introdutório...",
+        "infoCard": { "title": "Dica", "content": "Conteúdo da dica" }
+      }
+    ]
+  },
+  "en": { "sections": [...] },
+  "es": { "sections": [...] }
+}
 ```
+
+2. Criar templates (pt, en, es) em `src/docs/`:
+```njk
+---
+layout: layouts/docs-article.njk
+lang: pt-BR
+langCode: pt
+docsData: novo-artigo
+heroTitle: "Título do"
+heroTitleHighlight: "Artigo"
+sidebarNav:
+  - id: visao-geral
+    label: Visão Geral
+---
+```
+
+3. Atualizar `src/_data/docs.json` para incluir no hub
+
+4. Gerar o site:
+```bash
+cd firebase/hosting && npm run build
+```
+
+Ver `docs/WEBSITE_STRUCTURE.md` para documentação completa do sistema Eleventy.
 
 ### Checklist de Documentação
 
@@ -604,10 +663,10 @@ Antes de finalizar uma feature, verificar:
 
 - [ ] Arquivo `docs/FEATURE_NAME.md` criado/atualizado
 - [ ] Documentação técnica completa (arquitetura, fluxos, regras)
-- [ ] Arquivo `firebase/hosting/public/docs/feature.html` criado (PT)
-- [ ] Versões em inglês (`-en.html`) e espanhol (`-es.html`) criadas
-- [ ] Links no `index.html` atualizados (se aplicável)
-- [ ] CSS compartilhado (`docs.css`) atualizado se necessário
+- [ ] Dados JSON criados em `firebase/hosting/src/_data/docs/` (se doc pública)
+- [ ] Templates .njk criados em `firebase/hosting/src/docs/` (pt, en, es)
+- [ ] Hub de docs atualizado (`src/_data/docs.json`)
+- [ ] Build executado (`cd firebase/hosting && npm run build`)
 
 ### Quando Documentar
 
@@ -627,6 +686,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
+- `docs/WEBSITE_STRUCTURE.md` - Estrutura completa do site Eleventy
 - `docs/MULTI_TENANCY.md` - Detalhes da arquitetura multi-tenant
 - `docs/formularios_dinamicos.md` - Especificação de checklists/vistorias
 - `docs/DEPLOYMENT.md` - Guia completo de deploy
