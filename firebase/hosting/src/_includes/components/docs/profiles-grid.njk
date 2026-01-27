@@ -1,0 +1,14 @@
+{# Profiles Grid Component - Grid of profile cards #}
+{# Usage: {% include "components/docs/profiles-grid.njk" with {profiles: [...]} %} #}
+<div class="profiles-grid">
+    {% for profile in profiles %}
+    <a href="#{{ profile.id }}" class="profile-card profile-{{ profile.colorClass }}">
+        <div class="profile-icon">
+            <span class="profile-emoji">{{ profile.emoji | safe }}</span>
+        </div>
+        <h3>{{ profile.name }}</h3>
+        <p>{{ profile.description }}</p>
+        <span class="profile-tag">{{ profile.tag }}</span>
+    </a>
+    {% endfor %}
+</div>

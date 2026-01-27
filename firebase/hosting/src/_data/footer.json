@@ -1,0 +1,83 @@
+{
+  "pt": {
+    "brand": "Sistema completo para gestão de ordens de serviço. Simplifique seu negócio.",
+    "product": {
+      "title": "Produto",
+      "links": [
+        { "href": "#features", "label": "Funcionalidades" },
+        { "href": "#pricing", "label": "Planos" },
+        { "href": "#download", "label": "Download" }
+      ]
+    },
+    "support": {
+      "title": "Suporte",
+      "links": [
+        { "href": "docs/", "label": "Documentação" },
+        { "href": "support.html", "label": "Central de Suporte" },
+        { "href": "faq.html", "label": "FAQ" },
+        { "href": "#contact", "label": "Contato" },
+        { "href": "privacy.html", "label": "Privacidade" },
+        { "href": "terms.html", "label": "Termos de Uso" }
+      ]
+    },
+    "company": {
+      "title": "Empresa"
+    },
+    "copyright": "Todos os direitos reservados.",
+    "madeWith": "Desenvolvido com ❤️ por"
+  },
+  "en": {
+    "brand": "Complete system for work order management. Simplify your business.",
+    "product": {
+      "title": "Product",
+      "links": [
+        { "href": "#features", "label": "Features" },
+        { "href": "#pricing", "label": "Pricing" },
+        { "href": "#download", "label": "Download" }
+      ]
+    },
+    "support": {
+      "title": "Support",
+      "links": [
+        { "href": "docs/", "label": "Documentation" },
+        { "href": "support-en.html", "label": "Support Center" },
+        { "href": "faq-en.html", "label": "FAQ" },
+        { "href": "#contact", "label": "Contact" },
+        { "href": "privacy-en.html", "label": "Privacy" },
+        { "href": "terms-en.html", "label": "Terms of Use" }
+      ]
+    },
+    "company": {
+      "title": "Company"
+    },
+    "copyright": "All rights reserved.",
+    "madeWith": "Made with ❤️ by"
+  },
+  "es": {
+    "brand": "Sistema completo para gestión de órdenes de servicio. Simplifique su negocio.",
+    "product": {
+      "title": "Producto",
+      "links": [
+        { "href": "#features", "label": "Funciones" },
+        { "href": "#pricing", "label": "Planes" },
+        { "href": "#download", "label": "Descargar" }
+      ]
+    },
+    "support": {
+      "title": "Soporte",
+      "links": [
+        { "href": "docs/", "label": "Documentación" },
+        { "href": "support-es.html", "label": "Centro de Soporte" },
+        { "href": "faq-es.html", "label": "FAQ" },
+        { "href": "#contact", "label": "Contacto" },
+        { "href": "privacy-es.html", "label": "Privacidad" },
+        { "href": "terms-es.html", "label": "Términos de Uso" }
+      ]
+    },
+    "company": {
+      "title": "Empresa"
+    },
+    "copyright": "Todos los derechos reservados.",
+    "madeWith": "Desarrollado con ❤️ por"
+  }
+}

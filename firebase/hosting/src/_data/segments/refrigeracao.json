@@ -1,0 +1,381 @@
+{
+  "slug": "refrigeracao",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Técnico de Refrigeração | PraticOS",
+    "description": "Organize sua refrigeração e cresça seu negócio! Sistema de OS para técnicos de ar-condicionado com agenda, histórico de equipamentos e controle financeiro. Comece grátis.",
+    "keywords": "sistema para refrigeração, app para técnico de ar condicionado, software PMOC, gestão de manutenção ar condicionado, ordem de serviço refrigeração",
+    "ogTitle": "Sistema para Técnico de Refrigeração | PraticOS",
+    "ogDescription": "Organize sua refrigeração! Sistema de OS com agenda, histórico de equipamentos e controle financeiro. Comece grátis.",
+    "hero": {
+      "badge": "❄️ Refrigeração e Ar-Condicionado",
+      "title": "Organize sua refrigeração:",
+      "titleHighlight": "cresça seu negócio",
+      "subtitle": "Acabou a papelada! Histórico completo de cada equipamento, agenda inteligente que nunca esquece um agendamento e controle financeiro para saber quanto você realmente ganha.",
+      "ctaPrimary": "Testar Grátis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Técnicos ativos" },
+        "orders": { "value": "10k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliação" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Você enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem trabalha com refrigeração",
+      "items": [
+        { "icon": "📋", "title": "Gestão manual e confusa", "text": "Controle de contratos e manutenções todo manual. Perde clientes e faz retrabalho por falta de organização." },
+        { "icon": "🔧", "title": "Não tem histórico do equipamento", "text": "Cliente liga com problema e você não lembra o que já fez naquele ar-condicionado. Diagnóstico mais lento." },
+        { "icon": "📄", "title": "Papelada do PMOC", "text": "Gerar documentos PMOC manualmente é burocrático e demorado. Risco de perder contrato por falta de documentação." },
+        { "icon": "📅", "title": "Esquece agendamentos", "text": "Agenda confusa, conflitos de horário. Cliente fica esperando e você perde a confiança." },
+        { "icon": "💰", "title": "Cobrança desorganizada", "text": "Inadimplência, fluxo de caixa irregular. Não sabe quem deve e quanto tem a receber." },
+        { "icon": "📞", "title": "Cliente pergunta onde você está", "text": "Ligações constantes perguntando quando você vai chegar. Interrompe seu trabalho em campo." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluções",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para o dia a dia do técnico de refrigeração",
+      "items": [
+        { "icon": "📱", "title": "OS Digital completa", "text": "Acabou a papelada! Crie OS pelo celular com fotos, valores e histórico do equipamento." },
+        { "icon": "🔧", "title": "Histórico do equipamento", "text": "Saiba tudo sobre cada ar-condicionado: manutenções anteriores, peças trocadas, observações." },
+        { "icon": "📅", "title": "Agenda inteligente", "text": "Nunca esqueça um agendamento. Alertas automáticos para você e para o cliente.", "highlight": "Zero esquecimentos." },
+        { "icon": "📸", "title": "Fotos e relatórios", "text": "Documente cada serviço com fotos. Relatórios profissionais em poucos cliques." },
+        { "icon": "💰", "title": "Controle financeiro", "text": "Saiba quanto tem a receber, quem está inadimplente e qual seu lucro real.", "highlight": "Fluxo de caixa organizado." },
+        { "icon": "🔗", "title": "Link para o cliente", "text": "Cliente acompanha o status do serviço pelo celular. Menos ligações, mais produtividade." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulário",
+      "title": "Checklist de",
+      "titleHighlight": "manutenção",
+      "text": "Padronize suas manutenções com checklists digitais. Documente cada item verificado e gere relatórios automáticos.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Checklist de Manutenção",
+      "items": [
+        { "icon": "📸", "text": "Fotos do equipamento" },
+        { "icon": "🌡️", "text": "Temperatura de entrada/saída" },
+        { "icon": "⚡", "text": "Corrente elétrica (Amperes)" },
+        { "icon": "🔧", "text": "Limpeza de filtros" },
+        { "icon": "💨", "text": "Verificação de gás" },
+        { "icon": "✅", "text": "Teste de funcionamento" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar seus serviços",
+      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, histórico e valores. Tudo organizado no celular." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Documente cada serviço com fotos. Comprove o trabalho realizado para o cliente.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profissional", "text": "Gere relatórios e recibos em PDF. Profissionalismo que impressiona e fideliza.", "color": "orange" },
+        { "icon": "money", "title": "Controle Financeiro", "text": "Dashboard completo: faturamento, recebimentos, a receber e lucro real.", "color": "green" },
+        { "icon": "users", "title": "Cadastro de Clientes", "text": "Histórico completo de cada cliente e equipamento. Acesse tudo em segundos.", "color": "purple" },
+        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o serviço pelo celular. Menos ligações, mais produtividade.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes o controle de contratos e manutenções era todo manual e confuso. Com o PraticOS ganhei tempo, reduzi erros e passo muito mais profissionalismo para meus clientes.",
+      "name": "Carlos Henrique",
+      "role": "Técnico de refrigeração há 10 anos",
+      "metric": "50% mais produtividade"
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas dúvidas antes de começar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes." },
+        { "question": "Funciona offline?", "answer": "Você precisa de internet para sincronizar os dados, mas pode visualizar OS já carregadas mesmo offline. Na prática, com o 4G você não terá problemas." },
+        { "question": "Serve para empresa com vários técnicos?", "answer": "Sim! O PraticOS funciona tanto para técnico autônomo quanto para empresas com equipe. Cada técnico acessa pelo seu celular." },
+        { "question": "Tem controle de PMOC?", "answer": "O PraticOS ajuda você a organizar manutenções recorrentes e gerar relatórios. Você pode adaptar os checklists para suas necessidades de PMOC." },
+        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time entende a realidade do técnico de refrigeração." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar seus serviços",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe está pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "HVAC Technician Management System | PraticOS",
+    "description": "Organize your HVAC business and grow! Work order system for AC technicians with scheduling, equipment history and financial control. Start free.",
+    "keywords": "HVAC software, air conditioning technician app, AC maintenance system, refrigeration work order, HVAC business management",
+    "ogTitle": "HVAC Technician Management System | PraticOS",
+    "ogDescription": "Organize your HVAC business! WO system with scheduling, equipment history and financial control. Start free.",
+    "hero": {
+      "badge": "❄️ HVAC & Refrigeration",
+      "title": "Organize your HVAC business:",
+      "titleHighlight": "grow your company",
+      "subtitle": "No more paperwork! Complete history of each equipment, smart scheduling that never forgets an appointment and financial control to know how much you really make.",
+      "ctaPrimary": "Try Free",
+      "ctaSecondary": "Watch Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Active technicians" },
+        "orders": { "value": "10k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for HVAC technicians",
+      "items": [
+        { "icon": "📋", "title": "Manual and messy management", "text": "Contract and maintenance control all manual. Lose customers and redo work due to lack of organization." },
+        { "icon": "🔧", "title": "No equipment history", "text": "Customer calls with a problem and you don't remember what you already did on that AC. Slower diagnosis." },
+        { "icon": "📄", "title": "Maintenance paperwork", "text": "Generating maintenance documents manually is bureaucratic and time-consuming. Risk of losing contracts." },
+        { "icon": "📅", "title": "Forget appointments", "text": "Messy schedule, time conflicts. Customer keeps waiting and you lose their trust." },
+        { "icon": "💰", "title": "Disorganized billing", "text": "Late payments, irregular cash flow. Don't know who owes and how much you have to receive." },
+        { "icon": "📞", "title": "Customer asks where you are", "text": "Constant calls asking when you'll arrive. Interrupts your field work." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for daily HVAC technician operations",
+      "items": [
+        { "icon": "📱", "title": "Complete digital WO", "text": "No more paperwork! Create WOs on your phone with photos, values and equipment history." },
+        { "icon": "🔧", "title": "Equipment history", "text": "Know everything about each AC: previous maintenance, parts replaced, notes." },
+        { "icon": "📅", "title": "Smart scheduling", "text": "Never forget an appointment. Automatic alerts for you and the customer.", "highlight": "Zero forgotten appointments." },
+        { "icon": "📸", "title": "Photos and reports", "text": "Document each service with photos. Professional reports in just a few clicks." },
+        { "icon": "💰", "title": "Financial control", "text": "Know how much you have to receive, who's late and your real profit.", "highlight": "Organized cash flow." },
+        { "icon": "🔗", "title": "Link for customer", "text": "Customer tracks service status on their phone. Fewer calls, more productivity." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Maintenance",
+      "titleHighlight": "checklist",
+      "text": "Standardize your maintenance with digital checklists. Document each verified item and generate automatic reports.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Maintenance Checklist",
+      "items": [
+        { "icon": "📸", "text": "Equipment photos" },
+        { "icon": "🌡️", "text": "Inlet/outlet temperature" },
+        { "icon": "⚡", "text": "Electric current (Amps)" },
+        { "icon": "🔧", "text": "Filter cleaning" },
+        { "icon": "💨", "text": "Gas check" },
+        { "icon": "✅", "text": "Operation test" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your services",
+      "subtitle": "Powerful and intuitive tools to boost your productivity",
+      "items": [
+        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, history and values. All organized on your phone." },
+        { "icon": "image", "title": "Unlimited Photos", "text": "Document each service with photos. Prove the work done to the customer.", "color": "yellow" },
+        { "icon": "pdf", "title": "Professional PDF", "text": "Generate reports and receipts in PDF. Professionalism that impresses and retains.", "color": "orange" },
+        { "icon": "money", "title": "Financial Control", "text": "Complete dashboard: billing, receipts, receivables and real profit.", "color": "green" },
+        { "icon": "users", "title": "Customer Database", "text": "Complete history of each customer and equipment. Access everything in seconds.", "color": "purple" },
+        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks service on their phone. Fewer calls, more productivity.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Before, contract and maintenance control was all manual and messy. With PraticOS I saved time, reduced errors and project much more professionalism to my customers.",
+      "name": "Carlos Henrique",
+      "role": "HVAC technician for 10 years",
+      "metric": "50% more productivity"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent." },
+        { "question": "Does it work offline?", "answer": "You need internet to sync data, but you can view already loaded WOs offline. In practice, with 4G you won't have problems." },
+        { "question": "Does it work for companies with multiple technicians?", "answer": "Yes! PraticOS works for both independent technicians and companies with teams. Each technician accesses on their phone." },
+        { "question": "Does it have maintenance scheduling control?", "answer": "PraticOS helps you organize recurring maintenance and generate reports. You can adapt checklists to your maintenance needs." },
+        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team understands the reality of HVAC technicians." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "organize your services",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Técnico de Refrigeración | PraticOS",
+    "description": "¡Organiza tu negocio de refrigeración y crece! Sistema de OS para técnicos de aire acondicionado con agenda, historial de equipos y control financiero. Empieza gratis.",
+    "keywords": "sistema para refrigeración, app para técnico de aire acondicionado, software HVAC, gestión de mantenimiento aire acondicionado, orden de servicio refrigeración",
+    "ogTitle": "Sistema para Técnico de Refrigeración | PraticOS",
+    "ogDescription": "¡Organiza tu refrigeración! Sistema de OS con agenda, historial de equipos y control financiero. Empieza gratis.",
+    "hero": {
+      "badge": "❄️ Refrigeración y Aire Acondicionado",
+      "title": "Organiza tu refrigeración:",
+      "titleHighlight": "crece tu negocio",
+      "subtitle": "¡Se acabó el papeleo! Historial completo de cada equipo, agenda inteligente que nunca olvida una cita y control financiero para saber cuánto realmente ganas.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Técnicos activos" },
+        "orders": { "value": "10k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificación" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien trabaja con refrigeración",
+      "items": [
+        { "icon": "📋", "title": "Gestión manual y confusa", "text": "Control de contratos y mantenimientos todo manual. Pierdes clientes y haces retrabajo por falta de organización." },
+        { "icon": "🔧", "title": "No tiene historial del equipo", "text": "Cliente llama con problema y no recuerdas qué ya hiciste en ese aire acondicionado. Diagnóstico más lento." },
+        { "icon": "📄", "title": "Papeleo del mantenimiento", "text": "Generar documentos de mantenimiento manualmente es burocrático y demorado. Riesgo de perder contrato." },
+        { "icon": "📅", "title": "Olvida citas", "text": "Agenda confusa, conflictos de horario. Cliente queda esperando y pierdes su confianza." },
+        { "icon": "💰", "title": "Cobro desorganizado", "text": "Morosidad, flujo de caja irregular. No sabes quién debe y cuánto tienes por recibir." },
+        { "icon": "📞", "title": "Cliente pregunta dónde estás", "text": "Llamadas constantes preguntando cuándo vas a llegar. Interrumpe tu trabajo en campo." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Cómo",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para el día a día del técnico de refrigeración",
+      "items": [
+        { "icon": "📱", "title": "OS Digital completa", "text": "¡Se acabó el papeleo! Crea OS por el celular con fotos, valores e historial del equipo." },
+        { "icon": "🔧", "title": "Historial del equipo", "text": "Sabe todo sobre cada aire acondicionado: mantenimientos anteriores, piezas cambiadas, observaciones." },
+        { "icon": "📅", "title": "Agenda inteligente", "text": "Nunca olvides una cita. Alertas automáticas para ti y para el cliente.", "highlight": "Cero olvidos." },
+        { "icon": "📸", "title": "Fotos y reportes", "text": "Documenta cada servicio con fotos. Reportes profesionales en pocos clics." },
+        { "icon": "💰", "title": "Control financiero", "text": "Sabe cuánto tienes por recibir, quién está moroso y cuál es tu ganancia real.", "highlight": "Flujo de caja organizado." },
+        { "icon": "🔗", "title": "Link para el cliente", "text": "Cliente sigue el estado del servicio por el celular. Menos llamadas, más productividad." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "mantenimiento",
+      "text": "Estandariza tus mantenimientos con checklists digitales. Documenta cada ítem verificado y genera reportes automáticos.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Mantenimiento",
+      "items": [
+        { "icon": "📸", "text": "Fotos del equipo" },
+        { "icon": "🌡️", "text": "Temperatura de entrada/salida" },
+        { "icon": "⚡", "text": "Corriente eléctrica (Amperes)" },
+        { "icon": "🔧", "text": "Limpieza de filtros" },
+        { "icon": "💨", "text": "Verificación de gas" },
+        { "icon": "✅", "text": "Prueba de funcionamiento" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tus servicios",
+      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, historial y valores. Todo organizado en el celular." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Documenta cada servicio con fotos. Comprueba el trabajo realizado al cliente.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profesional", "text": "Genera reportes y recibos en PDF. Profesionalismo que impresiona y fideliza.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Dashboard completo: facturación, recibos, por recibir y ganancia real.", "color": "green" },
+        { "icon": "users", "title": "Registro de Clientes", "text": "Historial completo de cada cliente y equipo. Accede a todo en segundos.", "color": "purple" },
+        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el servicio por el celular. Menos llamadas, más productividad.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes el control de contratos y mantenimientos era todo manual y confuso. Con PraticOS gané tiempo, reduje errores y proyecto mucho más profesionalismo a mis clientes.",
+      "name": "Carlos Henrique",
+      "role": "Técnico de refrigeración hace 10 años",
+      "metric": "50% más productividad"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes." },
+        { "question": "¿Funciona sin internet?", "answer": "Necesitas internet para sincronizar los datos, pero puedes ver OS ya cargadas sin conexión. En la práctica, con 4G no tendrás problemas." },
+        { "question": "¿Sirve para empresa con varios técnicos?", "answer": "¡Sí! PraticOS funciona tanto para técnico autónomo como para empresas con equipo. Cada técnico accede por su celular." },
+        { "question": "¿Tiene control de mantenimiento programado?", "answer": "PraticOS te ayuda a organizar mantenimientos recurrentes y generar reportes. Puedes adaptar los checklists a tus necesidades." },
+        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo entiende la realidad del técnico de refrigeración." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "organizar tus servicios",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo está listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}

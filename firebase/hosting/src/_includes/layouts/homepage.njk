@@ -1,0 +1,24 @@
+---
+layout: layouts/base.njk
+---
+
+{# Get homepage data based on language #}
+{% set data = homepage[langCode] | default(homepage.pt) %}
+
+{# Hero Section #}
+{% include "components/hero.njk" %}
+
+{# Features Section #}
+{% include "components/features-grid.njk" %}
+
+{# Screenshots Section #}
+{% include "components/screenshots.njk" %}
+
+{# Pricing Section - uses existing pricing.json #}
+{% include "components/pricing.njk" %}
+
+{# Download Section #}
+{% include "components/download.njk" %}
+
+{# Contact Section #}
+{% include "components/contact.njk" %}

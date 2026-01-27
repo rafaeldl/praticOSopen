@@ -1,0 +1,128 @@
+{# Section Renderer Component - Renders a section based on its type #}
+{# Usage: {% include "components/docs/section-renderer.njk" with {section: {...}} %} #}
+
+<section id="{{ section.id }}" class="docs-section">
+    {% if section.headerInline %}
+    <div class="section-header-inline">
+        <span class="profile-badge {{ section.headerInline.badgeClass }}">{{ section.headerInline.emoji | safe }}</span>
+        <div>
+            <h2>{{ section.title }}</h2>
+            <p class="section-subtitle">{{ section.subtitle }}</p>
+        </div>
+    </div>
+    {% else %}
+    <h2>{{ section.title }}</h2>
+    {% endif %}
+
+    {% if section.intro %}<p>{{ section.intro | safe }}</p>{% endif %}
+
+    {# Info Card #}
+    {% if section.infoCard %}
+    {% set title = section.infoCard.title %}
+    {% set content = section.infoCard.content %}
+    {% include "components/docs/info-card.njk" %}
+    {% endif %}
+
+    {# Warning Card #}
+    {% if section.warningCard %}
+    {% set title = section.warningCard.title %}
+    {% set content = section.warningCard.content %}
+    {% include "components/docs/warning-card.njk" %}
+    {% endif %}
+
+    {# Features Highlight #}
+    {% if section.features %}
+    {% set features = section.features %}
+    {% include "components/docs/features-highlight.njk" %}
+    {% endif %}
+
+    {# Profiles Grid #}
+    {% if section.profiles %}
+    {% set profiles = section.profiles %}
+    {% include "components/docs/profiles-grid.njk" %}
+    {% endif %}
+
+    {# Permissions Grid #}
+    {% if section.permissionsGrid %}
+    {% set categories = section.permissionsGrid %}
+    {% include "components/docs/permissions-grid.njk" %}
+    {% endif %}
+
+    {# Status Cards #}
+    {% if section.statusCards %}
+    {% set cards = section.statusCards %}
+    {% include "components/docs/status-cards.njk" %}
+    {% endif %}
+
+    {# Status Flow #}
+    {% if section.statusFlow %}
+    {% set statuses = section.statusFlow %}
+    {% include "components/docs/status-flow.njk" %}
+    {% endif %}
+
+    {# Status Details #}
+    {% if section.statusDetails %}
+    {% set details = section.statusDetails %}
+    {% include "components/docs/status-details.njk" %}
+    {% endif %}
+
+    {# Subsections with titles and steps #}
+    {% if section.subsections %}
+    {% for sub in section.subsections %}
+    <h3>{{ sub.title }}</h3>
+    {% if sub.content %}<p>{{ sub.content | safe }}</p>{% endif %}
+    {% if sub.steps %}
+    {% set steps = sub.steps %}
+    {% include "components/docs/step-list.njk" %}
+    {% endif %}
+    {% if sub.validationList %}
+    {% set items = sub.validationList %}
+    {% include "components/docs/validation-list.njk" %}
+    {% endif %}
+    {% if sub.infoCard %}
+    {% set title = sub.infoCard.title %}
+    {% set content = sub.infoCard.content %}
+    {% include "components/docs/info-card.njk" %}
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    {# Metrics Grid #}
+    {% if section.metrics %}
+    {% set metrics = section.metrics %}
+    {% include "components/docs/metrics-grid.njk" %}
+    {% endif %}
+
+    {# Permissions Table(s) #}
+    {% if section.tables %}
+    {% for table in section.tables %}
+    {% set title = table.title %}
+    {% set headers = table.headers %}
+    {% set rows = table.rows %}
+    {% set note = table.note %}
+    {% include "components/docs/permissions-table.njk" %}
+    {% endfor %}
+    {% endif %}
+
+    {# Single Permissions Table #}
+    {% if section.table %}
+    {% set title = section.table.title %}
+    {% set headers = section.table.headers %}
+    {% set rows = section.table.rows %}
+    {% set note = section.table.note %}
+    {% include "components/docs/permissions-table.njk" %}
+    {% endif %}
+
+    {# FAQ Grid #}
+    {% if section.faq %}
+    {% set items = section.faq %}
+    {% include "components/docs/faq-grid.njk" %}
+    {% endif %}
+
+    {# Additional content/paragraphs #}
+    {% if section.paragraphs %}
+    {% for p in section.paragraphs %}
+    <p>{{ p | safe }}</p>
+    {% endfor %}
+    {% endif %}
+</section>

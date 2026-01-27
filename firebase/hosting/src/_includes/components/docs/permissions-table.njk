@@ -1,0 +1,25 @@
+{# Permissions Table Component - Table with yes/no/partial permissions #}
+{# Usage: {% include "components/docs/permissions-table.njk" with {title: "Title", headers: [...], rows: [...], note: "..."} %} #}
+<div class="table-wrapper">
+    {% if title %}<h4>{{ title }}</h4>{% endif %}
+    <table class="permissions-table">
+        <thead>
+            <tr>
+                {% for header in headers %}
+                <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td>{{ row.label }}</td>
+                {% for cell in row.cells %}
+                <td class="{{ cell.class }}">{% if cell.class == 'yes' %}&#10003;{% elif cell.class == 'no' %}&#10007;{% else %}*{% endif %}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if note %}<p class="table-note">{{ note }}</p>{% endif %}
+</div>

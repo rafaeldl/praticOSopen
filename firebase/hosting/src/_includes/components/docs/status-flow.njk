@@ -1,0 +1,13 @@
+{# Status Flow Component - Horizontal flow diagram of status transitions #}
+{# Usage: {% include "components/docs/status-flow.njk" with {statuses: [...]} %} #}
+<div class="status-flow">
+    {% for status in statuses %}
+    {% if not loop.first %}
+    <div class="status-arrow">&#8594;</div>
+    {% endif %}
+    <div class="status-item status-{{ status.class }}">
+        <span class="status-dot"></span>
+        <span class="status-name">{{ status.name }}</span>
+    </div>
+    {% endfor %}
+</div>

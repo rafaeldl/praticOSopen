@@ -1,0 +1,7 @@
+{# Step List Component - Ordered list of steps #}
+{# Usage: {% include "components/docs/step-list.njk" with {steps: [...]} %} #}
+<ol class="step-list">
+    {% for step in steps %}
+    <li>{{ step | safe }}</li>
+    {% endfor %}
+</ol>

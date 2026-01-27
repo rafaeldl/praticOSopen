@@ -1,0 +1,13 @@
+{
+  "name": "praticos-website",
+  "version": "1.0.0",
+  "description": "PraticOS website built with Eleventy",
+  "scripts": {
+    "build": "npx @11ty/eleventy",
+    "dev": "npx @11ty/eleventy --serve",
+    "watch": "npx @11ty/eleventy --watch"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^2.0.1"
+  }
+}

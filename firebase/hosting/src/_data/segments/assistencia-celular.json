@@ -1,0 +1,381 @@
+{
+  "slug": "assistencia-celular",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Assistência Técnica de Celular | PraticOS",
+    "description": "Chega de bagunça! Sistema de OS para assistência técnica de celular com foto, IMEI e link de acompanhamento. Organize sua loja em 5 minutos. Grátis para começar.",
+    "keywords": "sistema para assistência técnica celular, app para técnico de celular, programa ordem de serviço celular, controle de OS celular, software assistência técnica grátis",
+    "ogTitle": "Sistema para Assistência Técnica de Celular | PraticOS",
+    "ogDescription": "Chega de bagunça! Sistema de OS com foto, IMEI e link de acompanhamento. Organize sua assistência em 5 minutos.",
+    "hero": {
+      "badge": "📱 Assistência Técnica de Celular",
+      "title": "Chega de bagunça:",
+      "titleHighlight": "organize sua assistência em 5 minutos",
+      "subtitle": "Acabe com as 5 ligações por dia de \"já ficou pronto?\". Documente cada aparelho com foto e IMEI, e deixe o cliente acompanhar sozinho pelo link mágico.",
+      "ctaPrimary": "Testar Grátis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Técnicos ativos" },
+        "orders": { "value": "10k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliação" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Você enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem trabalha com assistência técnica de celular",
+      "items": [
+        { "icon": "📞", "title": "Cliente liga toda hora", "text": "Cliente liga 5x por dia perguntando se o aparelho ficou pronto. Você perde tempo e paciência." },
+        { "icon": "🔀", "title": "Aparelhos misturados", "text": "Vários celulares na bancada e você não sabe de quem é qual. Confusão na hora de entregar." },
+        { "icon": "💸", "title": "Esquece de cobrar peças", "text": "Usa peças no reparo mas esquece de anotar. No final, perde dinheiro sem perceber." },
+        { "icon": "😤", "title": "Cliente reclama sem razão", "text": "Cliente voltou dizendo que você quebrou algo, mas não tem como provar o estado anterior do aparelho." },
+        { "icon": "🚨", "title": "Medo de celular roubado", "text": "Recebi um aparelho sem saber que era roubado. Risco de problema com a polícia e prejuízo." },
+        { "icon": "📊", "title": "Não sabe quanto lucrou", "text": "Trabalha o mês inteiro mas no final não sabe quanto sobrou. Sem controle de custos e margem real por serviço." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluções",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para o dia a dia da assistência técnica",
+      "items": [
+        { "icon": "🔗", "title": "Link mágico para o cliente", "text": "Cliente recebe um link e acompanha o status em tempo real.", "highlight": "Reduz ligações em até 70%." },
+        { "icon": "📸", "title": "OS vinculada com foto e IMEI", "text": "Cada OS tem foto do aparelho, IMEI e dados completos. Nunca mais confunda equipamentos." },
+        { "icon": "🧮", "title": "Cálculo automático do total", "text": "Adiciona peças e mão de obra, o sistema calcula tudo automaticamente. Sem erro." },
+        { "icon": "✍️", "title": "Checklist com assinatura digital", "text": "Documente o estado do aparelho na entrada.", "highlight": "Reduz disputas de garantia em 85%." },
+        { "icon": "🔐", "title": "Registro de IMEI obrigatório", "text": "Registre o IMEI de cada aparelho. Histórico completo para sua segurança jurídica." },
+        { "icon": "💰", "title": "Dashboard financeiro completo", "text": "Saiba exatamente quanto lucrou no mês.", "highlight": "Controle total de custos e margem." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulário",
+      "title": "Checklist de",
+      "titleHighlight": "entrada do aparelho",
+      "text": "Documente o estado do celular na entrada e evite problemas na hora da entrega. O cliente assina digitalmente.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Checklist de Recebimento",
+      "items": [
+        { "icon": "📸", "text": "Fotos do aparelho (frente/verso)" },
+        { "icon": "📱", "text": "IMEI (15 dígitos)" },
+        { "icon": "🔋", "text": "Saúde da bateria (%)" },
+        { "icon": "✅", "text": "Estado: Tela, Touch, Câmeras, Botões" },
+        { "icon": "🔐", "text": "Senha de desbloqueio" },
+        { "icon": "📦", "text": "Acessórios deixados" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar sua assistência",
+      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, IMEI, descrição do defeito e valores. Tudo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe o estado do aparelho na entrada. Proteja-se de reclamações indevidas.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profissional", "text": "Gere comprovantes em PDF para o cliente. Profissionalismo que impressiona.", "color": "orange" },
+        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestão de Clientes", "text": "Histórico completo de cada cliente. Todos os serviços anteriores em um só lugar.", "color": "purple" },
+        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status do reparo pelo celular. Sem precisar ligar para você.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes eu perdia 2 horas por dia atendendo ligações de clientes perguntando se o celular ficou pronto. Agora eles acompanham pelo link e só me ligam quando é urgente de verdade.",
+      "name": "Carlos Silva",
+      "role": "Dono de assistência técnica há 8 anos",
+      "metric": "70% menos ligações de clientes"
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas dúvidas antes de começar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Diferente de 90% dos concorrentes, nossos preços são transparentes e você não precisa falar com vendedor." },
+        { "question": "Já tentei outros apps e não gostei", "answer": "PraticOS foi criado por quem trabalha com assistência técnica de celular. Não é um app genérico adaptado — foi feito especificamente para você. Por isso tem IMEI, checklist de entrada, link de acompanhamento e tudo que você precisa." },
+        { "question": "Funciona sem internet?", "answer": "Você precisa de internet para sincronizar os dados, mas pode visualizar OS já carregadas mesmo offline. Na prática, com o Wi-Fi da loja você não vai ter problemas." },
+        { "question": "Consigo importar meus dados?", "answer": "Sim! Você pode importar sua lista de clientes via planilha. É só entrar em contato pelo suporte que ajudamos você a migrar seus dados." },
+        { "question": "Tem suporte se eu precisar de ajuda?", "answer": "Sim! Temos suporte por email e uma documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da assistência técnica e vai te ajudar de verdade." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar sua assistência",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe está pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Phone Repair Shop Management System | PraticOS",
+    "description": "Stop the chaos! Work order system for phone repair shops with photos, IMEI tracking and customer status link. Get organized in 5 minutes. Free to start.",
+    "keywords": "phone repair shop software, cell phone repair management, work order system, repair shop app, phone technician app, IMEI tracking",
+    "ogTitle": "Phone Repair Shop Management System | PraticOS",
+    "ogDescription": "Stop the chaos! Work order system with photos, IMEI tracking and customer status link. Get organized in 5 minutes.",
+    "hero": {
+      "badge": "📱 Phone Repair Shop",
+      "title": "Stop the chaos:",
+      "titleHighlight": "organize your repair shop in 5 minutes",
+      "subtitle": "End the 5 daily \"is it ready yet?\" calls. Document every device with photos and IMEI, and let customers track status themselves with the magic link.",
+      "ctaPrimary": "Try Free",
+      "ctaSecondary": "Watch Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Active technicians" },
+        "orders": { "value": "10k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for phone repair technicians",
+      "items": [
+        { "icon": "📞", "title": "Customer calls all day", "text": "Customer calls 5x a day asking if the device is ready. You lose time and patience." },
+        { "icon": "🔀", "title": "Devices mixed up", "text": "Several phones on your bench and you don't know whose is which. Confusion at delivery time." },
+        { "icon": "💸", "title": "Forget to charge for parts", "text": "Use parts in repair but forget to write it down. At the end, you lose money without noticing." },
+        { "icon": "😤", "title": "Unfair customer complaints", "text": "Customer returns claiming you broke something, but you can't prove the device's previous condition." },
+        { "icon": "🚨", "title": "Fear of stolen phones", "text": "Received a device without knowing it was stolen. Risk of legal trouble and financial loss." },
+        { "icon": "📊", "title": "Don't know your profit", "text": "Work all month but don't know how much you actually made. No control over costs and real margins per job." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for daily repair shop operations",
+      "items": [
+        { "icon": "🔗", "title": "Magic link for customers", "text": "Customer receives a link and tracks status in real time.", "highlight": "Reduces calls by up to 70%." },
+        { "icon": "📸", "title": "WO linked with photo and IMEI", "text": "Each WO has device photo, IMEI and complete data. Never mix up devices again." },
+        { "icon": "🧮", "title": "Automatic total calculation", "text": "Add parts and labor, the system calculates everything automatically. No errors." },
+        { "icon": "✍️", "title": "Checklist with digital signature", "text": "Document the device condition at intake.", "highlight": "Reduces warranty disputes by 85%." },
+        { "icon": "🔐", "title": "Required IMEI registration", "text": "Register each device's IMEI. Complete history for your legal protection." },
+        { "icon": "💰", "title": "Complete financial dashboard", "text": "Know exactly how much you made this month.", "highlight": "Full control over costs and margins." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Device",
+      "titleHighlight": "intake checklist",
+      "text": "Document the device condition at intake and avoid problems at delivery. Customer signs digitally.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Intake Checklist",
+      "items": [
+        { "icon": "📸", "text": "Device photos (front/back)" },
+        { "icon": "📱", "text": "IMEI (15 digits)" },
+        { "icon": "🔋", "text": "Battery health (%)" },
+        { "icon": "✅", "text": "Status: Screen, Touch, Cameras, Buttons" },
+        { "icon": "🔐", "text": "Unlock password" },
+        { "icon": "📦", "text": "Accessories left" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your shop",
+      "subtitle": "Powerful and intuitive tools to boost your productivity",
+      "items": [
+        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, IMEI, defect description and values. All organized." },
+        { "icon": "image", "title": "Unlimited Photos", "text": "Photograph the device condition at intake. Protect yourself from undue complaints.", "color": "yellow" },
+        { "icon": "pdf", "title": "Professional PDF", "text": "Generate receipts in PDF for the customer. Professionalism that impresses.", "color": "orange" },
+        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
+        { "icon": "users", "title": "Customer Management", "text": "Complete history of each customer. All previous services in one place.", "color": "purple" },
+        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks repair status on their phone. No need to call you.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "I used to lose 2 hours a day answering customer calls asking if their phone was ready. Now they track it via the link and only call when it's truly urgent.",
+      "name": "Carlos Silva",
+      "role": "Repair shop owner for 8 years",
+      "metric": "70% fewer customer calls"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Unlike 90% of competitors, our pricing is transparent and you don't need to talk to a salesperson." },
+        { "question": "I've tried other apps and didn't like them", "answer": "PraticOS was created by people who work in phone repair shops. It's not a generic app adapted for your use — it was built specifically for you. That's why it has IMEI tracking, intake checklist, status tracking link and everything you need." },
+        { "question": "Does it work offline?", "answer": "You need internet to sync data, but you can view already loaded work orders offline. In practice, with your shop's Wi-Fi you won't have any issues." },
+        { "question": "Can I import my data?", "answer": "Yes! You can import your customer list via spreadsheet. Just contact our support and we'll help you migrate your data." },
+        { "question": "Is there support if I need help?", "answer": "Yes! We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of repair shops and will truly help you." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "organize your shop",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Asistencia Técnica de Celular | PraticOS",
+    "description": "¡Basta de desorden! Sistema de OS para asistencia técnica de celular con foto, IMEI y link de seguimiento. Organiza tu tienda en 5 minutos. Gratis para empezar.",
+    "keywords": "sistema asistencia técnica celular, app técnico celular, programa orden servicio celular, control OS celular, software asistencia técnica gratis",
+    "ogTitle": "Sistema para Asistencia Técnica de Celular | PraticOS",
+    "ogDescription": "¡Basta de desorden! Sistema de OS con foto, IMEI y link de seguimiento. Organiza tu asistencia en 5 minutos.",
+    "hero": {
+      "badge": "📱 Asistencia Técnica de Celular",
+      "title": "Basta de desorden:",
+      "titleHighlight": "organiza tu asistencia en 5 minutos",
+      "subtitle": "Acaba con las 5 llamadas al día de \"¿ya está listo?\". Documenta cada aparato con foto e IMEI, y deja que el cliente lo siga solo por el link mágico.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Técnicos activos" },
+        "orders": { "value": "10k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificación" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien trabaja con asistencia técnica de celular",
+      "items": [
+        { "icon": "📞", "title": "Cliente llama todo el día", "text": "Cliente llama 5x al día preguntando si el aparato está listo. Pierdes tiempo y paciencia." },
+        { "icon": "🔀", "title": "Aparatos mezclados", "text": "Varios celulares en la mesa y no sabes de quién es cuál. Confusión a la hora de entregar." },
+        { "icon": "💸", "title": "Olvida cobrar piezas", "text": "Usa piezas en la reparación pero olvida anotarlo. Al final, pierdes dinero sin darte cuenta." },
+        { "icon": "😤", "title": "Cliente reclama sin razón", "text": "Cliente volvió diciendo que rompiste algo, pero no tienes cómo probar el estado anterior del aparato." },
+        { "icon": "🚨", "title": "Miedo de celular robado", "text": "Recibí un aparato sin saber que era robado. Riesgo de problema con la policía y pérdida." },
+        { "icon": "📊", "title": "No sabe cuánto ganó", "text": "Trabaja todo el mes pero al final no sabe cuánto sobró. Sin control de costos y margen real por servicio." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Cómo",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para el día a día de la asistencia técnica",
+      "items": [
+        { "icon": "🔗", "title": "Link mágico para el cliente", "text": "Cliente recibe un link y sigue el estado en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
+        { "icon": "📸", "title": "OS vinculada con foto e IMEI", "text": "Cada OS tiene foto del aparato, IMEI y datos completos. Nunca más confundas equipos." },
+        { "icon": "🧮", "title": "Cálculo automático del total", "text": "Agrega piezas y mano de obra, el sistema calcula todo automáticamente. Sin error." },
+        { "icon": "✍️", "title": "Checklist con firma digital", "text": "Documenta el estado del aparato en la entrada.", "highlight": "Reduce disputas de garantía en 85%." },
+        { "icon": "🔐", "title": "Registro de IMEI obligatorio", "text": "Registra el IMEI de cada aparato. Historial completo para tu seguridad jurídica." },
+        { "icon": "💰", "title": "Dashboard financiero completo", "text": "Sabe exactamente cuánto ganaste en el mes.", "highlight": "Control total de costos y margen." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "entrada del aparato",
+      "text": "Documenta el estado del celular en la entrada y evita problemas a la hora de entregar. El cliente firma digitalmente.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Recepción",
+      "items": [
+        { "icon": "📸", "text": "Fotos del aparato (frente/atrás)" },
+        { "icon": "📱", "text": "IMEI (15 dígitos)" },
+        { "icon": "🔋", "text": "Salud de la batería (%)" },
+        { "icon": "✅", "text": "Estado: Pantalla, Touch, Cámaras, Botones" },
+        { "icon": "🔐", "text": "Contraseña de desbloqueo" },
+        { "icon": "📦", "text": "Accesorios dejados" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tu asistencia",
+      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, IMEI, descripción del defecto y valores. Todo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografía el estado del aparato en la entrada. Protégete de reclamaciones indebidas.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profesional", "text": "Genera comprobantes en PDF para el cliente. Profesionalismo que impresiona.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestión de Clientes", "text": "Historial completo de cada cliente. Todos los servicios anteriores en un solo lugar.", "color": "purple" },
+        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado de la reparación por el celular. Sin necesidad de llamarte.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes perdía 2 horas al día atendiendo llamadas de clientes preguntando si el celular estaba listo. Ahora lo siguen por el link y solo me llaman cuando es urgente de verdad.",
+      "name": "Carlos Silva",
+      "role": "Dueño de asistencia técnica hace 8 años",
+      "metric": "70% menos llamadas de clientes"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. A diferencia del 90% de la competencia, nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "Ya probé otras apps y no me gustaron", "answer": "PraticOS fue creado por quienes trabajan con asistencia técnica de celular. No es una app genérica adaptada — fue hecha específicamente para ti. Por eso tiene IMEI, checklist de entrada, link de seguimiento y todo lo que necesitas." },
+        { "question": "¿Funciona sin internet?", "answer": "Necesitas internet para sincronizar los datos, pero puedes visualizar OS ya cargadas sin conexión. En la práctica, con el Wi-Fi de la tienda no tendrás problemas." },
+        { "question": "¿Puedo importar mis datos?", "answer": "¡Sí! Puedes importar tu lista de clientes via planilla. Solo contacta nuestro soporte y te ayudamos a migrar tus datos." },
+        { "question": "¿Hay soporte si necesito ayuda?", "answer": "¡Sí! Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día de la asistencia técnica y te va a ayudar de verdad." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "organizar tu asistencia",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo está listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}

@@ -1,0 +1,294 @@
+---
+layout: layouts/base.njk
+navbarScrolled: true
+---
+{# Get pricing page data based on language #}
+{% set data = pricingPage[langCode] | default(pricingPage.pt) %}
+
+<!-- Page Header -->
+<header class="page-header pricing-page-header">
+    <div class="container">
+        <h1>{{ data.header.title }} <span class="gradient-text">{{ data.header.titleHighlight }}</span></h1>
+        <p class="subtitle">{{ data.header.subtitle }}</p>
+        <p class="subtext">{{ data.header.subtext }}</p>
+    </div>
+</header>
+
+<!-- Pricing Hero -->
+<section class="pricing-hero">
+    <div class="container">
+        <div class="pricing-grid">
+            {% for plan in data.plans %}
+            <div class="pricing-card{% if plan.featured %} featured{% endif %}">
+                {% if plan.badge %}
+                <div class="pricing-badge">{{ plan.badge }}</div>
+                {% endif %}
+                <div class="pricing-header">
+                    <span class="pricing-plan-tag">{{ plan.tag }}</span>
+                    <h3>{{ plan.name }}</h3>
+                    <div class="price">
+                        <span class="currency">{{ plan.currency }}</span>
+                        <span class="amount">{{ plan.price }}</span>
+                        <span class="period">{{ plan.period }}</span>
+                    </div>
+                    <span class="pricing-tagline">{{ plan.tagline }}</span>
+                </div>
+                <ul class="pricing-features">
+                    {% for feature in plan.features %}
+                    {% if feature.placeholder %}
+                    <li class="feature-placeholder"></li>
+                    {% else %}
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>{% if feature.bold %}<strong>{{ feature.text }}</strong>{% else %}{{ feature.text }}{% endif %}{{ feature.suffix | default("") }}</span>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+                <a href="{{ relPath }}{{ indexPage | default('index.html') }}#download" class="btn btn-{{ plan.ctaStyle }} btn-full">{{ plan.cta }}</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Included in all + Trust signals -->
+        <div class="pricing-footer">
+            <div class="pricing-included">
+                {% if langCode == "pt" %}
+                <span class="pricing-included-label">Incluído em todos:</span>
+                {% elif langCode == "en" %}
+                <span class="pricing-included-label">Included in all:</span>
+                {% elif langCode == "es" %}
+                <span class="pricing-included-label">Incluido en todos:</span>
+                {% endif %}
+                {% for item in data.included %}
+                <span class="pricing-included-item">{{ item }}</span>
+                {% if not loop.last %}<span class="pricing-included-sep">·</span>{% endif %}
+                {% endfor %}
+            </div>
+            <div class="pricing-trust">
+                {% for item in data.trust %}
+                <span class="pricing-trust-item">{{ item }}</span>
+                {% if not loop.last %}<span class="pricing-trust-sep">·</span>{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comparison Table -->
+<section class="pricing-comparison">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">{{ data.comparison.tag }}</span>
+            <h2>{{ data.comparison.title }} <span class="gradient-text">{{ data.comparison.titleHighlight }}</span></h2>
+            <p>{{ data.comparison.subtitle }}</p>
+        </div>
+        <div class="pricing-table-wrapper">
+            <table class="pricing-table">
+                <thead>
+                    <tr>
+                        {% if langCode == "pt" %}
+                        <th>Recurso</th>
+                        {% elif langCode == "en" %}
+                        <th>Feature</th>
+                        {% elif langCode == "es" %}
+                        <th>Recurso</th>
+                        {% endif %}
+                        <th class="plan-header">Free</th>
+                        <th class="plan-header featured">Starter</th>
+                        <th class="plan-header">Pro</th>
+                        <th class="plan-header">Business</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data.comparison.rows %}
+                    <tr>
+                        <td>{{ row.feature }}</td>
+                        <td{% if row.feature == "Usuários inclusos" or row.feature == "Users included" or row.feature == "Usuarios incluidos" or row.feature == "Usuários inclusos" %} class="highlight-cell"{% endif %}>
+                            {% if row.free == "—" or row.free == "-" %}
+                            <span class="dash-icon">—</span>
+                            {% elif row.free == "✓" or row.free == "check" %}
+                            <span class="check-icon">✓</span>
+                            {% else %}
+                            <strong>{{ row.free }}</strong>
+                            {% endif %}
+                        </td>
+                        <td class="highlight-cell">
+                            {% if row.starter == "—" or row.starter == "-" %}
+                            <span class="dash-icon">—</span>
+                            {% elif row.starter == "✓" %}
+                            <span class="check-icon">✓</span>
+                            {% else %}
+                            <strong>{{ row.starter }}</strong>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.pro == "—" or row.pro == "-" %}
+                            <span class="dash-icon">—</span>
+                            {% elif row.pro == "✓" %}
+                            <span class="check-icon">✓</span>
+                            {% else %}
+                            <strong>{{ row.pro }}</strong>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if row.business == "—" or row.business == "-" %}
+                            <span class="dash-icon">—</span>
+                            {% elif row.business == "✓" %}
+                            <span class="check-icon">✓</span>
+                            {% else %}
+                            <strong>{{ row.business }}</strong>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Use Cases -->
+<section class="pricing-use-cases">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">{{ data.useCases.tag }}</span>
+            <h2>{{ data.useCases.title }} <span class="gradient-text">{{ data.useCases.titleHighlight }}</span></h2>
+            <p>{{ data.useCases.subtitle }}</p>
+        </div>
+        <div class="use-cases-grid">
+            {% for case in data.useCases.cases %}
+            <div class="use-case-card">
+                <span class="plan-name">{{ case.plan }}</span>
+                <h3>{{ case.title }}</h3>
+                <p>{{ case.description }}</p>
+                <ul>
+                    {% for item in case.items %}
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        {{ item }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Differentials -->
+<section class="pricing-differentials">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">{{ data.differentials.tag }}</span>
+            <h2>{{ data.differentials.title }} <span class="gradient-text">{{ data.differentials.titleHighlight }}</span></h2>
+        </div>
+        <div class="differentials-card">
+            <h3>{{ data.differentials.subtitle }}</h3>
+            <div class="differentials-grid">
+                {% for item in data.differentials.items %}
+                <div class="differential-item">
+                    <div class="icon">
+                        {% if item.icon == "dollar-sign" %}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        {% elif item.icon == "user" %}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        {% elif item.icon == "shield" %}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        {% elif item.icon == "grid" %}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="3" y1="9" x2="21" y2="9"></line>
+                            <line x1="9" y1="21" x2="9" y2="9"></line>
+                        </svg>
+                        {% elif item.icon == "zap" %}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        {% elif item.icon == "arrow-up" %}
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4>{{ item.title }}</h4>
+                        <p>{{ item.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="pricing-faq">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">{{ data.faq.tag }}</span>
+            <h2>{{ data.faq.title }} <span class="gradient-text">{{ data.faq.titleHighlight }}</span></h2>
+        </div>
+        <div class="faq-grid">
+            {% for item in data.faq.items %}
+            <div class="faq-item">
+                <h4>{{ item.question }}</h4>
+                <p>{{ item.answer | safe }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="pricing-cta">
+    <div class="container">
+        <h2>{{ data.cta.title }} <span class="gradient-text">{{ data.cta.titleHighlight }}</span></h2>
+        <p>{{ data.cta.description }}</p>
+        <div class="cta-buttons">
+            <a href="{{ site.appStore }}" target="_blank" rel="noopener" class="store-button">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                </svg>
+                <div class="store-info">
+                    {% if langCode == "pt" %}
+                    <span class="store-label">Disponível na</span>
+                    {% elif langCode == "en" %}
+                    <span class="store-label">Available on</span>
+                    {% elif langCode == "es" %}
+                    <span class="store-label">Disponible en</span>
+                    {% endif %}
+                    <span class="store-name">App Store</span>
+                </div>
+            </a>
+            <a href="{{ site.playStore }}" target="_blank" rel="noopener" class="store-button">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/>
+                </svg>
+                <div class="store-info">
+                    {% if langCode == "pt" %}
+                    <span class="store-label">Disponível no</span>
+                    {% elif langCode == "en" %}
+                    <span class="store-label">Available on</span>
+                    {% elif langCode == "es" %}
+                    <span class="store-label">Disponible en</span>
+                    {% endif %}
+                    <span class="store-name">Google Play</span>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,381 @@
+{
+  "slug": "eletrodomesticos",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Assistência Técnica de Eletrodomésticos | PraticOS",
+    "description": "Gerencie atendimentos externos e controle sua equipe de técnicos de linha branca. Sistema com roteirização, histórico do cliente e checklist de visita. Ideal para field service.",
+    "keywords": "sistema assistência técnica eletrodomésticos, software técnico linha branca, app técnico geladeira, gestão equipe externa, sistema field service eletrodomésticos",
+    "ogTitle": "Sistema para Assistência Técnica de Eletrodomésticos | PraticOS",
+    "ogDescription": "Gerencie atendimentos externos e controle sua equipe de técnicos. Sistema com roteirização, histórico do cliente e checklist de visita.",
+    "hero": {
+      "badge": "🔧 Eletrodomésticos",
+      "title": "Gerencie sua equipe externa:",
+      "titleHighlight": "técnicos de linha branca na palma da mão",
+      "subtitle": "70% dos atendimentos são na casa do cliente. Controle rotas, veja onde cada técnico está e envie status automático pelo WhatsApp. Histórico completo de cada cliente e aparelho.",
+      "ctaPrimary": "Testar Grátis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Técnicos ativos" },
+        "orders": { "value": "10k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliação" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Você enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem trabalha com assistência técnica de eletrodomésticos",
+      "items": [
+        { "icon": "🚗", "title": "Deslocamento sem planejamento", "text": "Técnicos perdendo tempo no trânsito porque as visitas não foram organizadas por região. Combustível desperdiçado." },
+        { "icon": "📋", "title": "Sem histórico do cliente", "text": "Cliente liga e você não sabe o que já foi feito no aparelho dele. Perde tempo perguntando tudo de novo." },
+        { "icon": "👥", "title": "Não sabe onde está a equipe", "text": "Técnico saiu para atendimento e você não tem visibilidade. Cliente liga perguntando e você não sabe responder." },
+        { "icon": "📞", "title": "Cliente perguntando pelo técnico", "text": "Ligações constantes: 'O técnico já saiu?' 'Que horas chega?' Interrompe seu trabalho administrativo." },
+        { "icon": "📦", "title": "Controle de peças no veículo", "text": "Técnico usa peça e esquece de avisar. Estoque do carro desatualizado, falta peça no momento crítico." },
+        { "icon": "💸", "title": "Cobrança e inadimplência", "text": "Cliente não paga na hora, técnico volta sem receber. Difícil controlar quem deve e quanto." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluções",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para equipes de field service",
+      "items": [
+        { "icon": "🗺️", "title": "Roteirização integrada", "text": "Organize os atendimentos por região e integre com Google Maps.", "highlight": "Reduza tempo de deslocamento em até 40%." },
+        { "icon": "📋", "title": "Histórico completo do cliente", "text": "Veja todos os atendimentos anteriores daquele cliente. Aparelhos, defeitos, peças trocadas." },
+        { "icon": "📍", "title": "Visibilidade da equipe", "text": "Saiba em tempo real onde cada técnico está e qual o status de cada atendimento." },
+        { "icon": "📱", "title": "WhatsApp automático", "text": "Cliente recebe notificação quando técnico sai para atendimento.", "highlight": "Reduz ligações em até 70%." },
+        { "icon": "📦", "title": "Estoque por técnico", "text": "Controle as peças que cada técnico tem no veículo. Baixa automática quando usa." },
+        { "icon": "✍️", "title": "Assinatura e comprovante", "text": "Cliente assina no celular do técnico. Comprovante enviado na hora por WhatsApp." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulário",
+      "title": "Checklist de",
+      "titleHighlight": "visita técnica",
+      "text": "Documente cada atendimento com fotos e dados do aparelho. Proteja-se de reclamações e tenha histórico completo.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Checklist de Visita",
+      "items": [
+        { "icon": "📸", "text": "Foto do aparelho (antes e depois)" },
+        { "icon": "🔧", "text": "Modelo, marca e número de série" },
+        { "icon": "✅", "text": "Checklist de verificação técnica" },
+        { "icon": "📝", "text": "Defeito relatado e solução aplicada" },
+        { "icon": "📦", "text": "Peças utilizadas no atendimento" },
+        { "icon": "✍️", "text": "Assinatura digital do cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar sua equipe",
+      "subtitle": "Ferramentas para assistência técnica de linha branca",
+      "items": [
+        { "icon": "document", "title": "OS Digital com foto", "text": "Crie ordens de serviço com foto do aparelho na entrada. Documentação completa do atendimento." },
+        { "icon": "checklist", "title": "Checklist personalizado", "text": "Monte checklists específicos por tipo de aparelho. Geladeira, máquina de lavar, ar-condicionado.", "color": "yellow" },
+        { "icon": "signature", "title": "Assinatura no celular", "text": "Cliente assina no próprio celular do técnico. Comprovante digital enviado na hora.", "color": "orange" },
+        { "icon": "bell", "title": "Controle de garantia", "text": "Alertas automáticos de vencimento de garantia. Oportunidade de contato proativo.", "color": "green" },
+        { "icon": "money", "title": "Financeiro integrado", "text": "Controle de recebimentos por técnico. Comissões e repasses automáticos.", "color": "purple" },
+        { "icon": "chart", "title": "Relatórios de produtividade", "text": "Veja quantos atendimentos cada técnico fez. Tempo médio por visita.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes eu não sabia onde meus técnicos estavam e os clientes ligavam o tempo todo. Agora tenho visibilidade total e o cliente recebe atualização automática pelo WhatsApp.",
+      "name": "Carlos Mendes",
+      "role": "Dono de assistência técnica há 8 anos",
+      "metric": "Redução de 60% nas ligações"
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas dúvidas antes de começar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
+        { "question": "Funciona para atendimento externo?", "answer": "Sim! O PraticOS foi feito para field service. Técnicos usam no celular durante a visita, com ou sem internet. Sincroniza quando volta a ter conexão." },
+        { "question": "Consigo ver onde meus técnicos estão?", "answer": "Sim! O sistema mostra o status de cada técnico em tempo real: a caminho, em atendimento, finalizado. Você tem visibilidade total da equipe." },
+        { "question": "O cliente recebe notificação?", "answer": "Sim! O cliente recebe mensagem automática pelo WhatsApp quando o técnico sai para o atendimento e quando finaliza. Reduz ligações drasticamente." },
+        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da assistência técnica." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "gerenciar sua equipe",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe está pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Appliance Repair Service Management | PraticOS",
+    "description": "Manage field service teams and control your appliance repair technicians. System with route planning, customer history and visit checklist. Perfect for field service.",
+    "keywords": "appliance repair software, home appliance service management, field service app, technician dispatch software, appliance service scheduling",
+    "ogTitle": "Appliance Repair Service Management | PraticOS",
+    "ogDescription": "Manage field service teams and control your technicians. System with route planning, customer history and visit checklist.",
+    "hero": {
+      "badge": "🔧 Appliances",
+      "title": "Manage your field team:",
+      "titleHighlight": "appliance technicians at your fingertips",
+      "subtitle": "70% of services are at the customer's home. Control routes, see where each technician is and send automatic WhatsApp updates. Complete history of each customer and appliance.",
+      "ctaPrimary": "Try Free",
+      "ctaSecondary": "Watch Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Active technicians" },
+        "orders": { "value": "10k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for appliance repair service providers",
+      "items": [
+        { "icon": "🚗", "title": "Unplanned travel", "text": "Technicians wasting time in traffic because visits weren't organized by region. Wasted fuel." },
+        { "icon": "📋", "title": "No customer history", "text": "Customer calls and you don't know what was already done on their appliance. Waste time asking everything again." },
+        { "icon": "👥", "title": "Don't know where the team is", "text": "Technician left for a service call and you have no visibility. Customer calls asking and you can't answer." },
+        { "icon": "📞", "title": "Customer asking about technician", "text": "Constant calls: 'Did the technician leave yet?' 'What time will they arrive?' Interrupts your admin work." },
+        { "icon": "📦", "title": "Parts control in vehicle", "text": "Technician uses a part and forgets to report. Vehicle stock outdated, part missing at critical moment." },
+        { "icon": "💸", "title": "Collection and defaults", "text": "Customer doesn't pay on the spot, technician returns without payment. Hard to track who owes and how much." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for field service teams",
+      "items": [
+        { "icon": "🗺️", "title": "Integrated routing", "text": "Organize visits by region and integrate with Google Maps.", "highlight": "Reduce travel time by up to 40%." },
+        { "icon": "📋", "title": "Complete customer history", "text": "See all previous visits for that customer. Appliances, defects, parts replaced." },
+        { "icon": "📍", "title": "Team visibility", "text": "Know in real time where each technician is and the status of each service call." },
+        { "icon": "📱", "title": "Automatic WhatsApp", "text": "Customer receives notification when technician leaves for service.", "highlight": "Reduces calls by up to 70%." },
+        { "icon": "📦", "title": "Stock per technician", "text": "Control the parts each technician has in their vehicle. Automatic deduction when used." },
+        { "icon": "✍️", "title": "Signature and receipt", "text": "Customer signs on the technician's phone. Receipt sent immediately via WhatsApp." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Technical",
+      "titleHighlight": "visit checklist",
+      "text": "Document each visit with photos and appliance data. Protect yourself from complaints and have complete history.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Visit Checklist",
+      "items": [
+        { "icon": "📸", "text": "Appliance photo (before and after)" },
+        { "icon": "🔧", "text": "Model, brand and serial number" },
+        { "icon": "✅", "text": "Technical verification checklist" },
+        { "icon": "📝", "text": "Reported defect and applied solution" },
+        { "icon": "📦", "text": "Parts used in service" },
+        { "icon": "✍️", "text": "Customer digital signature" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your team",
+      "subtitle": "Tools for appliance repair service",
+      "items": [
+        { "icon": "document", "title": "Digital WO with photo", "text": "Create work orders with appliance intake photo. Complete service documentation." },
+        { "icon": "checklist", "title": "Custom checklist", "text": "Build specific checklists by appliance type. Refrigerator, washing machine, air conditioner.", "color": "yellow" },
+        { "icon": "signature", "title": "Mobile signature", "text": "Customer signs on the technician's phone. Digital receipt sent immediately.", "color": "orange" },
+        { "icon": "bell", "title": "Warranty control", "text": "Automatic warranty expiration alerts. Opportunity for proactive contact.", "color": "green" },
+        { "icon": "money", "title": "Integrated financials", "text": "Payment tracking by technician. Automatic commissions and transfers.", "color": "purple" },
+        { "icon": "chart", "title": "Productivity reports", "text": "See how many visits each technician completed. Average time per visit.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Before I didn't know where my technicians were and customers called all the time. Now I have total visibility and customers receive automatic updates via WhatsApp.",
+      "name": "Carlos Mendes",
+      "role": "Appliance service owner for 8 years",
+      "metric": "60% reduction in calls"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
+        { "question": "Does it work for field service?", "answer": "Yes! PraticOS was made for field service. Technicians use it on their phone during visits, with or without internet. Syncs when connection returns." },
+        { "question": "Can I see where my technicians are?", "answer": "Yes! The system shows each technician's status in real time: on the way, in service, finished. You have complete team visibility." },
+        { "question": "Does the customer get notified?", "answer": "Yes! The customer receives an automatic WhatsApp message when the technician leaves for the service and when it's finished. Drastically reduces calls." },
+        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of appliance repair services." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "manage your team",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Asistencia Técnica de Electrodomésticos | PraticOS",
+    "description": "Gestiona atendimientos externos y controla tu equipo de técnicos de línea blanca. Sistema con rutas, historial del cliente y checklist de visita. Ideal para field service.",
+    "keywords": "sistema asistencia técnica electrodomésticos, software técnico línea blanca, app técnico refrigerador, gestión equipo externo, sistema field service electrodomésticos",
+    "ogTitle": "Sistema para Asistencia Técnica de Electrodomésticos | PraticOS",
+    "ogDescription": "Gestiona atendimientos externos y controla tu equipo de técnicos. Sistema con rutas, historial del cliente y checklist de visita.",
+    "hero": {
+      "badge": "🔧 Electrodomésticos",
+      "title": "Gestiona tu equipo externo:",
+      "titleHighlight": "técnicos de línea blanca en la palma de tu mano",
+      "subtitle": "70% de los atendimientos son en casa del cliente. Controla rutas, mira dónde está cada técnico y envía estado automático por WhatsApp. Historial completo de cada cliente y aparato.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Técnicos activos" },
+        "orders": { "value": "10k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificación" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien trabaja con asistencia técnica de electrodomésticos",
+      "items": [
+        { "icon": "🚗", "title": "Desplazamiento sin planificación", "text": "Técnicos perdiendo tiempo en el tráfico porque las visitas no fueron organizadas por región. Combustible desperdiciado." },
+        { "icon": "📋", "title": "Sin historial del cliente", "text": "Cliente llama y no sabes qué se hizo en su aparato. Pierdes tiempo preguntando todo de nuevo." },
+        { "icon": "👥", "title": "No sabes dónde está el equipo", "text": "Técnico salió para atendimiento y no tienes visibilidad. Cliente llama preguntando y no sabes responder." },
+        { "icon": "📞", "title": "Cliente preguntando por el técnico", "text": "Llamadas constantes: '¿El técnico ya salió?' '¿A qué hora llega?' Interrumpe tu trabajo administrativo." },
+        { "icon": "📦", "title": "Control de piezas en vehículo", "text": "Técnico usa pieza y olvida avisar. Stock del carro desactualizado, falta pieza en momento crítico." },
+        { "icon": "💸", "title": "Cobro y morosidad", "text": "Cliente no paga en el momento, técnico vuelve sin recibir. Difícil controlar quién debe y cuánto." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Cómo",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para equipos de field service",
+      "items": [
+        { "icon": "🗺️", "title": "Rutas integradas", "text": "Organiza los atendimientos por región e integra con Google Maps.", "highlight": "Reduce tiempo de desplazamiento hasta 40%." },
+        { "icon": "📋", "title": "Historial completo del cliente", "text": "Mira todos los atendimientos anteriores de ese cliente. Aparatos, defectos, piezas cambiadas." },
+        { "icon": "📍", "title": "Visibilidad del equipo", "text": "Sabe en tiempo real dónde está cada técnico y el estado de cada atendimiento." },
+        { "icon": "📱", "title": "WhatsApp automático", "text": "Cliente recibe notificación cuando técnico sale para atendimiento.", "highlight": "Reduce llamadas hasta 70%." },
+        { "icon": "📦", "title": "Stock por técnico", "text": "Controla las piezas que cada técnico tiene en el vehículo. Baja automática cuando usa." },
+        { "icon": "✍️", "title": "Firma y comprobante", "text": "Cliente firma en el celular del técnico. Comprobante enviado al instante por WhatsApp." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "visita técnica",
+      "text": "Documenta cada atendimiento con fotos y datos del aparato. Protégete de reclamaciones y ten historial completo.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Visita",
+      "items": [
+        { "icon": "📸", "text": "Foto del aparato (antes y después)" },
+        { "icon": "🔧", "text": "Modelo, marca y número de serie" },
+        { "icon": "✅", "text": "Checklist de verificación técnica" },
+        { "icon": "📝", "text": "Defecto reportado y solución aplicada" },
+        { "icon": "📦", "text": "Piezas utilizadas en el atendimiento" },
+        { "icon": "✍️", "text": "Firma digital del cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tu equipo",
+      "subtitle": "Herramientas para asistencia técnica de línea blanca",
+      "items": [
+        { "icon": "document", "title": "OS Digital con foto", "text": "Crea órdenes de servicio con foto del aparato en la entrada. Documentación completa del atendimiento." },
+        { "icon": "checklist", "title": "Checklist personalizado", "text": "Monta checklists específicos por tipo de aparato. Refrigerador, lavadora, aire acondicionado.", "color": "yellow" },
+        { "icon": "signature", "title": "Firma en el celular", "text": "Cliente firma en el celular del técnico. Comprobante digital enviado al instante.", "color": "orange" },
+        { "icon": "bell", "title": "Control de garantía", "text": "Alertas automáticas de vencimiento de garantía. Oportunidad de contacto proactivo.", "color": "green" },
+        { "icon": "money", "title": "Financiero integrado", "text": "Control de cobros por técnico. Comisiones y traspasos automáticos.", "color": "purple" },
+        { "icon": "chart", "title": "Informes de productividad", "text": "Mira cuántos atendimientos hizo cada técnico. Tiempo promedio por visita.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes no sabía dónde estaban mis técnicos y los clientes llamaban todo el tiempo. Ahora tengo visibilidad total y el cliente recibe actualización automática por WhatsApp.",
+      "name": "Carlos Mendes",
+      "role": "Dueño de asistencia técnica hace 8 años",
+      "metric": "Reducción de 60% en llamadas"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "¿Funciona para atendimiento externo?", "answer": "¡Sí! PraticOS fue hecho para field service. Técnicos lo usan en el celular durante la visita, con o sin internet. Sincroniza cuando vuelve la conexión." },
+        { "question": "¿Puedo ver dónde están mis técnicos?", "answer": "¡Sí! El sistema muestra el estado de cada técnico en tiempo real: en camino, en atendimiento, finalizado. Tienes visibilidad total del equipo." },
+        { "question": "¿El cliente recibe notificación?", "answer": "¡Sí! El cliente recibe mensaje automático por WhatsApp cuando el técnico sale para el atendimiento y cuando finaliza. Reduce llamadas drásticamente." },
+        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día de la asistencia técnica." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "gestionar tu equipo",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo está listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}

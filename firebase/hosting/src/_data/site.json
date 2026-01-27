@@ -1,0 +1,15 @@
+{
+  "name": "PraticOS",
+  "logoText": "Prát<span class=\"yellow\">ic</span><span class=\"accent\">OS</span>",
+  "email": "praticos@rafsoft.com.br",
+  "company": "Rafsoft",
+  "companyUrl": "https://www.rafsoft.com.br",
+  "year": "2025",
+  "appStore": "https://apps.apple.com/br/app/praticos/id1534604555",
+  "playStore": "https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos",
+  "stats": {
+    "users": "500+",
+    "orders": "10k+",
+    "rating": "4.8"
+  }
+}

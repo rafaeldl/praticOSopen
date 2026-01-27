@@ -1,0 +1,58 @@
+{# Get pricing data based on language #}
+{% set price = pricing[langCode] | default(pricing.pt) %}
+
+<!-- Pricing Section -->
+<section id="pricing" class="pricing pricing-component">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">{{ price.tag }}</span>
+            <h2>{{ price.title }} <span class="gradient-text">{{ price.titleHighlight }}</span></h2>
+            <div class="pricing-subtitle-inline">
+                {% for item in price.subtitle %}
+                {% if not loop.first %}<span class="dot"></span>{% endif %}
+                <span>{{ item }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="pricing-grid">
+            {% for plan in price.plans %}
+            <div class="pricing-card{% if plan.featured %} featured{% endif %}">
+                {% if plan.badge %}
+                <div class="pricing-badge">{{ plan.badge }}</div>
+                {% endif %}
+                <div class="pricing-header">
+                    <h3>{{ plan.name }}</h3>
+                    <div class="price">
+                        <span class="currency">{{ plan.currency }}</span>
+                        <span class="amount">{{ plan.price }}</span>
+                        <span class="period">{{ plan.period }}</span>
+                    </div>
+                    <span class="pricing-tagline">{{ plan.tagline }}</span>
+                </div>
+                <ul class="pricing-features">
+                    {% for feature in plan.features %}
+                    <li>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>{% if feature.bold %}<strong>{{ feature.text }}</strong>{% else %}{{ feature.text }}{% endif %}{{ feature.suffix | default("") }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <a href="#download" class="btn btn-{{ plan.ctaStyle }} btn-full">{{ plan.cta }}</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Footer with single CTA -->
+        <div class="pricing-footer">
+            <a href="{{ relPath }}{{ price.detailsLink }}" class="pricing-details-link">
+                {{ price.detailsText }}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>

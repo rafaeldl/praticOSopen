@@ -1,0 +1,335 @@
+{
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "PraticOS - Gestao de Ordens de Servico Simplificada",
+    "description": "Sistema completo para gestao de ordens de servico, clientes e financas. Controle seu negocio de forma pratica e eficiente.",
+    "keywords": "ordem de servico, gestao, clientes, oficina, prestador de servico, app",
+    "ogTitle": "PraticOS - Gestao de Ordens de Servico",
+    "ogDescription": "Sistema completo para gestao de ordens de servico, clientes e financas.",
+    "hero": {
+      "badge": "Novidade! Múltiplas empresas",
+      "title": "Gerencie suas",
+      "titleHighlight": "Ordens de Servico",
+      "subtitle": "de forma simples e eficiente",
+      "text": "Sistema completo para prestadores de servico. Controle clientes, ordens de servico e financas em um so lugar.",
+      "ctaPrimary": { "text": "Baixar Gratis", "href": "#download" },
+      "ctaSecondary": { "text": "Ver Demo", "href": "#screenshots" },
+      "stats": [
+        { "value": "500+", "label": "Usuarios ativos" },
+        { "value": "10k+", "label": "OS criadas" },
+        { "value": "4.8", "label": "Avaliacao" }
+      ],
+      "phones": {
+        "back": { "image": "dashboard.png", "alt": "Dashboard PraticOS" },
+        "front": { "image": "home.png", "alt": "Lista de Ordens de Servico" }
+      },
+      "scroll": "Scroll"
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que voce precisa para",
+      "titleHighlight": "gerenciar seu negocio",
+      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
+      "items": [
+        {
+          "icon": "document",
+          "title": "Ordens de Servico",
+          "text": "Crie, edite e acompanhe todas as suas ordens de servico. Adicione fotos, descricoes detalhadas e valores."
+        },
+        {
+          "icon": "users",
+          "title": "Gestao de Clientes",
+          "text": "Cadastre e organize seus clientes. Historico completo de servicos, contatos e valores pendentes.",
+          "color": "yellow"
+        },
+        {
+          "icon": "chart",
+          "title": "Dashboard Financeiro",
+          "text": "Visualize faturamento, valores recebidos e a receber. Graficos e relatorios por periodo.",
+          "color": "orange"
+        },
+        {
+          "icon": "lock",
+          "title": "Múltiplas Empresas",
+          "text": "Gerencie várias empresas ou filiais em uma única conta. Ideal para franquias e grupos.",
+          "color": "green"
+        },
+        {
+          "icon": "settings",
+          "title": "Temas Claro/Escuro",
+          "text": "Interface adaptavel ao seu estilo. Suporte nativo a modo claro e escuro com design Material e Cupertino.",
+          "color": "purple"
+        },
+        {
+          "icon": "shield",
+          "title": "Autenticacao Segura",
+          "text": "Login com Google, Apple ou Email. Seus dados protegidos com as melhores praticas de seguranca.",
+          "color": "cyan"
+        }
+      ]
+    },
+    "screenshots": {
+      "tag": "Screenshots",
+      "title": "Conheca a",
+      "titleHighlight": "interface do app",
+      "subtitle": "Design moderno e intuitivo para a melhor experiencia",
+      "items": [
+        { "image": "login.png", "alt": "Tela de Login", "label": "Login" },
+        { "image": "home.png", "alt": "Ordens de Servico", "label": "Ordens de Servico" },
+        { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
+        { "image": "customers.png", "alt": "Clientes", "label": "Clientes" },
+        { "image": "settings.png", "alt": "Configuracoes", "label": "Configuracoes" }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar seu negocio",
+      "text": "Disponivel para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponivel na", "name": "App Store" },
+      "playStore": { "label": "Disponivel no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe esta pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Politica de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "PraticOS - Simplified Service Order Management",
+    "description": "Complete system for service order, customer, and financial management. Control your business efficiently.",
+    "keywords": "service order, management, customers, workshop, service provider, app",
+    "ogTitle": "PraticOS - Service Order Management",
+    "ogDescription": "Complete system for service order, customer, and financial management.",
+    "hero": {
+      "badge": "New! Multiple companies",
+      "title": "Manage your",
+      "titleHighlight": "Service Orders",
+      "subtitle": "simply and efficiently",
+      "text": "Complete system for service providers. Control customers, service orders, and finances in one place.",
+      "ctaPrimary": { "text": "Download Free", "href": "#download" },
+      "ctaSecondary": { "text": "See Demo", "href": "#screenshots" },
+      "stats": [
+        { "value": "500+", "label": "Active users" },
+        { "value": "10k+", "label": "Orders created" },
+        { "value": "4.8", "label": "Rating" }
+      ],
+      "phones": {
+        "back": { "image": "dashboard.png", "alt": "PraticOS Dashboard" },
+        "front": { "image": "home.png", "alt": "Service Orders List" }
+      },
+      "scroll": "Scroll"
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your business",
+      "subtitle": "Powerful and intuitive tools to increase your productivity",
+      "items": [
+        {
+          "icon": "document",
+          "title": "Service Orders",
+          "text": "Create, edit, and track all your service orders. Add photos, detailed descriptions, and values."
+        },
+        {
+          "icon": "users",
+          "title": "Customer Management",
+          "text": "Register and organize your customers. Complete history of services, contacts, and pending values.",
+          "color": "yellow"
+        },
+        {
+          "icon": "chart",
+          "title": "Financial Dashboard",
+          "text": "View revenue, received amounts, and receivables. Charts and reports by period.",
+          "color": "orange"
+        },
+        {
+          "icon": "lock",
+          "title": "Multiple Companies",
+          "text": "Manage multiple companies or branches in a single account. Ideal for franchises and groups.",
+          "color": "green"
+        },
+        {
+          "icon": "settings",
+          "title": "Light/Dark Themes",
+          "text": "Adaptable interface to your style. Native support for light and dark mode with Material and Cupertino design.",
+          "color": "purple"
+        },
+        {
+          "icon": "shield",
+          "title": "Secure Authentication",
+          "text": "Login with Google, Apple, or Email. Your data protected with the best security practices.",
+          "color": "cyan"
+        }
+      ]
+    },
+    "screenshots": {
+      "tag": "Screenshots",
+      "title": "Discover the",
+      "titleHighlight": "app interface",
+      "subtitle": "Modern and intuitive design for the best experience",
+      "items": [
+        { "image": "login.png", "alt": "Login Screen", "label": "Login" },
+        { "image": "home.png", "alt": "Service Orders", "label": "Service Orders" },
+        { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
+        { "image": "customers.png", "alt": "Customers", "label": "Customers" },
+        { "image": "settings.png", "alt": "Settings", "label": "Settings" }
+      ]
+    },
+    "download": {
+      "title": "Download now and start",
+      "titleHighlight": "organizing your business",
+      "text": "Available for iOS and Android. Start for free!",
+      "appStore": { "label": "Available on", "name": "App Store" },
+      "playStore": { "label": "Available on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "PraticOS - Gestion de Ordenes de Servicio Simplificada",
+    "description": "Sistema completo para gestion de ordenes de servicio, clientes y finanzas. Controle su negocio de forma practica y eficiente.",
+    "keywords": "orden de servicio, gestion, clientes, taller, proveedor de servicios, app",
+    "ogTitle": "PraticOS - Gestion de Ordenes de Servicio",
+    "ogDescription": "Sistema completo para gestion de ordenes de servicio, clientes y finanzas.",
+    "hero": {
+      "badge": "¡Novedad! Múltiples empresas",
+      "title": "Gestione sus",
+      "titleHighlight": "Ordenes de Servicio",
+      "subtitle": "de forma simple y eficiente",
+      "text": "Sistema completo para proveedores de servicios. Controle clientes, ordenes de servicio y finanzas en un solo lugar.",
+      "ctaPrimary": { "text": "Descargar Gratis", "href": "#download" },
+      "ctaSecondary": { "text": "Ver Demo", "href": "#screenshots" },
+      "stats": [
+        { "value": "500+", "label": "Usuarios activos" },
+        { "value": "10k+", "label": "OS creadas" },
+        { "value": "4.8", "label": "Calificacion" }
+      ],
+      "phones": {
+        "back": { "image": "dashboard.png", "alt": "Dashboard PraticOS" },
+        "front": { "image": "home.png", "alt": "Lista de Ordenes de Servicio" }
+      },
+      "scroll": "Scroll"
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Todo lo que necesita para",
+      "titleHighlight": "gestionar su negocio",
+      "subtitle": "Herramientas poderosas e intuitivas para aumentar su productividad",
+      "items": [
+        {
+          "icon": "document",
+          "title": "Ordenes de Servicio",
+          "text": "Cree, edite y siga todas sus ordenes de servicio. Agregue fotos, descripciones detalladas y valores."
+        },
+        {
+          "icon": "users",
+          "title": "Gestion de Clientes",
+          "text": "Registre y organice sus clientes. Historial completo de servicios, contactos y valores pendientes.",
+          "color": "yellow"
+        },
+        {
+          "icon": "chart",
+          "title": "Dashboard Financiero",
+          "text": "Visualice facturacion, valores recibidos y por recibir. Graficos e informes por periodo.",
+          "color": "orange"
+        },
+        {
+          "icon": "lock",
+          "title": "Múltiples Empresas",
+          "text": "Gestione varias empresas o sucursales en una sola cuenta. Ideal para franquicias y grupos.",
+          "color": "green"
+        },
+        {
+          "icon": "settings",
+          "title": "Temas Claro/Oscuro",
+          "text": "Interfaz adaptable a su estilo. Soporte nativo a modo claro y oscuro con diseno Material y Cupertino.",
+          "color": "purple"
+        },
+        {
+          "icon": "shield",
+          "title": "Autenticacion Segura",
+          "text": "Inicio de sesion con Google, Apple o Email. Sus datos protegidos con las mejores practicas de seguridad.",
+          "color": "cyan"
+        }
+      ]
+    },
+    "screenshots": {
+      "tag": "Capturas",
+      "title": "Conozca la",
+      "titleHighlight": "interfaz de la app",
+      "subtitle": "Diseno moderno e intuitivo para la mejor experiencia",
+      "items": [
+        { "image": "login.png", "alt": "Pantalla de Login", "label": "Login" },
+        { "image": "home.png", "alt": "Ordenes de Servicio", "label": "Ordenes de Servicio" },
+        { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
+        { "image": "customers.png", "alt": "Clientes", "label": "Clientes" },
+        { "image": "settings.png", "alt": "Configuraciones", "label": "Configuraciones" }
+      ]
+    },
+    "download": {
+      "title": "Descargue ahora y comience a",
+      "titleHighlight": "organizar su negocio",
+      "text": "Disponible para iOS y Android. Comience gratis!",
+      "appStore": { "label": "Disponible en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "Necesita",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo esta listo para atenderle",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Politica de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Su nombre",
+        "email": "Correo electronico",
+        "emailPlaceholder": "su@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "Como podemos ayudarle?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}

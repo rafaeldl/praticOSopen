@@ -1,0 +1,7 @@
+{# Validation List Component - List of validation rules #}
+{# Usage: {% include "components/docs/validation-list.njk" with {items: [...]} %} #}
+<ul class="validation-list">
+    {% for item in items %}
+    <li>{% if item.label %}<strong>{{ item.label }}:</strong> {% endif %}{{ item.text }}</li>
+    {% endfor %}
+</ul>

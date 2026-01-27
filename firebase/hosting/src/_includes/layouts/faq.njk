@@ -1,0 +1,26 @@
+---
+layout: layouts/base.njk
+navbarScrolled: true
+---
+{# Get FAQ data #}
+{% set faqData = faq[langCode] %}
+
+<!-- Page Header -->
+<header class="page-header">
+    <div class="container">
+        <h1>{{ faqData.title }} <span class="gradient-text">{{ faqData.titleHighlight }}</span></h1>
+        <p>{{ faqData.subtitle }}</p>
+    </div>
+</header>
+
+<!-- FAQ Content -->
+<main class="page-content">
+    <div class="container">
+        {% for item in faqData.items %}
+        <div class="faq-item">
+            <h4>{{ item.question }}</h4>
+            <p>{{ item.answer | safe }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</main>

@@ -1,0 +1,13 @@
+{# Status Cards Component - Cards showing different status types #}
+{# Usage: {% include "components/docs/status-cards.njk" with {cards: [...]} %} #}
+<div class="status-cards">
+    {% for card in cards %}
+    <div class="status-card-item">
+        <div class="status-indicator {{ card.color }}"></div>
+        <div class="status-info">
+            <h4>{{ card.title }}</h4>
+            <p>{{ card.description }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,50 @@
+{
+  "pt": {
+    "links": [
+      { "href": "#features", "label": "Funcionalidades" },
+      { "href": "#screenshots", "label": "Telas" },
+      { "href": "#pricing", "label": "Planos" },
+      { "href": "#contact", "label": "Contato" }
+    ],
+    "cta": "Baixar App",
+    "mobileLinks": [
+      { "href": "#features", "label": "Funcionalidades" },
+      { "href": "#screenshots", "label": "Telas" },
+      { "href": "#pricing", "label": "Planos" },
+      { "href": "support.html", "label": "Suporte", "external": true },
+      { "href": "#contact", "label": "Contato" }
+    ]
+  },
+  "en": {
+    "links": [
+      { "href": "#features", "label": "Features" },
+      { "href": "#screenshots", "label": "Screenshots" },
+      { "href": "#pricing", "label": "Pricing" },
+      { "href": "#contact", "label": "Contact" }
+    ],
+    "cta": "Download App",
+    "mobileLinks": [
+      { "href": "#features", "label": "Features" },
+      { "href": "#screenshots", "label": "Screenshots" },
+      { "href": "#pricing", "label": "Pricing" },
+      { "href": "support-en.html", "label": "Support", "external": true },
+      { "href": "#contact", "label": "Contact" }
+    ]
+  },
+  "es": {
+    "links": [
+      { "href": "#features", "label": "Funciones" },
+      { "href": "#screenshots", "label": "Capturas" },
+      { "href": "#pricing", "label": "Planes" },
+      { "href": "#contact", "label": "Contacto" }
+    ],
+    "cta": "Descargar App",
+    "mobileLinks": [
+      { "href": "#features", "label": "Funciones" },
+      { "href": "#screenshots", "label": "Capturas" },
+      { "href": "#pricing", "label": "Planes" },
+      { "href": "support-es.html", "label": "Soporte", "external": true },
+      { "href": "#contact", "label": "Contacto" }
+    ]
+  }
+}

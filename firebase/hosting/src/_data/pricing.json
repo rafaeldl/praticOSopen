@@ -1,0 +1,194 @@
+{
+  "pt": {
+    "tag": "Planos",
+    "title": "Comece grátis.",
+    "titleHighlight": "Pague só quando crescer.",
+    "subtitle": [
+      "Sem cartão de crédito",
+      "Sem limite de tempo",
+      "Upgrade quando quiser"
+    ],
+    "plans": [
+      {
+        "name": "Free",
+        "price": "0",
+        "currency": "R$",
+        "period": "/mês",
+        "tagline": "Grátis para sempre",
+        "features": [
+          { "text": "OS e Clientes ilimitados", "bold": true },
+          { "text": "1 usuário" },
+          { "text": "30 fotos/mês" },
+          { "text": "1 checklist" },
+          { "text": "Financeiro e link de acompanhamento" }
+        ],
+        "cta": "Começar Grátis",
+        "ctaStyle": "outline"
+      },
+      {
+        "name": "Starter",
+        "price": "59",
+        "currency": "R$",
+        "period": "/mês",
+        "tagline": "Ideal para crescer",
+        "featured": true,
+        "badge": "Mais Popular",
+        "features": [
+          { "text": "Tudo do Free, mais:" },
+          { "text": "2 usuários", "bold": true, "suffix": " inclusos" },
+          { "text": "200 fotos", "bold": true, "suffix": "/mês" },
+          { "text": "3 checklists personalizados" },
+          { "text": "PDF profissional", "bold": true, "suffix": " sem marca" }
+        ],
+        "cta": "Começar com Starter",
+        "ctaStyle": "primary"
+      },
+      {
+        "name": "Pro",
+        "price": "119",
+        "currency": "R$",
+        "period": "/mês",
+        "tagline": "Para equipes maiores",
+        "features": [
+          { "text": "Tudo do Starter, mais:" },
+          { "text": "3 usuários", "bold": true, "suffix": " inclusos" },
+          { "text": "1.000 fotos", "bold": true, "suffix": "/mês" },
+          { "text": "10 checklists personalizados" },
+          { "text": "Relatórios avançados" }
+        ],
+        "cta": "Começar com Pro",
+        "ctaStyle": "outline"
+      }
+    ],
+    "detailsLink": "pricing.html",
+    "detailsText": "Precisa de mais? API, multi-empresa e fotos ilimitadas → Compare todos os planos"
+  },
+  "en": {
+    "tag": "Pricing",
+    "title": "Start free.",
+    "titleHighlight": "Pay only when you grow.",
+    "subtitle": [
+      "No credit card",
+      "No time limit",
+      "Upgrade anytime"
+    ],
+    "plans": [
+      {
+        "name": "Free",
+        "price": "0",
+        "currency": "$",
+        "period": "/month",
+        "tagline": "Free forever",
+        "features": [
+          { "text": "Unlimited WOs and Customers", "bold": true },
+          { "text": "1 user" },
+          { "text": "30 photos/month" },
+          { "text": "1 checklist" },
+          { "text": "Financials and tracking link" }
+        ],
+        "cta": "Start Free",
+        "ctaStyle": "outline"
+      },
+      {
+        "name": "Starter",
+        "price": "12",
+        "currency": "$",
+        "period": "/month",
+        "tagline": "Ideal to grow",
+        "featured": true,
+        "badge": "Most Popular",
+        "features": [
+          { "text": "Everything in Free, plus:" },
+          { "text": "2 users", "bold": true, "suffix": " included" },
+          { "text": "200 photos", "bold": true, "suffix": "/month" },
+          { "text": "3 custom checklists" },
+          { "text": "Professional PDF", "bold": true, "suffix": " no watermark" }
+        ],
+        "cta": "Start with Starter",
+        "ctaStyle": "primary"
+      },
+      {
+        "name": "Pro",
+        "price": "24",
+        "currency": "$",
+        "period": "/month",
+        "tagline": "For larger teams",
+        "features": [
+          { "text": "Everything in Starter, plus:" },
+          { "text": "3 users", "bold": true, "suffix": " included" },
+          { "text": "1,000 photos", "bold": true, "suffix": "/month" },
+          { "text": "10 custom checklists" },
+          { "text": "Advanced reports" }
+        ],
+        "cta": "Start with Pro",
+        "ctaStyle": "outline"
+      }
+    ],
+    "detailsLink": "pricing-en.html",
+    "detailsText": "Need more? API, multi-company and unlimited photos → Compare all plans"
+  },
+  "es": {
+    "tag": "Planes",
+    "title": "Empieza gratis.",
+    "titleHighlight": "Paga solo cuando crezcas.",
+    "subtitle": [
+      "Sin tarjeta de crédito",
+      "Sin límite de tiempo",
+      "Upgrade cuando quieras"
+    ],
+    "plans": [
+      {
+        "name": "Free",
+        "price": "0",
+        "currency": "$",
+        "period": "/mes",
+        "tagline": "Gratis para siempre",
+        "features": [
+          { "text": "OS y Clientes ilimitados", "bold": true },
+          { "text": "1 usuario" },
+          { "text": "30 fotos/mes" },
+          { "text": "1 checklist" },
+          { "text": "Financiero y link de seguimiento" }
+        ],
+        "cta": "Empezar Gratis",
+        "ctaStyle": "outline"
+      },
+      {
+        "name": "Starter",
+        "price": "12",
+        "currency": "$",
+        "period": "/mes",
+        "tagline": "Ideal para crecer",
+        "featured": true,
+        "badge": "Más Popular",
+        "features": [
+          { "text": "Todo del Free, más:" },
+          { "text": "2 usuarios", "bold": true, "suffix": " inclusos" },
+          { "text": "200 fotos", "bold": true, "suffix": "/mes" },
+          { "text": "3 checklists personalizados" },
+          { "text": "PDF profesional", "bold": true, "suffix": " sin marca" }
+        ],
+        "cta": "Empezar con Starter",
+        "ctaStyle": "primary"
+      },
+      {
+        "name": "Pro",
+        "price": "24",
+        "currency": "$",
+        "period": "/mes",
+        "tagline": "Para equipos mayores",
+        "features": [
+          { "text": "Todo del Starter, más:" },
+          { "text": "3 usuarios", "bold": true, "suffix": " inclusos" },
+          { "text": "1.000 fotos", "bold": true, "suffix": "/mes" },
+          { "text": "10 checklists personalizados" },
+          { "text": "Informes avanzados" }
+        ],
+        "cta": "Empezar con Pro",
+        "ctaStyle": "outline"
+      }
+    ],
+    "detailsLink": "pricing-es.html",
+    "detailsText": "¿Necesitas más? API, multi-empresa y fotos ilimitadas → Compara todos los planes"
+  }
+}

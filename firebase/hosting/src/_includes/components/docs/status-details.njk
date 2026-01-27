@@ -1,0 +1,48 @@
+{# Status Details Component - Detailed cards explaining status rules #}
+{# Usage: {% include "components/docs/status-details.njk" with {details: [...]} %} #}
+<div class="status-details">
+    {% for detail in details %}
+    <div class="status-card">
+        <h4>
+            <span class="status-indicator {{ detail.indicatorClass }}"></span>
+            {{ detail.title }}
+        </h4>
+        {% if detail.description %}<p>{{ detail.description | safe }}</p>{% endif %}
+
+        {% if detail.list %}
+        <ul>
+            {% for item in detail.list %}
+            <li>{{ item | safe }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if detail.note %}<p class="note">{{ detail.note | safe }}</p>{% endif %}
+
+        {% if detail.permissions %}
+        <div class="status-permissions">
+            {% if detail.permissions.canDo %}
+            <div class="can-do">
+                <h5>&#10003; {{ detail.permissions.canDoTitle }}</h5>
+                <ul>
+                    {% for item in detail.permissions.canDo %}
+                    <li>{{ item | safe }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% if detail.permissions.cannotDo %}
+            <div class="cannot-do">
+                <h5>&#10007; {{ detail.permissions.cannotDoTitle }}</h5>
+                <ul>
+                    {% for item in detail.permissions.cannotDo %}
+                    <li>{{ item | safe }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>

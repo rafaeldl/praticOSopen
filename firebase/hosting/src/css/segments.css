@@ -1,0 +1,264 @@
+/* ============================================
+   Segment Pages - Specific Styles
+   ============================================ */
+
+/* Problems Section */
+.segment-problems {
+    padding: var(--section-padding) 0;
+    background: var(--bg-primary);
+}
+
+.segment-problems-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.segment-problem-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    transition: var(--transition-normal);
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.segment-problem-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.segment-problem-card:hover {
+    border-color: var(--border-color-hover);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.segment-problem-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 59, 48, 0.15);
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    font-size: 1.75rem;
+}
+
+.segment-problem-card h3 {
+    margin-bottom: 12px;
+}
+
+.segment-problem-card p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+/* Solutions Section */
+.segment-solutions {
+    padding: var(--section-padding) 0;
+    background: var(--bg-secondary);
+}
+
+.segment-solutions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.segment-solution-card {
+    background: var(--gradient-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    transition: var(--transition-normal);
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.segment-solution-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.segment-solution-card:hover {
+    border-color: var(--border-color-hover);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.segment-solution-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(52, 199, 89, 0.15);
+    border-radius: var(--radius-md);
+    margin-bottom: 24px;
+    font-size: 1.75rem;
+}
+
+.segment-solution-card h3 {
+    margin-bottom: 12px;
+}
+
+.segment-solution-card p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+/* Checklist Section */
+.segment-checklist {
+    padding: var(--section-padding) 0;
+    background: var(--bg-primary);
+}
+
+.segment-checklist-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+.segment-checklist-content h2 {
+    margin-bottom: 16px;
+}
+
+.segment-checklist-content p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    font-size: 1.1rem;
+}
+
+.segment-checklist-preview {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+}
+
+.segment-checklist-preview h4 {
+    margin-bottom: 24px;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.segment-checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-secondary);
+}
+
+.segment-checklist-item:last-child {
+    border-bottom: none;
+}
+
+.segment-checklist-item span.icon {
+    font-size: 1.3rem;
+}
+
+/* Testimonial Section */
+.segment-testimonial {
+    padding: var(--section-padding) 0;
+    background: var(--bg-secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.segment-testimonial::before {
+    content: '"';
+    position: absolute;
+    top: 60px;
+    left: 10%;
+    font-size: 20rem;
+    font-family: Georgia, serif;
+    color: rgba(255, 204, 0, 0.08);
+    line-height: 1;
+    pointer-events: none;
+}
+
+.testimonial-card {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.testimonial-quote {
+    font-size: 1.5rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+    font-style: italic;
+    margin-bottom: 32px;
+    font-weight: 300;
+}
+
+.testimonial-author {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.testimonial-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.testimonial-role {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.testimonial-metric {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding: 12px 24px;
+    background: rgba(52, 199, 89, 0.15);
+    border-radius: var(--radius-full);
+    color: #34C759;
+    font-weight: 600;
+}
+
+/* FAQ Section */
+.segment-faq {
+    padding: var(--section-padding) 0;
+    background: var(--bg-primary);
+}
+
+.segment-faq .faq-grid {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .segment-problems-grid,
+    .segment-solutions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .segment-checklist-container {
+        grid-template-columns: 1fr;
+    }
+
+    .testimonial-quote {
+        font-size: 1.25rem;
+    }
+
+    .segment-testimonial::before {
+        font-size: 12rem;
+        top: 20px;
+        left: 5%;
+    }
+}

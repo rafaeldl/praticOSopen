@@ -1,0 +1,381 @@
+{
+  "slug": "eletronica",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Assistência Técnica de Eletrônica | PraticOS",
+    "description": "Organize sua oficina de eletrônicos com sistema de OS completo. Controle orçamentos, fotos de entrada, termo de abandono e gestão de peças importadas. Ideal para conserto de TV, som e monitores.",
+    "keywords": "sistema assistência técnica eletrônica, software conserto TV, app assistência técnica celular, gestão oficina eletrônica, sistema ordem serviço eletrônicos",
+    "ogTitle": "Sistema para Assistência Técnica de Eletrônica | PraticOS",
+    "ogDescription": "Organize sua oficina de eletrônicos. Controle orçamentos, fotos de entrada, termo de abandono e gestão de peças importadas.",
+    "hero": {
+      "badge": "📺 Eletrônica",
+      "title": "Acabe com TV abandonada:",
+      "titleHighlight": "organize sua oficina de eletrônicos",
+      "subtitle": "Foto obrigatória na entrada, termo de abandono automático e controle de peças importadas. Orçamentos digitais com follow-up automático para fechar mais serviços.",
+      "ctaPrimary": "Testar Grátis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Técnicos ativos" },
+        "orders": { "value": "10k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliação" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Você enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem trabalha com assistência técnica de eletrônicos",
+      "items": [
+        { "icon": "⏰", "title": "Peças importadas demoram", "text": "Encomendou a peça mas não lembra quando chega. Cliente cobra e você não tem informação para dar." },
+        { "icon": "📝", "title": "Orçamentos perdidos", "text": "Fez o orçamento no papel ou WhatsApp, cliente some e você perde a venda. Sem follow-up organizado." },
+        { "icon": "📺", "title": "Aparelhos abandonados", "text": "TVs e equipamentos acumulados na oficina há meses. Cliente não busca e você não pode descartar." },
+        { "icon": "📸", "title": "Sem foto de entrada", "text": "Cliente volta reclamando de arranhão que já existia. Sem foto, não tem como provar." },
+        { "icon": "😤", "title": "Disputa de garantia", "text": "Cliente diz que o problema voltou, mas você não documentou o que foi feito. Acaba refazendo de graça." },
+        { "icon": "💰", "title": "Preço inconsistente", "text": "Cobra valores diferentes para o mesmo serviço. Sem tabela de preços, acaba no prejuízo." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluções",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para oficinas de eletrônicos",
+      "items": [
+        { "icon": "📦", "title": "Controle de peças", "text": "Registre pedidos de peças importadas com rastreio.", "highlight": "Saiba exatamente quando cada peça chega." },
+        { "icon": "📱", "title": "Orçamentos com follow-up", "text": "Envie orçamentos digitais e acompanhe. Sistema avisa quando cliente não respondeu." },
+        { "icon": "📄", "title": "Termo de abandono automático", "text": "Após prazo configurável, sistema gera termo de abandono. Documentação legal para descarte." },
+        { "icon": "📸", "title": "Foto obrigatória na entrada", "text": "Configure foto como requisito. Documenta estado estético e acessórios recebidos." },
+        { "icon": "📋", "title": "Histórico completo", "text": "Tudo documentado: defeito, diagnóstico, peças, fotos. Proteção total em caso de reclamação." },
+        { "icon": "💵", "title": "Catálogo de serviços", "text": "Tabela de preços por tipo de serviço. Preço consistente e cálculo de margem automático." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulário",
+      "title": "Checklist de",
+      "titleHighlight": "recebimento do aparelho",
+      "text": "Documente tudo na entrada e evite problemas. Estado estético, acessórios e defeito relatado pelo cliente.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Checklist de Recebimento",
+      "items": [
+        { "icon": "📸", "text": "Fotos do aparelho (frente, traseira, laterais)" },
+        { "icon": "🔢", "text": "Número de série e modelo" },
+        { "icon": "✅", "text": "Estado estético: riscos, amassados, manchas" },
+        { "icon": "📝", "text": "Defeito relatado pelo cliente" },
+        { "icon": "📦", "text": "Acessórios recebidos (controle, cabos)" },
+        { "icon": "✍️", "text": "Assinatura digital do cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar sua oficina",
+      "subtitle": "Ferramentas para assistência técnica de eletrônicos",
+      "items": [
+        { "icon": "image", "title": "Foto de entrada obrigatória", "text": "Configure foto como requisito na abertura da OS. Documenta estado do aparelho automaticamente." },
+        { "icon": "package", "title": "Controle de peças importadas", "text": "Registre pedidos com código de rastreio. Alerta quando peça está prevista para chegar.", "color": "yellow" },
+        { "icon": "document", "title": "Termo de abandono", "text": "Após prazo configurável, sistema gera termo automaticamente. Proteção legal para descarte.", "color": "orange" },
+        { "icon": "message", "title": "Status pelo WhatsApp", "text": "Cliente recebe atualização automática. Orçamento aprovado, peça chegou, pronto para retirada.", "color": "green" },
+        { "icon": "list", "title": "Catálogo de serviços", "text": "Tabela de preços padronizada. Calcula margem automaticamente por tipo de serviço.", "color": "purple" },
+        { "icon": "money", "title": "Relatórios financeiros", "text": "Veja faturamento por tipo de aparelho. Identifique os serviços mais lucrativos.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes tinha TVs acumuladas na oficina e não podia fazer nada. Agora com o termo de abandono automático, tenho respaldo legal. E a foto de entrada me salvou de várias reclamações falsas.",
+      "name": "Marcos Silva",
+      "role": "Dono de assistência técnica há 15 anos",
+      "metric": "Redução de 80% em disputas"
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas dúvidas antes de começar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
+        { "question": "Como funciona o termo de abandono?", "answer": "Você configura o prazo (ex: 90 dias). Quando o aparelho completa esse tempo sem ser retirado, o sistema gera automaticamente o termo de abandono com toda documentação legal." },
+        { "question": "Posso obrigar foto na entrada?", "answer": "Sim! Você configura se a foto é obrigatória ou opcional. Com foto obrigatória, não é possível abrir OS sem documentar o estado do aparelho." },
+        { "question": "Funciona para controlar peças importadas?", "answer": "Sim! Você registra o pedido com código de rastreio e data prevista. O sistema avisa quando a peça deve chegar, facilitando o follow-up com o cliente." },
+        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da assistência técnica." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar sua oficina",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe está pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Electronics Repair Shop Management | PraticOS",
+    "description": "Organize your electronics repair shop with a complete work order system. Control quotes, intake photos, abandonment terms and imported parts management. Perfect for TV, audio and monitor repair.",
+    "keywords": "electronics repair software, TV repair shop management, electronics service app, repair shop software, work order system electronics",
+    "ogTitle": "Electronics Repair Shop Management | PraticOS",
+    "ogDescription": "Organize your electronics repair shop. Control quotes, intake photos, abandonment terms and imported parts management.",
+    "hero": {
+      "badge": "📺 Electronics",
+      "title": "End abandoned equipment:",
+      "titleHighlight": "organize your electronics repair shop",
+      "subtitle": "Mandatory intake photo, automatic abandonment terms and imported parts tracking. Digital quotes with automatic follow-up to close more services.",
+      "ctaPrimary": "Try Free",
+      "ctaSecondary": "Watch Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Active technicians" },
+        "orders": { "value": "10k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for electronics repair shops",
+      "items": [
+        { "icon": "⏰", "title": "Imported parts take forever", "text": "Ordered the part but don't remember when it arrives. Customer asks and you have no info to give." },
+        { "icon": "📝", "title": "Lost quotes", "text": "Made the quote on paper or WhatsApp, customer disappears and you lose the sale. No organized follow-up." },
+        { "icon": "📺", "title": "Abandoned equipment", "text": "TVs and equipment piling up in the shop for months. Customer doesn't pick up and you can't dispose of it." },
+        { "icon": "📸", "title": "No intake photo", "text": "Customer returns complaining about a scratch that already existed. Without a photo, you can't prove it." },
+        { "icon": "😤", "title": "Warranty disputes", "text": "Customer says the problem returned, but you didn't document what was done. End up redoing it for free." },
+        { "icon": "💰", "title": "Inconsistent pricing", "text": "Charge different prices for the same service. Without a price table, you end up losing money." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for electronics repair shops",
+      "items": [
+        { "icon": "📦", "title": "Parts control", "text": "Register imported parts orders with tracking.", "highlight": "Know exactly when each part arrives." },
+        { "icon": "📱", "title": "Quotes with follow-up", "text": "Send digital quotes and track them. System alerts when customer hasn't responded." },
+        { "icon": "📄", "title": "Automatic abandonment term", "text": "After configurable deadline, system generates abandonment term. Legal documentation for disposal." },
+        { "icon": "📸", "title": "Mandatory intake photo", "text": "Configure photo as requirement. Documents cosmetic condition and received accessories." },
+        { "icon": "📋", "title": "Complete history", "text": "Everything documented: defect, diagnosis, parts, photos. Full protection in case of complaint." },
+        { "icon": "💵", "title": "Service catalog", "text": "Price table by service type. Consistent pricing and automatic margin calculation." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Equipment",
+      "titleHighlight": "intake checklist",
+      "text": "Document everything at intake and avoid problems. Cosmetic condition, accessories and customer-reported defect.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Intake Checklist",
+      "items": [
+        { "icon": "📸", "text": "Equipment photos (front, back, sides)" },
+        { "icon": "🔢", "text": "Serial number and model" },
+        { "icon": "✅", "text": "Cosmetic condition: scratches, dents, stains" },
+        { "icon": "📝", "text": "Customer-reported defect" },
+        { "icon": "📦", "text": "Received accessories (remote, cables)" },
+        { "icon": "✍️", "text": "Customer digital signature" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your shop",
+      "subtitle": "Tools for electronics repair shops",
+      "items": [
+        { "icon": "image", "title": "Mandatory intake photo", "text": "Configure photo as requirement when opening WO. Automatically documents equipment condition." },
+        { "icon": "package", "title": "Imported parts control", "text": "Register orders with tracking code. Alert when part is expected to arrive.", "color": "yellow" },
+        { "icon": "document", "title": "Abandonment term", "text": "After configurable deadline, system generates term automatically. Legal protection for disposal.", "color": "orange" },
+        { "icon": "message", "title": "Status via WhatsApp", "text": "Customer receives automatic updates. Quote approved, part arrived, ready for pickup.", "color": "green" },
+        { "icon": "list", "title": "Service catalog", "text": "Standardized price table. Automatically calculates margin by service type.", "color": "purple" },
+        { "icon": "money", "title": "Financial reports", "text": "See revenue by equipment type. Identify the most profitable services.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Before I had TVs piling up in the shop and couldn't do anything. Now with the automatic abandonment term, I have legal backing. And the intake photo saved me from several false complaints.",
+      "name": "Marcos Silva",
+      "role": "Electronics repair shop owner for 15 years",
+      "metric": "80% reduction in disputes"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
+        { "question": "How does the abandonment term work?", "answer": "You set the deadline (e.g., 90 days). When the equipment reaches that time without being picked up, the system automatically generates the abandonment term with all legal documentation." },
+        { "question": "Can I require intake photos?", "answer": "Yes! You configure whether the photo is mandatory or optional. With mandatory photo, it's not possible to open a WO without documenting the equipment condition." },
+        { "question": "Does it work for tracking imported parts?", "answer": "Yes! You register the order with tracking code and expected date. The system alerts when the part should arrive, making it easy to follow up with the customer." },
+        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of electronics repair shops." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "organize your shop",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Asistencia Técnica de Electrónica | PraticOS",
+    "description": "Organiza tu taller de electrónicos con sistema de OS completo. Controla presupuestos, fotos de entrada, término de abandono y gestión de piezas importadas. Ideal para reparación de TV, audio y monitores.",
+    "keywords": "sistema asistencia técnica electrónica, software reparación TV, app asistencia técnica electrónicos, gestión taller electrónica, sistema orden servicio electrónicos",
+    "ogTitle": "Sistema para Asistencia Técnica de Electrónica | PraticOS",
+    "ogDescription": "Organiza tu taller de electrónicos. Controla presupuestos, fotos de entrada, término de abandono y gestión de piezas importadas.",
+    "hero": {
+      "badge": "📺 Electrónica",
+      "title": "Acaba con TV abandonada:",
+      "titleHighlight": "organiza tu taller de electrónicos",
+      "subtitle": "Foto obligatoria en la entrada, término de abandono automático y control de piezas importadas. Presupuestos digitales con follow-up automático para cerrar más servicios.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaSecondary": "Ver Demo",
+      "stats": {
+        "users": { "value": "500+", "label": "Técnicos activos" },
+        "orders": { "value": "10k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificación" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien trabaja con asistencia técnica de electrónicos",
+      "items": [
+        { "icon": "⏰", "title": "Piezas importadas demoran", "text": "Pediste la pieza pero no recuerdas cuándo llega. Cliente pregunta y no tienes información que dar." },
+        { "icon": "📝", "title": "Presupuestos perdidos", "text": "Hiciste el presupuesto en papel o WhatsApp, cliente desaparece y pierdes la venta. Sin follow-up organizado." },
+        { "icon": "📺", "title": "Aparatos abandonados", "text": "TVs y equipos acumulados en el taller hace meses. Cliente no busca y no puedes descartar." },
+        { "icon": "📸", "title": "Sin foto de entrada", "text": "Cliente vuelve reclamando de rayón que ya existía. Sin foto, no hay forma de probar." },
+        { "icon": "😤", "title": "Disputa de garantía", "text": "Cliente dice que el problema volvió, pero no documentaste qué se hizo. Terminas rehaciendo gratis." },
+        { "icon": "💰", "title": "Precio inconsistente", "text": "Cobras valores diferentes para el mismo servicio. Sin tabla de precios, terminas en pérdida." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Cómo",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para talleres de electrónicos",
+      "items": [
+        { "icon": "📦", "title": "Control de piezas", "text": "Registra pedidos de piezas importadas con rastreo.", "highlight": "Sabe exactamente cuándo llega cada pieza." },
+        { "icon": "📱", "title": "Presupuestos con follow-up", "text": "Envía presupuestos digitales y da seguimiento. Sistema avisa cuando cliente no respondió." },
+        { "icon": "📄", "title": "Término de abandono automático", "text": "Después del plazo configurable, sistema genera término de abandono. Documentación legal para descarte." },
+        { "icon": "📸", "title": "Foto obligatoria en la entrada", "text": "Configura foto como requisito. Documenta estado estético y accesorios recibidos." },
+        { "icon": "📋", "title": "Historial completo", "text": "Todo documentado: defecto, diagnóstico, piezas, fotos. Protección total en caso de reclamación." },
+        { "icon": "💵", "title": "Catálogo de servicios", "text": "Tabla de precios por tipo de servicio. Precio consistente y cálculo de margen automático." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "recepción del aparato",
+      "text": "Documenta todo en la entrada y evita problemas. Estado estético, accesorios y defecto reportado por el cliente.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Recepción",
+      "items": [
+        { "icon": "📸", "text": "Fotos del aparato (frente, trasera, laterales)" },
+        { "icon": "🔢", "text": "Número de serie y modelo" },
+        { "icon": "✅", "text": "Estado estético: rayones, abolladuras, manchas" },
+        { "icon": "📝", "text": "Defecto reportado por el cliente" },
+        { "icon": "📦", "text": "Accesorios recibidos (control, cables)" },
+        { "icon": "✍️", "text": "Firma digital del cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tu taller",
+      "subtitle": "Herramientas para asistencia técnica de electrónicos",
+      "items": [
+        { "icon": "image", "title": "Foto de entrada obligatoria", "text": "Configura foto como requisito al abrir OS. Documenta estado del aparato automáticamente." },
+        { "icon": "package", "title": "Control de piezas importadas", "text": "Registra pedidos con código de rastreo. Alerta cuando pieza está prevista para llegar.", "color": "yellow" },
+        { "icon": "document", "title": "Término de abandono", "text": "Después del plazo configurable, sistema genera término automáticamente. Protección legal para descarte.", "color": "orange" },
+        { "icon": "message", "title": "Estado por WhatsApp", "text": "Cliente recibe actualización automática. Presupuesto aprobado, pieza llegó, listo para retirar.", "color": "green" },
+        { "icon": "list", "title": "Catálogo de servicios", "text": "Tabla de precios estandarizada. Calcula margen automáticamente por tipo de servicio.", "color": "purple" },
+        { "icon": "money", "title": "Informes financieros", "text": "Mira facturación por tipo de aparato. Identifica los servicios más lucrativos.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes tenía TVs acumuladas en el taller y no podía hacer nada. Ahora con el término de abandono automático, tengo respaldo legal. Y la foto de entrada me salvó de varias reclamaciones falsas.",
+      "name": "Marcos Silva",
+      "role": "Dueño de asistencia técnica hace 15 años",
+      "metric": "Reducción de 80% en disputas"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "¿Cómo funciona el término de abandono?", "answer": "Configuras el plazo (ej: 90 días). Cuando el aparato cumple ese tiempo sin ser retirado, el sistema genera automáticamente el término de abandono con toda la documentación legal." },
+        { "question": "¿Puedo obligar foto en la entrada?", "answer": "¡Sí! Configuras si la foto es obligatoria u opcional. Con foto obligatoria, no es posible abrir OS sin documentar el estado del aparato." },
+        { "question": "¿Funciona para controlar piezas importadas?", "answer": "¡Sí! Registras el pedido con código de rastreo y fecha prevista. El sistema avisa cuando la pieza debe llegar, facilitando el follow-up con el cliente." },
+        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día de la asistencia técnica." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "organizar tu taller",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo está listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}
