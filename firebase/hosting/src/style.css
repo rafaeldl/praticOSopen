@@ -252,6 +252,7 @@ h4 { font-size: 1.125rem; }
 
 .nav-links {
     display: flex;
+    align-items: center;
     gap: 32px;
 }
 
@@ -351,6 +352,8 @@ h4 { font-size: 1.125rem; }
     opacity: 0;
     visibility: hidden;
     transition: var(--transition-normal);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .mobile-menu.active {
@@ -362,9 +365,9 @@ h4 { font-size: 1.125rem; }
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100%;
+    min-height: 100%;
     gap: 24px;
+    padding: 100px 24px 40px;
 }
 
 .mobile-menu-content a {
@@ -391,6 +394,167 @@ h4 { font-size: 1.125rem; }
 
 .mobile-lang a.active {
     background: var(--bg-card);
+}
+
+/* ============================================
+   Segments Dropdown (Desktop)
+   ============================================ */
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-trigger {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition-fast);
+}
+
+.nav-dropdown-trigger:hover {
+    color: var(--text-primary);
+}
+
+.nav-dropdown-trigger svg {
+    transition: var(--transition-fast);
+}
+
+.nav-dropdown:hover .nav-dropdown-trigger svg,
+.nav-dropdown.active .nav-dropdown-trigger svg {
+    transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 14, 23, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    padding-top: 28px;
+    min-width: 420px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    pointer-events: none;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Invisible bridge to keep hover state when moving to menu */
+.nav-dropdown-menu::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: transparent;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown.active .nav-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.nav-dropdown-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px 24px;
+}
+
+.nav-dropdown-item {
+    display: block;
+    padding: 10px 12px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
+    white-space: nowrap;
+}
+
+.nav-dropdown-item:hover {
+    color: var(--text-primary);
+    background: var(--bg-card);
+}
+
+.nav-dropdown-item::after {
+    display: none;
+}
+
+/* ============================================
+   Mobile Segments Accordion
+   ============================================ */
+.mobile-segments {
+    width: 100%;
+    max-width: 280px;
+}
+
+.mobile-segments-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition-fast);
+}
+
+.mobile-segments-trigger:hover {
+    color: var(--text-primary);
+}
+
+.mobile-segments-trigger svg {
+    transition: var(--transition-fast);
+}
+
+.mobile-segments.active .mobile-segments-trigger svg {
+    transform: rotate(180deg);
+}
+
+.mobile-segments-content {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+}
+
+.mobile-segments.active .mobile-segments-content {
+    display: flex;
+}
+
+.mobile-segments-content a {
+    font-size: 1rem !important;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    transition: var(--transition-fast);
+}
+
+.mobile-segments-content a:hover {
+    background: var(--bg-card-hover);
 }
 
 /* ============================================

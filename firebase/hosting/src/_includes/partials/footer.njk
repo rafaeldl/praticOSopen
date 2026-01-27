@@ -1,5 +1,6 @@
 {# Get footer data based on language #}
 {% set foot = footer[langCode] | default(footer.pt) %}
+{% set seg = segments[langCode] | default(segments.pt) %}
 
 <!-- Footer -->
 <footer class="footer">
@@ -21,8 +22,8 @@
                 <a href="{{ site.companyUrl }}" target="_blank" rel="noopener">{{ site.company }}</a>
             </div>
             <div class="footer-links">
-                <h4>{{ foot.segments.title }}</h4>
-                {% for link in foot.segments.links %}
+                <h4>{{ seg.title }}</h4>
+                {% for link in seg.links %}
                 <a href="{{ relPath }}{{ link.href }}">{{ link.label }}</a>
                 {% endfor %}
             </div>
