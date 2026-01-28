@@ -7,6 +7,14 @@
       }
     }
   },
+  "tools": {
+    "profile": "full",
+    "web": {
+      "fetch": {
+        "enabled": true
+      }
+    }
+  },
   "agents": {
     "defaults": {
       "model": {
