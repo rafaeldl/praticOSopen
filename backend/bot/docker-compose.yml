@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  clawdbot-gateway:
+    build: .
+    container_name: praticos-bot-gateway
+    restart: always
+    ports:
+      - "18791:18789"
+    volumes:
+      - ./workspace:/app/workspace  # Pasta para memória do bot (agentes, memórias diárias)
+      - ./logs:/app/logs            # Pasta para logs
+      - ./clawdbot.json:/root/.clawdbot/clawdbot.json # Sua configuração do número de WhatsApp
+      - ./credentials:/root/.clawdbot/credentials # Credenciais (Google, WhatsApp, etc)
+    environment:
+      - CLAWDBOT_GATEWAY_PORT=18789
+      - CLAWDBOT_GATEWAY_BIND=lan
