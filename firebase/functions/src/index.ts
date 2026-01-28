@@ -201,27 +201,27 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // API Core v1 Routes
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/orders', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, ordersRoutes);
-app.use('/api/v1/customers', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, customersRoutes);
-app.use('/api/v1/devices', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, devicesRoutes);
-app.use('/api/v1/services', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, servicesRoutes);
-app.use('/api/v1/products', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, productsRoutes);
-app.use('/api/v1/company', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, companyRoutes);
-app.use('/api/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, analyticsRoutes);
+app.use('/v1/auth', authRoutes);
+app.use('/v1/orders', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, ordersRoutes);
+app.use('/v1/customers', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, customersRoutes);
+app.use('/v1/devices', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, devicesRoutes);
+app.use('/v1/services', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, servicesRoutes);
+app.use('/v1/products', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, productsRoutes);
+app.use('/v1/company', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, companyRoutes);
+app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, analyticsRoutes);
 
 // Bearer token routes (for Flutter app)
-app.use('/api/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes);
-app.use('/api/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customersRoutes);
-app.use('/api/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
+app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes);
+app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customersRoutes);
+app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
 
 // API Bot Routes
-app.use('/api/bot/link', botLimiter, botAuth, linkRoutes);
-app.use('/api/bot/invite', botLimiter, botAuth, inviteRoutes);
-app.use('/api/bot/customers', botLimiter, botAuth, searchRoutes);
-app.use('/api/bot/devices', botLimiter, botAuth, searchRoutes);
-app.use('/api/bot/orders', botLimiter, botAuth, quickRoutes);
-app.use('/api/bot/summary', botLimiter, botAuth, summaryRoutes);
+app.use('/bot/link', botLimiter, botAuth, linkRoutes);
+app.use('/bot/invite', botLimiter, botAuth, inviteRoutes);
+app.use('/bot/customers', botLimiter, botAuth, searchRoutes);
+app.use('/bot/devices', botLimiter, botAuth, searchRoutes);
+app.use('/bot/orders', botLimiter, botAuth, quickRoutes);
+app.use('/bot/summary', botLimiter, botAuth, summaryRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

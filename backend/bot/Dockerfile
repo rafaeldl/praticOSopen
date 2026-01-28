@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     make \
     g++ \
     git \
+    curl \
     ffmpeg \
     libnss3 \
     libatk-bridge2.0-0 \

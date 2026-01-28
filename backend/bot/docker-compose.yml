@@ -8,17 +8,18 @@ services:
     ports:
       - "18791:18789"
     volumes:
-      - ./workspace:/app/workspace  # Pasta para memória do bot (agentes, memórias diárias)
+      - ./workspace:/root/.clawdbot  # Workspace completo (agentes, skills, memórias)
       - ./logs:/app/logs            # Pasta para logs
       - ./clawdbot.json:/root/.clawdbot/clawdbot.json # Sua configuração do número de WhatsApp
       - ./credentials:/root/.clawdbot/credentials # Credenciais (Google, WhatsApp, etc)
     environment:
       - CLAWDBOT_GATEWAY_PORT=18789
       - CLAWDBOT_GATEWAY_BIND=lan
+      # Google/Gemini API Key
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-AIzaSyBk7I0p1d4Xie4dd9DmeP6fcgIp4zNsv6s}
       # PraticOS API Configuration
-      # Para teste local: http://host.docker.internal:5001/praticos-app/southamerica-east1/api
-      # Para produção: https://southamerica-east1-praticos-app.cloudfunctions.net/api
-      - PRATICOS_API_URL=${PRATICOS_API_URL:-http://host.docker.internal:5001/praticos-app/southamerica-east1/api}
+      # host.docker.internal resolve para o IP do host
+      - PRATICOS_API_URL=${PRATICOS_API_URL:-http://host.docker.internal:5001/praticos/southamerica-east1/api}
       - PRATICOS_API_KEY=${PRATICOS_API_KEY:-bot_praticos_dev_key}
     extra_hosts:
       - "host.docker.internal:host-gateway"
