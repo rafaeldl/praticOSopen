@@ -7,12 +7,14 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",
+    "emulators": "npm run build && firebase emulators:start",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "npm run build && firebase deploy --only functions",
     "logs": "firebase functions:log",
     "lint": "eslint --ext .ts src/",
-    "lint:fix": "eslint --ext .ts src/ --fix"
+    "lint:fix": "eslint --ext .ts src/ --fix",
+    "setup-test": "npx ts-node scripts/setup-test-data.ts"
   },
   "engines": {
     "node": "22"
@@ -35,6 +37,7 @@
     "@typescript-eslint/parser": "^8.10.0",
     "eslint": "^9.13.0",
     "firebase-functions-test": "^3.1.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
   "private": true

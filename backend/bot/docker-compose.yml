@@ -15,3 +15,6 @@ services:
     environment:
       - CLAWDBOT_GATEWAY_PORT=18789
       - CLAWDBOT_GATEWAY_BIND=lan
+      # PraticOS API Configuration
+      - PRATICOS_API_URL=${PRATICOS_API_URL:-https://southamerica-east1-praticos-app.cloudfunctions.net/api}
+      - PRATICOS_API_KEY=${PRATICOS_API_KEY:-bot_praticos_dev_key}
