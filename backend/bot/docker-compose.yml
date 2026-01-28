@@ -16,5 +16,9 @@ services:
       - CLAWDBOT_GATEWAY_PORT=18789
       - CLAWDBOT_GATEWAY_BIND=lan
       # PraticOS API Configuration
-      - PRATICOS_API_URL=${PRATICOS_API_URL:-https://southamerica-east1-praticos-app.cloudfunctions.net/api}
+      # Para teste local: http://host.docker.internal:5001/praticos-app/southamerica-east1/api
+      # Para produção: https://southamerica-east1-praticos-app.cloudfunctions.net/api
+      - PRATICOS_API_URL=${PRATICOS_API_URL:-http://host.docker.internal:5001/praticos-app/southamerica-east1/api}
       - PRATICOS_API_KEY=${PRATICOS_API_KEY:-bot_praticos_dev_key}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

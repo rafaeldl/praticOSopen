@@ -27,7 +27,7 @@ export interface ChannelLink {
   userId: string;
   companyId: string;
   role: RoleType;
-  linkedAt: FirebaseFirestore.Timestamp;
+  linkedAt: FirebaseFirestore.Timestamp | FirebaseFirestore.FieldValue | Date;
   userName?: string;
   companyName?: string;
 }

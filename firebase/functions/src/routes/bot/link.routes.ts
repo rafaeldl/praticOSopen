@@ -204,10 +204,15 @@ router.post('/dev', async (req: AuthenticatedRequest, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Dev link error:', error);
+    const err = error as Error;
+    console.error('Dev link error:', err.message, err.stack);
     res.status(500).json({
       success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to link WhatsApp' },
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Failed to link WhatsApp',
+        details: err.message,
+      },
     });
   }
 });

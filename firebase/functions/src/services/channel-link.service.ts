@@ -4,16 +4,19 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import * as admin from 'firebase-admin';
 import {
   db,
   auth,
-  Timestamp,
 } from './firestore.service';
 import {
   ChannelLink,
   LinkToken,
   RoleType,
 } from '../models/types';
+
+// Use Date directly - Firestore SDK will convert it to Timestamp
+const nowTimestamp = () => new Date();
 
 // Token expiration times (in milliseconds)
 const LINK_TOKEN_EXPIRATION = 15 * 60 * 1000; // 15 minutes
@@ -40,7 +43,7 @@ export async function generateLinkToken(
     userId,
     companyId,
     role,
-    expiresAt: Timestamp.fromDate(expiresAt),
+    expiresAt: admin.firestore.Timestamp.fromDate(expiresAt),
     used: false,
     userName,
     companyName,
@@ -112,7 +115,7 @@ export async function linkWhatsApp(
     userId,
     companyId,
     role,
-    linkedAt: Timestamp.now(),
+    linkedAt: nowTimestamp(),
     userName,
     companyName,
   };
@@ -198,7 +201,7 @@ export async function createUserFromWhatsApp(
     id: userRecord.uid,
     name,
     phone: normalizedNumber,
-    createdAt: Timestamp.now(),
+    createdAt: nowTimestamp(),
     createdVia: 'whatsapp_invite',
   });
 
