@@ -140,6 +140,79 @@ router.get('/context', async (req: AuthenticatedRequest, res: Response) => {
 });
 
 /**
+ * POST /api/bot/link/dev
+ * [DEV ONLY] Link WhatsApp directly without token
+ * Only works when FUNCTIONS_EMULATOR=true or NODE_ENV=development
+ */
+router.post('/dev', async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    // Only allow in development/emulator
+    const isDev = process.env.FUNCTIONS_EMULATOR === 'true' ||
+                  process.env.NODE_ENV === 'development' ||
+                  process.env.ALLOW_DEV_LINK === 'true';
+
+    if (!isDev) {
+      res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'This endpoint is only available in development mode',
+        },
+      });
+      return;
+    }
+
+    const { whatsappNumber, userId, companyId, role, userName, companyName } = req.body;
+
+    // Validate required fields
+    if (!whatsappNumber || !userId || !companyId) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'whatsappNumber, userId, and companyId are required',
+        },
+      });
+      return;
+    }
+
+    // Check if already linked
+    const existingLink = await channelLinkService.getWhatsAppLink(whatsappNumber);
+    if (existingLink) {
+      // Update existing link
+      await channelLinkService.unlinkWhatsApp(whatsappNumber);
+    }
+
+    // Link WhatsApp
+    await channelLinkService.linkWhatsApp(
+      whatsappNumber,
+      userId,
+      companyId,
+      role || 'owner',
+      userName || 'Dev User',
+      companyName || 'Dev Company'
+    );
+
+    res.json({
+      success: true,
+      data: {
+        message: 'WhatsApp linked successfully (dev mode)',
+        whatsappNumber,
+        userId,
+        companyId,
+        role: role || 'owner',
+      },
+    });
+  } catch (error) {
+    console.error('Dev link error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to link WhatsApp' },
+    });
+  }
+});
+
+/**
  * DELETE /api/bot/link (also /api/bot/unlink)
  * Unlink WhatsApp number
  */
