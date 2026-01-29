@@ -11,6 +11,15 @@ export interface DateRange {
 }
 
 /**
+ * Parse ISO date string (YYYY-MM-DD) as local time
+ * Avoids UTC conversion issues with new Date("YYYY-MM-DD")
+ */
+export function parseLocalDate(dateString: string): Date {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
+/**
  * Get the start and end dates for a given period type
  */
 export function getPeriodDates(
@@ -47,8 +56,9 @@ export function getPeriodDates(
       if (!customStart || !customEnd) {
         throw new Error('Custom period requires startDate and endDate');
       }
-      start = startOfDay(new Date(customStart));
-      end = endOfDay(new Date(customEnd));
+      // Use parseLocalDate to avoid UTC conversion issues
+      start = startOfDay(parseLocalDate(customStart));
+      end = endOfDay(parseLocalDate(customEnd));
       break;
 
     default:
@@ -151,16 +161,28 @@ export function toISOString(date: Date): string {
 
 /**
  * Convert Firestore Timestamp to Date
+ * Handles: Firestore Timestamp, serialized timestamp, or ISO string
  */
 export function timestampToDate(
-  timestamp: FirebaseFirestore.Timestamp | { _seconds: number; _nanoseconds: number } | undefined
+  timestamp: FirebaseFirestore.Timestamp | { _seconds: number; _nanoseconds: number } | string | undefined
 ): Date | undefined {
   if (!timestamp) return undefined;
-  if ('toDate' in timestamp) {
+
+  // Handle ISO date strings
+  if (typeof timestamp === 'string') {
+    const parsed = new Date(timestamp);
+    return isNaN(parsed.getTime()) ? undefined : parsed;
+  }
+
+  // Handle Firestore Timestamp with toDate() method
+  if ('toDate' in timestamp && typeof timestamp.toDate === 'function') {
     return timestamp.toDate();
   }
+
+  // Handle serialized timestamp object
   if ('_seconds' in timestamp) {
     return new Date(timestamp._seconds * 1000);
   }
+
   return undefined;
 }

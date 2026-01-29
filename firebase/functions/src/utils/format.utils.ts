@@ -233,3 +233,195 @@ export function truncate(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str;
   return str.slice(0, maxLength - 3) + '...';
 }
+
+/**
+ * Format status update message for WhatsApp
+ */
+export function formatStatusUpdate(
+  orderNumber: number,
+  oldStatus: string,
+  newStatus: string
+): string {
+  return [
+    `*OS #${orderNumber}* atualizada!`,
+    '',
+    `${formatStatus(oldStatus)} ➜ ${formatStatus(newStatus)}`,
+  ].join('\n');
+}
+
+/**
+ * Format financial summary for WhatsApp message
+ */
+export function formatFinancialSummary(data: {
+  period: string;
+  total: number;
+  paid: number;
+  unpaid: number;
+  discount: number;
+  ordersCount: number;
+}): string {
+  const lines = [
+    `*Faturamento - ${data.period}*`,
+    '',
+    `📊 ${data.ordersCount} OS no período`,
+    '',
+    `💰 *Total:* ${formatCurrency(data.total)}`,
+    `✅ *Recebido:* ${formatCurrency(data.paid)}`,
+  ];
+
+  if (data.discount > 0) {
+    lines.push(`🏷️ *Descontos:* ${formatCurrency(data.discount)}`);
+  }
+
+  if (data.unpaid > 0) {
+    lines.push(`⏳ *A Receber:* ${formatCurrency(data.unpaid)}`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Format catalog search results for WhatsApp message
+ */
+export function formatCatalogResults(
+  query: string,
+  services: Array<{ name: string; value: number }>,
+  products: Array<{ name: string; value: number }>
+): string {
+  const lines = [`*Resultados para "${query}":*`, ''];
+
+  if (services.length > 0) {
+    lines.push('*Serviços:*');
+    services.slice(0, 5).forEach((s) => {
+      lines.push(`• ${s.name}: ${formatCurrency(s.value)}`);
+    });
+    if (services.length > 5) {
+      lines.push(`  ...e mais ${services.length - 5}`);
+    }
+    lines.push('');
+  }
+
+  if (products.length > 0) {
+    lines.push('*Produtos:*');
+    products.slice(0, 5).forEach((p) => {
+      lines.push(`• ${p.name}: ${formatCurrency(p.value)}`);
+    });
+    if (products.length > 5) {
+      lines.push(`  ...e mais ${products.length - 5}`);
+    }
+  }
+
+  if (services.length === 0 && products.length === 0) {
+    lines.push('Nenhum resultado encontrado.');
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Format catalog list for WhatsApp message (when listing without search query)
+ */
+export function formatCatalogList(
+  type: string,
+  services: Array<{ name: string; value: number }>,
+  products: Array<{ name: string; value: number }>
+): string {
+  const lines: string[] = [];
+
+  if (type === 'service' || type === 'all') {
+    if (services.length > 0) {
+      lines.push(`*Serviços (${services.length}):*`);
+      services.forEach((s) => {
+        lines.push(`• ${s.name}: ${formatCurrency(s.value)}`);
+      });
+    } else {
+      lines.push('Nenhum serviço cadastrado.');
+    }
+  }
+
+  if (type === 'product' || type === 'all') {
+    if (lines.length > 0 && (type === 'all')) {
+      lines.push('');
+    }
+    if (products.length > 0) {
+      lines.push(`*Produtos (${products.length}):*`);
+      products.forEach((p) => {
+        lines.push(`• ${p.name}: ${formatCurrency(p.value)}`);
+      });
+    } else {
+      lines.push('Nenhum produto cadastrado.');
+    }
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Get period label in Portuguese
+ */
+export function getPeriodLabel(period: string): string {
+  const now = new Date();
+  const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
+  switch (period) {
+    case 'today':
+      return 'Hoje';
+    case 'week':
+      return 'Esta Semana';
+    case 'month':
+      return monthNames[now.getMonth()];
+    case 'year':
+      return String(now.getFullYear());
+    default:
+      return period;
+  }
+}
+
+/**
+ * Get current month label in Portuguese
+ */
+export function formatCurrentMonthLabel(): string {
+  const now = new Date();
+  const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+  return `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+/**
+ * Format date range label in Portuguese
+ * Adapts the label based on whether it's a single day, same month, or cross-month range
+ */
+export function formatDateRangeLabel(start: Date, end: Date): string {
+  const monthNames = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
+  const sameDay = start.toDateString() === end.toDateString();
+  const sameMonth = start.getMonth() === end.getMonth() &&
+                    start.getFullYear() === end.getFullYear();
+
+  // Check if it's a full month (first to last day)
+  const isFullMonth = sameMonth &&
+                      start.getDate() === 1 &&
+                      end.getDate() === new Date(end.getFullYear(), end.getMonth() + 1, 0).getDate();
+
+  if (sameDay) {
+    return formatDate(start);
+  }
+
+  if (isFullMonth) {
+    return `${monthNames[start.getMonth()]} ${start.getFullYear()}`;
+  }
+
+  if (sameMonth) {
+    return `${start.getDate()} a ${end.getDate()} de ${monthNames[start.getMonth()]} ${start.getFullYear()}`;
+  }
+
+  return `${formatDate(start)} - ${formatDate(end)}`;
+}

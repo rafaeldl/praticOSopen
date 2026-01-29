@@ -3,10 +3,7 @@
  * Business logic for dashboard and reporting
  */
 
-import {
-  getTenantCollection,
-  Timestamp,
-} from './firestore.service';
+import { getTenantCollection } from './firestore.service';
 import {
   Order,
   AnalyticsSummary,
@@ -33,6 +30,31 @@ import {
 // ============================================================================
 
 /**
+ * Parse order date from various formats (Timestamp, string, or object)
+ */
+function parseOrderDate(value: unknown): Date | null {
+  if (!value) return null;
+
+  // Handle Firestore Timestamp
+  if (typeof value === 'object' && 'toDate' in (value as object)) {
+    return (value as { toDate: () => Date }).toDate();
+  }
+
+  // Handle serialized timestamp { _seconds, _nanoseconds }
+  if (typeof value === 'object' && '_seconds' in (value as object)) {
+    return new Date((value as { _seconds: number })._seconds * 1000);
+  }
+
+  // Handle string (ISO format or similar)
+  if (typeof value === 'string') {
+    const parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  return null;
+}
+
+/**
  * Get analytics summary for a period
  */
 export async function getAnalyticsSummary(
@@ -44,22 +66,31 @@ export async function getAnalyticsSummary(
   const dateRange = getPeriodDates(period, startDate, endDate);
   const collection = getTenantCollection(companyId, 'orders');
 
-  // Get orders in the period
-  const snapshot = await collection
-    .where('createdAt', '>=', Timestamp.fromDate(dateRange.start))
-    .where('createdAt', '<=', Timestamp.fromDate(dateRange.end))
-    .get();
+  // Get all orders and filter in memory (createdAt may be string or Timestamp)
+  const snapshot = await collection.get();
 
-  const orders = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  })) as Order[];
+  // Filter orders by date range
+  const orders = snapshot.docs
+    .map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }) as Order)
+    .filter((order) => {
+      const orderDate = parseOrderDate(order.createdAt);
+      if (!orderDate) return false;
+      return orderDate >= dateRange.start && orderDate <= dateRange.end;
+    });
 
   // Calculate metrics
   const ordersByStatus = calculateOrdersByStatus(orders);
   const revenue = calculateRevenue(orders);
   const topCustomers = calculateTopCustomers(orders);
   const topServices = calculateTopServices(orders);
+
+  // Count only confirmed orders (exclude quote and canceled) for the total
+  const confirmedOrdersCount = orders.filter(
+    (o) => o.status !== 'quote' && o.status !== 'canceled'
+  ).length;
 
   const periodResult: AnalyticsPeriod = {
     start: toISODateString(dateRange.start),
@@ -69,7 +100,7 @@ export async function getAnalyticsSummary(
   return {
     period: periodResult,
     orders: {
-      total: orders.length,
+      total: confirmedOrdersCount,
       byStatus: ordersByStatus,
     },
     revenue,
@@ -101,6 +132,7 @@ function calculateOrdersByStatus(orders: Order[]): OrdersByStatus {
 
 /**
  * Calculate revenue metrics
+ * Only counts confirmed orders (excludes quote and canceled)
  */
 function calculateRevenue(orders: Order[]): RevenueMetrics {
   let total = 0;
@@ -108,8 +140,8 @@ function calculateRevenue(orders: Order[]): RevenueMetrics {
   let discount = 0;
 
   for (const order of orders) {
-    // Only count orders that are not canceled
-    if (order.status !== 'canceled') {
+    // Only count confirmed orders (exclude quote and canceled)
+    if (order.status !== 'canceled' && order.status !== 'quote') {
       total += order.total || 0;
       paid += order.paidAmount || 0;
       discount += order.discount || 0;
@@ -126,6 +158,7 @@ function calculateRevenue(orders: Order[]): RevenueMetrics {
 
 /**
  * Calculate top customers by revenue
+ * Only counts confirmed orders (excludes quote and canceled)
  */
 function calculateTopCustomers(orders: Order[], limit = 5): TopCustomer[] {
   const customerMap = new Map<
@@ -134,7 +167,7 @@ function calculateTopCustomers(orders: Order[], limit = 5): TopCustomer[] {
   >();
 
   for (const order of orders) {
-    if (order.customer && order.status !== 'canceled') {
+    if (order.customer && order.status !== 'canceled' && order.status !== 'quote') {
       const customerId = order.customer.id;
       const existing = customerMap.get(customerId) || {
         name: order.customer.name || 'Unknown',
@@ -156,6 +189,7 @@ function calculateTopCustomers(orders: Order[], limit = 5): TopCustomer[] {
 
 /**
  * Calculate top services by revenue
+ * Only counts confirmed orders (excludes quote and canceled)
  */
 function calculateTopServices(orders: Order[], limit = 5): TopService[] {
   const serviceMap = new Map<
@@ -164,7 +198,7 @@ function calculateTopServices(orders: Order[], limit = 5): TopService[] {
   >();
 
   for (const order of orders) {
-    if (order.services && order.status !== 'canceled') {
+    if (order.services && order.status !== 'canceled' && order.status !== 'quote') {
       for (const orderService of order.services) {
         if (orderService.service) {
           const serviceId = orderService.service.id;
@@ -298,18 +332,23 @@ export async function getTodaySummary(companyId: string): Promise<TodaySummaryDa
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  // Get orders created today
-  const todaySnapshot = await collection
-    .where('createdAt', '>=', Timestamp.fromDate(today))
-    .where('createdAt', '<', Timestamp.fromDate(tomorrow))
-    .get();
+  // Get all orders and filter in memory (createdAt may be string or Timestamp)
+  const allSnapshot = await collection.get();
 
-  const ordersCreatedToday = todaySnapshot.size;
+  // Filter orders created today
+  const todayOrders = allSnapshot.docs
+    .map((doc) => ({ id: doc.id, ...doc.data() }) as Order)
+    .filter((order) => {
+      const orderDate = parseOrderDate(order.createdAt);
+      if (!orderDate) return false;
+      return orderDate >= today && orderDate < tomorrow;
+    });
+
+  const ordersCreatedToday = todayOrders.length;
 
   // Calculate revenue from orders created today
   let revenue = 0;
-  todaySnapshot.docs.forEach((doc) => {
-    const order = doc.data() as Order;
+  todayOrders.forEach((order) => {
     if (order.status !== 'canceled') {
       revenue += order.total || 0;
     }
