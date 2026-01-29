@@ -5,6 +5,26 @@
 
 import { Request } from 'express';
 
+// Date type that supports both Firestore Timestamp and ISO string format
+// This allows compatibility between Flutter app (ISO strings) and legacy data (Timestamps)
+export type DateValue = FirebaseFirestore.Timestamp | string;
+
+/**
+ * Convert DateValue (Timestamp or ISO string) to JavaScript Date
+ * Handles both Firestore Timestamp objects and ISO string formats
+ */
+export function toDate(value: DateValue | null | undefined): Date | null {
+  if (!value) return null;
+  if (typeof value === 'string') {
+    return new Date(value);
+  }
+  // Firestore Timestamp has toDate() method
+  if (typeof (value as FirebaseFirestore.Timestamp).toDate === 'function') {
+    return (value as FirebaseFirestore.Timestamp).toDate();
+  }
+  return null;
+}
+
 // ============================================================================
 // Authentication Types
 // ============================================================================
@@ -17,8 +37,8 @@ export interface ApiKeyData {
   name: string;
   permissions: string[];
   active: boolean;
-  createdAt: FirebaseFirestore.Timestamp;
-  expiresAt?: FirebaseFirestore.Timestamp;
+  createdAt: DateValue;
+  expiresAt?: DateValue;
 }
 
 export interface ChannelLink {
@@ -37,7 +57,7 @@ export interface LinkToken {
   userId: string;
   companyId: string;
   role: RoleType;
-  expiresAt: FirebaseFirestore.Timestamp;
+  expiresAt: DateValue;
   used: boolean;
   userName?: string;
   companyName?: string;
@@ -51,11 +71,11 @@ export interface InviteCode {
   invitedByName: string;
   collaboratorName: string;
   role: RoleType;
-  expiresAt: FirebaseFirestore.Timestamp;
+  expiresAt: DateValue;
   accepted: boolean;
   acceptedByUserId?: string;
-  acceptedAt?: FirebaseFirestore.Timestamp;
-  createdAt: FirebaseFirestore.Timestamp;
+  acceptedAt?: DateValue;
+  createdAt: DateValue;
 }
 
 // ============================================================================
@@ -100,9 +120,9 @@ export interface CustomerAggr {
 export interface Customer extends CustomerAggr {
   address?: string;
   company: CompanyAggr;
-  createdAt: FirebaseFirestore.Timestamp;
+  createdAt: DateValue;
   createdBy: UserAggr;
-  updatedAt?: FirebaseFirestore.Timestamp;
+  updatedAt?: DateValue;
   updatedBy?: UserAggr;
 }
 
@@ -122,9 +142,9 @@ export interface Device extends DeviceAggr {
   category?: string;
   description?: string;
   company: CompanyAggr;
-  createdAt: FirebaseFirestore.Timestamp;
+  createdAt: DateValue;
   createdBy: UserAggr;
-  updatedAt?: FirebaseFirestore.Timestamp;
+  updatedAt?: DateValue;
   updatedBy?: UserAggr;
 }
 
@@ -141,9 +161,9 @@ export interface ServiceAggr {
 
 export interface Service extends ServiceAggr {
   company: CompanyAggr;
-  createdAt: FirebaseFirestore.Timestamp;
+  createdAt: DateValue;
   createdBy: UserAggr;
-  updatedAt?: FirebaseFirestore.Timestamp;
+  updatedAt?: DateValue;
   updatedBy?: UserAggr;
 }
 
@@ -156,9 +176,9 @@ export interface ProductAggr {
 
 export interface Product extends ProductAggr {
   company: CompanyAggr;
-  createdAt: FirebaseFirestore.Timestamp;
+  createdAt: DateValue;
   createdBy: UserAggr;
-  updatedAt?: FirebaseFirestore.Timestamp;
+  updatedAt?: DateValue;
   updatedBy?: UserAggr;
 }
 
@@ -189,7 +209,8 @@ export interface OrderPhoto {
   id: string;
   url: string;
   storagePath: string;
-  createdAt: FirebaseFirestore.Timestamp;
+  description?: string;
+  createdAt: DateValue;
   createdBy: UserAggr;
 }
 
@@ -198,7 +219,7 @@ export interface PaymentTransaction {
   type: TransactionType;
   amount: number;
   description?: string;
-  createdAt: FirebaseFirestore.Timestamp;
+  createdAt: DateValue;
   createdBy: UserAggr;
 }
 
@@ -219,7 +240,7 @@ export interface Order {
   photos?: OrderPhoto[];
   total: number;
   discount: number;
-  dueDate?: FirebaseFirestore.Timestamp;
+  dueDate?: DateValue;
   status: OrderStatus;
   done: boolean;
   paid: boolean;
@@ -228,9 +249,9 @@ export interface Order {
   transactions?: PaymentTransaction[];
   assignedTo?: UserAggr;
   company: CompanyAggr;
-  createdAt: FirebaseFirestore.Timestamp;
+  createdAt: DateValue;
   createdBy: UserAggr;
-  updatedAt?: FirebaseFirestore.Timestamp;
+  updatedAt?: DateValue;
   updatedBy?: UserAggr;
 }
 
@@ -256,9 +277,9 @@ export interface Company {
   subspecialties?: string[];
   owner: UserAggr;
   users?: UserRoleAggr[];
-  createdAt: FirebaseFirestore.Timestamp;
+  createdAt: DateValue;
   createdBy: UserAggr;
-  updatedAt?: FirebaseFirestore.Timestamp;
+  updatedAt?: DateValue;
   updatedBy?: UserAggr;
 }
 

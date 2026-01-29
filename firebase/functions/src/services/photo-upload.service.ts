@@ -1,10 +1,10 @@
 /**
  * Photo Upload Service
- * Handles photo uploads from URL or base64 for bot integration
+ * Handles photo uploads from base64 for bot integration
  */
 
 // No uuid needed - using timestamp-based IDs like the Flutter app
-import { storage, Timestamp } from './firestore.service';
+import { storage } from './firestore.service';
 import { UserAggr, OrderPhoto } from '../models/types';
 
 // ============================================================================
@@ -18,80 +18,17 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 // Photo Upload Functions
 // ============================================================================
 
-export interface UploadFromUrlInput {
-  url: string;
-  description?: string;
-}
-
 export interface UploadFromBase64Input {
   base64: string;
   filename: string;
   description?: string;
 }
 
-/**
- * Upload photo from URL
- */
-export async function uploadPhotoFromUrl(
-  companyId: string,
-  orderId: string,
-  input: UploadFromUrlInput,
-  createdBy: UserAggr
-): Promise<OrderPhoto> {
-  // Fetch the image from URL
-  const response = await fetch(input.url);
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
-  }
-
-  const contentType = response.headers.get('content-type') || 'image/jpeg';
-  const buffer = Buffer.from(await response.arrayBuffer());
-
-  // Validate content type
-  if (!ALLOWED_MIME_TYPES.includes(contentType.split(';')[0])) {
-    throw new Error(`Invalid image type: ${contentType}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`);
-  }
-
-  // Validate file size
-  if (buffer.length > MAX_FILE_SIZE) {
-    throw new Error(`Image too large. Maximum size: ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
-  }
-
-  // Generate unique filename using timestamp-based ID like Flutter app
-  const extension = getExtensionFromMimeType(contentType);
-  const photoId = generatePhotoId();
-  const filename = `${photoId}.${extension}`;
-
-  // Upload to Storage
-  const storagePath = `tenants/${companyId}/orders/${orderId}/photos/${filename}`;
-  const bucket = storage.bucket();
-  const file = bucket.file(storagePath);
-
-  await file.save(buffer, {
-    metadata: {
-      contentType,
-      metadata: {
-        orderId,
-        uploadedBy: createdBy.id,
-        description: input.description || '',
-      },
-    },
-  });
-
-  // Make the file publicly accessible
-  await file.makePublic();
-
-  // Get public URL
-  const publicUrl = `https://storage.googleapis.com/${bucket.name}/${storagePath}`;
-
-  return {
-    id: photoId,
-    url: publicUrl,
-    storagePath,
-    createdAt: Timestamp.now(),
-    createdBy,
-  };
+export interface UploadFromBufferInput {
+  buffer: Buffer;
+  filename: string;
+  mimeType: string;
+  description?: string;
 }
 
 /**
@@ -160,7 +97,64 @@ export async function uploadPhotoFromBase64(
     id: photoId,
     url: publicUrl,
     storagePath,
-    createdAt: Timestamp.now(),
+    description: input.description,
+    createdAt: new Date().toISOString(),
+    createdBy,
+  };
+}
+
+/**
+ * Upload photo from buffer (for multipart uploads)
+ */
+export async function uploadPhotoFromBuffer(
+  companyId: string,
+  orderId: string,
+  input: UploadFromBufferInput,
+  createdBy: UserAggr
+): Promise<OrderPhoto> {
+  // Validate content type
+  if (!ALLOWED_MIME_TYPES.includes(input.mimeType)) {
+    throw new Error(`Invalid image type: ${input.mimeType}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`);
+  }
+
+  // Validate file size
+  if (input.buffer.length > MAX_FILE_SIZE) {
+    throw new Error(`Image too large. Maximum size: ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
+  }
+
+  // Generate unique filename
+  const extension = getExtensionFromMimeType(input.mimeType) || getExtensionFromFilename(input.filename);
+  const photoId = generatePhotoId();
+  const filename = `${photoId}.${extension}`;
+
+  // Upload to Storage
+  const storagePath = `tenants/${companyId}/orders/${orderId}/photos/${filename}`;
+  const bucket = storage.bucket();
+  const file = bucket.file(storagePath);
+
+  await file.save(input.buffer, {
+    metadata: {
+      contentType: input.mimeType,
+      metadata: {
+        orderId,
+        uploadedBy: createdBy.id,
+        description: input.description || '',
+      },
+    },
+  });
+
+  // Make the file publicly accessible
+  await file.makePublic();
+
+  // Get public URL
+  const publicUrl = `https://storage.googleapis.com/${bucket.name}/${storagePath}`;
+
+  return {
+    id: photoId,
+    url: publicUrl,
+    storagePath,
+    description: input.description,
+    createdAt: new Date().toISOString(),
     createdBy,
   };
 }
