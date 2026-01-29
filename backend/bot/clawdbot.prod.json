@@ -26,13 +26,18 @@
     "mode": "local",
     "bind": "lan",
     "auth": {
-      "mode": "token"
+      "mode": "token",
+      "token": "${CLAWDBOT_TOKEN}"
+    },
+    "controlUi": {
+      "allowInsecureAuth": true
     }
   },
   "channels": {
     "whatsapp": {
       "selfChatMode": false,
-      "dmPolicy": "open"
+      "dmPolicy": "open",
+      "allowFrom": ["*"]
     }
   },
   "plugins": {

@@ -7,7 +7,7 @@ services:
     container_name: praticos-bot
     restart: unless-stopped
     ports:
-      - "18789:18789"
+      - "18790:18789"
     volumes:
       - ./credentials:/root/.clawdbot/credentials
       - ./workspace/identity:/root/.clawdbot/identity

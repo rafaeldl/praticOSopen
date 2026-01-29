@@ -28,6 +28,9 @@
     "auth": {
       "mode": "token",
       "token": "praticos-dev-token-change-me"
+    },
+    "controlUi": {
+      "allowInsecureAuth": true
     }
   },
   "channels": {
