@@ -60,3 +60,5 @@ firebase/hosting/public/
 
 # Bot credentials (WhatsApp, Telegram sessions)
 backend/bot/credentials/
+backend/bot/workspace/agents/main/sessions/
+backend/bot/workspace/media/
