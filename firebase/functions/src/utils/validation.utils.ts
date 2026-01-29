@@ -54,6 +54,17 @@ export const createDeviceSchema = z.object({
   description: z.string().max(1000).optional(),
 });
 
+/**
+ * Schema for creating device via bot (serial is required)
+ */
+export const createBotDeviceSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(200),
+  serial: z.string().min(1, 'Serial is required').max(100),
+  manufacturer: z.string().max(100).optional(),
+  category: z.string().max(100).optional(),
+  description: z.string().max(1000).optional(),
+});
+
 export const updateDeviceSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   serial: z.string().max(100).optional(),
@@ -141,18 +152,22 @@ export const acceptInviteSchema = z.object({
   name: z.string().max(100).optional(),
 });
 
-export const quickOrderSchema = z.object({
-  customerName: z.string().min(1, 'Customer name is required').max(200),
-  customerPhone: z.string().optional(),
-  deviceName: z.string().min(1, 'Device name is required').max(200),
-  deviceSerial: z.string().max(100).optional(),
-  problem: z.string().min(1, 'Problem description is required').max(1000),
-  estimatedValue: z.number().min(0).optional(),
-  dueDate: z.string().datetime().optional(),
-});
-
 export const searchQuerySchema = z.object({
   q: z.string().min(1, 'Search query is required').max(100),
+});
+
+export const optionalSearchQuerySchema = z.object({
+  q: z.string().max(100).optional(),
+});
+
+export const unifiedSearchSchema = z.object({
+  customer: z.string().max(100).optional(),
+  customerPhone: z.string().max(20).optional(),
+  device: z.string().max(100).optional(),
+  deviceSerial: z.string().max(100).optional(),
+  service: z.string().max(100).optional(),
+  product: z.string().max(100).optional(),
+  limit: z.coerce.number().min(1).max(10).default(5),
 });
 
 // ============================================================================
@@ -161,111 +176,77 @@ export const searchQuerySchema = z.object({
 
 /**
  * Schema for creating a complete order via bot
- * Allows referencing existing entities by ID or creating new ones by name
+ * REQUIRES existing entity IDs - does NOT accept names
+ * Value is optional - falls back to catalog value if not provided
  */
 export const createFullOrderSchema = z.object({
-  // Customer: either ID or name (will create/find)
-  customerId: idSchema.optional(),
-  customerName: z.string().min(1).max(200).optional(),
-  customerPhone: z.string().optional(),
+  // Customer: ID required
+  customerId: idSchema,
 
-  // Device: either ID or name (will create/find)
+  // Device: optional but only by ID
   deviceId: idSchema.optional(),
-  deviceName: z.string().max(200).optional(),
-  deviceSerial: z.string().max(100).optional(),
 
-  // Services: either by ID or by name (will create/find)
+  // Services: by ID only, value optional (falls back to catalog)
   services: z.array(z.object({
-    serviceId: idSchema.optional(),
-    serviceName: z.string().max(200).optional(),
-    value: z.number().min(0),
+    serviceId: idSchema,
+    value: z.number().min(0).optional(),
     description: z.string().max(500).optional(),
-  }).refine(
-    data => data.serviceId || data.serviceName,
-    { message: 'Either serviceId or serviceName is required for each service' }
-  )).optional(),
+  })).optional(),
 
-  // Products: either by ID or by name (will create/find)
+  // Products: by ID only, value optional (falls back to catalog)
   products: z.array(z.object({
-    productId: idSchema.optional(),
-    productName: z.string().max(200).optional(),
-    value: z.number().min(0),
+    productId: idSchema,
+    value: z.number().min(0).optional(),
     quantity: z.number().min(1).default(1),
     description: z.string().max(500).optional(),
-  }).refine(
-    data => data.productId || data.productName,
-    { message: 'Either productId or productName is required for each product' }
-  )).optional(),
+  })).optional(),
 
   dueDate: z.string().optional(),
   status: z.enum(['quote', 'approved', 'progress']).default('quote'),
-}).refine(
-  data => data.customerId || data.customerName,
-  { message: 'Either customerId or customerName is required' }
-);
+});
 
 /**
  * Schema for adding a service to an existing order
+ * REQUIRES existing service ID - does NOT accept names
+ * Value is optional - falls back to catalog value if not provided
  */
 export const addServiceToOrderSchema = z.object({
-  serviceId: idSchema.optional(),
-  serviceName: z.string().max(200).optional(),
-  value: z.number().min(0),
+  serviceId: idSchema,
+  value: z.number().min(0).optional(),
   description: z.string().max(500).optional(),
-}).refine(
-  data => data.serviceId || data.serviceName,
-  { message: 'Either serviceId or serviceName is required' }
-);
+});
 
 /**
  * Schema for adding a product to an existing order
+ * REQUIRES existing product ID - does NOT accept names
+ * Value is optional - falls back to catalog value if not provided
  */
 export const addProductToOrderSchema = z.object({
-  productId: idSchema.optional(),
-  productName: z.string().max(200).optional(),
-  value: z.number().min(0),
+  productId: idSchema,
+  value: z.number().min(0).optional(),
   quantity: z.number().min(1).default(1),
   description: z.string().max(500).optional(),
-}).refine(
-  data => data.productId || data.productName,
-  { message: 'Either productId or productName is required' }
-);
+});
 
 /**
  * Schema for updating order device
+ * REQUIRES existing device ID - does NOT accept names
  */
 export const updateOrderDeviceSchema = z.object({
-  deviceId: idSchema.optional(),
-  deviceName: z.string().max(200).optional(),
-  deviceSerial: z.string().max(100).optional(),
-}).refine(
-  data => data.deviceId || data.deviceName,
-  { message: 'Either deviceId or deviceName is required' }
-);
+  deviceId: idSchema,
+});
 
 /**
  * Schema for updating order customer
+ * REQUIRES existing customer ID - does NOT accept names
  */
 export const updateOrderCustomerSchema = z.object({
-  customerId: idSchema.optional(),
-  customerName: z.string().max(200).optional(),
-  customerPhone: z.string().optional(),
-}).refine(
-  data => data.customerId || data.customerName,
-  { message: 'Either customerId or customerName is required' }
-);
-
-// ============================================================================
-// Photo Upload Schemas
-// ============================================================================
-
-/**
- * Schema for uploading photo from URL
- */
-export const uploadPhotoUrlSchema = z.object({
-  url: z.string().url('Invalid URL format'),
-  description: z.string().max(500).optional(),
+  customerId: idSchema,
 });
+
+// ============================================================================
+// Photo Upload Schema
+// ============================================================================
 
 /**
  * Schema for uploading photo from base64

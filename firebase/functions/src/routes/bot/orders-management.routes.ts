@@ -38,7 +38,6 @@ import {
   formatOrderFullDetails,
   formatDeviceUpdated,
   formatCustomerUpdated,
-  CreatedEntities,
 } from '../../utils/format.utils';
 
 const router: Router = Router();
@@ -75,101 +74,69 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
     const createdBy = getUserAggr(req);
     const company = getCompanyAggr(req);
 
-    const created: CreatedEntities = {
-      services: [],
-      products: [],
-    };
-
-    // Get or create customer
-    let customerAggr;
-    if (data.customerId) {
-      const customer = await customerService.getCustomer(companyId, data.customerId);
-      if (!customer) {
-        res.status(404).json({
-          success: false,
-          error: { code: 'NOT_FOUND', message: 'Cliente não encontrado' },
-        });
-        return;
-      }
-      customerAggr = customerService.toCustomerAggr(customer);
-      created.customer = false;
-    } else {
-      const result = await customerService.getOrCreateCustomer(
-        companyId,
-        data.customerName!,
-        data.customerPhone,
-        createdBy,
-        company
-      );
-      customerAggr = result.customer;
-      created.customer = result.created;
+    // Get customer by ID (required)
+    const customer = await customerService.getCustomer(companyId, data.customerId);
+    if (!customer) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Customer not found', customerId: data.customerId },
+      });
+      return;
     }
+    const customerAggr = customerService.toCustomerAggr(customer);
 
-    // Get or create device (optional)
+    // Get device by ID (optional)
     let deviceAggr;
     if (data.deviceId) {
       const device = await deviceService.getDevice(companyId, data.deviceId);
       if (!device) {
         res.status(404).json({
           success: false,
-          error: { code: 'NOT_FOUND', message: 'Dispositivo não encontrado' },
+          error: { code: 'NOT_FOUND', message: 'Device not found', deviceId: data.deviceId },
         });
         return;
       }
       deviceAggr = deviceService.toDeviceAggr(device);
-      created.device = false;
-    } else if (data.deviceName) {
-      const result = await deviceService.getOrCreateDevice(
-        companyId,
-        data.deviceName,
-        data.deviceSerial,
-        createdBy,
-        company
-      );
-      deviceAggr = result.device;
-      created.device = result.created;
     }
 
-    // Process services
+    // Process services (IDs required)
     const orderServices = [];
     if (data.services && data.services.length > 0) {
       for (const s of data.services) {
-        const result = await catalogService.getOrCreateService(
-          companyId,
-          { serviceId: s.serviceId, serviceName: s.serviceName, value: s.value, description: s.description },
-          createdBy,
-          company
-        );
+        const service = await catalogService.getService(companyId, s.serviceId);
+        if (!service) {
+          res.status(404).json({
+            success: false,
+            error: { code: 'NOT_FOUND', message: 'Service not found', serviceId: s.serviceId },
+          });
+          return;
+        }
         orderServices.push({
-          serviceId: result.service.id!,
+          serviceId: service.id!,
           value: s.value,
           description: s.description,
         });
-        if (result.created && s.serviceName) {
-          created.services!.push(s.serviceName);
-        }
       }
     }
 
-    // Process products
+    // Process products (IDs required)
     const orderProducts: Array<{ productId: string; quantity: number; value?: number; description?: string }> = [];
     if (data.products && data.products.length > 0) {
       for (const p of data.products) {
-        const result = await catalogService.getOrCreateProduct(
-          companyId,
-          { productId: p.productId, productName: p.productName, value: p.value, quantity: p.quantity || 1, description: p.description },
-          createdBy,
-          company
-        );
+        const product = await catalogService.getProduct(companyId, p.productId);
+        if (!product) {
+          res.status(404).json({
+            success: false,
+            error: { code: 'NOT_FOUND', message: 'Product not found', productId: p.productId },
+          });
+          return;
+        }
         orderProducts.push({
-          productId: result.product.id!,
+          productId: product.id!,
           quantity: p.quantity || 1,
           value: p.value,
           description: p.description,
         });
-        if (result.created && p.productName) {
-          created.products!.push(p.productName);
-        }
       }
     }
 
@@ -193,7 +160,7 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
     // Get the created order to format the response
     const order = await orderService.getOrderByNumber(companyId, orderResult.number);
 
-    const message = order ? formatOrderCreated(order, created) : `OS #${orderResult.number} criada!`;
+    const message = order ? formatOrderCreated(order, {}) : `OS #${orderResult.number} criada!`;
 
     res.status(201).json({
       success: true,
@@ -202,8 +169,9 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         orderNumber: orderResult.number,
         status: orderResult.status,
         total: order?.total || 0,
+        customer: order?.customer || null,
+        device: order?.device || null,
         message,
-        created,
       },
     });
   } catch (error) {
@@ -255,7 +223,6 @@ router.post('/:number/services', requireLinked, async (req: AuthenticatedRequest
 
     const data = validation.data;
     const createdBy = getUserAggr(req);
-    const company = getCompanyAggr(req);
 
     // Check if order exists
     const order = await orderService.getOrderByNumber(companyId, orderNumber);
@@ -267,25 +234,30 @@ router.post('/:number/services', requireLinked, async (req: AuthenticatedRequest
       return;
     }
 
-    // Get or create service
-    const serviceResult = await catalogService.getOrCreateService(
-      companyId,
-      { serviceId: data.serviceId, serviceName: data.serviceName, value: data.value, description: data.description },
-      createdBy,
-      company
-    );
+    // Get service by ID (required)
+    const service = await catalogService.getService(companyId, data.serviceId);
+    if (!service) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Service not found', serviceId: data.serviceId },
+      });
+      return;
+    }
+
+    // Calculate value with fallback to catalog (value 0 is valid for gifts/courtesy)
+    const serviceValue = data.value !== undefined ? data.value : (service.value ?? 0);
 
     // Add service to order
     const result = await orderService.addServiceToOrderByNumber(
       companyId,
       orderNumber,
       {
-        id: serviceResult.service.id!,
-        name: serviceResult.service.name || '',
-        value: serviceResult.service.value || data.value,
-        photo: serviceResult.service.photo,
+        id: service.id!,
+        name: service.name || '',
+        value: serviceValue,
+        photo: service.photo,
       },
-      data.value,
+      serviceValue,
       data.description,
       createdBy
     );
@@ -300,8 +272,8 @@ router.post('/:number/services', requireLinked, async (req: AuthenticatedRequest
 
     const message = formatServiceAdded(
       orderNumber,
-      serviceResult.service.name || data.serviceName || 'Serviço',
-      data.value,
+      service.name || 'Serviço',
+      serviceValue,
       result.newTotal
     );
 
@@ -309,7 +281,6 @@ router.post('/:number/services', requireLinked, async (req: AuthenticatedRequest
       success: true,
       data: {
         message,
-        serviceCreated: serviceResult.created,
         newTotal: result.newTotal,
       },
     });
@@ -362,7 +333,6 @@ router.post('/:number/products', requireLinked, async (req: AuthenticatedRequest
 
     const data = validation.data;
     const createdBy = getUserAggr(req);
-    const company = getCompanyAggr(req);
 
     // Check if order exists
     const order = await orderService.getOrderByNumber(companyId, orderNumber);
@@ -374,26 +344,31 @@ router.post('/:number/products', requireLinked, async (req: AuthenticatedRequest
       return;
     }
 
-    // Get or create product
-    const productResult = await catalogService.getOrCreateProduct(
-      companyId,
-      { productId: data.productId, productName: data.productName, value: data.value, quantity: data.quantity || 1, description: data.description },
-      createdBy,
-      company
-    );
+    // Get product by ID (required)
+    const product = await catalogService.getProduct(companyId, data.productId);
+    if (!product) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Product not found', productId: data.productId },
+      });
+      return;
+    }
+
+    // Calculate value with fallback to catalog (value 0 is valid for gifts/courtesy)
+    const productValue = data.value !== undefined ? data.value : (product.value ?? 0);
 
     // Add product to order
     const result = await orderService.addProductToOrderByNumber(
       companyId,
       orderNumber,
       {
-        id: productResult.product.id!,
-        name: productResult.product.name || '',
-        value: productResult.product.value || data.value,
-        photo: productResult.product.photo,
+        id: product.id!,
+        name: product.name || '',
+        value: productValue,
+        photo: product.photo,
       },
       data.quantity || 1,
-      data.value,
+      productValue,
       data.description,
       createdBy
     );
@@ -408,8 +383,8 @@ router.post('/:number/products', requireLinked, async (req: AuthenticatedRequest
 
     const message = formatProductAdded(
       orderNumber,
-      productResult.product.name || data.productName || 'Produto',
-      data.value,
+      product.name || 'Produto',
+      productValue,
       data.quantity || 1,
       result.newTotal
     );
@@ -418,7 +393,6 @@ router.post('/:number/products', requireLinked, async (req: AuthenticatedRequest
       success: true,
       data: {
         message,
-        productCreated: productResult.created,
         newTotal: result.newTotal,
       },
     });
@@ -621,32 +595,17 @@ router.patch('/:number/device', requireLinked, async (req: AuthenticatedRequest,
 
     const data = validation.data;
     const createdBy = getUserAggr(req);
-    const company = getCompanyAggr(req);
 
-    // Get or create device
-    let deviceAggr;
-    let deviceCreated = false;
-    if (data.deviceId) {
-      const device = await deviceService.getDevice(companyId, data.deviceId);
-      if (!device) {
-        res.status(404).json({
-          success: false,
-          error: { code: 'NOT_FOUND', message: 'Dispositivo não encontrado' },
-        });
-        return;
-      }
-      deviceAggr = deviceService.toDeviceAggr(device);
-    } else {
-      const result = await deviceService.getOrCreateDevice(
-        companyId,
-        data.deviceName!,
-        data.deviceSerial,
-        createdBy,
-        company
-      );
-      deviceAggr = result.device;
-      deviceCreated = result.created;
+    // Get device by ID (required)
+    const device = await deviceService.getDevice(companyId, data.deviceId);
+    if (!device) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Device not found', deviceId: data.deviceId },
+      });
+      return;
     }
+    const deviceAggr = deviceService.toDeviceAggr(device);
 
     // Update order device
     const result = await orderService.updateOrderDevice(
@@ -670,7 +629,6 @@ router.patch('/:number/device', requireLinked, async (req: AuthenticatedRequest,
       success: true,
       data: {
         message,
-        deviceCreated,
         device: deviceAggr,
       },
     });
@@ -723,32 +681,17 @@ router.patch('/:number/customer', requireLinked, async (req: AuthenticatedReques
 
     const data = validation.data;
     const createdBy = getUserAggr(req);
-    const company = getCompanyAggr(req);
 
-    // Get or create customer
-    let customerAggr;
-    let customerCreated = false;
-    if (data.customerId) {
-      const customer = await customerService.getCustomer(companyId, data.customerId);
-      if (!customer) {
-        res.status(404).json({
-          success: false,
-          error: { code: 'NOT_FOUND', message: 'Cliente não encontrado' },
-        });
-        return;
-      }
-      customerAggr = customerService.toCustomerAggr(customer);
-    } else {
-      const result = await customerService.getOrCreateCustomer(
-        companyId,
-        data.customerName!,
-        data.customerPhone,
-        createdBy,
-        company
-      );
-      customerAggr = result.customer;
-      customerCreated = result.created;
+    // Get customer by ID (required)
+    const customer = await customerService.getCustomer(companyId, data.customerId);
+    if (!customer) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Customer not found', customerId: data.customerId },
+      });
+      return;
     }
+    const customerAggr = customerService.toCustomerAggr(customer);
 
     // Update order customer
     const result = await orderService.updateOrderCustomer(
@@ -772,7 +715,6 @@ router.patch('/:number/customer', requireLinked, async (req: AuthenticatedReques
       success: true,
       data: {
         message,
-        customerCreated,
         customer: customerAggr,
       },
     });
@@ -822,10 +764,18 @@ router.get('/:number/details', async (req: AuthenticatedRequest, res: Response) 
 
     const message = formatOrderFullDetails(order);
 
+    // Optimize payload: replace photos array with photosCount
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { photos, ...orderWithoutPhotos } = order;
+    const orderData = {
+      ...orderWithoutPhotos,
+      photosCount: photos?.length || 0,
+    };
+
     res.json({
       success: true,
       data: {
-        order,
+        order: orderData,
         message,
       },
     });

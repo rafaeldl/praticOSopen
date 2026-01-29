@@ -95,8 +95,8 @@ export async function paginatedQuery<T>(
   // Execute query
   const snapshot = await query.get();
   const data = snapshot.docs.map((doc) => ({
-    id: doc.id,
     ...doc.data(),
+    id: doc.id,
   })) as T[];
 
   return {
@@ -115,7 +115,7 @@ export async function getDocument<T>(
 ): Promise<T | null> {
   const doc = await collectionRef.doc(id).get();
   if (!doc.exists) return null;
-  return { id: doc.id, ...doc.data() } as T;
+  return { ...doc.data(), id: doc.id } as T;
 }
 
 /**
@@ -127,7 +127,7 @@ export async function createDocument<T extends Record<string, unknown>>(
 ): Promise<string> {
   const docRef = await collectionRef.add({
     ...data,
-    createdAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
   });
   return docRef.id;
 }
@@ -142,7 +142,7 @@ export async function setDocument<T extends Record<string, unknown>>(
 ): Promise<void> {
   await collectionRef.doc(id).set({
     ...data,
-    createdAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
   });
 }
 
@@ -156,7 +156,7 @@ export async function updateDocument<T extends Record<string, unknown>>(
 ): Promise<void> {
   await collectionRef.doc(id).update({
     ...data,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 }
 
@@ -193,8 +193,8 @@ export async function searchByPrefix<T>(
     .get();
 
   return snapshot.docs.map((doc) => ({
-    id: doc.id,
     ...doc.data(),
+    id: doc.id,
   })) as T[];
 }
 
@@ -213,7 +213,7 @@ export async function findByField<T>(
 
   if (snapshot.empty) return null;
   const doc = snapshot.docs[0];
-  return { id: doc.id, ...doc.data() } as T;
+  return { ...doc.data(), id: doc.id } as T;
 }
 
 /**
@@ -229,8 +229,8 @@ export async function findAllByField<T>(
     .get();
 
   return snapshot.docs.map((doc) => ({
-    id: doc.id,
     ...doc.data(),
+    id: doc.id,
   })) as T[];
 }
 
@@ -255,11 +255,11 @@ export async function getNextOrderNumber(companyId: string): Promise<number> {
 
   return runTransaction(async (transaction) => {
     const doc = await transaction.get(counterRef);
-    const currentCounter = doc.exists ? (doc.data()?.orderCounter || 0) : 0;
-    const nextNumber = currentCounter + 1;
+    const currentNumber = doc.exists ? (doc.data()?.nextOrderNumber || 1) : 1;
+    const nextNumber = currentNumber + 1;
 
-    transaction.update(counterRef, { orderCounter: nextNumber });
+    transaction.update(counterRef, { nextOrderNumber: nextNumber });
 
-    return nextNumber;
+    return currentNumber;
   });
 }

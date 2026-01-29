@@ -72,8 +72,8 @@ export async function getAnalyticsSummary(
   // Filter orders by date range
   const orders = snapshot.docs
     .map((doc) => ({
-      id: doc.id,
       ...doc.data(),
+      id: doc.id,
     }) as Order)
     .filter((order) => {
       const orderDate = parseOrderDate(order.createdAt);
@@ -238,8 +238,8 @@ export async function getPendingItems(companyId: string): Promise<PendingItems> 
     .get();
 
   const orders = snapshot.docs.map((doc) => ({
-    id: doc.id,
     ...doc.data(),
+    id: doc.id,
   })) as Order[];
 
   const toApprove: PendingOrder[] = [];
@@ -337,7 +337,7 @@ export async function getTodaySummary(companyId: string): Promise<TodaySummaryDa
 
   // Filter orders created today
   const todayOrders = allSnapshot.docs
-    .map((doc) => ({ id: doc.id, ...doc.data() }) as Order)
+    .map((doc) => ({ ...doc.data(), id: doc.id }) as Order)
     .filter((order) => {
       const orderDate = parseOrderDate(order.createdAt);
       if (!orderDate) return false;

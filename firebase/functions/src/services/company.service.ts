@@ -8,7 +8,6 @@ import {
   getRootCollection,
   getDocument,
   updateDocument,
-  Timestamp,
 } from './firestore.service';
 import {
   Company,
@@ -54,7 +53,7 @@ export async function updateCompany(
 
   const updateData: Record<string, unknown> = {
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   };
 
   if (input.name !== undefined) updateData.name = input.name;
@@ -138,7 +137,7 @@ export async function updateMemberRole(
   await updateDocument(collection, companyId, {
     users,
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   // Also update in user's companies array
@@ -173,7 +172,7 @@ export async function removeMember(
   await updateDocument(collection, companyId, {
     users,
     updatedBy: removedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   // Remove from user's companies array
@@ -211,7 +210,7 @@ export async function addMemberToCompany(
   const collection = getRootCollection('companies');
   await updateDocument(collection, companyId, {
     users,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 }
 

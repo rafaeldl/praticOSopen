@@ -11,7 +11,6 @@ import {
   createDocument,
   updateDocument,
   getNextOrderNumber,
-  Timestamp,
   QueryFilter,
 } from './firestore.service';
 import {
@@ -75,7 +74,7 @@ export async function listOrders(
     filters.push({
       field: 'createdAt',
       operator: '>=',
-      value: Timestamp.fromDate(new Date(params.startDate)),
+      value: new Date(params.startDate).toISOString(),
     });
   }
 
@@ -83,7 +82,7 @@ export async function listOrders(
     filters.push({
       field: 'createdAt',
       operator: '<=',
-      value: Timestamp.fromDate(new Date(params.endDate)),
+      value: new Date(params.endDate).toISOString(),
     });
   }
 
@@ -124,8 +123,8 @@ export async function getOrderByNumber(
 
   const doc = snapshot.docs[0];
   return {
-    id: doc.id,
     ...doc.data(),
+    id: doc.id,
   } as Order;
 }
 
@@ -145,13 +144,14 @@ export async function getOrdersByStatus(
     .get();
 
   return snapshot.docs.map((doc) => ({
-    id: doc.id,
     ...doc.data(),
+    id: doc.id,
   })) as Order[];
 }
 
 /**
  * Get orders due today
+ * Note: Queries use ISO string comparison (works correctly with ISO format)
  */
 export async function getOrdersDueToday(
   companyId: string
@@ -163,14 +163,14 @@ export async function getOrdersDueToday(
   tomorrow.setDate(tomorrow.getDate() + 1);
 
   const snapshot = await collection
-    .where('dueDate', '>=', Timestamp.fromDate(today))
-    .where('dueDate', '<', Timestamp.fromDate(tomorrow))
+    .where('dueDate', '>=', today.toISOString())
+    .where('dueDate', '<', tomorrow.toISOString())
     .where('status', 'in', ['approved', 'progress'])
     .get();
 
   return snapshot.docs.map((doc) => ({
-    id: doc.id,
     ...doc.data(),
+    id: doc.id,
   })) as Order[];
 }
 
@@ -190,13 +190,14 @@ export async function getUnpaidOrders(
     .get();
 
   return snapshot.docs.map((doc) => ({
-    id: doc.id,
     ...doc.data(),
+    id: doc.id,
   })) as Order[];
 }
 
 /**
  * Get overdue orders
+ * Note: Queries use ISO string comparison (works correctly with ISO format)
  */
 export async function getOverdueOrders(
   companyId: string
@@ -206,13 +207,13 @@ export async function getOverdueOrders(
   today.setHours(0, 0, 0, 0);
 
   const snapshot = await collection
-    .where('dueDate', '<', Timestamp.fromDate(today))
+    .where('dueDate', '<', today.toISOString())
     .where('status', 'in', ['approved', 'progress'])
     .get();
 
   return snapshot.docs.map((doc) => ({
-    id: doc.id,
     ...doc.data(),
+    id: doc.id,
   })) as Order[];
 }
 
@@ -332,7 +333,7 @@ export async function createOrder(
     photos: [],
     total,
     discount: 0,
-    dueDate: input.dueDate ? Timestamp.fromDate(new Date(input.dueDate)) : null,
+    dueDate: input.dueDate ? new Date(input.dueDate).toISOString() : null,
     status,
     done: status === 'done',
     paid: false,
@@ -342,7 +343,7 @@ export async function createOrder(
     assignedTo: null,
     company,
     createdBy,
-    createdAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
   };
 
   const id = await createDocument(collection, orderData);
@@ -373,7 +374,7 @@ export async function updateOrder(
 
   const updateData: Record<string, unknown> = {
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   };
 
   if (input.status !== undefined) {
@@ -382,7 +383,7 @@ export async function updateOrder(
   }
 
   if (input.dueDate !== undefined) {
-    updateData.dueDate = Timestamp.fromDate(new Date(input.dueDate));
+    updateData.dueDate = new Date(input.dueDate).toISOString();
   }
 
   if (input.assignedTo !== undefined) {
@@ -435,7 +436,7 @@ export async function addOrderService(
     services,
     total: newTotal,
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   return { success: true, newTotal };
@@ -485,7 +486,7 @@ export async function addOrderProduct(
     products,
     total: newTotal,
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   return { success: true, newTotal };
@@ -517,7 +518,7 @@ export async function addPayment(
     type,
     amount,
     description,
-    createdAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
     createdBy,
   };
 
@@ -542,7 +543,7 @@ export async function addPayment(
     paid: isFullyPaid,
     payment: isFullyPaid ? 'paid' : newPaidAmount > 0 ? 'partial' : 'unpaid',
     updatedBy: createdBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   return {
@@ -622,7 +623,7 @@ export async function addServiceToOrderByNumber(
     services,
     total: newTotal,
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   return {
@@ -676,7 +677,7 @@ export async function addProductToOrderByNumber(
     products,
     total: newTotal,
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   return {
@@ -714,7 +715,7 @@ export async function removeServiceFromOrder(
     services,
     total: newTotal,
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   return { success: true, removedService, newTotal };
@@ -749,7 +750,7 @@ export async function removeProductFromOrder(
     products,
     total: newTotal,
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   return { success: true, removedProduct, newTotal };
@@ -774,7 +775,7 @@ export async function updateOrderDevice(
   await updateDocument(collection, order.id, {
     device,
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   return { success: true, order: { ...order, device } };
@@ -799,7 +800,7 @@ export async function updateOrderCustomer(
   await updateDocument(collection, order.id, {
     customer,
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 
   return { success: true, order: { ...order, customer } };
@@ -829,7 +830,7 @@ export async function addPhotoToOrder(
 
   await updateDocument(collection, orderId, {
     photos: updatedPhotos,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 }
 
@@ -853,6 +854,6 @@ export async function removePhotoFromOrder(
 
   await updateDocument(collection, orderId, {
     photos: updatedPhotos,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   });
 }

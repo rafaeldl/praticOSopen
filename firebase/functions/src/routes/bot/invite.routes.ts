@@ -4,7 +4,7 @@
  */
 
 import { Router, Response } from 'express';
-import { AuthenticatedRequest } from '../../models/types';
+import { AuthenticatedRequest, toDate } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import * as botInviteService from '../../services/bot-invite.service';
 import { validateInput, createInviteSchema, acceptInviteSchema } from '../../utils/validation.utils';
@@ -152,8 +152,8 @@ router.get('/list', requireLinked, async (req: AuthenticatedRequest, res: Respon
           code: inv.code,
           collaboratorName: inv.collaboratorName,
           role: inv.role,
-          createdAt: inv.createdAt.toDate().toISOString(),
-          expiresAt: inv.expiresAt.toDate().toISOString(),
+          createdAt: toDate(inv.createdAt)?.toISOString(),
+          expiresAt: toDate(inv.expiresAt)?.toISOString(),
           accepted: inv.accepted,
         })),
       },

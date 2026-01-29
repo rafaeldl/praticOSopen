@@ -4,7 +4,7 @@
  */
 
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest, ApiKeyData, ChannelLink, RoleType } from '../models/types';
+import { AuthenticatedRequest, ApiKeyData, ChannelLink, RoleType, toDate } from '../models/types';
 import { db, auth } from '../services/firestore.service';
 
 // Environment variables
@@ -72,7 +72,8 @@ export async function apiKeyAuth(
     }
 
     // Check expiration
-    if (keyData.expiresAt && keyData.expiresAt.toDate() < new Date()) {
+    const expiresAt = toDate(keyData.expiresAt);
+    if (expiresAt && expiresAt < new Date()) {
       res.status(401).json({
         success: false,
         error: {

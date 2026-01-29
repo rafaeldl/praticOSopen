@@ -133,13 +133,14 @@ import analyticsRoutes from './routes/v1/analytics.routes';
 import linkRoutes from './routes/bot/link.routes';
 import inviteRoutes from './routes/bot/invite.routes';
 import searchRoutes from './routes/bot/search.routes';
-import quickRoutes from './routes/bot/quick.routes';
 import summaryRoutes from './routes/bot/summary.routes';
 import botOrdersRoutes from './routes/bot/orders.routes';
 import botOrdersManagementRoutes from './routes/bot/orders-management.routes';
 import botAnalyticsRoutes from './routes/bot/analytics.routes';
 import botCatalogRoutes from './routes/bot/catalog.routes';
 import botPhotosRoutes from './routes/bot/photos.routes';
+import botUnifiedSearchRoutes from './routes/bot/unified-search.routes';
+import botEntitiesRoutes from './routes/bot/entities.routes';
 
 // Initialize Express app
 const app = express();
@@ -251,13 +252,14 @@ app.use('/bot/link', botLimiter, botAuth, linkRoutes);
 app.use('/bot/invite', botLimiter, botAuth, inviteRoutes);
 app.use('/bot/customers', botLimiter, botAuth, searchRoutes);
 app.use('/bot/devices', botLimiter, botAuth, searchRoutes);
-app.use('/bot/orders', botLimiter, botAuth, quickRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botOrdersRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botOrdersManagementRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botPhotosRoutes);
 app.use('/bot/summary', botLimiter, botAuth, summaryRoutes);
 app.use('/bot/analytics', botLimiter, botAuth, botAnalyticsRoutes);
 app.use('/bot/catalog', botLimiter, botAuth, botCatalogRoutes);
+app.use('/bot/search', botLimiter, botAuth, botUnifiedSearchRoutes);
+app.use('/bot', botLimiter, botAuth, botEntitiesRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

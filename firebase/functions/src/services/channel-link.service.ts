@@ -13,6 +13,7 @@ import {
   ChannelLink,
   LinkToken,
   RoleType,
+  toDate,
 } from '../models/types';
 
 // Use Date directly - Firestore SDK will convert it to Timestamp
@@ -68,7 +69,8 @@ export async function consumeLinkToken(token: string): Promise<LinkToken | null>
   if (tokenData.used) return null;
 
   // Check if expired
-  if (tokenData.expiresAt.toDate() < new Date()) return null;
+  const expiresAt = toDate(tokenData.expiresAt);
+  if (expiresAt && expiresAt < new Date()) return null;
 
   // Mark as used
   await tokenDoc.ref.update({ used: true });

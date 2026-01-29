@@ -3,7 +3,7 @@
  * Helper functions for formatting messages and data
  */
 
-import { Order, Customer, PendingItems } from '../models/types';
+import { Order, Customer, PendingItems, toDate } from '../models/types';
 
 /**
  * Format currency value for display
@@ -205,8 +205,10 @@ export function formatOrderDetails(order: Order): string {
   }
 
   if (order.dueDate) {
-    const dueDate = order.dueDate.toDate ? order.dueDate.toDate() : new Date(order.dueDate as unknown as string);
-    lines.push(`*Previsão:* ${formatDate(dueDate)}`);
+    const dueDate = toDate(order.dueDate);
+    if (dueDate) {
+      lines.push(`*Previsão:* ${formatDate(dueDate)}`);
+    }
   }
 
   return lines.join('\n');
@@ -633,8 +635,10 @@ export function formatOrderFullDetails(order: Order): string {
   }
 
   if (order.dueDate) {
-    const dueDate = order.dueDate.toDate ? order.dueDate.toDate() : new Date(order.dueDate as unknown as string);
-    lines.push(`*Previsão:* ${formatDate(dueDate)}`);
+    const dueDate = toDate(order.dueDate);
+    if (dueDate) {
+      lines.push(`*Previsão:* ${formatDate(dueDate)}`);
+    }
   }
 
   return lines.join('\n');

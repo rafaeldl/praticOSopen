@@ -10,8 +10,6 @@ import {
   createDocument,
   updateDocument,
   findByField,
-  searchByPrefix,
-  Timestamp,
   QueryFilter,
 } from './firestore.service';
 import {
@@ -21,6 +19,7 @@ import {
   CompanyAggr,
 } from '../models/types';
 import { normalizeSearchQuery } from '../utils/validation.utils';
+import { generateKeywords } from '../utils/search.utils';
 
 // ============================================================================
 // Query Operations
@@ -96,7 +95,9 @@ export async function findCustomerByPhone(
 }
 
 /**
- * Search customers by name prefix
+ * Search customers by keyword
+ * Uses array-contains query on keywords field for better search flexibility
+ * If query is empty, returns all customers (limited)
  */
 export async function searchCustomers(
   companyId: string,
@@ -105,7 +106,31 @@ export async function searchCustomers(
 ): Promise<Customer[]> {
   const collection = getTenantCollection(companyId, 'customers');
   const normalizedQuery = normalizeSearchQuery(query);
-  return searchByPrefix<Customer>(collection, 'nameLower', normalizedQuery, limit);
+  // Use first keyword for array-contains query
+  const keyword = normalizedQuery.split(/\s+/)[0];
+
+  // If no keyword, list all customers
+  if (!keyword) {
+    const snapshot = await collection
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+      .get();
+
+    return snapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })) as Customer[];
+  }
+
+  const snapshot = await collection
+    .where('keywords', 'array-contains', keyword)
+    .limit(limit)
+    .get();
+
+  return snapshot.docs.map((doc) => ({
+    ...doc.data(),
+    id: doc.id,
+  })) as Customer[];
 }
 
 // ============================================================================
@@ -132,13 +157,14 @@ export async function createCustomer(
 
   const customerData = {
     name: input.name,
-    nameLower: input.name.toLowerCase(), // For search
+    nameLower: input.name.toLowerCase(), // For exact match lookups
+    keywords: generateKeywords(input.name), // For array-contains search
     phone: input.phone || null,
     email: input.email || null,
     address: input.address || null,
     company,
     createdBy,
-    createdAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
   };
 
   const id = await createDocument(collection, customerData);
@@ -178,12 +204,13 @@ export async function updateCustomer(
 
   const updateData: Record<string, unknown> = {
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   };
 
   if (input.name !== undefined) {
     updateData.name = input.name;
     updateData.nameLower = input.name.toLowerCase();
+    updateData.keywords = generateKeywords(input.name);
   }
   if (input.phone !== undefined) updateData.phone = input.phone;
   if (input.email !== undefined) updateData.email = input.email;

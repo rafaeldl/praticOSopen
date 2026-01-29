@@ -4,8 +4,8 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { db, Timestamp } from '../../services/firestore.service';
-import { ApiKeyData } from '../../models/types';
+import { db } from '../../services/firestore.service';
+import { ApiKeyData, toDate } from '../../models/types';
 import { v4 as uuidv4 } from 'uuid';
 
 const router: Router = Router();
@@ -63,7 +63,8 @@ router.post('/token', async (req: Request, res: Response) => {
     }
 
     // Check expiration
-    if (keyData.expiresAt && keyData.expiresAt.toDate() < new Date()) {
+    const expiresAt = toDate(keyData.expiresAt);
+    if (expiresAt && expiresAt < new Date()) {
       res.status(401).json({
         success: false,
         error: {
@@ -76,8 +77,8 @@ router.post('/token', async (req: Request, res: Response) => {
 
     // Generate access token (valid for 1 hour)
     const accessToken = `at_${uuidv4().replace(/-/g, '')}`;
-    const expiresAt = new Date();
-    expiresAt.setHours(expiresAt.getHours() + 1);
+    const tokenExpiresAt = new Date();
+    tokenExpiresAt.setHours(tokenExpiresAt.getHours() + 1);
 
     // Store token
     await db.collection('accessTokens').doc(accessToken).set({
@@ -85,8 +86,8 @@ router.post('/token', async (req: Request, res: Response) => {
       apiKeyId: keySnapshot.docs[0].id,
       companyId: keyData.companyId,
       permissions: keyData.permissions,
-      createdAt: Timestamp.now(),
-      expiresAt: Timestamp.fromDate(expiresAt),
+      createdAt: new Date().toISOString(),
+      expiresAt: tokenExpiresAt.toISOString(),
     });
 
     res.json({

@@ -8,9 +8,7 @@ import {
   paginatedQuery,
   getDocument,
   createDocument,
-  searchByPrefix,
   findByField,
-  Timestamp,
   QueryFilter,
 } from './firestore.service';
 import {
@@ -22,6 +20,7 @@ import {
   CompanyAggr,
 } from '../models/types';
 import { normalizeSearchQuery } from '../utils/validation.utils';
+import { generateKeywords } from '../utils/search.utils';
 
 // ============================================================================
 // Service Operations
@@ -84,7 +83,8 @@ export async function getService(
 }
 
 /**
- * Search services by name prefix
+ * Search services by keyword
+ * Uses array-contains query on keywords field for better search flexibility
  */
 export async function searchServices(
   companyId: string,
@@ -93,7 +93,19 @@ export async function searchServices(
 ): Promise<Service[]> {
   const collection = getTenantCollection(companyId, 'services');
   const normalizedQuery = normalizeSearchQuery(query);
-  return searchByPrefix<Service>(collection, 'nameLower', normalizedQuery, limit);
+  // Use first keyword for array-contains query
+  const keyword = normalizedQuery.split(/\s+/)[0];
+  if (!keyword) return [];
+
+  const snapshot = await collection
+    .where('keywords', 'array-contains', keyword)
+    .limit(limit)
+    .get();
+
+  return snapshot.docs.map((doc) => ({
+    ...doc.data(),
+    id: doc.id,
+  })) as Service[];
 }
 
 export interface CreateServiceInput {
@@ -114,12 +126,13 @@ export async function createService(
 
   const serviceData = {
     name: input.name,
-    nameLower: input.name.toLowerCase(),
+    nameLower: input.name.toLowerCase(), // For exact match lookups
+    keywords: generateKeywords(input.name), // For array-contains search
     value: input.value,
     photo: null,
     company,
     createdBy,
-    createdAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
   };
 
   const id = await createDocument(collection, serviceData);
@@ -192,7 +205,8 @@ export async function getProduct(
 }
 
 /**
- * Search products by name prefix
+ * Search products by keyword
+ * Uses array-contains query on keywords field for better search flexibility
  */
 export async function searchProducts(
   companyId: string,
@@ -201,7 +215,19 @@ export async function searchProducts(
 ): Promise<Product[]> {
   const collection = getTenantCollection(companyId, 'products');
   const normalizedQuery = normalizeSearchQuery(query);
-  return searchByPrefix<Product>(collection, 'nameLower', normalizedQuery, limit);
+  // Use first keyword for array-contains query
+  const keyword = normalizedQuery.split(/\s+/)[0];
+  if (!keyword) return [];
+
+  const snapshot = await collection
+    .where('keywords', 'array-contains', keyword)
+    .limit(limit)
+    .get();
+
+  return snapshot.docs.map((doc) => ({
+    ...doc.data(),
+    id: doc.id,
+  })) as Product[];
 }
 
 export interface CreateProductInput {
@@ -222,12 +248,13 @@ export async function createProduct(
 
   const productData = {
     name: input.name,
-    nameLower: input.name.toLowerCase(),
+    nameLower: input.name.toLowerCase(), // For exact match lookups
+    keywords: generateKeywords(input.name), // For array-contains search
     value: input.value,
     photo: null,
     company,
     createdBy,
-    createdAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
   };
 
   const id = await createDocument(collection, productData);

@@ -6,7 +6,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import {
   db,
-  Timestamp,
 } from './firestore.service';
 import {
   InviteCode,
@@ -48,9 +47,9 @@ export async function createInvite(
     invitedByName,
     collaboratorName,
     role,
-    expiresAt: Timestamp.fromDate(expiresAt),
+    expiresAt: expiresAt.toISOString(),
     accepted: false,
-    createdAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
   };
 
   await db.collection('inviteCodes').doc(code).set(inviteData);
@@ -90,8 +89,11 @@ export async function acceptInvite(
     return { success: false, error: 'Invite has already been used' };
   }
 
-  // Check if expired
-  if (invite.expiresAt.toDate() < new Date()) {
+  // Check if expired (handles both Timestamp and ISO string formats)
+  const expiresAt = typeof invite.expiresAt === 'string'
+    ? new Date(invite.expiresAt)
+    : invite.expiresAt.toDate();
+  if (expiresAt < new Date()) {
     return { success: false, error: 'Invite has expired' };
   }
 
@@ -135,7 +137,7 @@ export async function acceptInvite(
   await inviteDoc.ref.update({
     accepted: true,
     acceptedByUserId: userId,
-    acceptedAt: Timestamp.now(),
+    acceptedAt: new Date().toISOString(),
   });
 
   return {

@@ -4,7 +4,7 @@
  */
 
 import { Router, Response } from 'express';
-import { AuthenticatedRequest } from '../../models/types';
+import { AuthenticatedRequest, toDate } from '../../models/types';
 import { getUserAggr, getCompanyAggr } from '../../middleware/company.middleware';
 import * as customerService from '../../services/customer.service';
 import {
@@ -100,7 +100,7 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
         phone: customer.phone,
         email: customer.email,
         address: customer.address,
-        createdAt: customer.createdAt?.toDate?.()?.toISOString(),
+        createdAt: toDate(customer.createdAt)?.toISOString(),
       },
     });
   } catch (error) {

@@ -10,8 +10,6 @@ import {
   createDocument,
   updateDocument,
   findByField,
-  searchByPrefix,
-  Timestamp,
   QueryFilter,
 } from './firestore.service';
 import {
@@ -21,6 +19,7 @@ import {
   CompanyAggr,
 } from '../models/types';
 import { normalizeSearchQuery } from '../utils/validation.utils';
+import { generateKeywords } from '../utils/search.utils';
 
 // ============================================================================
 // Query Operations
@@ -99,7 +98,9 @@ export async function findDeviceBySerial(
 }
 
 /**
- * Search devices by name prefix
+ * Search devices by keyword
+ * Uses array-contains query on keywords field for better search flexibility
+ * If query is empty, returns all devices (limited)
  */
 export async function searchDevices(
   companyId: string,
@@ -108,7 +109,31 @@ export async function searchDevices(
 ): Promise<Device[]> {
   const collection = getTenantCollection(companyId, 'devices');
   const normalizedQuery = normalizeSearchQuery(query);
-  return searchByPrefix<Device>(collection, 'nameLower', normalizedQuery, limit);
+  // Use first keyword for array-contains query
+  const keyword = normalizedQuery.split(/\s+/)[0];
+
+  // If no keyword, list all devices
+  if (!keyword) {
+    const snapshot = await collection
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+      .get();
+
+    return snapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })) as Device[];
+  }
+
+  const snapshot = await collection
+    .where('keywords', 'array-contains', keyword)
+    .limit(limit)
+    .get();
+
+  return snapshot.docs.map((doc) => ({
+    ...doc.data(),
+    id: doc.id,
+  })) as Device[];
 }
 
 // ============================================================================
@@ -136,14 +161,15 @@ export async function createDevice(
 
   const deviceData = {
     name: input.name,
-    nameLower: input.name.toLowerCase(), // For search
+    nameLower: input.name.toLowerCase(), // For exact match lookups
+    keywords: generateKeywords(input.name), // For array-contains search
     serial: input.serial || null,
     manufacturer: input.manufacturer || null,
     category: input.category || null,
     description: input.description || null,
     company,
     createdBy,
-    createdAt: Timestamp.now(),
+    createdAt: new Date().toISOString(),
   };
 
   const id = await createDocument(collection, deviceData);
@@ -153,7 +179,8 @@ export async function createDevice(
     device: {
       id,
       name: input.name,
-      serial: input.serial,
+      serial: input.serial ?? null,
+      photo: null,
     },
   };
 }
@@ -183,12 +210,13 @@ export async function updateDevice(
 
   const updateData: Record<string, unknown> = {
     updatedBy,
-    updatedAt: Timestamp.now(),
+    updatedAt: new Date().toISOString(),
   };
 
   if (input.name !== undefined) {
     updateData.name = input.name;
     updateData.nameLower = input.name.toLowerCase();
+    updateData.keywords = generateKeywords(input.name);
   }
   if (input.serial !== undefined) updateData.serial = input.serial;
   if (input.manufacturer !== undefined) updateData.manufacturer = input.manufacturer;
