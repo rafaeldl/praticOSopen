@@ -9,6 +9,7 @@ import {
   getDocument,
   createDocument,
   searchByPrefix,
+  findByField,
   Timestamp,
   QueryFilter,
 } from './firestore.service';
@@ -244,4 +245,131 @@ export function toProductAggr(product: Product): ProductAggr {
     value: product.value,
     photo: product.photo,
   };
+}
+
+// ============================================================================
+// Get or Create Operations (for bot integration)
+// ============================================================================
+
+export interface ServiceInput {
+  serviceId?: string;
+  serviceName?: string;
+  value: number;
+  description?: string;
+}
+
+/**
+ * Get or create service (for bot order management)
+ * Finds by ID, or by exact name match, or creates new
+ */
+export async function getOrCreateService(
+  companyId: string,
+  input: ServiceInput,
+  createdBy: UserAggr,
+  company: CompanyAggr
+): Promise<{ service: ServiceAggr; created: boolean }> {
+  // If ID is provided, try to get it first
+  if (input.serviceId) {
+    const existing = await getService(companyId, input.serviceId);
+    if (existing) {
+      return {
+        service: toServiceAggr(existing),
+        created: false,
+      };
+    }
+  }
+
+  // If name is provided, try to find by exact name match
+  if (input.serviceName) {
+    const collection = getTenantCollection(companyId, 'services');
+    const byName = await findByField<Service>(collection, 'nameLower', input.serviceName.toLowerCase());
+    if (byName) {
+      return {
+        service: toServiceAggr(byName),
+        created: false,
+      };
+    }
+
+    // Create new service
+    const result = await createService(
+      companyId,
+      { name: input.serviceName, value: input.value },
+      createdBy,
+      company
+    );
+
+    return {
+      service: {
+        id: result.id,
+        name: result.name,
+        value: input.value,
+        photo: undefined,
+      },
+      created: true,
+    };
+  }
+
+  throw new Error('Either serviceId or serviceName is required');
+}
+
+export interface ProductInput {
+  productId?: string;
+  productName?: string;
+  value: number;
+  quantity?: number;
+  description?: string;
+}
+
+/**
+ * Get or create product (for bot order management)
+ * Finds by ID, or by exact name match, or creates new
+ */
+export async function getOrCreateProduct(
+  companyId: string,
+  input: ProductInput,
+  createdBy: UserAggr,
+  company: CompanyAggr
+): Promise<{ product: ProductAggr; created: boolean }> {
+  // If ID is provided, try to get it first
+  if (input.productId) {
+    const existing = await getProduct(companyId, input.productId);
+    if (existing) {
+      return {
+        product: toProductAggr(existing),
+        created: false,
+      };
+    }
+  }
+
+  // If name is provided, try to find by exact name match
+  if (input.productName) {
+    const collection = getTenantCollection(companyId, 'products');
+    const byName = await findByField<Product>(collection, 'nameLower', input.productName.toLowerCase());
+    if (byName) {
+      return {
+        product: toProductAggr(byName),
+        created: false,
+      };
+    }
+
+    // Create new product
+    const result = await createProduct(
+      companyId,
+      { name: input.productName, value: input.value },
+      createdBy,
+      company
+    );
+
+    return {
+      product: {
+        id: result.id,
+        name: result.name,
+        value: input.value,
+        photo: undefined,
+      },
+      created: true,
+    };
+  }
+
+  throw new Error('Either productId or productName is required');
 }

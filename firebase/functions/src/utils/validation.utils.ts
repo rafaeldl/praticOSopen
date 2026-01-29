@@ -156,6 +156,127 @@ export const searchQuerySchema = z.object({
 });
 
 // ============================================================================
+// Bot Order Management Schemas
+// ============================================================================
+
+/**
+ * Schema for creating a complete order via bot
+ * Allows referencing existing entities by ID or creating new ones by name
+ */
+export const createFullOrderSchema = z.object({
+  // Customer: either ID or name (will create/find)
+  customerId: idSchema.optional(),
+  customerName: z.string().min(1).max(200).optional(),
+  customerPhone: z.string().optional(),
+
+  // Device: either ID or name (will create/find)
+  deviceId: idSchema.optional(),
+  deviceName: z.string().max(200).optional(),
+  deviceSerial: z.string().max(100).optional(),
+
+  // Services: either by ID or by name (will create/find)
+  services: z.array(z.object({
+    serviceId: idSchema.optional(),
+    serviceName: z.string().max(200).optional(),
+    value: z.number().min(0),
+    description: z.string().max(500).optional(),
+  }).refine(
+    data => data.serviceId || data.serviceName,
+    { message: 'Either serviceId or serviceName is required for each service' }
+  )).optional(),
+
+  // Products: either by ID or by name (will create/find)
+  products: z.array(z.object({
+    productId: idSchema.optional(),
+    productName: z.string().max(200).optional(),
+    value: z.number().min(0),
+    quantity: z.number().min(1).default(1),
+    description: z.string().max(500).optional(),
+  }).refine(
+    data => data.productId || data.productName,
+    { message: 'Either productId or productName is required for each product' }
+  )).optional(),
+
+  dueDate: z.string().optional(),
+  status: z.enum(['quote', 'approved', 'progress']).default('quote'),
+}).refine(
+  data => data.customerId || data.customerName,
+  { message: 'Either customerId or customerName is required' }
+);
+
+/**
+ * Schema for adding a service to an existing order
+ */
+export const addServiceToOrderSchema = z.object({
+  serviceId: idSchema.optional(),
+  serviceName: z.string().max(200).optional(),
+  value: z.number().min(0),
+  description: z.string().max(500).optional(),
+}).refine(
+  data => data.serviceId || data.serviceName,
+  { message: 'Either serviceId or serviceName is required' }
+);
+
+/**
+ * Schema for adding a product to an existing order
+ */
+export const addProductToOrderSchema = z.object({
+  productId: idSchema.optional(),
+  productName: z.string().max(200).optional(),
+  value: z.number().min(0),
+  quantity: z.number().min(1).default(1),
+  description: z.string().max(500).optional(),
+}).refine(
+  data => data.productId || data.productName,
+  { message: 'Either productId or productName is required' }
+);
+
+/**
+ * Schema for updating order device
+ */
+export const updateOrderDeviceSchema = z.object({
+  deviceId: idSchema.optional(),
+  deviceName: z.string().max(200).optional(),
+  deviceSerial: z.string().max(100).optional(),
+}).refine(
+  data => data.deviceId || data.deviceName,
+  { message: 'Either deviceId or deviceName is required' }
+);
+
+/**
+ * Schema for updating order customer
+ */
+export const updateOrderCustomerSchema = z.object({
+  customerId: idSchema.optional(),
+  customerName: z.string().max(200).optional(),
+  customerPhone: z.string().optional(),
+}).refine(
+  data => data.customerId || data.customerName,
+  { message: 'Either customerId or customerName is required' }
+);
+
+// ============================================================================
+// Photo Upload Schemas
+// ============================================================================
+
+/**
+ * Schema for uploading photo from URL
+ */
+export const uploadPhotoUrlSchema = z.object({
+  url: z.string().url('Invalid URL format'),
+  description: z.string().max(500).optional(),
+});
+
+/**
+ * Schema for uploading photo from base64
+ */
+export const uploadPhotoBase64Schema = z.object({
+  base64: z.string().min(1, 'Base64 data is required'),
+  filename: z.string().min(1, 'Filename is required').max(255),
+  description: z.string().max(500).optional(),
+});
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
 

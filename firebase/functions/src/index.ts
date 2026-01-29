@@ -136,8 +136,10 @@ import searchRoutes from './routes/bot/search.routes';
 import quickRoutes from './routes/bot/quick.routes';
 import summaryRoutes from './routes/bot/summary.routes';
 import botOrdersRoutes from './routes/bot/orders.routes';
+import botOrdersManagementRoutes from './routes/bot/orders-management.routes';
 import botAnalyticsRoutes from './routes/bot/analytics.routes';
 import botCatalogRoutes from './routes/bot/catalog.routes';
+import botPhotosRoutes from './routes/bot/photos.routes';
 
 // Initialize Express app
 const app = express();
@@ -150,11 +152,11 @@ app.use(cors({
   credentials: true,
 }));
 
-// Parse JSON bodies
-app.use(express.json({ limit: '1mb' }));
+// Parse JSON bodies (larger limit for base64 image uploads)
+app.use(express.json({ limit: '15mb' }));
 
 // Parse URL-encoded bodies
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 // Request logging (Moved after body parsers to ensure body is captured)
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -251,6 +253,8 @@ app.use('/bot/customers', botLimiter, botAuth, searchRoutes);
 app.use('/bot/devices', botLimiter, botAuth, searchRoutes);
 app.use('/bot/orders', botLimiter, botAuth, quickRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botOrdersRoutes);
+app.use('/bot/orders', botLimiter, botAuth, botOrdersManagementRoutes);
+app.use('/bot/orders', botLimiter, botAuth, botPhotosRoutes);
 app.use('/bot/summary', botLimiter, botAuth, summaryRoutes);
 app.use('/bot/analytics', botLimiter, botAuth, botAnalyticsRoutes);
 app.use('/bot/catalog', botLimiter, botAuth, botCatalogRoutes);

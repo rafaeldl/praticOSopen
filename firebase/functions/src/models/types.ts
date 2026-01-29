@@ -93,8 +93,8 @@ export interface UserContext {
 export interface CustomerAggr {
   id: string;
   name: string;
-  phone?: string;
-  email?: string;
+  phone?: string | null;
+  email?: string | null;
 }
 
 export interface Customer extends CustomerAggr {
@@ -113,8 +113,8 @@ export interface Customer extends CustomerAggr {
 export interface DeviceAggr {
   id: string;
   name: string;
-  serial?: string;
-  photo?: string;
+  serial?: string | null;
+  photo?: string | null;
 }
 
 export interface Device extends DeviceAggr {
@@ -136,7 +136,7 @@ export interface ServiceAggr {
   id: string;
   name: string;
   value?: number;
-  photo?: string;
+  photo?: string | null;
 }
 
 export interface Service extends ServiceAggr {
@@ -151,7 +151,7 @@ export interface ProductAggr {
   id: string;
   name: string;
   value?: number;
-  photo?: string;
+  photo?: string | null;
 }
 
 export interface Product extends ProductAggr {

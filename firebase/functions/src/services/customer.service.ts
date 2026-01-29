@@ -215,8 +215,8 @@ export async function getOrCreateCustomer(
         customer: {
           id: existing.id,
           name: existing.name,
-          phone: existing.phone,
-          email: existing.email,
+          phone: existing.phone ?? null,
+          email: existing.email ?? null,
         },
         created: false,
       };
@@ -231,8 +231,8 @@ export async function getOrCreateCustomer(
       customer: {
         id: byName.id,
         name: byName.name,
-        phone: byName.phone,
-        email: byName.email,
+        phone: byName.phone ?? null,
+        email: byName.email ?? null,
       },
       created: false,
     };
@@ -259,7 +259,7 @@ export function toCustomerAggr(customer: Customer): CustomerAggr {
   return {
     id: customer.id,
     name: customer.name,
-    phone: customer.phone,
-    email: customer.email,
+    phone: customer.phone ?? null,
+    email: customer.email ?? null,
   };
 }

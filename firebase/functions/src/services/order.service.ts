@@ -20,6 +20,7 @@ import {
   OrderStatus,
   OrderService as OrderServiceItem,
   OrderProduct as OrderProductItem,
+  OrderPhoto,
   PaymentTransaction,
   TransactionType,
   UserAggr,
@@ -267,7 +268,7 @@ export async function createOrder(
             id: service.id,
             name: service.name,
             value: service.value,
-            photo: service.photo,
+            photo: service.photo ?? null,
           },
           description: s.description || service.name,
           value,
@@ -292,7 +293,7 @@ export async function createOrder(
             id: product.id,
             name: product.name,
             value: product.value,
-            photo: product.photo,
+            photo: product.photo ?? null,
           },
           description: p.description || product.name,
           value,
@@ -306,10 +307,26 @@ export async function createOrder(
   const total = servicesTotal + productsTotal;
   const status = input.status || 'quote';
 
+  // Sanitize customer to convert undefined to null for Firestore compatibility
+  const sanitizedCustomer = {
+    id: input.customer.id,
+    name: input.customer.name,
+    phone: input.customer.phone ?? null,
+    email: input.customer.email ?? null,
+  };
+
+  // Sanitize device to convert undefined to null for Firestore compatibility
+  const sanitizedDevice = input.device ? {
+    id: input.device.id,
+    name: input.device.name,
+    serial: input.device.serial ?? null,
+    photo: input.device.photo ?? null,
+  } : null;
+
   const orderData = {
     number: orderNumber,
-    customer: input.customer,
-    device: input.device || null,
+    customer: sanitizedCustomer,
+    device: sanitizedDevice,
     services: orderServices,
     products: orderProducts,
     photos: [],
@@ -557,4 +574,285 @@ export function toOrderAggr(order: Order): OrderAggr {
  */
 export function calculateRemainingBalance(order: Order): number {
   return Math.max(0, order.total - order.discount - order.paidAmount);
+}
+
+// ============================================================================
+// Bot Management Operations
+// ============================================================================
+
+/**
+ * Add a service to an order by order number
+ * Used for bot integration with getOrCreate pattern
+ */
+export async function addServiceToOrderByNumber(
+  companyId: string,
+  orderNumber: number,
+  service: {
+    id: string;
+    name: string;
+    value: number;
+    photo?: string | null;
+  },
+  value: number,
+  description?: string,
+  updatedBy?: UserAggr
+): Promise<{ success: boolean; newTotal: number; order?: Order }> {
+  const order = await getOrderByNumber(companyId, orderNumber);
+
+  if (!order) {
+    return { success: false, newTotal: 0 };
+  }
+
+  const newService: OrderServiceItem = {
+    service: {
+      id: service.id,
+      name: service.name,
+      value: service.value,
+      photo: service.photo ?? null,
+    },
+    description: description || service.name,
+    value,
+  };
+
+  const services = [...(order.services || []), newService];
+  const newTotal = order.total + value;
+
+  const collection = getTenantCollection(companyId, 'orders');
+  await updateDocument(collection, order.id, {
+    services,
+    total: newTotal,
+    updatedBy,
+    updatedAt: Timestamp.now(),
+  });
+
+  return {
+    success: true,
+    newTotal,
+    order: { ...order, services, total: newTotal },
+  };
+}
+
+/**
+ * Add a product to an order by order number
+ * Used for bot integration with getOrCreate pattern
+ */
+export async function addProductToOrderByNumber(
+  companyId: string,
+  orderNumber: number,
+  product: {
+    id: string;
+    name: string;
+    value: number;
+    photo?: string | null;
+  },
+  quantity: number,
+  value: number,
+  description?: string,
+  updatedBy?: UserAggr
+): Promise<{ success: boolean; newTotal: number; order?: Order }> {
+  const order = await getOrderByNumber(companyId, orderNumber);
+
+  if (!order) {
+    return { success: false, newTotal: 0 };
+  }
+
+  const newProduct: OrderProductItem = {
+    product: {
+      id: product.id,
+      name: product.name,
+      value: product.value,
+      photo: product.photo ?? null,
+    },
+    description: description || product.name,
+    value,
+    quantity,
+  };
+
+  const products = [...(order.products || []), newProduct];
+  const newTotal = order.total + (value * quantity);
+
+  const collection = getTenantCollection(companyId, 'orders');
+  await updateDocument(collection, order.id, {
+    products,
+    total: newTotal,
+    updatedBy,
+    updatedAt: Timestamp.now(),
+  });
+
+  return {
+    success: true,
+    newTotal,
+    order: { ...order, products, total: newTotal },
+  };
+}
+
+/**
+ * Remove a service from an order by index
+ */
+export async function removeServiceFromOrder(
+  companyId: string,
+  orderNumber: number,
+  serviceIndex: number,
+  updatedBy?: UserAggr
+): Promise<{ success: boolean; removedService?: OrderServiceItem; newTotal: number }> {
+  const order = await getOrderByNumber(companyId, orderNumber);
+
+  if (!order) {
+    return { success: false, newTotal: 0 };
+  }
+
+  const services = [...(order.services || [])];
+  if (serviceIndex < 0 || serviceIndex >= services.length) {
+    return { success: false, newTotal: order.total };
+  }
+
+  const [removedService] = services.splice(serviceIndex, 1);
+  const newTotal = order.total - removedService.value;
+
+  const collection = getTenantCollection(companyId, 'orders');
+  await updateDocument(collection, order.id, {
+    services,
+    total: newTotal,
+    updatedBy,
+    updatedAt: Timestamp.now(),
+  });
+
+  return { success: true, removedService, newTotal };
+}
+
+/**
+ * Remove a product from an order by index
+ */
+export async function removeProductFromOrder(
+  companyId: string,
+  orderNumber: number,
+  productIndex: number,
+  updatedBy?: UserAggr
+): Promise<{ success: boolean; removedProduct?: OrderProductItem; newTotal: number }> {
+  const order = await getOrderByNumber(companyId, orderNumber);
+
+  if (!order) {
+    return { success: false, newTotal: 0 };
+  }
+
+  const products = [...(order.products || [])];
+  if (productIndex < 0 || productIndex >= products.length) {
+    return { success: false, newTotal: order.total };
+  }
+
+  const [removedProduct] = products.splice(productIndex, 1);
+  const productTotal = removedProduct.value * (removedProduct.quantity || 1);
+  const newTotal = order.total - productTotal;
+
+  const collection = getTenantCollection(companyId, 'orders');
+  await updateDocument(collection, order.id, {
+    products,
+    total: newTotal,
+    updatedBy,
+    updatedAt: Timestamp.now(),
+  });
+
+  return { success: true, removedProduct, newTotal };
+}
+
+/**
+ * Update order device
+ */
+export async function updateOrderDevice(
+  companyId: string,
+  orderNumber: number,
+  device: DeviceAggr,
+  updatedBy?: UserAggr
+): Promise<{ success: boolean; order?: Order }> {
+  const order = await getOrderByNumber(companyId, orderNumber);
+
+  if (!order) {
+    return { success: false };
+  }
+
+  const collection = getTenantCollection(companyId, 'orders');
+  await updateDocument(collection, order.id, {
+    device,
+    updatedBy,
+    updatedAt: Timestamp.now(),
+  });
+
+  return { success: true, order: { ...order, device } };
+}
+
+/**
+ * Update order customer
+ */
+export async function updateOrderCustomer(
+  companyId: string,
+  orderNumber: number,
+  customer: CustomerAggr,
+  updatedBy?: UserAggr
+): Promise<{ success: boolean; order?: Order }> {
+  const order = await getOrderByNumber(companyId, orderNumber);
+
+  if (!order) {
+    return { success: false };
+  }
+
+  const collection = getTenantCollection(companyId, 'orders');
+  await updateDocument(collection, order.id, {
+    customer,
+    updatedBy,
+    updatedAt: Timestamp.now(),
+  });
+
+  return { success: true, order: { ...order, customer } };
+}
+
+// ============================================================================
+// Photo Management
+// ============================================================================
+
+/**
+ * Add photo to an order
+ */
+export async function addPhotoToOrder(
+  companyId: string,
+  orderId: string,
+  photo: OrderPhoto
+): Promise<void> {
+  const collection = getTenantCollection(companyId, 'orders');
+  const orderDoc = await getDocument<Order>(collection, orderId);
+
+  if (!orderDoc) {
+    throw new Error('Order not found');
+  }
+
+  const currentPhotos = orderDoc.photos || [];
+  const updatedPhotos = [...currentPhotos, photo];
+
+  await updateDocument(collection, orderId, {
+    photos: updatedPhotos,
+    updatedAt: Timestamp.now(),
+  });
+}
+
+/**
+ * Remove photo from an order
+ */
+export async function removePhotoFromOrder(
+  companyId: string,
+  orderId: string,
+  photoId: string
+): Promise<void> {
+  const collection = getTenantCollection(companyId, 'orders');
+  const orderDoc = await getDocument<Order>(collection, orderId);
+
+  if (!orderDoc) {
+    throw new Error('Order not found');
+  }
+
+  const currentPhotos = orderDoc.photos || [];
+  const updatedPhotos = currentPhotos.filter((p) => p.id !== photoId);
+
+  await updateDocument(collection, orderId, {
+    photos: updatedPhotos,
+    updatedAt: Timestamp.now(),
+  });
 }

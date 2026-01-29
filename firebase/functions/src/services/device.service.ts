@@ -221,8 +221,8 @@ export async function getOrCreateDevice(
         device: {
           id: existing.id,
           name: existing.name,
-          serial: existing.serial,
-          photo: existing.photo,
+          serial: existing.serial ?? null,
+          photo: existing.photo ?? null,
         },
         created: false,
       };
@@ -237,8 +237,8 @@ export async function getOrCreateDevice(
       device: {
         id: byName.id,
         name: byName.name,
-        serial: byName.serial,
-        photo: byName.photo,
+        serial: byName.serial ?? null,
+        photo: byName.photo ?? null,
       },
       created: false,
     };
@@ -265,7 +265,7 @@ export function toDeviceAggr(device: Device): DeviceAggr {
   return {
     id: device.id,
     name: device.name,
-    serial: device.serial,
-    photo: device.photo,
+    serial: device.serial ?? null,
+    photo: device.photo ?? null,
   };
 }

@@ -69,7 +69,7 @@ router.get('/search', requireLinked, async (req: AuthenticatedRequest, res: Resp
     suggestions = byName.map((c) => ({
       id: c.id,
       name: c.name,
-      phone: c.phone,
+      phone: c.phone ?? undefined,
     }));
 
     // Remove exact match from suggestions if present
@@ -184,7 +184,7 @@ router.get('/devices/search', requireLinked, async (req: AuthenticatedRequest, r
     suggestions = byName.map((d) => ({
       id: d.id,
       name: d.name,
-      serial: d.serial,
+      serial: d.serial ?? undefined,
     }));
 
     // Remove exact match from suggestions if present

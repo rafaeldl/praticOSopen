@@ -6,6 +6,7 @@
 import * as admin from 'firebase-admin';
 import { getFirestore, Timestamp as FirestoreTimestamp, FieldValue as FirestoreFieldValue } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
+import { getStorage } from 'firebase-admin/storage';
 
 // Initialize Firebase Admin (singleton)
 if (!admin.apps.length) {
@@ -14,6 +15,7 @@ if (!admin.apps.length) {
 
 export const db = getFirestore();
 export const auth = getAuth();
+export const storage = getStorage();
 
 // Re-export Timestamp and FieldValue from the modular SDK
 export const Timestamp = FirestoreTimestamp;

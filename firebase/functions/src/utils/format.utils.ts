@@ -425,3 +425,292 @@ export function formatDateRangeLabel(start: Date, end: Date): string {
 
   return `${formatDate(start)} - ${formatDate(end)}`;
 }
+
+// ============================================================================
+// Bot Order Management Formatting
+// ============================================================================
+
+export interface CreatedEntities {
+  customer?: boolean;
+  device?: boolean;
+  services?: string[];
+  products?: string[];
+}
+
+/**
+ * Format order creation message for WhatsApp
+ */
+export function formatOrderCreated(order: Order, created: CreatedEntities): string {
+  const lines = [
+    `*OS #${order.number} criada!*`,
+    '',
+  ];
+
+  lines.push(`*Cliente:* ${order.customer?.name || 'Não informado'}`);
+
+  if (order.device?.name) {
+    lines.push(`*Dispositivo:* ${order.device.name}`);
+  }
+
+  lines.push(`*Status:* ${formatStatus(order.status)}`);
+
+  // Services
+  if (order.services && order.services.length > 0) {
+    lines.push('');
+    lines.push(`*Serviços (${order.services.length}):*`);
+    order.services.forEach((s) => {
+      lines.push(`• ${s.service?.name || s.description}: ${formatCurrency(s.value)}`);
+    });
+  }
+
+  // Products
+  if (order.products && order.products.length > 0) {
+    lines.push('');
+    lines.push(`*Produtos (${order.products.length}):*`);
+    order.products.forEach((p) => {
+      const qty = p.quantity > 1 ? ` (x${p.quantity})` : '';
+      lines.push(`• ${p.product?.name || p.description}: ${formatCurrency(p.value)}${qty}`);
+    });
+  }
+
+  lines.push('');
+  lines.push(`*Total:* ${formatCurrency(order.total)}`);
+
+  // Created entities info
+  const createdItems: string[] = [];
+  if (created.customer) createdItems.push('cliente');
+  if (created.device) createdItems.push('dispositivo');
+  if (created.services && created.services.length > 0) {
+    createdItems.push(`${created.services.length} serviço(s)`);
+  }
+  if (created.products && created.products.length > 0) {
+    createdItems.push(`${created.products.length} produto(s)`);
+  }
+
+  if (createdItems.length > 0) {
+    lines.push('');
+    lines.push(`_Criados: ${createdItems.join(', ')}_`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Format service added message for WhatsApp
+ */
+export function formatServiceAdded(
+  orderNumber: number,
+  serviceName: string,
+  value: number,
+  newTotal: number
+): string {
+  return [
+    `*Serviço adicionado à OS #${orderNumber}!*`,
+    '',
+    `• ${serviceName}: ${formatCurrency(value)}`,
+    '',
+    `*Novo total:* ${formatCurrency(newTotal)}`,
+  ].join('\n');
+}
+
+/**
+ * Format product added message for WhatsApp
+ */
+export function formatProductAdded(
+  orderNumber: number,
+  productName: string,
+  value: number,
+  quantity: number,
+  newTotal: number
+): string {
+  const qty = quantity > 1 ? ` (x${quantity})` : '';
+  return [
+    `*Produto adicionado à OS #${orderNumber}!*`,
+    '',
+    `• ${productName}: ${formatCurrency(value)}${qty}`,
+    '',
+    `*Novo total:* ${formatCurrency(newTotal)}`,
+  ].join('\n');
+}
+
+/**
+ * Format service removed message for WhatsApp
+ */
+export function formatServiceRemoved(
+  orderNumber: number,
+  serviceName: string,
+  newTotal: number
+): string {
+  return [
+    `*Serviço removido da OS #${orderNumber}!*`,
+    '',
+    `Removido: ${serviceName}`,
+    '',
+    `*Novo total:* ${formatCurrency(newTotal)}`,
+  ].join('\n');
+}
+
+/**
+ * Format product removed message for WhatsApp
+ */
+export function formatProductRemoved(
+  orderNumber: number,
+  productName: string,
+  newTotal: number
+): string {
+  return [
+    `*Produto removido da OS #${orderNumber}!*`,
+    '',
+    `Removido: ${productName}`,
+    '',
+    `*Novo total:* ${formatCurrency(newTotal)}`,
+  ].join('\n');
+}
+
+/**
+ * Format full order details for WhatsApp
+ */
+export function formatOrderFullDetails(order: Order): string {
+  const lines = [
+    `*OS #${order.number}*`,
+    '',
+    `*Cliente:* ${order.customer?.name || 'Não informado'}`,
+  ];
+
+  if (order.customer?.phone) {
+    lines.push(`*Telefone:* ${formatPhone(order.customer.phone)}`);
+  }
+
+  if (order.device?.name) {
+    lines.push(`*Dispositivo:* ${order.device.name}`);
+    if (order.device.serial) {
+      lines.push(`*Serial:* ${order.device.serial}`);
+    }
+  }
+
+  lines.push(`*Status:* ${formatStatus(order.status)}`);
+
+  // Services
+  if (order.services && order.services.length > 0) {
+    lines.push('');
+    lines.push(`*Serviços (${order.services.length}):*`);
+    order.services.forEach((s, i) => {
+      lines.push(`${i + 1}. ${s.service?.name || s.description}: ${formatCurrency(s.value)}`);
+    });
+  } else {
+    lines.push('');
+    lines.push('*Serviços:* Nenhum');
+  }
+
+  // Products
+  if (order.products && order.products.length > 0) {
+    lines.push('');
+    lines.push(`*Produtos (${order.products.length}):*`);
+    order.products.forEach((p, i) => {
+      const qty = p.quantity > 1 ? ` (x${p.quantity})` : '';
+      const subtotal = p.value * (p.quantity || 1);
+      lines.push(`${i + 1}. ${p.product?.name || p.description}: ${formatCurrency(p.value)}${qty} = ${formatCurrency(subtotal)}`);
+    });
+  } else {
+    lines.push('');
+    lines.push('*Produtos:* Nenhum');
+  }
+
+  // Totals
+  lines.push('');
+  lines.push(`*Total:* ${formatCurrency(order.total)}`);
+
+  if (order.discount > 0) {
+    lines.push(`*Desconto:* ${formatCurrency(order.discount)}`);
+  }
+
+  if (order.paidAmount > 0) {
+    lines.push(`*Pago:* ${formatCurrency(order.paidAmount)}`);
+    const remaining = order.total - order.discount - order.paidAmount;
+    if (remaining > 0) {
+      lines.push(`*A receber:* ${formatCurrency(remaining)}`);
+    }
+  }
+
+  if (order.dueDate) {
+    const dueDate = order.dueDate.toDate ? order.dueDate.toDate() : new Date(order.dueDate as unknown as string);
+    lines.push(`*Previsão:* ${formatDate(dueDate)}`);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Format device updated message for WhatsApp
+ */
+export function formatDeviceUpdated(
+  orderNumber: number,
+  deviceName: string
+): string {
+  return [
+    `*Dispositivo atualizado na OS #${orderNumber}!*`,
+    '',
+    `*Novo dispositivo:* ${deviceName}`,
+  ].join('\n');
+}
+
+/**
+ * Format customer updated message for WhatsApp
+ */
+export function formatCustomerUpdated(
+  orderNumber: number,
+  customerName: string
+): string {
+  return [
+    `*Cliente atualizado na OS #${orderNumber}!*`,
+    '',
+    `*Novo cliente:* ${customerName}`,
+  ].join('\n');
+}
+
+// ============================================================================
+// Photo Management Formatting
+// ============================================================================
+
+/**
+ * Format photo added message for WhatsApp
+ */
+export function formatPhotoAdded(orderNumber: number, totalPhotos: number): string {
+  return `Foto adicionada à OS #${orderNumber}! (${totalPhotos} foto${totalPhotos > 1 ? 's' : ''} no total)`;
+}
+
+/**
+ * Format photos list message for WhatsApp
+ */
+export function formatPhotosList(
+  orderNumber: number,
+  photos: Array<{ id: string; url: string; createdAt?: unknown; createdBy?: { name?: string } }>
+): string {
+  if (photos.length === 0) {
+    return `*OS #${orderNumber}*\n\nNenhuma foto anexada.`;
+  }
+
+  const lines = [
+    `*OS #${orderNumber} - Fotos (${photos.length}):*`,
+    '',
+  ];
+
+  photos.forEach((photo, index) => {
+    lines.push(`${index + 1}. ${photo.url}`);
+    if (photo.createdBy?.name) {
+      lines.push(`   _Por: ${photo.createdBy.name}_`);
+    }
+  });
+
+  return lines.join('\n');
+}
+
+/**
+ * Format photo deleted message for WhatsApp
+ */
+export function formatPhotoDeleted(orderNumber: number, remainingPhotos: number): string {
+  if (remainingPhotos === 0) {
+    return `Foto removida da OS #${orderNumber}!\n\nNenhuma foto restante.`;
+  }
+  return `Foto removida da OS #${orderNumber}!\n\n${remainingPhotos} foto${remainingPhotos > 1 ? 's' : ''} restante${remainingPhotos > 1 ? 's' : ''}.`;
+}
