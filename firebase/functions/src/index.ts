@@ -135,6 +135,9 @@ import inviteRoutes from './routes/bot/invite.routes';
 import searchRoutes from './routes/bot/search.routes';
 import quickRoutes from './routes/bot/quick.routes';
 import summaryRoutes from './routes/bot/summary.routes';
+import botOrdersRoutes from './routes/bot/orders.routes';
+import botAnalyticsRoutes from './routes/bot/analytics.routes';
+import botCatalogRoutes from './routes/bot/catalog.routes';
 
 // Initialize Express app
 const app = express();
@@ -153,9 +156,35 @@ app.use(express.json({ limit: '1mb' }));
 // Parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-// Request logging
-app.use((req: Request, _res: Response, next: NextFunction) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+// Request logging (Moved after body parsers to ensure body is captured)
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now();
+  const timestamp = new Date().toISOString();
+  
+  // Log request
+  console.log(`\n--- [${timestamp}] INCOMING REQUEST ---`);
+  console.log(`${req.method} ${req.path}`);
+  console.log(`HEADERS:`, JSON.stringify({
+    'x-api-key': req.headers['x-api-key'],
+    'x-api-secret': req.headers['x-api-secret'],
+    'x-whatsapp-number': req.headers['x-whatsapp-number'],
+    'authorization': req.headers['authorization'] ? 'Bearer [HIDDEN]' : undefined,
+    'content-type': req.headers['content-type']
+  }, null, 2));
+  if (Object.keys(req.query).length) console.log(`QUERY:`, JSON.stringify(req.query, null, 2));
+  if (req.body && Object.keys(req.body).length) console.log(`BODY:`, JSON.stringify(req.body, null, 2));
+  
+  // Capture the original send to log response
+  const originalSend = res.send;
+  res.send = function(body): Response {
+    const duration = Date.now() - start;
+    console.log(`--- [${timestamp}] RESPONSE (${duration}ms) ---`);
+    console.log(`STATUS: ${res.statusCode}`);
+    console.log(`RESULT:`, typeof body === 'string' ? body : JSON.stringify(body, null, 2));
+    console.log(`---------------------------------------\n`);
+    return originalSend.call(this, body);
+  };
+
   next();
 });
 
@@ -221,7 +250,10 @@ app.use('/bot/invite', botLimiter, botAuth, inviteRoutes);
 app.use('/bot/customers', botLimiter, botAuth, searchRoutes);
 app.use('/bot/devices', botLimiter, botAuth, searchRoutes);
 app.use('/bot/orders', botLimiter, botAuth, quickRoutes);
+app.use('/bot/orders', botLimiter, botAuth, botOrdersRoutes);
 app.use('/bot/summary', botLimiter, botAuth, summaryRoutes);
+app.use('/bot/analytics', botLimiter, botAuth, botAnalyticsRoutes);
+app.use('/bot/catalog', botLimiter, botAuth, botCatalogRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

@@ -4,16 +4,20 @@
  */
 
 import * as admin from 'firebase-admin';
+import { getFirestore, Timestamp as FirestoreTimestamp, FieldValue as FirestoreFieldValue } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 // Initialize Firebase Admin (singleton)
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-export const db = admin.firestore();
-export const auth = admin.auth();
-export const FieldValue = admin.firestore.FieldValue;
-export const Timestamp = admin.firestore.Timestamp;
+export const db = getFirestore();
+export const auth = getAuth();
+
+// Re-export Timestamp and FieldValue from the modular SDK
+export const Timestamp = FirestoreTimestamp;
+export const FieldValue = FirestoreFieldValue;
 
 // ============================================================================
 // Collection References

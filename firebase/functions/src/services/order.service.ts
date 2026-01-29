@@ -107,6 +107,28 @@ export async function getOrder(
 }
 
 /**
+ * Get a single order by its number
+ */
+export async function getOrderByNumber(
+  companyId: string,
+  orderNumber: number
+): Promise<Order | null> {
+  const collection = getTenantCollection(companyId, 'orders');
+  const snapshot = await collection
+    .where('number', '==', orderNumber)
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) return null;
+
+  const doc = snapshot.docs[0];
+  return {
+    id: doc.id,
+    ...doc.data(),
+  } as Order;
+}
+
+/**
  * Get orders by status
  */
 export async function getOrdersByStatus(
