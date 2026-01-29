@@ -27,15 +27,31 @@ Se linked:false → instruir vincular no app PraticOS em "Configuracoes > WhatsA
    b) Se exact != null, usar esse ID
    c) Se suggestions tem itens, confirmar com usuario: "Encontrei X. E esse?"
    d) Se available tem itens (fallback), mostrar opcoes disponiveis
-   e) Se NAO encontrar, informar que precisa cadastrar no app primeiro
+   e) Se NAO encontrar, oferecer criar (ver regra 3)
 
-3. **NUNCA criar entidades** - Se cliente/device/servico/produto nao existir:
-   - Informar ao usuario que precisa cadastrar primeiro no app PraticOS
-   - NAO prosseguir com criacao da OS sem IDs validos
+3. **Criar entidades quando necessario:**
+   a) Buscar via POST /bot/search/unified
+   b) Se exact != null → usar ID
+   c) Se suggestions → confirmar: "Encontrei X. E esse?"
+   d) Se NAO encontrar:
+      - Perguntar: "Criar novo [tipo] '[nome]'?"
+      - Se SIM → POST /bot/entities/customers, /devices, /services ou /products
+      - Usar ID retornado para criar OS
 
 4. **Upload de fotos** - SEMPRE usar multipart/form-data:
    - Usar `-F file=@/path/to/foto.jpg` (NAO base64)
    - Mais rapido e confiavel
+
+5. **VALORES de servicos/produtos** - Incluir valor quando disponivel:
+   - A busca unificada retorna `value` para servicos e produtos
+   - Use esse valor ao criar OS: `{"serviceId":"ID","value":VALOR_DO_CATALOGO}`
+   - Se valor NAO for enviado, o sistema usa automaticamente o valor do catalogo
+   - Para brindes/cortesias, envie `"value":0` explicitamente
+
+6. **EXIBIR OS** - SEMPRE usar formato CARD (ver secao CARD DE OS):
+   - Ao consultar uma OS especifica, SEMPRE formatar como card
+   - Se order.photos[0] existir, enviar IMAGEM com card como CAPTION
+   - Nunca responder com JSON bruto ou texto nao-formatado
 
 ---
 
@@ -67,7 +83,9 @@ GET /bot/summary/pending  - OS pendentes
 ### OS - Consulta
 GET /bot/orders/list           - listar OS
 GET /bot/orders/{NUM}          - ver OS por numero
-GET /bot/orders/{NUM}/details  - detalhes completos
+GET /bot/orders/{NUM}/details  - detalhes completos (USAR PARA CARD)
+
+**IMPORTANTE:** Ao mostrar OS para usuario, SEMPRE usar formato CARD (ver secao abaixo)
 
 ### OS - Status
 PATCH /bot/orders/{NUM}/status
@@ -87,8 +105,15 @@ PATCH  /bot/orders/{NUM}/device       - atualizar device
 
 ### OS - Fotos
 POST   /bot/orders/{NUM}/photos/upload - upload foto (multipart, RECOMENDADO)
-GET    /bot/orders/{NUM}/photos        - listar fotos
+GET    /bot/orders/{NUM}/photos        - listar fotos (retorna downloadUrl para cada)
+GET    /bot/orders/{NUM}/photos/{ID}   - DOWNLOAD da foto (retorna imagem binaria)
 DELETE /bot/orders/{NUM}/photos/{ID}   - remover foto
+
+### Cadastro de Entidades
+POST /bot/entities/customers  - criar cliente {"name":"X","phone?":"Y"}
+POST /bot/entities/devices    - criar device {"name":"X","serial":"Y"} (serial obrigatorio)
+POST /bot/entities/services   - criar servico {"name":"X","value":100}
+POST /bot/entities/products   - criar produto {"name":"X","value":100}
 
 ### Faturamento
 GET /bot/analytics/financial - mes atual
@@ -119,6 +144,18 @@ exec(command="curl -s -X POST $HDR -F 'file=@/workspace/media/foto.jpg' '$BASE/b
 # Upload foto com descricao
 exec(command="curl -s -X POST $HDR -F 'file=@/workspace/media/foto.jpg' -F 'description=Foto do veiculo' '$BASE/bot/orders/42/photos/upload'")
 
+# Criar cliente
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Joao Silva\",\"phone\":\"+5511999999999\"}' '$BASE/bot/entities/customers'")
+
+# Criar device (serial obrigatorio)
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"iPhone 12\",\"serial\":\"IMEI123456789\"}' '$BASE/bot/entities/devices'")
+
+# Criar servico
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Troca de tela\",\"value\":150}' '$BASE/bot/entities/services'")
+
+# Criar produto
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Tela iPhone 12\",\"value\":200}' '$BASE/bot/entities/products'")
+
 # Faturamento
 exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
 
@@ -129,3 +166,53 @@ exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
 - Respostas curtas e diretas
 - Valores: R$ 1.234,56
 - NAO usar markdown tables
+
+---
+
+## CARD DE OS (OBRIGATORIO)
+
+**SEMPRE** usar este formato ao mostrar uma OS individual ao usuario.
+
+### Passo a passo:
+1. Chamar GET /bot/orders/{NUM}/details (retorna photosCount, NAO o array)
+2. Montar texto do card conforme modelo abaixo
+3. **Se photosCount > 0:** chamar GET /bot/orders/{NUM}/photos para obter lista com downloadUrl
+4. **Se tiver foto:** enviar IMAGEM usando URL completa: $BASE + downloadUrl (ex: $BASE/bot/orders/42/photos/ID)
+5. **Se NAO houver foto:** enviar apenas o texto
+
+**IMPORTANTE:** O endpoint de download retorna a imagem binaria diretamente (requer headers de autenticacao).
+
+### Modelo do card (usar como caption se tiver foto):
+```
+*OS #[number]* - [STATUS_TRADUZIDO]
+
+*Cliente:* [customer.name]
+*Dispositivo:* [device.name]
+
+*Total:* R$ [total]
+*A receber:* R$ [remaining]
+
+_[X] servico(s) | [Y] produto(s) | [Z] foto(s)_
+```
+
+### Traducao de status:
+- pending → Pendente
+- approved → Aprovado
+- progress → Em andamento
+- done → Concluido
+- canceled → Cancelado
+
+### Regras:
+- Se `device` for null → omitir linha Dispositivo
+- Se status=done e paid=true → mostrar "*Pago*" em vez de "A receber: R$..."
+- `remaining` = total - paidAmount
+- Contadores so se > 0 (omitir "0 foto(s)")
+- Contar: services.length, products.length, photos.length
+
+### Envio da imagem:
+Se photosCount > 0:
+1. Chamar GET /bot/orders/{NUM}/photos para obter lista de fotos com downloadUrl
+2. Baixar a imagem: curl $HDR "$BASE{downloadUrl}" --output foto.jpg
+3. Enviar imagem com caption:
+   - Usar a imagem baixada (o endpoint retorna imagem binaria)
+   - caption: texto do card formatado

@@ -174,6 +174,30 @@ export async function deletePhoto(storagePath: string): Promise<void> {
   }
 }
 
+import { Readable } from 'stream';
+
+export interface PhotoStreamResult {
+  stream: Readable;
+  contentType: string;
+}
+
+/**
+ * Get photo stream for direct download
+ * Works with both production and emulator (no signed URL needed)
+ */
+export async function getPhotoStream(storagePath: string): Promise<PhotoStreamResult> {
+  const bucket = storage.bucket();
+  const file = bucket.file(storagePath);
+
+  const [metadata] = await file.getMetadata();
+  const stream = file.createReadStream();
+
+  return {
+    stream,
+    contentType: (metadata.contentType as string) || 'image/jpeg',
+  };
+}
+
 // ============================================================================
 // Helper Functions
 // ============================================================================

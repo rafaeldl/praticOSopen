@@ -245,7 +245,7 @@ router.post('/:number/photos/upload', requireLinked, async (req: AuthenticatedRe
 
 /**
  * GET /bot/orders/:number/photos
- * List photos of an order
+ * List photos of an order (returns downloadUrl for direct API access)
  */
 router.get('/:number/photos', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -281,16 +281,20 @@ router.get('/:number/photos', requireLinked, async (req: AuthenticatedRequest, r
 
     const photos = order.photos || [];
 
+    // Return download URLs pointing to our API (no signed URLs needed)
+    const photosWithDownloadUrls = photos.map((p) => ({
+      id: p.id,
+      url: p.url,
+      downloadUrl: `/bot/orders/${orderNumber}/photos/${p.id}`,
+      description: p.description,
+      createdAt: p.createdAt,
+      createdBy: p.createdBy?.name || 'Unknown',
+    }));
+
     res.json({
       success: true,
       data: {
-        photos: photos.map((p) => ({
-          id: p.id,
-          url: p.url,
-          description: p.description,
-          createdAt: p.createdAt,
-          createdBy: p.createdBy?.name || 'Unknown',
-        })),
+        photos: photosWithDownloadUrls,
         count: photos.length,
         message: formatPhotosList(orderNumber, photos),
       },
@@ -300,6 +304,78 @@ router.get('/:number/photos', requireLinked, async (req: AuthenticatedRequest, r
     res.status(500).json({
       success: false,
       error: { code: 'INTERNAL_ERROR', message: 'Failed to list photos' },
+    });
+  }
+});
+
+/**
+ * GET /bot/orders/:number/photos/:photoId
+ * Download photo directly (streams the image binary)
+ */
+router.get('/:number/photos/:photoId', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const companyId = req.userContext?.companyId;
+
+    if (!companyId) {
+      res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Company context required' },
+      });
+      return;
+    }
+
+    const numberParam = Array.isArray(req.params.number) ? req.params.number[0] : req.params.number;
+    const orderNumber = parseInt(numberParam, 10);
+    const photoIdParam = Array.isArray(req.params.photoId) ? req.params.photoId[0] : req.params.photoId;
+
+    if (isNaN(orderNumber)) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Invalid order number' },
+      });
+      return;
+    }
+
+    const order = await orderService.getOrderByNumber(companyId, orderNumber);
+    if (!order) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: `Order #${orderNumber} not found` },
+      });
+      return;
+    }
+
+    const photos = order.photos || [];
+    const photo = photos.find((p) => p.id === photoIdParam);
+
+    if (!photo) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: `Photo not found in order #${orderNumber}` },
+      });
+      return;
+    }
+
+    if (!photo.storagePath) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Photo storage path not available' },
+      });
+      return;
+    }
+
+    // Stream the photo directly from Storage
+    const { stream, contentType } = await photoService.getPhotoStream(photo.storagePath);
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `inline; filename="${photo.id}.jpg"`);
+
+    stream.pipe(res);
+  } catch (error) {
+    console.error('Download photo error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Failed to download photo' },
     });
   }
 });
