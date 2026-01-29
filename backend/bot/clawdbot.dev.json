@@ -27,7 +27,7 @@
     "bind": "lan",
     "auth": {
       "mode": "token",
-      "token": "praticos-secret-token-change-me"
+      "token": "praticos-dev-token-change-me"
     }
   },
   "channels": {

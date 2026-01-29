@@ -1,7 +1,7 @@
-# Use uma imagem base do Node.js estável
+# ClawdBot Docker Image for PraticOS
 FROM node:22-slim
 
-# Instalar dependências do sistema necessárias para o Clawdbot e Puppeteer (se usar browser)
+# Install system dependencies for Clawdbot and Puppeteer
 RUN apt-get update && apt-get install -y \
     python3 \
     make \
@@ -20,25 +20,33 @@ RUN apt-get update && apt-get install -y \
     libxshmfence1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Criar diretório do app
-WORKDIR /app
-
-# Instalar o Clawdbot globalmente via NPM
-# Usamos a versão específica para garantir estabilidade
+# Install Clawdbot globally
 RUN npm install -g clawdbot@latest
 
-# Criar estrutura de pastas para o workspace e logs
-RUN mkdir -p /app/workspace /app/logs /root/.clawdbot
+# Select environment (default: prod)
+ARG ENV=prod
 
-# Expor a porta padrão do Gateway
+# Copy workspace (skills, persona, cron)
+COPY workspace/skills/ /root/.clawdbot/skills/
+COPY workspace/*.md /root/.clawdbot/
+COPY workspace/cron/jobs.json /root/.clawdbot/cron/jobs.json
+
+# Create agent directories (sessions are created at runtime)
+RUN mkdir -p /root/.clawdbot/agents/main/sessions
+
+# Copy environment-specific config
+COPY clawdbot.${ENV}.json /root/.clawdbot/clawdbot.json
+
+# Create credentials directory (will be mounted as volume)
+RUN mkdir -p /root/.clawdbot/credentials /root/.clawdbot/identity /root/.clawdbot/devices
+
+# Gateway configuration
 EXPOSE 18789
-
-# Script de entrada para garantir que o workspace exista
-COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
-
-# Variáveis de ambiente padrão
 ENV CLAWDBOT_GATEWAY_PORT=18789
 ENV CLAWDBOT_GATEWAY_BIND=lan
+
+# Entrypoint script
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
