@@ -10,6 +10,7 @@ class Service extends BaseAuditCompany {
   String? name;
   double? value;
   String? photo;
+  List<String>? keywords;
 
   Service();
   factory Service.fromJson(Map<String, dynamic> json) =>

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
+import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,6 +49,7 @@ abstract class _CustomerStore with Store {
     customer.company = user?.companies![0].company;
     customer.updatedAt = DateTime.now();
     customer.updatedBy = user?.toAggr();
+    customer.keywords = generateKeywords(customer.name);
     await repository.createItem(companyId!, customer);
   }
 

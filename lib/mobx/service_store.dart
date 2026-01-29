@@ -6,6 +6,7 @@ import 'package:praticos/models/service.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/v2/service_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,6 +53,7 @@ abstract class _ServiceStore with Store {
     service.company = user?.companies![0].company;
     service.updatedAt = DateTime.now();
     service.updatedBy = user?.toAggr();
+    service.keywords = generateKeywords(service.name);
     await repository.createItem(companyId!, service);
   }
 
