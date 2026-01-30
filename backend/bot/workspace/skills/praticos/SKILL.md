@@ -38,17 +38,22 @@ Se linked:false → instruir vincular no app PraticOS em "Configuracoes > WhatsA
       - Se SIM → POST /bot/entities/customers, /devices, /services ou /products
       - Usar ID retornado para criar OS
 
-4. **Upload de fotos** - SEMPRE usar multipart/form-data:
+4. **Editar entidades existentes:**
+   - PATCH /bot/entities/{tipo}/{id} para corrigir dados
+   - Campos opcionais: envie apenas o que deseja alterar
+   - Usar quando usuario pedir para corrigir nome, telefone, valor, etc.
+
+5. **Upload de fotos** - SEMPRE usar multipart/form-data:
    - Usar `-F file=@/path/to/foto.jpg` (NAO base64)
    - Mais rapido e confiavel
 
-5. **VALORES de servicos/produtos** - Incluir valor quando disponivel:
+6. **VALORES de servicos/produtos** - Incluir valor quando disponivel:
    - A busca unificada retorna `value` para servicos e produtos
    - Use esse valor ao criar OS: `{"serviceId":"ID","value":VALOR_DO_CATALOGO}`
    - Se valor NAO for enviado, o sistema usa automaticamente o valor do catalogo
    - Para brindes/cortesias, envie `"value":0` explicitamente
 
-6. **EXIBIR OS** - SEMPRE usar formato CARD (ver secao CARD DE OS):
+7. **EXIBIR OS** - SEMPRE usar formato CARD (ver secao CARD DE OS):
    - Ao consultar uma OS especifica, SEMPRE formatar como card
    - Se order.photos[0] existir, enviar IMAGEM com card como CAPTION
    - Nunca responder com JSON bruto ou texto nao-formatado
@@ -93,11 +98,15 @@ Body: {"status":"approved|progress|done|canceled"}
 
 ### OS - Criar
 POST /bot/orders/full
-Body: {"customerId":"ID","deviceId":"ID","services":[{"serviceId":"ID","value":100}],"products":[{"productId":"ID","quantity":1,"value":50}]}
+Body: {"customerId":"ID","deviceId":"ID","services":[{"serviceId":"ID","value":100,"description":"detalhes"}],"products":[{"productId":"ID","quantity":1,"value":50,"description":"detalhes"}]}
+
+Campos opcionais em services/products:
+- value: valor (se omitido, usa valor do catalogo)
+- description: detalhes adicionais do item nesta OS (max 500 chars)
 
 ### OS - Gerenciar Itens
-POST   /bot/orders/{NUM}/services     - adicionar servico
-POST   /bot/orders/{NUM}/products     - adicionar produto
+POST   /bot/orders/{NUM}/services     - adicionar servico {"serviceId":"ID","value":100,"description":"detalhes"}
+POST   /bot/orders/{NUM}/products     - adicionar produto {"productId":"ID","quantity":1,"value":50,"description":"detalhes"}
 DELETE /bot/orders/{NUM}/services/{I} - remover servico (indice)
 DELETE /bot/orders/{NUM}/products/{I} - remover produto
 PATCH  /bot/orders/{NUM}/customer     - atualizar cliente
@@ -114,6 +123,12 @@ POST /bot/entities/customers  - criar cliente {"name":"X","phone?":"Y"}
 POST /bot/entities/devices    - criar device {"name":"X","serial":"Y"} (serial obrigatorio)
 POST /bot/entities/services   - criar servico {"name":"X","value":100}
 POST /bot/entities/products   - criar produto {"name":"X","value":100}
+
+### Editar Entidades
+PATCH /bot/entities/customers/{id}  - atualizar cliente {"name?":"X","phone?":"Y","email?":"Z"}
+PATCH /bot/entities/devices/{id}    - atualizar device {"name?":"X","serial?":"Y","manufacturer?":"Z"}
+PATCH /bot/entities/services/{id}   - atualizar servico {"name?":"X","value?":100}
+PATCH /bot/entities/products/{id}   - atualizar produto {"name?":"X","value?":100}
 
 ### Faturamento
 GET /bot/analytics/financial - mes atual
@@ -155,6 +170,18 @@ exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"na
 
 # Criar produto
 exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Tela iPhone 12\",\"value\":200}' '$BASE/bot/entities/products'")
+
+# Editar cliente
+exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Joao Santos\",\"phone\":\"+5511888888888\"}' '$BASE/bot/entities/customers/abc123'")
+
+# Editar device
+exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"name\":\"iPhone 13 Pro\"}' '$BASE/bot/entities/devices/dev456'")
+
+# Editar servico
+exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"value\":180}' '$BASE/bot/entities/services/srv789'")
+
+# Editar produto
+exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Tela iPhone 13\",\"value\":250}' '$BASE/bot/entities/products/prd012'")
 
 # Faturamento
 exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
