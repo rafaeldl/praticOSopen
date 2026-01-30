@@ -29,31 +29,29 @@ Se linked:false → instruir vincular no app PraticOS em "Configuracoes > WhatsA
    d) Se available tem itens (fallback), mostrar opcoes disponiveis
    e) Se NAO encontrar, oferecer criar (ver regra 3)
 
-3. **Criar entidades quando necessario:**
-   a) Buscar via POST /bot/search/unified
-   b) Se exact != null → usar ID
-   c) Se suggestions → confirmar: "Encontrei X. E esse?"
-   d) Se NAO encontrar:
-      - Perguntar: "Criar novo [tipo] '[nome]'?"
-      - Se SIM → POST /bot/entities/customers, /devices, /services ou /products
-      - Usar ID retornado para criar OS
+3. **Gerenciamento de Entidades (CRUD completo):**
+   a) **Listar:** GET /bot/entities/{tipo}?q=filtro - para ver opcoes disponiveis
+   b) **Consultar:** GET /bot/entities/{tipo}/{id} - para ver detalhes completos
+   c) **Criar:** POST /bot/entities/{tipo} - quando nao encontrar na busca
+   d) **Editar:** PATCH /bot/entities/{tipo}/{id} - para corrigir dados
+   e) **Excluir:** DELETE /bot/entities/{tipo}/{id} - SEMPRE pedir confirmacao!
 
-4. **Editar entidades existentes:**
-   - PATCH /bot/entities/{tipo}/{id} para corrigir dados
-   - Campos opcionais: envie apenas o que deseja alterar
-   - Usar quando usuario pedir para corrigir nome, telefone, valor, etc.
+   Fluxo recomendado:
+   - Buscar primeiro via /bot/search/unified
+   - Se nao encontrar, perguntar se quer criar
+   - Para editar/excluir, sempre confirmar com usuario
 
-5. **Upload de fotos** - SEMPRE usar multipart/form-data:
+4. **Upload de fotos** - SEMPRE usar multipart/form-data:
    - Usar `-F file=@/path/to/foto.jpg` (NAO base64)
    - Mais rapido e confiavel
 
-6. **VALORES de servicos/produtos** - Incluir valor quando disponivel:
+5. **VALORES de servicos/produtos** - Incluir valor quando disponivel:
    - A busca unificada retorna `value` para servicos e produtos
    - Use esse valor ao criar OS: `{"serviceId":"ID","value":VALOR_DO_CATALOGO}`
    - Se valor NAO for enviado, o sistema usa automaticamente o valor do catalogo
    - Para brindes/cortesias, envie `"value":0` explicitamente
 
-7. **EXIBIR OS** - SEMPRE usar formato CARD (ver secao CARD DE OS):
+6. **EXIBIR OS** - SEMPRE usar formato CARD (ver secao CARD DE OS):
    - Ao consultar uma OS especifica, SEMPRE formatar como card
    - Se order.photos[0] existir, enviar IMAGEM com card como CAPTION
    - Nunca responder com JSON bruto ou texto nao-formatado
@@ -118,17 +116,20 @@ GET    /bot/orders/{NUM}/photos        - listar fotos (retorna downloadUrl para 
 GET    /bot/orders/{NUM}/photos/{ID}   - DOWNLOAD da foto (retorna imagem binaria)
 DELETE /bot/orders/{NUM}/photos/{ID}   - remover foto
 
-### Cadastro de Entidades
-POST /bot/entities/customers  - criar cliente {"name":"X","phone?":"Y"}
-POST /bot/entities/devices    - criar device {"name":"X","serial":"Y"} (serial obrigatorio)
-POST /bot/entities/services   - criar servico {"name":"X","value":100}
-POST /bot/entities/products   - criar produto {"name":"X","value":100}
+### Entidades - CRUD Generico
+Base: /bot/entities/{TIPO} onde TIPO = customers | devices | services | products
 
-### Editar Entidades
-PATCH /bot/entities/customers/{id}  - atualizar cliente {"name?":"X","phone?":"Y","email?":"Z"}
-PATCH /bot/entities/devices/{id}    - atualizar device {"name?":"X","serial?":"Y","manufacturer?":"Z"}
-PATCH /bot/entities/services/{id}   - atualizar servico {"name?":"X","value?":100}
-PATCH /bot/entities/products/{id}   - atualizar produto {"name?":"X","value?":100}
+GET    /{TIPO}?q=filtro&limit=20  - listar (limit max 50)
+GET    /{TIPO}/{id}               - detalhes
+POST   /{TIPO}                    - criar
+PATCH  /{TIPO}/{id}               - editar (campos opcionais)
+DELETE /{TIPO}/{id}               - excluir
+
+**Campos por tipo:**
+- customers: name, phone?, email?, address?
+- devices: name, serial (obrigatorio), manufacturer?
+- services: name, value
+- products: name, value
 
 ### Faturamento
 GET /bot/analytics/financial - mes atual
@@ -159,29 +160,21 @@ exec(command="curl -s -X POST $HDR -F 'file=@/workspace/media/foto.jpg' '$BASE/b
 # Upload foto com descricao
 exec(command="curl -s -X POST $HDR -F 'file=@/workspace/media/foto.jpg' -F 'description=Foto do veiculo' '$BASE/bot/orders/42/photos/upload'")
 
-# Criar cliente
-exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Joao Silva\",\"phone\":\"+5511999999999\"}' '$BASE/bot/entities/customers'")
-
-# Criar device (serial obrigatorio)
-exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"iPhone 12\",\"serial\":\"IMEI123456789\"}' '$BASE/bot/entities/devices'")
-
-# Criar servico
-exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Troca de tela\",\"value\":150}' '$BASE/bot/entities/services'")
-
-# Criar produto
-exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Tela iPhone 12\",\"value\":200}' '$BASE/bot/entities/products'")
-
-# Editar cliente
-exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Joao Santos\",\"phone\":\"+5511888888888\"}' '$BASE/bot/entities/customers/abc123'")
-
-# Editar device
-exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"name\":\"iPhone 13 Pro\"}' '$BASE/bot/entities/devices/dev456'")
-
-# Editar servico
-exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"value\":180}' '$BASE/bot/entities/services/srv789'")
-
-# Editar produto
-exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"name\":\"Tela iPhone 13\",\"value\":250}' '$BASE/bot/entities/products/prd012'")
+# Entidades CRUD (substituir {TIPO} por customers|devices|services|products)
+# Listar
+exec(command="curl -s $HDR '$BASE/bot/entities/{TIPO}?q=filtro&limit=10'")
+# Consultar
+exec(command="curl -s $HDR '$BASE/bot/entities/{TIPO}/{id}'")
+# Criar (customer)
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"X\",\"phone\":\"+55...\"}' '$BASE/bot/entities/customers'")
+# Criar (device - serial obrigatorio)
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"X\",\"serial\":\"Y\"}' '$BASE/bot/entities/devices'")
+# Criar (service/product)
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"name\":\"X\",\"value\":100}' '$BASE/bot/entities/{services|products}'")
+# Editar
+exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"campo\":\"valor\"}' '$BASE/bot/entities/{TIPO}/{id}'")
+# Excluir
+exec(command="curl -s -X DELETE $HDR '$BASE/bot/entities/{TIPO}/{id}'")
 
 # Faturamento
 exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
