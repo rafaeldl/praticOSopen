@@ -19,7 +19,7 @@ import {
   CompanyAggr,
 } from '../models/types';
 import { normalizeSearchQuery } from '../utils/validation.utils';
-import { generateKeywords } from '../utils/search.utils';
+import { generateSearchKeywords, normalizeSearchTerm, removeAccents } from '../utils/search.utils';
 
 // ============================================================================
 // Query Operations
@@ -99,7 +99,8 @@ export async function findDeviceBySerial(
 
 /**
  * Search devices by keyword
- * Uses array-contains query on keywords field for better search flexibility
+ * Uses array-contains query on keywords field for better search flexibility.
+ * Falls back to name-based search for records without keywords field.
  * If query is empty, returns all devices (limited)
  */
 export async function searchDevices(
@@ -108,9 +109,8 @@ export async function searchDevices(
   limit = 10
 ): Promise<Device[]> {
   const collection = getTenantCollection(companyId, 'devices');
-  const normalizedQuery = normalizeSearchQuery(query);
-  // Use first keyword for array-contains query
-  const keyword = normalizedQuery.split(/\s+/)[0];
+  // Use normalized search term (stopwords removed, words joined)
+  const keyword = normalizeSearchTerm(query);
 
   // If no keyword, list all devices
   if (!keyword) {
@@ -125,15 +125,35 @@ export async function searchDevices(
     })) as Device[];
   }
 
+  // 1. Primary search: by keywords (new records with keywords field)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
     .get();
 
-  return snapshot.docs.map((doc) => ({
-    ...doc.data(),
-    id: doc.id,
-  })) as Device[];
+  if (!snapshot.empty) {
+    return snapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })) as Device[];
+  }
+
+  // 2. Fallback: search by name, serial or manufacturer in memory (old records without keywords)
+  const allSnapshot = await collection
+    .orderBy('name')
+    .limit(100)
+    .get();
+
+  const queryNormalized = removeAccents(query.toLowerCase());
+  return allSnapshot.docs
+    .map((doc) => ({ ...doc.data(), id: doc.id } as Device))
+    .filter((d) => {
+      const nameMatch = removeAccents(d.name?.toLowerCase() || '').includes(queryNormalized);
+      const serialMatch = removeAccents(d.serial?.toLowerCase() || '').includes(queryNormalized);
+      const manufacturerMatch = removeAccents(d.manufacturer?.toLowerCase() || '').includes(queryNormalized);
+      return nameMatch || serialMatch || manufacturerMatch;
+    })
+    .slice(0, limit);
 }
 
 // ============================================================================
@@ -162,7 +182,11 @@ export async function createDevice(
   const deviceData = {
     name: input.name,
     nameLower: input.name.toLowerCase(), // For exact match lookups
-    keywords: generateKeywords(input.name), // For array-contains search
+    keywords: [
+      ...generateSearchKeywords(input.name),
+      ...generateSearchKeywords(input.serial),
+      ...generateSearchKeywords(input.manufacturer),
+    ], // For array-contains search (name + serial + manufacturer)
     serial: input.serial || null,
     manufacturer: input.manufacturer || null,
     category: input.category || null,
@@ -213,10 +237,21 @@ export async function updateDevice(
     updatedAt: new Date().toISOString(),
   };
 
+  // Recalculate keywords if name, serial, or manufacturer changes
+  if (input.name !== undefined || input.serial !== undefined || input.manufacturer !== undefined) {
+    const name = input.name ?? existing.name;
+    const serial = input.serial ?? existing.serial;
+    const manufacturer = input.manufacturer ?? existing.manufacturer;
+    updateData.keywords = [
+      ...generateSearchKeywords(name),
+      ...generateSearchKeywords(serial),
+      ...generateSearchKeywords(manufacturer),
+    ];
+  }
+
   if (input.name !== undefined) {
     updateData.name = input.name;
     updateData.nameLower = input.name.toLowerCase();
-    updateData.keywords = generateKeywords(input.name);
   }
   if (input.serial !== undefined) updateData.serial = input.serial;
   if (input.manufacturer !== undefined) updateData.manufacturer = input.manufacturer;

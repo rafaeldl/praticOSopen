@@ -19,7 +19,7 @@ import {
   CompanyAggr,
 } from '../models/types';
 import { normalizeSearchQuery } from '../utils/validation.utils';
-import { generateKeywords } from '../utils/search.utils';
+import { generateSearchKeywords, generatePhoneKeywords, normalizeSearchTerm, removeAccents } from '../utils/search.utils';
 
 // ============================================================================
 // Query Operations
@@ -96,7 +96,8 @@ export async function findCustomerByPhone(
 
 /**
  * Search customers by keyword
- * Uses array-contains query on keywords field for better search flexibility
+ * Uses array-contains query on keywords field for better search flexibility.
+ * Falls back to name-based search for records without keywords field.
  * If query is empty, returns all customers (limited)
  */
 export async function searchCustomers(
@@ -105,9 +106,8 @@ export async function searchCustomers(
   limit = 10
 ): Promise<Customer[]> {
   const collection = getTenantCollection(companyId, 'customers');
-  const normalizedQuery = normalizeSearchQuery(query);
-  // Use first keyword for array-contains query
-  const keyword = normalizedQuery.split(/\s+/)[0];
+  // Use normalized search term (stopwords removed, words joined)
+  const keyword = normalizeSearchTerm(query);
 
   // If no keyword, list all customers
   if (!keyword) {
@@ -122,15 +122,36 @@ export async function searchCustomers(
     })) as Customer[];
   }
 
+  // 1. Primary search: by keywords (new records with keywords field)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
     .get();
 
-  return snapshot.docs.map((doc) => ({
-    ...doc.data(),
-    id: doc.id,
-  })) as Customer[];
+  if (!snapshot.empty) {
+    return snapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })) as Customer[];
+  }
+
+  // 2. Fallback: search by name or phone in memory (old records without keywords)
+  const allSnapshot = await collection
+    .orderBy('name')
+    .limit(100)
+    .get();
+
+  const queryNormalized = removeAccents(query.toLowerCase());
+  // For phone search, also try matching digits only
+  const queryDigits = query.replace(/\D/g, '');
+  return allSnapshot.docs
+    .map((doc) => ({ ...doc.data(), id: doc.id } as Customer))
+    .filter((c) => {
+      const nameMatch = removeAccents(c.name?.toLowerCase() || '').includes(queryNormalized);
+      const phoneMatch = queryDigits.length >= 4 && (c.phone?.replace(/\D/g, '') || '').includes(queryDigits);
+      return nameMatch || phoneMatch;
+    })
+    .slice(0, limit);
 }
 
 // ============================================================================
@@ -158,7 +179,10 @@ export async function createCustomer(
   const customerData = {
     name: input.name,
     nameLower: input.name.toLowerCase(), // For exact match lookups
-    keywords: generateKeywords(input.name), // For array-contains search
+    keywords: [
+      ...generateSearchKeywords(input.name),
+      ...generatePhoneKeywords(input.phone),
+    ], // For array-contains search (name + phone)
     phone: input.phone || null,
     email: input.email || null,
     address: input.address || null,
@@ -207,10 +231,19 @@ export async function updateCustomer(
     updatedAt: new Date().toISOString(),
   };
 
+  // Recalculate keywords if name or phone changes
+  if (input.name !== undefined || input.phone !== undefined) {
+    const name = input.name ?? existing.name;
+    const phone = input.phone ?? existing.phone;
+    updateData.keywords = [
+      ...generateSearchKeywords(name),
+      ...generatePhoneKeywords(phone),
+    ];
+  }
+
   if (input.name !== undefined) {
     updateData.name = input.name;
     updateData.nameLower = input.name.toLowerCase();
-    updateData.keywords = generateKeywords(input.name);
   }
   if (input.phone !== undefined) updateData.phone = input.phone;
   if (input.email !== undefined) updateData.email = input.email;

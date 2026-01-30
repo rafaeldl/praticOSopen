@@ -20,7 +20,7 @@ import {
   CompanyAggr,
 } from '../models/types';
 import { normalizeSearchQuery } from '../utils/validation.utils';
-import { generateKeywords } from '../utils/search.utils';
+import { generateSearchKeywords, normalizeSearchTerm, removeAccents } from '../utils/search.utils';
 
 // ============================================================================
 // Service Operations
@@ -84,7 +84,8 @@ export async function getService(
 
 /**
  * Search services by keyword
- * Uses array-contains query on keywords field for better search flexibility
+ * Uses array-contains query on keywords field for better search flexibility.
+ * Falls back to name-based search for records without keywords field.
  */
 export async function searchServices(
   companyId: string,
@@ -92,20 +93,34 @@ export async function searchServices(
   limit = 10
 ): Promise<Service[]> {
   const collection = getTenantCollection(companyId, 'services');
-  const normalizedQuery = normalizeSearchQuery(query);
-  // Use first keyword for array-contains query
-  const keyword = normalizedQuery.split(/\s+/)[0];
+  // Use normalized search term (stopwords removed, words joined)
+  const keyword = normalizeSearchTerm(query);
   if (!keyword) return [];
 
+  // 1. Primary search: by keywords (new records with keywords field)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
     .get();
 
-  return snapshot.docs.map((doc) => ({
-    ...doc.data(),
-    id: doc.id,
-  })) as Service[];
+  if (!snapshot.empty) {
+    return snapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })) as Service[];
+  }
+
+  // 2. Fallback: search by name in memory (old records without keywords)
+  const allSnapshot = await collection
+    .orderBy('name')
+    .limit(100)
+    .get();
+
+  const queryNormalized = removeAccents(query.toLowerCase());
+  return allSnapshot.docs
+    .map((doc) => ({ ...doc.data(), id: doc.id } as Service))
+    .filter((s) => removeAccents(s.name?.toLowerCase() || '').includes(queryNormalized))
+    .slice(0, limit);
 }
 
 export interface CreateServiceInput {
@@ -127,7 +142,7 @@ export async function createService(
   const serviceData = {
     name: input.name,
     nameLower: input.name.toLowerCase(), // For exact match lookups
-    keywords: generateKeywords(input.name), // For array-contains search
+    keywords: generateSearchKeywords(input.name), // For array-contains search
     value: input.value,
     photo: null,
     company,
@@ -206,7 +221,8 @@ export async function getProduct(
 
 /**
  * Search products by keyword
- * Uses array-contains query on keywords field for better search flexibility
+ * Uses array-contains query on keywords field for better search flexibility.
+ * Falls back to name-based search for records without keywords field.
  */
 export async function searchProducts(
   companyId: string,
@@ -214,20 +230,34 @@ export async function searchProducts(
   limit = 10
 ): Promise<Product[]> {
   const collection = getTenantCollection(companyId, 'products');
-  const normalizedQuery = normalizeSearchQuery(query);
-  // Use first keyword for array-contains query
-  const keyword = normalizedQuery.split(/\s+/)[0];
+  // Use normalized search term (stopwords removed, words joined)
+  const keyword = normalizeSearchTerm(query);
   if (!keyword) return [];
 
+  // 1. Primary search: by keywords (new records with keywords field)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
     .get();
 
-  return snapshot.docs.map((doc) => ({
-    ...doc.data(),
-    id: doc.id,
-  })) as Product[];
+  if (!snapshot.empty) {
+    return snapshot.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    })) as Product[];
+  }
+
+  // 2. Fallback: search by name in memory (old records without keywords)
+  const allSnapshot = await collection
+    .orderBy('name')
+    .limit(100)
+    .get();
+
+  const queryNormalized = removeAccents(query.toLowerCase());
+  return allSnapshot.docs
+    .map((doc) => ({ ...doc.data(), id: doc.id } as Product))
+    .filter((p) => removeAccents(p.name?.toLowerCase() || '').includes(queryNormalized))
+    .slice(0, limit);
 }
 
 export interface CreateProductInput {
@@ -249,7 +279,7 @@ export async function createProduct(
   const productData = {
     name: input.name,
     nameLower: input.name.toLowerCase(), // For exact match lookups
-    keywords: generateKeywords(input.name), // For array-contains search
+    keywords: generateSearchKeywords(input.name), // For array-contains search
     value: input.value,
     photo: null,
     company,
