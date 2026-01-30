@@ -13,7 +13,7 @@ services:
       - ./data/.openclaw/agents:/root/.clawdbot/agents
       - ./workspace/skills:/root/.clawdbot/skills
       - ./workspace/AGENTS.md:/root/.clawdbot/AGENTS.md
-      - ./workspace/PERSONA.md:/root/.clawdbot/PERSONA.md
+      - ./workspace/SOUL.md:/root/.clawdbot/SOUL.md
       - ./workspace/cron:/root/.clawdbot/cron
     env_file:
       - .env

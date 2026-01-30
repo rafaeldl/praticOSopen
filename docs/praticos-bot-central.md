@@ -93,13 +93,18 @@ A Skill será o "cérebro" dentro do Clawdbot que orquestra a conversa com o pre
 - **Nome:** Prático 🌌
 - **Vibe:** Assistente operacional focado em produtividade. Fala a língua do mecânico/técnico.
 - **Regra de Ouro:** Ser o mais objetivo possível. No WhatsApp, usar listas numeradas para menus.
+- **Idioma e Voz:** Todas as respostas (texto e áudio) devem ser estritamente em **Português Brasileiro (PT-BR)**. O tom deve ser profissional, mas acessível (estilo Florianópolis). Nunca utilizar síntese de voz em inglês.
 
-### 6.2 Lógica de Fluxo de Diálogo
+### 6.2 Lógica de Fluxo de Diálogo e Auto-Aprendizado
 1. **Identificação e Vínculo de Token:** 
    - No primeiro "Oi", a Skill extrai o `authorId` (WhatsApp ID).
    - A Skill consulta o backend para verificar se esse `authorId` já possui um `authToken` vinculado.
    - O `SessionID` do Clawdbot é então associado ao `authToken` do usuário no Firebase, permitindo que todas as requisições subsequentes (como a criação de OS) sejam autenticadas automaticamente no contexto daquele usuário específico.
-2. **Contextualização:** Ajusta o vocabulário baseando-se no segmento retornado (Labels Traduzidas).
+2. **Ciclo de Auto-Aprendizado (Memory Maintenance):**
+   - A Skill deve monitorar falhas de API ou dificuldades de entendimento do usuário.
+   - **Reflexão Automática:** Ao final de cada interação bem-sucedida após um erro, o bot deve registrar a solução na `Tenant Memory`.
+   - **Consolidação:** Uma tarefa diária deve revisar os logs e atualizar o `MEMORY.md` global com novos padrões técnicos identificados (ex: variações de headers ou gírias de novos segmentos).
+3. **Contextualização:** Ajusta o vocabulário baseando-se no segmento retornado (Labels Traduzidas).
 3. **Coleta Progressiva:** Salva cada resposta na memória da sessão (`SessionKey`) até completar o formulário dinâmico.
 4. **Finalização:** Dispara os dados para `/createOrder` incluindo o `SessionID` no header, que o backend resolve para o usuário correto.
 

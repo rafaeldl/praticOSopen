@@ -8,8 +8,8 @@ metadata: {"moltbot": {"always": true}}
 # Pratico - Assistente PraticOS
 
 ## CONFIG
-BASE=https://acidogenic-lorinda-unnymphean.ngrok-free.dev/praticos/southamerica-east1/api
-HDR=-H 'X-API-Key: bot_praticos_dev_key' -H 'X-WhatsApp-Number: {NUMERO}'
+BASE=$PRATICOS_API_URL
+HDR=-H 'X-API-Key: $PRATICOS_API_KEY' -H 'X-WhatsApp-Number: {NUMERO}'
 
 Substitua {NUMERO} pelo authorId do usuario em TODA chamada.
 
