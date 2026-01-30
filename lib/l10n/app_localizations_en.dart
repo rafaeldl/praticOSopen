@@ -2414,4 +2414,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String formLabelWithTitle(String title) {
     return 'Form: $title';
   }
+
+  @override
+  String get connectedChannels => 'Connected Channels';
+
+  @override
+  String get linked => 'Linked';
+
+  @override
+  String get notLinked => 'Not linked';
+
+  @override
+  String get linkWhatsApp => 'Link WhatsApp';
+
+  @override
+  String get linkWhatsAppDescription =>
+      'Scan the QR code or tap the button to open WhatsApp and send the linking code to the PraticOS bot.';
+
+  @override
+  String linkExpiresIn(String time) {
+    return 'Expires in $time';
+  }
+
+  @override
+  String get openWhatsApp => 'Open WhatsApp';
+
+  @override
+  String get whatsAppLinked => 'WhatsApp linked';
+
+  @override
+  String get whatsAppNotLinked => 'WhatsApp not linked';
+
+  @override
+  String get unlinkWhatsApp => 'Unlink WhatsApp';
+
+  @override
+  String get unlinkWhatsAppConfirm =>
+      'Are you sure you want to unlink your WhatsApp?';
+
+  @override
+  String get whatsAppUnlinked => 'WhatsApp unlinked successfully';
+
+  @override
+  String get errorGeneratingToken => 'Error generating linking code';
+
+  @override
+  String get errorCheckingStatus => 'Error checking status';
+
+  @override
+  String get errorUnlinking => 'Error unlinking';
+
+  @override
+  String get scanQRCodeOrTapButton =>
+      'Scan the QR code or tap the button below';
+
+  @override
+  String get linkYourWhatsApp => 'Link your WhatsApp';
+
+  @override
+  String get linkWhatsAppBenefit =>
+      'Receive notifications and manage your work orders via WhatsApp';
 }

@@ -129,6 +129,9 @@ import productsRoutes from './routes/v1/products.routes';
 import companyRoutes from './routes/v1/company.routes';
 import analyticsRoutes from './routes/v1/analytics.routes';
 
+// Routes - User (Flutter app authenticated)
+import userLinkRoutes from './routes/user/link.routes';
+
 // Routes - API Bot
 import linkRoutes from './routes/bot/link.routes';
 import inviteRoutes from './routes/bot/invite.routes';
@@ -246,6 +249,9 @@ app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, anal
 app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes);
 app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customersRoutes);
 app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
+
+// User routes (Flutter app authenticated - WhatsApp linking, etc.)
+app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);
 
 // API Bot Routes
 app.use('/bot/link', botLimiter, botAuth, linkRoutes);

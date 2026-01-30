@@ -1008,5 +1008,31 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "connectedChannels": "Canais Conectados",
+  "linked": "Vinculado",
+  "notLinked": "Não vinculado",
+  "linkWhatsApp": "Vincular WhatsApp",
+  "linkWhatsAppDescription": "Escaneie o QR code ou clique no botão para abrir o WhatsApp e enviar o código de vinculação ao bot PraticOS.",
+  "linkExpiresIn": "Expira em {time}",
+  "@linkExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "openWhatsApp": "Abrir WhatsApp",
+  "whatsAppLinked": "WhatsApp vinculado",
+  "whatsAppNotLinked": "WhatsApp não vinculado",
+  "unlinkWhatsApp": "Desvincular WhatsApp",
+  "unlinkWhatsAppConfirm": "Tem certeza que deseja desvincular seu WhatsApp?",
+  "whatsAppUnlinked": "WhatsApp desvinculado com sucesso",
+  "errorGeneratingToken": "Erro ao gerar código de vinculação",
+  "errorCheckingStatus": "Erro ao verificar status",
+  "errorUnlinking": "Erro ao desvincular",
+  "scanQRCodeOrTapButton": "Escaneie o QR code ou toque no botão abaixo",
+  "linkYourWhatsApp": "Vincule seu WhatsApp",
+  "linkWhatsAppBenefit": "Receba notificações e gerencie suas OS pelo WhatsApp"
 }

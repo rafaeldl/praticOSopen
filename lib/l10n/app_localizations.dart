@@ -4695,6 +4695,114 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Formulario: {title}'**
   String formLabelWithTitle(String title);
+
+  /// No description provided for @connectedChannels.
+  ///
+  /// In pt, this message translates to:
+  /// **'Canais Conectados'**
+  String get connectedChannels;
+
+  /// No description provided for @linked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vinculado'**
+  String get linked;
+
+  /// No description provided for @notLinked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não vinculado'**
+  String get notLinked;
+
+  /// No description provided for @linkWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vincular WhatsApp'**
+  String get linkWhatsApp;
+
+  /// No description provided for @linkWhatsAppDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escaneie o QR code ou clique no botão para abrir o WhatsApp e enviar o código de vinculação ao bot PraticOS.'**
+  String get linkWhatsAppDescription;
+
+  /// No description provided for @linkExpiresIn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expira em {time}'**
+  String linkExpiresIn(String time);
+
+  /// No description provided for @openWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir WhatsApp'**
+  String get openWhatsApp;
+
+  /// No description provided for @whatsAppLinked.
+  ///
+  /// In pt, this message translates to:
+  /// **'WhatsApp vinculado'**
+  String get whatsAppLinked;
+
+  /// No description provided for @whatsAppNotLinked.
+  ///
+  /// In pt, this message translates to:
+  /// **'WhatsApp não vinculado'**
+  String get whatsAppNotLinked;
+
+  /// No description provided for @unlinkWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desvincular WhatsApp'**
+  String get unlinkWhatsApp;
+
+  /// No description provided for @unlinkWhatsAppConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja desvincular seu WhatsApp?'**
+  String get unlinkWhatsAppConfirm;
+
+  /// No description provided for @whatsAppUnlinked.
+  ///
+  /// In pt, this message translates to:
+  /// **'WhatsApp desvinculado com sucesso'**
+  String get whatsAppUnlinked;
+
+  /// No description provided for @errorGeneratingToken.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao gerar código de vinculação'**
+  String get errorGeneratingToken;
+
+  /// No description provided for @errorCheckingStatus.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao verificar status'**
+  String get errorCheckingStatus;
+
+  /// No description provided for @errorUnlinking.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao desvincular'**
+  String get errorUnlinking;
+
+  /// No description provided for @scanQRCodeOrTapButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escaneie o QR code ou toque no botão abaixo'**
+  String get scanQRCodeOrTapButton;
+
+  /// No description provided for @linkYourWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vincule seu WhatsApp'**
+  String get linkYourWhatsApp;
+
+  /// No description provided for @linkWhatsAppBenefit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receba notificações e gerencie suas OS pelo WhatsApp'**
+  String get linkWhatsAppBenefit;
 }
 
 class _AppLocalizationsDelegate

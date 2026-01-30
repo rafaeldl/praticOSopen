@@ -4,7 +4,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import * as admin from 'firebase-admin';
 import {
   db,
   auth,
@@ -37,20 +36,20 @@ export async function generateLinkToken(
   companyName?: string
 ): Promise<string> {
   const token = `LT_${uuidv4().replace(/-/g, '')}`;
-  const expiresAt = new Date(Date.now() + LINK_TOKEN_EXPIRATION);
+  const expiresAt = new Date(Date.now() + LINK_TOKEN_EXPIRATION).toISOString();
 
   const tokenData: LinkToken = {
     token,
     userId,
     companyId,
     role,
-    expiresAt: admin.firestore.Timestamp.fromDate(expiresAt),
+    expiresAt,
     used: false,
     userName,
     companyName,
   };
 
-  await db.collection('linkTokens').doc(token).set(tokenData);
+  await db.collection('links').doc('tokens').collection('pending').doc(token).set(tokenData);
 
   return token;
 }
@@ -59,7 +58,7 @@ export async function generateLinkToken(
  * Validate and consume a link token
  */
 export async function consumeLinkToken(token: string): Promise<LinkToken | null> {
-  const tokenDoc = await db.collection('linkTokens').doc(token).get();
+  const tokenDoc = await db.collection('links').doc('tokens').collection('pending').doc(token).get();
 
   if (!tokenDoc.exists) return null;
 

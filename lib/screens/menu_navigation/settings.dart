@@ -6,6 +6,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
+import 'package:praticos/mobx/whatsapp_link_store.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -13,6 +14,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/onboarding/company_info_screen.dart';
 import 'package:praticos/repositories/company_repository.dart';
+import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -23,6 +25,13 @@ class _SettingsState extends State<Settings> {
   final UserStore _userStore = UserStore();
   final AuthStore _authStore = AuthStore();
   final AuthorizationService _authService = AuthorizationService.instance;
+  final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
+
+  @override
+  void initState() {
+    super.initState();
+    _whatsappStore.loadStatus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +142,57 @@ class _SettingsState extends State<Settings> {
                 }
                 return const SizedBox.shrink();
               }),
+
+              // Connected Channels Section (WhatsApp)
+              CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.connectedChannels.toUpperCase()),
+                children: [
+                  Observer(
+                    builder: (_) {
+                      final isLinked = _whatsappStore.isLinked;
+                      final isLoading = _whatsappStore.isLoading;
+
+                      return CupertinoListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: isLinked
+                                ? CupertinoColors.systemGreen
+                                : CupertinoColors.systemGrey,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            CupertinoIcons.chat_bubble_2_fill,
+                            color: CupertinoColors.white,
+                            size: 20,
+                          ),
+                        ),
+                        title: const Text('WhatsApp'),
+                        subtitle: Text(
+                          isLoading
+                              ? context.l10n.loading
+                              : isLinked
+                                  ? _whatsappStore.linkedNumber ?? context.l10n.linked
+                                  : context.l10n.notLinked,
+                        ),
+                        trailing: isLoading
+                            ? const CupertinoActivityIndicator()
+                            : isLinked
+                                ? Icon(
+                                    CupertinoIcons.checkmark_circle_fill,
+                                    color: CupertinoColors.systemGreen.resolveFrom(context),
+                                  )
+                                : const CupertinoListTileChevron(),
+                        onTap: isLoading
+                            ? null
+                            : isLinked
+                                ? () => _showUnlinkWhatsAppDialog(context)
+                                : () => _showLinkWhatsAppSheet(context),
+                      );
+                    },
+                  ),
+                ],
+              ),
 
               // Admin/Management Section - RBAC based
               Observer(builder: (ctx) {
@@ -453,5 +513,53 @@ class _SettingsState extends State<Settings> {
         );
       }
     }
+  }
+
+  /// Show bottom sheet to link WhatsApp
+  void _showLinkWhatsAppSheet(BuildContext context) {
+    LinkWhatsAppSheet.show(context, _whatsappStore).then((_) {
+      // Refresh status after closing the sheet
+      _whatsappStore.loadStatus();
+    });
+  }
+
+  /// Show dialog to confirm unlinking WhatsApp
+  void _showUnlinkWhatsAppDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.unlinkWhatsApp),
+        content: Text(context.l10n.unlinkWhatsAppConfirm),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              final success = await _whatsappStore.unlink();
+              if (context.mounted && success) {
+                // Show success message
+                showCupertinoDialog(
+                  context: context,
+                  builder: (ctx) => CupertinoAlertDialog(
+                    title: Text(context.l10n.whatsAppUnlinked),
+                    actions: [
+                      CupertinoDialogAction(
+                        child: Text(context.l10n.ok),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                );
+              }
+            },
+            child: Text(context.l10n.unlinkWhatsApp),
+          ),
+        ],
+      ),
+    );
   }
 }

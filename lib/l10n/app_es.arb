@@ -963,5 +963,31 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "connectedChannels": "Canales Conectados",
+  "linked": "Vinculado",
+  "notLinked": "No vinculado",
+  "linkWhatsApp": "Vincular WhatsApp",
+  "linkWhatsAppDescription": "Escanea el código QR o toca el botón para abrir WhatsApp y enviar el código de vinculación al bot PraticOS.",
+  "linkExpiresIn": "Expira en {time}",
+  "@linkExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "openWhatsApp": "Abrir WhatsApp",
+  "whatsAppLinked": "WhatsApp vinculado",
+  "whatsAppNotLinked": "WhatsApp no vinculado",
+  "unlinkWhatsApp": "Desvincular WhatsApp",
+  "unlinkWhatsAppConfirm": "¿Estás seguro de que deseas desvincular tu WhatsApp?",
+  "whatsAppUnlinked": "WhatsApp desvinculado exitosamente",
+  "errorGeneratingToken": "Error al generar código de vinculación",
+  "errorCheckingStatus": "Error al verificar estado",
+  "errorUnlinking": "Error al desvincular",
+  "scanQRCodeOrTapButton": "Escanea el código QR o toca el botón de abajo",
+  "linkYourWhatsApp": "Vincula tu WhatsApp",
+  "linkWhatsAppBenefit": "Recibe notificaciones y gestiona tus órdenes de servicio por WhatsApp"
 }

@@ -963,5 +963,31 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "connectedChannels": "Connected Channels",
+  "linked": "Linked",
+  "notLinked": "Not linked",
+  "linkWhatsApp": "Link WhatsApp",
+  "linkWhatsAppDescription": "Scan the QR code or tap the button to open WhatsApp and send the linking code to the PraticOS bot.",
+  "linkExpiresIn": "Expires in {time}",
+  "@linkExpiresIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "openWhatsApp": "Open WhatsApp",
+  "whatsAppLinked": "WhatsApp linked",
+  "whatsAppNotLinked": "WhatsApp not linked",
+  "unlinkWhatsApp": "Unlink WhatsApp",
+  "unlinkWhatsAppConfirm": "Are you sure you want to unlink your WhatsApp?",
+  "whatsAppUnlinked": "WhatsApp unlinked successfully",
+  "errorGeneratingToken": "Error generating linking code",
+  "errorCheckingStatus": "Error checking status",
+  "errorUnlinking": "Error unlinking",
+  "scanQRCodeOrTapButton": "Scan the QR code or tap the button below",
+  "linkYourWhatsApp": "Link your WhatsApp",
+  "linkWhatsAppBenefit": "Receive notifications and manage your work orders via WhatsApp"
 }
