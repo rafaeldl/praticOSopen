@@ -61,5 +61,19 @@
         }
       }
     }
+  },
+  "messages": {
+    "tts": {
+      "auto": "always",
+      "provider": "edge",
+      "edge": {
+        "enabled": true,
+        "voice": "pt-BR-FranciscaNeural",
+        "lang": "pt-BR",
+        "outputFormat": "audio-24khz-48kbitrate-mono-mp3",
+        "rate": "+0%",
+        "pitch": "+0%"
+      }
+    }
   }
 }
