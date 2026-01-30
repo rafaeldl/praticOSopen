@@ -78,9 +78,19 @@ export const createServiceSchema = z.object({
   value: z.number().min(0),
 });
 
+export const updateServiceSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  value: z.number().min(0).optional(),
+});
+
 export const createProductSchema = z.object({
   name: z.string().min(1, 'Name is required').max(200),
   value: z.number().min(0),
+});
+
+export const updateProductSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  value: z.number().min(0).optional(),
 });
 
 export const createOrderSchema = z.object({

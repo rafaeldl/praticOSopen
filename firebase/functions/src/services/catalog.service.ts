@@ -8,6 +8,7 @@ import {
   paginatedQuery,
   getDocument,
   createDocument,
+  updateDocument,
   findByField,
   QueryFilter,
 } from './firestore.service';
@@ -155,6 +156,44 @@ export async function createService(
   return { id, name: input.name };
 }
 
+export interface UpdateServiceInput {
+  name?: string;
+  value?: number;
+}
+
+/**
+ * Update an existing service
+ */
+export async function updateService(
+  companyId: string,
+  serviceId: string,
+  input: UpdateServiceInput,
+  updatedBy: UserAggr
+): Promise<Service | null> {
+  const collection = getTenantCollection(companyId, 'services');
+
+  // Check if service exists
+  const existing = await getDocument<Service>(collection, serviceId);
+  if (!existing) return null;
+
+  const updateData: Record<string, unknown> = {
+    updatedBy,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (input.name !== undefined) {
+    updateData.name = input.name;
+    updateData.nameLower = input.name.toLowerCase();
+    updateData.keywords = generateSearchKeywords(input.name);
+  }
+  if (input.value !== undefined) {
+    updateData.value = input.value;
+  }
+
+  await updateDocument(collection, serviceId, updateData);
+  return { ...existing, ...updateData, id: serviceId } as Service;
+}
+
 /**
  * Convert Service to ServiceAggr
  */
@@ -290,6 +329,44 @@ export async function createProduct(
   const id = await createDocument(collection, productData);
 
   return { id, name: input.name };
+}
+
+export interface UpdateProductInput {
+  name?: string;
+  value?: number;
+}
+
+/**
+ * Update an existing product
+ */
+export async function updateProduct(
+  companyId: string,
+  productId: string,
+  input: UpdateProductInput,
+  updatedBy: UserAggr
+): Promise<Product | null> {
+  const collection = getTenantCollection(companyId, 'products');
+
+  // Check if product exists
+  const existing = await getDocument<Product>(collection, productId);
+  if (!existing) return null;
+
+  const updateData: Record<string, unknown> = {
+    updatedBy,
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (input.name !== undefined) {
+    updateData.name = input.name;
+    updateData.nameLower = input.name.toLowerCase();
+    updateData.keywords = generateSearchKeywords(input.name);
+  }
+  if (input.value !== undefined) {
+    updateData.value = input.value;
+  }
+
+  await updateDocument(collection, productId, updateData);
+  return { ...existing, ...updateData, id: productId } as Product;
 }
 
 /**
