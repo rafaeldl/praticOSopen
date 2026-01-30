@@ -160,13 +160,19 @@ export const optionalSearchQuerySchema = z.object({
   q: z.string().max(100).optional(),
 });
 
+// Helper schema: accepts string or array of strings (max 5 items)
+const stringOrArraySchema = z.union([
+  z.string().max(100),
+  z.array(z.string().max(100)).max(5),
+]);
+
 export const unifiedSearchSchema = z.object({
-  customer: z.string().max(100).optional(),
+  customer: stringOrArraySchema.optional(),
   customerPhone: z.string().max(20).optional(),
-  device: z.string().max(100).optional(),
+  device: stringOrArraySchema.optional(),
   deviceSerial: z.string().max(100).optional(),
-  service: z.string().max(100).optional(),
-  product: z.string().max(100).optional(),
+  service: stringOrArraySchema.optional(),
+  product: stringOrArraySchema.optional(),
   limit: z.coerce.number().min(1).max(10).default(5),
 });
 

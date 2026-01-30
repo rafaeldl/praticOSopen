@@ -40,6 +40,27 @@ interface CatalogResult {
 // ============================================================================
 
 /**
+ * Normalize search input: string or array to array
+ */
+function normalizeSearchInput(input: string | string[] | undefined): string[] {
+  if (!input) return [];
+  if (Array.isArray(input)) return input;
+  return [input];
+}
+
+/**
+ * Deduplicate results by ID
+ */
+function deduplicateById<T extends { id: string }>(items: T[]): T[] {
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  });
+}
+
+/**
  * Search customer by phone (exact match)
  */
 async function searchCustomerByPhone(
@@ -233,27 +254,70 @@ router.post('/unified', requireLinked, async (req: AuthenticatedRequest, res: Re
     const limit = data.limit ?? 5;
     const fallbackLimit = 10;
 
-    // Determine which customer search to use (phone takes priority)
-    const customerSearchFn = data.customerPhone
-      ? () => searchCustomerByPhone(companyId, data.customerPhone!)
-      : data.customer
-        ? () => searchCustomerByName(companyId, data.customer!, limit)
-        : null;
+    // Normalize inputs to arrays
+    const customerTerms = normalizeSearchInput(data.customer);
+    const deviceTerms = normalizeSearchInput(data.device);
+    const serviceTerms = normalizeSearchInput(data.service);
+    const productTerms = normalizeSearchInput(data.product);
 
-    // Determine which device search to use (serial takes priority)
-    const deviceSearchFn = data.deviceSerial
-      ? () => searchDeviceBySerial(companyId, data.deviceSerial!)
-      : data.device
-        ? () => searchDeviceByName(companyId, data.device!, limit)
-        : null;
+    // Customer search: phone takes priority, then multiple name terms
+    let customerResult: { exact: CustomerResult['exact']; suggestions: CustomerResult['suggestions'] } | null = null;
+    if (data.customerPhone) {
+      customerResult = await searchCustomerByPhone(companyId, data.customerPhone);
+    } else if (customerTerms.length > 0) {
+      // Search for each term in parallel and combine results
+      const results = await Promise.all(
+        customerTerms.map((term) => searchCustomerByName(companyId, term, limit))
+      );
+      const allSuggestions = results.flatMap((r) => r.suggestions);
+      customerResult = {
+        exact: null,
+        suggestions: deduplicateById(allSuggestions).slice(0, limit),
+      };
+    }
 
-    // Execute searches in parallel
-    const [customerResult, deviceResult, serviceResult, productResult] = await Promise.all([
-      customerSearchFn ? customerSearchFn() : null,
-      deviceSearchFn ? deviceSearchFn() : null,
-      data.service ? catalogService.searchServices(companyId, data.service, limit) : null,
-      data.product ? catalogService.searchProducts(companyId, data.product, limit) : null,
-    ]);
+    // Device search: serial takes priority, then multiple name terms
+    let deviceResult: { exact: DeviceResult['exact']; suggestions: DeviceResult['suggestions'] } | null = null;
+    if (data.deviceSerial) {
+      deviceResult = await searchDeviceBySerial(companyId, data.deviceSerial);
+    } else if (deviceTerms.length > 0) {
+      const results = await Promise.all(
+        deviceTerms.map((term) => searchDeviceByName(companyId, term, limit))
+      );
+      const allSuggestions = results.flatMap((r) => r.suggestions);
+      deviceResult = {
+        exact: null,
+        suggestions: deduplicateById(allSuggestions).slice(0, limit),
+      };
+    }
+
+    // Service search: multiple terms
+    let serviceResult: Array<{ id: string; name: string; value?: number }> | null = null;
+    if (serviceTerms.length > 0) {
+      const results = await Promise.all(
+        serviceTerms.map((term) => catalogService.searchServices(companyId, term, limit))
+      );
+      const allResults = results.flatMap((r) => r.map((s) => ({
+        id: s.id,
+        name: s.name,
+        value: s.value,
+      })));
+      serviceResult = deduplicateById(allResults).slice(0, limit);
+    }
+
+    // Product search: multiple terms
+    let productResult: Array<{ id: string; name: string; value?: number }> | null = null;
+    if (productTerms.length > 0) {
+      const results = await Promise.all(
+        productTerms.map((term) => catalogService.searchProducts(companyId, term, limit))
+      );
+      const allResults = results.flatMap((r) => r.map((p) => ({
+        id: p.id,
+        name: p.name,
+        value: p.value,
+      })));
+      productResult = deduplicateById(allResults).slice(0, limit);
+    }
 
     // Build response object
     const response: {
@@ -264,7 +328,7 @@ router.post('/unified', requireLinked, async (req: AuthenticatedRequest, res: Re
     } = {};
 
     // Process customer results
-    if (data.customer !== undefined || data.customerPhone !== undefined) {
+    if (customerTerms.length > 0 || data.customerPhone !== undefined) {
       const needsFallback = customerResult && !customerResult.exact && customerResult.suggestions.length === 0;
       response.customer = {
         exact: customerResult?.exact ?? null,
@@ -274,7 +338,7 @@ router.post('/unified', requireLinked, async (req: AuthenticatedRequest, res: Re
     }
 
     // Process device results
-    if (data.device !== undefined || data.deviceSerial !== undefined) {
+    if (deviceTerms.length > 0 || data.deviceSerial !== undefined) {
       const needsFallback = deviceResult && !deviceResult.exact && deviceResult.suggestions.length === 0;
       response.device = {
         exact: deviceResult?.exact ?? null,
@@ -284,12 +348,8 @@ router.post('/unified', requireLinked, async (req: AuthenticatedRequest, res: Re
     }
 
     // Process service results
-    if (data.service !== undefined) {
-      const results = (serviceResult ?? []).map((s) => ({
-        id: s.id,
-        name: s.name,
-        value: s.value,
-      }));
+    if (serviceTerms.length > 0) {
+      const results = serviceResult ?? [];
       const needsFallback = results.length === 0;
       response.service = {
         results,
@@ -298,12 +358,8 @@ router.post('/unified', requireLinked, async (req: AuthenticatedRequest, res: Re
     }
 
     // Process product results
-    if (data.product !== undefined) {
-      const results = (productResult ?? []).map((p) => ({
-        id: p.id,
-        name: p.name,
-        value: p.value,
-      }));
+    if (productTerms.length > 0) {
+      const results = productResult ?? [];
       const needsFallback = results.length === 0;
       response.product = {
         results,
