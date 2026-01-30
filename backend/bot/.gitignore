@@ -3,12 +3,13 @@
 .env.local
 .env
 
-# Credentials and session data (runtime)
+# Persistent data (runtime - matches production structure)
+data/
 credentials/
+
+# Legacy paths (for backwards compatibility)
 workspace/identity/
 workspace/devices/
-
-# Session data (runtime - should not be versioned)
 workspace/agents/*/sessions/*.jsonl
 workspace/agents/*/sessions/sessions.json
 

@@ -9,9 +9,12 @@ services:
     ports:
       - "18790:18789"
     volumes:
-      - ./credentials:/root/.clawdbot/credentials
-      - ./workspace/identity:/root/.clawdbot/identity
-      - ./workspace/devices:/root/.clawdbot/devices
+      - ./data/.openclaw/credentials:/root/.clawdbot/credentials
+      - ./data/.openclaw/agents:/root/.clawdbot/agents
+      - ./workspace/skills:/root/.clawdbot/skills
+      - ./workspace/AGENTS.md:/root/.clawdbot/AGENTS.md
+      - ./workspace/PERSONA.md:/root/.clawdbot/PERSONA.md
+      - ./workspace/cron:/root/.clawdbot/cron
     env_file:
       - .env
     extra_hosts:
