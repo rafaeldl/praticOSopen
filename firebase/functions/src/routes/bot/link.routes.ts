@@ -8,8 +8,23 @@ import { AuthenticatedRequest } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import * as channelLinkService from '../../services/channel-link.service';
 import { validateInput, linkWhatsAppSchema } from '../../utils/validation.utils';
+import { db } from '../../services/firestore.service';
 
 const router: Router = Router();
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+interface CustomField {
+  key: string;
+  type: string;
+  labels?: Record<string, string>;
+}
+
+// ============================================================================
+// Routes
+// ============================================================================
 
 /**
  * POST /api/bot/link
@@ -118,6 +133,25 @@ router.get('/context', async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
+    // Fetch company data to get segment information
+    const companyDoc = await db.collection('companies').doc(link.companyId).get();
+    const company = companyDoc.data();
+    const segmentId = company?.segment || 'other';
+
+    // Fetch segment document for labels and name
+    const segmentDoc = await db.collection('segments').doc(segmentId).get();
+    const segmentData = segmentDoc.data();
+    const segmentName = segmentData?.name || segmentId;
+
+    // Extract labels from customFields
+    const segmentLabels: Record<string, string> = {};
+    const customFields = (segmentData?.customFields || []) as CustomField[];
+    for (const field of customFields) {
+      if (field.type === 'label' && field.labels?.['pt-BR']) {
+        segmentLabels[field.key] = field.labels['pt-BR'];
+      }
+    }
+
     res.json({
       success: true,
       data: {
@@ -128,6 +162,11 @@ router.get('/context', async (req: AuthenticatedRequest, res: Response) => {
         companyName: link.companyName,
         role: link.role,
         permissions: [], // Would be resolved from role
+        segment: {
+          id: segmentId,
+          name: segmentName,
+          labels: segmentLabels,
+        },
       },
     });
   } catch (error) {

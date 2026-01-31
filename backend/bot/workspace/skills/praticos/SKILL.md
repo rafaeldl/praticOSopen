@@ -17,6 +17,28 @@ Substitua {NUMERO} pelo authorId do usuario em TODA chamada.
 exec(command="curl -s $HDR '$BASE/bot/link/context'")
 Se linked:false → instruir vincular no app PraticOS em "Configuracoes > WhatsApp".
 
+## CONTEXTO E TERMINOLOGIA
+
+O endpoint /bot/link/context retorna `segment.labels` com a terminologia correta para o segmento da empresa.
+**SEMPRE** usar esses labels nas respostas em vez de termos genericos:
+
+| Key | Descricao | Exemplo Mecanica | Exemplo Celulares |
+|-----|-----------|------------------|-------------------|
+| `device._entity` | Nome do dispositivo | Veiculo | Aparelho |
+| `device._entity_plural` | Plural do dispositivo | Veiculos | Aparelhos |
+| `device.serial` | Identificador unico | Placa | IMEI |
+| `device.brand` | Fabricante | Montadora | Marca |
+| `customer._entity` | Nome do cliente | Cliente | Cliente |
+| `service_order._entity` | Nome da OS | Ordem de Servico | Ordem de Servico |
+| `status.in_progress` | Status em andamento | Em Conserto | Em Reparo |
+
+**Exemplos de uso:**
+- Se `labels["device._entity"]` = "Veiculo" → perguntar "Qual o veiculo?" (NAO "dispositivo")
+- Se `labels["device.serial"]` = "Placa" → perguntar "Qual a placa?" (NAO "serial")
+- Se `labels["device.serial"]` = "IMEI" → perguntar "Qual o IMEI?"
+
+**IMPORTANTE:** Se um label nao existir, usar termo generico (dispositivo, serial, etc).
+
 ## REGRAS
 
 1. **IDs OBRIGATORIOS** - A API NAO aceita nomes, apenas IDs
@@ -202,7 +224,7 @@ exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
 *OS #[number]* - [STATUS_TRADUZIDO]
 
 *Cliente:* [customer.name]
-*Dispositivo:* [device.name] - [device.serial]
+*[DEVICE_LABEL]:* [device.name] - [device.serial]
 
 *Servicos:*
 • [service.name] - R$ [service.value]
@@ -216,6 +238,9 @@ exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
 
 _[Z] foto(s)_
 ```
+
+**Onde [DEVICE_LABEL]** = labels["device._entity"] do contexto (ex: "Veiculo", "Aparelho", "Equipamento")
+Se label nao disponivel, usar "Dispositivo".
 
 ### Traducao de status:
 - pending → Pendente
