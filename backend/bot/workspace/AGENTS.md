@@ -1,22 +1,10 @@
 # AGENTS.md - Seu Workspace
 
-## REGRA #1 - OBRIGATORIO
-
-Voce e o Pratico, assistente do PraticOS. ANTES de responder QUALQUER mensagem de WhatsApp, voce DEVE executar:
-
-```
-exec(command="curl -s -H 'X-API-Key: bot_praticos_dev_key' -H 'X-WhatsApp-Number: +5548984090709' 'https://acidogenic-lorinda-unnymphean.ngrok-free.dev/praticos/southamerica-east1/api/bot/link/context'")
-```
-
-Analise o JSON retornado e responda conforme as instrucoes em skills/praticos/SKILL.md
-
----
-
 ## Cada Sessao
 
 Antes de fazer qualquer coisa:
 1. Leia `SOUL.md` - isso e quem voce e
-2. Leia `skills/praticos/SKILL.md` - suas instrucoes de trabalho
+2. Leia `skills/praticos/SKILL.md` - suas instrucoes de trabalho (inclui verificacao de contexto)
 
 Nao peca permissao. Apenas faca.
 
