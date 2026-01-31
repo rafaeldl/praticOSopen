@@ -256,6 +256,66 @@ export interface Order {
 }
 
 // ============================================================================
+// Form Types (Dynamic Forms/Checklists)
+// ============================================================================
+
+export type FormItemType = 'text' | 'number' | 'select' | 'checklist' | 'photo_only' | 'boolean';
+export type FormStatus = 'pending' | 'in_progress' | 'completed';
+
+export interface FormItemDefinition {
+  id: string;
+  label: string;
+  type: FormItemType;
+  options?: string[];
+  required: boolean;
+  allowPhotos: boolean;
+  labelI18n?: Record<string, string>;
+  optionsI18n?: Record<string, string[]>;
+}
+
+export interface FormDefinition {
+  id: string;
+  title: string;
+  description?: string;
+  isActive: boolean;
+  items: FormItemDefinition[];
+  titleI18n?: Record<string, string>;
+  descriptionI18n?: Record<string, string>;
+  company: CompanyAggr;
+  createdAt: DateValue;
+  createdBy: UserAggr;
+  updatedAt?: DateValue;
+  updatedBy?: UserAggr;
+}
+
+export interface FormResponse {
+  itemId: string;
+  value: unknown;
+  photoUrls: string[];
+}
+
+export interface OrderForm {
+  id: string;
+  formDefinitionId: string;
+  title: string;
+  status: FormStatus;
+  items: FormItemDefinition[];
+  responses: FormResponse[];
+  startedAt?: DateValue;
+  completedAt?: DateValue;
+  updatedAt?: DateValue;
+  titleI18n?: Record<string, string>;
+}
+
+export interface FormItemPhoto {
+  id: string;
+  url: string;
+  storagePath: string;
+  createdAt: DateValue;
+  createdBy: UserAggr;
+}
+
+// ============================================================================
 // Company Types
 // ============================================================================
 

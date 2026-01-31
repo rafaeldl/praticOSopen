@@ -144,6 +144,7 @@ import botCatalogRoutes from './routes/bot/catalog.routes';
 import botPhotosRoutes from './routes/bot/photos.routes';
 import botUnifiedSearchRoutes from './routes/bot/unified-search.routes';
 import botEntitiesRoutes from './routes/bot/entities.routes';
+import botFormsRoutes from './routes/bot/forms.routes';
 
 // Initialize Express app
 const app = express();
@@ -261,6 +262,8 @@ app.use('/bot/devices', botLimiter, botAuth, searchRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botOrdersRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botOrdersManagementRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botPhotosRoutes);
+app.use('/bot/orders', botLimiter, botAuth, botFormsRoutes);
+app.use('/bot/forms', botLimiter, botAuth, botFormsRoutes);
 app.use('/bot/summary', botLimiter, botAuth, summaryRoutes);
 app.use('/bot/analytics', botLimiter, botAuth, botAnalyticsRoutes);
 app.use('/bot/catalog', botLimiter, botAuth, botCatalogRoutes);

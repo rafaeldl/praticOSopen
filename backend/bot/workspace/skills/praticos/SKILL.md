@@ -176,6 +176,44 @@ DELETE /{TIPO}/{id}               - excluir
 GET /bot/analytics/financial - mes atual
 GET /bot/analytics/financial?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
 
+### Checklists/Formularios
+
+**Templates disponiveis:**
+GET /bot/forms/templates - listar templates de checklist da empresa
+
+**Listar checklists de uma OS:**
+GET /bot/orders/{NUM}/forms - retorna lista com status e progresso
+
+**Ver detalhes do checklist:**
+GET /bot/orders/{NUM}/forms/{FORM_ID} - itens, respostas, fotos
+
+**Adicionar checklist a OS:**
+POST /bot/orders/{NUM}/forms
+Body: {"templateId":"ID_DO_TEMPLATE"}
+
+**Salvar resposta de item:**
+POST /bot/orders/{NUM}/forms/{FORM_ID}/items/{ITEM_ID}
+Body: {"value":"resposta"}
+
+Tipos de resposta por tipo de item:
+- text: string livre
+- number: numero (aceita string "123" ou numero 123)
+- boolean: true/false, "sim"/"nao", "s"/"n", "yes"/"no"
+- select: indice (1-N) ou valor exato da opcao
+- checklist: indices separados por virgula ("1,3,5") ou array [1,3,5]
+- photo_only: nao requer value, apenas foto
+
+**Upload foto no item:**
+POST /bot/orders/{NUM}/forms/{FORM_ID}/items/{ITEM_ID}/photos
+Body: multipart/form-data com arquivo
+
+**Finalizar checklist:**
+PATCH /bot/orders/{NUM}/forms/{FORM_ID}/status
+Body: {"status":"completed"}
+
+Status possiveis: pending, in_progress, completed
+- "completed" so funciona se todos os itens obrigatorios estiverem preenchidos
+
 ---
 
 ## EXEMPLOS curl
@@ -219,6 +257,30 @@ exec(command="curl -s -X DELETE $HDR '$BASE/bot/entities/{TIPO}/{id}'")
 
 # Faturamento
 exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
+
+# Checklists - Listar templates
+exec(command="curl -s $HDR '$BASE/bot/forms/templates'")
+
+# Checklists - Listar de uma OS
+exec(command="curl -s $HDR '$BASE/bot/orders/42/forms'")
+
+# Checklists - Ver detalhes
+exec(command="curl -s $HDR '$BASE/bot/orders/42/forms/FORM_ID'")
+
+# Checklists - Adicionar a OS
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"templateId\":\"TEMPLATE_ID\"}' '$BASE/bot/orders/42/forms'")
+
+# Checklists - Salvar resposta (texto/numero/boolean/select)
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"value\":\"Bom\"}' '$BASE/bot/orders/42/forms/FORM_ID/items/ITEM_ID'")
+
+# Checklists - Salvar resposta (checklist multipla)
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"value\":\"1,3,5\"}' '$BASE/bot/orders/42/forms/FORM_ID/items/ITEM_ID'")
+
+# Checklists - Upload foto em item
+exec(command="curl -s -X POST $HDR -F 'file=@/workspace/media/foto.jpg' '$BASE/bot/orders/42/forms/FORM_ID/items/ITEM_ID/photos'")
+
+# Checklists - Finalizar
+exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"status\":\"completed\"}' '$BASE/bot/orders/42/forms/FORM_ID/status'")
 
 ---
 
@@ -281,3 +343,131 @@ Se photosCount > 0:
    - filePath: caminho da imagem baixada
    - message: texto do card formatado (este e o campo que aparece no WhatsApp)
    - NAO usar o campo caption - usar sempre message para o texto
+
+---
+
+## CHECKLISTS/FORMULARIOS
+
+Permite preencher vistorias e checklists dinamicos anexados a uma OS.
+
+### Fluxo Principal
+
+1. **Listar checklists da OS:**
+```
+GET /bot/orders/{NUM}/forms
+```
+Retorna lista formatada com status e progresso de cada checklist.
+
+2. **Ver/Preencher um checklist:**
+```
+GET /bot/orders/{NUM}/forms/{FORM_ID}
+```
+Retorna todos os itens com seus tipos, opcoes e respostas atuais.
+
+3. **Responder item por item:**
+```
+POST /bot/orders/{NUM}/forms/{FORM_ID}/items/{ITEM_ID}
+Body: {"value": "resposta"}
+```
+
+4. **Anexar foto a um item:**
+```
+POST /bot/orders/{NUM}/forms/{FORM_ID}/items/{ITEM_ID}/photos
+Body: multipart/form-data
+```
+
+5. **Finalizar checklist:**
+```
+PATCH /bot/orders/{NUM}/forms/{FORM_ID}/status
+Body: {"status": "completed"}
+```
+
+### Tipos de Campo e Respostas
+
+| Tipo | Descricao | Exemplo de Resposta |
+|------|-----------|---------------------|
+| text | Texto livre | {"value": "Observacao qualquer"} |
+| number | Numero | {"value": 45230} ou {"value": "45230"} |
+| boolean | Sim/Nao | {"value": true} ou {"value": "sim"} |
+| select | Escolha unica | {"value": 2} ou {"value": "Arranhado"} |
+| checklist | Multipla escolha | {"value": "1,3,5"} ou {"value": [1,3,5]} |
+| photo_only | Apenas foto | Nao requer value, usar endpoint de photo |
+
+**Aceitos para boolean:** true, false, "sim", "nao", "s", "n", "yes", "no", 1, 0
+
+**Aceitos para select/checklist:**
+- Indices numericos (1-based): 1, 2, 3...
+- Valores exatos das opcoes
+- Para checklist: separar por virgula "1,3,5" ou array [1,3,5]
+
+### Exibicao de Checklist
+
+Ao listar checklists, usar emojis para status:
+- ⏳ pending (Pendente)
+- 🔄 in_progress (Em andamento)
+- ✅ completed (Concluido)
+
+**Exemplo de resposta formatada:**
+```
+*Checklists da OS #42*
+
+1. ✅ Checklist de Entrada (Concluido)
+2. 🔄 Vistoria de Pintura (3/8 itens)
+3. ⏳ Checklist de Saida (Pendente)
+
+Responda com o numero para ver/preencher.
+```
+
+### Preenchimento Guiado
+
+Ao preencher um checklist, apresentar item por item:
+
+**Item tipo select:**
+```
+*Estado do capo:*
+1. Bom
+2. Arranhado
+3. Amassado
+4. Necessita repintura
+
+Responda com o numero:
+```
+
+**Item tipo checklist (multipla):**
+```
+*Itens presentes:*
+1. Triangulo
+2. Macaco
+3. Chave de roda
+4. Estepe
+5. Extintor
+
+Responda com os numeros separados por virgula (ex: 1,3,5):
+```
+
+**Item tipo photo_only:**
+```
+*Foto do painel:*
+Envie uma foto do painel do veiculo.
+```
+
+### Finalizacao
+
+Ao tentar finalizar, se houver itens obrigatorios pendentes:
+```
+Nao foi possivel finalizar.
+
+Itens obrigatorios pendentes:
+• Estado do para-choque
+• Foto da lateral esquerda
+
+Preencha esses itens para concluir.
+```
+
+Se tudo preenchido:
+```
+✅ *Vistoria de Pintura* concluida!
+
+• 8 itens preenchidos
+• 5 fotos anexadas
+```

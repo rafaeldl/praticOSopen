@@ -274,6 +274,31 @@ export const uploadPhotoBase64Schema = z.object({
 });
 
 // ============================================================================
+// Form/Checklist Schemas
+// ============================================================================
+
+/**
+ * Schema for adding a form to an order
+ */
+export const addFormToOrderSchema = z.object({
+  templateId: idSchema,
+});
+
+/**
+ * Schema for saving a form item response
+ */
+export const saveFormItemResponseSchema = z.object({
+  value: z.unknown(),
+});
+
+/**
+ * Schema for updating form status
+ */
+export const updateFormStatusSchema = z.object({
+  status: z.enum(['pending', 'in_progress', 'completed']),
+});
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
 
