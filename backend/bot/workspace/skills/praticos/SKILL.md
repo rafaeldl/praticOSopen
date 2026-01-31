@@ -202,7 +202,7 @@ exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
 *OS #[number]* - [STATUS_TRADUZIDO]
 
 *Cliente:* [customer.name]
-*Dispositivo:* [device.name]
+*Dispositivo:* [device.name] - [device.serial]
 
 *Servicos:*
 • [service.name] - R$ [service.value]
