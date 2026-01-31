@@ -33,10 +33,10 @@ run-dev:
 
 # ===== PRODUÇÃO =====
 build:
-	docker build -t $(IMAGE):latest .
+	gcloud builds submit --tag $(IMAGE):latest --region=southamerica-east1 .
 
 push: build
-	docker push $(IMAGE):latest
+	@echo "Image already pushed by Cloud Build"
 
 # SSH key file (override with SSH_KEY_FILE env var)
 SSH_KEY_FILE ?= ~/.ssh/id_rsa
@@ -56,7 +56,7 @@ deploy: push
 # Estrutura de persistência:
 #   /var/clawdbot/.openclaw/credentials  → sessão WhatsApp (persistente)
 #   /var/clawdbot/.openclaw/agents       → histórico de sessões (persistente)
-#   Workspace (SKILL.md, etc.)           → copiado no Docker image
+#   Workspace (SKILL.md, etc.)           → arquivos montados da VM
 setup-vm:
 	gcloud compute instances create-with-container praticos-bot \
 		--project=$(PROJECT) \
@@ -69,7 +69,19 @@ setup-vm:
 		--container-env-file=.env.prod \
 		--container-mount-host-path=mount-path=/root/.clawdbot/credentials,host-path=/var/clawdbot/.openclaw/credentials,mode=rw \
 		--container-mount-host-path=mount-path=/root/.clawdbot/agents,host-path=/var/clawdbot/.openclaw/agents,mode=rw \
+		--container-mount-host-path=mount-path=/root/.clawdbot/clawdbot.json,host-path=/var/clawdbot/workspace/clawdbot.json,mode=ro \
+		--container-mount-host-path=mount-path=/root/.clawdbot/skills,host-path=/var/clawdbot/workspace/skills,mode=ro \
+		--container-mount-host-path=mount-path=/root/.clawdbot/SOUL.md,host-path=/var/clawdbot/workspace/SOUL.md,mode=ro \
 		--container-restart-policy=always
+
+# NOVO: Sincroniza apenas configurações e skills sem precisar de build/push
+sync:
+	@echo "Sincronizando configurações e skills..."
+	gcloud compute scp clawdbot.prod.json praticos-bot:/var/clawdbot/workspace/clawdbot.json --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
+	gcloud compute scp workspace/SOUL.md praticos-bot:/var/clawdbot/workspace/SOUL.md --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
+	gcloud compute scp --recurse workspace/skills/* praticos-bot:/var/clawdbot/workspace/skills/ --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
+	@echo "Sincronização concluída. Reiniciando container..."
+	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- 'sudo docker restart $$(sudo docker ps -q)'
 
 setup-directories:
 	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- \
@@ -112,4 +124,18 @@ status:
 restart:
 	gcloud compute instances reset praticos-bot --zone=$(ZONE)
 
-.PHONY: dev build-dev run-dev build push deploy setup-vm setup-directories setup-credentials destroy-vm recreate-vm verify-mounts up down logs-local logs ssh status restart
+# Limpar sessões e reiniciar container (produção)
+clear-sessions:
+	@echo "Limpando sessões na produção..."
+	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- \
+		'sudo rm -rf /var/clawdbot/.openclaw/agents/main/sessions/* && sudo docker restart $$(sudo docker ps -q)'
+	@echo "✅ Sessões limpas e container reiniciado"
+
+# Limpar sessões locais
+clear-sessions-local:
+	@echo "Limpando sessões locais..."
+	rm -rf data/.openclaw/agents/main/sessions/*
+	docker compose restart
+	@echo "✅ Sessões locais limpas e container reiniciado"
+
+.PHONY: dev build-dev run-dev build push deploy setup-vm setup-directories setup-credentials destroy-vm recreate-vm verify-mounts up down logs-local logs ssh status restart clear-sessions clear-sessions-local

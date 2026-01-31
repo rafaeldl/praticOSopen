@@ -23,6 +23,9 @@ RUN apt-get update && apt-get install -y \
 # Install Clawdbot globally
 RUN npm install -g clawdbot@latest
 
+# Add npm global bin to PATH
+ENV PATH="/usr/local/lib/node_modules/clawdbot/bin:${PATH}"
+
 # Select environment (default: prod)
 ARG ENV=prod
 
@@ -43,10 +46,7 @@ RUN mkdir -p /root/.clawdbot/credentials /root/.clawdbot/identity /root/.clawdbo
 # Gateway configuration
 EXPOSE 18789
 ENV CLAWDBOT_GATEWAY_PORT=18789
-ENV CLAWDBOT_GATEWAY_BIND=lan
+ENV CLAWDBOT_GATEWAY_BIND=0.0.0.0
 
-# Entrypoint script
-COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
-
-ENTRYPOINT ["/app/docker-entrypoint.sh"]
+# Start Clawdbot directly
+CMD ["clawdbot", "gateway", "run", "--allow-unconfigured", "--verbose"]
