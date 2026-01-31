@@ -56,7 +56,7 @@ deploy: push
 # Estrutura de persistência:
 #   /var/clawdbot/.openclaw/credentials  → sessão WhatsApp (persistente)
 #   /var/clawdbot/.openclaw/agents       → histórico de sessões (persistente)
-#   Workspace (SKILL.md, etc.)           → arquivos montados da VM
+#   Config e skills                      → embarcados na imagem Docker
 setup-vm:
 	gcloud compute instances create-with-container praticos-bot \
 		--project=$(PROJECT) \
@@ -69,18 +69,27 @@ setup-vm:
 		--container-env-file=.env.prod \
 		--container-mount-host-path=mount-path=/root/.clawdbot/credentials,host-path=/var/clawdbot/.openclaw/credentials,mode=rw \
 		--container-mount-host-path=mount-path=/root/.clawdbot/agents,host-path=/var/clawdbot/.openclaw/agents,mode=rw \
-		--container-mount-host-path=mount-path=/root/.clawdbot/clawdbot.json,host-path=/var/clawdbot/workspace/clawdbot.json,mode=ro \
-		--container-mount-host-path=mount-path=/root/.clawdbot/skills,host-path=/var/clawdbot/workspace/skills,mode=ro \
-		--container-mount-host-path=mount-path=/root/.clawdbot/SOUL.md,host-path=/var/clawdbot/workspace/SOUL.md,mode=ro \
 		--container-restart-policy=always
 
-# NOVO: Sincroniza apenas configurações e skills sem precisar de build/push
+# Sincroniza configs e skills para dentro do container (sem rebuild)
 sync:
-	@echo "Sincronizando configurações e skills..."
-	gcloud compute scp clawdbot.prod.json praticos-bot:/var/clawdbot/workspace/clawdbot.json --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
-	gcloud compute scp workspace/SOUL.md praticos-bot:/var/clawdbot/workspace/SOUL.md --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
-	gcloud compute scp --recurse workspace/skills/* praticos-bot:/var/clawdbot/workspace/skills/ --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
-	@echo "Sincronização concluída. Reiniciando container..."
+	@echo "Copiando configs para a VM..."
+	gcloud compute scp clawdbot.prod.json praticos-bot:/tmp/clawdbot.json --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
+	gcloud compute scp workspace/SOUL.md workspace/IDENTITY.md workspace/HEARTBEAT.md workspace/USER.md workspace/AGENTS.md workspace/TOOLS.md praticos-bot:/tmp/ --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
+	gcloud compute scp --recurse workspace/skills praticos-bot:/tmp/skills --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
+	@echo "Copiando para dentro do container..."
+	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- \
+		'CONTAINER=$$(sudo docker ps -q) && \
+		sudo docker cp /tmp/clawdbot.json $$CONTAINER:/root/.clawdbot/clawdbot.json && \
+		sudo docker cp /tmp/SOUL.md $$CONTAINER:/root/.clawdbot/SOUL.md && \
+		sudo docker cp /tmp/IDENTITY.md $$CONTAINER:/root/.clawdbot/IDENTITY.md && \
+		sudo docker cp /tmp/HEARTBEAT.md $$CONTAINER:/root/.clawdbot/HEARTBEAT.md && \
+		sudo docker cp /tmp/USER.md $$CONTAINER:/root/.clawdbot/USER.md && \
+		sudo docker cp /tmp/AGENTS.md $$CONTAINER:/root/.clawdbot/AGENTS.md && \
+		sudo docker cp /tmp/TOOLS.md $$CONTAINER:/root/.clawdbot/TOOLS.md && \
+		sudo docker cp /tmp/skills $$CONTAINER:/root/.clawdbot/ && \
+		sudo rm -rf /tmp/clawdbot.json /tmp/*.md /tmp/skills'
+	@echo "✅ Sincronização concluída. Reiniciando container..."
 	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- 'sudo docker restart $$(sudo docker ps -q)'
 
 setup-directories:
@@ -138,4 +147,4 @@ clear-sessions-local:
 	docker compose restart
 	@echo "✅ Sessões locais limpas e container reiniciado"
 
-.PHONY: dev build-dev run-dev build push deploy setup-vm setup-directories setup-credentials destroy-vm recreate-vm verify-mounts up down logs-local logs ssh status restart clear-sessions clear-sessions-local
+.PHONY: dev build-dev run-dev build push deploy setup-vm sync setup-directories setup-credentials destroy-vm recreate-vm verify-mounts up down logs-local logs ssh status restart clear-sessions clear-sessions-local
