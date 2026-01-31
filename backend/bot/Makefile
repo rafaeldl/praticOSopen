@@ -24,7 +24,8 @@ run-dev:
 		-v $(PWD)/data/.openclaw/agents:/root/.clawdbot/agents \
 		-v $(PWD)/workspace/skills:/root/.clawdbot/skills \
 		-v $(PWD)/workspace/AGENTS.md:/root/.clawdbot/AGENTS.md \
-		-v $(PWD)/workspace/PERSONA.md:/root/.clawdbot/PERSONA.md \
+		-v $(PWD)/workspace/IDENTITY.md:/root/.clawdbot/IDENTITY.md \
+		-v $(PWD)/workspace/SOUL.md:/root/.clawdbot/SOUL.md \
 		-e GEMINI_API_KEY \
 		-e PRATICOS_API_URL \
 		-e PRATICOS_API_KEY \
@@ -39,7 +40,7 @@ push: build
 	@echo "Image already pushed by Cloud Build"
 
 # SSH key file (override with SSH_KEY_FILE env var)
-SSH_KEY_FILE ?= ~/.ssh/id_rsa
+SSH_KEY_FILE ?= ~/.ssh/id_ed25519
 
 # Build, push and deploy to GCE
 deploy: push
@@ -75,14 +76,14 @@ setup-vm:
 sync:
 	@echo "Copiando configs para a VM..."
 	gcloud compute scp clawdbot.prod.json praticos-bot:/tmp/clawdbot.json --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
-	gcloud compute scp workspace/SOUL.md workspace/IDENTITY.md workspace/HEARTBEAT.md workspace/USER.md workspace/AGENTS.md workspace/TOOLS.md praticos-bot:/tmp/ --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
+	gcloud compute scp workspace/IDENTITY.md workspace/SOUL.md workspace/HEARTBEAT.md workspace/USER.md workspace/AGENTS.md workspace/TOOLS.md praticos-bot:/tmp/ --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
 	gcloud compute scp --recurse workspace/skills praticos-bot:/tmp/skills --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
 	@echo "Copiando para dentro do container..."
 	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- \
 		'CONTAINER=$$(sudo docker ps -q) && \
 		sudo docker cp /tmp/clawdbot.json $$CONTAINER:/root/.clawdbot/clawdbot.json && \
-		sudo docker cp /tmp/SOUL.md $$CONTAINER:/root/.clawdbot/SOUL.md && \
 		sudo docker cp /tmp/IDENTITY.md $$CONTAINER:/root/.clawdbot/IDENTITY.md && \
+		sudo docker cp /tmp/SOUL.md $$CONTAINER:/root/.clawdbot/SOUL.md && \
 		sudo docker cp /tmp/HEARTBEAT.md $$CONTAINER:/root/.clawdbot/HEARTBEAT.md && \
 		sudo docker cp /tmp/USER.md $$CONTAINER:/root/.clawdbot/USER.md && \
 		sudo docker cp /tmp/AGENTS.md $$CONTAINER:/root/.clawdbot/AGENTS.md && \

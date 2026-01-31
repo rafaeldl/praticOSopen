@@ -33,6 +33,9 @@ Se linked:false → instruir vincular no app PraticOS em "Configuracoes > WhatsA
    a) **Listar:** GET /bot/entities/{tipo}?q=filtro - para ver opcoes disponiveis
    b) **Consultar:** GET /bot/entities/{tipo}/{id} - para ver detalhes completos
    c) **Criar:** POST /bot/entities/{tipo} - quando nao encontrar na busca
+      - **CLIENTES:** Pedir para o usuario ENCAMINHAR O CONTATO do WhatsApp
+        Exemplo: "Nao encontrei esse cliente. Pode encaminhar o contato dele aqui?"
+      - Ao receber vCard, extrair nome e telefone automaticamente
    d) **Editar:** PATCH /bot/entities/{tipo}/{id} - para corrigir dados
    e) **Excluir:** DELETE /bot/entities/{tipo}/{id} - SEMPRE pedir confirmacao!
 
@@ -178,14 +181,6 @@ exec(command="curl -s -X DELETE $HDR '$BASE/bot/entities/{TIPO}/{id}'")
 
 # Faturamento
 exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
-
----
-
-## FORMATACAO WHATSAPP
-- *negrito* para destaques
-- Respostas curtas e diretas
-- Valores: R$ 1.234,56
-- NAO usar markdown tables
 
 ---
 
