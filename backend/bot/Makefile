@@ -39,8 +39,9 @@ build:
 push: build
 	@echo "Image already pushed by Cloud Build"
 
-# SSH key file (override with SSH_KEY_FILE env var)
+# SSH key file (override with SSH_KEY_FILE env var, leave empty for OS Login)
 SSH_KEY_FILE ?= ~/.ssh/id_ed25519
+SSH_KEY_FLAG = $(if $(SSH_KEY_FILE),--ssh-key-file=$(SSH_KEY_FILE),)
 
 # Build, push and deploy to GCE
 deploy: push
@@ -50,7 +51,7 @@ deploy: push
 	@echo "Waiting for container to start..."
 	@sleep 10
 	@echo "Checking logs..."
-	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- \
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- \
 		'sudo docker logs --tail 20 $$(sudo docker ps -q)'
 
 # ===== SETUP INICIAL (rodar 1x) =====
@@ -75,11 +76,11 @@ setup-vm:
 # Sincroniza configs e skills para dentro do container (sem rebuild)
 sync:
 	@echo "Copiando configs para a VM..."
-	gcloud compute scp clawdbot.prod.json praticos-bot:/tmp/clawdbot.json --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
-	gcloud compute scp workspace/IDENTITY.md workspace/SOUL.md workspace/HEARTBEAT.md workspace/USER.md workspace/AGENTS.md workspace/TOOLS.md praticos-bot:/tmp/ --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
-	gcloud compute scp --recurse workspace/skills praticos-bot:/tmp/skills --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
+	gcloud compute scp clawdbot.prod.json praticos-bot:/tmp/clawdbot.json --zone=$(ZONE) $(SSH_KEY_FLAG)
+	gcloud compute scp workspace/IDENTITY.md workspace/SOUL.md workspace/HEARTBEAT.md workspace/USER.md workspace/AGENTS.md workspace/TOOLS.md praticos-bot:/tmp/ --zone=$(ZONE) $(SSH_KEY_FLAG)
+	gcloud compute scp --recurse workspace/skills praticos-bot:/tmp/skills --zone=$(ZONE) $(SSH_KEY_FLAG)
 	@echo "Copiando para dentro do container..."
-	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- \
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- \
 		'CONTAINER=$$(sudo docker ps -q) && \
 		sudo docker cp /tmp/clawdbot.json $$CONTAINER:/root/.clawdbot/clawdbot.json && \
 		sudo docker cp /tmp/IDENTITY.md $$CONTAINER:/root/.clawdbot/IDENTITY.md && \
@@ -91,10 +92,10 @@ sync:
 		sudo docker cp /tmp/skills $$CONTAINER:/root/.clawdbot/ && \
 		sudo rm -rf /tmp/clawdbot.json /tmp/*.md /tmp/skills'
 	@echo "✅ Sincronização concluída. Reiniciando container..."
-	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- 'sudo docker restart $$(sudo docker ps -q)'
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- 'sudo docker restart $$(sudo docker ps -q)'
 
 setup-directories:
-	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- \
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- \
 		'sudo mkdir -p /var/clawdbot/.openclaw/{credentials,agents} && sudo chmod -R 777 /var/clawdbot'
 
 # Legacy alias for backwards compatibility
@@ -108,7 +109,7 @@ recreate-vm: destroy-vm setup-vm setup-directories
 	@echo "VM recreated. Run 'make deploy' to deploy the latest image."
 
 verify-mounts:
-	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- \
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- \
 		'sudo docker inspect $$(sudo docker ps -q) | grep -A20 Mounts'
 
 # ===== DOCKER COMPOSE (local) =====
@@ -123,10 +124,10 @@ logs-local:
 
 # ===== UTILITÁRIOS GCE =====
 logs:
-	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- 'sudo docker logs -f $$(sudo docker ps -q)'
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- 'sudo docker logs -f $$(sudo docker ps -q)'
 
 ssh:
-	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE)
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG)
 
 status:
 	gcloud compute instances list --filter="name=praticos-bot"
@@ -137,7 +138,7 @@ restart:
 # Limpar sessões e reiniciar container (produção)
 clear-sessions:
 	@echo "Limpando sessões na produção..."
-	gcloud compute ssh praticos-bot --zone=$(ZONE) --ssh-key-file=$(SSH_KEY_FILE) -- \
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- \
 		'sudo rm -rf /var/clawdbot/.openclaw/agents/main/sessions/* && sudo docker restart $$(sudo docker ps -q)'
 	@echo "✅ Sessões limpas e container reiniciado"
 

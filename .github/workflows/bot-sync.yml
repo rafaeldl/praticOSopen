@@ -1,0 +1,33 @@
+# .github/workflows/bot-sync.yml
+
+name: Sync Bot Workspace
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'backend/bot/workspace/**'
+      - 'backend/bot/clawdbot.prod.json'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRATICOS }}'
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: praticos
+
+      - name: Sync bot workspace
+        working-directory: backend/bot
+        run: make sync SSH_KEY_FILE=
