@@ -204,10 +204,17 @@ exec(command="curl -s $HDR '$BASE/bot/analytics/financial'")
 *Cliente:* [customer.name]
 *Dispositivo:* [device.name]
 
+*Servicos:*
+• [service.name] - R$ [service.value]
+• [service.name] - R$ [service.value]
+
+*Produtos:*
+• [product.name] (x[qty]) - R$ [product.value]
+
 *Total:* R$ [total]
 *A receber:* R$ [remaining]
 
-_[X] servico(s) | [Y] produto(s) | [Z] foto(s)_
+_[Z] foto(s)_
 ```
 
 ### Traducao de status:
@@ -219,15 +226,17 @@ _[X] servico(s) | [Y] produto(s) | [Z] foto(s)_
 
 ### Regras:
 - Se `device` for null → omitir linha Dispositivo
+- Se `services` vazio → omitir secao *Servicos:*
+- Se `products` vazio → omitir secao *Produtos:*
 - Se status=done e paid=true → mostrar "*Pago*" em vez de "A receber: R$..."
 - `remaining` = total - paidAmount
-- Contadores so se > 0 (omitir "0 foto(s)")
-- Contar: services.length, products.length, photos.length
+- Contador de fotos so se > 0 (omitir "0 foto(s)")
 
 ### Envio da imagem:
 Se photosCount > 0:
 1. Chamar GET /bot/orders/{NUM}/photos para obter lista de fotos com downloadUrl
 2. Baixar a imagem: curl $HDR "$BASE{downloadUrl}" --output foto.jpg
-3. Enviar imagem com caption:
-   - Usar a imagem baixada (o endpoint retorna imagem binaria)
-   - caption: texto do card formatado
+3. Enviar imagem com o card como `message` (NAO usar campo `caption`):
+   - filePath: caminho da imagem baixada
+   - message: texto do card formatado (este e o campo que aparece no WhatsApp)
+   - NAO usar o campo caption - usar sempre message para o texto
