@@ -1,0 +1,36 @@
+# Environment files with secrets
+.env.prod
+.env.local
+.env
+
+# Persistent data (runtime - matches production structure)
+data/
+credentials/
+
+# Legacy paths (for backwards compatibility)
+workspace/identity/
+workspace/devices/
+workspace/agents/*/sessions/*.jsonl
+workspace/agents/*/sessions/sessions.json
+
+# Media files (too large for git)
+workspace/media/
+
+# Old config file (replaced by clawdbot.dev.json and clawdbot.prod.json)
+clawdbot.json
+workspace/clawdbot.json
+
+# Runtime/cache files
+workspace/update-check.json
+workspace/cron/*.bak
+
+# Node modules (if any local scripts)
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db

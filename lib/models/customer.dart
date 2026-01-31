@@ -11,6 +11,7 @@ class Customer extends BaseAuditCompany {
   String? phone;
   String? email;
   String? address;
+  List<String>? keywords;
 
   Customer();
   factory Customer.fromJson(Map<String, dynamic> json) =>

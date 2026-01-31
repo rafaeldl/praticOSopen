@@ -2428,4 +2428,64 @@ class AppLocalizationsEs extends AppLocalizations {
   String formLabelWithTitle(String title) {
     return 'Formulario: $title';
   }
+
+  @override
+  String get connectedChannels => 'Canales Conectados';
+
+  @override
+  String get linked => 'Vinculado';
+
+  @override
+  String get notLinked => 'No vinculado';
+
+  @override
+  String get linkWhatsApp => 'Vincular WhatsApp';
+
+  @override
+  String get linkWhatsAppDescription =>
+      'Escanea el código QR o toca el botón para abrir WhatsApp y enviar el código de vinculación al bot PraticOS.';
+
+  @override
+  String linkExpiresIn(String time) {
+    return 'Expira en $time';
+  }
+
+  @override
+  String get openWhatsApp => 'Abrir WhatsApp';
+
+  @override
+  String get whatsAppLinked => 'WhatsApp vinculado';
+
+  @override
+  String get whatsAppNotLinked => 'WhatsApp no vinculado';
+
+  @override
+  String get unlinkWhatsApp => 'Desvincular WhatsApp';
+
+  @override
+  String get unlinkWhatsAppConfirm =>
+      '¿Estás seguro de que deseas desvincular tu WhatsApp?';
+
+  @override
+  String get whatsAppUnlinked => 'WhatsApp desvinculado exitosamente';
+
+  @override
+  String get errorGeneratingToken => 'Error al generar código de vinculación';
+
+  @override
+  String get errorCheckingStatus => 'Error al verificar estado';
+
+  @override
+  String get errorUnlinking => 'Error al desvincular';
+
+  @override
+  String get scanQRCodeOrTapButton =>
+      'Escanea el código QR o toca el botón de abajo';
+
+  @override
+  String get linkYourWhatsApp => 'Vincula tu WhatsApp';
+
+  @override
+  String get linkWhatsAppBenefit =>
+      'Recibe notificaciones y gestiona tus órdenes de servicio por WhatsApp';
 }

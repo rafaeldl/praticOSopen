@@ -6,6 +6,7 @@ import 'package:praticos/models/product.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,6 +53,7 @@ abstract class _ProductStore with Store {
     product.company = user?.companies![0].company;
     product.updatedAt = DateTime.now();
     product.updatedBy = user?.toAggr();
+    product.keywords = generateKeywords(product.name);
     await repository.createItem(companyId!, product);
   }
 

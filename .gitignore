@@ -57,3 +57,8 @@ firebase/hosting/public/
 
 # Auto Claude data directory
 .auto-claude/
+
+# Bot credentials (WhatsApp, Telegram sessions)
+backend/bot/credentials/
+backend/bot/workspace/agents/main/sessions/
+backend/bot/workspace/media/

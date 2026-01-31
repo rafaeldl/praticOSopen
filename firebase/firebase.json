@@ -5,8 +5,9 @@
   },
   "functions": {
     "source": "functions",
+    "runtime": "nodejs22",
     "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" run lint"
+      "npm --prefix \"$RESOURCE_DIR\" run build"
     ]
   },
   "storage": {
@@ -22,5 +23,22 @@
     "i18n": {
       "root": "/"
     }
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001,
+      "host": "0.0.0.0"
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "auth": {
+      "port": 9099
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "singleProjectMode": true
   }
 }

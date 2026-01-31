@@ -13,6 +13,7 @@ class Device extends BaseAuditCompany {
   String? category;
   String? description;
   String? photo;
+  List<String>? keywords;
 
   Device();
   factory Device.fromJson(Map<String, dynamic> json) => _$DeviceFromJson(json);

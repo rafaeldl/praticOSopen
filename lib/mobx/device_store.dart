@@ -6,6 +6,7 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 
 import 'user_store.dart';
@@ -41,6 +42,7 @@ abstract class _DeviceStore with Store {
     device.company = Global.companyAggr;
     device.updatedAt = DateTime.now();
     device.updatedBy = user?.toAggr();
+    device.keywords = generateKeywords(device.name);
     await repository.createItem(companyId!, device);
   }
 

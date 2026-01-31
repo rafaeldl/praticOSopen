@@ -1,0 +1,21 @@
+services:
+  clawdbot:
+    build:
+      context: .
+      args:
+        ENV: dev
+    container_name: praticos-bot
+    restart: unless-stopped
+    ports:
+      - "18790:18789"
+    volumes:
+      - ./data/.openclaw/credentials:/root/.clawdbot/credentials
+      - ./data/.openclaw/agents:/root/.clawdbot/agents
+      - ./workspace/skills:/root/.clawdbot/skills
+      - ./workspace/AGENTS.md:/root/.clawdbot/AGENTS.md
+      - ./workspace/SOUL.md:/root/.clawdbot/SOUL.md
+      - ./workspace/cron:/root/.clawdbot/cron
+    env_file:
+      - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
