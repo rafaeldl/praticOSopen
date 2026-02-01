@@ -13,9 +13,10 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "google/gemini-3-flash-preview",
+        "primary": "gemini-2.5-flash-lite",
         "fallbacks": [
-          "google/gemini-2.5-flash"
+          "google/gemini-2.5-flash",
+          "google/gemini-3-flash-preview"
         ]
       },
       "workspace": "/root/.clawdbot"
