@@ -118,45 +118,44 @@ class _OrderFormState extends State<OrderForm> {
           final rating = os?.rating;
           final hasRating = rating?.hasRating == true;
 
+          if (!hasRating) {
+            return Text(
+              os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            );
+          }
+
           return Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Flexible(
-                child: Text(
-                  os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      CupertinoIcons.star_fill,
+                      color: Color(0xFFFFD700),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      '${rating!.score}',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              if (hasRating) ...[
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFD700).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        CupertinoIcons.star_fill,
-                        color: Color(0xFFFFD700),
-                        size: 14,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${rating!.score}',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFFFFD700),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ],
           );
         },
