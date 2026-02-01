@@ -1,0 +1,596 @@
+{
+  "pt": {
+    "sections": [
+      {
+        "id": "visao-geral",
+        "title": "Visao Geral do Compartilhamento",
+        "intro": "O PraticOS permite compartilhar Ordens de Servico com seus clientes atraves de links magicos. O cliente pode visualizar detalhes, aprovar orcamentos e comentar - tudo sem precisar criar conta ou fazer login.",
+        "infoCard": {
+          "title": "Acesso Seguro",
+          "content": "Cada link e unico, temporario e pode ser revogado a qualquer momento. O cliente acessa apenas a OS compartilhada, com permissoes controladas por voce."
+        },
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
+            "color": "blue",
+            "title": "Visualizacao",
+            "description": "Cliente ve detalhes da OS, servicos e valores em tempo real"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
+            "color": "green",
+            "title": "Aprovacao",
+            "description": "Aprove ou rejeite orcamentos diretamente pelo link"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
+            "color": "orange",
+            "title": "Comentarios",
+            "description": "Comunicacao direta entre cliente e equipe tecnica"
+          }
+        ]
+      },
+      {
+        "id": "como-compartilhar",
+        "title": "Como Compartilhar uma OS",
+        "intro": "Compartilhar uma Ordem de Servico e simples e pode ser feito de varias formas.",
+        "subsections": [
+          {
+            "title": "Passo a Passo",
+            "steps": [
+              "Abra a Ordem de Servico que deseja compartilhar",
+              "Toque no botao <strong>Compartilhar</strong> no canto superior direito",
+              "O link sera gerado automaticamente",
+              "Escolha como enviar: <strong>WhatsApp</strong>, <strong>Compartilhar</strong> ou <strong>Copiar Link</strong>"
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Dica: WhatsApp Direto",
+          "content": "Se o cliente tiver telefone cadastrado, o botao WhatsApp ja abre a conversa com o link e mensagem personalizada prontos para enviar."
+        }
+      },
+      {
+        "id": "permissoes",
+        "title": "Permissoes do Link",
+        "intro": "Voce controla o que o cliente pode fazer ao acessar o link. Por padrao, todas as permissoes estao ativadas.",
+        "statusCards": [
+          {
+            "color": "blue",
+            "title": "Visualizar",
+            "description": "Ver detalhes da OS, lista de servicos, produtos e valores totais."
+          },
+          {
+            "color": "green",
+            "title": "Aprovar",
+            "description": "Aprovar ou rejeitar o orcamento. Ao rejeitar, pode incluir motivo."
+          },
+          {
+            "color": "orange",
+            "title": "Comentar",
+            "description": "Enviar comentarios e duvidas diretamente na OS."
+          }
+        ],
+        "subsections": [
+          {
+            "title": "Personalizando Permissoes",
+            "steps": [
+              "Na tela de compartilhamento, toque em <strong>Opcoes Avancadas</strong>",
+              "Ative ou desative cada permissao conforme necessario",
+              "As alteracoes sao aplicadas ao proximo link gerado"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "validade",
+        "title": "Validade do Link",
+        "intro": "Links de compartilhamento tem validade configuravel para garantir seguranca.",
+        "subsections": [
+          {
+            "title": "Opcoes de Validade",
+            "validationList": [
+              { "label": "7 dias", "text": "Padrao - ideal para orcamentos simples" },
+              { "label": "14 dias", "text": "Para servicos que precisam de mais tempo de analise" },
+              { "label": "30 dias", "text": "Para projetos maiores ou clientes que demoram a decidir" }
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Link Expirado",
+          "content": "Quando o link expira, o cliente ve uma mensagem informando que o acesso nao esta mais disponivel. Voce pode gerar um novo link a qualquer momento."
+        }
+      },
+      {
+        "id": "acompanhamento",
+        "title": "Acompanhamento de Acessos",
+        "intro": "O sistema registra automaticamente quando o cliente acessa o link compartilhado.",
+        "metrics": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
+            "color": "blue",
+            "title": "Visualizacoes",
+            "description": "Quantidade de vezes que o link foi acessado"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
+            "color": "green",
+            "title": "Ultimo Acesso",
+            "description": "Data e hora da ultima visualizacao pelo cliente"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
+            "color": "orange",
+            "title": "Status",
+            "description": "Se foi aprovado, rejeitado ou ainda pendente"
+          }
+        ]
+      },
+      {
+        "id": "revogar",
+        "title": "Revogar Acesso",
+        "intro": "Voce pode remover o acesso do cliente a qualquer momento, mesmo antes do link expirar.",
+        "subsections": [
+          {
+            "title": "Como Revogar",
+            "steps": [
+              "Abra a OS e toque em <strong>Compartilhar</strong>",
+              "Role ate o final e toque em <strong>Revogar Link</strong>",
+              "Confirme a acao no dialogo que aparece",
+              "O link deixa de funcionar imediatamente"
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Acao Irreversivel",
+          "content": "Ao revogar, o cliente perde acesso instantaneamente. Se precisar, voce pode gerar um novo link depois."
+        }
+      },
+      {
+        "id": "notificacoes",
+        "title": "Notificacoes",
+        "intro": "Sua equipe recebe notificacoes push quando o cliente interage com a OS compartilhada.",
+        "subsections": [
+          {
+            "title": "Voce Sera Notificado Quando",
+            "validationList": [
+              { "label": "Aprovacao", "text": "Cliente aprovou o orcamento pelo link" },
+              { "label": "Rejeicao", "text": "Cliente rejeitou o orcamento (com motivo, se informado)" },
+              { "label": "Comentario", "text": "Cliente enviou um novo comentario ou pergunta" }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Resposta Rapida",
+          "content": "As notificacoes permitem que voce responda rapidamente ao cliente, melhorando a experiencia e agilizando aprovacoes."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Perguntas Frequentes",
+        "faq": [
+          {
+            "question": "O cliente precisa criar conta para acessar?",
+            "answer": "Nao. O link magico permite acesso direto sem cadastro ou login. Basta clicar no link."
+          },
+          {
+            "question": "Posso compartilhar a mesma OS varias vezes?",
+            "answer": "Sim. Se ja existir um link valido, ele sera reutilizado. Voce tambem pode revogar e criar um novo link quando quiser."
+          },
+          {
+            "question": "O que acontece quando o cliente aprova?",
+            "answer": "A OS muda automaticamente para status Aprovado, um comentario e adicionado ao historico e sua equipe recebe notificacao."
+          },
+          {
+            "question": "Posso ver os comentarios do cliente?",
+            "answer": "Sim. Os comentarios aparecem no historico da OS, identificados como vindos do link de compartilhamento."
+          },
+          {
+            "question": "O link funciona no computador e celular?",
+            "answer": "Sim. A pagina se adapta automaticamente ao dispositivo do cliente (responsiva)."
+          },
+          {
+            "question": "Como saber se o cliente visualizou?",
+            "answer": "Na tela de compartilhamento voce ve o contador de visualizacoes e a data do ultimo acesso."
+          }
+        ]
+      }
+    ]
+  },
+  "en": {
+    "sections": [
+      {
+        "id": "overview",
+        "title": "Sharing Overview",
+        "intro": "PraticOS allows you to share Service Orders with your customers through magic links. Customers can view details, approve quotes, and comment - all without creating an account or logging in.",
+        "infoCard": {
+          "title": "Secure Access",
+          "content": "Each link is unique, temporary, and can be revoked at any time. The customer only accesses the shared SO, with permissions controlled by you."
+        },
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
+            "color": "blue",
+            "title": "View",
+            "description": "Customer sees SO details, services, and values in real time"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
+            "color": "green",
+            "title": "Approval",
+            "description": "Approve or reject quotes directly through the link"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
+            "color": "orange",
+            "title": "Comments",
+            "description": "Direct communication between customer and technical team"
+          }
+        ]
+      },
+      {
+        "id": "how-to-share",
+        "title": "How to Share an SO",
+        "intro": "Sharing a Service Order is simple and can be done in several ways.",
+        "subsections": [
+          {
+            "title": "Step by Step",
+            "steps": [
+              "Open the Service Order you want to share",
+              "Tap the <strong>Share</strong> button in the top right corner",
+              "The link will be generated automatically",
+              "Choose how to send: <strong>WhatsApp</strong>, <strong>Share</strong>, or <strong>Copy Link</strong>"
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Tip: Direct WhatsApp",
+          "content": "If the customer has a registered phone number, the WhatsApp button opens the conversation with the link and personalized message ready to send."
+        }
+      },
+      {
+        "id": "permissions",
+        "title": "Link Permissions",
+        "intro": "You control what the customer can do when accessing the link. By default, all permissions are enabled.",
+        "statusCards": [
+          {
+            "color": "blue",
+            "title": "View",
+            "description": "See SO details, list of services, products, and total values."
+          },
+          {
+            "color": "green",
+            "title": "Approve",
+            "description": "Approve or reject the quote. When rejecting, can include a reason."
+          },
+          {
+            "color": "orange",
+            "title": "Comment",
+            "description": "Send comments and questions directly on the SO."
+          }
+        ],
+        "subsections": [
+          {
+            "title": "Customizing Permissions",
+            "steps": [
+              "On the sharing screen, tap <strong>Advanced Options</strong>",
+              "Enable or disable each permission as needed",
+              "Changes are applied to the next generated link"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "validity",
+        "title": "Link Validity",
+        "intro": "Share links have configurable validity to ensure security.",
+        "subsections": [
+          {
+            "title": "Validity Options",
+            "validationList": [
+              { "label": "7 days", "text": "Default - ideal for simple quotes" },
+              { "label": "14 days", "text": "For services that need more analysis time" },
+              { "label": "30 days", "text": "For larger projects or customers who take time to decide" }
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Expired Link",
+          "content": "When the link expires, the customer sees a message informing that access is no longer available. You can generate a new link at any time."
+        }
+      },
+      {
+        "id": "tracking",
+        "title": "Access Tracking",
+        "intro": "The system automatically records when the customer accesses the shared link.",
+        "metrics": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
+            "color": "blue",
+            "title": "Views",
+            "description": "Number of times the link was accessed"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
+            "color": "green",
+            "title": "Last Access",
+            "description": "Date and time of last customer view"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
+            "color": "orange",
+            "title": "Status",
+            "description": "Whether it was approved, rejected, or still pending"
+          }
+        ]
+      },
+      {
+        "id": "revoke",
+        "title": "Revoke Access",
+        "intro": "You can remove customer access at any time, even before the link expires.",
+        "subsections": [
+          {
+            "title": "How to Revoke",
+            "steps": [
+              "Open the SO and tap <strong>Share</strong>",
+              "Scroll to the bottom and tap <strong>Revoke Link</strong>",
+              "Confirm the action in the dialog that appears",
+              "The link stops working immediately"
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Irreversible Action",
+          "content": "When revoked, the customer loses access instantly. If needed, you can generate a new link afterward."
+        }
+      },
+      {
+        "id": "notifications",
+        "title": "Notifications",
+        "intro": "Your team receives push notifications when the customer interacts with the shared SO.",
+        "subsections": [
+          {
+            "title": "You Will Be Notified When",
+            "validationList": [
+              { "label": "Approval", "text": "Customer approved the quote through the link" },
+              { "label": "Rejection", "text": "Customer rejected the quote (with reason, if provided)" },
+              { "label": "Comment", "text": "Customer sent a new comment or question" }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Quick Response",
+          "content": "Notifications allow you to respond quickly to the customer, improving the experience and speeding up approvals."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Frequently Asked Questions",
+        "faq": [
+          {
+            "question": "Does the customer need to create an account to access?",
+            "answer": "No. The magic link allows direct access without registration or login. Just click the link."
+          },
+          {
+            "question": "Can I share the same SO multiple times?",
+            "answer": "Yes. If a valid link already exists, it will be reused. You can also revoke and create a new link whenever you want."
+          },
+          {
+            "question": "What happens when the customer approves?",
+            "answer": "The SO automatically changes to Approved status, a comment is added to the history, and your team receives a notification."
+          },
+          {
+            "question": "Can I see the customer's comments?",
+            "answer": "Yes. Comments appear in the SO history, identified as coming from the share link."
+          },
+          {
+            "question": "Does the link work on computer and mobile?",
+            "answer": "Yes. The page automatically adapts to the customer's device (responsive)."
+          },
+          {
+            "question": "How do I know if the customer viewed it?",
+            "answer": "On the sharing screen you see the view counter and the date of last access."
+          }
+        ]
+      }
+    ]
+  },
+  "es": {
+    "sections": [
+      {
+        "id": "vision-general",
+        "title": "Vision General del Compartir",
+        "intro": "PraticOS permite compartir Ordenes de Servicio con sus clientes a traves de enlaces magicos. El cliente puede ver detalles, aprobar presupuestos y comentar, todo sin necesidad de crear una cuenta o iniciar sesion.",
+        "infoCard": {
+          "title": "Acceso Seguro",
+          "content": "Cada enlace es unico, temporal y puede ser revocado en cualquier momento. El cliente solo accede a la OS compartida, con permisos controlados por usted."
+        },
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
+            "color": "blue",
+            "title": "Visualizacion",
+            "description": "Cliente ve detalles de la OS, servicios y valores en tiempo real"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
+            "color": "green",
+            "title": "Aprobacion",
+            "description": "Apruebe o rechace presupuestos directamente por el enlace"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
+            "color": "orange",
+            "title": "Comentarios",
+            "description": "Comunicacion directa entre cliente y equipo tecnico"
+          }
+        ]
+      },
+      {
+        "id": "como-compartir",
+        "title": "Como Compartir una OS",
+        "intro": "Compartir una Orden de Servicio es simple y se puede hacer de varias formas.",
+        "subsections": [
+          {
+            "title": "Paso a Paso",
+            "steps": [
+              "Abra la Orden de Servicio que desea compartir",
+              "Toque el boton <strong>Compartir</strong> en la esquina superior derecha",
+              "El enlace se generara automaticamente",
+              "Elija como enviar: <strong>WhatsApp</strong>, <strong>Compartir</strong> o <strong>Copiar Enlace</strong>"
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Consejo: WhatsApp Directo",
+          "content": "Si el cliente tiene telefono registrado, el boton WhatsApp ya abre la conversacion con el enlace y mensaje personalizado listos para enviar."
+        }
+      },
+      {
+        "id": "permisos",
+        "title": "Permisos del Enlace",
+        "intro": "Usted controla lo que el cliente puede hacer al acceder al enlace. Por defecto, todos los permisos estan activados.",
+        "statusCards": [
+          {
+            "color": "blue",
+            "title": "Visualizar",
+            "description": "Ver detalles de la OS, lista de servicios, productos y valores totales."
+          },
+          {
+            "color": "green",
+            "title": "Aprobar",
+            "description": "Aprobar o rechazar el presupuesto. Al rechazar, puede incluir motivo."
+          },
+          {
+            "color": "orange",
+            "title": "Comentar",
+            "description": "Enviar comentarios y dudas directamente en la OS."
+          }
+        ],
+        "subsections": [
+          {
+            "title": "Personalizando Permisos",
+            "steps": [
+              "En la pantalla de compartir, toque en <strong>Opciones Avanzadas</strong>",
+              "Active o desactive cada permiso segun sea necesario",
+              "Los cambios se aplican al proximo enlace generado"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "validez",
+        "title": "Validez del Enlace",
+        "intro": "Los enlaces de compartir tienen validez configurable para garantizar seguridad.",
+        "subsections": [
+          {
+            "title": "Opciones de Validez",
+            "validationList": [
+              { "label": "7 dias", "text": "Por defecto - ideal para presupuestos simples" },
+              { "label": "14 dias", "text": "Para servicios que necesitan mas tiempo de analisis" },
+              { "label": "30 dias", "text": "Para proyectos mayores o clientes que demoran en decidir" }
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Enlace Expirado",
+          "content": "Cuando el enlace expira, el cliente ve un mensaje informando que el acceso ya no esta disponible. Puede generar un nuevo enlace en cualquier momento."
+        }
+      },
+      {
+        "id": "seguimiento",
+        "title": "Seguimiento de Accesos",
+        "intro": "El sistema registra automaticamente cuando el cliente accede al enlace compartido.",
+        "metrics": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z\"></path><circle cx=\"12\" cy=\"12\" r=\"3\"></circle></svg>",
+            "color": "blue",
+            "title": "Visualizaciones",
+            "description": "Cantidad de veces que el enlace fue accedido"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
+            "color": "green",
+            "title": "Ultimo Acceso",
+            "description": "Fecha y hora de la ultima visualizacion por el cliente"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
+            "color": "orange",
+            "title": "Estado",
+            "description": "Si fue aprobado, rechazado o aun pendiente"
+          }
+        ]
+      },
+      {
+        "id": "revocar",
+        "title": "Revocar Acceso",
+        "intro": "Puede remover el acceso del cliente en cualquier momento, incluso antes de que el enlace expire.",
+        "subsections": [
+          {
+            "title": "Como Revocar",
+            "steps": [
+              "Abra la OS y toque en <strong>Compartir</strong>",
+              "Desplacese hasta el final y toque en <strong>Revocar Enlace</strong>",
+              "Confirme la accion en el dialogo que aparece",
+              "El enlace deja de funcionar inmediatamente"
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Accion Irreversible",
+          "content": "Al revocar, el cliente pierde acceso instantaneamente. Si lo necesita, puede generar un nuevo enlace despues."
+        }
+      },
+      {
+        "id": "notificaciones",
+        "title": "Notificaciones",
+        "intro": "Su equipo recibe notificaciones push cuando el cliente interactua con la OS compartida.",
+        "subsections": [
+          {
+            "title": "Sera Notificado Cuando",
+            "validationList": [
+              { "label": "Aprobacion", "text": "Cliente aprobo el presupuesto por el enlace" },
+              { "label": "Rechazo", "text": "Cliente rechazo el presupuesto (con motivo, si lo informo)" },
+              { "label": "Comentario", "text": "Cliente envio un nuevo comentario o pregunta" }
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Respuesta Rapida",
+          "content": "Las notificaciones permiten que responda rapidamente al cliente, mejorando la experiencia y agilizando aprobaciones."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Preguntas Frecuentes",
+        "faq": [
+          {
+            "question": "El cliente necesita crear cuenta para acceder?",
+            "answer": "No. El enlace magico permite acceso directo sin registro o inicio de sesion. Solo haga clic en el enlace."
+          },
+          {
+            "question": "Puedo compartir la misma OS varias veces?",
+            "answer": "Si. Si ya existe un enlace valido, sera reutilizado. Tambien puede revocar y crear un nuevo enlace cuando quiera."
+          },
+          {
+            "question": "Que sucede cuando el cliente aprueba?",
+            "answer": "La OS cambia automaticamente a estado Aprobado, un comentario se agrega al historial y su equipo recibe notificacion."
+          },
+          {
+            "question": "Puedo ver los comentarios del cliente?",
+            "answer": "Si. Los comentarios aparecen en el historial de la OS, identificados como provenientes del enlace de compartir."
+          },
+          {
+            "question": "El enlace funciona en computadora y celular?",
+            "answer": "Si. La pagina se adapta automaticamente al dispositivo del cliente (responsiva)."
+          },
+          {
+            "question": "Como saber si el cliente visualizo?",
+            "answer": "En la pantalla de compartir ve el contador de visualizaciones y la fecha del ultimo acceso."
+          }
+        ]
+      }
+    ]
+  }
+}
