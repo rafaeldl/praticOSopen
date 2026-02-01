@@ -166,6 +166,47 @@
         }
       },
       {
+        "id": "avaliacao",
+        "title": "Avaliação do Cliente",
+        "intro": "Quando a OS é concluída, o cliente pode avaliar o serviço diretamente pelo link compartilhado.",
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2\"/></svg>",
+            "color": "yellow",
+            "title": "1 a 5 Estrelas",
+            "description": "Avaliação simples e intuitiva com estrelas"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
+            "color": "blue",
+            "title": "Comentário Opcional",
+            "description": "Cliente pode deixar feedback detalhado (até 500 caracteres)"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg>",
+            "color": "green",
+            "title": "Uma Vez",
+            "description": "Cada OS pode ser avaliada apenas uma vez pelo cliente"
+          }
+        ],
+        "subsections": [
+          {
+            "title": "Como Funciona",
+            "steps": [
+              "OS é marcada como <strong>Concluída</strong> pelo técnico",
+              "Cliente acessa o link de compartilhamento",
+              "Seção de avaliação aparece automaticamente",
+              "Cliente seleciona 1 a 5 estrelas e opcionalmente comenta",
+              "Você recebe notificação push da nova avaliação"
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Veja Todas as Avaliações",
+          "content": "No app, acesse Configurações > Avaliações para ver média geral, total de avaliações e lista completa com comentários."
+        }
+      },
+      {
         "id": "faq",
         "title": "Perguntas Frequentes",
         "faq": [
@@ -364,6 +405,47 @@
         }
       },
       {
+        "id": "rating",
+        "title": "Customer Rating",
+        "intro": "When the SO is completed, the customer can rate the service directly through the shared link.",
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2\"/></svg>",
+            "color": "yellow",
+            "title": "1 to 5 Stars",
+            "description": "Simple and intuitive star rating"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
+            "color": "blue",
+            "title": "Optional Comment",
+            "description": "Customer can leave detailed feedback (up to 500 characters)"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg>",
+            "color": "green",
+            "title": "Once Only",
+            "description": "Each SO can only be rated once by the customer"
+          }
+        ],
+        "subsections": [
+          {
+            "title": "How It Works",
+            "steps": [
+              "SO is marked as <strong>Completed</strong> by the technician",
+              "Customer accesses the share link",
+              "Rating section appears automatically",
+              "Customer selects 1 to 5 stars and optionally comments",
+              "You receive a push notification of the new rating"
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "View All Ratings",
+          "content": "In the app, go to Settings > Ratings to see overall average, total ratings, and complete list with comments."
+        }
+      },
+      {
         "id": "faq",
         "title": "Frequently Asked Questions",
         "faq": [
@@ -559,6 +641,47 @@
         "infoCard": {
           "title": "Respuesta Rápida",
           "content": "Las notificaciones permiten que responda rápidamente al cliente, mejorando la experiencia y agilizando aprobaciones."
+        }
+      },
+      {
+        "id": "calificacion",
+        "title": "Calificación del Cliente",
+        "intro": "Cuando la OS está completada, el cliente puede calificar el servicio directamente por el enlace compartido.",
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polygon points=\"12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2\"/></svg>",
+            "color": "yellow",
+            "title": "1 a 5 Estrellas",
+            "description": "Calificación simple e intuitiva con estrellas"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z\"></path></svg>",
+            "color": "blue",
+            "title": "Comentario Opcional",
+            "description": "Cliente puede dejar retroalimentación detallada (hasta 500 caracteres)"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path><polyline points=\"22 4 12 14.01 9 11.01\"></polyline></svg>",
+            "color": "green",
+            "title": "Una Vez",
+            "description": "Cada OS solo puede ser calificada una vez por el cliente"
+          }
+        ],
+        "subsections": [
+          {
+            "title": "Cómo Funciona",
+            "steps": [
+              "OS es marcada como <strong>Completada</strong> por el técnico",
+              "Cliente accede al enlace de compartir",
+              "Sección de calificación aparece automáticamente",
+              "Cliente selecciona 1 a 5 estrellas y opcionalmente comenta",
+              "Usted recibe notificación push de la nueva calificación"
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Ver Todas las Calificaciones",
+          "content": "En la app, acceda a Configuraciones > Calificaciones para ver promedio general, total de calificaciones y lista completa con comentarios."
         }
       },
       {

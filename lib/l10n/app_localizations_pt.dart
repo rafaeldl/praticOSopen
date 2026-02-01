@@ -2645,4 +2645,47 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get sendToCustomer => 'Enviar para o cliente';
+
+  @override
+  String get rating => 'Avaliação';
+
+  @override
+  String get ratings => 'Avaliações';
+
+  @override
+  String get averageRating => 'Média das avaliações';
+
+  @override
+  String get totalRatings => 'Total de avaliações';
+
+  @override
+  String get noRatingsYet => 'Nenhuma avaliação ainda';
+
+  @override
+  String get rateService => 'Avalie nosso serviço';
+
+  @override
+  String get rateSubmit => 'Enviar Avaliação';
+
+  @override
+  String get rateSuccess => 'Obrigado pela sua avaliação!';
+
+  @override
+  String ratingScore(int score) {
+    return '$score/5';
+  }
+
+  @override
+  String get customerRating => 'Avaliação do Cliente';
+
+  @override
+  String ratingWithStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'estrelas',
+      one: 'estrela',
+    );
+    return '$count $_temp0';
+  }
 }

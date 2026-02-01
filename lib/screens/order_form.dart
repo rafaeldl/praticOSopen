@@ -115,10 +115,48 @@ class _OrderFormState extends State<OrderForm> {
       largeTitle: Observer(
         builder: (_) {
           Order? os = _store.orderStream?.value;
-          return Text(
-            os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          final rating = os?.rating;
+          final hasRating = rating?.hasRating == true;
+
+          if (!hasRating) {
+            return Text(
+              os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            );
+          }
+
+          return Row(
+            children: [
+              Text(
+                os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      CupertinoIcons.star_fill,
+                      color: Color(0xFFFFD700),
+                      size: 18,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      '${rating!.score}',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           );
         },
       ),

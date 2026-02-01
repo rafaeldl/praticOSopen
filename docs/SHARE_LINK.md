@@ -16,7 +16,7 @@ O Share Link permite que técnicos e empresas compartilhem ordens de serviço co
 |----------|----------|
 | Web App | `https://praticos.web.app/q/{token}` |
 | API (Prod) | `https://southamerica-east1-praticos.cloudfunctions.net/api` |
-| API (Dev) | `http://localhost:5001/praticos/southamerica-east1/api` |
+| API (Dev) | `http://localhost:5000/praticos/southamerica-east1/api` |
 
 ## Arquitetura
 
@@ -466,6 +466,39 @@ O sistema envia push notifications para a equipe quando:
 - Cliente **aprova** o orçamento
 - Cliente **rejeita** o orçamento
 - Cliente **adiciona comentário**
+- Cliente **avalia** a OS concluída
+
+## Avaliação do Cliente
+
+Quando a OS está com status `done` (concluída), o cliente pode avaliar o serviço através do link compartilhado.
+
+### Endpoint
+
+```
+POST /public/orders/{token}/rating
+```
+
+**Request:**
+```json
+{
+  "score": 5,
+  "comment": "Excelente serviço!"
+}
+```
+
+**Validações:**
+- Score deve ser inteiro entre 1 e 5
+- Comentário é opcional, máximo 500 caracteres
+- OS deve estar com status `done`
+- OS não pode já ter sido avaliada
+
+### Onde a Avaliação Aparece
+
+1. **Web (Magic Link):** Seção de rating no final da página
+2. **App (Order Detail):** Seção de avaliação na tela da OS
+3. **App (Ratings Screen):** Lista completa em Configurações > Avaliações
+
+Ver `docs/CUSTOMER_RATING.md` para documentação completa do sistema de avaliação.
 
 ## Exemplos de Uso
 

@@ -5097,6 +5097,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Enviar para o cliente'**
   String get sendToCustomer;
+
+  /// No description provided for @rating.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avaliação'**
+  String get rating;
+
+  /// No description provided for @ratings.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avaliações'**
+  String get ratings;
+
+  /// No description provided for @averageRating.
+  ///
+  /// In pt, this message translates to:
+  /// **'Média das avaliações'**
+  String get averageRating;
+
+  /// No description provided for @totalRatings.
+  ///
+  /// In pt, this message translates to:
+  /// **'Total de avaliações'**
+  String get totalRatings;
+
+  /// No description provided for @noRatingsYet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma avaliação ainda'**
+  String get noRatingsYet;
+
+  /// No description provided for @rateService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avalie nosso serviço'**
+  String get rateService;
+
+  /// No description provided for @rateSubmit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar Avaliação'**
+  String get rateSubmit;
+
+  /// No description provided for @rateSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Obrigado pela sua avaliação!'**
+  String get rateSuccess;
+
+  /// No description provided for @ratingScore.
+  ///
+  /// In pt, this message translates to:
+  /// **'{score}/5'**
+  String ratingScore(int score);
+
+  /// No description provided for @customerRating.
+  ///
+  /// In pt, this message translates to:
+  /// **'Avaliação do Cliente'**
+  String get customerRating;
+
+  /// No description provided for @ratingWithStars.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} {count, plural, =1{estrela} other{estrelas}}'**
+  String ratingWithStars(int count);
 }
 
 class _AppLocalizationsDelegate

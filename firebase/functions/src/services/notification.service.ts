@@ -315,3 +315,41 @@ export async function notifyOrderStatusChanged(
     console.error('Error sending status change notification:', error);
   }
 }
+
+/**
+ * Notify when a customer rates the completed order via magic link
+ */
+export async function notifyOrderRated(
+  order: Order,
+  companyId: string,
+  customerName: string,
+  score: number
+): Promise<void> {
+  try {
+    const recipients = await getNotificationRecipients(companyId, order);
+
+    if (recipients.length === 0) {
+      console.log('[NOTIFICATION] No recipients for order rating notification');
+      return;
+    }
+
+    // Generate stars based on score
+    const stars = '⭐'.repeat(score);
+
+    const payload: NotificationPayload = {
+      title: `Nova Avaliação! ${stars}`,
+      body: `${customerName} avaliou a OS #${order.number} com ${score} estrelas`,
+      data: {
+        type: 'order_rated',
+        orderId: order.id,
+        orderNumber: String(order.number),
+        companyId,
+        score: String(score),
+      },
+    };
+
+    await sendNotification(recipients, payload);
+  } catch (error) {
+    console.error('Error sending order rating notification:', error);
+  }
+}

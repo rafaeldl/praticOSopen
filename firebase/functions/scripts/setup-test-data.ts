@@ -239,15 +239,15 @@ async function setupTestData() {
   console.log('🧪 Test the API:');
   console.log('');
   console.log('# Health check');
-  console.log('curl http://localhost:5001/praticos-app/southamerica-east1/api/health');
+  console.log('curl http://localhost:5000/praticos-app/southamerica-east1/api/health');
   console.log('');
   console.log('# Get user context');
   console.log(`curl -H "X-API-Key: bot_praticos_dev_key" -H "X-WhatsApp-Number: ${whatsappNumber}" \\`);
-  console.log('  http://localhost:5001/praticos-app/southamerica-east1/api/api/bot/link/context');
+  console.log('  http://localhost:5000/praticos-app/southamerica-east1/api/api/bot/link/context');
   console.log('');
   console.log('# Get summary');
   console.log(`curl -H "X-API-Key: bot_praticos_dev_key" -H "X-WhatsApp-Number: ${whatsappNumber}" \\`);
-  console.log('  http://localhost:5001/praticos-app/southamerica-east1/api/api/bot/summary/today');
+  console.log('  http://localhost:5000/praticos-app/southamerica-east1/api/api/bot/summary/today');
   console.log('');
 
   process.exit(0);

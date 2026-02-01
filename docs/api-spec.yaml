@@ -21,7 +21,7 @@ info:
 servers:
   - url: https://southamerica-east1-praticos-app.cloudfunctions.net/api
     description: Production
-  - url: http://localhost:5001/praticos-app/southamerica-east1/api
+  - url: http://localhost:5000/praticos-app/southamerica-east1/api
     description: Local Emulator
 
 tags:

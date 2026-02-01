@@ -73,6 +73,7 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
             url: p.url,
             description: p.description,
           })),
+          rating: order.rating,
         },
         company: company ? {
           name: company.name,
@@ -364,5 +365,128 @@ router.get('/:token/comments', shareTokenAuth, async (req: AuthenticatedRequest,
     });
   }
 });
+
+/**
+ * POST /public/orders/:token/rating
+ * Submit a rating for a completed order
+ */
+router.post(
+  '/:token/rating',
+  shareTokenAuth,
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { companyId, orderId, customer } = req.shareTokenAuth!;
+      const { score, comment } = req.body;
+
+      // Validate score (1-5)
+      if (typeof score !== 'number' || score < 1 || score > 5 || !Number.isInteger(score)) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Score must be an integer between 1 and 5' },
+        });
+        return;
+      }
+
+      // Validate comment (optional, max 500 chars)
+      if (comment !== undefined && comment !== null) {
+        if (typeof comment !== 'string') {
+          res.status(400).json({
+            success: false,
+            error: { code: 'VALIDATION_ERROR', message: 'Comment must be a string' },
+          });
+          return;
+        }
+        if (comment.length > 500) {
+          res.status(400).json({
+            success: false,
+            error: { code: 'VALIDATION_ERROR', message: 'Comment too long (max 500 characters)' },
+          });
+          return;
+        }
+      }
+
+      // Get order
+      const order = await orderService.getOrder(companyId, orderId) as Order | null;
+      if (!order) {
+        res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Order not found' },
+        });
+        return;
+      }
+
+      // Verify order is completed (done)
+      if (order.status !== 'done') {
+        res.status(400).json({
+          success: false,
+          error: { code: 'INVALID_STATUS', message: 'Only completed orders can be rated' },
+        });
+        return;
+      }
+
+      // Verify order has not been rated yet
+      if (order.rating?.score) {
+        res.status(400).json({
+          success: false,
+          error: { code: 'ALREADY_RATED', message: 'This order has already been rated' },
+        });
+        return;
+      }
+
+      const now = new Date().toISOString();
+
+      // Build rating object
+      const rating = {
+        score,
+        comment: comment?.trim() || null,
+        createdAt: now,
+        customerName: customer.name,
+      };
+
+      // Update order with rating
+      await getTenantCollection(companyId, 'orders').doc(orderId).update({
+        rating,
+        updatedAt: now,
+      });
+
+      // Add audit comment
+      const stars = '⭐'.repeat(score);
+      const ratingCommentText = comment?.trim()
+        ? `Avaliação do cliente: ${stars} (${score}/5)\n\n"${comment.trim()}"`
+        : `Avaliação do cliente: ${stars} (${score}/5)`;
+
+      await commentService.addComment(
+        companyId,
+        orderId,
+        ratingCommentText,
+        'customer',
+        {
+          name: customer.name,
+          phone: customer.phone || undefined,
+          email: customer.email || undefined,
+        },
+        'magicLink',
+        false
+      );
+
+      // Send push notification to team
+      await notificationService.notifyOrderRated(order, companyId, customer.name, score);
+
+      res.status(201).json({
+        success: true,
+        data: {
+          message: 'Rating submitted successfully',
+          rating,
+        },
+      });
+    } catch (error) {
+      console.error('Submit rating error:', error);
+      res.status(500).json({
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to submit rating' },
+      });
+    }
+  }
+);
 
 export default router;

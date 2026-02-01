@@ -641,6 +641,16 @@ export function formatOrderFullDetails(order: Order): string {
     }
   }
 
+  // Customer rating (if available)
+  if (order.rating?.score) {
+    lines.push('');
+    const stars = '⭐'.repeat(order.rating.score);
+    lines.push(`*Avaliação:* ${stars} (${order.rating.score}/5)`);
+    if (order.rating.comment) {
+      lines.push(`_"${order.rating.comment}"_`);
+    }
+  }
+
   return lines.join('\n');
 }
 

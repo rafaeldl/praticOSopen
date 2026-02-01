@@ -248,6 +248,7 @@ export interface Order {
   paidAmount: number;
   transactions?: PaymentTransaction[];
   assignedTo?: UserAggr;
+  rating?: OrderRating;
   company: CompanyAggr;
   createdAt: DateValue;
   createdBy: UserAggr;
@@ -482,4 +483,15 @@ export interface OrderComment {
   createdAt: string;
   updatedAt?: string;
   deleted?: boolean;
+}
+
+// ============================================================================
+// Order Rating Types (Customer Rating)
+// ============================================================================
+
+export interface OrderRating {
+  score: number;       // 1-5 stars
+  comment?: string;    // Optional (max 500 chars)
+  createdAt: string;
+  customerName: string;
 }
