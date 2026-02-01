@@ -100,7 +100,6 @@ class _OrderFormState extends State<OrderForm> {
                   _buildProductsSection(context, config),
                   _buildFormsSection(context, config),
                   _buildCommentsSection(context),
-                  _buildRatingSection(context),
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -116,10 +115,49 @@ class _OrderFormState extends State<OrderForm> {
       largeTitle: Observer(
         builder: (_) {
           Order? os = _store.orderStream?.value;
-          return Text(
-            os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          final rating = os?.rating;
+          final hasRating = rating?.hasRating == true;
+
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  os?.number != null ? "${context.l10n.orderShort} #${os!.number}" : config.label(LabelKeys.createServiceOrder),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (hasRating) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        CupertinoIcons.star_fill,
+                        color: Color(0xFFFFD700),
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${rating!.score}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFFFFD700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           );
         },
       ),
@@ -521,99 +559,6 @@ class _OrderFormState extends State<OrderForm> {
             companyId: order.company!.id!,
             showInternalToggle: true,
           ),
-        );
-      },
-    );
-  }
-
-  /// Rating section - shows customer rating for completed orders
-  Widget _buildRatingSection(BuildContext context) {
-    return Observer(
-      builder: (_) {
-        final order = _store.order;
-        final rating = order?.rating;
-
-        // Only show rating if order has one
-        if (rating == null || !rating.hasRating) {
-          return const SizedBox.shrink();
-        }
-
-        return _buildGroupedSection(
-          header: context.l10n.customerRating.toUpperCase(),
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Star rating display
-                  Row(
-                    children: [
-                      ...List.generate(5, (index) {
-                        return Icon(
-                          index < (rating.score ?? 0)
-                              ? CupertinoIcons.star_fill
-                              : CupertinoIcons.star,
-                          color: index < (rating.score ?? 0)
-                              ? const Color(0xFFFFD700)
-                              : CupertinoColors.systemGrey3.resolveFrom(context),
-                          size: 24,
-                        );
-                      }),
-                      const SizedBox(width: 12),
-                      Text(
-                        context.l10n.ratingScore(rating.score ?? 0),
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
-                          color: CupertinoColors.label.resolveFrom(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Comment if exists
-                  if (rating.comment != null && rating.comment!.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemGrey6.resolveFrom(context),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '"${rating.comment}"',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontStyle: FontStyle.italic,
-                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                        ),
-                      ),
-                    ),
-                  ],
-                  // Customer name and date
-                  const SizedBox(height: 8),
-                  Text(
-                    '— ${rating.customerName ?? context.l10n.customer}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                    ),
-                  ),
-                  if (rating.createdAt != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      FormatService().formatDateTime(rating.createdAt!),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: CupertinoColors.tertiaryLabel.resolveFrom(context),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
         );
       },
     );

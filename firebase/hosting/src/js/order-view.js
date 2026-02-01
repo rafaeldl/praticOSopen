@@ -9,7 +9,7 @@
     // API Configuration - auto-detect local vs production
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const API_BASE = isLocalhost
-        ? 'http://localhost:5001/praticos/southamerica-east1/api'
+        ? 'http://localhost:5000/praticos/southamerica-east1/api'
         : 'https://southamerica-east1-praticos.cloudfunctions.net/api';
 
     // DOM Elements
@@ -266,6 +266,11 @@
         // Render header
         renderHeader(order, company);
 
+        // Render rating section FIRST if order is done (most important for completed orders)
+        if (order.status === 'done') {
+            renderRatingSection(order);
+        }
+
         // Render cards
         renderInfoCard(order, customer);
         renderServicesCard(order);
@@ -276,11 +281,6 @@
         // Render action buttons if quote status and has approve permission
         if (order.status === 'quote' && permissions.includes('approve')) {
             renderActionButtons();
-        }
-
-        // Render rating section if order is done
-        if (order.status === 'done') {
-            renderRatingSection(order);
         }
 
         // Render comments if has comment permission
