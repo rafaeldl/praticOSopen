@@ -346,6 +346,9 @@ exec(command="curl -s -X DELETE $HDR '$BASE/bot/orders/42/share/ST_xxx'")
 *Total:* R$ [total]
 *A receber:* R$ [remaining]
 
+*Avaliação:* ⭐⭐⭐⭐⭐ ([rating.score]/5)
+_"[rating.comment]"_
+
 🔗 Link cliente: [URL]
 
 _[Z] foto(s)_
@@ -373,6 +376,9 @@ Se label nao disponivel, usar "Dispositivo".
 - Se status=done e paid=true → mostrar "*Pago*" em vez de "A receber: R$..."
 - `remaining` = total - paidAmount
 - Contador de fotos so se > 0 (omitir "0 foto(s)")
+- Se `rating` existir e `rating.score` > 0 → mostrar linha de avaliacao com estrelas (⭐ repetido conforme score)
+- Se `rating.comment` existir → mostrar comentario em italico na linha seguinte
+- Se nao houver rating → omitir secao de avaliacao
 
 ### Envio da imagem:
 Se photosCount > 0:
