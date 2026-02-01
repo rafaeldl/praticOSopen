@@ -16,7 +16,7 @@ O Share Link permite que técnicos e empresas compartilhem ordens de serviço co
 |----------|----------|
 | Web App | `https://praticos.web.app/q/{token}` |
 | API (Prod) | `https://southamerica-east1-praticos.cloudfunctions.net/api` |
-| API (Dev) | `http://localhost:5001/praticos/southamerica-east1/api` |
+| API (Dev) | `http://localhost:5000/praticos/southamerica-east1/api` |
 
 ## Arquitetura
 

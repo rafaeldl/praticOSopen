@@ -266,11 +266,6 @@
         // Render header
         renderHeader(order, company);
 
-        // Render rating section FIRST if order is done (most important for completed orders)
-        if (order.status === 'done') {
-            renderRatingSection(order);
-        }
-
         // Render cards
         renderInfoCard(order, customer);
         renderServicesCard(order);
@@ -283,9 +278,19 @@
             renderActionButtons();
         }
 
+        // Render rating section BEFORE comments if not yet rated (encourage rating)
+        if (order.status === 'done' && !order.rating?.score) {
+            renderRatingSection(order);
+        }
+
         // Render comments if has comment permission
         if (permissions.includes('comment') || permissions.includes('view')) {
             renderComments(comments, permissions.includes('comment'));
+        }
+
+        // Render rating section AFTER comments if already rated (just for reference)
+        if (order.status === 'done' && order.rating?.score) {
+            renderRatingSection(order);
         }
 
         // Render footer
