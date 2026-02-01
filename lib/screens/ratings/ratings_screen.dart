@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Colors, Divider;
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:provider/provider.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
@@ -67,7 +67,9 @@ class _RatingsScreenState extends State<RatingsScreen> {
 
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: CustomScrollView(
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
         slivers: [
           CupertinoSliverNavigationBar(
             largeTitle: Text(context.l10n.ratings),
@@ -172,6 +174,7 @@ class _RatingsScreenState extends State<RatingsScreen> {
           ],
         ],
       ),
+      ),
     );
   }
 
@@ -208,7 +211,7 @@ class _RatingsScreenState extends State<RatingsScreen> {
                         average.toStringAsFixed(1),
                         style: TextStyle(
                           fontSize: 32,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           color: CupertinoColors.label.resolveFrom(context),
                         ),
                       ),
@@ -256,7 +259,7 @@ class _RatingsScreenState extends State<RatingsScreen> {
                     totalRatings.toString(),
                     style: TextStyle(
                       fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       color: CupertinoColors.label.resolveFrom(context),
                     ),
                   ),
@@ -314,8 +317,8 @@ class _RatingsScreenState extends State<RatingsScreen> {
             onTap: () {
               Navigator.pushNamed(context, '/order', arguments: {'order': order});
             },
-            child: Container(
-              color: Colors.transparent,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,7 +336,7 @@ class _RatingsScreenState extends State<RatingsScreen> {
                         score.toString(),
                         style: const TextStyle(
                           color: CupertinoColors.white,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           fontSize: 16,
                         ),
                       ),
@@ -421,10 +424,10 @@ class _RatingsScreenState extends State<RatingsScreen> {
             ),
           ),
           if (!isLast)
-            Divider(
+            Container(
               height: 1,
-              indent: 64,
-              color: CupertinoColors.systemGrey5.resolveFrom(context),
+              margin: const EdgeInsets.only(left: 64),
+              color: CupertinoColors.separator.resolveFrom(context),
             ),
         ],
       ),
