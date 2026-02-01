@@ -2606,4 +2606,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rejectionReason => 'Rejection reason';
+
+  @override
+  String get linkValidity => 'Link Validity';
+
+  @override
+  String get validFor => 'Valid for';
+
+  @override
+  String get days => 'days';
+
+  @override
+  String get selectValidity => 'Select validity';
+
+  @override
+  String get usingExistingLink => 'Active link found';
+
+  @override
+  String get generateNewLink => 'Generate new';
+
+  @override
+  String get loadingExistingLinks => 'Checking existing links...';
+
+  @override
+  String get advancedOptions => 'Advanced options';
+
+  @override
+  String get sendToCustomer => 'Send to customer';
 }

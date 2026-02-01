@@ -1047,5 +1047,15 @@
   "rejectQuoteAction": "Reject Quote",
   "quoteApprovedByCustomer": "Quote approved by customer",
   "quoteRejectedByCustomer": "Quote rejected by customer",
-  "rejectionReason": "Rejection reason"
+  "rejectionReason": "Rejection reason",
+
+  "linkValidity": "Link Validity",
+  "validFor": "Valid for",
+  "days": "days",
+  "selectValidity": "Select validity",
+  "usingExistingLink": "Active link found",
+  "generateNewLink": "Generate new",
+  "loadingExistingLinks": "Checking existing links...",
+  "advancedOptions": "Advanced options",
+  "sendToCustomer": "Send to customer"
 }

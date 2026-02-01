@@ -147,9 +147,16 @@ class ShareLinkService {
     required String url,
     String? message,
     String? subject,
+    Rect? sharePositionOrigin,
   }) async {
     final text = message != null ? '$message\n\n$url' : url;
-    await Share.share(text, subject: subject);
+    await SharePlus.instance.share(
+      ShareParams(
+        text: text,
+        subject: subject,
+        sharePositionOrigin: sharePositionOrigin,
+      ),
+    );
   }
 
   /// Share via WhatsApp

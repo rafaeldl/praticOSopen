@@ -5043,6 +5043,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Motivo da rejeição'**
   String get rejectionReason;
+
+  /// No description provided for @linkValidity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Validade do Link'**
+  String get linkValidity;
+
+  /// No description provided for @validFor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Válido por'**
+  String get validFor;
+
+  /// No description provided for @days.
+  ///
+  /// In pt, this message translates to:
+  /// **'dias'**
+  String get days;
+
+  /// No description provided for @selectValidity.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione a validade'**
+  String get selectValidity;
+
+  /// No description provided for @usingExistingLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link ativo encontrado'**
+  String get usingExistingLink;
+
+  /// No description provided for @generateNewLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerar novo'**
+  String get generateNewLink;
+
+  /// No description provided for @loadingExistingLinks.
+  ///
+  /// In pt, this message translates to:
+  /// **'Verificando links existentes...'**
+  String get loadingExistingLinks;
+
+  /// No description provided for @advancedOptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opções avançadas'**
+  String get advancedOptions;
+
+  /// No description provided for @sendToCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar para o cliente'**
+  String get sendToCustomer;
 }
 
 class _AppLocalizationsDelegate

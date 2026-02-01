@@ -2618,4 +2618,31 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get rejectionReason => 'Motivo da rejeição';
+
+  @override
+  String get linkValidity => 'Validade do Link';
+
+  @override
+  String get validFor => 'Válido por';
+
+  @override
+  String get days => 'dias';
+
+  @override
+  String get selectValidity => 'Selecione a validade';
+
+  @override
+  String get usingExistingLink => 'Link ativo encontrado';
+
+  @override
+  String get generateNewLink => 'Gerar novo';
+
+  @override
+  String get loadingExistingLinks => 'Verificando links existentes...';
+
+  @override
+  String get advancedOptions => 'Opções avançadas';
+
+  @override
+  String get sendToCustomer => 'Enviar para o cliente';
 }

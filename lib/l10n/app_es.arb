@@ -1047,5 +1047,15 @@
   "rejectQuoteAction": "Rechazar Presupuesto",
   "quoteApprovedByCustomer": "Presupuesto aprobado por el cliente",
   "quoteRejectedByCustomer": "Presupuesto rechazado por el cliente",
-  "rejectionReason": "Motivo del rechazo"
+  "rejectionReason": "Motivo del rechazo",
+
+  "linkValidity": "Validez del Enlace",
+  "validFor": "Válido por",
+  "days": "días",
+  "selectValidity": "Seleccione la validez",
+  "usingExistingLink": "Enlace activo encontrado",
+  "generateNewLink": "Generar nuevo",
+  "loadingExistingLinks": "Verificando enlaces existentes...",
+  "advancedOptions": "Opciones avanzadas",
+  "sendToCustomer": "Enviar al cliente"
 }
