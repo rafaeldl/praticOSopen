@@ -21,6 +21,7 @@ import 'package:praticos/screens/forms/form_template_form_screen.dart';
 import 'package:praticos/screens/user_profile_edit_screen.dart';
 import 'package:praticos/screens/accumulated_value_list_screen.dart';
 import 'package:praticos/screens/ratings/ratings_screen.dart';
+import 'package:praticos/screens/notifications/notification_list_screen.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   // '/onboarding': removed - onboarding now handled by AuthWrapper with authStore
@@ -46,4 +47,5 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/form_template_form': (context) => FormTemplateFormScreen(),
   '/user_profile_edit': (context) => const UserProfileEditScreen(),
   '/ratings': (context) => const RatingsScreen(),
+  '/notifications': (context) => const NotificationListScreen(),
 };
