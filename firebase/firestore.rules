@@ -141,6 +141,21 @@ service cloud.firestore {
         && canManageUsers(resource.data.company.id);
     }
 
+    // Share Tokens - magic links para clientes acompanharem OS
+    // Path: /links/share/tokens/{tokenId}
+    // Acesso principal é via Cloud Functions (Admin SDK)
+    // Usuários autenticados podem ler tokens das suas empresas
+    match /links/{linkType}/tokens/{tokenId} {
+      // Leitura: membro da empresa pode ver tokens da empresa
+      allow read: if request.auth != null
+        && resource.data.companyId != null
+        && belongsToCompany(resource.data.companyId);
+
+      // Escrita: apenas via Cloud Functions (Admin SDK)
+      // Usuários não podem criar/editar tokens diretamente
+      allow write: if false;
+    }
+
     // Segments - global collection (read-only para usuários autenticados)
     match /segments/{segmentId} {
       allow read: if request.auth != null;
@@ -276,6 +291,19 @@ service cloud.firestore {
         match /forms/{formId} {
           allow read: if belongsToCompany(companyId);
           allow write: if belongsToCompany(companyId);
+        }
+
+        // Subcollection de comentários dentro de orders
+        // Membros podem ler todos os comentários (internos e públicos)
+        // Membros podem criar/atualizar comentários
+        // Comentários de clientes via magic link são criados via Cloud Functions (Admin SDK)
+        match /comments/{commentId} {
+          allow read: if belongsToCompany(companyId);
+          allow create: if belongsToCompany(companyId);
+          allow update: if belongsToCompany(companyId)
+            && resource.data.author.userId == request.auth.uid;
+          allow delete: if isCompanyAdmin(companyId)
+            || resource.data.author.userId == request.auth.uid;
         }
       }
 

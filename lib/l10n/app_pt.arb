@@ -1034,5 +1034,73 @@
   "errorUnlinking": "Erro ao desvincular",
   "scanQRCodeOrTapButton": "Escaneie o QR code ou toque no botão abaixo",
   "linkYourWhatsApp": "Vincule seu WhatsApp",
-  "linkWhatsAppBenefit": "Receba notificações e gerencie suas OS pelo WhatsApp"
+  "linkWhatsAppBenefit": "Receba notificações e gerencie suas OS pelo WhatsApp",
+
+  "shareWithCustomer": "Compartilhar com Cliente",
+  "shareLinkTitle": "Link de Acompanhamento",
+  "shareLinkDescription": "Envie este link para o cliente acompanhar a OS",
+  "linkValidFor": "Link válido por {days} dias",
+  "@linkValidFor": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "canApprove": "Pode aprovar",
+  "canComment": "Pode comentar",
+  "viewOnly": "Apenas visualização",
+  "copyLink": "Copiar Link",
+  "sendViaWhatsApp": "Enviar via WhatsApp",
+  "shareLink": "Compartilhar Link",
+  "linkCopied": "Link copiado!",
+  "generatingLink": "Gerando link...",
+  "errorGeneratingLink": "Erro ao gerar link",
+  "sharePermissions": "Permissões do Link",
+  "shareLinkExpired": "Este link expirou",
+  "shareLinkApproved": "Aprovado pelo cliente",
+  "shareLinkRejected": "Rejeitado pelo cliente",
+  "viewCount": "{count} {count, plural, =1{visualização} other{visualizações}}",
+  "@viewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "revokeLink": "Revogar Link",
+  "revokeLinkConfirm": "Deseja revogar este link? O cliente não poderá mais acessar.",
+  "linkRevoked": "Link revogado",
+  "activeLinks": "Links Ativos",
+  "noActiveLinks": "Nenhum link ativo",
+
+  "comments": "Comentários",
+  "noComments": "Nenhum comentário",
+  "addComment": "Adicionar comentário",
+  "commentPlaceholder": "Digite seu comentário...",
+  "commentAdded": "Comentário adicionado",
+  "commentFromCustomer": "Cliente",
+  "commentFromTeam": "Equipe",
+  "internalComment": "Comentário interno",
+  "internalCommentHint": "Visível apenas para a equipe",
+  "publicComment": "Comentário público",
+  "publicCommentHint": "Visível para o cliente",
+  "markAsInternal": "Marcar como interno",
+  "sendComment": "Enviar",
+
+  "approveQuoteAction": "Aprovar Orçamento",
+  "rejectQuoteAction": "Rejeitar Orçamento",
+  "quoteApprovedByCustomer": "Orçamento aprovado pelo cliente",
+  "quoteRejectedByCustomer": "Orçamento rejeitado pelo cliente",
+  "rejectionReason": "Motivo da rejeição",
+
+  "linkValidity": "Validade do Link",
+  "validFor": "Válido por",
+  "days": "dias",
+  "selectValidity": "Selecione a validade",
+  "usingExistingLink": "Link ativo encontrado",
+  "generateNewLink": "Gerar novo",
+  "loadingExistingLinks": "Verificando links existentes...",
+  "advancedOptions": "Opções avançadas",
+  "sendToCustomer": "Enviar para o cliente"
 }

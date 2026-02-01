@@ -12,6 +12,10 @@ Este documento fornece contexto e diretrizes para Claude Code trabalhar no proje
 - **MobX**: Gerenciamento de estado reativo
 - **Fastlane**: Automação de deploy (iOS/Android)
 
+### URLs do Projeto
+- **Web App (Cliente)**: `https://praticos.web.app/`
+- **Share Links**: `https://praticos.web.app/q/{token}`
+
 ### Arquitetura em Camadas
 
 ```
@@ -684,6 +688,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/I18N.md` - Sistema de internacionalização completo
 - `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
 - `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
+- `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
 - `docs/WEBSITE_STRUCTURE.md` - Estrutura completa do site Eleventy

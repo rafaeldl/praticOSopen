@@ -3,63 +3,63 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "Sistema para Integrador de Automacao Residencial | PraticOS",
-    "description": "Chega de orcamento no Excel e projeto no WhatsApp! Sistema de OS para automacao residencial com historico de instalacao, documentacao com fotos e controle financeiro. Organize sua empresa em 5 minutos.",
-    "keywords": "sistema para automacao residencial, programa para integrador de automacao, software casa inteligente, ordem de servico automacao, app integrador residencial, gestao de projetos automacao",
-    "ogTitle": "Sistema para Integrador de Automacao Residencial | PraticOS",
-    "ogDescription": "Chega de orcamento no Excel! Sistema de OS com historico de instalacao, documentacao com fotos e controle financeiro. Organize sua empresa em 5 minutos.",
+    "title": "Sistema para Integrador de Automação Residencial | PraticOS",
+    "description": "Chega de orçamento no Excel e projeto no WhatsApp! Sistema de OS para automação residencial com histórico de instalação, documentação com fotos e controle financeiro. Organize sua empresa em 5 minutos.",
+    "keywords": "sistema para automação residencial, programa para integrador de automação, software casa inteligente, ordem de serviço automação, app integrador residencial, gestão de projetos automação",
+    "ogTitle": "Sistema para Integrador de Automação Residencial | PraticOS",
+    "ogDescription": "Chega de orçamento no Excel! Sistema de OS com histórico de instalação, documentação com fotos e controle financeiro. Organize sua empresa em 5 minutos.",
     "hero": {
-      "badge": "🏠 Automacao Residencial",
+      "badge": "🏠 Automação Residencial",
       "title": "Chega de projeto no WhatsApp:",
       "titleHighlight": "organize sua empresa em 5 minutos",
-      "subtitle": "Acabe com orcamentos no Excel e tenha controle total dos seus projetos. Historico completo de cada instalacao, documentacao com fotos e cliente acompanhando pelo celular.",
-      "ctaPrimary": "Testar Gratis",
+      "subtitle": "Acabe com orçamentos no Excel e tenha controle total dos seus projetos. Histórico completo de cada instalação, documentação com fotos e cliente acompanhando pelo celular.",
+      "ctaPrimary": "Testar Grátis",
       "ctaSecondary": "Ver Demo",
       "stats": {
         "users": { "value": "200+", "label": "Integradores ativos" },
         "orders": { "value": "5k+", "label": "Projetos criados" },
-        "rating": { "value": "4.8", "label": "Avaliacao" }
+        "rating": { "value": "4.8", "label": "Avaliação" }
       }
     },
     "problems": {
       "tag": "Problemas",
-      "title": "Voce enfrenta",
+      "title": "Você enfrenta",
       "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com automacao residencial",
+      "subtitle": "Dores comuns de quem trabalha com automação residencial",
       "items": [
-        { "icon": "📝", "title": "Orcamentos no Excel, projetos no WhatsApp", "text": "Cada orcamento e feito do zero no Excel. Informacoes do projeto espalhadas em grupos de WhatsApp. Impossivel encontrar algo quando precisa." },
-        { "icon": "📞", "title": "Pos-venda problematico", "text": "Cliente liga 2 anos depois com problema e voce nao tem nenhuma documentacao. Qual equipamento instalou? Qual firmware? Qual senha do roteador?" },
-        { "icon": "📦", "title": "Sem controle de estoque", "text": "Nao sabe o que tem na van, o que tem no deposito. Chega no cliente e falta uma fonte. Viagem perdida." },
-        { "icon": "💰", "title": "Precificacao inconsistente", "text": "Cada orcamento e calculado de um jeito diferente. Esquece de cobrar horas de programacao, cabo, infraestrutura." },
-        { "icon": "😤", "title": "Cliente nao entende o valor", "text": "'Por que tao caro se eu posso comprar na Amazon?' Cliente nao ve o trabalho de integracao, configuracao, programacao." },
-        { "icon": "💸", "title": "Fluxo de caixa apertado", "text": "Cliente paga parcelado, fornecedor quer a vista. Sem controle, voce nao sabe se o projeto deu lucro." }
+        { "icon": "📝", "title": "Orçamentos no Excel, projetos no WhatsApp", "text": "Cada orçamento é feito do zero no Excel. Informações do projeto espalhadas em grupos de WhatsApp. Impossível encontrar algo quando precisa." },
+        { "icon": "📞", "title": "Pós-venda problemático", "text": "Cliente liga 2 anos depois com problema e você não tem nenhuma documentação. Qual equipamento instalou? Qual firmware? Qual senha do roteador?" },
+        { "icon": "📦", "title": "Sem controle de estoque", "text": "Não sabe o que tem na van, o que tem no depósito. Chega no cliente e falta uma fonte. Viagem perdida." },
+        { "icon": "💰", "title": "Precificação inconsistente", "text": "Cada orçamento é calculado de um jeito diferente. Esquece de cobrar horas de programação, cabo, infraestrutura." },
+        { "icon": "😤", "title": "Cliente não entende o valor", "text": "'Por que tão caro se eu posso comprar na Amazon?' Cliente não vê o trabalho de integração, configuração, programação." },
+        { "icon": "💸", "title": "Fluxo de caixa apertado", "text": "Cliente paga parcelado, fornecedor quer à vista. Sem controle, você não sabe se o projeto deu lucro." }
       ]
     },
     "solutions": {
-      "tag": "Solucoes",
+      "tag": "Soluções",
       "title": "Como o",
       "titleHighlight": "PraticOS resolve",
-      "subtitle": "Funcionalidades pensadas para o dia a dia do integrador de automacao",
+      "subtitle": "Funcionalidades pensadas para o dia a dia do integrador de automação",
       "items": [
-        { "icon": "🔗", "title": "Link para o cliente acompanhar", "text": "Cliente recebe um link e acompanha o status do projeto em tempo real.", "highlight": "Reduz ligacoes em ate 70%." },
-        { "icon": "📋", "title": "Historico completo por cliente", "text": "Busque pelo cliente e veja todo o historico. Equipamentos instalados, configuracoes, senhas, observacoes." },
-        { "icon": "📸", "title": "Documentacao com fotos", "text": "Fotografe cada etapa da instalacao. Infraestrutura, equipamentos, telas de configuracao. Proteja-se de reclamacoes." },
-        { "icon": "🧮", "title": "Orcamento profissional rapido", "text": "Catalogo de produtos e servicos pre-cadastrados. Monte orcamentos em minutos, nao em horas." },
+        { "icon": "🔗", "title": "Link para o cliente acompanhar", "text": "Cliente recebe um link e acompanha o status do projeto em tempo real.", "highlight": "Reduz ligações em até 70%." },
+        { "icon": "📋", "title": "Histórico completo por cliente", "text": "Busque pelo cliente e veja todo o histórico. Equipamentos instalados, configurações, senhas, observações." },
+        { "icon": "📸", "title": "Documentação com fotos", "text": "Fotografe cada etapa da instalação. Infraestrutura, equipamentos, telas de configuração. Proteja-se de reclamações." },
+        { "icon": "🧮", "title": "Orçamento profissional rápido", "text": "Catálogo de produtos e serviços pré-cadastrados. Monte orçamentos em minutos, não em horas." },
         { "icon": "💰", "title": "Dashboard financeiro completo", "text": "Saiba exatamente quanto lucrou em cada projeto.", "highlight": "Controle total de custos e margem." },
         { "icon": "📱", "title": "Proposta em PDF pelo WhatsApp", "text": "Envie propostas profissionais em 2 cliques. Impressione o cliente desde o primeiro contato." }
       ]
     },
     "checklist": {
-      "tag": "Formulario",
-      "title": "Documentacao de",
-      "titleHighlight": "instalacao",
-      "text": "Documente cada instalacao com fotos e informacoes tecnicas. O cliente assina digitalmente a entrega.",
-      "cta": "Testar Gratis - Sem Cartao",
-      "previewTitle": "📋 Checklist de Instalacao",
+      "tag": "Formulário",
+      "title": "Documentação de",
+      "titleHighlight": "instalação",
+      "text": "Documente cada instalação com fotos e informações técnicas. O cliente assina digitalmente a entrega.",
+      "cta": "Testar Grátis - Sem Cartão",
+      "previewTitle": "📋 Checklist de Instalação",
       "items": [
         { "icon": "📸", "text": "Fotos da infraestrutura" },
-        { "icon": "🔌", "text": "Equipamentos instalados e localizacao" },
-        { "icon": "⚙️", "text": "Configuracoes e senhas (criptografadas)" },
+        { "icon": "🔌", "text": "Equipamentos instalados e localização" },
+        { "icon": "⚙️", "text": "Configurações e senhas (criptografadas)" },
         { "icon": "📱", "text": "Apps configurados no celular do cliente" },
         { "icon": "📝", "text": "Treinamento realizado" },
         { "icon": "✍️", "text": "Assinatura digital de entrega" }
@@ -67,53 +67,53 @@
     },
     "features": {
       "tag": "Funcionalidades",
-      "title": "Tudo que voce precisa para",
+      "title": "Tudo que você precisa para",
       "titleHighlight": "gerenciar seus projetos",
       "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
       "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de servico completas com fotos, equipamentos e valores. Tudo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe cada etapa da instalacao. Documentacao completa para pos-venda.", "color": "yellow" },
-        { "icon": "pdf", "title": "Proposta em PDF", "text": "Gere propostas profissionais em PDF. Destaque-se da concorrencia.", "color": "orange" },
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, equipamentos e valores. Tudo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe cada etapa da instalação. Documentação completa para pós-venda.", "color": "yellow" },
+        { "icon": "pdf", "title": "Proposta em PDF", "text": "Gere propostas profissionais em PDF. Destaque-se da concorrência.", "color": "orange" },
         { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestao de Clientes", "text": "Historico completo de cada cliente e instalacao. Todos os projetos anteriores.", "color": "purple" },
+        { "icon": "users", "title": "Gestão de Clientes", "text": "Histórico completo de cada cliente e instalação. Todos os projetos anteriores.", "color": "purple" },
         { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status do projeto pelo celular. Sem precisar ligar.", "color": "cyan" }
       ]
     },
     "testimonial": {
-      "quote": "Antes eu perdia horas fazendo orcamentos no Excel e quando o cliente ligava meses depois, eu nao tinha nenhuma documentacao. Agora tenho tudo organizado e os clientes confiam muito mais no meu trabalho.",
+      "quote": "Antes eu perdia horas fazendo orçamentos no Excel e quando o cliente ligava meses depois, eu não tinha nenhuma documentação. Agora tenho tudo organizado e os clientes confiam muito mais no meu trabalho.",
       "name": "Fernando Costa",
-      "role": "Integrador de automacao ha 8 anos",
+      "role": "Integrador de automação há 8 anos",
       "metric": "Aumento de 40% no faturamento"
     },
     "faq": {
-      "tag": "Duvidas",
+      "tag": "Dúvidas",
       "title": "Perguntas",
       "titleHighlight": "frequentes",
-      "subtitle": "Tire suas duvidas antes de comecar",
+      "subtitle": "Tire suas dúvidas antes de começar",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Nao! O plano gratuito e real e nao tem limite de tempo. Voce pode usar para sempre com ate 30 fotos/mes. Nossos precos sao transparentes e voce nao precisa falar com vendedor." },
-        { "question": "Funciona para qualquer tipo de automacao?", "answer": "Sim! PraticOS funciona para integradores de automacao residencial, comercial, audio e video, iluminacao, ar condicionado e muito mais. O sistema se adapta ao seu negocio." },
-        { "question": "Consigo guardar senhas e configuracoes?", "answer": "Sim! Voce pode documentar todas as configuracoes, senhas de roteadores, IPs de equipamentos. Tudo fica organizado e acessivel quando precisar." },
-        { "question": "Meus tecnicos vao conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tao simples quanto usar WhatsApp. Se voce sabe usar o celular, sabe usar o PraticOS." },
-        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentacao completa. Respondemos em ate 24 horas uteis. Nosso time entende as necessidades do integrador de automacao." }
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
+        { "question": "Funciona para qualquer tipo de automação?", "answer": "Sim! PraticOS funciona para integradores de automação residencial, comercial, áudio e vídeo, iluminação, ar condicionado e muito mais. O sistema se adapta ao seu negócio." },
+        { "question": "Consigo guardar senhas e configurações?", "answer": "Sim! Você pode documentar todas as configurações, senhas de roteadores, IPs de equipamentos. Tudo fica organizado e acessível quando precisar." },
+        { "question": "Meus técnicos vão conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tão simples quanto usar WhatsApp. Se você sabe usar o celular, sabe usar o PraticOS." },
+        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time entende as necessidades do integrador de automação." }
       ]
     },
     "download": {
       "title": "Baixe agora e comece a",
       "titleHighlight": "organizar seus projetos",
-      "text": "Disponivel para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponivel na", "name": "App Store" },
-      "playStore": { "label": "Disponivel no", "name": "Google Play" }
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
     },
     "contact": {
       "tag": "Contato",
       "title": "Precisa de",
       "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe esta pronta para te atender",
+      "subtitle": "Nossa equipe está pronta para te atender",
       "cards": {
         "email": { "title": "Email" },
         "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Politica de privacidade" }
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
       },
       "form": {
         "name": "Nome",
@@ -255,65 +255,65 @@
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "Sistema para Integrador de Automatizacion Residencial | PraticOS",
-    "description": "¡Basta de presupuestos en Excel y proyectos en WhatsApp! Sistema de OS para automatizacion residencial con historial de instalacion, documentacion con fotos y control financiero. Organiza tu empresa en 5 minutos.",
-    "keywords": "sistema para automatizacion residencial, programa para integrador de automatizacion, software casa inteligente, orden de servicio automatizacion, app integrador residencial, gestion de proyectos automatizacion",
-    "ogTitle": "Sistema para Integrador de Automatizacion Residencial | PraticOS",
-    "ogDescription": "¡Basta de presupuestos en Excel! Sistema de OS con historial de instalacion, documentacion con fotos y control financiero. Organiza tu empresa en 5 minutos.",
+    "title": "Sistema para Integrador de Automatización Residencial | PraticOS",
+    "description": "¡Basta de presupuestos en Excel y proyectos en WhatsApp! Sistema de OS para automatización residencial con historial de instalación, documentación con fotos y control financiero. Organiza tu empresa en 5 minutos.",
+    "keywords": "sistema para automatización residencial, programa para integrador de automatización, software casa inteligente, orden de servicio automatización, app integrador residencial, gestión de proyectos automatización",
+    "ogTitle": "Sistema para Integrador de Automatización Residencial | PraticOS",
+    "ogDescription": "¡Basta de presupuestos en Excel! Sistema de OS con historial de instalación, documentación con fotos y control financiero. Organiza tu empresa en 5 minutos.",
     "hero": {
-      "badge": "🏠 Automatizacion Residencial",
+      "badge": "🏠 Automatización Residencial",
       "title": "Basta de proyectos en WhatsApp:",
       "titleHighlight": "organiza tu empresa en 5 minutos",
-      "subtitle": "Acaba con presupuestos en Excel y ten control total de tus proyectos. Historial completo de cada instalacion, documentacion con fotos y cliente siguiendo por el celular.",
+      "subtitle": "Acaba con presupuestos en Excel y ten control total de tus proyectos. Historial completo de cada instalación, documentación con fotos y cliente siguiendo por el celular.",
       "ctaPrimary": "Probar Gratis",
       "ctaSecondary": "Ver Demo",
       "stats": {
         "users": { "value": "200+", "label": "Integradores activos" },
         "orders": { "value": "5k+", "label": "Proyectos creados" },
-        "rating": { "value": "4.8", "label": "Calificacion" }
+        "rating": { "value": "4.8", "label": "Calificación" }
       }
     },
     "problems": {
       "tag": "Problemas",
       "title": "¿Enfrentas",
       "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con automatizacion residencial",
+      "subtitle": "Dolores comunes de quien trabaja con automatización residencial",
       "items": [
-        { "icon": "📝", "title": "Presupuestos en Excel, proyectos en WhatsApp", "text": "Cada presupuesto se hace desde cero en Excel. Informacion del proyecto dispersa en grupos de WhatsApp. Imposible encontrar algo cuando se necesita." },
-        { "icon": "📞", "title": "Posventa problematico", "text": "Cliente llama 2 anos despues con un problema y no tienes ninguna documentacion. ¿Que equipo instalaste? ¿Que firmware? ¿Cual es la contrasena del router?" },
-        { "icon": "📦", "title": "Sin control de inventario", "text": "No sabes que tienes en la camioneta, que tienes en el deposito. Llegas donde el cliente y falta una fuente. Viaje perdido." },
-        { "icon": "💰", "title": "Precios inconsistentes", "text": "Cada presupuesto se calcula de manera diferente. Olvidas cobrar horas de programacion, cable, infraestructura." },
-        { "icon": "😤", "title": "Cliente no entiende el valor", "text": "'¿Por que tan caro si puedo comprarlo en Amazon?' Cliente no ve el trabajo de integracion, configuracion, programacion." },
+        { "icon": "📝", "title": "Presupuestos en Excel, proyectos en WhatsApp", "text": "Cada presupuesto se hace desde cero en Excel. Información del proyecto dispersa en grupos de WhatsApp. Imposible encontrar algo cuando se necesita." },
+        { "icon": "📞", "title": "Posventa problemático", "text": "Cliente llama 2 años después con un problema y no tienes ninguna documentación. ¿Qué equipo instalaste? ¿Qué firmware? ¿Cuál es la contraseña del router?" },
+        { "icon": "📦", "title": "Sin control de inventario", "text": "No sabes qué tienes en la camioneta, qué tienes en el depósito. Llegas donde el cliente y falta una fuente. Viaje perdido." },
+        { "icon": "💰", "title": "Precios inconsistentes", "text": "Cada presupuesto se calcula de manera diferente. Olvidas cobrar horas de programación, cable, infraestructura." },
+        { "icon": "😤", "title": "Cliente no entiende el valor", "text": "'¿Por qué tan caro si puedo comprarlo en Amazon?' Cliente no ve el trabajo de integración, configuración, programación." },
         { "icon": "💸", "title": "Flujo de caja apretado", "text": "Cliente paga en cuotas, proveedor quiere al contado. Sin control, no sabes si el proyecto dio ganancia." }
       ]
     },
     "solutions": {
       "tag": "Soluciones",
-      "title": "Como",
+      "title": "Cómo",
       "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para el dia a dia del integrador de automatizacion",
+      "subtitle": "Funcionalidades pensadas para el día a día del integrador de automatización",
       "items": [
         { "icon": "🔗", "title": "Link para el cliente seguir", "text": "Cliente recibe un link y sigue el estado del proyecto en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
-        { "icon": "📋", "title": "Historial completo por cliente", "text": "Busca por cliente y ve todo el historial. Equipos instalados, configuraciones, contrasenas, observaciones." },
-        { "icon": "📸", "title": "Documentacion con fotos", "text": "Fotografía cada etapa de la instalacion. Infraestructura, equipos, pantallas de configuracion. Protegete de reclamos." },
-        { "icon": "🧮", "title": "Presupuesto profesional rapido", "text": "Catalogo de productos y servicios pre-registrados. Arma presupuestos en minutos, no en horas." },
-        { "icon": "💰", "title": "Dashboard financiero completo", "text": "Sabe exactamente cuanto ganaste en cada proyecto.", "highlight": "Control total de costos y margen." },
-        { "icon": "📱", "title": "Propuesta en PDF por WhatsApp", "text": "Envia propuestas profesionales en 2 clics. Impresiona al cliente desde el primer contacto." }
+        { "icon": "📋", "title": "Historial completo por cliente", "text": "Busca por cliente y ve todo el historial. Equipos instalados, configuraciones, contraseñas, observaciones." },
+        { "icon": "📸", "title": "Documentación con fotos", "text": "Fotografía cada etapa de la instalación. Infraestructura, equipos, pantallas de configuración. Protégete de reclamos." },
+        { "icon": "🧮", "title": "Presupuesto profesional rápido", "text": "Catálogo de productos y servicios pre-registrados. Arma presupuestos en minutos, no en horas." },
+        { "icon": "💰", "title": "Dashboard financiero completo", "text": "Sabe exactamente cuánto ganaste en cada proyecto.", "highlight": "Control total de costos y margen." },
+        { "icon": "📱", "title": "Propuesta en PDF por WhatsApp", "text": "Envía propuestas profesionales en 2 clics. Impresiona al cliente desde el primer contacto." }
       ]
     },
     "checklist": {
       "tag": "Formulario",
-      "title": "Documentacion de",
-      "titleHighlight": "instalacion",
-      "text": "Documenta cada instalacion con fotos e informacion tecnica. El cliente firma digitalmente la entrega.",
+      "title": "Documentación de",
+      "titleHighlight": "instalación",
+      "text": "Documenta cada instalación con fotos e información técnica. El cliente firma digitalmente la entrega.",
       "cta": "Probar Gratis - Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Instalacion",
+      "previewTitle": "📋 Checklist de Instalación",
       "items": [
         { "icon": "📸", "text": "Fotos de la infraestructura" },
-        { "icon": "🔌", "text": "Equipos instalados y ubicacion" },
-        { "icon": "⚙️", "text": "Configuraciones y contrasenas (encriptadas)" },
+        { "icon": "🔌", "text": "Equipos instalados y ubicación" },
+        { "icon": "⚙️", "text": "Configuraciones y contraseñas (encriptadas)" },
         { "icon": "📱", "text": "Apps configuradas en el celular del cliente" },
-        { "icon": "📝", "text": "Capacitacion realizada" },
+        { "icon": "📝", "text": "Capacitación realizada" },
         { "icon": "✍️", "text": "Firma digital de entrega" }
       ]
     },
@@ -323,19 +323,19 @@
       "titleHighlight": "gestionar tus proyectos",
       "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
       "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crea ordenes de servicio completas con fotos, equipos y valores. Todo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografía cada etapa de la instalacion. Documentacion completa para posventa.", "color": "yellow" },
-        { "icon": "pdf", "title": "Propuesta en PDF", "text": "Genera propuestas profesionales en PDF. Destacate de la competencia.", "color": "orange" },
-        { "icon": "money", "title": "Control Financiero", "text": "Mira cuanto facturaste, cuanto recibiste y cuanto tienes por recibir. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestion de Clientes", "text": "Historial completo de cada cliente e instalacion. Todos los proyectos anteriores.", "color": "purple" },
+        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, equipos y valores. Todo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografía cada etapa de la instalación. Documentación completa para posventa.", "color": "yellow" },
+        { "icon": "pdf", "title": "Propuesta en PDF", "text": "Genera propuestas profesionales en PDF. Destácate de la competencia.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestión de Clientes", "text": "Historial completo de cada cliente e instalación. Todos los proyectos anteriores.", "color": "purple" },
         { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado del proyecto por el celular. Sin necesidad de llamar.", "color": "cyan" }
       ]
     },
     "testimonial": {
-      "quote": "Antes pasaba horas haciendo presupuestos en Excel y cuando el cliente llamaba meses despues, no tenia ninguna documentacion. Ahora tengo todo organizado y los clientes confian mucho mas en mi trabajo.",
+      "quote": "Antes pasaba horas haciendo presupuestos en Excel y cuando el cliente llamaba meses después, no tenía ninguna documentación. Ahora tengo todo organizado y los clientes confían mucho más en mi trabajo.",
       "name": "Fernando Costa",
-      "role": "Integrador de automatizacion hace 8 anos",
-      "metric": "Aumento de 40% en facturacion"
+      "role": "Integrador de automatización hace 8 años",
+      "metric": "Aumento de 40% en facturación"
     },
     "faq": {
       "tag": "Dudas",
@@ -343,11 +343,11 @@
       "titleHighlight": "frecuentes",
       "subtitle": "Resuelve tus dudas antes de empezar",
       "items": [
-        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene limite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "¿Funciona para cualquier tipo de automatizacion?", "answer": "¡Si! PraticOS funciona para integradores de automatizacion residencial, comercial, audio y video, iluminacion, aire acondicionado y mas. El sistema se adapta a tu negocio." },
-        { "question": "¿Puedo guardar contrasenas y configuraciones?", "answer": "¡Si! Puedes documentar todas las configuraciones, contrasenas de routers, IPs de equipos. Todo queda organizado y accesible cuando lo necesites." },
-        { "question": "¿Mis tecnicos van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
-        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentacion completa. Respondemos en hasta 24 horas habiles. Nuestro equipo entiende las necesidades del integrador de automatizacion." }
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "¿Funciona para cualquier tipo de automatización?", "answer": "¡Sí! PraticOS funciona para integradores de automatización residencial, comercial, audio y video, iluminación, aire acondicionado y más. El sistema se adapta a tu negocio." },
+        { "question": "¿Puedo guardar contraseñas y configuraciones?", "answer": "¡Sí! Puedes documentar todas las configuraciones, contraseñas de routers, IPs de equipos. Todo queda organizado y accesible cuando lo necesites." },
+        { "question": "¿Mis técnicos van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
+        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo entiende las necesidades del integrador de automatización." }
       ]
     },
     "download": {
@@ -361,11 +361,11 @@
       "tag": "Contacto",
       "title": "¿Necesitas",
       "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo esta listo para atenderte",
+      "subtitle": "Nuestro equipo está listo para atenderte",
       "cards": {
         "email": { "title": "Email" },
         "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Politica de privacidad" }
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
       },
       "form": {
         "name": "Nombre",
@@ -373,7 +373,7 @@
         "email": "Email",
         "emailPlaceholder": "tu@email.com",
         "message": "Mensaje",
-        "messagePlaceholder": "¿Como podemos ayudar?",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
         "submit": "Enviar Mensaje"
       }
     }

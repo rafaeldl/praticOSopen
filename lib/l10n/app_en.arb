@@ -989,5 +989,73 @@
   "errorUnlinking": "Error unlinking",
   "scanQRCodeOrTapButton": "Scan the QR code or tap the button below",
   "linkYourWhatsApp": "Link your WhatsApp",
-  "linkWhatsAppBenefit": "Receive notifications and manage your work orders via WhatsApp"
+  "linkWhatsAppBenefit": "Receive notifications and manage your work orders via WhatsApp",
+
+  "shareWithCustomer": "Share with Customer",
+  "shareLinkTitle": "Tracking Link",
+  "shareLinkDescription": "Send this link to the customer to track the work order",
+  "linkValidFor": "Link valid for {days} days",
+  "@linkValidFor": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "canApprove": "Can approve",
+  "canComment": "Can comment",
+  "viewOnly": "View only",
+  "copyLink": "Copy Link",
+  "sendViaWhatsApp": "Send via WhatsApp",
+  "shareLink": "Share Link",
+  "linkCopied": "Link copied!",
+  "generatingLink": "Generating link...",
+  "errorGeneratingLink": "Error generating link",
+  "sharePermissions": "Link Permissions",
+  "shareLinkExpired": "This link has expired",
+  "shareLinkApproved": "Approved by customer",
+  "shareLinkRejected": "Rejected by customer",
+  "viewCount": "{count} {count, plural, =1{view} other{views}}",
+  "@viewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "revokeLink": "Revoke Link",
+  "revokeLinkConfirm": "Do you want to revoke this link? The customer will no longer be able to access it.",
+  "linkRevoked": "Link revoked",
+  "activeLinks": "Active Links",
+  "noActiveLinks": "No active links",
+
+  "comments": "Comments",
+  "noComments": "No comments",
+  "addComment": "Add comment",
+  "commentPlaceholder": "Type your comment...",
+  "commentAdded": "Comment added",
+  "commentFromCustomer": "Customer",
+  "commentFromTeam": "Team",
+  "internalComment": "Internal comment",
+  "internalCommentHint": "Visible only to the team",
+  "publicComment": "Public comment",
+  "publicCommentHint": "Visible to the customer",
+  "markAsInternal": "Mark as internal",
+  "sendComment": "Send",
+
+  "approveQuoteAction": "Approve Quote",
+  "rejectQuoteAction": "Reject Quote",
+  "quoteApprovedByCustomer": "Quote approved by customer",
+  "quoteRejectedByCustomer": "Quote rejected by customer",
+  "rejectionReason": "Rejection reason",
+
+  "linkValidity": "Link Validity",
+  "validFor": "Valid for",
+  "days": "days",
+  "selectValidity": "Select validity",
+  "usingExistingLink": "Active link found",
+  "generateNewLink": "Generate new",
+  "loadingExistingLinks": "Checking existing links...",
+  "advancedOptions": "Advanced options",
+  "sendToCustomer": "Send to customer"
 }

@@ -97,6 +97,11 @@ O endpoint /bot/link/context retorna `segment.labels` com a terminologia correta
    - Se order.photos[0] existir, enviar IMAGEM com card como CAPTION
    - Nunca responder com JSON bruto ou texto nao-formatado
 
+7. **APOS CRIAR OS** - Oferecer compartilhamento:
+   - Ao criar OS com sucesso, perguntar: "Quer que eu gere um link para enviar ao cliente?"
+   - Se sim, chamar POST /bot/orders/{NUM}/share automaticamente
+   - Usar a `message` da resposta para enviar ao usuario
+
 ---
 
 ## ENDPOINTS
@@ -214,6 +219,24 @@ Body: {"status":"completed"}
 Status possiveis: pending, in_progress, completed
 - "completed" so funciona se todos os itens obrigatorios estiverem preenchidos
 
+### Magic Link (Compartilhamento com Cliente)
+POST   /bot/orders/{NUM}/share         - gerar link para cliente
+GET    /bot/orders/{NUM}/share         - listar links ativos
+DELETE /bot/orders/{NUM}/share/{TOKEN} - revogar link
+
+**POST - Gerar link:**
+Body (opcional): {"permissions":["view","approve","comment"],"expiresInDays":7}
+- permissions: view (sempre incluso), approve, comment
+- expiresInDays: 1 a 30 dias (default: 7)
+
+Resposta inclui `message` formatada pronta para WhatsApp.
+
+**GET - Listar links:**
+Retorna apenas links ativos (nao expirados) com contagem de visualizacoes.
+
+**DELETE - Revogar:**
+Remove o link imediatamente. Cliente nao consegue mais acessar.
+
 ---
 
 ## EXEMPLOS curl
@@ -282,6 +305,15 @@ exec(command="curl -s -X POST $HDR -F 'file=@/workspace/media/foto.jpg' '$BASE/b
 # Checklists - Finalizar
 exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"status\":\"completed\"}' '$BASE/bot/orders/42/forms/FORM_ID/status'")
 
+# Magic Link - Gerar
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"permissions\":[\"view\",\"approve\",\"comment\"]}' '$BASE/bot/orders/42/share'")
+
+# Magic Link - Listar ativos
+exec(command="curl -s $HDR '$BASE/bot/orders/42/share'")
+
+# Magic Link - Revogar
+exec(command="curl -s -X DELETE $HDR '$BASE/bot/orders/42/share/ST_xxx'")
+
 ---
 
 ## CARD DE OS (OBRIGATORIO)
@@ -314,8 +346,15 @@ exec(command="curl -s -X PATCH $HDR -H 'Content-Type: application/json' -d '{\"s
 *Total:* R$ [total]
 *A receber:* R$ [remaining]
 
+🔗 Link cliente: [URL]
+
 _[Z] foto(s)_
 ```
+
+**Link de compartilhamento:**
+- Chamar GET /bot/orders/{NUM}/share para verificar links ativos
+- Se tokens[] nao vazio, usar URL do primeiro token ativo
+- Se nao houver link ativo, omitir a linha "🔗 Link cliente:"
 
 **Onde [DEVICE_LABEL]** = labels["device._entity"] do contexto (ex: "Veiculo", "Aparelho", "Equipamento")
 Se label nao disponivel, usar "Dispositivo".
@@ -471,3 +510,4 @@ Se tudo preenchido:
 • 8 itens preenchidos
 • 5 fotos anexadas
 ```
+

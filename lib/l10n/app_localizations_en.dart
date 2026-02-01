@@ -2474,4 +2474,163 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get linkWhatsAppBenefit =>
       'Receive notifications and manage your work orders via WhatsApp';
+
+  @override
+  String get shareWithCustomer => 'Share with Customer';
+
+  @override
+  String get shareLinkTitle => 'Tracking Link';
+
+  @override
+  String get shareLinkDescription =>
+      'Send this link to the customer to track the work order';
+
+  @override
+  String linkValidFor(int days) {
+    return 'Link valid for $days days';
+  }
+
+  @override
+  String get canApprove => 'Can approve';
+
+  @override
+  String get canComment => 'Can comment';
+
+  @override
+  String get viewOnly => 'View only';
+
+  @override
+  String get copyLink => 'Copy Link';
+
+  @override
+  String get sendViaWhatsApp => 'Send via WhatsApp';
+
+  @override
+  String get shareLink => 'Share Link';
+
+  @override
+  String get linkCopied => 'Link copied!';
+
+  @override
+  String get generatingLink => 'Generating link...';
+
+  @override
+  String get errorGeneratingLink => 'Error generating link';
+
+  @override
+  String get sharePermissions => 'Link Permissions';
+
+  @override
+  String get shareLinkExpired => 'This link has expired';
+
+  @override
+  String get shareLinkApproved => 'Approved by customer';
+
+  @override
+  String get shareLinkRejected => 'Rejected by customer';
+
+  @override
+  String viewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'views',
+      one: 'view',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get revokeLink => 'Revoke Link';
+
+  @override
+  String get revokeLinkConfirm =>
+      'Do you want to revoke this link? The customer will no longer be able to access it.';
+
+  @override
+  String get linkRevoked => 'Link revoked';
+
+  @override
+  String get activeLinks => 'Active Links';
+
+  @override
+  String get noActiveLinks => 'No active links';
+
+  @override
+  String get noComments => 'No comments';
+
+  @override
+  String get addComment => 'Add comment';
+
+  @override
+  String get commentPlaceholder => 'Type your comment...';
+
+  @override
+  String get commentAdded => 'Comment added';
+
+  @override
+  String get commentFromCustomer => 'Customer';
+
+  @override
+  String get commentFromTeam => 'Team';
+
+  @override
+  String get internalComment => 'Internal comment';
+
+  @override
+  String get internalCommentHint => 'Visible only to the team';
+
+  @override
+  String get publicComment => 'Public comment';
+
+  @override
+  String get publicCommentHint => 'Visible to the customer';
+
+  @override
+  String get markAsInternal => 'Mark as internal';
+
+  @override
+  String get sendComment => 'Send';
+
+  @override
+  String get approveQuoteAction => 'Approve Quote';
+
+  @override
+  String get rejectQuoteAction => 'Reject Quote';
+
+  @override
+  String get quoteApprovedByCustomer => 'Quote approved by customer';
+
+  @override
+  String get quoteRejectedByCustomer => 'Quote rejected by customer';
+
+  @override
+  String get rejectionReason => 'Rejection reason';
+
+  @override
+  String get linkValidity => 'Link Validity';
+
+  @override
+  String get validFor => 'Valid for';
+
+  @override
+  String get days => 'days';
+
+  @override
+  String get selectValidity => 'Select validity';
+
+  @override
+  String get usingExistingLink => 'Active link found';
+
+  @override
+  String get generateNewLink => 'Generate new';
+
+  @override
+  String get loadingExistingLinks => 'Checking existing links...';
+
+  @override
+  String get advancedOptions => 'Advanced options';
+
+  @override
+  String get sendToCustomer => 'Send to customer';
 }

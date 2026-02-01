@@ -2,32 +2,40 @@
   "hub": {
     "pt": {
       "badge": "Central de Ajuda",
-      "title": "Documentacao",
-      "subtitle": "Guias completos e referencias para aproveitar ao maximo o PraticOS. Encontre tutoriais, dicas e informacoes detalhadas sobre cada funcionalidade.",
-      "searchPlaceholder": "Buscar na documentacao...",
-      "quickLinksTitle": "Links Rapidos",
+      "title": "Documentação",
+      "subtitle": "Guias completos e referências para aproveitar ao máximo o PraticOS. Encontre tutoriais, dicas e informações detalhadas sobre cada funcionalidade.",
+      "searchPlaceholder": "Buscar na documentação...",
+      "quickLinksTitle": "Links Rápidos",
       "categories": [
         {
-          "title": "Perfis de Usuarios",
-          "description": "Conheca os diferentes perfis (Admin, Gerente, Supervisor, Consultor, Tecnico) e suas permissoes especificas.",
+          "title": "Perfis de Usuários",
+          "description": "Conheça os diferentes perfis (Admin, Gerente, Supervisor, Consultor, Técnico) e suas permissões específicas.",
           "href": "perfis.html",
-          "linkText": "Ver documentacao ->",
+          "linkText": "Ver documentação ->",
           "badge": "Novo",
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle><path d=\"M23 21v-2a4 4 0 0 0-3-3.87\"></path><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"></path></svg>"
         },
         {
-          "title": "Ordens de Servico",
-          "description": "Como criar, editar e gerenciar ordens de servico. Fluxo de status e boas praticas.",
+          "title": "Ordens de Serviço",
+          "description": "Como criar, editar e gerenciar ordens de serviço. Fluxo de status e boas práticas.",
           "linkText": "Em breve",
           "badge": "Em breve",
           "comingSoon": true,
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line><polyline points=\"10 9 9 9 8 9\"></polyline></svg>"
         },
         {
+          "title": "Compartilhar OS",
+          "description": "Envie links mágicos para clientes visualizarem, aprovarem orçamentos e comentarem.",
+          "href": "compartilhar.html",
+          "linkText": "Ver documentação ->",
+          "badge": "Novo",
+          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line><line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line></svg>"
+        },
+        {
           "title": "Procedimentos",
-          "description": "Crie checklists e formularios personalizados para padronizar processos da sua empresa.",
+          "description": "Crie checklists e formulários personalizados para padronizar processos da sua empresa.",
           "href": "procedimentos.html",
-          "linkText": "Ver documentacao ->",
+          "linkText": "Ver documentação ->",
           "badge": "Novo",
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>"
         },
@@ -41,15 +49,15 @@
         },
         {
           "title": "Sistema Financeiro",
-          "description": "Pagamentos parciais, descontos, historico de transacoes e dashboard financeiro.",
+          "description": "Pagamentos parciais, descontos, histórico de transações e dashboard financeiro.",
           "href": "financeiro.html",
-          "linkText": "Ver documentacao ->",
+          "linkText": "Ver documentação ->",
           "badge": "Novo",
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>"
         },
         {
-          "title": "Configuracoes",
-          "description": "Personalize o sistema: dados da empresa, colaboradores, produtos, servicos e mais.",
+          "title": "Configurações",
+          "description": "Personalize o sistema: dados da empresa, colaboradores, produtos, serviços e mais.",
           "linkText": "Em breve",
           "badge": "Em breve",
           "comingSoon": true,
@@ -59,7 +67,7 @@
       "quickLinks": [
         {
           "title": "Perguntas Frequentes",
-          "description": "Respostas para as duvidas mais comuns",
+          "description": "Respostas para as dúvidas mais comuns",
           "href": "../faq.html",
           "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\"></path><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"></line></svg>"
         },
@@ -71,7 +79,7 @@
         },
         {
           "title": "Baixar App",
-          "description": "Disponivel para iOS e Android",
+          "description": "Disponível para iOS e Android",
           "href": "../index.html#download",
           "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"></path><polyline points=\"7 10 12 15 17 10\"></polyline><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\"></line></svg>"
         }
@@ -99,6 +107,14 @@
           "badge": "Coming soon",
           "comingSoon": true,
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line><polyline points=\"10 9 9 9 8 9\"></polyline></svg>"
+        },
+        {
+          "title": "Share SO",
+          "description": "Send magic links for customers to view, approve quotes, and comment.",
+          "href": "compartilhar-en.html",
+          "linkText": "View documentation ->",
+          "badge": "New",
+          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line><line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line></svg>"
         },
         {
           "title": "Procedures",
@@ -156,40 +172,48 @@
     },
     "es": {
       "badge": "Centro de Ayuda",
-      "title": "Documentacion",
-      "subtitle": "Guias completas y referencias para aprovechar al maximo PraticOS. Encuentra tutoriales, consejos e informacion detallada sobre cada funcionalidad.",
-      "searchPlaceholder": "Buscar en la documentacion...",
-      "quickLinksTitle": "Enlaces Rapidos",
+      "title": "Documentación",
+      "subtitle": "Guías completas y referencias para aprovechar al máximo PraticOS. Encuentra tutoriales, consejos e información detallada sobre cada funcionalidad.",
+      "searchPlaceholder": "Buscar en la documentación...",
+      "quickLinksTitle": "Enlaces Rápidos",
       "categories": [
         {
           "title": "Perfiles de Usuario",
-          "description": "Conoce los diferentes perfiles (Admin, Gerente, Supervisor, Consultor, Tecnico) y sus permisos especificos.",
+          "description": "Conoce los diferentes perfiles (Admin, Gerente, Supervisor, Consultor, Técnico) y sus permisos específicos.",
           "href": "perfis-es.html",
-          "linkText": "Ver documentacion ->",
+          "linkText": "Ver documentación ->",
           "badge": "Nuevo",
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2\"></path><circle cx=\"9\" cy=\"7\" r=\"4\"></circle><path d=\"M23 21v-2a4 4 0 0 0-3-3.87\"></path><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"></path></svg>"
         },
         {
-          "title": "Ordenes de Servicio",
-          "description": "Como crear, editar y gestionar ordenes de servicio. Flujo de estados y buenas practicas.",
-          "linkText": "Proximamente",
-          "badge": "Proximamente",
+          "title": "Órdenes de Servicio",
+          "description": "Cómo crear, editar y gestionar órdenes de servicio. Flujo de estados y buenas prácticas.",
+          "linkText": "Próximamente",
+          "badge": "Próximamente",
           "comingSoon": true,
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line><polyline points=\"10 9 9 9 8 9\"></polyline></svg>"
+        },
+        {
+          "title": "Compartir OS",
+          "description": "Envía enlaces mágicos para que clientes visualicen, aprueben presupuestos y comenten.",
+          "href": "compartilhar-es.html",
+          "linkText": "Ver documentación ->",
+          "badge": "Nuevo",
+          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line><line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line></svg>"
         },
         {
           "title": "Procedimientos",
           "description": "Crea checklists y formularios personalizados para estandarizar los procesos de tu empresa.",
           "href": "procedimentos-es.html",
-          "linkText": "Ver documentacion ->",
+          "linkText": "Ver documentación ->",
           "badge": "Nuevo",
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>"
         },
         {
           "title": "Clientes y Dispositivos",
           "description": "Gestiona tu base de clientes y equipos/dispositivos vinculados.",
-          "linkText": "Proximamente",
-          "badge": "Proximamente",
+          "linkText": "Próximamente",
+          "badge": "Próximamente",
           "comingSoon": true,
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"2\" y=\"7\" width=\"20\" height=\"14\" rx=\"2\" ry=\"2\"></rect><path d=\"M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16\"></path></svg>"
         },
@@ -197,15 +221,15 @@
           "title": "Sistema Financiero",
           "description": "Pagos parciales, descuentos, historial de transacciones y dashboard financiero.",
           "href": "financeiro-es.html",
-          "linkText": "Ver documentacion ->",
+          "linkText": "Ver documentación ->",
           "badge": "Nuevo",
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>"
         },
         {
           "title": "Configuraciones",
-          "description": "Personaliza el sistema: datos de la empresa, colaboradores, productos, servicios y mas.",
-          "linkText": "Proximamente",
-          "badge": "Proximamente",
+          "description": "Personaliza el sistema: datos de la empresa, colaboradores, productos, servicios y más.",
+          "linkText": "Próximamente",
+          "badge": "Próximamente",
           "comingSoon": true,
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"3\"></circle><path d=\"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z\"></path></svg>"
         }
@@ -213,7 +237,7 @@
       "quickLinks": [
         {
           "title": "Preguntas Frecuentes",
-          "description": "Respuestas a las preguntas mas comunes",
+          "description": "Respuestas a las preguntas más comunes",
           "href": "../faq-es.html",
           "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\"></path><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"></line></svg>"
         },

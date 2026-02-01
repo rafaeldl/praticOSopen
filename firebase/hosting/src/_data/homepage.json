@@ -2,51 +2,51 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "PraticOS - Gestao de Ordens de Servico Simplificada",
-    "description": "Sistema completo para gestao de ordens de servico, clientes e financas. Controle seu negocio de forma pratica e eficiente.",
-    "keywords": "ordem de servico, gestao, clientes, oficina, prestador de servico, app",
-    "ogTitle": "PraticOS - Gestao de Ordens de Servico",
-    "ogDescription": "Sistema completo para gestao de ordens de servico, clientes e financas.",
+    "title": "PraticOS - Gestão de Ordens de Serviço Simplificada",
+    "description": "Sistema completo para gestão de ordens de serviço, clientes e finanças. Controle seu negócio de forma prática e eficiente.",
+    "keywords": "ordem de serviço, gestão, clientes, oficina, prestador de serviço, app",
+    "ogTitle": "PraticOS - Gestão de Ordens de Serviço",
+    "ogDescription": "Sistema completo para gestão de ordens de serviço, clientes e finanças.",
     "hero": {
       "badge": "Novidade! Múltiplas empresas",
       "title": "Gerencie suas",
-      "titleHighlight": "Ordens de Servico",
+      "titleHighlight": "Ordens de Serviço",
       "subtitle": "de forma simples e eficiente",
-      "text": "Sistema completo para prestadores de servico. Controle clientes, ordens de servico e financas em um so lugar.",
-      "ctaPrimary": { "text": "Baixar Gratis", "href": "#download" },
+      "text": "Sistema completo para prestadores de serviço. Controle clientes, ordens de serviço e finanças em um só lugar.",
+      "ctaPrimary": { "text": "Baixar Grátis", "href": "#download" },
       "ctaSecondary": { "text": "Ver Demo", "href": "#screenshots" },
       "stats": [
-        { "value": "500+", "label": "Usuarios ativos" },
+        { "value": "500+", "label": "Usuários ativos" },
         { "value": "10k+", "label": "OS criadas" },
-        { "value": "4.8", "label": "Avaliacao" }
+        { "value": "4.8", "label": "Avaliação" }
       ],
       "phones": {
         "back": { "image": "dashboard.png", "alt": "Dashboard PraticOS" },
-        "front": { "image": "home.png", "alt": "Lista de Ordens de Servico" }
+        "front": { "image": "home.png", "alt": "Lista de Ordens de Serviço" }
       },
       "scroll": "Scroll"
     },
     "features": {
       "tag": "Funcionalidades",
-      "title": "Tudo que voce precisa para",
-      "titleHighlight": "gerenciar seu negocio",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar seu negócio",
       "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
       "items": [
         {
           "icon": "document",
-          "title": "Ordens de Servico",
-          "text": "Crie, edite e acompanhe todas as suas ordens de servico. Adicione fotos, descricoes detalhadas e valores."
+          "title": "Ordens de Serviço",
+          "text": "Crie, edite e acompanhe todas as suas ordens de serviço. Adicione fotos, descrições detalhadas e valores."
         },
         {
           "icon": "users",
-          "title": "Gestao de Clientes",
-          "text": "Cadastre e organize seus clientes. Historico completo de servicos, contatos e valores pendentes.",
+          "title": "Gestão de Clientes",
+          "text": "Cadastre e organize seus clientes. Histórico completo de serviços, contatos e valores pendentes.",
           "color": "yellow"
         },
         {
           "icon": "chart",
           "title": "Dashboard Financeiro",
-          "text": "Visualize faturamento, valores recebidos e a receber. Graficos e relatorios por periodo.",
+          "text": "Visualize faturamento, valores recebidos e a receber. Gráficos e relatórios por período.",
           "color": "orange"
         },
         {
@@ -58,46 +58,46 @@
         {
           "icon": "settings",
           "title": "Temas Claro/Escuro",
-          "text": "Interface adaptavel ao seu estilo. Suporte nativo a modo claro e escuro com design Material e Cupertino.",
+          "text": "Interface adaptável ao seu estilo. Suporte nativo a modo claro e escuro com design Material e Cupertino.",
           "color": "purple"
         },
         {
           "icon": "shield",
-          "title": "Autenticacao Segura",
-          "text": "Login com Google, Apple ou Email. Seus dados protegidos com as melhores praticas de seguranca.",
+          "title": "Autenticação Segura",
+          "text": "Login com Google, Apple ou Email. Seus dados protegidos com as melhores práticas de segurança.",
           "color": "cyan"
         }
       ]
     },
     "screenshots": {
       "tag": "Screenshots",
-      "title": "Conheca a",
+      "title": "Conheça a",
       "titleHighlight": "interface do app",
-      "subtitle": "Design moderno e intuitivo para a melhor experiencia",
+      "subtitle": "Design moderno e intuitivo para a melhor experiência",
       "items": [
         { "image": "login.png", "alt": "Tela de Login", "label": "Login" },
-        { "image": "home.png", "alt": "Ordens de Servico", "label": "Ordens de Servico" },
+        { "image": "home.png", "alt": "Ordens de Serviço", "label": "Ordens de Serviço" },
         { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
         { "image": "customers.png", "alt": "Clientes", "label": "Clientes" },
-        { "image": "settings.png", "alt": "Configuracoes", "label": "Configuracoes" }
+        { "image": "settings.png", "alt": "Configurações", "label": "Configurações" }
       ]
     },
     "download": {
       "title": "Baixe agora e comece a",
-      "titleHighlight": "organizar seu negocio",
-      "text": "Disponivel para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponivel na", "name": "App Store" },
-      "playStore": { "label": "Disponivel no", "name": "Google Play" }
+      "titleHighlight": "organizar seu negócio",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
     },
     "contact": {
       "tag": "Contato",
       "title": "Precisa de",
       "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe esta pronta para te atender",
+      "subtitle": "Nossa equipe está pronta para te atender",
       "cards": {
         "email": { "title": "Email" },
         "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Politica de privacidade" }
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
       },
       "form": {
         "name": "Nome",
@@ -224,27 +224,27 @@
   "es": {
     "lang": "es",
     "langCode": "es",
-    "title": "PraticOS - Gestion de Ordenes de Servicio Simplificada",
-    "description": "Sistema completo para gestion de ordenes de servicio, clientes y finanzas. Controle su negocio de forma practica y eficiente.",
-    "keywords": "orden de servicio, gestion, clientes, taller, proveedor de servicios, app",
-    "ogTitle": "PraticOS - Gestion de Ordenes de Servicio",
-    "ogDescription": "Sistema completo para gestion de ordenes de servicio, clientes y finanzas.",
+    "title": "PraticOS - Gestión de Órdenes de Servicio Simplificada",
+    "description": "Sistema completo para gestión de órdenes de servicio, clientes y finanzas. Controle su negocio de forma práctica y eficiente.",
+    "keywords": "orden de servicio, gestión, clientes, taller, proveedor de servicios, app",
+    "ogTitle": "PraticOS - Gestión de Órdenes de Servicio",
+    "ogDescription": "Sistema completo para gestión de órdenes de servicio, clientes y finanzas.",
     "hero": {
       "badge": "¡Novedad! Múltiples empresas",
       "title": "Gestione sus",
-      "titleHighlight": "Ordenes de Servicio",
+      "titleHighlight": "Órdenes de Servicio",
       "subtitle": "de forma simple y eficiente",
-      "text": "Sistema completo para proveedores de servicios. Controle clientes, ordenes de servicio y finanzas en un solo lugar.",
+      "text": "Sistema completo para proveedores de servicios. Controle clientes, órdenes de servicio y finanzas en un solo lugar.",
       "ctaPrimary": { "text": "Descargar Gratis", "href": "#download" },
       "ctaSecondary": { "text": "Ver Demo", "href": "#screenshots" },
       "stats": [
         { "value": "500+", "label": "Usuarios activos" },
         { "value": "10k+", "label": "OS creadas" },
-        { "value": "4.8", "label": "Calificacion" }
+        { "value": "4.8", "label": "Calificación" }
       ],
       "phones": {
         "back": { "image": "dashboard.png", "alt": "Dashboard PraticOS" },
-        "front": { "image": "home.png", "alt": "Lista de Ordenes de Servicio" }
+        "front": { "image": "home.png", "alt": "Lista de Órdenes de Servicio" }
       },
       "scroll": "Scroll"
     },
@@ -256,19 +256,19 @@
       "items": [
         {
           "icon": "document",
-          "title": "Ordenes de Servicio",
-          "text": "Cree, edite y siga todas sus ordenes de servicio. Agregue fotos, descripciones detalladas y valores."
+          "title": "Órdenes de Servicio",
+          "text": "Cree, edite y siga todas sus órdenes de servicio. Agregue fotos, descripciones detalladas y valores."
         },
         {
           "icon": "users",
-          "title": "Gestion de Clientes",
+          "title": "Gestión de Clientes",
           "text": "Registre y organice sus clientes. Historial completo de servicios, contactos y valores pendientes.",
           "color": "yellow"
         },
         {
           "icon": "chart",
           "title": "Dashboard Financiero",
-          "text": "Visualice facturacion, valores recibidos y por recibir. Graficos e informes por periodo.",
+          "text": "Visualice facturación, valores recibidos y por recibir. Gráficos e informes por período.",
           "color": "orange"
         },
         {
@@ -280,13 +280,13 @@
         {
           "icon": "settings",
           "title": "Temas Claro/Oscuro",
-          "text": "Interfaz adaptable a su estilo. Soporte nativo a modo claro y oscuro con diseno Material y Cupertino.",
+          "text": "Interfaz adaptable a su estilo. Soporte nativo a modo claro y oscuro con diseño Material y Cupertino.",
           "color": "purple"
         },
         {
           "icon": "shield",
-          "title": "Autenticacion Segura",
-          "text": "Inicio de sesion con Google, Apple o Email. Sus datos protegidos con las mejores practicas de seguridad.",
+          "title": "Autenticación Segura",
+          "text": "Inicio de sesión con Google, Apple o Email. Sus datos protegidos con las mejores prácticas de seguridad.",
           "color": "cyan"
         }
       ]
@@ -295,10 +295,10 @@
       "tag": "Capturas",
       "title": "Conozca la",
       "titleHighlight": "interfaz de la app",
-      "subtitle": "Diseno moderno e intuitivo para la mejor experiencia",
+      "subtitle": "Diseño moderno e intuitivo para la mejor experiencia",
       "items": [
         { "image": "login.png", "alt": "Pantalla de Login", "label": "Login" },
-        { "image": "home.png", "alt": "Ordenes de Servicio", "label": "Ordenes de Servicio" },
+        { "image": "home.png", "alt": "Órdenes de Servicio", "label": "Órdenes de Servicio" },
         { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
         { "image": "customers.png", "alt": "Clientes", "label": "Clientes" },
         { "image": "settings.png", "alt": "Configuraciones", "label": "Configuraciones" }
@@ -307,27 +307,27 @@
     "download": {
       "title": "Descargue ahora y comience a",
       "titleHighlight": "organizar su negocio",
-      "text": "Disponible para iOS y Android. Comience gratis!",
+      "text": "Disponible para iOS y Android. ¡Comience gratis!",
       "appStore": { "label": "Disponible en", "name": "App Store" },
       "playStore": { "label": "Disponible en", "name": "Google Play" }
     },
     "contact": {
       "tag": "Contacto",
-      "title": "Necesita",
+      "title": "¿Necesita",
       "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo esta listo para atenderle",
+      "subtitle": "Nuestro equipo está listo para atenderle",
       "cards": {
         "email": { "title": "Email" },
         "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Politica de privacidad" }
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
       },
       "form": {
         "name": "Nombre",
         "namePlaceholder": "Su nombre",
-        "email": "Correo electronico",
+        "email": "Correo electrónico",
         "emailPlaceholder": "su@email.com",
         "message": "Mensaje",
-        "messagePlaceholder": "Como podemos ayudarle?",
+        "messagePlaceholder": "¿Cómo podemos ayudarle?",
         "submit": "Enviar Mensaje"
       }
     }

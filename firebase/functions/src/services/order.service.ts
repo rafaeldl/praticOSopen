@@ -857,3 +857,28 @@ export async function removePhotoFromOrder(
     updatedAt: new Date().toISOString(),
   });
 }
+
+// ============================================================================
+// Share Link Management
+// ============================================================================
+
+export interface OrderShareLink {
+  token: string;
+  expiresAt: string;
+  permissions: string[];
+}
+
+/**
+ * Update the share link on an order
+ */
+export async function updateOrderShareLink(
+  companyId: string,
+  orderId: string,
+  shareLink: OrderShareLink | null
+): Promise<void> {
+  const collection = getTenantCollection(companyId, 'orders');
+  await updateDocument(collection, orderId, {
+    shareLink,
+    updatedAt: new Date().toISOString(),
+  });
+}

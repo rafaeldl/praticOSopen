@@ -417,10 +417,69 @@ export interface PendingItems {
 
 export interface AuthenticatedRequest extends Request {
   auth?: {
-    type: 'apiKey' | 'bot' | 'bearer';
+    type: 'apiKey' | 'bot' | 'bearer' | 'shareToken';
     companyId: string;
     userId?: string;
     permissions?: string[];
   };
   userContext?: UserContext;
+  shareTokenAuth?: ShareTokenAuth;
+}
+
+// ============================================================================
+// Share Token Types (Customer Magic Link)
+// ============================================================================
+
+export type ShareTokenPermission = 'view' | 'approve' | 'comment';
+
+export interface ShareToken {
+  token: string;                        // "ST_<uuid>"
+  orderId: string;
+  companyId: string;
+  permissions: ShareTokenPermission[];
+  customer: CustomerAggr;
+  createdAt: string;
+  expiresAt: string;
+  createdBy: UserAggr;
+  viewCount: number;
+  lastViewedAt?: string;
+  approvedAt?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+}
+
+export interface ShareTokenAuth {
+  type: 'shareToken';
+  token: string;
+  companyId: string;
+  orderId: string;
+  permissions: ShareTokenPermission[];
+  customer: CustomerAggr;
+}
+
+// ============================================================================
+// Order Comment Types
+// ============================================================================
+
+export type CommentAuthorType = 'customer' | 'internal';
+export type CommentSource = 'app' | 'magicLink' | 'bot';
+
+export interface CommentAuthor {
+  name: string;
+  email?: string;
+  phone?: string;
+  userId?: string;
+}
+
+export interface OrderComment {
+  id: string;
+  text: string;
+  authorType: CommentAuthorType;
+  author: CommentAuthor;
+  source: CommentSource;
+  shareToken?: string;
+  isInternal: boolean;
+  createdAt: string;
+  updatedAt?: string;
+  deleted?: boolean;
 }

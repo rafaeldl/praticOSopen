@@ -1,0 +1,70 @@
+---
+layout: false
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Acompanhe sua OS - PraticOS</title>
+    <meta name="description" content="Acompanhe o status da sua ordem de serviço">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+
+    <!-- Base Styles -->
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/css/order-view.css">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Acompanhe sua OS - PraticOS">
+    <meta property="og:description" content="Visualize detalhes, aprove orçamentos e deixe comentários">
+    <meta property="og:type" content="website">
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0A0E17">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <main class="order-page no-navbar" id="order-page">
+        <!-- Loading State -->
+        <div class="order-loading" id="loading-state">
+            <div class="spinner"></div>
+            <p>Carregando...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="order-error" id="error-state" style="display: none;">
+            <div class="error-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            <h2>Link inválido</h2>
+            <p>Este link expirou ou é inválido. Por favor, solicite um novo link.</p>
+        </div>
+
+        <!-- Order Content -->
+        <div id="order-content" style="display: none;">
+            <!-- Header (populated by JS) -->
+            <header class="order-header"></header>
+
+            <!-- Cards Container -->
+            <div class="order-content">
+                <div class="order-cards"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Order View Script -->
+    <script src="/js/order-view.js"></script>
+</body>
+</html>
