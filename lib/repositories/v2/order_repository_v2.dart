@@ -70,25 +70,37 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
   // ═══════════════════════════════════════════════════════════════════
 
   /// Busca orders que possuem avaliação do cliente.
+  /// Filtra client-side para evitar necessidade de índice composto.
   Future<List<Order>> getRatedOrders(String companyId) async {
     final FirebaseFirestore db = FirebaseFirestore.instance;
 
+    // Query simples sem filtro de rating - filtro feito client-side
+    // Isso evita a necessidade de criar índice composto para rating.score
     final snapshot = await db
         .collection('companies')
         .doc(companyId)
         .collection('orders')
-        .where('rating.score', isGreaterThan: 0)
-        .orderBy('rating.score', descending: true)
-        .orderBy('rating.createdAt', descending: true)
+        .where('status', isEqualTo: 'done')
+        .orderBy('createdAt', descending: true)
         .get();
 
-    return snapshot.docs
+    final orders = snapshot.docs
         .map((doc) {
           final data = doc.data();
           data['id'] = doc.id;
           return Order.fromJson(data);
         })
+        .where((order) => order.rating?.hasRating == true)
         .toList();
+
+    // Sort by rating date (most recent first)
+    orders.sort((a, b) {
+      final aDate = a.rating?.createdAt ?? DateTime(1970);
+      final bDate = b.rating?.createdAt ?? DateTime(1970);
+      return bDate.compareTo(aDate);
+    });
+
+    return orders;
   }
 
   // ═══════════════════════════════════════════════════════════════════
