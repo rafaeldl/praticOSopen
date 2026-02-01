@@ -128,6 +128,10 @@ import servicesRoutes from './routes/v1/services.routes';
 import productsRoutes from './routes/v1/products.routes';
 import companyRoutes from './routes/v1/company.routes';
 import analyticsRoutes from './routes/v1/analytics.routes';
+import shareRoutes from './routes/v1/share.routes';
+
+// Routes - Public (no authentication required)
+import publicOrdersRoutes from './routes/public/orders.routes';
 
 // Routes - User (Flutter app authenticated)
 import userLinkRoutes from './routes/user/link.routes';
@@ -227,6 +231,22 @@ const botLimiter = rateLimit({
   },
 });
 
+// Rate limiter for Public Routes (stricter)
+const publicLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Too many requests, please try again later',
+    },
+  },
+  keyGenerator: (req: Request) => {
+    return req.ip || 'unknown';
+  },
+});
+
 // Health Check
 app.get('/health', (_req: Request, res: Response) => {
   res.json({
@@ -236,9 +256,13 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// Public Routes (no authentication - magic links)
+app.use('/public/orders', publicLimiter, publicOrdersRoutes);
+
 // API Core v1 Routes
 app.use('/v1/auth', authRoutes);
 app.use('/v1/orders', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, ordersRoutes);
+app.use('/v1/orders', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, shareRoutes);
 app.use('/v1/customers', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, customersRoutes);
 app.use('/v1/devices', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, devicesRoutes);
 app.use('/v1/services', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, servicesRoutes);
@@ -248,6 +272,7 @@ app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, anal
 
 // Bearer token routes (for Flutter app)
 app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes);
+app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, shareRoutes);
 app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customersRoutes);
 app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
 

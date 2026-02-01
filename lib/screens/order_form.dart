@@ -31,6 +31,8 @@ import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/screens/pdf_preview_screen.dart';
+import 'package:praticos/screens/widgets/share_link_sheet.dart';
+import 'package:praticos/screens/widgets/order_comments_widget.dart';
 
 class OrderForm extends StatefulWidget {
   @override
@@ -97,6 +99,7 @@ class _OrderFormState extends State<OrderForm> {
                   _buildServicesSection(context, config),
                   _buildProductsSection(context, config),
                   _buildFormsSection(context, config),
+                  _buildCommentsSection(context),
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -488,6 +491,28 @@ class _OrderFormState extends State<OrderForm> {
         );
       }
     }
+  }
+
+  /// Comments section - shows customer and team comments on the order
+  Widget _buildCommentsSection(BuildContext context) {
+    return Observer(
+      builder: (_) {
+        final order = _store.order;
+        // Only show comments section if order is saved (has id and company)
+        if (order?.id == null || order?.company?.id == null) {
+          return const SizedBox.shrink();
+        }
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 16.0),
+          child: OrderCommentsWidget(
+            orderId: order!.id!,
+            companyId: order.company!.id!,
+            showInternalToggle: true,
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildServicesSection(BuildContext context, SegmentConfigProvider config) {
@@ -928,6 +953,14 @@ class _OrderFormState extends State<OrderForm> {
               _showAddPhotoOptions(config);
             },
           ),
+          if (_store.order?.id != null)
+            CupertinoActionSheetAction(
+              child: Text(context.l10n.shareWithCustomer),
+              onPressed: () {
+                Navigator.pop(context);
+                _showShareLinkSheet();
+              },
+            ),
         ],
         cancelButton: CupertinoActionSheetAction(
           isDestructiveAction: canDelete,
@@ -941,6 +974,13 @@ class _OrderFormState extends State<OrderForm> {
         ),
       ),
     );
+  }
+
+  void _showShareLinkSheet() {
+    final order = _store.order;
+    if (order?.id == null || order?.company?.id == null) return;
+
+    ShareLinkSheet.show(context, order!);
   }
 
   void _selectCustomer() {

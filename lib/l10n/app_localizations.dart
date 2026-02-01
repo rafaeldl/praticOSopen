@@ -4803,6 +4803,246 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Receba notificações e gerencie suas OS pelo WhatsApp'**
   String get linkWhatsAppBenefit;
+
+  /// No description provided for @shareWithCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar com Cliente'**
+  String get shareWithCustomer;
+
+  /// No description provided for @shareLinkTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link de Acompanhamento'**
+  String get shareLinkTitle;
+
+  /// No description provided for @shareLinkDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Envie este link para o cliente acompanhar a OS'**
+  String get shareLinkDescription;
+
+  /// No description provided for @linkValidFor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link válido por {days} dias'**
+  String linkValidFor(int days);
+
+  /// No description provided for @canApprove.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode aprovar'**
+  String get canApprove;
+
+  /// No description provided for @canComment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode comentar'**
+  String get canComment;
+
+  /// No description provided for @viewOnly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apenas visualização'**
+  String get viewOnly;
+
+  /// No description provided for @copyLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar Link'**
+  String get copyLink;
+
+  /// No description provided for @sendViaWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar via WhatsApp'**
+  String get sendViaWhatsApp;
+
+  /// No description provided for @shareLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar Link'**
+  String get shareLink;
+
+  /// No description provided for @linkCopied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link copiado!'**
+  String get linkCopied;
+
+  /// No description provided for @generatingLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerando link...'**
+  String get generatingLink;
+
+  /// No description provided for @errorGeneratingLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao gerar link'**
+  String get errorGeneratingLink;
+
+  /// No description provided for @sharePermissions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Permissões do Link'**
+  String get sharePermissions;
+
+  /// No description provided for @shareLinkExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este link expirou'**
+  String get shareLinkExpired;
+
+  /// No description provided for @shareLinkApproved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovado pelo cliente'**
+  String get shareLinkApproved;
+
+  /// No description provided for @shareLinkRejected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitado pelo cliente'**
+  String get shareLinkRejected;
+
+  /// No description provided for @viewCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} {count, plural, =1{visualização} other{visualizações}}'**
+  String viewCount(int count);
+
+  /// No description provided for @revokeLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Revogar Link'**
+  String get revokeLink;
+
+  /// No description provided for @revokeLinkConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja revogar este link? O cliente não poderá mais acessar.'**
+  String get revokeLinkConfirm;
+
+  /// No description provided for @linkRevoked.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link revogado'**
+  String get linkRevoked;
+
+  /// No description provided for @activeLinks.
+  ///
+  /// In pt, this message translates to:
+  /// **'Links Ativos'**
+  String get activeLinks;
+
+  /// No description provided for @noActiveLinks.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum link ativo'**
+  String get noActiveLinks;
+
+  /// No description provided for @noComments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum comentário'**
+  String get noComments;
+
+  /// No description provided for @addComment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar comentário'**
+  String get addComment;
+
+  /// No description provided for @commentPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite seu comentário...'**
+  String get commentPlaceholder;
+
+  /// No description provided for @commentAdded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comentário adicionado'**
+  String get commentAdded;
+
+  /// No description provided for @commentFromCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente'**
+  String get commentFromCustomer;
+
+  /// No description provided for @commentFromTeam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equipe'**
+  String get commentFromTeam;
+
+  /// No description provided for @internalComment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comentário interno'**
+  String get internalComment;
+
+  /// No description provided for @internalCommentHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visível apenas para a equipe'**
+  String get internalCommentHint;
+
+  /// No description provided for @publicComment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comentário público'**
+  String get publicComment;
+
+  /// No description provided for @publicCommentHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visível para o cliente'**
+  String get publicCommentHint;
+
+  /// No description provided for @markAsInternal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar como interno'**
+  String get markAsInternal;
+
+  /// No description provided for @sendComment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar'**
+  String get sendComment;
+
+  /// No description provided for @approveQuoteAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aprovar Orçamento'**
+  String get approveQuoteAction;
+
+  /// No description provided for @rejectQuoteAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rejeitar Orçamento'**
+  String get rejectQuoteAction;
+
+  /// No description provided for @quoteApprovedByCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamento aprovado pelo cliente'**
+  String get quoteApprovedByCustomer;
+
+  /// No description provided for @quoteRejectedByCustomer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamento rejeitado pelo cliente'**
+  String get quoteRejectedByCustomer;
+
+  /// No description provided for @rejectionReason.
+  ///
+  /// In pt, this message translates to:
+  /// **'Motivo da rejeição'**
+  String get rejectionReason;
 }
 
 class _AppLocalizationsDelegate

@@ -2486,4 +2486,136 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get linkWhatsAppBenefit =>
       'Receba notificações e gerencie suas OS pelo WhatsApp';
+
+  @override
+  String get shareWithCustomer => 'Compartilhar com Cliente';
+
+  @override
+  String get shareLinkTitle => 'Link de Acompanhamento';
+
+  @override
+  String get shareLinkDescription =>
+      'Envie este link para o cliente acompanhar a OS';
+
+  @override
+  String linkValidFor(int days) {
+    return 'Link válido por $days dias';
+  }
+
+  @override
+  String get canApprove => 'Pode aprovar';
+
+  @override
+  String get canComment => 'Pode comentar';
+
+  @override
+  String get viewOnly => 'Apenas visualização';
+
+  @override
+  String get copyLink => 'Copiar Link';
+
+  @override
+  String get sendViaWhatsApp => 'Enviar via WhatsApp';
+
+  @override
+  String get shareLink => 'Compartilhar Link';
+
+  @override
+  String get linkCopied => 'Link copiado!';
+
+  @override
+  String get generatingLink => 'Gerando link...';
+
+  @override
+  String get errorGeneratingLink => 'Erro ao gerar link';
+
+  @override
+  String get sharePermissions => 'Permissões do Link';
+
+  @override
+  String get shareLinkExpired => 'Este link expirou';
+
+  @override
+  String get shareLinkApproved => 'Aprovado pelo cliente';
+
+  @override
+  String get shareLinkRejected => 'Rejeitado pelo cliente';
+
+  @override
+  String viewCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'visualizações',
+      one: 'visualização',
+    );
+    return '$count $_temp0';
+  }
+
+  @override
+  String get revokeLink => 'Revogar Link';
+
+  @override
+  String get revokeLinkConfirm =>
+      'Deseja revogar este link? O cliente não poderá mais acessar.';
+
+  @override
+  String get linkRevoked => 'Link revogado';
+
+  @override
+  String get activeLinks => 'Links Ativos';
+
+  @override
+  String get noActiveLinks => 'Nenhum link ativo';
+
+  @override
+  String get noComments => 'Nenhum comentário';
+
+  @override
+  String get addComment => 'Adicionar comentário';
+
+  @override
+  String get commentPlaceholder => 'Digite seu comentário...';
+
+  @override
+  String get commentAdded => 'Comentário adicionado';
+
+  @override
+  String get commentFromCustomer => 'Cliente';
+
+  @override
+  String get commentFromTeam => 'Equipe';
+
+  @override
+  String get internalComment => 'Comentário interno';
+
+  @override
+  String get internalCommentHint => 'Visível apenas para a equipe';
+
+  @override
+  String get publicComment => 'Comentário público';
+
+  @override
+  String get publicCommentHint => 'Visível para o cliente';
+
+  @override
+  String get markAsInternal => 'Marcar como interno';
+
+  @override
+  String get sendComment => 'Enviar';
+
+  @override
+  String get approveQuoteAction => 'Aprovar Orçamento';
+
+  @override
+  String get rejectQuoteAction => 'Rejeitar Orçamento';
+
+  @override
+  String get quoteApprovedByCustomer => 'Orçamento aprovado pelo cliente';
+
+  @override
+  String get quoteRejectedByCustomer => 'Orçamento rejeitado pelo cliente';
+
+  @override
+  String get rejectionReason => 'Motivo da rejeição';
 }

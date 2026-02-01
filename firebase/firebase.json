@@ -20,6 +20,12 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "rewrites": [
+      {
+        "source": "/q/**",
+        "destination": "/order/index.html"
+      }
+    ],
     "i18n": {
       "root": "/"
     }

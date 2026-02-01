@@ -989,5 +989,63 @@
   "errorUnlinking": "Error al desvincular",
   "scanQRCodeOrTapButton": "Escanea el código QR o toca el botón de abajo",
   "linkYourWhatsApp": "Vincula tu WhatsApp",
-  "linkWhatsAppBenefit": "Recibe notificaciones y gestiona tus órdenes de servicio por WhatsApp"
+  "linkWhatsAppBenefit": "Recibe notificaciones y gestiona tus órdenes de servicio por WhatsApp",
+
+  "shareWithCustomer": "Compartir con Cliente",
+  "shareLinkTitle": "Enlace de Seguimiento",
+  "shareLinkDescription": "Envía este enlace al cliente para que siga la orden de servicio",
+  "linkValidFor": "Enlace válido por {days} días",
+  "@linkValidFor": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "canApprove": "Puede aprobar",
+  "canComment": "Puede comentar",
+  "viewOnly": "Solo visualización",
+  "copyLink": "Copiar Enlace",
+  "sendViaWhatsApp": "Enviar vía WhatsApp",
+  "shareLink": "Compartir Enlace",
+  "linkCopied": "¡Enlace copiado!",
+  "generatingLink": "Generando enlace...",
+  "errorGeneratingLink": "Error al generar enlace",
+  "sharePermissions": "Permisos del Enlace",
+  "shareLinkExpired": "Este enlace ha expirado",
+  "shareLinkApproved": "Aprobado por el cliente",
+  "shareLinkRejected": "Rechazado por el cliente",
+  "viewCount": "{count} {count, plural, =1{visualización} other{visualizaciones}}",
+  "@viewCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "revokeLink": "Revocar Enlace",
+  "revokeLinkConfirm": "¿Deseas revocar este enlace? El cliente ya no podrá acceder.",
+  "linkRevoked": "Enlace revocado",
+  "activeLinks": "Enlaces Activos",
+  "noActiveLinks": "Sin enlaces activos",
+
+  "comments": "Comentarios",
+  "noComments": "Sin comentarios",
+  "addComment": "Agregar comentario",
+  "commentPlaceholder": "Escribe tu comentario...",
+  "commentAdded": "Comentario agregado",
+  "commentFromCustomer": "Cliente",
+  "commentFromTeam": "Equipo",
+  "internalComment": "Comentario interno",
+  "internalCommentHint": "Visible solo para el equipo",
+  "publicComment": "Comentario público",
+  "publicCommentHint": "Visible para el cliente",
+  "markAsInternal": "Marcar como interno",
+  "sendComment": "Enviar",
+
+  "approveQuoteAction": "Aprobar Presupuesto",
+  "rejectQuoteAction": "Rechazar Presupuesto",
+  "quoteApprovedByCustomer": "Presupuesto aprobado por el cliente",
+  "quoteRejectedByCustomer": "Presupuesto rechazado por el cliente",
+  "rejectionReason": "Motivo del rechazo"
 }
