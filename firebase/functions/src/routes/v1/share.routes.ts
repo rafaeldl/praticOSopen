@@ -74,6 +74,13 @@ router.post('/:orderId/share', async (req: AuthenticatedRequest, res: Response) 
     const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
     const shareUrl = `${baseUrl}/q/${shareToken.token}`;
 
+    // Save share link reference to order document
+    await orderService.updateOrderShareLink(companyId, orderId, {
+      token: shareToken.token,
+      expiresAt: shareToken.expiresAt,
+      permissions: requestedPermissions,
+    });
+
     res.status(201).json({
       success: true,
       data: {
@@ -171,6 +178,9 @@ router.delete('/:orderId/share/:token', async (req: AuthenticatedRequest, res: R
     }
 
     await shareTokenService.revokeShareToken(token);
+
+    // Clear share link reference from order document
+    await orderService.updateOrderShareLink(companyId, shareToken.orderId, null);
 
     res.json({
       success: true,

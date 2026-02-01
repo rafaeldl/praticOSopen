@@ -12,6 +12,10 @@ Este documento fornece contexto e diretrizes para Claude Code trabalhar no proje
 - **MobX**: Gerenciamento de estado reativo
 - **Fastlane**: Automação de deploy (iOS/Android)
 
+### URLs do Projeto
+- **Web App (Cliente)**: `https://praticos.web.app/`
+- **Share Links**: `https://praticos.web.app/q/{token}`
+
 ### Arquitetura em Camadas
 
 ```

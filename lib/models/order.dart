@@ -36,6 +36,9 @@ class Order extends BaseAuditCompany {
   /// Técnico atribuído à OS (para controle de acesso RBAC)
   UserAggr? assignedTo;
 
+  /// Link de compartilhamento ativo
+  OrderShareLink? shareLink;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 
@@ -144,4 +147,27 @@ class OrderService {
   factory OrderService.fromJson(Map<String, dynamic> json) =>
       _$OrderServiceFromJson(json);
   Map<String, dynamic> toJson() => _$OrderServiceToJson(this);
+}
+
+/// Link de compartilhamento da OS
+@JsonSerializable()
+class OrderShareLink {
+  String? token;
+  DateTime? expiresAt;
+  List<String>? permissions;
+
+  OrderShareLink();
+
+  /// Verifica se o link está expirado
+  bool get isExpired {
+    if (expiresAt == null) return false;
+    return DateTime.now().isAfter(expiresAt!);
+  }
+
+  /// Retorna a URL completa do link
+  String? get url => token != null ? 'https://praticos.web.app/q/$token' : null;
+
+  factory OrderShareLink.fromJson(Map<String, dynamic> json) =>
+      _$OrderShareLinkFromJson(json);
+  Map<String, dynamic> toJson() => _$OrderShareLinkToJson(this);
 }

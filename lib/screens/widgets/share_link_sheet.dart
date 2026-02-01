@@ -20,7 +20,11 @@ class ShareLinkSheet extends StatefulWidget {
   State<ShareLinkSheet> createState() => _ShareLinkSheetState();
 
   /// Show the share link sheet as a modal popup
-  static Future<void> show(BuildContext context, Order order, {String? companyName}) {
+  static Future<void> show(
+    BuildContext context,
+    Order order, {
+    String? companyName,
+  }) {
     return showCupertinoModalPopup(
       context: context,
       builder: (context) => ShareLinkSheet(
@@ -55,15 +59,30 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
       _errorMessage = null;
     });
 
-    try {
-      // Try to fetch existing tokens first
-      final tokens = await _service.getShareTokens(widget.order.id!);
+    // First check if order already has a valid share link
+    final existingLink = widget.order.shareLink;
+    if (existingLink != null && !existingLink.isExpired && existingLink.token != null) {
+      setState(() {
+        _result = ShareLinkResult()
+          ..token = existingLink.token
+          ..permissions = existingLink.permissions
+          ..expiresAt = existingLink.expiresAt
+          ..customer = widget.order.customer;
+        _result!.url = existingLink.url;
+        _isReusing = true;
+        _canApprove = existingLink.permissions?.contains('approve') ?? false;
+        _canComment = existingLink.permissions?.contains('comment') ?? false;
+        _isLoading = false;
+      });
+      return;
+    }
 
-      // Filter active tokens (not expired)
+    // If no local link, fetch from API or generate new
+    try {
+      final tokens = await _service.getShareTokens(widget.order.id!);
       final activeTokens = tokens.where((t) => !t.isExpired).toList();
 
       if (activeTokens.isNotEmpty) {
-        // Use existing active token
         final token = activeTokens.first;
         setState(() {
           _result = ShareLinkResult()
@@ -71,19 +90,16 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
             ..permissions = token.permissions
             ..expiresAt = token.expiresAt
             ..customer = token.customer;
-          // Build URL from token
-          _result!.url = 'https://app.praticos.com/c/${token.token}';
+          _result!.url = 'https://praticos.web.app/q/${token.token}';
           _isReusing = true;
           _canApprove = token.permissions?.contains('approve') ?? false;
           _canComment = token.permissions?.contains('comment') ?? false;
           _isLoading = false;
         });
       } else {
-        // No active tokens, generate new
         await _generateLink();
       }
     } catch (e) {
-      // If fetching existing fails, just generate new
       await _generateLink();
     }
   }
@@ -156,6 +172,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
         _result = result;
         _isLoading = false;
       });
+      // Share link is saved to order by the API
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -225,26 +242,75 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
         Future.delayed(const Duration(seconds: 2), () {
           if (context.mounted) Navigator.of(context).pop();
         });
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 100),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            decoration: BoxDecoration(
-              color: CupertinoColors.systemGrey.darkColor,
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: CupertinoColors.white,
-                fontSize: 15,
+        return DefaultTextStyle(
+          style: const TextStyle(
+            fontFamily: '.SF Pro Text',
+            decoration: TextDecoration.none,
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 100),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGrey.darkColor,
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: Text(
+                message,
+                style: const TextStyle(
+                  color: CupertinoColors.white,
+                  fontSize: 15,
+                ),
               ),
             ),
           ),
         );
       },
     );
+  }
+
+  void _confirmRevokeLink() {
+    showCupertinoDialog(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(context.l10n.revokeLink),
+        content: Text(context.l10n.revokeLinkConfirm),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              _revokeLink();
+            },
+            child: Text(context.l10n.revokeLink),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _revokeLink() async {
+    if (_result?.token == null) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      await _service.revokeShareToken(widget.order.id!, _result!.token!);
+      // Share link is cleared from order by the API
+
+      if (mounted) {
+        Navigator.pop(context);
+        _showCupertinoToast(context.l10n.linkRevoked);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showCupertinoToast(e.toString());
+    }
   }
 
   @override
@@ -723,7 +789,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
               ),
             ),
           // Reusing existing link indicator
-          if (_isReusing)
+          if (_isReusing) ...[
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Row(
@@ -756,6 +822,28 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
                 ],
               ),
             ),
+            // Revoke link button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: SizedBox(
+                width: double.infinity,
+                child: CupertinoButton(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  color: CupertinoColors.systemRed.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  onPressed: _confirmRevokeLink,
+                  child: Text(
+                    context.l10n.revokeLink,
+                    style: const TextStyle(
+                      color: CupertinoColors.systemRed,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
         ],
       ),

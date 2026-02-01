@@ -17,8 +17,13 @@ import 'dart:io';
 
 class OrderPhotosWidget extends StatelessWidget {
   final OrderStore store;
+  final VoidCallback? onAddPhoto;
 
-  const OrderPhotosWidget({super.key, required this.store});
+  const OrderPhotosWidget({
+    super.key,
+    required this.store,
+    this.onAddPhoto,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,23 +52,99 @@ class OrderPhotosWidget extends StatelessWidget {
           );
         }
 
-        // Don't show anything if no photos
-        if (store.photos.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        // Show photos grid
+        // Show photos grid (or just add button if no photos)
         return _buildPhotosGrid(context, config);
       },
     );
   }
 
   Widget _buildPhotosGrid(BuildContext context, SegmentConfigProvider config) {
-    if (store.photos.isEmpty) return const SizedBox.shrink();
+    final hasPhotos = store.photos.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: _buildCoverPhoto(context, config),
+      child: Column(
+        children: [
+          if (hasPhotos) ...[
+            _buildCoverPhoto(context, config),
+            const SizedBox(height: 12),
+          ],
+          _buildThumbnailRow(context, config),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThumbnailRow(BuildContext context, SegmentConfigProvider config) {
+    const double thumbSize = 56;
+    const double spacing = 8;
+
+    return SizedBox(
+      height: thumbSize,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: store.photos.length + 1, // +1 for add button
+        separatorBuilder: (_, __) => const SizedBox(width: spacing),
+        itemBuilder: (context, index) {
+          // First item is the add photo button
+          if (index == 0) {
+            return _buildAddPhotoButton(context, thumbSize);
+          }
+
+          // Photo thumbnails (index - 1 because first item is add button)
+          final photoIndex = index - 1;
+          final photo = store.photos[photoIndex];
+          final isSelected = photoIndex == 0; // First photo is cover
+
+          return GestureDetector(
+            onTap: () => _showPhotoViewer(context, photoIndex, config),
+            child: Container(
+              width: thumbSize,
+              height: thumbSize,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: isSelected
+                    ? Border.all(
+                        color: CupertinoColors.activeBlue,
+                        width: 2,
+                      )
+                    : null,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(isSelected ? 6 : 8),
+                child: CachedImage.cover(
+                  imageUrl: photo.url!,
+                  height: thumbSize,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAddPhotoButton(BuildContext context, double size) {
+    return GestureDetector(
+      onTap: onAddPhoto,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemGrey6.resolveFrom(context),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: CupertinoColors.systemGrey4.resolveFrom(context),
+            width: 1,
+          ),
+        ),
+        child: Icon(
+          CupertinoIcons.camera_fill,
+          color: CupertinoColors.systemGrey.resolveFrom(context),
+          size: 24,
+        ),
+      ),
     );
   }
 

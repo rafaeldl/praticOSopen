@@ -30,7 +30,7 @@ import 'package:praticos/screens/forms/form_fill_screen.dart';
 
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
-import 'package:praticos/screens/pdf_preview_screen.dart';
+import 'package:praticos/services/share_link_service.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
 
@@ -93,7 +93,7 @@ class _OrderFormState extends State<OrderForm> {
               top: false,
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildPhotosSection(context),
+                  _buildPhotosSection(context, config),
                   _buildClientDeviceSection(context, config),
                   _buildSummarySection(context, config),
                   _buildServicesSection(context, config),
@@ -122,28 +122,38 @@ class _OrderFormState extends State<OrderForm> {
           );
         },
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: const Icon(CupertinoIcons.camera),
-            onPressed: () => _showAddPhotoOptions(config),
-          ),
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            child: const Icon(CupertinoIcons.ellipsis_circle),
-            onPressed: () => _showActionSheet(context, config),
-          ),
-        ],
+      trailing: Observer(
+        builder: (_) {
+          final order = _store.orderStream?.value;
+          final hasOrder = order?.id != null;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hasOrder)
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _shareOrShowSheet,
+                  child: const Icon(CupertinoIcons.share),
+                ),
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => _showActionSheet(context, config),
+                child: const Icon(CupertinoIcons.ellipsis_circle),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildPhotosSection(BuildContext context) {
+  Widget _buildPhotosSection(BuildContext context, SegmentConfigProvider config) {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      child: OrderPhotosWidget(store: _store),
+      child: OrderPhotosWidget(
+        store: _store,
+        onAddPhoto: () => _showAddPhotoOptions(config),
+      ),
     );
   }
 
@@ -917,7 +927,7 @@ class _OrderFormState extends State<OrderForm> {
   void _showActionSheet(BuildContext context, SegmentConfigProvider config) {
     // Verificar se o usuário pode visualizar valores (necessário para gerar PDF completo)
     final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
-    
+
     // Verificar permissão de exclusão usando RBAC
     bool canDelete = false;
     if (_store.order != null) {
@@ -927,25 +937,7 @@ class _OrderFormState extends State<OrderForm> {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
-        title: Text('${context.l10n.options} ${config.serviceOrder}'),
         actions: <CupertinoActionSheetAction>[
-          // Apenas exibir opções de PDF para usuários com acesso a valores
-          if (canViewPrices) ...[
-            CupertinoActionSheetAction(
-              child: Text('${context.l10n.preview} PDF'),
-              onPressed: () {
-                Navigator.pop(context);
-                _onPreview(context, _store.order, config);
-              },
-            ),
-            CupertinoActionSheetAction(
-              child: Text('${context.l10n.share} PDF'),
-              onPressed: () {
-                Navigator.pop(context);
-                _onShare(context, _store.order, config);
-              },
-            ),
-          ],
           CupertinoActionSheetAction(
             child: Text(config.label(LabelKeys.addPhoto)),
             onPressed: () {
@@ -953,33 +945,82 @@ class _OrderFormState extends State<OrderForm> {
               _showAddPhotoOptions(config);
             },
           ),
+          // Enviar link para cliente
           if (_store.order?.id != null)
             CupertinoActionSheetAction(
               child: Text(context.l10n.shareWithCustomer),
               onPressed: () {
                 Navigator.pop(context);
-                _showShareLinkSheet();
+                _openShareLinkSheet();
+              },
+            ),
+          // Compartilhar PDF para usuários com acesso a valores
+          if (canViewPrices)
+            CupertinoActionSheetAction(
+              child: Text('${context.l10n.share} PDF'),
+              onPressed: () {
+                Navigator.pop(context);
+                _onShare(context, _store.order, config);
+              },
+            ),
+          // Excluir OS (se permitido)
+          if (canDelete)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              child: Text('${context.l10n.delete} ${config.serviceOrder}'),
+              onPressed: () {
+                Navigator.pop(context);
+                _showDeleteConfirmation(config);
               },
             ),
         ],
         cancelButton: CupertinoActionSheetAction(
-          isDestructiveAction: canDelete,
-          child: Text(canDelete ? '${context.l10n.delete} ${config.serviceOrder}' : context.l10n.cancel),
-          onPressed: () {
-            Navigator.pop(context);
-            if (canDelete) {
-              _showDeleteConfirmation(config);
-            }
-          },
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
     );
   }
 
-  void _showShareLinkSheet() {
+  /// Share directly if link exists, otherwise open sheet
+  Future<void> _shareOrShowSheet() async {
     final order = _store.order;
     if (order?.id == null || order?.company?.id == null) return;
 
+    // Check if order has an active share link
+    final shareLink = order!.shareLink;
+    if (shareLink != null && !shareLink.isExpired && shareLink.url != null) {
+      // Has active link - share directly
+      final service = ShareLinkService.instance;
+      final message = service.buildShareMessage(
+        customerName: order.customer?.name ?? '',
+        orderNumber: order.number ?? 0,
+        companyName: order.company?.name,
+        locale: context.l10n.localeName,
+      );
+
+      // Get share position for iPad
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin = box != null
+          ? box.localToGlobal(Offset.zero) & box.size
+          : null;
+
+      await service.shareViaSheet(
+        url: shareLink.url!,
+        message: message,
+        subject: '${context.l10n.order} #${order.number}',
+        sharePositionOrigin: sharePositionOrigin,
+      );
+    } else if (mounted) {
+      // No active link - show sheet to create one
+      ShareLinkSheet.show(context, order);
+    }
+  }
+
+  /// Always open the share link sheet (for menu item)
+  void _openShareLinkSheet() {
+    final order = _store.order;
+    if (order?.id == null) return;
     ShareLinkSheet.show(context, order!);
   }
 
@@ -1349,110 +1390,6 @@ class _OrderFormState extends State<OrderForm> {
     return FormatService().formatCurrency(total ?? 0.0);
   }
   
-  // PDF Preview Logic - Navigate to preview screen
-  _onPreview(BuildContext context, Order? order, SegmentConfigProvider config) async {
-    if (order == null) return;
-
-    // Store navigator reference before async operations
-    final navigator = Navigator.of(context, rootNavigator: true);
-
-    // Create PDF localizations from context before async operations
-    final pdfLocalizations = PdfLocalizations.fromContext(context);
-
-    showCupertinoDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return CupertinoAlertDialog(
-          content: Column(
-            children: [
-              const CupertinoActivityIndicator(),
-              const SizedBox(height: 10),
-              Text('${context.l10n.loading}...'),
-            ],
-          ),
-        );
-      },
-    );
-
-    try {
-      // 1. Coletar dados
-      CompanyStore companyStore = CompanyStore();
-      Company company = await companyStore.retrieveCompany(order.company!.id);
-
-      Customer? customer;
-      if (order.customer != null) {
-        if (order.customer!.id != null && _store.companyId != null) {
-          try {
-            CustomerStore customerStore = CustomerStore();
-            customerStore.companyId = _store.companyId;
-            customer = await customerStore.retrieveCustomer(order.customer!.id);
-          } catch (e) {
-            // Silently fail and use fallback
-          }
-        }
-
-        // Fallback: usar dados do agregado se a busca falhou
-        customer ??= Customer()
-          ..id = order.customer!.id
-          ..name = order.customer!.name
-          ..phone = order.customer!.phone
-          ..email = order.customer!.email;
-      }
-
-      // 2. Buscar formularios anexados a OS
-      List<of_model.OrderForm> forms = [];
-      if (_store.companyId != null && order.id != null) {
-        forms = await _formsService
-            .getOrderForms(_store.companyId!, order.id!)
-            .first;
-      }
-
-      // 3. Criar dados para o PDF
-      final pdfData = OsPdfData(
-        order: order,
-        customer: customer,
-        company: company,
-        forms: forms,
-        config: config,
-        localizations: pdfLocalizations,
-      );
-
-      // 4. Fechar dialog de loading
-      if (mounted) {
-        navigator.pop();
-      }
-
-      // 5. Navegar para tela de preview
-      if (mounted) {
-        Navigator.push(
-          context,
-          CupertinoPageRoute(
-            builder: (context) => PdfPreviewScreen(pdfData: pdfData),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        navigator.pop();
-
-        showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: Text(context.l10n.errorOccurred),
-            content: Text('${context.l10n.errorOccurred}: $e'),
-            actions: [
-              CupertinoDialogAction(
-                child: Text(context.l10n.ok),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        );
-      }
-    }
-  }
-
   // PDF Generation Logic - Usando novo PdfService
   _onShare(BuildContext context, Order? order, SegmentConfigProvider config) async {
     if (order == null) return;

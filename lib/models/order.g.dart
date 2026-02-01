@@ -54,7 +54,10 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
       .toList()
   ..assignedTo = json['assignedTo'] == null
       ? null
-      : UserAggr.fromJson(json['assignedTo'] as Map<String, dynamic>);
+      : UserAggr.fromJson(json['assignedTo'] as Map<String, dynamic>)
+  ..shareLink = json['shareLink'] == null
+      ? null
+      : OrderShareLink.fromJson(json['shareLink'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'id': instance.id,
@@ -79,6 +82,7 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'paidAmount': instance.paidAmount,
   'transactions': instance.transactions?.map((e) => e.toJson()).toList(),
   'assignedTo': instance.assignedTo?.toJson(),
+  'shareLink': instance.shareLink?.toJson(),
 };
 
 OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()
@@ -130,4 +134,21 @@ Map<String, dynamic> _$OrderServiceToJson(OrderService instance) =>
       'description': instance.description,
       'value': instance.value,
       'photo': instance.photo,
+    };
+
+OrderShareLink _$OrderShareLinkFromJson(Map<String, dynamic> json) =>
+    OrderShareLink()
+      ..token = json['token'] as String?
+      ..expiresAt = json['expiresAt'] == null
+          ? null
+          : DateTime.parse(json['expiresAt'] as String)
+      ..permissions = (json['permissions'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList();
+
+Map<String, dynamic> _$OrderShareLinkToJson(OrderShareLink instance) =>
+    <String, dynamic>{
+      'token': instance.token,
+      'expiresAt': instance.expiresAt?.toIso8601String(),
+      'permissions': instance.permissions,
     };
