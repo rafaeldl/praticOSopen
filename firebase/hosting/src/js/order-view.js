@@ -86,7 +86,14 @@
             alreadyApproved: 'Este orçamento já foi aprovado',
             alreadyRejected: 'Este orçamento foi rejeitado',
             poweredBy: 'Powered by',
-            team: 'Equipe'
+            team: 'Equipe',
+            rateService: 'Avalie nosso serviço',
+            rateDescription: 'Como foi sua experiência? Sua avaliação nos ajuda a melhorar.',
+            rateCommentPlaceholder: 'Deixe um comentário sobre o serviço (opcional)',
+            rateSubmit: 'Enviar Avaliação',
+            rateSuccess: 'Obrigado pela sua avaliação!',
+            rateAlreadyRated: 'Este serviço já foi avaliado',
+            yourRating: 'Sua Avaliação'
         },
         en: {
             loading: 'Loading...',
@@ -121,7 +128,14 @@
             alreadyApproved: 'This quote has already been approved',
             alreadyRejected: 'This quote has been rejected',
             poweredBy: 'Powered by',
-            team: 'Team'
+            team: 'Team',
+            rateService: 'Rate our service',
+            rateDescription: 'How was your experience? Your feedback helps us improve.',
+            rateCommentPlaceholder: 'Leave a comment about the service (optional)',
+            rateSubmit: 'Submit Rating',
+            rateSuccess: 'Thank you for your rating!',
+            rateAlreadyRated: 'This service has already been rated',
+            yourRating: 'Your Rating'
         },
         es: {
             loading: 'Cargando...',
@@ -156,7 +170,14 @@
             alreadyApproved: 'Este presupuesto ya ha sido aprobado',
             alreadyRejected: 'Este presupuesto ha sido rechazado',
             poweredBy: 'Powered by',
-            team: 'Equipo'
+            team: 'Equipo',
+            rateService: 'Califica nuestro servicio',
+            rateDescription: '¿Cómo fue tu experiencia? Tu opinión nos ayuda a mejorar.',
+            rateCommentPlaceholder: 'Deja un comentario sobre el servicio (opcional)',
+            rateSubmit: 'Enviar Calificación',
+            rateSuccess: '¡Gracias por tu calificación!',
+            rateAlreadyRated: 'Este servicio ya ha sido calificado',
+            yourRating: 'Tu Calificación'
         }
     };
     const text = ui[lang] || ui['pt'];
@@ -255,6 +276,11 @@
         // Render action buttons if quote status and has approve permission
         if (order.status === 'quote' && permissions.includes('approve')) {
             renderActionButtons();
+        }
+
+        // Render rating section if order is done
+        if (order.status === 'done') {
+            renderRatingSection(order);
         }
 
         // Render comments if has comment permission
@@ -619,6 +645,132 @@
         container.appendChild(section);
     }
 
+    // Rating state
+    let selectedRating = 0;
+
+    // Render rating section (for completed orders)
+    function renderRatingSection(order) {
+        const container = document.querySelector('.order-cards');
+        const section = document.createElement('div');
+        section.className = 'rating-section order-card';
+
+        // Star SVG
+        const starSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+
+        // Check if already rated
+        if (order.rating?.score) {
+            // Display existing rating (read-only)
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                const isFilled = i <= order.rating.score;
+                starsHtml += `<svg viewBox="0 0 24 24" ${isFilled ? 'fill="#FFD700" stroke="#FFD700"' : 'fill="none" stroke="currentColor" class="empty"'} stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+            }
+
+            section.innerHTML = `
+                <div class="card-header">
+                    <svg viewBox="0 0 24 24" fill="#FFD700" stroke="#FFD700" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <h3>${text.yourRating}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="rating-display">
+                        <div class="rating-stars-display">${starsHtml}</div>
+                        <div class="rating-score-text">${order.rating.score}/5</div>
+                        ${order.rating.comment ? `<div class="rating-comment-display">"${order.rating.comment}"</div>` : ''}
+                        <div class="rating-customer-name">— ${order.rating.customerName}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Show rating form
+            let starsHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                starsHtml += `<button class="star-rating-btn" data-rating="${i}" onclick="orderView.setRating(${i})">${starSvg}</button>`;
+            }
+
+            section.innerHTML = `
+                <div class="card-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <h3>${text.rateService}</h3>
+                </div>
+                <div class="card-body">
+                    <p class="rating-description">${text.rateDescription}</p>
+                    <div class="star-rating" id="star-rating">${starsHtml}</div>
+                    <textarea class="rating-comment-input" id="rating-comment" placeholder="${text.rateCommentPlaceholder}" maxlength="500"></textarea>
+                    <button class="btn-rating-submit" id="rating-submit" disabled onclick="orderView.submitRating()">${text.rateSubmit}</button>
+                </div>
+            `;
+        }
+
+        container.appendChild(section);
+
+        // Add hover effects for stars
+        if (!order.rating?.score) {
+            const starBtns = section.querySelectorAll('.star-rating-btn');
+            starBtns.forEach((btn, index) => {
+                btn.addEventListener('mouseenter', () => {
+                    starBtns.forEach((b, i) => {
+                        b.classList.toggle('hover', i <= index);
+                    });
+                });
+                btn.addEventListener('mouseleave', () => {
+                    starBtns.forEach((b, i) => {
+                        b.classList.remove('hover');
+                        b.classList.toggle('active', i < selectedRating);
+                    });
+                });
+            });
+        }
+    }
+
+    // Set rating
+    function setRating(rating) {
+        selectedRating = rating;
+        const starBtns = document.querySelectorAll('.star-rating-btn');
+        starBtns.forEach((btn, i) => {
+            btn.classList.toggle('active', i < rating);
+        });
+        document.getElementById('rating-submit').disabled = false;
+    }
+
+    // Submit rating
+    async function submitRating() {
+        if (selectedRating < 1 || selectedRating > 5) return;
+
+        const btn = document.getElementById('rating-submit');
+        const comment = document.getElementById('rating-comment')?.value?.trim() || '';
+
+        btn.disabled = true;
+        btn.textContent = '...';
+
+        try {
+            const response = await fetch(`${API_BASE}/public/orders/${token}/rating`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    score: selectedRating,
+                    comment: comment || undefined
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showToast(text.rateSuccess, 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                throw new Error(result.error?.message);
+            }
+        } catch (error) {
+            showToast(error.message || text.error, 'error');
+            btn.disabled = false;
+            btn.textContent = text.rateSubmit;
+        }
+    }
+
     // Render action buttons
     function renderActionButtons() {
         const container = document.querySelector('.order-cards');
@@ -926,7 +1078,9 @@
         openLightbox,
         closeLightbox,
         prevPhoto,
-        nextPhoto
+        nextPhoto,
+        setRating,
+        submitRating
     };
 
     // Start

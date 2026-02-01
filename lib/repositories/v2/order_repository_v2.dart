@@ -66,6 +66,32 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
   }
 
   // ═══════════════════════════════════════════════════════════════════
+  // Ratings Support
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Busca orders que possuem avaliação do cliente.
+  Future<List<Order>> getRatedOrders(String companyId) async {
+    final FirebaseFirestore db = FirebaseFirestore.instance;
+
+    final snapshot = await db
+        .collection('companies')
+        .doc(companyId)
+        .collection('orders')
+        .where('rating.score', isGreaterThan: 0)
+        .orderBy('rating.score', descending: true)
+        .orderBy('rating.createdAt', descending: true)
+        .get();
+
+    return snapshot.docs
+        .map((doc) {
+          final data = doc.data();
+          data['id'] = doc.id;
+          return Order.fromJson(data);
+        })
+        .toList();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
   // Pagination Support
   // ═══════════════════════════════════════════════════════════════════
 

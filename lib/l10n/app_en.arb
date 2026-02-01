@@ -1057,5 +1057,31 @@
   "generateNewLink": "Generate new",
   "loadingExistingLinks": "Checking existing links...",
   "advancedOptions": "Advanced options",
-  "sendToCustomer": "Send to customer"
+  "sendToCustomer": "Send to customer",
+
+  "rating": "Rating",
+  "ratings": "Ratings",
+  "averageRating": "Average rating",
+  "totalRatings": "Total ratings",
+  "noRatingsYet": "No ratings yet",
+  "rateService": "Rate our service",
+  "rateSubmit": "Submit Rating",
+  "rateSuccess": "Thank you for your rating!",
+  "ratingScore": "{score}/5",
+  "@ratingScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "customerRating": "Customer Rating",
+  "ratingWithStars": "{count} {count, plural, =1{star} other{stars}}",
+  "@ratingWithStars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

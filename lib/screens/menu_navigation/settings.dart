@@ -259,6 +259,15 @@ class _SettingsState extends State<Settings> {
                         title: context.l10n.procedures,
                         onTap: () => Navigator.pushNamed(context, '/form_template_list'),
                       ),
+
+                    // Avaliações - Admin/Manager podem visualizar
+                    if (canManageCompany)
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.star_fill,
+                        color: const Color(0xFFFFD700),
+                        title: context.l10n.ratings,
+                        onTap: () => Navigator.pushNamed(context, '/ratings'),
+                      ),
                   ],
                 );
               }),

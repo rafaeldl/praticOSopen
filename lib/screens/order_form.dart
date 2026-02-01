@@ -100,6 +100,7 @@ class _OrderFormState extends State<OrderForm> {
                   _buildProductsSection(context, config),
                   _buildFormsSection(context, config),
                   _buildCommentsSection(context),
+                  _buildRatingSection(context),
                   const SizedBox(height: 40),
                 ]),
               ),
@@ -520,6 +521,99 @@ class _OrderFormState extends State<OrderForm> {
             companyId: order.company!.id!,
             showInternalToggle: true,
           ),
+        );
+      },
+    );
+  }
+
+  /// Rating section - shows customer rating for completed orders
+  Widget _buildRatingSection(BuildContext context) {
+    return Observer(
+      builder: (_) {
+        final order = _store.order;
+        final rating = order?.rating;
+
+        // Only show rating if order has one
+        if (rating == null || !rating.hasRating) {
+          return const SizedBox.shrink();
+        }
+
+        return _buildGroupedSection(
+          header: context.l10n.customerRating.toUpperCase(),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Star rating display
+                  Row(
+                    children: [
+                      ...List.generate(5, (index) {
+                        return Icon(
+                          index < (rating.score ?? 0)
+                              ? CupertinoIcons.star_fill
+                              : CupertinoIcons.star,
+                          color: index < (rating.score ?? 0)
+                              ? const Color(0xFFFFD700)
+                              : CupertinoColors.systemGrey3.resolveFrom(context),
+                          size: 24,
+                        );
+                      }),
+                      const SizedBox(width: 12),
+                      Text(
+                        context.l10n.ratingScore(rating.score ?? 0),
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: CupertinoColors.label.resolveFrom(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // Comment if exists
+                  if (rating.comment != null && rating.comment!.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemGrey6.resolveFrom(context),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '"${rating.comment}"',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontStyle: FontStyle.italic,
+                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                        ),
+                      ),
+                    ),
+                  ],
+                  // Customer name and date
+                  const SizedBox(height: 8),
+                  Text(
+                    '— ${rating.customerName ?? context.l10n.customer}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                    ),
+                  ),
+                  if (rating.createdAt != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      FormatService().formatDateTime(rating.createdAt!),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         );
       },
     );

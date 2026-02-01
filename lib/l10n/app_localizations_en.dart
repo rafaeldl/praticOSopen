@@ -2633,4 +2633,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sendToCustomer => 'Send to customer';
+
+  @override
+  String get rating => 'Rating';
+
+  @override
+  String get ratings => 'Ratings';
+
+  @override
+  String get averageRating => 'Average rating';
+
+  @override
+  String get totalRatings => 'Total ratings';
+
+  @override
+  String get noRatingsYet => 'No ratings yet';
+
+  @override
+  String get rateService => 'Rate our service';
+
+  @override
+  String get rateSubmit => 'Submit Rating';
+
+  @override
+  String get rateSuccess => 'Thank you for your rating!';
+
+  @override
+  String ratingScore(int score) {
+    return '$score/5';
+  }
+
+  @override
+  String get customerRating => 'Customer Rating';
+
+  @override
+  String ratingWithStars(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'stars',
+      one: 'star',
+    );
+    return '$count $_temp0';
+  }
 }

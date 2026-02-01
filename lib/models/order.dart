@@ -39,6 +39,9 @@ class Order extends BaseAuditCompany {
   /// Link de compartilhamento ativo
   OrderShareLink? shareLink;
 
+  /// Avaliação do cliente
+  OrderRating? rating;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 
@@ -170,4 +173,29 @@ class OrderShareLink {
   factory OrderShareLink.fromJson(Map<String, dynamic> json) =>
       _$OrderShareLinkFromJson(json);
   Map<String, dynamic> toJson() => _$OrderShareLinkToJson(this);
+}
+
+/// Customer rating for completed orders
+@JsonSerializable()
+class OrderRating {
+  /// Rating score from 1 to 5 stars
+  int? score;
+
+  /// Optional customer comment (max 500 chars)
+  String? comment;
+
+  /// When the rating was submitted
+  DateTime? createdAt;
+
+  /// Name of the customer who rated
+  String? customerName;
+
+  OrderRating();
+
+  /// Returns true if the order has a valid rating
+  bool get hasRating => score != null && score! >= 1 && score! <= 5;
+
+  factory OrderRating.fromJson(Map<String, dynamic> json) =>
+      _$OrderRatingFromJson(json);
+  Map<String, dynamic> toJson() => _$OrderRatingToJson(this);
 }

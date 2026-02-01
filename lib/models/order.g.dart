@@ -57,7 +57,10 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
       : UserAggr.fromJson(json['assignedTo'] as Map<String, dynamic>)
   ..shareLink = json['shareLink'] == null
       ? null
-      : OrderShareLink.fromJson(json['shareLink'] as Map<String, dynamic>);
+      : OrderShareLink.fromJson(json['shareLink'] as Map<String, dynamic>)
+  ..rating = json['rating'] == null
+      ? null
+      : OrderRating.fromJson(json['rating'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'id': instance.id,
@@ -83,6 +86,7 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'transactions': instance.transactions?.map((e) => e.toJson()).toList(),
   'assignedTo': instance.assignedTo?.toJson(),
   'shareLink': instance.shareLink?.toJson(),
+  'rating': instance.rating?.toJson(),
 };
 
 OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()
@@ -151,4 +155,20 @@ Map<String, dynamic> _$OrderShareLinkToJson(OrderShareLink instance) =>
       'token': instance.token,
       'expiresAt': instance.expiresAt?.toIso8601String(),
       'permissions': instance.permissions,
+    };
+
+OrderRating _$OrderRatingFromJson(Map<String, dynamic> json) => OrderRating()
+  ..score = (json['score'] as num?)?.toInt()
+  ..comment = json['comment'] as String?
+  ..createdAt = json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String)
+  ..customerName = json['customerName'] as String?;
+
+Map<String, dynamic> _$OrderRatingToJson(OrderRating instance) =>
+    <String, dynamic>{
+      'score': instance.score,
+      'comment': instance.comment,
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'customerName': instance.customerName,
     };
