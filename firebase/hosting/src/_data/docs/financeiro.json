@@ -3,24 +3,24 @@
     "sections": [
       {
         "id": "visao-geral",
-        "title": "Visao Geral do Sistema Financeiro",
-        "intro": "O PraticOS oferece um sistema financeiro completo e integrado para controle de pagamentos, descontos e acompanhamento de faturamento. Todas as transacoes sao registradas com historico detalhado e vinculadas as Ordens de Servico.",
+        "title": "Visão Geral do Sistema Financeiro",
+        "intro": "O PraticOS oferece um sistema financeiro completo e integrado para controle de pagamentos, descontos e acompanhamento de faturamento. Todas as transações são registradas com histórico detalhado e vinculadas às Ordens de Serviço.",
         "infoCard": {
-          "title": "Integracao com RBAC",
-          "content": "O acesso aos dados financeiros e controlado por perfil. Tecnicos e Supervisores nao visualizam valores, garantindo seguranca das informacoes."
+          "title": "Integração com RBAC",
+          "content": "O acesso aos dados financeiros é controlado por perfil. Técnicos e Supervisores não visualizam valores, garantindo segurança das informações."
         },
         "features": [
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
             "color": "green",
             "title": "Pagamentos Parciais",
-            "description": "Registre multiplos pagamentos com historico completo de transacoes"
+            "description": "Registre múltiplos pagamentos com histórico completo de transações"
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z\"></path><line x1=\"7\" y1=\"7\" x2=\"7.01\" y2=\"7\"></line></svg>",
             "color": "orange",
             "title": "Descontos",
-            "description": "Aplique descontos com descricao e rastreabilidade completa"
+            "description": "Aplique descontos com descrição e rastreabilidade completa"
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"10\"></line><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"4\"></line><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"16\"></line></svg>",
@@ -33,55 +33,55 @@
       {
         "id": "status",
         "title": "Status de Pagamento",
-        "intro": "O sistema utiliza tres status para indicar a situacao financeira de cada Ordem de Servico:",
+        "intro": "O sistema utiliza três status para indicar a situação financeira de cada Ordem de Serviço:",
         "statusCards": [
           {
             "color": "orange",
             "title": "A Receber",
-            "description": "Nenhum pagamento registrado. O valor total da OS esta pendente."
+            "description": "Nenhum pagamento registrado. O valor total da OS está pendente."
           },
           {
             "color": "blue",
             "title": "Parcial",
-            "description": "Pagamento parcial registrado. Ainda ha saldo a receber do cliente."
+            "description": "Pagamento parcial registrado. Ainda há saldo a receber do cliente."
           },
           {
             "color": "green",
             "title": "Pago",
-            "description": "Totalmente pago. Nao ha saldo pendente para esta OS."
+            "description": "Totalmente pago. Não há saldo pendente para esta OS."
           }
         ]
       },
       {
         "id": "pagamentos",
-        "title": "Gestao de Pagamentos",
-        "intro": "A tela de pagamentos centraliza todas as operacoes financeiras de uma OS, permitindo registrar pagamentos, aplicar descontos e visualizar o historico completo.",
+        "title": "Gestão de Pagamentos",
+        "intro": "A tela de pagamentos centraliza todas as operações financeiras de uma OS, permitindo registrar pagamentos, aplicar descontos e visualizar o histórico completo.",
         "subsections": [
           {
             "title": "Como Acessar",
             "steps": [
-              "Abra uma Ordem de Servico existente",
-              "Na secao <strong>Resumo</strong>, clique em <strong>Total</strong> ou no status de <strong>Pagamento</strong>",
-              "A tela de gestao de pagamentos sera aberta automaticamente"
+              "Abra uma Ordem de Serviço existente",
+              "Na seção <strong>Resumo</strong>, clique em <strong>Total</strong> ou no status de <strong>Pagamento</strong>",
+              "A tela de gestão de pagamentos será aberta automaticamente"
             ]
           }
         ]
       },
       {
         "id": "regras",
-        "title": "Regras de Negocio",
-        "intro": "O sistema aplica validacoes para garantir a integridade dos dados financeiros e o fluxo correto de pagamentos.",
+        "title": "Regras de Negócio",
+        "intro": "O sistema aplica validações para garantir a integridade dos dados financeiros e o fluxo correto de pagamentos.",
         "warningCard": {
-          "title": "Orcamentos nao Aceitam Pagamentos",
-          "content": "Pagamentos so sao permitidos a partir do status Aprovado. Primeiro aprove o orcamento para liberar o registro de pagamentos."
+          "title": "Orçamentos não Aceitam Pagamentos",
+          "content": "Pagamentos só são permitidos a partir do status Aprovado. Primeiro aprove o orçamento para liberar o registro de pagamentos."
         },
         "subsections": [
           {
-            "title": "Validacoes Aplicadas",
+            "title": "Validações Aplicadas",
             "validationList": [
-              { "label": "Valor minimo", "text": "O valor do pagamento ou desconto deve ser maior que zero" },
-              { "label": "Valor maximo", "text": "O valor nao pode exceder o saldo restante da OS" },
-              { "label": "Status valido", "text": "A OS deve estar aprovada, em andamento ou concluida" }
+              { "label": "Valor mínimo", "text": "O valor do pagamento ou desconto deve ser maior que zero" },
+              { "label": "Valor máximo", "text": "O valor não pode exceder o saldo restante da OS" },
+              { "label": "Status válido", "text": "A OS deve estar aprovada, em andamento ou concluída" }
             ]
           }
         ]
@@ -89,10 +89,10 @@
       {
         "id": "dashboard",
         "title": "Dashboard Financeiro",
-        "intro": "O dashboard oferece uma visao consolidada do faturamento da empresa, com indicadores em tempo real e ranking de clientes.",
+        "intro": "O dashboard oferece uma visão consolidada do faturamento da empresa, com indicadores em tempo real e ranking de clientes.",
         "subsections": [
           {
-            "title": "Indicadores Disponiveis"
+            "title": "Indicadores Disponíveis"
           }
         ],
         "metrics": [
@@ -100,7 +100,7 @@
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
             "color": "blue",
             "title": "Faturamento Total",
-            "description": "Soma dos valores totais de todas as OS no periodo selecionado"
+            "description": "Soma dos valores totais de todas as OS no período selecionado"
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
@@ -112,29 +112,29 @@
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
             "color": "orange",
             "title": "A Receber",
-            "description": "Saldo pendente das OS nao totalmente pagas"
+            "description": "Saldo pendente das OS não totalmente pagas"
           }
         ]
       },
       {
         "id": "pdf",
-        "title": "Impressao (PDF)",
-        "intro": "O PDF da Ordem de Servico inclui o resumo financeiro completo, adaptando-se automaticamente ao status de pagamento."
+        "title": "Impressão (PDF)",
+        "intro": "O PDF da Ordem de Serviço inclui o resumo financeiro completo, adaptando-se automaticamente ao status de pagamento."
       },
       {
         "id": "permissoes",
-        "title": "Permissoes por Perfil",
-        "intro": "O acesso as funcionalidades financeiras e controlado pelo sistema de perfis (RBAC). Cada perfil possui permissoes especificas.",
+        "title": "Permissões por Perfil",
+        "intro": "O acesso às funcionalidades financeiras é controlado pelo sistema de perfis (RBAC). Cada perfil possui permissões específicas.",
         "table": {
-          "headers": ["Perfil", "Ver Precos", "Ver Dashboard", "Registrar Pagamentos"],
+          "headers": ["Perfil", "Ver Preços", "Ver Dashboard", "Registrar Pagamentos"],
           "rows": [
             { "label": "Administrador", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "yes"}] },
             { "label": "Gerente", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "yes"}] },
             { "label": "Supervisor", "cells": [{"class": "no"}, {"class": "no"}, {"class": "no"}] },
             { "label": "Consultor", "cells": [{"class": "partial"}, {"class": "no"}, {"class": "no"}] },
-            { "label": "Tecnico", "cells": [{"class": "no"}, {"class": "no"}, {"class": "no"}] }
+            { "label": "Técnico", "cells": [{"class": "no"}, {"class": "no"}, {"class": "no"}] }
           ],
-          "note": "* Consultor visualiza precos apenas das OS que ele proprio criou"
+          "note": "* Consultor visualiza preços apenas das OS que ele próprio criou"
         }
       },
       {
@@ -142,20 +142,20 @@
         "title": "Perguntas Frequentes",
         "faq": [
           {
-            "question": "Posso registrar pagamento em um orcamento?",
-            "answer": "Nao. Pagamentos so sao liberados a partir do status \"Aprovado\". Primeiro aprove o orcamento, depois registre o pagamento."
+            "question": "Posso registrar pagamento em um orçamento?",
+            "answer": "Não. Pagamentos só são liberados a partir do status \"Aprovado\". Primeiro aprove o orçamento, depois registre o pagamento."
           },
           {
             "question": "Como aplicar um desconto?",
-            "answer": "Na tela de pagamentos, alterne para \"Desconto\" no seletor superior, informe o valor e adicione uma descricao (ex: \"Desconto fidelidade\")."
+            "answer": "Na tela de pagamentos, alterne para \"Desconto\" no seletor superior, informe o valor e adicione uma descrição (ex: \"Desconto fidelidade\")."
           },
           {
             "question": "Posso remover um pagamento registrado?",
-            "answer": "Sim. No historico de transacoes, deslize o item para a esquerda e confirme a remocao. A acao e registrada no historico."
+            "answer": "Sim. No histórico de transações, deslize o item para a esquerda e confirme a remoção. A ação é registrada no histórico."
           },
           {
-            "question": "Tecnicos podem ver valores financeiros?",
-            "answer": "Nao. Tecnicos e Supervisores nao tem acesso a dados financeiros. Apenas Admin, Gerente e Consultor (proprias OS) visualizam valores."
+            "question": "Técnicos podem ver valores financeiros?",
+            "answer": "Não. Técnicos e Supervisores não têm acesso a dados financeiros. Apenas Admin, Gerente e Consultor (próprias OS) visualizam valores."
           }
         ]
       }
@@ -327,47 +327,47 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Vision General del Sistema Financiero",
-        "intro": "PraticOS ofrece un sistema financiero completo e integrado para control de pagos, descuentos y seguimiento de facturacion. Todas las transacciones se registran con historial detallado y vinculadas a las Ordenes de Servicio.",
+        "title": "Visión General del Sistema Financiero",
+        "intro": "PraticOS ofrece un sistema financiero completo e integrado para control de pagos, descuentos y seguimiento de facturación. Todas las transacciones se registran con historial detallado y vinculadas a las Órdenes de Servicio.",
         "infoCard": {
-          "title": "Integracion con RBAC",
-          "content": "El acceso a los datos financieros esta controlado por perfil. Tecnicos y Supervisores no visualizan valores, garantizando la seguridad de la informacion."
+          "title": "Integración con RBAC",
+          "content": "El acceso a los datos financieros está controlado por perfil. Técnicos y Supervisores no visualizan valores, garantizando la seguridad de la información."
         },
         "features": [
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
             "color": "green",
             "title": "Pagos Parciales",
-            "description": "Registre multiples pagos con historial completo de transacciones"
+            "description": "Registre múltiples pagos con historial completo de transacciones"
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z\"></path><line x1=\"7\" y1=\"7\" x2=\"7.01\" y2=\"7\"></line></svg>",
             "color": "orange",
             "title": "Descuentos",
-            "description": "Aplique descuentos con descripcion y trazabilidad completa"
+            "description": "Aplique descuentos con descripción y trazabilidad completa"
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"10\"></line><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"4\"></line><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"16\"></line></svg>",
             "color": "blue",
             "title": "Dashboard",
-            "description": "Acompane facturacion y valores a cobrar en tiempo real"
+            "description": "Acompañe facturación y valores a cobrar en tiempo real"
           }
         ]
       },
       {
         "id": "status",
         "title": "Estado de Pago",
-        "intro": "El sistema utiliza tres estados para indicar la situacion financiera de cada Orden de Servicio:",
+        "intro": "El sistema utiliza tres estados para indicar la situación financiera de cada Orden de Servicio:",
         "statusCards": [
           {
             "color": "orange",
             "title": "Por Cobrar",
-            "description": "Ningun pago registrado. El valor total de la OS esta pendiente."
+            "description": "Ningún pago registrado. El valor total de la OS está pendiente."
           },
           {
             "color": "blue",
             "title": "Parcial",
-            "description": "Pago parcial registrado. Aun hay saldo a cobrar del cliente."
+            "description": "Pago parcial registrado. Aún hay saldo a cobrar del cliente."
           },
           {
             "color": "green",
@@ -378,15 +378,15 @@
       },
       {
         "id": "pagos",
-        "title": "Gestion de Pagos",
+        "title": "Gestión de Pagos",
         "intro": "La pantalla de pagos centraliza todas las operaciones financieras de una OS, permitiendo registrar pagos, aplicar descuentos y visualizar el historial completo.",
         "subsections": [
           {
-            "title": "Como Acceder",
+            "title": "Cómo Acceder",
             "steps": [
               "Abra una Orden de Servicio existente",
-              "En la seccion <strong>Resumen</strong>, haga clic en <strong>Total</strong> o en el estado de <strong>Pago</strong>",
-              "La pantalla de gestion de pagos se abrira automaticamente"
+              "En la sección <strong>Resumen</strong>, haga clic en <strong>Total</strong> o en el estado de <strong>Pago</strong>",
+              "La pantalla de gestión de pagos se abrirá automáticamente"
             ]
           }
         ]
@@ -403,9 +403,9 @@
           {
             "title": "Validaciones Aplicadas",
             "validationList": [
-              { "label": "Valor minimo", "text": "El valor del pago o descuento debe ser mayor que cero" },
-              { "label": "Valor maximo", "text": "El valor no puede exceder el saldo restante de la OS" },
-              { "label": "Estado valido", "text": "La OS debe estar aprobada, en progreso o completada" }
+              { "label": "Valor mínimo", "text": "El valor del pago o descuento debe ser mayor que cero" },
+              { "label": "Valor máximo", "text": "El valor no puede exceder el saldo restante de la OS" },
+              { "label": "Estado válido", "text": "La OS debe estar aprobada, en progreso o completada" }
             ]
           }
         ]
@@ -413,7 +413,7 @@
       {
         "id": "dashboard",
         "title": "Dashboard Financiero",
-        "intro": "El dashboard ofrece una vision consolidada de la facturacion de la empresa, con indicadores en tiempo real y ranking de clientes.",
+        "intro": "El dashboard ofrece una visión consolidada de la facturación de la empresa, con indicadores en tiempo real y ranking de clientes.",
         "subsections": [
           {
             "title": "Indicadores Disponibles"
@@ -423,8 +423,8 @@
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
             "color": "blue",
-            "title": "Facturacion Total",
-            "description": "Suma de los valores totales de todas las OS en el periodo seleccionado"
+            "title": "Facturación Total",
+            "description": "Suma de los valores totales de todas las OS en el período seleccionado"
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"20 6 9 17 4 12\"></polyline></svg>",
@@ -442,13 +442,13 @@
       },
       {
         "id": "pdf",
-        "title": "Impresion (PDF)",
-        "intro": "El PDF de la Orden de Servicio incluye el resumen financiero completo, adaptandose automaticamente al estado de pago."
+        "title": "Impresión (PDF)",
+        "intro": "El PDF de la Orden de Servicio incluye el resumen financiero completo, adaptándose automáticamente al estado de pago."
       },
       {
         "id": "permisos",
         "title": "Permisos por Perfil",
-        "intro": "El acceso a las funcionalidades financieras esta controlado por el sistema de perfiles (RBAC). Cada perfil tiene permisos especificos.",
+        "intro": "El acceso a las funcionalidades financieras está controlado por el sistema de perfiles (RBAC). Cada perfil tiene permisos específicos.",
         "table": {
           "headers": ["Perfil", "Ver Precios", "Ver Dashboard", "Registrar Pagos"],
           "rows": [
@@ -456,9 +456,9 @@
             { "label": "Gerente", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "yes"}] },
             { "label": "Supervisor", "cells": [{"class": "no"}, {"class": "no"}, {"class": "no"}] },
             { "label": "Consultor", "cells": [{"class": "partial"}, {"class": "no"}, {"class": "no"}] },
-            { "label": "Tecnico", "cells": [{"class": "no"}, {"class": "no"}, {"class": "no"}] }
+            { "label": "Técnico", "cells": [{"class": "no"}, {"class": "no"}, {"class": "no"}] }
           ],
-          "note": "* Consultor visualiza precios solo de las OS que el mismo creo"
+          "note": "* Consultor visualiza precios solo de las OS que él mismo creó"
         }
       },
       {
@@ -466,20 +466,20 @@
         "title": "Preguntas Frecuentes",
         "faq": [
           {
-            "question": "Puedo registrar un pago en un presupuesto?",
-            "answer": "No. Los pagos solo se liberan a partir del estado \"Aprobado\". Primero apruebe el presupuesto, despues registre el pago."
+            "question": "¿Puedo registrar un pago en un presupuesto?",
+            "answer": "No. Los pagos solo se liberan a partir del estado \"Aprobado\". Primero apruebe el presupuesto, después registre el pago."
           },
           {
-            "question": "Como aplicar un descuento?",
-            "answer": "En la pantalla de pagos, cambie a \"Descuento\" en el selector superior, ingrese el valor y agregue una descripcion (ej: \"Descuento fidelidad\")."
+            "question": "¿Cómo aplicar un descuento?",
+            "answer": "En la pantalla de pagos, cambie a \"Descuento\" en el selector superior, ingrese el valor y agregue una descripción (ej: \"Descuento fidelidad\")."
           },
           {
-            "question": "Puedo eliminar un pago registrado?",
-            "answer": "Si. En el historial de transacciones, deslice el item hacia la izquierda y confirme la eliminacion. La accion queda registrada en el historial."
+            "question": "¿Puedo eliminar un pago registrado?",
+            "answer": "Sí. En el historial de transacciones, deslice el ítem hacia la izquierda y confirme la eliminación. La acción queda registrada en el historial."
           },
           {
-            "question": "Los tecnicos pueden ver valores financieros?",
-            "answer": "No. Tecnicos y Supervisores no tienen acceso a datos financieros. Solo Admin, Gerente y Consultor (propias OS) visualizan valores."
+            "question": "¿Los técnicos pueden ver valores financieros?",
+            "answer": "No. Técnicos y Supervisores no tienen acceso a datos financieros. Solo Admin, Gerente y Consultor (propias OS) visualizan valores."
           }
         ]
       }

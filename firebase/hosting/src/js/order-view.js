@@ -419,8 +419,8 @@
         const card = document.createElement('div');
         card.className = 'order-card photos-card';
 
-        const photosHtml = order.photos.map(p => `
-            <div class="photo-item" onclick="window.open('${p.url}', '_blank')">
+        const photosHtml = order.photos.map((p, index) => `
+            <div class="photo-item" onclick="orderView.openLightbox(${index})">
                 <img src="${p.url}" alt="${p.description || 'Foto'}" loading="lazy">
                 ${p.description ? `<div class="photo-description">${p.description}</div>` : ''}
             </div>
@@ -440,6 +440,136 @@
             </div>
         `;
         container.appendChild(card);
+    }
+
+    // Lightbox state
+    let lightboxIndex = 0;
+    let lightboxPhotos = [];
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // Open lightbox
+    function openLightbox(index) {
+        lightboxPhotos = orderData.order.photos || [];
+        if (lightboxPhotos.length === 0) return;
+
+        lightboxIndex = index;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'lightbox-overlay';
+        overlay.id = 'lightbox';
+        overlay.innerHTML = `
+            <div class="lightbox-header">
+                <span class="lightbox-counter">${index + 1} / ${lightboxPhotos.length}</span>
+                <button class="lightbox-close" onclick="orderView.closeLightbox()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="lightbox-content">
+                <button class="lightbox-nav lightbox-prev" onclick="orderView.prevPhoto()" ${index === 0 ? 'disabled' : ''}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                </button>
+                <img class="lightbox-image" src="${lightboxPhotos[index].url}" alt="${lightboxPhotos[index].description || 'Foto'}">
+                <button class="lightbox-nav lightbox-next" onclick="orderView.nextPhoto()" ${index === lightboxPhotos.length - 1 ? 'disabled' : ''}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="lightbox-description">${lightboxPhotos[index].description || ''}</div>
+        `;
+
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+
+        // Add touch events for swipe
+        const content = overlay.querySelector('.lightbox-content');
+        content.addEventListener('touchstart', handleTouchStart, { passive: true });
+        content.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', handleLightboxKeydown);
+
+        requestAnimationFrame(() => overlay.classList.add('active'));
+    }
+
+    // Close lightbox
+    function closeLightbox() {
+        const overlay = document.getElementById('lightbox');
+        if (!overlay) return;
+
+        document.removeEventListener('keydown', handleLightboxKeydown);
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+
+        setTimeout(() => overlay.remove(), 300);
+    }
+
+    // Navigate photos
+    function updateLightbox() {
+        const overlay = document.getElementById('lightbox');
+        if (!overlay) return;
+
+        const photo = lightboxPhotos[lightboxIndex];
+        overlay.querySelector('.lightbox-counter').textContent = `${lightboxIndex + 1} / ${lightboxPhotos.length}`;
+        overlay.querySelector('.lightbox-image').src = photo.url;
+        overlay.querySelector('.lightbox-image').alt = photo.description || 'Foto';
+        overlay.querySelector('.lightbox-description').textContent = photo.description || '';
+        overlay.querySelector('.lightbox-prev').disabled = lightboxIndex === 0;
+        overlay.querySelector('.lightbox-next').disabled = lightboxIndex === lightboxPhotos.length - 1;
+    }
+
+    function prevPhoto() {
+        if (lightboxIndex > 0) {
+            lightboxIndex--;
+            updateLightbox();
+        }
+    }
+
+    function nextPhoto() {
+        if (lightboxIndex < lightboxPhotos.length - 1) {
+            lightboxIndex++;
+            updateLightbox();
+        }
+    }
+
+    // Touch handlers for swipe
+    function handleTouchStart(e) {
+        touchStartX = e.changedTouches[0].screenX;
+    }
+
+    function handleTouchEnd(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }
+
+    function handleSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+                nextPhoto(); // Swipe left = next
+            } else {
+                prevPhoto(); // Swipe right = prev
+            }
+        }
+    }
+
+    // Keyboard navigation
+    function handleLightboxKeydown(e) {
+        if (e.key === 'Escape') {
+            closeLightbox();
+        } else if (e.key === 'ArrowLeft') {
+            prevPhoto();
+        } else if (e.key === 'ArrowRight') {
+            nextPhoto();
+        }
     }
 
     // Render total
@@ -562,7 +692,7 @@
                             placeholder="${text.addComment}"
                             rows="1"
                         ></textarea>
-                        <button class="btn btn-send" id="send-comment" onclick="orderView.sendComment()">
+                        <button class="btn-send" id="send-comment" onclick="orderView.sendComment()">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <line x1="22" y1="2" x2="11" y2="13"/>
                                 <polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -792,7 +922,11 @@
     window.orderView = {
         showApproveModal,
         showRejectModal,
-        sendComment
+        sendComment,
+        openLightbox,
+        closeLightbox,
+        prevPhoto,
+        nextPhoto
     };
 
     // Start

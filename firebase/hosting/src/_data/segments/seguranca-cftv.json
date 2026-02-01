@@ -3,117 +3,117 @@
   "pt": {
     "lang": "pt-BR",
     "langCode": "pt",
-    "title": "Sistema para Empresa de CFTV e Seguranca | PraticOS",
-    "description": "Chega de retrabalho por falta de informacao! Sistema de OS para empresas de CFTV e seguranca com historico do equipamento, rotas otimizadas e relatorio fotografico. Organize sua empresa em 5 minutos.",
-    "keywords": "sistema para empresa de cftv, software empresa de seguranca, programa para instalador de cameras, ordem de servico cftv, app instalacao cameras, gestao empresa seguranca eletronica",
-    "ogTitle": "Sistema para Empresa de CFTV e Seguranca | PraticOS",
-    "ogDescription": "Chega de retrabalho! Sistema de OS com historico do equipamento por QR code, rotas otimizadas e relatorio fotografico automatico.",
+    "title": "Sistema para Empresa de CFTV e Segurança | PraticOS",
+    "description": "Chega de retrabalho por falta de informação! Sistema de OS para empresas de CFTV e segurança com histórico do equipamento, rotas otimizadas e relatório fotográfico. Organize sua empresa em 5 minutos.",
+    "keywords": "sistema para empresa de cftv, software empresa de segurança, programa para instalador de câmeras, ordem de serviço cftv, app instalação câmeras, gestão empresa segurança eletrônica",
+    "ogTitle": "Sistema para Empresa de CFTV e Segurança | PraticOS",
+    "ogDescription": "Chega de retrabalho! Sistema de OS com histórico do equipamento por QR code, rotas otimizadas e relatório fotográfico automático.",
     "hero": {
-      "badge": "📹 CFTV e Seguranca",
-      "title": "Chega de retrabalho por falta de informacao:",
+      "badge": "📹 CFTV e Segurança",
+      "title": "Chega de retrabalho por falta de informação:",
       "titleHighlight": "organize sua empresa em 5 minutos",
-      "subtitle": "Acabe com a planilha e saiba exatamente onde cada equipamento esta instalado. Historico completo por QR code, rota otimizada e cliente acompanhando pelo celular.",
-      "ctaPrimary": "Testar Gratis",
+      "subtitle": "Acabe com a planilha e saiba exatamente onde cada equipamento está instalado. Histórico completo por QR code, rota otimizada e cliente acompanhando pelo celular.",
+      "ctaPrimary": "Testar Grátis",
       "ctaSecondary": "Ver Demo",
       "stats": {
-        "users": { "value": "300+", "label": "Tecnicos ativos" },
+        "users": { "value": "300+", "label": "Técnicos ativos" },
         "orders": { "value": "8k+", "label": "OS criadas" },
-        "rating": { "value": "4.8", "label": "Avaliacao" }
+        "rating": { "value": "4.8", "label": "Avaliação" }
       }
     },
     "problems": {
       "tag": "Problemas",
-      "title": "Voce enfrenta",
+      "title": "Você enfrenta",
       "titleHighlight": "esses problemas?",
-      "subtitle": "Dores comuns de quem trabalha com CFTV e seguranca eletronica",
+      "subtitle": "Dores comuns de quem trabalha com CFTV e segurança eletrônica",
       "items": [
-        { "icon": "📍", "title": "Tecnico vai no endereco errado", "text": "Falta de informacao clara na OS. Tecnico perde tempo procurando o local ou vai no endereco antigo do cliente." },
-        { "icon": "🚗", "title": "Sem controle de rotas", "text": "Tecnicos cruzam a cidade sem planejamento. Combustivel e tempo desperdicados todos os dias." },
-        { "icon": "📞", "title": "Cliente nao sabe quando o tecnico chega", "text": "Ligacoes constantes perguntando horario. Voce para o servico para responder WhatsApp." },
-        { "icon": "📝", "title": "Documentacao manual da dor de cabeca", "text": "OS em papel se perde, foto fica no celular do tecnico. No final, nao tem como comprovar o servico." },
-        { "icon": "📸", "title": "Relatorio fotografico demora horas", "text": "Juntar fotos, montar documento, enviar pro cliente. Tempo que poderia estar atendendo outro chamado." },
-        { "icon": "🔔", "title": "Esquece da manutencao preventiva", "text": "Contrato de manutencao mensal mas so lembra quando o cliente reclama. Perde credibilidade e renovacao." }
+        { "icon": "📍", "title": "Técnico vai no endereço errado", "text": "Falta de informação clara na OS. Técnico perde tempo procurando o local ou vai no endereço antigo do cliente." },
+        { "icon": "🚗", "title": "Sem controle de rotas", "text": "Técnicos cruzam a cidade sem planejamento. Combustível e tempo desperdiçados todos os dias." },
+        { "icon": "📞", "title": "Cliente não sabe quando o técnico chega", "text": "Ligações constantes perguntando horário. Você para o serviço para responder WhatsApp." },
+        { "icon": "📝", "title": "Documentação manual dá dor de cabeça", "text": "OS em papel se perde, foto fica no celular do técnico. No final, não tem como comprovar o serviço." },
+        { "icon": "📸", "title": "Relatório fotográfico demora horas", "text": "Juntar fotos, montar documento, enviar pro cliente. Tempo que poderia estar atendendo outro chamado." },
+        { "icon": "🔔", "title": "Esquece da manutenção preventiva", "text": "Contrato de manutenção mensal mas só lembra quando o cliente reclama. Perde credibilidade e renovação." }
       ]
     },
     "solutions": {
-      "tag": "Solucoes",
+      "tag": "Soluções",
       "title": "Como o",
       "titleHighlight": "PraticOS resolve",
       "subtitle": "Funcionalidades pensadas para o dia a dia de empresas de CFTV",
       "items": [
-        { "icon": "📍", "title": "OS digital com localizacao", "text": "Endereco completo com mapa integrado. Tecnico abre o Waze direto do app.", "highlight": "Zero retrabalho por endereco errado." },
+        { "icon": "📍", "title": "OS digital com localização", "text": "Endereço completo com mapa integrado. Técnico abre o Waze direto do app.", "highlight": "Zero retrabalho por endereço errado." },
         { "icon": "🗺️", "title": "Rota otimizada do dia", "text": "Sistema organiza os atendimentos por proximidade. Menos km rodados, mais clientes atendidos." },
-        { "icon": "🔗", "title": "Link para o cliente acompanhar", "text": "Cliente recebe link e ve a posicao do tecnico em tempo real.", "highlight": "Reduz ligacoes em ate 70%." },
-        { "icon": "📸", "title": "Relatorio fotografico automatico", "text": "Fotos com data/hora e localizacao. Relatorio gerado em 1 clique para enviar ao cliente." },
-        { "icon": "🔄", "title": "Gestao de servicos recorrentes", "text": "Cadastre contratos de manutencao. Sistema avisa quando esta chegando a data.", "highlight": "Nunca mais esqueca uma preventiva." },
-        { "icon": "📱", "title": "Historico do equipamento por QR code", "text": "Cole um QR code na camera/DVR. Escaneie e veja todo historico de manutencao." }
+        { "icon": "🔗", "title": "Link para o cliente acompanhar", "text": "Cliente recebe link e vê a posição do técnico em tempo real.", "highlight": "Reduz ligações em até 70%." },
+        { "icon": "📸", "title": "Relatório fotográfico automático", "text": "Fotos com data/hora e localização. Relatório gerado em 1 clique para enviar ao cliente." },
+        { "icon": "🔄", "title": "Gestão de serviços recorrentes", "text": "Cadastre contratos de manutenção. Sistema avisa quando está chegando a data.", "highlight": "Nunca mais esqueça uma preventiva." },
+        { "icon": "📱", "title": "Histórico do equipamento por QR code", "text": "Cole um QR code na câmera/DVR. Escaneie e veja todo histórico de manutenção." }
       ]
     },
     "checklist": {
-      "tag": "Formulario",
+      "tag": "Formulário",
       "title": "Checklist de",
-      "titleHighlight": "instalacao CFTV",
-      "text": "Documente cada etapa da instalacao e evite chamados de garantia. Cliente assina digitalmente.",
-      "cta": "Testar Gratis — Sem Cartao",
-      "previewTitle": "📋 Checklist de Instalacao",
+      "titleHighlight": "instalação CFTV",
+      "text": "Documente cada etapa da instalação e evite chamados de garantia. Cliente assina digitalmente.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Checklist de Instalação",
       "items": [
-        { "icon": "📸", "text": "Fotos antes e depois da instalacao" },
-        { "icon": "📍", "text": "Localizacao GPS automatica" },
-        { "icon": "✅", "text": "Teste de cada camera instalada" },
-        { "icon": "🔧", "text": "Configuracoes do DVR/NVR" },
+        { "icon": "📸", "text": "Fotos antes e depois da instalação" },
+        { "icon": "📍", "text": "Localização GPS automática" },
+        { "icon": "✅", "text": "Teste de cada câmera instalada" },
+        { "icon": "🔧", "text": "Configurações do DVR/NVR" },
         { "icon": "📱", "text": "Acesso remoto configurado" },
         { "icon": "✍️", "text": "Assinatura digital do cliente" }
       ]
     },
     "features": {
       "tag": "Funcionalidades",
-      "title": "Tudo que voce precisa para",
+      "title": "Tudo que você precisa para",
       "titleHighlight": "gerenciar sua empresa",
       "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
       "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de servico completas com fotos, localizacao e valores. Tudo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe cada etapa da instalacao. Relatorio automatico com data e hora.", "color": "yellow" },
-        { "icon": "pdf", "title": "Relatorio PDF", "text": "Gere relatorios profissionais em PDF para enviar ao cliente. Em 1 clique.", "color": "orange" },
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, localização e valores. Tudo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe cada etapa da instalação. Relatório automático com data e hora.", "color": "yellow" },
+        { "icon": "pdf", "title": "Relatório PDF", "text": "Gere relatórios profissionais em PDF para enviar ao cliente. Em 1 clique.", "color": "orange" },
         { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestao de Equipamentos", "text": "Historico completo de cada equipamento instalado. Todas as manutencoes anteriores.", "color": "purple" },
-        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status e localizacao do tecnico pelo celular.", "color": "cyan" }
+        { "icon": "users", "title": "Gestão de Equipamentos", "text": "Histórico completo de cada equipamento instalado. Todas as manutenções anteriores.", "color": "purple" },
+        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status e localização do técnico pelo celular.", "color": "cyan" }
       ]
     },
     "testimonial": {
-      "quote": "Antes eu perdia muito tempo montando relatorio fotografico manualmente. Agora o PraticOS gera tudo automatico e o cliente recebe na hora. Ganhei pelo menos 2 horas por dia.",
+      "quote": "Antes eu perdia muito tempo montando relatório fotográfico manualmente. Agora o PraticOS gera tudo automático e o cliente recebe na hora. Ganhei pelo menos 2 horas por dia.",
       "name": "Carlos Eduardo",
-      "role": "Dono de empresa de CFTV ha 8 anos",
-      "metric": "Reducao de 60% no tempo administrativo"
+      "role": "Dono de empresa de CFTV há 8 anos",
+      "metric": "Redução de 60% no tempo administrativo"
     },
     "faq": {
-      "tag": "Duvidas",
+      "tag": "Dúvidas",
       "title": "Perguntas",
       "titleHighlight": "frequentes",
-      "subtitle": "Tire suas duvidas antes de comecar",
+      "subtitle": "Tire suas dúvidas antes de começar",
       "items": [
-        { "question": "Preciso pagar para usar?", "answer": "Nao! O plano gratuito e real e nao tem limite de tempo. Voce pode usar para sempre com ate 30 fotos/mes. Nossos precos sao transparentes e voce nao precisa falar com vendedor." },
-        { "question": "Funciona para instalacao e manutencao?", "answer": "Sim! PraticOS funciona tanto para instalacoes novas quanto para manutencoes preventivas e corretivas. O sistema se adapta ao seu fluxo de trabalho." },
-        { "question": "Consigo controlar contratos de manutencao?", "answer": "Sim! Cadastre servicos recorrentes e o sistema avisa automaticamente quando esta chegando a data. Nunca mais perca uma preventiva." },
-        { "question": "O QR code do equipamento funciona como?", "answer": "Voce gera um QR code unico para cada equipamento. Cole na camera ou DVR. Quando precisar, escaneie e veja todo o historico de manutencao na hora." },
-        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentacao completa. Respondemos em ate 24 horas uteis. Nosso time conhece o dia a dia de empresas de CFTV." }
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
+        { "question": "Funciona para instalação e manutenção?", "answer": "Sim! PraticOS funciona tanto para instalações novas quanto para manutenções preventivas e corretivas. O sistema se adapta ao seu fluxo de trabalho." },
+        { "question": "Consigo controlar contratos de manutenção?", "answer": "Sim! Cadastre serviços recorrentes e o sistema avisa automaticamente quando está chegando a data. Nunca mais perca uma preventiva." },
+        { "question": "O QR code do equipamento funciona como?", "answer": "Você gera um QR code único para cada equipamento. Cole na câmera ou DVR. Quando precisar, escaneie e veja todo o histórico de manutenção na hora." },
+        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia de empresas de CFTV." }
       ]
     },
     "download": {
       "title": "Baixe agora e comece a",
       "titleHighlight": "organizar sua empresa",
-      "text": "Disponivel para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponivel na", "name": "App Store" },
-      "playStore": { "label": "Disponivel no", "name": "Google Play" }
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
     },
     "contact": {
       "tag": "Contato",
       "title": "Precisa de",
       "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe esta pronta para te atender",
+      "subtitle": "Nossa equipe está pronta para te atender",
       "cards": {
         "email": { "title": "Email" },
         "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Politica de privacidade" }
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
       },
       "form": {
         "name": "Nome",
@@ -256,62 +256,62 @@
     "lang": "es",
     "langCode": "es",
     "title": "Sistema para Empresa de CFTV y Seguridad | PraticOS",
-    "description": "Basta de retrabajo por falta de informacion! Sistema de OS para empresas de CCTV y seguridad con historial del equipo, rutas optimizadas e informe fotografico. Organiza tu empresa en 5 minutos.",
-    "keywords": "sistema para empresa de cctv, software empresa de seguridad, programa para instalador de camaras, orden de servicio cctv, app instalacion camaras, gestion empresa seguridad electronica",
+    "description": "Basta de retrabajo por falta de información! Sistema de OS para empresas de CCTV y seguridad con historial del equipo, rutas optimizadas e informe fotográfico. Organiza tu empresa en 5 minutos.",
+    "keywords": "sistema para empresa de cctv, software empresa de seguridad, programa para instalador de cámaras, orden de servicio cctv, app instalación cámaras, gestión empresa seguridad electrónica",
     "ogTitle": "Sistema para Empresa de CFTV y Seguridad | PraticOS",
-    "ogDescription": "Basta de retrabajo! Sistema de OS con historial del equipo por codigo QR, rutas optimizadas e informe fotografico automatico.",
+    "ogDescription": "Basta de retrabajo! Sistema de OS con historial del equipo por código QR, rutas optimizadas e informe fotográfico automático.",
     "hero": {
       "badge": "📹 CCTV y Seguridad",
-      "title": "Basta de retrabajo por falta de informacion:",
+      "title": "Basta de retrabajo por falta de información:",
       "titleHighlight": "organiza tu empresa en 5 minutos",
-      "subtitle": "Acaba con la planilla y sabe exactamente donde cada equipo esta instalado. Historial completo por codigo QR, ruta optimizada y cliente siguiendo por el celular.",
+      "subtitle": "Acaba con la planilla y sabe exactamente donde cada equipo está instalado. Historial completo por código QR, ruta optimizada y cliente siguiendo por el celular.",
       "ctaPrimary": "Probar Gratis",
       "ctaSecondary": "Ver Demo",
       "stats": {
-        "users": { "value": "300+", "label": "Tecnicos activos" },
+        "users": { "value": "300+", "label": "Técnicos activos" },
         "orders": { "value": "8k+", "label": "OS creadas" },
-        "rating": { "value": "4.8", "label": "Calificacion" }
+        "rating": { "value": "4.8", "label": "Calificación" }
       }
     },
     "problems": {
       "tag": "Problemas",
       "title": "Enfrentas",
       "titleHighlight": "estos problemas?",
-      "subtitle": "Dolores comunes de quien trabaja con CCTV y seguridad electronica",
+      "subtitle": "Dolores comunes de quien trabaja con CCTV y seguridad electrónica",
       "items": [
-        { "icon": "📍", "title": "Tecnico va a la direccion equivocada", "text": "Falta de informacion clara en la OS. Tecnico pierde tiempo buscando el lugar o va a la direccion antigua del cliente." },
-        { "icon": "🚗", "title": "Sin control de rutas", "text": "Tecnicos cruzan la ciudad sin planificacion. Combustible y tiempo desperdiciados todos los dias." },
-        { "icon": "📞", "title": "Cliente no sabe cuando llega el tecnico", "text": "Llamadas constantes preguntando horario. Paras el servicio para responder WhatsApp." },
-        { "icon": "📝", "title": "Documentacion manual da dolor de cabeza", "text": "OS en papel se pierde, foto queda en el celular del tecnico. Al final, no hay como comprobar el servicio." },
-        { "icon": "📸", "title": "Informe fotografico demora horas", "text": "Juntar fotos, armar documento, enviar al cliente. Tiempo que podria estar atendiendo otro llamado." },
-        { "icon": "🔔", "title": "Olvida el mantenimiento preventivo", "text": "Contrato de mantenimiento mensual pero solo recuerda cuando el cliente reclama. Pierde credibilidad y renovacion." }
+        { "icon": "📍", "title": "Técnico va a la dirección equivocada", "text": "Falta de información clara en la OS. Técnico pierde tiempo buscando el lugar o va a la dirección antigua del cliente." },
+        { "icon": "🚗", "title": "Sin control de rutas", "text": "Técnicos cruzan la ciudad sin planificación. Combustible y tiempo desperdiciados todos los días." },
+        { "icon": "📞", "title": "Cliente no sabe cuándo llega el técnico", "text": "Llamadas constantes preguntando horario. Paras el servicio para responder WhatsApp." },
+        { "icon": "📝", "title": "Documentación manual da dolor de cabeza", "text": "OS en papel se pierde, foto queda en el celular del técnico. Al final, no hay como comprobar el servicio." },
+        { "icon": "📸", "title": "Informe fotográfico demora horas", "text": "Juntar fotos, armar documento, enviar al cliente. Tiempo que podría estar atendiendo otro llamado." },
+        { "icon": "🔔", "title": "Olvida el mantenimiento preventivo", "text": "Contrato de mantenimiento mensual pero solo recuerda cuando el cliente reclama. Pierde credibilidad y renovación." }
       ]
     },
     "solutions": {
       "tag": "Soluciones",
-      "title": "Como",
+      "title": "Cómo",
       "titleHighlight": "PraticOS lo resuelve",
-      "subtitle": "Funcionalidades pensadas para el dia a dia de empresas de CCTV",
+      "subtitle": "Funcionalidades pensadas para el día a día de empresas de CCTV",
       "items": [
-        { "icon": "📍", "title": "OS digital con ubicacion", "text": "Direccion completa con mapa integrado. Tecnico abre Waze directo de la app.", "highlight": "Cero retrabajo por direccion equivocada." },
-        { "icon": "🗺️", "title": "Ruta optimizada del dia", "text": "Sistema organiza las atenciones por proximidad. Menos km recorridos, mas clientes atendidos." },
-        { "icon": "🔗", "title": "Link para el cliente seguir", "text": "Cliente recibe link y ve la posicion del tecnico en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
-        { "icon": "📸", "title": "Informe fotografico automatico", "text": "Fotos con fecha/hora y ubicacion. Informe generado en 1 clic para enviar al cliente." },
-        { "icon": "🔄", "title": "Gestion de servicios recurrentes", "text": "Registra contratos de mantenimiento. Sistema avisa cuando se acerca la fecha.", "highlight": "Nunca mas olvides una preventiva." },
-        { "icon": "📱", "title": "Historial del equipo por codigo QR", "text": "Pega un codigo QR en la camara/DVR. Escanea y ve todo el historial de mantenimiento." }
+        { "icon": "📍", "title": "OS digital con ubicación", "text": "Dirección completa con mapa integrado. Técnico abre Waze directo de la app.", "highlight": "Cero retrabajo por dirección equivocada." },
+        { "icon": "🗺️", "title": "Ruta optimizada del día", "text": "Sistema organiza las atenciones por proximidad. Menos km recorridos, más clientes atendidos." },
+        { "icon": "🔗", "title": "Link para el cliente seguir", "text": "Cliente recibe link y ve la posición del técnico en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
+        { "icon": "📸", "title": "Informe fotográfico automático", "text": "Fotos con fecha/hora y ubicación. Informe generado en 1 clic para enviar al cliente." },
+        { "icon": "🔄", "title": "Gestión de servicios recurrentes", "text": "Registra contratos de mantenimiento. Sistema avisa cuando se acerca la fecha.", "highlight": "Nunca más olvides una preventiva." },
+        { "icon": "📱", "title": "Historial del equipo por código QR", "text": "Pega un código QR en la cámara/DVR. Escanea y ve todo el historial de mantenimiento." }
       ]
     },
     "checklist": {
       "tag": "Formulario",
       "title": "Checklist de",
-      "titleHighlight": "instalacion CCTV",
-      "text": "Documenta cada etapa de la instalacion y evita llamados de garantia. Cliente firma digitalmente.",
+      "titleHighlight": "instalación CCTV",
+      "text": "Documenta cada etapa de la instalación y evita llamados de garantía. Cliente firma digitalmente.",
       "cta": "Probar Gratis — Sin Tarjeta",
-      "previewTitle": "📋 Checklist de Instalacion",
+      "previewTitle": "📋 Checklist de Instalación",
       "items": [
-        { "icon": "📸", "text": "Fotos antes y despues de la instalacion" },
-        { "icon": "📍", "text": "Ubicacion GPS automatica" },
-        { "icon": "✅", "text": "Prueba de cada camara instalada" },
+        { "icon": "📸", "text": "Fotos antes y después de la instalación" },
+        { "icon": "📍", "text": "Ubicación GPS automática" },
+        { "icon": "✅", "text": "Prueba de cada cámara instalada" },
         { "icon": "🔧", "text": "Configuraciones del DVR/NVR" },
         { "icon": "📱", "text": "Acceso remoto configurado" },
         { "icon": "✍️", "text": "Firma digital del cliente" }
@@ -323,19 +323,19 @@
       "titleHighlight": "gestionar tu empresa",
       "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
       "items": [
-        { "icon": "document", "title": "OS Digital", "text": "Crea ordenes de servicio completas con fotos, ubicacion y valores. Todo organizado." },
-        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografias de cada etapa de la instalacion. Informe automatico con fecha y hora.", "color": "yellow" },
+        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, ubicación y valores. Todo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografías de cada etapa de la instalación. Informe automático con fecha y hora.", "color": "yellow" },
         { "icon": "pdf", "title": "Informe PDF", "text": "Genera informes profesionales en PDF para enviar al cliente. En 1 clic.", "color": "orange" },
-        { "icon": "money", "title": "Control Financiero", "text": "Mira cuanto facturaste, cuanto recibiste y cuanto tienes por recibir. Dashboard completo.", "color": "green" },
-        { "icon": "users", "title": "Gestion de Equipos", "text": "Historial completo de cada equipo instalado. Todos los mantenimientos anteriores.", "color": "purple" },
-        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado y ubicacion del tecnico por el celular.", "color": "cyan" }
+        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestión de Equipos", "text": "Historial completo de cada equipo instalado. Todos los mantenimientos anteriores.", "color": "purple" },
+        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado y ubicación del técnico por el celular.", "color": "cyan" }
       ]
     },
     "testimonial": {
-      "quote": "Antes perdia mucho tiempo armando informe fotografico manualmente. Ahora PraticOS genera todo automatico y el cliente recibe al instante. Gane por lo menos 2 horas por dia.",
+      "quote": "Antes perdía mucho tiempo armando informe fotográfico manualmente. Ahora PraticOS genera todo automático y el cliente recibe al instante. Gané por lo menos 2 horas por día.",
       "name": "Carlos Eduardo",
-      "role": "Dueno de empresa de CCTV hace 8 anos",
-      "metric": "Reduccion de 60% en tiempo administrativo"
+      "role": "Dueño de empresa de CCTV hace 8 años",
+      "metric": "Reducción de 60% en tiempo administrativo"
     },
     "faq": {
       "tag": "Dudas",
@@ -343,11 +343,11 @@
       "titleHighlight": "frecuentes",
       "subtitle": "Resuelve tus dudas antes de empezar",
       "items": [
-        { "question": "Necesito pagar para usar?", "answer": "No! El plan gratuito es real y no tiene limite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
-        { "question": "Funciona para instalacion y mantenimiento?", "answer": "Si! PraticOS funciona tanto para instalaciones nuevas como para mantenimientos preventivos y correctivos. El sistema se adapta a tu flujo de trabajo." },
-        { "question": "Puedo controlar contratos de mantenimiento?", "answer": "Si! Registra servicios recurrentes y el sistema avisa automaticamente cuando se acerca la fecha. Nunca mas pierdas una preventiva." },
-        { "question": "Como funciona el codigo QR del equipo?", "answer": "Generas un codigo QR unico para cada equipo. Lo pegas en la camara o DVR. Cuando necesites, escanea y ve todo el historial de mantenimiento al instante." },
-        { "question": "Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentacion completa. Respondemos en hasta 24 horas habiles. Nuestro equipo conoce el dia a dia de empresas de CCTV." }
+        { "question": "Necesito pagar para usar?", "answer": "No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "Funciona para instalación y mantenimiento?", "answer": "Sí! PraticOS funciona tanto para instalaciones nuevas como para mantenimientos preventivos y correctivos. El sistema se adapta a tu flujo de trabajo." },
+        { "question": "Puedo controlar contratos de mantenimiento?", "answer": "Sí! Registra servicios recurrentes y el sistema avisa automáticamente cuando se acerca la fecha. Nunca más pierdas una preventiva." },
+        { "question": "Cómo funciona el código QR del equipo?", "answer": "Generas un código QR único para cada equipo. Lo pegas en la cámara o DVR. Cuando necesites, escanea y ve todo el historial de mantenimiento al instante." },
+        { "question": "Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día de empresas de CCTV." }
       ]
     },
     "download": {
@@ -361,11 +361,11 @@
       "tag": "Contacto",
       "title": "Necesitas",
       "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo esta listo para atenderte",
+      "subtitle": "Nuestro equipo está listo para atenderte",
       "cards": {
         "email": { "title": "Email" },
         "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Politica de privacidad" }
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
       },
       "form": {
         "name": "Nombre",
@@ -373,7 +373,7 @@
         "email": "Email",
         "emailPlaceholder": "tu@email.com",
         "message": "Mensaje",
-        "messagePlaceholder": "Como podemos ayudar?",
+        "messagePlaceholder": "Cómo podemos ayudar?",
         "submit": "Enviar Mensaje"
       }
     }

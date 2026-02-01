@@ -3,24 +3,24 @@
     "sections": [
       {
         "id": "visao-geral",
-        "title": "Visao Geral dos Procedimentos",
-        "intro": "O PraticOS permite criar formularios e checklists personalizados para padronizar processos da sua empresa. Cada procedimento pode ter multiplos campos com diferentes tipos de entrada.",
+        "title": "Visão Geral dos Procedimentos",
+        "intro": "O PraticOS permite criar formulários e checklists personalizados para padronizar processos da sua empresa. Cada procedimento pode ter múltiplos campos com diferentes tipos de entrada.",
         "infoCard": {
-          "title": "Templates Reutilizaveis",
-          "content": "Crie templates de procedimentos que podem ser aplicados a multiplas Ordens de Servico. Edite o template uma vez e todas as novas instancias serao atualizadas."
+          "title": "Templates Reutilizáveis",
+          "content": "Crie templates de procedimentos que podem ser aplicados a múltiplas Ordens de Serviço. Edite o template uma vez e todas as novas instâncias serão atualizadas."
         },
         "features": [
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
             "color": "blue",
             "title": "Checklists",
-            "description": "Itens de verificacao com opcoes Sim/Nao/N/A"
+            "description": "Itens de verificação com opções Sim/Não/N/A"
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"8\" y1=\"6\" x2=\"21\" y2=\"6\"></line><line x1=\"8\" y1=\"12\" x2=\"21\" y2=\"12\"></line><line x1=\"8\" y1=\"18\" x2=\"21\" y2=\"18\"></line><line x1=\"3\" y1=\"6\" x2=\"3.01\" y2=\"6\"></line><line x1=\"3\" y1=\"12\" x2=\"3.01\" y2=\"12\"></line><line x1=\"3\" y1=\"18\" x2=\"3.01\" y2=\"18\"></line></svg>",
             "color": "green",
             "title": "Campos de Texto",
-            "description": "Campos abertos para descricoes e observacoes"
+            "description": "Campos abertos para descrições e observações"
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><circle cx=\"8.5\" cy=\"8.5\" r=\"1.5\"></circle><polyline points=\"21 15 16 10 5 21\"></polyline></svg>",
@@ -37,25 +37,25 @@
         "statusCards": [
           {
             "color": "blue",
-            "title": "Verificacao (Check)",
-            "description": "Opcoes: Sim, Nao ou N/A (Nao Aplicavel). Ideal para checklists de inspecao."
+            "title": "Verificação (Check)",
+            "description": "Opções: Sim, Não ou N/A (Não Aplicável). Ideal para checklists de inspeção."
           },
           {
             "color": "green",
             "title": "Texto",
-            "description": "Campo livre para descricoes, observacoes ou valores customizados."
+            "description": "Campo livre para descrições, observações ou valores customizados."
           },
           {
             "color": "orange",
             "title": "Foto",
-            "description": "Permite anexar uma ou mais fotos ao item especifico."
+            "description": "Permite anexar uma ou mais fotos ao item específico."
           }
         ]
       },
       {
         "id": "templates",
         "title": "Gerenciar Templates",
-        "intro": "Templates sao modelos de procedimentos que podem ser reutilizados em multiplas OS.",
+        "intro": "Templates são modelos de procedimentos que podem ser reutilizados em múltiplas OS.",
         "subsections": [
           {
             "title": "Como Criar um Template",
@@ -63,12 +63,12 @@
               "Acesse <strong>Ajustes > Procedimentos</strong>",
               "Clique em <strong>Adicionar Procedimento</strong>",
               "Defina o nome do procedimento",
-              "Adicione os campos desejados (verificacao, texto, foto)",
+              "Adicione os campos desejados (verificação, texto, foto)",
               "Salve o template"
             ],
             "infoCard": {
               "title": "Ordem dos Itens",
-              "content": "Arraste os itens para reorganiza-los. A ordem definida no template sera mantida nas instancias aplicadas."
+              "content": "Arraste os itens para reorganizá-los. A ordem definida no template será mantida nas instâncias aplicadas."
             }
           }
         ]
@@ -76,22 +76,22 @@
       {
         "id": "preenchimento",
         "title": "Preenchimento de Procedimentos",
-        "intro": "Procedimentos podem ser preenchidos diretamente na Ordem de Servico, durante a execucao do trabalho.",
+        "intro": "Procedimentos podem ser preenchidos diretamente na Ordem de Serviço, durante a execução do trabalho.",
         "subsections": [
           {
             "title": "Como Preencher",
             "steps": [
-              "Abra a Ordem de Servico",
-              "Navegue ate a secao <strong>Procedimentos</strong>",
+              "Abra a Ordem de Serviço",
+              "Navegue até a seção <strong>Procedimentos</strong>",
               "Selecione o procedimento desejado",
-              "Preencha cada campo conforme necessario",
-              "As alteracoes sao salvas automaticamente"
+              "Preencha cada campo conforme necessário",
+              "As alterações são salvas automaticamente"
             ]
           }
         ],
         "warningCard": {
-          "title": "Procedimentos Concluidos",
-          "content": "Apos marcar um procedimento como concluido, apenas Admin, Gerente e Supervisor podem reabri-lo para edicao."
+          "title": "Procedimentos Concluídos",
+          "content": "Após marcar um procedimento como concluído, apenas Admin, Gerente e Supervisor podem reabri-lo para edição."
         }
       },
       {
@@ -102,26 +102,26 @@
           {
             "title": "Recursos de Foto",
             "validationList": [
-              { "label": "Camera ou Galeria", "text": "Capture fotos em tempo real ou selecione da galeria" },
-              { "label": "Multiplas Fotos", "text": "Cada item pode ter varias fotos anexadas" },
-              { "label": "Visualizacao", "text": "Toque na miniatura para ver em tela cheia" },
-              { "label": "Remocao", "text": "Mantenha pressionado para excluir uma foto" }
+              { "label": "Câmera ou Galeria", "text": "Capture fotos em tempo real ou selecione da galeria" },
+              { "label": "Múltiplas Fotos", "text": "Cada item pode ter várias fotos anexadas" },
+              { "label": "Visualização", "text": "Toque na miniatura para ver em tela cheia" },
+              { "label": "Remoção", "text": "Mantenha pressionado para excluir uma foto" }
             ]
           }
         ]
       },
       {
         "id": "permissoes",
-        "title": "Permissoes por Perfil",
-        "intro": "O acesso as funcionalidades de procedimentos varia conforme o perfil do usuario:",
+        "title": "Permissões por Perfil",
+        "intro": "O acesso às funcionalidades de procedimentos varia conforme o perfil do usuário:",
         "table": {
-          "headers": ["Perfil", "Preencher", "Gerenciar Templates", "Reabrir Concluidos"],
+          "headers": ["Perfil", "Preencher", "Gerenciar Templates", "Reabrir Concluídos"],
           "rows": [
             { "label": "Administrador", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "yes"}] },
             { "label": "Gerente", "cells": [{"class": "no"}, {"class": "no"}, {"class": "yes"}] },
             { "label": "Supervisor", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "yes"}] },
             { "label": "Consultor", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "no"}] },
-            { "label": "Tecnico", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "no"}] }
+            { "label": "Técnico", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "no"}] }
           ]
         }
       },
@@ -130,20 +130,20 @@
         "title": "Perguntas Frequentes",
         "faq": [
           {
-            "question": "Posso editar um template ja aplicado?",
-            "answer": "Sim. Edicoes no template afetam apenas novas instancias. Procedimentos ja aplicados mantem a estrutura original."
+            "question": "Posso editar um template já aplicado?",
+            "answer": "Sim. Edições no template afetam apenas novas instâncias. Procedimentos já aplicados mantêm a estrutura original."
           },
           {
-            "question": "Como reabrir um procedimento concluido?",
+            "question": "Como reabrir um procedimento concluído?",
             "answer": "Apenas Admin, Gerente e Supervisor podem reabrir. Na lista de procedimentos, deslize o item e selecione \"Reabrir\"."
           },
           {
-            "question": "As fotos sao sincronizadas?",
-            "answer": "Sim. Todas as fotos sao enviadas para a nuvem e ficam disponiveis em todos os dispositivos da empresa."
+            "question": "As fotos são sincronizadas?",
+            "answer": "Sim. Todas as fotos são enviadas para a nuvem e ficam disponíveis em todos os dispositivos da empresa."
           },
           {
-            "question": "Posso usar o mesmo procedimento em varias OS?",
-            "answer": "Sim. Um template pode ser aplicado a qualquer numero de Ordens de Servico. Cada instancia e independente."
+            "question": "Posso usar o mesmo procedimento em várias OS?",
+            "answer": "Sim. Um template pode ser aplicado a qualquer número de Ordens de Serviço. Cada instância é independente."
           }
         ]
       }
@@ -303,18 +303,18 @@
     "sections": [
       {
         "id": "vision-general",
-        "title": "Vision General de los Procedimientos",
-        "intro": "PraticOS permite crear formularios y checklists personalizados para estandarizar los procesos de tu empresa. Cada procedimiento puede tener multiples campos con diferentes tipos de entrada.",
+        "title": "Visión General de los Procedimientos",
+        "intro": "PraticOS permite crear formularios y checklists personalizados para estandarizar los procesos de tu empresa. Cada procedimiento puede tener múltiples campos con diferentes tipos de entrada.",
         "infoCard": {
           "title": "Templates Reutilizables",
-          "content": "Crea templates de procedimientos que pueden aplicarse a multiples Ordenes de Servicio. Edita el template una vez y todas las nuevas instancias se actualizaran."
+          "content": "Crea templates de procedimientos que pueden aplicarse a múltiples Órdenes de Servicio. Edita el template una vez y todas las nuevas instancias se actualizarán."
         },
         "features": [
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
             "color": "blue",
             "title": "Checklists",
-            "description": "Items de verificacion con opciones Si/No/N/A"
+            "description": "Ítems de verificación con opciones Sí/No/N/A"
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"8\" y1=\"6\" x2=\"21\" y2=\"6\"></line><line x1=\"8\" y1=\"12\" x2=\"21\" y2=\"12\"></line><line x1=\"8\" y1=\"18\" x2=\"21\" y2=\"18\"></line><line x1=\"3\" y1=\"6\" x2=\"3.01\" y2=\"6\"></line><line x1=\"3\" y1=\"12\" x2=\"3.01\" y2=\"12\"></line><line x1=\"3\" y1=\"18\" x2=\"3.01\" y2=\"18\"></line></svg>",
@@ -326,7 +326,7 @@
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" ry=\"2\"></rect><circle cx=\"8.5\" cy=\"8.5\" r=\"1.5\"></circle><polyline points=\"21 15 16 10 5 21\"></polyline></svg>",
             "color": "orange",
             "title": "Fotos",
-            "description": "Anexe fotos directamente a cada item del procedimiento"
+            "description": "Anexe fotos directamente a cada ítem del procedimiento"
           }
         ]
       },
@@ -337,8 +337,8 @@
         "statusCards": [
           {
             "color": "blue",
-            "title": "Verificacion (Check)",
-            "description": "Opciones: Si, No o N/A (No Aplicable). Ideal para checklists de inspeccion."
+            "title": "Verificación (Check)",
+            "description": "Opciones: Sí, No o N/A (No Aplicable). Ideal para checklists de inspección."
           },
           {
             "color": "green",
@@ -348,27 +348,27 @@
           {
             "color": "orange",
             "title": "Foto",
-            "description": "Permite anexar una o mas fotos al item especifico."
+            "description": "Permite anexar una o más fotos al ítem específico."
           }
         ]
       },
       {
         "id": "templates",
         "title": "Gestionar Templates",
-        "intro": "Templates son modelos de procedimientos que pueden reutilizarse en multiples OS.",
+        "intro": "Templates son modelos de procedimientos que pueden reutilizarse en múltiples OS.",
         "subsections": [
           {
-            "title": "Como Crear un Template",
+            "title": "Cómo Crear un Template",
             "steps": [
               "Acceda a <strong>Ajustes > Procedimientos</strong>",
               "Haga clic en <strong>Agregar Procedimiento</strong>",
               "Defina el nombre del procedimiento",
-              "Agregue los campos deseados (verificacion, texto, foto)",
+              "Agregue los campos deseados (verificación, texto, foto)",
               "Guarde el template"
             ],
             "infoCard": {
-              "title": "Orden de los Items",
-              "content": "Arrastre los items para reorganizarlos. El orden definido en el template se mantendra en las instancias aplicadas."
+              "title": "Orden de los Ítems",
+              "content": "Arrastre los ítems para reorganizarlos. El orden definido en el template se mantendrá en las instancias aplicadas."
             }
           }
         ]
@@ -376,36 +376,36 @@
       {
         "id": "llenado",
         "title": "Llenado de Procedimientos",
-        "intro": "Los procedimientos pueden llenarse directamente en la Orden de Servicio, durante la ejecucion del trabajo.",
+        "intro": "Los procedimientos pueden llenarse directamente en la Orden de Servicio, durante la ejecución del trabajo.",
         "subsections": [
           {
-            "title": "Como Llenar",
+            "title": "Cómo Llenar",
             "steps": [
               "Abra la Orden de Servicio",
-              "Navegue hasta la seccion <strong>Procedimientos</strong>",
+              "Navegue hasta la sección <strong>Procedimientos</strong>",
               "Seleccione el procedimiento deseado",
-              "Llene cada campo segun sea necesario",
-              "Los cambios se guardan automaticamente"
+              "Llene cada campo según sea necesario",
+              "Los cambios se guardan automáticamente"
             ]
           }
         ],
         "warningCard": {
           "title": "Procedimientos Completados",
-          "content": "Despues de marcar un procedimiento como completado, solo Admin, Gerente y Supervisor pueden reabrirlo para edicion."
+          "content": "Después de marcar un procedimiento como completado, solo Admin, Gerente y Supervisor pueden reabrirlo para edición."
         }
       },
       {
         "id": "fotos",
         "title": "Fotos en los Procedimientos",
-        "intro": "Cada item de procedimiento puede tener fotos anexadas, permitiendo documentar visualmente el trabajo realizado.",
+        "intro": "Cada ítem de procedimiento puede tener fotos anexadas, permitiendo documentar visualmente el trabajo realizado.",
         "subsections": [
           {
             "title": "Recursos de Foto",
             "validationList": [
-              { "label": "Camara o Galeria", "text": "Capture fotos en tiempo real o seleccione de la galeria" },
-              { "label": "Multiples Fotos", "text": "Cada item puede tener varias fotos anexadas" },
-              { "label": "Visualizacion", "text": "Toque la miniatura para ver en pantalla completa" },
-              { "label": "Eliminacion", "text": "Mantenga presionado para eliminar una foto" }
+              { "label": "Cámara o Galería", "text": "Capture fotos en tiempo real o seleccione de la galería" },
+              { "label": "Múltiples Fotos", "text": "Cada ítem puede tener varias fotos anexadas" },
+              { "label": "Visualización", "text": "Toque la miniatura para ver en pantalla completa" },
+              { "label": "Eliminación", "text": "Mantenga presionado para eliminar una foto" }
             ]
           }
         ]
@@ -413,7 +413,7 @@
       {
         "id": "permisos",
         "title": "Permisos por Perfil",
-        "intro": "El acceso a las funcionalidades de procedimientos varia segun el perfil del usuario:",
+        "intro": "El acceso a las funcionalidades de procedimientos varía según el perfil del usuario:",
         "table": {
           "headers": ["Perfil", "Llenar", "Gestionar Templates", "Reabrir Completados"],
           "rows": [
@@ -421,7 +421,7 @@
             { "label": "Gerente", "cells": [{"class": "no"}, {"class": "no"}, {"class": "yes"}] },
             { "label": "Supervisor", "cells": [{"class": "yes"}, {"class": "yes"}, {"class": "yes"}] },
             { "label": "Consultor", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "no"}] },
-            { "label": "Tecnico", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "no"}] }
+            { "label": "Técnico", "cells": [{"class": "yes"}, {"class": "no"}, {"class": "no"}] }
           ]
         }
       },
@@ -430,20 +430,20 @@
         "title": "Preguntas Frecuentes",
         "faq": [
           {
-            "question": "Puedo editar un template ya aplicado?",
-            "answer": "Si. Las ediciones en el template afectan solo las nuevas instancias. Los procedimientos ya aplicados mantienen la estructura original."
+            "question": "¿Puedo editar un template ya aplicado?",
+            "answer": "Sí. Las ediciones en el template afectan solo las nuevas instancias. Los procedimientos ya aplicados mantienen la estructura original."
           },
           {
-            "question": "Como reabrir un procedimiento completado?",
-            "answer": "Solo Admin, Gerente y Supervisor pueden reabrir. En la lista de procedimientos, deslice el item y seleccione \"Reabrir\"."
+            "question": "¿Cómo reabrir un procedimiento completado?",
+            "answer": "Solo Admin, Gerente y Supervisor pueden reabrir. En la lista de procedimientos, deslice el ítem y seleccione \"Reabrir\"."
           },
           {
-            "question": "Las fotos se sincronizan?",
-            "answer": "Si. Todas las fotos se envian a la nube y quedan disponibles en todos los dispositivos de la empresa."
+            "question": "¿Las fotos se sincronizan?",
+            "answer": "Sí. Todas las fotos se envían a la nube y quedan disponibles en todos los dispositivos de la empresa."
           },
           {
-            "question": "Puedo usar el mismo procedimiento en varias OS?",
-            "answer": "Si. Un template puede aplicarse a cualquier numero de Ordenes de Servicio. Cada instancia es independiente."
+            "question": "¿Puedo usar el mismo procedimiento en varias OS?",
+            "answer": "Sí. Un template puede aplicarse a cualquier número de Órdenes de Servicio. Cada instancia es independiente."
           }
         ]
       }
