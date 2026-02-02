@@ -1,0 +1,461 @@
+{
+  "pt": {
+    "sections": [
+      {
+        "id": "visao-geral",
+        "title": "Visão Geral da Integração WhatsApp",
+        "intro": "O PraticOS oferece integração com WhatsApp para facilitar a comunicação com seus clientes. Você pode vincular sua conta, compartilhar Ordens de Serviço e receber notificações diretamente no seu WhatsApp.",
+        "infoCard": {
+          "title": "Comunicação Direta",
+          "content": "Com a integração WhatsApp, você envia links de OS para clientes em segundos. Eles podem visualizar, aprovar orçamentos e comentar sem precisar baixar nenhum app."
+        },
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\"></path></svg>",
+            "color": "green",
+            "title": "Vincular Conta",
+            "description": "Conecte seu WhatsApp pessoal à sua conta PraticOS via QR Code"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line><line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line></svg>",
+            "color": "blue",
+            "title": "Compartilhar OS",
+            "description": "Envie ordens de serviço diretamente para o WhatsApp do cliente"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>",
+            "color": "orange",
+            "title": "Notificações",
+            "description": "Receba alertas de novas avaliações e atualizações de pedidos"
+          }
+        ]
+      },
+      {
+        "id": "vincular",
+        "title": "Vincular WhatsApp",
+        "intro": "Vincule seu WhatsApp à conta PraticOS para receber notificações e facilitar o compartilhamento de OS.",
+        "subsections": [
+          {
+            "title": "Passo a Passo",
+            "steps": [
+              "Abra o app PraticOS e vá em <strong>Configurações</strong>",
+              "Toque em <strong>Vincular WhatsApp</strong>",
+              "Um QR Code será exibido na tela",
+              "Abra a câmera do seu celular e escaneie o QR Code",
+              "O WhatsApp abrirá automaticamente com uma mensagem pronta",
+              "Envie a mensagem para confirmar a vinculação",
+              "Pronto! Seu WhatsApp está vinculado"
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "QR Code Temporário",
+          "content": "O QR Code expira em 15 minutos por segurança. Se expirar, basta gerar um novo tocando em \"Tentar Novamente\"."
+        }
+      },
+      {
+        "id": "compartilhar",
+        "title": "Compartilhar via WhatsApp",
+        "intro": "Envie ordens de serviço diretamente para o WhatsApp do seu cliente com apenas um toque.",
+        "subsections": [
+          {
+            "title": "Como Compartilhar",
+            "steps": [
+              "Abra a Ordem de Serviço que deseja enviar",
+              "Toque no botão <strong>Compartilhar</strong> no canto superior",
+              "Selecione <strong>WhatsApp</strong> na lista de opções",
+              "O WhatsApp abrirá com a conversa do cliente e mensagem pronta",
+              "Toque em enviar"
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Telefone Necessário",
+          "content": "Para compartilhar via WhatsApp, o cliente precisa ter um número de telefone cadastrado na ficha."
+        }
+      },
+      {
+        "id": "mensagem",
+        "title": "Mensagem Enviada",
+        "intro": "Quando você compartilha uma OS via WhatsApp, o cliente recebe uma mensagem personalizada com link para visualizar os detalhes.",
+        "statusCards": [
+          {
+            "color": "green",
+            "title": "Nome do Cliente",
+            "description": "A mensagem inclui o nome do cliente para personalização."
+          },
+          {
+            "color": "blue",
+            "title": "Número da OS",
+            "description": "Identificação clara da ordem de serviço compartilhada."
+          },
+          {
+            "color": "orange",
+            "title": "Link Mágico",
+            "description": "Link único que permite visualização, aprovação e comentários."
+          }
+        ],
+        "infoCard": {
+          "title": "Exemplo de Mensagem",
+          "content": "\"Olá João! Segue o link para acompanhar sua OS #42 da Oficina do Carlos: https://praticos.web.app/q/... Através deste link você pode visualizar os detalhes e aprovar o orçamento.\""
+        }
+      },
+      {
+        "id": "desvincular",
+        "title": "Desvincular WhatsApp",
+        "intro": "Você pode remover a vinculação do WhatsApp a qualquer momento.",
+        "subsections": [
+          {
+            "title": "Como Desvincular",
+            "steps": [
+              "Vá em <strong>Configurações</strong> no app",
+              "Toque em <strong>WhatsApp Vinculado</strong>",
+              "Toque em <strong>Desvincular</strong>",
+              "Confirme a ação no diálogo que aparece"
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Notificações Interrompidas",
+          "content": "Ao desvincular, você deixará de receber notificações via WhatsApp. Você pode vincular novamente quando quiser."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Perguntas Frequentes",
+        "faq": [
+          {
+            "question": "Preciso ter o app do WhatsApp instalado?",
+            "answer": "Sim. Para vincular e receber notificações, você precisa ter o WhatsApp instalado no mesmo dispositivo que usa o PraticOS."
+          },
+          {
+            "question": "Posso vincular mais de um número de WhatsApp?",
+            "answer": "Atualmente, cada usuário pode vincular apenas um número de WhatsApp. Se precisar trocar, desvincule o atual e vincule o novo."
+          },
+          {
+            "question": "O cliente precisa ter conta no PraticOS?",
+            "answer": "Não. O cliente recebe um link mágico que permite visualizar a OS, aprovar e comentar sem precisar criar conta."
+          },
+          {
+            "question": "Quanto tempo leva para vincular?",
+            "answer": "O processo é instantâneo. Basta escanear o QR Code e enviar a mensagem - seu WhatsApp estará vinculado em segundos."
+          },
+          {
+            "question": "Meus dados ficam seguros?",
+            "answer": "Sim. A vinculação usa tokens temporários e criptografados. Apenas você pode vincular seu número à sua conta."
+          },
+          {
+            "question": "Posso compartilhar OS mesmo sem vincular?",
+            "answer": "Sim! A vinculação é para receber notificações. O compartilhamento via WhatsApp funciona independentemente."
+          }
+        ]
+      }
+    ]
+  },
+  "en": {
+    "sections": [
+      {
+        "id": "overview",
+        "title": "WhatsApp Integration Overview",
+        "intro": "PraticOS offers WhatsApp integration to facilitate communication with your customers. You can link your account, share Service Orders, and receive notifications directly on your WhatsApp.",
+        "infoCard": {
+          "title": "Direct Communication",
+          "content": "With WhatsApp integration, you send SO links to customers in seconds. They can view, approve quotes, and comment without downloading any app."
+        },
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\"></path></svg>",
+            "color": "green",
+            "title": "Link Account",
+            "description": "Connect your personal WhatsApp to your PraticOS account via QR Code"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line><line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line></svg>",
+            "color": "blue",
+            "title": "Share SO",
+            "description": "Send service orders directly to your customer's WhatsApp"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>",
+            "color": "orange",
+            "title": "Notifications",
+            "description": "Receive alerts for new ratings and order updates"
+          }
+        ]
+      },
+      {
+        "id": "link",
+        "title": "Link WhatsApp",
+        "intro": "Link your WhatsApp to your PraticOS account to receive notifications and facilitate SO sharing.",
+        "subsections": [
+          {
+            "title": "Step by Step",
+            "steps": [
+              "Open the PraticOS app and go to <strong>Settings</strong>",
+              "Tap <strong>Link WhatsApp</strong>",
+              "A QR Code will be displayed on screen",
+              "Open your phone's camera and scan the QR Code",
+              "WhatsApp will open automatically with a ready message",
+              "Send the message to confirm the link",
+              "Done! Your WhatsApp is now linked"
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Temporary QR Code",
+          "content": "The QR Code expires in 15 minutes for security. If it expires, simply generate a new one by tapping \"Try Again\"."
+        }
+      },
+      {
+        "id": "share",
+        "title": "Share via WhatsApp",
+        "intro": "Send service orders directly to your customer's WhatsApp with just one tap.",
+        "subsections": [
+          {
+            "title": "How to Share",
+            "steps": [
+              "Open the Service Order you want to send",
+              "Tap the <strong>Share</strong> button in the top corner",
+              "Select <strong>WhatsApp</strong> from the options list",
+              "WhatsApp will open with the customer's chat and ready message",
+              "Tap send"
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Phone Number Required",
+          "content": "To share via WhatsApp, the customer must have a phone number registered in their profile."
+        }
+      },
+      {
+        "id": "message",
+        "title": "Message Sent",
+        "intro": "When you share an SO via WhatsApp, the customer receives a personalized message with a link to view the details.",
+        "statusCards": [
+          {
+            "color": "green",
+            "title": "Customer Name",
+            "description": "The message includes the customer's name for personalization."
+          },
+          {
+            "color": "blue",
+            "title": "SO Number",
+            "description": "Clear identification of the shared service order."
+          },
+          {
+            "color": "orange",
+            "title": "Magic Link",
+            "description": "Unique link that allows viewing, approval, and comments."
+          }
+        ],
+        "infoCard": {
+          "title": "Message Example",
+          "content": "\"Hi John! Here is the link to track your SO #42 from Carlos Workshop: https://praticos.web.app/q/... Through this link you can view details and approve the quote.\""
+        }
+      },
+      {
+        "id": "unlink",
+        "title": "Unlink WhatsApp",
+        "intro": "You can remove the WhatsApp link at any time.",
+        "subsections": [
+          {
+            "title": "How to Unlink",
+            "steps": [
+              "Go to <strong>Settings</strong> in the app",
+              "Tap <strong>Linked WhatsApp</strong>",
+              "Tap <strong>Unlink</strong>",
+              "Confirm the action in the dialog that appears"
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Notifications Stopped",
+          "content": "When you unlink, you will stop receiving WhatsApp notifications. You can link again whenever you want."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Frequently Asked Questions",
+        "faq": [
+          {
+            "question": "Do I need to have the WhatsApp app installed?",
+            "answer": "Yes. To link and receive notifications, you need WhatsApp installed on the same device you use PraticOS."
+          },
+          {
+            "question": "Can I link more than one WhatsApp number?",
+            "answer": "Currently, each user can link only one WhatsApp number. If you need to change, unlink the current one and link the new one."
+          },
+          {
+            "question": "Does the customer need a PraticOS account?",
+            "answer": "No. The customer receives a magic link that allows them to view the SO, approve, and comment without creating an account."
+          },
+          {
+            "question": "How long does it take to link?",
+            "answer": "The process is instant. Just scan the QR Code and send the message - your WhatsApp will be linked in seconds."
+          },
+          {
+            "question": "Is my data secure?",
+            "answer": "Yes. The linking uses temporary and encrypted tokens. Only you can link your number to your account."
+          },
+          {
+            "question": "Can I share SO even without linking?",
+            "answer": "Yes! Linking is for receiving notifications. WhatsApp sharing works independently."
+          }
+        ]
+      }
+    ]
+  },
+  "es": {
+    "sections": [
+      {
+        "id": "vision-general",
+        "title": "Visión General de la Integración WhatsApp",
+        "intro": "PraticOS ofrece integración con WhatsApp para facilitar la comunicación con sus clientes. Puede vincular su cuenta, compartir Órdenes de Servicio y recibir notificaciones directamente en su WhatsApp.",
+        "infoCard": {
+          "title": "Comunicación Directa",
+          "content": "Con la integración WhatsApp, envía enlaces de OS a clientes en segundos. Ellos pueden visualizar, aprobar presupuestos y comentar sin necesidad de descargar ninguna app."
+        },
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z\"></path></svg>",
+            "color": "green",
+            "title": "Vincular Cuenta",
+            "description": "Conecte su WhatsApp personal a su cuenta PraticOS via código QR"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"18\" cy=\"5\" r=\"3\"></circle><circle cx=\"6\" cy=\"12\" r=\"3\"></circle><circle cx=\"18\" cy=\"19\" r=\"3\"></circle><line x1=\"8.59\" y1=\"13.51\" x2=\"15.42\" y2=\"17.49\"></line><line x1=\"15.41\" y1=\"6.51\" x2=\"8.59\" y2=\"10.49\"></line></svg>",
+            "color": "blue",
+            "title": "Compartir OS",
+            "description": "Envíe órdenes de servicio directamente al WhatsApp del cliente"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>",
+            "color": "orange",
+            "title": "Notificaciones",
+            "description": "Reciba alertas de nuevas calificaciones y actualizaciones de pedidos"
+          }
+        ]
+      },
+      {
+        "id": "vincular",
+        "title": "Vincular WhatsApp",
+        "intro": "Vincule su WhatsApp a su cuenta PraticOS para recibir notificaciones y facilitar el compartir de OS.",
+        "subsections": [
+          {
+            "title": "Paso a Paso",
+            "steps": [
+              "Abra la app PraticOS y vaya a <strong>Configuraciones</strong>",
+              "Toque en <strong>Vincular WhatsApp</strong>",
+              "Un código QR se mostrará en la pantalla",
+              "Abra la cámara de su celular y escanee el código QR",
+              "WhatsApp se abrirá automáticamente con un mensaje listo",
+              "Envíe el mensaje para confirmar la vinculación",
+              "¡Listo! Su WhatsApp está vinculado"
+            ]
+          }
+        ],
+        "infoCard": {
+          "title": "Código QR Temporal",
+          "content": "El código QR expira en 15 minutos por seguridad. Si expira, simplemente genere uno nuevo tocando en \"Intentar de Nuevo\"."
+        }
+      },
+      {
+        "id": "compartir",
+        "title": "Compartir via WhatsApp",
+        "intro": "Envíe órdenes de servicio directamente al WhatsApp de su cliente con solo un toque.",
+        "subsections": [
+          {
+            "title": "Cómo Compartir",
+            "steps": [
+              "Abra la Orden de Servicio que desea enviar",
+              "Toque el botón <strong>Compartir</strong> en la esquina superior",
+              "Seleccione <strong>WhatsApp</strong> de la lista de opciones",
+              "WhatsApp se abrirá con el chat del cliente y mensaje listo",
+              "Toque enviar"
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Teléfono Requerido",
+          "content": "Para compartir via WhatsApp, el cliente debe tener un número de teléfono registrado en su ficha."
+        }
+      },
+      {
+        "id": "mensaje",
+        "title": "Mensaje Enviado",
+        "intro": "Cuando comparte una OS via WhatsApp, el cliente recibe un mensaje personalizado con enlace para ver los detalles.",
+        "statusCards": [
+          {
+            "color": "green",
+            "title": "Nombre del Cliente",
+            "description": "El mensaje incluye el nombre del cliente para personalización."
+          },
+          {
+            "color": "blue",
+            "title": "Número de OS",
+            "description": "Identificación clara de la orden de servicio compartida."
+          },
+          {
+            "color": "orange",
+            "title": "Enlace Mágico",
+            "description": "Enlace único que permite visualización, aprobación y comentarios."
+          }
+        ],
+        "infoCard": {
+          "title": "Ejemplo de Mensaje",
+          "content": "\"¡Hola Juan! Aquí está el enlace para seguir tu OS #42 del Taller de Carlos: https://praticos.web.app/q/... A través de este enlace puedes ver los detalles y aprobar el presupuesto.\""
+        }
+      },
+      {
+        "id": "desvincular",
+        "title": "Desvincular WhatsApp",
+        "intro": "Puede remover la vinculación de WhatsApp en cualquier momento.",
+        "subsections": [
+          {
+            "title": "Cómo Desvincular",
+            "steps": [
+              "Vaya a <strong>Configuraciones</strong> en la app",
+              "Toque en <strong>WhatsApp Vinculado</strong>",
+              "Toque en <strong>Desvincular</strong>",
+              "Confirme la acción en el diálogo que aparece"
+            ]
+          }
+        ],
+        "warningCard": {
+          "title": "Notificaciones Detenidas",
+          "content": "Al desvincular, dejará de recibir notificaciones via WhatsApp. Puede vincular nuevamente cuando quiera."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Preguntas Frecuentes",
+        "faq": [
+          {
+            "question": "¿Necesito tener la app de WhatsApp instalada?",
+            "answer": "Sí. Para vincular y recibir notificaciones, necesita WhatsApp instalado en el mismo dispositivo que usa PraticOS."
+          },
+          {
+            "question": "¿Puedo vincular más de un número de WhatsApp?",
+            "answer": "Actualmente, cada usuario puede vincular solo un número de WhatsApp. Si necesita cambiar, desvincule el actual y vincule el nuevo."
+          },
+          {
+            "question": "¿El cliente necesita cuenta en PraticOS?",
+            "answer": "No. El cliente recibe un enlace mágico que le permite ver la OS, aprobar y comentar sin crear cuenta."
+          },
+          {
+            "question": "¿Cuánto tiempo toma vincular?",
+            "answer": "El proceso es instantáneo. Solo escanee el código QR y envíe el mensaje - su WhatsApp estará vinculado en segundos."
+          },
+          {
+            "question": "¿Mis datos están seguros?",
+            "answer": "Sí. La vinculación usa tokens temporales y cifrados. Solo usted puede vincular su número a su cuenta."
+          },
+          {
+            "question": "¿Puedo compartir OS sin vincular?",
+            "answer": "¡Sí! La vinculación es para recibir notificaciones. El compartir via WhatsApp funciona independientemente."
+          }
+        ]
+      }
+    ]
+  }
+}
