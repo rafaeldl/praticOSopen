@@ -698,6 +698,7 @@
   "no": "Não",
 
   "financialDashboard": "Painel Financeiro",
+  "financial": "Financeiro",
   "financialAccessDenied": "Você não tem permissão para acessar o painel financeiro.\\n\\nApenas Administradores e Gerentes podem visualizar dados financeiros.",
   "today": "Hoje",
   "week": "Semana",

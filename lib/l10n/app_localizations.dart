@@ -3742,6 +3742,12 @@ abstract class AppLocalizations {
   /// **'Painel Financeiro'**
   String get financialDashboard;
 
+  /// No description provided for @financial.
+  ///
+  /// In pt, this message translates to:
+  /// **'Financeiro'**
+  String get financial;
+
   /// No description provided for @financialAccessDenied.
   ///
   /// In pt, this message translates to:
