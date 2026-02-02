@@ -382,6 +382,16 @@ service cloud.firestore {
       }
 
       // ──────────────────────────────────────────────────────────────────────
+      // VALORES ACUMULADOS (autocomplete de campos)
+      // Todos podem visualizar e adicionar, apenas admin pode remover
+      // ──────────────────────────────────────────────────────────────────────
+      match /accumulatedFields/{fieldType}/values/{valueId} {
+        allow read: if belongsToCompany(companyId);
+        allow create, update: if belongsToCompany(companyId);
+        allow delete: if canManageCompany(companyId);
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
       // NOTIFICAÇÕES IN-APP
       // Usuário pode ler/atualizar apenas suas próprias notificações
       // Criação apenas via Cloud Functions (Admin SDK)
