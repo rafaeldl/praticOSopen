@@ -126,6 +126,9 @@ logs-local:
 logs:
 	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- 'sudo docker logs -f $$(sudo docker ps -q)'
 
+login:
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- 'sudo docker exec -it $$(sudo docker ps -q) clawdbot channels login'
+
 ssh:
 	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG)
 
