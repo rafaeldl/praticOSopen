@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/models/app_notification.dart';
+import 'package:praticos/models/order.dart';
 import 'package:praticos/screens/notifications/notification_list_tile.dart';
 
 /// Screen to display all notifications for the current user
@@ -145,10 +146,18 @@ class _NotificationListScreenState extends State<NotificationListScreen> {
 
     // Navigate to order if orderId exists
     if (notification.orderId != null) {
+      final order = Order()..id = notification.orderId;
+      final isCommentNotification = notification.type == NotificationType.newComment;
       Navigator.pushNamed(
         context,
         '/order',
-        arguments: {'orderId': notification.orderId},
+        arguments: {
+          'order': order,
+          // Scroll to comments if this is a comment notification
+          if (isCommentNotification) 'scrollToComments': true,
+          if (isCommentNotification && notification.data?['commentId'] != null)
+            'commentId': notification.data!['commentId'],
+        },
       );
     }
   }

@@ -28,7 +28,7 @@ abstract class _NotificationStore with Store {
   bool isInitialized = false;
 
   String? get companyId => Global.companyAggr?.id;
-  String? get userId => Global.userAggr?.id;
+  String? get userId => Global.currentUser?.uid;
 
   /// Initialize the notification system
   @action

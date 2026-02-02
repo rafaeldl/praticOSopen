@@ -11,12 +11,14 @@ class OrderCommentsWidget extends StatefulWidget {
   final String orderId;
   final String companyId;
   final bool showInternalToggle;
+  final String? highlightCommentId;
 
   const OrderCommentsWidget({
     super.key,
     required this.orderId,
     required this.companyId,
     this.showInternalToggle = true,
+    this.highlightCommentId,
   });
 
   @override
@@ -26,13 +28,33 @@ class OrderCommentsWidget extends StatefulWidget {
 class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
   final TextEditingController _commentController = TextEditingController();
   final FormatService _formatService = FormatService();
+  final Map<String, GlobalKey> _commentKeys = {};
   bool _isInternal = false;
   bool _isSending = false;
+  bool _hasScrolledToComment = false;
 
   @override
   void dispose() {
     _commentController.dispose();
     super.dispose();
+  }
+
+  void _scrollToComment(String commentId) {
+    if (_hasScrolledToComment) return;
+    _hasScrolledToComment = true;
+
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      final key = _commentKeys[commentId];
+      if (key?.currentContext != null) {
+        Scrollable.ensureVisible(
+          key!.currentContext!,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          alignment: 0.3,
+        );
+      }
+    });
   }
 
   Future<void> _sendComment() async {
@@ -157,10 +179,19 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
           );
         }
 
-        final comments = snapshot.data!.docs
-            .map((doc) => OrderComment.fromJson(doc.data() as Map<String, dynamic>))
-            .where((c) => c.deleted != true)
-            .toList();
+        final comments = snapshot.data!.docs.map((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final comment = OrderComment.fromJson(data);
+          comment.id = doc.id;
+          return comment;
+        }).where((c) => c.deleted != true).toList();
+
+        // Scroll to highlighted comment after build
+        if (widget.highlightCommentId != null && !_hasScrolledToComment && comments.isNotEmpty) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollToComment(widget.highlightCommentId!);
+          });
+        }
 
         return _buildGroupedCard(
           children: [
@@ -170,7 +201,12 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
               ...comments.asMap().entries.map((entry) {
                 final index = entry.key;
                 final comment = entry.value;
-                return _buildCommentRow(comment, isLast: index == comments.length - 1);
+                final isHighlighted = comment.id == widget.highlightCommentId;
+                return _buildCommentRow(
+                  comment,
+                  isLast: index == comments.length - 1,
+                  isHighlighted: isHighlighted,
+                );
               }),
             // Divider before input
             Divider(
@@ -222,9 +258,14 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
     );
   }
 
-  Widget _buildCommentRow(OrderComment comment, {bool isLast = false}) {
+  Widget _buildCommentRow(OrderComment comment, {bool isLast = false, bool isHighlighted = false}) {
     final isCustomer = comment.authorType == 'customer';
     final isInternal = comment.isInternal == true;
+
+    // Create or get key for this comment
+    if (comment.id != null) {
+      _commentKeys.putIfAbsent(comment.id!, () => GlobalKey());
+    }
 
     // Icon and color based on comment type
     IconData icon;
@@ -246,8 +287,12 @@ class _OrderCommentsWidgetState extends State<OrderCommentsWidget> {
     }
 
     return Column(
+      key: comment.id != null ? _commentKeys[comment.id!] : null,
       children: [
-        Padding(
+        Container(
+          color: isHighlighted
+              ? CupertinoColors.systemYellow.withValues(alpha: 0.2)
+              : null,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
