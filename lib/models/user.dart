@@ -1,4 +1,5 @@
 import 'package:praticos/models/base.dart';
+import 'package:praticos/models/fcm_token.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -12,6 +13,9 @@ class User extends BaseAudit {
   String? email;
   String? photo;
   List<CompanyRoleAggr>? companies;
+
+  /// FCM tokens for push notifications (multi-device support)
+  List<FcmToken>? fcmTokens;
 
   User();
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

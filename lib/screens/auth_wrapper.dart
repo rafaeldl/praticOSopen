@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
 import 'package:praticos/screens/onboarding/welcome_screen.dart';
 import 'package:praticos/screens/onboarding/pending_invites_screen.dart';
@@ -317,6 +318,10 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
       if (country != null) {
         segmentProvider.setCountry(country);
       }
+
+      // Initialize notifications after user is fully authenticated
+      final notificationStore = context.read<NotificationStore>();
+      notificationStore.initialize();
 
       setState(() {
         _isLoading = false;

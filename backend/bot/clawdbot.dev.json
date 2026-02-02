@@ -68,7 +68,7 @@
       "provider": "edge",
       "edge": {
         "enabled": true,
-        "voice": "pt-BR-FranciscaNeural",
+        "voice": "pt-BR-AntonioNeural",
         "lang": "pt-BR",
         "outputFormat": "audio-24khz-48kbitrate-mono-mp3",
         "rate": "+0%",

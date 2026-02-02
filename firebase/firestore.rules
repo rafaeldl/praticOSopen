@@ -380,6 +380,35 @@ service cloud.firestore {
         allow read: if belongsToCompany(companyId);
         allow write: if canManageTemplates(companyId);
       }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // VALORES ACUMULADOS (autocomplete de campos)
+      // Todos podem visualizar e adicionar, apenas admin pode remover
+      // ──────────────────────────────────────────────────────────────────────
+      match /accumulatedFields/{fieldType}/values/{valueId} {
+        allow read: if belongsToCompany(companyId);
+        allow create, update: if belongsToCompany(companyId);
+        allow delete: if canManageCompany(companyId);
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // NOTIFICAÇÕES IN-APP
+      // Usuário pode ler/atualizar apenas suas próprias notificações
+      // Criação apenas via Cloud Functions (Admin SDK)
+      // ──────────────────────────────────────────────────────────────────────
+      match /notifications/{notificationId} {
+        // Leitura: membro da empresa pode ler suas próprias notificações
+        allow read: if belongsToCompany(companyId)
+          && resource.data.recipientId == request.auth.uid;
+
+        // Atualização: apenas para marcar como lida (próprias notificações)
+        allow update: if belongsToCompany(companyId)
+          && resource.data.recipientId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt']);
+
+        // Criação e deleção: apenas via Cloud Functions (Admin SDK)
+        allow create, delete: if false;
+      }
     }
   }
 }

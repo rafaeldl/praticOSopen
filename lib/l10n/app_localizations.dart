@@ -2368,6 +2368,24 @@ abstract class AppLocalizations {
   /// **'Notificações'**
   String get notifications;
 
+  /// No description provided for @noNotifications.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma notificação'**
+  String get noNotifications;
+
+  /// No description provided for @noNotificationsDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você receberá notificações quando clientes aprovarem, rejeitarem ou avaliarem ordens de serviço.'**
+  String get noNotificationsDescription;
+
+  /// No description provided for @markAllAsRead.
+  ///
+  /// In pt, this message translates to:
+  /// **'Marcar todas'**
+  String get markAllAsRead;
+
   /// No description provided for @enableNotifications.
   ///
   /// In pt, this message translates to:

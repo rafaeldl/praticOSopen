@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
@@ -206,6 +207,8 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildNavigationBar(BuildContext context, SegmentConfigProvider config) {
+    final notificationStore = Provider.of<NotificationStore>(context);
+
     return CupertinoSliverNavigationBar(
       largeTitle: Semantics(
         identifier: 'home_title',
@@ -215,6 +218,50 @@ class _HomeState extends State<Home> {
         builder: (_) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Notification bell with badge
+            Semantics(
+              identifier: 'notifications_button',
+              button: true,
+              label: context.l10n.notifications,
+              child: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: Observer(
+                  builder: (_) {
+                    final count = notificationStore.unreadCount?.value ?? 0;
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const Icon(CupertinoIcons.bell),
+                        if (count > 0)
+                          Positioned(
+                            right: -6,
+                            top: -4,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.systemRed,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                              child: Text(
+                                count > 99 ? '99+' : count.toString(),
+                                style: const TextStyle(
+                                  color: CupertinoColors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                onPressed: () => Navigator.of(context, rootNavigator: true)
+                    .pushNamed('/notifications'),
+              ),
+            ),
             if (_authService.hasPermission(PermissionType.viewFinancialReports))
               Semantics(
                 identifier: 'dashboard_button',

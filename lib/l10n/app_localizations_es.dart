@@ -1153,6 +1153,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get notifications => 'Notificaciones';
 
   @override
+  String get noNotifications => 'Sin notificaciones';
+
+  @override
+  String get noNotificationsDescription =>
+      'Recibirás notificaciones cuando los clientes aprueben, rechacen o califiquen órdenes de servicio.';
+
+  @override
+  String get markAllAsRead => 'Marcar todas';
+
+  @override
   String get enableNotifications => 'Activar Notificaciones';
 
   @override

@@ -25,6 +25,9 @@ User _$UserFromJson(Map<String, dynamic> json) => User()
   ..photo = json['photo'] as String?
   ..companies = (json['companies'] as List<dynamic>?)
       ?.map((e) => CompanyRoleAggr.fromJson(e as Map<String, dynamic>))
+      .toList()
+  ..fcmTokens = (json['fcmTokens'] as List<dynamic>?)
+      ?.map((e) => FcmToken.fromJson(e as Map<String, dynamic>))
       .toList();
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -37,6 +40,7 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'email': instance.email,
   'photo': instance.photo,
   'companies': instance.companies?.map((e) => e.toJson()).toList(),
+  'fcmTokens': instance.fcmTokens?.map((e) => e.toJson()).toList(),
 };
 
 UserAggr _$UserAggrFromJson(Map<String, dynamic> json) => UserAggr()

@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/mobx/locale_store.dart';
+import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/models/company.dart';
@@ -55,6 +56,7 @@ Future<void> main() async {
           create: (_) => BottomNavigationBarStore(),
         ),
         Provider<ThemeStore>(create: (_) => ThemeStore()),
+        Provider<NotificationStore>(create: (_) => NotificationStore()),
         ChangeNotifierProvider<SegmentConfigProvider>(
           create: (_) => SegmentConfigProvider(),
         ),

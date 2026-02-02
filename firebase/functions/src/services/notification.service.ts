@@ -2,13 +2,13 @@
  * Notification Service
  * Handles push notifications for magic link events
  *
- * TODO: FCM Integration
- * To enable push notifications:
- * 1. Add fcmTokens field to user documents in Firestore
- * 2. Implement FCM token registration in the Flutter app
- * 3. Replace console.log calls with actual FCM sends
+ * FCM is now enabled. The Flutter app registers FCM tokens in user documents,
+ * and this service sends push notifications and saves them to Firestore for
+ * in-app notification history.
  */
 
+import { getMessaging } from 'firebase-admin/messaging';
+import { FieldValue } from 'firebase-admin/firestore';
 import { db } from './firestore.service';
 import { Order, OrderComment, Company, UserAggr, RoleType } from '../models/types';
 
@@ -97,17 +97,12 @@ async function getNotificationRecipients(
 }
 
 /**
- * Send notification to recipients
- * Currently logs to console - replace with FCM when tokens are available
- *
- * TODO: Implement FCM sending
- * import { getMessaging } from 'firebase-admin/messaging';
- * const messaging = getMessaging();
- * await messaging.sendEachForMulticast({ tokens, notification, data });
+ * Send notification to recipients via FCM and save to Firestore for in-app display
  */
 async function sendNotification(
   recipients: NotificationRecipient[],
-  payload: NotificationPayload
+  payload: NotificationPayload,
+  companyId: string
 ): Promise<void> {
   // Log notification for debugging
   console.log(`[NOTIFICATION] ${payload.title}`);
@@ -115,45 +110,93 @@ async function sendNotification(
   console.log(`[NOTIFICATION] Recipients: ${recipients.map(r => r.name).join(', ')}`);
   console.log(`[NOTIFICATION] Data:`, payload.data);
 
-  // TODO: When FCM is implemented, uncomment and adapt:
-  // const allTokens: string[] = [];
-  // for (const recipient of recipients) {
-  //   // Fetch FCM tokens from user document
-  //   const userDoc = await db.collection('users').doc(recipient.userId).get();
-  //   if (userDoc.exists) {
-  //     const userData = userDoc.data();
-  //     if (userData?.fcmTokens && Array.isArray(userData.fcmTokens)) {
-  //       allTokens.push(...userData.fcmTokens);
-  //     }
-  //   }
-  // }
-  //
-  // if (allTokens.length > 0) {
-  //   const messaging = getMessaging();
-  //   await messaging.sendEachForMulticast({
-  //     tokens: allTokens,
-  //     notification: {
-  //       title: payload.title,
-  //       body: payload.body,
-  //     },
-  //     data: payload.data,
-  //     android: {
-  //       priority: 'high',
-  //       notification: {
-  //         sound: 'default',
-  //         channelId: 'orders',
-  //       },
-  //     },
-  //     apns: {
-  //       payload: {
-  //         aps: {
-  //           sound: 'default',
-  //           badge: 1,
-  //         },
-  //       },
-  //     },
-  //   });
-  // }
+  const allTokens: string[] = [];
+
+  // Save notification to Firestore and collect FCM tokens
+  for (const recipient of recipients) {
+    // Save notification to Firestore for in-app display
+    try {
+      await db.collection('companies').doc(companyId).collection('notifications').add({
+        title: payload.title,
+        body: payload.body,
+        type: payload.data?.type,
+        orderId: payload.data?.orderId,
+        orderNumber: payload.data?.orderNumber,
+        recipientId: recipient.userId,
+        read: false,
+        readAt: null,
+        data: payload.data,
+        createdAt: FieldValue.serverTimestamp(),
+        company: { id: companyId },
+      });
+    } catch (error) {
+      console.error(`[NOTIFICATION] Error saving notification for ${recipient.name}:`, error);
+    }
+
+    // Fetch FCM tokens from user document
+    try {
+      const userDoc = await db.collection('users').doc(recipient.userId).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        if (userData?.fcmTokens && Array.isArray(userData.fcmTokens)) {
+          const tokens = userData.fcmTokens
+            .filter((t: { token?: string }) => t.token)
+            .map((t: { token: string }) => t.token);
+          allTokens.push(...tokens);
+        }
+      }
+    } catch (error) {
+      console.error(`[NOTIFICATION] Error fetching tokens for ${recipient.name}:`, error);
+    }
+  }
+
+  // Send FCM push notifications
+  if (allTokens.length > 0) {
+    try {
+      const messaging = getMessaging();
+      const response = await messaging.sendEachForMulticast({
+        tokens: allTokens,
+        notification: {
+          title: payload.title,
+          body: payload.body,
+        },
+        data: payload.data,
+        android: {
+          priority: 'high',
+          notification: {
+            sound: 'default',
+            channelId: 'orders_channel',
+          },
+        },
+        apns: {
+          payload: {
+            aps: {
+              sound: 'default',
+              badge: 1,
+            },
+          },
+        },
+      });
+
+      console.log(`[NOTIFICATION] FCM sent: ${response.successCount} success, ${response.failureCount} failed`);
+
+      // Handle invalid tokens
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          const errorCode = resp.error?.code;
+          if (errorCode === 'messaging/invalid-registration-token' ||
+              errorCode === 'messaging/registration-token-not-registered') {
+            console.log(`[NOTIFICATION] Invalid token at index ${idx}: ${allTokens[idx]}`);
+            // TODO: Remove invalid token from user document
+          }
+        }
+      });
+    } catch (error) {
+      console.error('[NOTIFICATION] Error sending FCM:', error);
+    }
+  } else {
+    console.log('[NOTIFICATION] No FCM tokens available for recipients');
+  }
 }
 
 /**
@@ -183,7 +226,7 @@ export async function notifyOrderApproved(
       },
     };
 
-    await sendNotification(recipients, payload);
+    await sendNotification(recipients, payload, companyId);
   } catch (error) {
     console.error('Error sending order approved notification:', error);
   }
@@ -223,7 +266,7 @@ export async function notifyOrderRejected(
       },
     };
 
-    await sendNotification(recipients, payload);
+    await sendNotification(recipients, payload, companyId);
   } catch (error) {
     console.error('Error sending order rejected notification:', error);
   }
@@ -264,7 +307,7 @@ export async function notifyNewComment(
       },
     };
 
-    await sendNotification(recipients, payload);
+    await sendNotification(recipients, payload, companyId);
   } catch (error) {
     console.error('Error sending new comment notification:', error);
   }
@@ -310,7 +353,7 @@ export async function notifyOrderStatusChanged(
       },
     };
 
-    await sendNotification(recipients, payload);
+    await sendNotification(recipients, payload, companyId);
   } catch (error) {
     console.error('Error sending status change notification:', error);
   }
@@ -348,7 +391,7 @@ export async function notifyOrderRated(
       },
     };
 
-    await sendNotification(recipients, payload);
+    await sendNotification(recipients, payload, companyId);
   } catch (error) {
     console.error('Error sending order rating notification:', error);
   }

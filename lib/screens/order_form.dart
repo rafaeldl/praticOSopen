@@ -43,6 +43,9 @@ class _OrderFormState extends State<OrderForm> {
   late OrderStore _store;
   final FormsService _formsService = FormsService();
   final AuthorizationService _authService = AuthorizationService.instance;
+  final ScrollController _scrollController = ScrollController();
+  bool _shouldScrollToComments = false;
+  String? _highlightCommentId;
 
   /// Gets the current locale code for i18n (e.g., 'pt', 'en', 'es')
   String? get _localeCode => context.l10n.localeName;
@@ -56,26 +59,56 @@ class _OrderFormState extends State<OrderForm> {
       final args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
+      // Check if we should scroll to comments
+      _shouldScrollToComments = args?['scrollToComments'] == true;
+      _highlightCommentId = args?['commentId'] as String?;
+
       if (args != null && args.containsKey('order')) {
         Order orderArg = args['order'];
 
         if (orderArg.id != null) {
           _store.repository.getSingle(_store.companyId!, orderArg.id!).then((updatedOrder) {
             _store.setOrder(updatedOrder ?? orderArg);
+            _scrollToCommentsIfNeeded();
           });
         } else if (orderArg.number != null) {
           _store.repository.getOrderByNumber(_store.companyId!, orderArg.number!).then((
             existingOrder,
           ) {
             _store.setOrder(existingOrder ?? orderArg);
+            _scrollToCommentsIfNeeded();
           });
         } else {
           _store.setOrder(orderArg);
+          _scrollToCommentsIfNeeded();
         }
       } else {
         _store.loadOrder();
       }
     });
+  }
+
+  void _scrollToCommentsIfNeeded() {
+    if (!_shouldScrollToComments) return;
+    _shouldScrollToComments = false; // Only scroll once
+
+    // Wait for the page to be fully rendered, then scroll to bottom (where comments are)
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -87,6 +120,7 @@ class _OrderFormState extends State<OrderForm> {
       child: Material(
         type: MaterialType.transparency,
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             _buildNavigationBar(context, config),
             SliverSafeArea(
@@ -160,27 +194,10 @@ class _OrderFormState extends State<OrderForm> {
           );
         },
       ),
-      trailing: Observer(
-        builder: (_) {
-          final order = _store.orderStream?.value;
-          final hasOrder = order?.id != null;
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (hasOrder)
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: _shareOrShowSheet,
-                  child: const Icon(CupertinoIcons.share),
-                ),
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => _showActionSheet(context, config),
-                child: const Icon(CupertinoIcons.ellipsis_circle),
-              ),
-            ],
-          );
-        },
+      trailing: CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: () => _showActionSheet(context, config),
+        child: const Icon(CupertinoIcons.ellipsis_circle),
       ),
     );
   }
@@ -557,6 +574,7 @@ class _OrderFormState extends State<OrderForm> {
             orderId: order!.id!,
             companyId: order.company!.id!,
             showInternalToggle: true,
+            highlightCommentId: _highlightCommentId,
           ),
         );
       },
