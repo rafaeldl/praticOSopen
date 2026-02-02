@@ -659,6 +659,7 @@
   "no": "No",
 
   "financialDashboard": "Financial Dashboard",
+  "financial": "Financial",
   "financialAccessDenied": "You don't have permission to access the financial dashboard.\\n\\nOnly Administrators and Managers can view financial data.",
   "today": "Today",
   "week": "Week",

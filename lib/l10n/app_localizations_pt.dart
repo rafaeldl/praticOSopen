@@ -1875,6 +1875,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get financialDashboard => 'Painel Financeiro';
 
   @override
+  String get financial => 'Financeiro';
+
+  @override
   String get financialAccessDenied =>
       'Você não tem permissão para acessar o painel financeiro.\\n\\nApenas Administradores e Gerentes podem visualizar dados financeiros.';
 

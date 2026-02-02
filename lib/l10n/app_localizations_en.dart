@@ -1866,6 +1866,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get financialDashboard => 'Financial Dashboard';
 
   @override
+  String get financial => 'Financial';
+
+  @override
   String get financialAccessDenied =>
       'You don\'t have permission to access the financial dashboard.\\n\\nOnly Administrators and Managers can view financial data.';
 

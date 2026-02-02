@@ -124,17 +124,31 @@ class _OrderFormState extends State<OrderForm> {
             _buildNavigationBar(context, config),
             SliverSafeArea(
               top: false,
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _buildPhotosSection(context, config),
-                  _buildClientDeviceSection(context, config),
-                  _buildSummarySection(context, config),
-                  _buildServicesSection(context, config),
-                  _buildProductsSection(context, config),
-                  _buildFormsSection(context, config),
-                  _buildCommentsSection(context),
-                  const SizedBox(height: 40),
-                ]),
+              sliver: Observer(
+                builder: (_) {
+                  final services = _store.services ?? [];
+                  final products = _store.products ?? [];
+                  final forms = _store.formsStream?.value ?? [];
+
+                  return SliverList(
+                    delegate: SliverChildListDelegate([
+                      _buildPhotosSection(context, config),
+                      _buildClientDeviceSection(context, config),
+                      _buildSummarySection(context, config),
+                      // Only show sections that have items
+                      if (services.isNotEmpty)
+                        _buildServicesSection(context, config),
+                      if (products.isNotEmpty)
+                        _buildProductsSection(context, config),
+                      if (forms.isNotEmpty)
+                        _buildFormsSection(context, config),
+                      // Always show consolidated add button
+                      _buildConsolidatedAddSection(context, config),
+                      _buildCommentsSection(context),
+                      const SizedBox(height: 40),
+                    ]),
+                  );
+                },
               ),
             ),
           ],
@@ -193,10 +207,35 @@ class _OrderFormState extends State<OrderForm> {
           );
         },
       ),
-      trailing: CupertinoButton(
-        padding: EdgeInsets.zero,
-        onPressed: () => _showActionSheet(context, config),
-        child: const Icon(CupertinoIcons.ellipsis_circle),
+      trailing: Observer(
+        builder: (_) {
+          final order = _store.orderStream?.value;
+          final isSaved = order?.id != null;
+
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Share button - only for saved orders
+              if (isSaved)
+                Semantics(
+                  identifier: 'share_order_button',
+                  button: true,
+                  label: context.l10n.shareWithCustomer,
+                  child: CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: _openShareLinkSheet,
+                    child: const Icon(CupertinoIcons.square_arrow_up),
+                  ),
+                ),
+              // Menu button
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => _showActionSheet(context, config),
+                child: const Icon(CupertinoIcons.ellipsis_circle),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -656,6 +695,93 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
+  // --- Helper Methods ---
+
+  /// Show action sheet with consolidated add options
+  void _showConsolidatedAddOptions(SegmentConfigProvider config) {
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
+    final canManageForms = _store.order != null
+        ? _authService.canManageOrderForms(_store.order!)
+        : true;
+
+    final actions = <CupertinoActionSheetAction>[];
+
+    if (canEditFields) {
+      actions.add(CupertinoActionSheetAction(
+        child: Text(config.label(LabelKeys.createService)),
+        onPressed: () {
+          Navigator.pop(context);
+          _addService();
+        },
+      ));
+      actions.add(CupertinoActionSheetAction(
+        child: Text(config.label(LabelKeys.createProduct)),
+        onPressed: () {
+          Navigator.pop(context);
+          _addProduct();
+        },
+      ));
+    }
+
+    if (canManageForms) {
+      actions.add(CupertinoActionSheetAction(
+        child: Text('${context.l10n.add} ${context.l10n.form}'),
+        onPressed: () {
+          Navigator.pop(context);
+          _addForm(config);
+        },
+      ));
+    }
+
+    if (actions.isEmpty) return;
+
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(context.l10n.add),
+        actions: actions,
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
+  /// Build consolidated add section - always visible for adding items
+  /// Follows iOS HIG pattern: same style as other grouped rows with primary color text
+  Widget _buildConsolidatedAddSection(BuildContext context, SegmentConfigProvider config) {
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
+    final canManageForms = _store.order != null
+        ? _authService.canManageOrderForms(_store.order!)
+        : true;
+
+    // Only show if user has at least one permission
+    if (!canEditFields && !canManageForms) {
+      return const SizedBox.shrink();
+    }
+
+    return _buildGroupedSection(
+      header: '',
+      children: [
+        _buildListTile(
+          context: context,
+          icon: CupertinoIcons.plus_circle_fill,
+          title: context.l10n.addItems,
+          value: '',
+          onTap: () => _showConsolidatedAddOptions(config),
+          showChevron: true,
+          isLast: true,
+          textColor: CupertinoTheme.of(context).primaryColor,
+        ),
+      ],
+    );
+  }
+
   // --- Helper Widgets for iOS Style ---
 
   Widget _buildGroupedSection({
@@ -667,24 +793,28 @@ class _OrderFormState extends State<OrderForm> {
       builder: (context) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(32, 24, 20, 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  header,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.2,
+          // Only show header if not empty
+          if (header.isNotEmpty || trailing != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(32, 24, 20, 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    header,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.2,
+                    ),
                   ),
-                ),
-                if (trailing != null) trailing,
-              ],
-            ),
-          ),
+                  if (trailing != null) trailing,
+                ],
+              ),
+            )
+          else
+            const SizedBox(height: 16),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
