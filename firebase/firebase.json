@@ -32,7 +32,7 @@
   },
   "emulators": {
     "functions": {
-      "port": 5001,
+      "port": 5000,
       "host": "0.0.0.0"
     },
     "firestore": {

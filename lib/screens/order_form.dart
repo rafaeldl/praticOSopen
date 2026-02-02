@@ -30,7 +30,6 @@ import 'package:praticos/screens/forms/form_fill_screen.dart';
 
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
-import 'package:praticos/services/share_link_service.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
 
@@ -1038,42 +1037,7 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  /// Share directly if link exists, otherwise open sheet
-  Future<void> _shareOrShowSheet() async {
-    final order = _store.order;
-    if (order?.id == null || order?.company?.id == null) return;
-
-    // Check if order has an active share link
-    final shareLink = order!.shareLink;
-    if (shareLink != null && !shareLink.isExpired && shareLink.url != null) {
-      // Has active link - share directly
-      final service = ShareLinkService.instance;
-      final message = service.buildShareMessage(
-        customerName: order.customer?.name ?? '',
-        orderNumber: order.number ?? 0,
-        companyName: order.company?.name,
-        locale: context.l10n.localeName,
-      );
-
-      // Get share position for iPad
-      final box = context.findRenderObject() as RenderBox?;
-      final sharePositionOrigin = box != null
-          ? box.localToGlobal(Offset.zero) & box.size
-          : null;
-
-      await service.shareViaSheet(
-        url: shareLink.url!,
-        message: message,
-        subject: '${context.l10n.order} #${order.number}',
-        sharePositionOrigin: sharePositionOrigin,
-      );
-    } else if (mounted) {
-      // No active link - show sheet to create one
-      ShareLinkSheet.show(context, order);
-    }
-  }
-
-  /// Always open the share link sheet (for menu item)
+  /// Open the share link sheet
   void _openShareLinkSheet() {
     final order = _store.order;
     if (order?.id == null) return;
