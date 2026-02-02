@@ -19,7 +19,7 @@ class ShareLinkService {
     if (kDebugMode) {
       // Use 10.0.2.2 for Android emulator, localhost for iOS simulator
       final host = Platform.isAndroid ? '10.0.2.2' : 'localhost';
-      return 'http://$host:5001/praticos/southamerica-east1/api';
+      return 'http://$host:5000/praticos/southamerica-east1/api';
     }
     return 'https://southamerica-east1-praticos.cloudfunctions.net/api';
   }

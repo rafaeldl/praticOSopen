@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/models/app_notification.dart';
-import 'package:praticos/repositories/repository.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 
 /// Convert Firestore Timestamps to DateTime in a map
