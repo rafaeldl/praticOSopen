@@ -268,9 +268,9 @@
 
         // Render cards
         renderInfoCard(order, customer);
+        renderPhotosCard(order);
         renderServicesCard(order);
         renderProductsCard(order);
-        renderPhotosCard(order);
         renderTotal(order);
 
         // Render action buttons if quote status and has approve permission
@@ -609,7 +609,13 @@
         const total = order.total || 0;
         const discount = order.discount || 0;
         const paidAmount = order.paidAmount || 0;
-        const remaining = order.remainingBalance ?? (total - paidAmount);
+
+        // Note: order.total from the app already has discount subtracted
+        // So we add it back to show the subtotal (before discount)
+        const subtotal = total + discount;
+
+        // Remaining is total minus paid (discount already applied in total)
+        const remaining = total - paidAmount;
 
         const section = document.createElement('div');
         section.className = 'total-section';
@@ -617,7 +623,7 @@
         let html = `
             <div class="total-row">
                 <span class="total-label">${text.subtotal}</span>
-                <span class="total-value">${formatCurrency(total)}</span>
+                <span class="total-value">${formatCurrency(subtotal)}</span>
             </div>
         `;
 
