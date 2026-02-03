@@ -876,7 +876,7 @@
         const footer = document.createElement('div');
         footer.className = 'order-footer';
         footer.innerHTML = `
-            ${text.poweredBy} <a href="https://praticos.app" target="_blank">PraticOS</a>
+            ${text.poweredBy} <a href="https://praticos.web.app" target="_blank">PraticOS</a>
         `;
         orderContent.appendChild(footer);
     }

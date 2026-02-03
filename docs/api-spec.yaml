@@ -13,10 +13,10 @@ info:
   version: 1.0.0
   contact:
     name: PraticOS Support
-    url: https://praticos.app
+    url: https://praticos.web.app
   license:
     name: Proprietary
-    url: https://praticos.app/terms
+    url: https://praticos.web.app/terms
 
 servers:
   - url: https://southamerica-east1-praticos-app.cloudfunctions.net/api
