@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "scripts": {
     "deploy": "firebase deploy",
-    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:hosting": "npm run build --prefix hosting && firebase deploy --only hosting",
     "deploy:functions": "firebase deploy --only functions",
     "deploy:firestore": "firebase deploy --only firestore",
     "deploy:indexes": "firebase deploy --only firestore:indexes",
     "deploy:rules": "firebase deploy --only firestore:rules,storage:rules",
-    "serve": "firebase serve --only hosting",
+    "serve": "npm run dev --prefix hosting",
     "serve:functions": "firebase serve --only functions"
   },
   "private": true
