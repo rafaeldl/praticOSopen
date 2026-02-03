@@ -21,7 +21,20 @@
           "google/gemini-2.5-flash"
         ]
       },
-      "workspace": "/root/.clawdbot"
+      "workspace": "/root/.clawdbot",
+      "contextPruning": {
+        "softTrimRatio": 0.3,
+        "hardClearRatio": 0.55,
+        "softTrim": {
+          "maxChars": 3500,
+          "headChars": 1000,
+          "tailChars": 1500
+        },
+        "hardClear": {
+          "enabled": true,
+          "placeholder": "[older context cleared]"
+        }
+      }
     }
   },
   "gateway": {
@@ -65,7 +78,7 @@
   },
   "messages": {
     "tts": {
-      "auto": "always",
+      "auto": "tagged",
       "provider": "edge",
       "edge": {
         "enabled": true,

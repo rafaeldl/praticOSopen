@@ -9,6 +9,7 @@ services:
     ports:
       - "18790:18789"
     volumes:
+      - ./clawdbot.dev.json:/root/.clawdbot/clawdbot.json
       - ./data/.openclaw/credentials:/root/.clawdbot/credentials
       - ./data/.openclaw/agents:/root/.clawdbot/agents
       - ./workspace/skills:/root/.clawdbot/skills

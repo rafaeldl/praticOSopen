@@ -468,7 +468,7 @@ Para todas as subcategorias do segmento HVAC, usar:
 |-------|-------|
 | Nome | Maria Santos (Exemplo) |
 | Telefone | (11) 99999-0000 |
-| Email | exemplo@praticos.app |
+| Email | exemplo@praticos.web.app |
 | Endereço | Av. Exemplo, 456 |
 
 ---
@@ -515,7 +515,7 @@ Para todas as subcategorias do segmento HVAC, usar:
 |-------|-------|
 | Nome | Pedro Oliveira (Exemplo) |
 | Telefone | (11) 99999-0000 |
-| Email | exemplo@praticos.app |
+| Email | exemplo@praticos.web.app |
 | Endereço | Rua Exemplo, 789 |
 
 ---
@@ -683,7 +683,7 @@ Para todas as subcategorias do segmento Informática, usar:
 |-------|-------|
 | Nome | Ana Costa (Exemplo) |
 | Telefone | (11) 99999-0000 |
-| Email | exemplo@praticos.app |
+| Email | exemplo@praticos.web.app |
 | Endereço | Av. Exemplo, 321 |
 
 ---
@@ -730,7 +730,7 @@ Para todas as subcategorias do segmento Informática, usar:
 |-------|-------|
 | Nome | Carlos Ferreira (Exemplo) |
 | Telefone | (11) 99999-0000 |
-| Email | exemplo@praticos.app |
+| Email | exemplo@praticos.web.app |
 | Endereço | Rua Exemplo, 654 |
 
 ---
@@ -903,7 +903,7 @@ Para todas as subcategorias do segmento Segurança, usar:
 |-------|-------|
 | Nome | Roberto Lima (Exemplo) |
 | Telefone | (11) 99999-0000 |
-| Email | exemplo@praticos.app |
+| Email | exemplo@praticos.web.app |
 | Endereço | Rua Exemplo, 999 |
 
 ---
@@ -943,7 +943,7 @@ Para todas as subcategorias do segmento Segurança, usar:
 |-------|-------|
 | Nome | Cliente Exemplo |
 | Telefone | (11) 99999-0000 |
-| Email | exemplo@praticos.app |
+| Email | exemplo@praticos.web.app |
 | Endereço | Endereço de Exemplo, 123 |
 
 ---
@@ -956,7 +956,7 @@ Para todas as subcategorias do segmento automotivo, usar:
 |-------|-------|
 | Nome | João da Silva (Exemplo) |
 | Telefone | (11) 99999-0000 |
-| Email | exemplo@praticos.app |
+| Email | exemplo@praticos.web.app |
 | Endereço | Rua Exemplo, 123 |
 
 ---
@@ -1351,7 +1351,7 @@ Os dados de exemplo ficam armazenados no Firestore, organizados por segmento e s
   "customer": {
     "name": "João da Silva (Exemplo)",
     "phone": "(11) 99999-0000",
-    "email": "exemplo@praticos.app",
+    "email": "exemplo@praticos.web.app",
     "address": "Rua Exemplo, 123"
   }
 }
