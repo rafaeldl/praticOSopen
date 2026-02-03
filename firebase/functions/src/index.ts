@@ -129,6 +129,7 @@ import productsRoutes from './routes/v1/products.routes';
 import companyRoutes from './routes/v1/company.routes';
 import analyticsRoutes from './routes/v1/analytics.routes';
 import shareRoutes from './routes/v1/share.routes';
+import appInviteRoutes from './routes/v1/invite.routes';
 
 // Routes - Public (no authentication required)
 import publicOrdersRoutes from './routes/public/orders.routes';
@@ -276,6 +277,7 @@ app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ord
 app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, shareRoutes);
 app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customersRoutes);
 app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
+app.use('/v1/app/invites', apiCoreLimiter, bearerAuth, resolveCompanyContext, appInviteRoutes);
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
 app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);

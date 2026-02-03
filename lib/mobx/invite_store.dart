@@ -38,23 +38,50 @@ abstract class _InviteStore with Store {
   @observable
   String? errorMessage;
 
-  /// Carrega os convites pendentes para o email do usuário atual.
+  /// Carrega os convites pendentes para o email e/ou telefone do usuário atual.
   @action
   Future<void> loadPendingInvites() async {
     // Usa FirebaseAuth diretamente para evitar race condition com Global.currentUser
-    // que é definido assincronamente após o login
-    final email = FirebaseAuth.instance.currentUser?.email;
-    if (email == null) return;
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return;
 
     isLoading = true;
     errorMessage = null;
 
     try {
-      final invites = await _inviteRepository.getPendingByEmail(email);
+      final email = currentUser.email;
+      final phone = currentUser.phoneNumber?.replaceAll(RegExp(r'\D'), '');
+
+      final Set<String> seenTokens = {};
+      final List<Invite> allInvites = [];
+
+      // Busca por email
+      if (email != null && email.isNotEmpty) {
+        final emailInvites = await _inviteRepository.getPendingByEmail(email);
+        for (final invite in emailInvites) {
+          if (invite.token != null && !seenTokens.contains(invite.token)) {
+            seenTokens.add(invite.token!);
+            allInvites.add(invite);
+          }
+        }
+      }
+
+      // Busca por telefone
+      if (phone != null && phone.isNotEmpty) {
+        final phoneInvites = await _inviteRepository.getPendingByPhone(phone);
+        for (final invite in phoneInvites) {
+          if (invite.token != null && !seenTokens.contains(invite.token)) {
+            seenTokens.add(invite.token!);
+            allInvites.add(invite);
+          }
+        }
+      }
+
       pendingInvites.clear();
-      pendingInvites.addAll(invites);
+      pendingInvites.addAll(allInvites);
     } catch (e) {
       errorMessage = e.toString();
+      print('[InviteStore] Error loading pending invites: $e');
     } finally {
       isLoading = false;
     }
@@ -88,8 +115,8 @@ abstract class _InviteStore with Store {
         (c) => c.company?.id == companyId
       ) ?? false;
       if (alreadyMember) {
-        // Se já é membro, apenas remove o convite
-        await _inviteRepository.updateStatus(invite.id!, InviteStatus.accepted);
+        // Se já é membro, apenas atualiza status do convite (usa token como ID)
+        await _inviteRepository.updateStatus(invite.token!, InviteStatus.accepted);
         await loadPendingInvites();
         return;
       }
@@ -121,9 +148,13 @@ abstract class _InviteStore with Store {
       );
       batch.set(membershipRef, membership.toFirestore());
 
-      // 3c. Atualiza status do convite
-      final inviteRef = _db.collection('invites').doc(invite.id);
-      batch.update(inviteRef, {'status': InviteStatus.accepted.name});
+      // 3c. Atualiza status do convite (path: /links/invites/tokens/{token})
+      final inviteRef = _db.collection('links').doc('invites').collection('tokens').doc(invite.token);
+      batch.update(inviteRef, {
+        'status': InviteStatus.accepted.name,
+        'acceptedAt': FieldValue.serverTimestamp(),
+        'acceptedByUserId': userId,
+      });
 
       // 4. Commit atômico
       await batch.commit();
@@ -150,7 +181,8 @@ abstract class _InviteStore with Store {
     errorMessage = null;
 
     try {
-      await _inviteRepository.updateStatus(invite.id!, InviteStatus.rejected);
+      // Usa token como ID do documento
+      await _inviteRepository.updateStatus(invite.token!, InviteStatus.rejected);
       await loadPendingInvites();
     } catch (e) {
       errorMessage = e.toString();

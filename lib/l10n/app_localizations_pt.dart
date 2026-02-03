@@ -554,6 +554,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get name => 'Nome';
 
   @override
+  String get namePlaceholder => 'Ex: João Silva';
+
+  @override
   String get fullName => 'Nome Completo';
 
   @override
@@ -2244,6 +2247,73 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String areYouSureReject(String company) {
     return 'Tem certeza que deseja recusar o convite de $company?';
+  }
+
+  @override
+  String get or => 'ou';
+
+  @override
+  String get createMyCompany => 'Criar Minha Empresa';
+
+  @override
+  String get reject => 'Recusar';
+
+  @override
+  String invitedBy(String name) {
+    return 'Convidado por $name';
+  }
+
+  @override
+  String roleLabel(String role) {
+    return 'Cargo: $role';
+  }
+
+  @override
+  String get inviteExpired => 'Este convite expirou';
+
+  @override
+  String get inviteCancelled => 'Este convite foi cancelado';
+
+  @override
+  String get inviteNotFound => 'Convite não encontrado';
+
+  @override
+  String get inviteAlreadyUsed => 'Este convite já foi utilizado';
+
+  @override
+  String get enterInviteCode => 'Digite o código do convite';
+
+  @override
+  String get enterCodeReceived =>
+      'Digite o código que você recebeu para entrar na equipe';
+
+  @override
+  String get searchAnotherCode => 'Buscar outro código';
+
+  @override
+  String get joinAnotherCompany => 'Entrar em outra empresa';
+
+  @override
+  String get shareInvite => 'Compartilhar Convite';
+
+  @override
+  String get copyInviteLink => 'Copiar Link do Convite';
+
+  @override
+  String get sendViaWhatsAppInvite => 'Enviar convite via WhatsApp';
+
+  @override
+  String get inviteLinkCopied => 'Link do convite copiado!';
+
+  @override
+  String get phoneOptional => 'Telefone (opcional)';
+
+  @override
+  String get emailOrPhone => 'Informe email ou telefone';
+
+  @override
+  String inviteExpiresIn(int days) {
+    return 'Convite válido por $days dias';
   }
 
   @override

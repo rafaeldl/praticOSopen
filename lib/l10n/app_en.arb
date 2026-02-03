@@ -202,6 +202,7 @@
   "addCustomer": "Add Customer",
 
   "name": "Name",
+  "namePlaceholder": "E.g.: John Smith",
   "fullName": "Full Name",
   "nickname": "Nickname",
   "phone": "Phone",
@@ -811,6 +812,47 @@
     "placeholders": {
       "company": {
         "type": "String"
+      }
+    }
+  },
+  "or": "or",
+  "createMyCompany": "Create My Company",
+  "reject": "Reject",
+  "invitedBy": "Invited by {name}",
+  "@invitedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "roleLabel": "Role: {role}",
+  "@roleLabel": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteExpired": "This invite has expired",
+  "inviteCancelled": "This invite was cancelled",
+  "inviteNotFound": "Invite not found",
+  "inviteAlreadyUsed": "This invite has already been used",
+  "enterInviteCode": "Enter invite code",
+  "enterCodeReceived": "Enter the code you received to join the team",
+  "searchAnotherCode": "Search another code",
+  "joinAnotherCompany": "Join another company",
+  "shareInvite": "Share Invite",
+  "copyInviteLink": "Copy Invite Link",
+  "sendViaWhatsAppInvite": "Send invite via WhatsApp",
+  "inviteLinkCopied": "Invite link copied!",
+  "phoneOptional": "Phone (optional)",
+  "emailOrPhone": "Enter email or phone",
+  "inviteExpiresIn": "Invite valid for {days} days",
+  "@inviteExpiresIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
       }
     }
   },

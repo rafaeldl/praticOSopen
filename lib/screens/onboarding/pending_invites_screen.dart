@@ -6,6 +6,7 @@ import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
 
 /// Tela de convites pendentes.
 ///
@@ -97,6 +98,21 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
             onPressed: () => Navigator.pop(context),
           ),
         ],
+      ),
+    );
+  }
+
+  void _openAcceptInviteScreen() {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => AcceptInviteScreen(
+          onInviteAccepted: () {
+            Navigator.pop(context); // Fecha a tela de código
+            widget.onInviteAccepted?.call();
+          },
+          onCancel: () => Navigator.pop(context),
+        ),
       ),
     );
   }
@@ -219,7 +235,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16),
                                 child: Text(
-                                  'ou',
+                                  context.l10n.or,
                                   style: TextStyle(
                                     color: CupertinoColors.secondaryLabel.resolveFrom(context),
                                     fontSize: 14,
@@ -235,13 +251,25 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                             ],
                           ),
                           const SizedBox(height: 24),
+                          // Botão para digitar código de convite
+                          SizedBox(
+                            width: double.infinity,
+                            child: CupertinoButton.filled(
+                              onPressed: _openAcceptInviteScreen,
+                              child: Text(
+                                context.l10n.enterInviteCode,
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
                             child: CupertinoButton(
                               color: CupertinoColors.systemGrey5,
                               onPressed: widget.onCreateCompany,
                               child: Text(
-                                'Criar Minha Empresa',
+                                context.l10n.createMyCompany,
                                 style: TextStyle(
                                   color: CupertinoColors.label.resolveFrom(context),
                                   fontWeight: FontWeight.w600,
@@ -317,7 +345,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Cargo: ${_getRoleLabel(invite.role)}',
+                        context.l10n.roleLabel(_getRoleLabel(invite.role)),
                         style: TextStyle(
                           fontSize: 14,
                           color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -331,7 +359,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
             if (invite.invitedBy?.name != null) ...[
               const SizedBox(height: 12),
               Text(
-                'Convidado por ${invite.invitedBy!.name}',
+                context.l10n.invitedBy(invite.invitedBy!.name!),
                 style: TextStyle(
                   fontSize: 13,
                   color: CupertinoColors.secondaryLabel.resolveFrom(context),
@@ -347,7 +375,7 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                     color: CupertinoColors.systemGrey5,
                     onPressed: () => _showRejectConfirmation(invite),
                     child: Text(
-                      'Recusar',
+                      context.l10n.reject,
                       style: TextStyle(
                         color: CupertinoColors.label.resolveFrom(context),
                         fontWeight: FontWeight.w600,
@@ -360,9 +388,9 @@ class _PendingInvitesScreenState extends State<PendingInvitesScreen> {
                   child: CupertinoButton.filled(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     onPressed: () => _acceptInvite(invite),
-                    child: const Text(
-                      'Aceitar',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                    child: Text(
+                      context.l10n.acceptInvite,
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),

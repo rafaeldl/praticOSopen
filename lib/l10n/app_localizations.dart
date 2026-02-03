@@ -1168,6 +1168,12 @@ abstract class AppLocalizations {
   /// **'Nome'**
   String get name;
 
+  /// No description provided for @namePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: João Silva'**
+  String get namePlaceholder;
+
   /// No description provided for @fullName.
   ///
   /// In pt, this message translates to:
@@ -4425,6 +4431,126 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tem certeza que deseja recusar o convite de {company}?'**
   String areYouSureReject(String company);
+
+  /// No description provided for @or.
+  ///
+  /// In pt, this message translates to:
+  /// **'ou'**
+  String get or;
+
+  /// No description provided for @createMyCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criar Minha Empresa'**
+  String get createMyCompany;
+
+  /// No description provided for @reject.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recusar'**
+  String get reject;
+
+  /// No description provided for @invitedBy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convidado por {name}'**
+  String invitedBy(String name);
+
+  /// No description provided for @roleLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cargo: {role}'**
+  String roleLabel(String role);
+
+  /// No description provided for @inviteExpired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este convite expirou'**
+  String get inviteExpired;
+
+  /// No description provided for @inviteCancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este convite foi cancelado'**
+  String get inviteCancelled;
+
+  /// No description provided for @inviteNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite não encontrado'**
+  String get inviteNotFound;
+
+  /// No description provided for @inviteAlreadyUsed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Este convite já foi utilizado'**
+  String get inviteAlreadyUsed;
+
+  /// No description provided for @enterInviteCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código do convite'**
+  String get enterInviteCode;
+
+  /// No description provided for @enterCodeReceived.
+  ///
+  /// In pt, this message translates to:
+  /// **'Digite o código que você recebeu para entrar na equipe'**
+  String get enterCodeReceived;
+
+  /// No description provided for @searchAnotherCode.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar outro código'**
+  String get searchAnotherCode;
+
+  /// No description provided for @joinAnotherCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entrar em outra empresa'**
+  String get joinAnotherCompany;
+
+  /// No description provided for @shareInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar Convite'**
+  String get shareInvite;
+
+  /// No description provided for @copyInviteLink.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar Link do Convite'**
+  String get copyInviteLink;
+
+  /// No description provided for @sendViaWhatsAppInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar convite via WhatsApp'**
+  String get sendViaWhatsAppInvite;
+
+  /// No description provided for @inviteLinkCopied.
+  ///
+  /// In pt, this message translates to:
+  /// **'Link do convite copiado!'**
+  String get inviteLinkCopied;
+
+  /// No description provided for @phoneOptional.
+  ///
+  /// In pt, this message translates to:
+  /// **'Telefone (opcional)'**
+  String get phoneOptional;
+
+  /// No description provided for @emailOrPhone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe email ou telefone'**
+  String get emailOrPhone;
+
+  /// No description provided for @inviteExpiresIn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite válido por {days} dias'**
+  String inviteExpiresIn(int days);
 
   /// No description provided for @markAsToReceive.
   ///

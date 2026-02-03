@@ -4,6 +4,7 @@ import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/invite_share_sheet.dart';
 
 class CollaboratorFormScreen extends StatefulWidget {
   @override
@@ -14,17 +15,66 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
   // Usa singleton para compartilhar estado com a tela de listagem
   final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   RolesType _selectedRole = RolesType.technician; // Default para técnico
   bool _isLoading = false;
+
+  // Default invite expiration days
+  static const int _inviteExpirationDays = 7;
+
+  /// Validates phone number format.
+  /// Returns true if empty (optional) or valid format.
+  bool _isValidPhone(String phone) {
+    if (phone.isEmpty) return true;
+    // Remove non-digits and check length (min 10 for BR, max 15 for international)
+    final digitsOnly = phone.replaceAll(RegExp(r'\D'), '');
+    return digitsOnly.length >= 10 && digitsOnly.length <= 15;
+  }
+
+  /// Generates the WhatsApp link for the invite.
+  /// If phone is provided, opens chat with that number. Otherwise, opens share dialog.
+  String _getWhatsAppLink(String token, {String? phone}) {
+    final inviteLink = _getInviteLink(token);
+    final message = Uri.encodeComponent(
+      'Você foi convidado para se juntar à nossa equipe no PraticOS!\n\n'
+      'Use este link para aceitar o convite:\n$inviteLink\n\n'
+      'Ou digite o código: $token',
+    );
+
+    if (phone != null && phone.isNotEmpty) {
+      final cleanNumber = phone.replaceAll(RegExp(r'\D'), '');
+      return 'https://wa.me/$cleanNumber?text=$message';
+    }
+    // No phone - let user choose recipient
+    return 'https://wa.me/?text=$message';
+  }
+
+  /// Generates the web link for the invite.
+  String _getInviteLink(String token) {
+    return 'https://praticos.web.app/invite?token=$token';
+  }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+
+    // Form-level validation: at least one of email or phone must be provided
+    if (email.isEmpty && phone.isEmpty) {
+      _showErrorDialog(context.l10n.emailOrPhone);
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
-      final wasAddedDirectly = await _collaboratorStore.addCollaborator(
-        _emailController.text.trim(),
+      final (wasAddedDirectly, inviteToken) = await _collaboratorStore.addCollaborator(
+        name.isNotEmpty ? name : null,
+        email.isNotEmpty ? email : null,
+        phone.isNotEmpty ? phone : null,
         _selectedRole,
       );
       if (mounted) {
@@ -35,11 +85,10 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
             context.l10n.collaboratorAddedSuccess,
           );
         } else {
-          // Usuário não existia, convite foi criado
-          _showSuccessDialog(
-            context.l10n.inviteSent,
-            context.l10n.inviteCreatedMessage,
-          );
+          // Usuário não existia, convite foi criado - show share sheet
+          if (inviteToken != null) {
+            await _showInviteShareSheet(inviteToken);
+          }
         }
       }
     } catch (e) {
@@ -50,6 +99,20 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  Future<void> _showInviteShareSheet(String token) async {
+    final phone = _phoneController.text.trim();
+    await InviteShareSheet.show(
+      context,
+      token: token,
+      inviteLink: _getInviteLink(token),
+      whatsappLink: _getWhatsAppLink(token, phone: phone.isNotEmpty ? phone : null),
+      expirationDays: _inviteExpirationDays,
+    );
+    if (mounted) {
+      Navigator.pop(context, true); // Volta para a lista após compartilhar
     }
   }
 
@@ -144,6 +207,14 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
@@ -165,7 +236,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
             child: ListView(
               children: [
                 const SizedBox(height: 20),
-                
+
                 // Header Icon
                 Center(
                   child: Container(
@@ -189,17 +260,43 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
                   footer: Text(context.l10n.userWillReceiveInviteByEmail),
                   children: [
                     CupertinoTextFormFieldRow(
+                      controller: _nameController,
+                      prefix: Text(context.l10n.name, style: const TextStyle(fontSize: 16)),
+                      placeholder: context.l10n.namePlaceholder,
+                      keyboardType: TextInputType.name,
+                      textCapitalization: TextCapitalization.words,
+                      textAlign: TextAlign.right,
+                    ),
+                    CupertinoTextFormFieldRow(
                       controller: _emailController,
                       prefix: Text(context.l10n.email, style: const TextStyle(fontSize: 16)),
                       placeholder: context.l10n.emailPlaceholder,
                       keyboardType: TextInputType.emailAddress,
                       textAlign: TextAlign.right,
                       validator: (value) {
+                        // Email is optional if phone is provided
                         if (value == null || value.isEmpty) {
-                          return context.l10n.required;
+                          return null; // Will be validated at form level
                         }
                         if (!value.contains('@')) {
                           return context.l10n.invalidEmail;
+                        }
+                        return null;
+                      },
+                    ),
+                    CupertinoTextFormFieldRow(
+                      controller: _phoneController,
+                      prefix: Text(context.l10n.phoneOptional, style: const TextStyle(fontSize: 16)),
+                      placeholder: '+55 11 99999-9999',
+                      keyboardType: TextInputType.phone,
+                      textAlign: TextAlign.right,
+                      validator: (value) {
+                        // Phone is optional if email is provided
+                        if (value == null || value.isEmpty) {
+                          return null; // Will be validated at form level
+                        }
+                        if (!_isValidPhone(value)) {
+                          return context.l10n.invalidPhone;
                         }
                         return null;
                       },

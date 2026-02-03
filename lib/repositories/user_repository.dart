@@ -23,4 +23,13 @@ class UserRepository extends Repository<User> {
     if (users.isEmpty) return null;
     return users.first;
   }
+
+  Future<User?> findUserByPhone(String phone) async {
+    // Normalize phone number (remove non-digits)
+    final normalizedPhone = phone.replaceAll(RegExp(r'\D'), '');
+    List<User> users =
+        await super.getQueryList(args: [QueryArgs('phone', normalizedPhone)]);
+    if (users.isEmpty) return null;
+    return users.first;
+  }
 }

@@ -13,6 +13,7 @@ import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/screens/onboarding/company_info_screen.dart';
+import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
 import 'package:praticos/repositories/company_repository.dart';
 import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
 
@@ -322,6 +323,21 @@ class _SettingsState extends State<Settings> {
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.account.toUpperCase()),
                 children: [
+                  // Accept Invite - join another company
+                  CupertinoListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemBlue,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(CupertinoIcons.ticket_fill, color: CupertinoColors.white, size: 20),
+                    ),
+                    title: Text(context.l10n.acceptInvite),
+                    subtitle: Text(context.l10n.joinAnotherCompany),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () => _openAcceptInviteScreen(context),
+                  ),
                   CupertinoListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(4),
@@ -522,6 +538,23 @@ class _SettingsState extends State<Settings> {
         );
       }
     }
+  }
+
+  /// Open Accept Invite screen to join another company
+  void _openAcceptInviteScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      CupertinoPageRoute(
+        builder: (context) => AcceptInviteScreen(
+          onInviteAccepted: () {
+            Navigator.pop(context);
+            // Refresh to show new company option
+            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+          },
+          onCancel: () => Navigator.pop(context),
+        ),
+      ),
+    );
   }
 
   /// Show bottom sheet to link WhatsApp

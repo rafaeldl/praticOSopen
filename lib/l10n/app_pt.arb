@@ -226,6 +226,7 @@
   "addCustomer": "Adicionar Cliente",
 
   "name": "Nome",
+  "namePlaceholder": "Ex: João Silva",
   "fullName": "Nome Completo",
   "nickname": "Apelido",
   "phone": "Telefone",
@@ -878,6 +879,47 @@
     "placeholders": {
       "company": {
         "type": "String"
+      }
+    }
+  },
+  "or": "ou",
+  "createMyCompany": "Criar Minha Empresa",
+  "reject": "Recusar",
+  "invitedBy": "Convidado por {name}",
+  "@invitedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "roleLabel": "Cargo: {role}",
+  "@roleLabel": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
+  "inviteExpired": "Este convite expirou",
+  "inviteCancelled": "Este convite foi cancelado",
+  "inviteNotFound": "Convite não encontrado",
+  "inviteAlreadyUsed": "Este convite já foi utilizado",
+  "enterInviteCode": "Digite o código do convite",
+  "enterCodeReceived": "Digite o código que você recebeu para entrar na equipe",
+  "searchAnotherCode": "Buscar outro código",
+  "joinAnotherCompany": "Entrar em outra empresa",
+  "shareInvite": "Compartilhar Convite",
+  "copyInviteLink": "Copiar Link do Convite",
+  "sendViaWhatsAppInvite": "Enviar convite via WhatsApp",
+  "inviteLinkCopied": "Link do convite copiado!",
+  "phoneOptional": "Telefone (opcional)",
+  "emailOrPhone": "Informe email ou telefone",
+  "inviteExpiresIn": "Convite válido por {days} dias",
+  "@inviteExpiresIn": {
+    "placeholders": {
+      "days": {
+        "type": "int"
       }
     }
   },
