@@ -219,6 +219,45 @@ Body: {"status":"completed"}
 Status possiveis: pending, in_progress, completed
 - "completed" so funciona se todos os itens obrigatorios estiverem preenchidos
 
+### Convites de Colaboradores
+POST   /bot/invite/create  - criar convite (admin/supervisor)
+POST   /bot/invite/accept  - aceitar convite (novo usuario)
+GET    /bot/invite/list    - listar convites criados
+DELETE /bot/invite/{CODE}  - cancelar convite
+
+**POST /bot/invite/create** (requer usuario vinculado com permissao):
+Body: {"collaboratorName":"Nome","role":"technician","phone":"+5511999999999"}
+- **OBRIGATORIO:** email OU phone (pelo menos um)
+- Roles permitidos: admin, supervisor, manager, technician
+- Supervisors so podem convidar technicians
+- Retorna: {inviteCode, inviteLink, expiresAt}
+
+Campos:
+- collaboratorName: nome do colaborador (obrigatorio)
+- role: perfil de acesso (obrigatorio)
+- phone: telefone no formato internacional (opcional se email)
+- email: email do colaborador (opcional se phone)
+
+**POST /bot/invite/accept** (para novos usuarios):
+Body: {"inviteCode":"INV_XXXXXXXX","whatsappNumber":"+5511999999999","name":"Nome"}
+- whatsappNumber: numero de quem esta aceitando
+- name: opcional (usa nome do convite se nao fornecido)
+- Retorna: {userId, userName, companyId, companyName, role}
+
+**Fluxo de convite:**
+1. Admin envia "convidar Joao como tecnico"
+2. Bot chama POST /bot/invite/create
+3. Bot responde com codigo INV_XXXXXXXX e link
+4. Admin compartilha link/codigo com Joao
+5. Joao envia o codigo para o bot
+6. Bot detecta formato INV_XXXXXXXX e chama POST /bot/invite/accept
+7. Joao e vinculado a empresa
+
+**Detectar codigo de convite:**
+Se usuario NAO vinculado enviar mensagem no formato INV_XXXXXXXX:
+- Extrair codigo e chamar POST /bot/invite/accept automaticamente
+- Usar numero do remetente como whatsappNumber
+
 ### Magic Link (Compartilhamento com Cliente)
 POST   /bot/orders/{NUM}/share         - gerar link para cliente
 GET    /bot/orders/{NUM}/share         - listar links ativos
@@ -313,6 +352,18 @@ exec(command="curl -s $HDR '$BASE/bot/orders/42/share'")
 
 # Magic Link - Revogar
 exec(command="curl -s -X DELETE $HDR '$BASE/bot/orders/42/share/ST_xxx'")
+
+# Convites - Criar (admin/supervisor) - phone OU email obrigatorio
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"collaboratorName\":\"Joao Silva\",\"role\":\"technician\",\"phone\":\"+5511999999999\"}' '$BASE/bot/invite/create'")
+
+# Convites - Aceitar (novo usuario)
+exec(command="curl -s -X POST -H 'Content-Type: application/json' -d '{\"inviteCode\":\"INV_XXXXXXXX\",\"whatsappNumber\":\"+5511999999999\",\"name\":\"Joao Silva\"}' '$BASE/bot/invite/accept'")
+
+# Convites - Listar meus convites
+exec(command="curl -s $HDR '$BASE/bot/invite/list'")
+
+# Convites - Cancelar
+exec(command="curl -s -X DELETE $HDR '$BASE/bot/invite/INV_XXXXXXXX'")
 
 ---
 

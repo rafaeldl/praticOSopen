@@ -13,6 +13,10 @@ import {
   toDate,
 } from '../models/types';
 import * as companyService from './company.service';
+import * as channelLinkService from './channel-link.service';
+
+// Bot WhatsApp number (from environment or config)
+const BOT_WHATSAPP_NUMBER = process.env.BOT_WHATSAPP_NUMBER || '+5548988794742';
 
 // Token expiration time (7 days)
 const INVITE_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
@@ -290,6 +294,19 @@ export async function listByUser(email?: string, phone?: string): Promise<Invite
 }
 
 /**
+ * List invites created by a specific user
+ */
+export async function listByInviter(userId: string): Promise<Invite[]> {
+  const snapshot = await getInvitesCollection()
+    .where('invitedBy.id', '==', userId)
+    .orderBy('createdAt', 'desc')
+    .limit(50)
+    .get();
+
+  return snapshot.docs.map((doc) => doc.data() as Invite);
+}
+
+/**
  * Cancel an invite
  */
 export async function cancelInvite(
@@ -352,8 +369,9 @@ export async function rejectInvite(token: string): Promise<boolean> {
 
 /**
  * Add company to user's companies array
+ * Also exported as addCompanyToUserDoc for bot service
  */
-async function addCompanyToUser(
+export async function addCompanyToUserDoc(
   userId: string,
   company: { id: string; name: string },
   role: RoleType
@@ -381,6 +399,25 @@ async function addCompanyToUser(
   }
 
   await db.collection('users').doc(userId).update({ companies });
+}
+
+// Alias for internal use
+const addCompanyToUser = addCompanyToUserDoc;
+
+/**
+ * Mark invite as accepted (for bot service)
+ */
+export async function markAsAccepted(
+  token: string,
+  userId: string,
+  userName: string
+): Promise<void> {
+  await getInvitesCollection().doc(token).update({
+    status: 'accepted',
+    acceptedByUserId: userId,
+    acceptedByUserName: userName,
+    acceptedAt: new Date().toISOString(),
+  });
 }
 
 /**
@@ -412,4 +449,153 @@ export async function listAllByCompany(companyId: string): Promise<Invite[]> {
     .get();
 
   return snapshot.docs.map((doc) => doc.data() as Invite);
+}
+
+// ============================================================================
+// WhatsApp Bot Functions
+// ============================================================================
+
+export interface AcceptInviteViaWhatsAppResult {
+  success: true;
+  userId: string;
+  userName: string;
+  companyId: string;
+  companyName: string;
+  role: RoleType;
+}
+
+export interface AcceptInviteViaWhatsAppError {
+  success: false;
+  error: string;
+}
+
+/**
+ * Accept an invite via WhatsApp
+ * Handles WhatsApp-specific logic: user creation, WhatsApp linking
+ */
+export async function acceptInviteViaWhatsApp(
+  inviteCode: string,
+  whatsappNumber: string,
+  name?: string
+): Promise<AcceptInviteViaWhatsAppResult | AcceptInviteViaWhatsAppError> {
+  // Normalize invite code (support both old INVITE_ and new INV_ formats)
+  const normalizedCode = normalizeInviteCode(inviteCode);
+
+  // Get invite
+  const invite = await getByToken(normalizedCode);
+
+  if (!invite) {
+    return { success: false, error: 'Invalid invite code' };
+  }
+
+  // Check if already accepted
+  if (invite.status === 'accepted') {
+    return { success: false, error: 'Invite has already been used' };
+  }
+
+  if (invite.status === 'cancelled') {
+    return { success: false, error: 'Invite has been cancelled' };
+  }
+
+  // Check if expired
+  if (invite.expiresAt && new Date(invite.expiresAt) < new Date()) {
+    return { success: false, error: 'Invite has expired' };
+  }
+
+  // Check if WhatsApp is already linked
+  const existingLink = await channelLinkService.getWhatsAppLink(whatsappNumber);
+  if (existingLink) {
+    return { success: false, error: 'This WhatsApp number is already linked to another account' };
+  }
+
+  // Check if user exists by phone, or create new user
+  let userId: string;
+  let userName = name || invite.name || 'Usuário';
+
+  const existingUser = await channelLinkService.getUserByPhone(whatsappNumber);
+  if (existingUser) {
+    userId = existingUser.id;
+    userName = existingUser.name;
+  } else {
+    // Create new user
+    userId = await channelLinkService.createUserFromWhatsApp(whatsappNumber, userName);
+  }
+
+  // Add user to company
+  await companyService.addMemberToCompany(
+    invite.company.id,
+    { id: userId, name: userName },
+    invite.role
+  );
+
+  // Link WhatsApp
+  await channelLinkService.linkWhatsApp(
+    whatsappNumber,
+    userId,
+    invite.company.id,
+    invite.role,
+    userName,
+    invite.company.name
+  );
+
+  // Add company to user's companies array (for claims update)
+  await addCompanyToUserDoc(userId, invite.company, invite.role);
+
+  // Mark invite as accepted
+  await markAsAccepted(normalizedCode, userId, userName);
+
+  return {
+    success: true,
+    userId,
+    userName,
+    companyId: invite.company.id,
+    companyName: invite.company.name,
+    role: invite.role,
+  };
+}
+
+/**
+ * Create invite and return WhatsApp link
+ */
+export async function createInviteWithWhatsAppLink(
+  params: CreateInviteParams
+): Promise<{ code: string; link: string; expiresAt: Date }> {
+  const result = await createInvite(params);
+
+  return {
+    code: result.token,
+    link: generateWhatsAppInviteLink(result.token),
+    expiresAt: result.expiresAt,
+  };
+}
+
+/**
+ * Generate WhatsApp invite link
+ */
+export function generateWhatsAppInviteLink(code: string): string {
+  const cleanNumber = BOT_WHATSAPP_NUMBER.replace(/\D/g, '');
+  const message = encodeURIComponent(code);
+  return `https://wa.me/${cleanNumber}?text=${message}`;
+}
+
+/**
+ * Normalize invite code to support both old and new formats
+ * Old format: INVITE_XXXXXXXX
+ * New format: INV_XXXXXXXX
+ */
+export function normalizeInviteCode(code: string): string {
+  const upperCode = code.trim().toUpperCase();
+
+  // Already in new format
+  if (upperCode.startsWith('INV_')) {
+    return upperCode;
+  }
+
+  // Old format - keep as is for backwards compatibility
+  if (upperCode.startsWith('INVITE_')) {
+    return upperCode;
+  }
+
+  // No prefix - assume new format
+  return `INV_${upperCode}`;
 }
