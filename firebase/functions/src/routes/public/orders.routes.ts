@@ -87,7 +87,7 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
           rating: order.rating ? {
             score: order.rating.score,
             comment: order.rating.comment,
-            createdAt: order.rating.createdAt,
+            createdAt: timestampToDate(order.rating.createdAt)?.toISOString(),
             customerName: maskName(order.rating.customerName),
           } : null,
         },
@@ -105,7 +105,7 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
           authorName: c.authorType === 'customer'
             ? maskName(c.author.name)
             : c.author.name, // Team member names are public/visible
-          createdAt: c.createdAt,
+          createdAt: timestampToDate(c.createdAt)?.toISOString(),
         })),
         permissions: req.shareTokenAuth!.permissions,
         customer: maskedCustomer,
@@ -341,7 +341,7 @@ router.post(
           text: comment.text,
           authorType: comment.authorType,
           authorName: maskName(comment.author.name),
-          createdAt: comment.createdAt,
+          createdAt: timestampToDate(comment.createdAt)?.toISOString(),
         },
       });
     } catch (error) {
@@ -374,7 +374,7 @@ router.get('/:token/comments', shareTokenAuth, async (req: AuthenticatedRequest,
         authorName: c.authorType === 'customer'
           ? maskName(c.author.name)
           : c.author.name, // Team member names are public/visible
-        createdAt: c.createdAt,
+        createdAt: timestampToDate(c.createdAt)?.toISOString(),
       })),
     });
   } catch (error) {
