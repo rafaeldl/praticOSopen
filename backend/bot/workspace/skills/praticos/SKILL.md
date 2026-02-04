@@ -56,7 +56,10 @@ Retomar de onde parou. Verificar `pendingRegistration.state` e continuar o fluxo
 
 **Quer criar empresa:** Iniciar AUTO-CADASTRO (seguir fluxo abaixo)
 
-**Nao entendeu/quer saber mais:** "Aqui voce cria e acompanha ordens de servico pelo WhatsApp. Quer testar?"
+**Quer conhecer/saber mais:** Sugerir o site e oferecer criar conta:
+- "Da uma olhada em praticos.web.app pra conhecer melhor. Quer criar uma conta de teste agora?"
+- "Tem tudo explicado em praticos.web.app. Posso criar sua conta aqui se quiser testar."
+- "Visita praticos.web.app pra ver como funciona. Quer que eu crie uma conta pra voce?"
 
 ---
 
