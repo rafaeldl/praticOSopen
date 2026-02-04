@@ -141,17 +141,23 @@ function normalizePhone(phone: string): string {
 
 /**
  * Check if phone has exceeded registration attempts
+ * Uses simple query + in-memory filtering to avoid composite indexes
  */
 async function checkRateLimit(phone: string): Promise<boolean> {
   const normalizedPhone = normalizePhone(phone);
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
   const snapshot = await getRegistrationsCollection()
     .where('whatsappNumber', '==', normalizedPhone)
-    .where('createdAt', '>=', oneDayAgo)
     .get();
 
-  return snapshot.size < MAX_REGISTRATIONS_PER_DAY;
+  // Filter in memory for registrations in the last 24 hours
+  const recentCount = snapshot.docs.filter((doc) => {
+    const data = doc.data();
+    return new Date(data.createdAt) >= oneDayAgo;
+  }).length;
+
+  return recentCount < MAX_REGISTRATIONS_PER_DAY;
 }
 
 // ============================================================================
@@ -231,27 +237,37 @@ export async function startRegistration(
 
 /**
  * Get active registration by phone number
+ * Uses simple query + in-memory filtering to avoid needing composite indexes
  */
 export async function getActiveByPhone(
   whatsappNumber: string
 ): Promise<RegistrationToken | null> {
   const normalizedPhone = normalizePhone(whatsappNumber);
 
+  // Simple query without composite index requirements
   const snapshot = await getRegistrationsCollection()
     .where('whatsappNumber', '==', normalizedPhone)
-    .where('state', 'not-in', ['completed', 'cancelled'])
-    .orderBy('createdAt', 'desc')
-    .limit(1)
     .get();
 
   if (snapshot.empty) return null;
 
-  const data = snapshot.docs[0].data() as RegistrationToken;
+  // Filter and sort in memory
+  const activeRegistrations = snapshot.docs
+    .map((doc) => doc.data() as RegistrationToken)
+    .filter((reg) => reg.state !== 'completed' && reg.state !== 'cancelled')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  if (activeRegistrations.length === 0) return null;
+
+  const data = activeRegistrations[0];
 
   // Check if expired
   if (new Date(data.expiresAt) < new Date()) {
     // Mark as cancelled
-    await snapshot.docs[0].ref.update({ state: 'cancelled' });
+    const docToUpdate = snapshot.docs.find((doc) => doc.data().token === data.token);
+    if (docToUpdate) {
+      await docToUpdate.ref.update({ state: 'cancelled' });
+    }
     return null;
   }
 
