@@ -7,6 +7,7 @@ import { Router, Response } from 'express';
 import { AuthenticatedRequest, toDate } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import * as inviteService from '../../services/invite.service';
+import * as channelLinkService from '../../services/channel-link.service';
 import { validateInput, createInviteSchema, acceptInviteSchema } from '../../utils/validation.utils';
 
 const router: Router = Router();
@@ -88,9 +89,84 @@ router.post('/create', requireLinked, async (req: AuthenticatedRequest, res: Res
 /**
  * POST /api/bot/invite/accept
  * Accept an invite code (for new collaborators)
+ *
+ * Also handles Link Tokens (LT_) by redirecting to link logic.
+ * This provides compatibility when the bot sends LT_ tokens to this endpoint.
  */
 router.post('/accept', async (req: AuthenticatedRequest, res: Response) => {
   try {
+    const { inviteCode, whatsappNumber } = req.body;
+    // Also accept whatsappNumber from header
+    const whatsapp = whatsappNumber || req.headers['x-whatsapp-number'] as string;
+
+    // Detect Link Token (LT_) and redirect to link logic
+    if (inviteCode && inviteCode.startsWith('LT_')) {
+      console.log(`[INVITE] Detected Link Token, redirecting to link logic: ${inviteCode}`);
+
+      if (!whatsapp) {
+        res.status(400).json({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'WhatsApp number is required (in body or X-WhatsApp-Number header)',
+          },
+        });
+        return;
+      }
+
+      // Check if already linked
+      const existingLink = await channelLinkService.getWhatsAppLink(whatsapp);
+      if (existingLink) {
+        res.status(409).json({
+          success: false,
+          error: {
+            code: 'ALREADY_LINKED',
+            message: 'This WhatsApp number is already linked to an account',
+          },
+        });
+        return;
+      }
+
+      // Consume link token
+      const tokenData = await channelLinkService.consumeLinkToken(inviteCode);
+      if (!tokenData) {
+        res.status(401).json({
+          success: false,
+          error: {
+            code: 'INVALID_TOKEN',
+            message: 'Invalid or expired link token',
+          },
+        });
+        return;
+      }
+
+      // Link WhatsApp
+      await channelLinkService.linkWhatsApp(
+        whatsapp,
+        tokenData.userId,
+        tokenData.companyId,
+        tokenData.role,
+        tokenData.userName,
+        tokenData.companyName
+      );
+
+      console.log(`[INVITE] Link Token processed successfully: user=${tokenData.userId}, company=${tokenData.companyId}`);
+
+      res.json({
+        success: true,
+        data: {
+          success: true,
+          userId: tokenData.userId,
+          userName: tokenData.userName || '',
+          companyId: tokenData.companyId,
+          companyName: tokenData.companyName || '',
+          role: tokenData.role,
+        },
+      });
+      return;
+    }
+
+    // Normal invite flow (INV_ tokens)
     // Validate input
     const validation = validateInput(acceptInviteSchema, req.body);
     if (!validation.success) {
@@ -104,9 +180,13 @@ router.post('/accept', async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
-    const { inviteCode, whatsappNumber, name } = validation.data;
+    const validatedData = validation.data;
 
-    const result = await inviteService.acceptInviteViaWhatsApp(inviteCode, whatsappNumber, name);
+    const result = await inviteService.acceptInviteViaWhatsApp(
+      validatedData.inviteCode,
+      validatedData.whatsappNumber,
+      validatedData.name
+    );
 
     if (!result.success) {
       res.status(400).json({

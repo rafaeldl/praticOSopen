@@ -56,25 +56,46 @@ export async function generateLinkToken(
 
 /**
  * Validate and consume a link token
+ * Uses a transaction to prevent race conditions
  */
 export async function consumeLinkToken(token: string): Promise<LinkToken | null> {
-  const tokenDoc = await db.collection('links').doc('tokens').collection('pending').doc(token).get();
+  console.log(`[LINK] Consuming token: ${token}`);
 
-  if (!tokenDoc.exists) return null;
+  const tokenRef = db.collection('links').doc('tokens').collection('pending').doc(token);
 
-  const tokenData = tokenDoc.data() as LinkToken;
+  try {
+    return await db.runTransaction(async (transaction) => {
+      const tokenDoc = await transaction.get(tokenRef);
 
-  // Check if already used
-  if (tokenData.used) return null;
+      if (!tokenDoc.exists) {
+        console.log(`[LINK] Token NOT FOUND: ${token}`);
+        return null;
+      }
 
-  // Check if expired
-  const expiresAt = toDate(tokenData.expiresAt);
-  if (expiresAt && expiresAt < new Date()) return null;
+      const tokenData = tokenDoc.data() as LinkToken;
 
-  // Mark as used
-  await tokenDoc.ref.update({ used: true });
+      // Check if already used
+      if (tokenData.used) {
+        console.log(`[LINK] Token already used: ${token}`);
+        return null;
+      }
 
-  return tokenData;
+      // Check if expired
+      const expiresAt = toDate(tokenData.expiresAt);
+      if (expiresAt && expiresAt < new Date()) {
+        console.log(`[LINK] Token expired: ${token}, expiresAt: ${expiresAt?.toISOString()}`);
+        return null;
+      }
+
+      // Mark as used within the transaction
+      transaction.update(tokenRef, { used: true });
+      console.log(`[LINK] Token consumed successfully for user: ${tokenData.userId}, company: ${tokenData.companyId}`);
+      return tokenData;
+    });
+  } catch (error) {
+    console.error(`[LINK] Error consuming token ${token}:`, error);
+    return null;
+  }
 }
 
 // ============================================================================

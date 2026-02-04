@@ -7,7 +7,6 @@ import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import * as channelLinkService from '../../services/channel-link.service';
-import { validateInput, linkWhatsAppSchema } from '../../utils/validation.utils';
 import { db } from '../../services/firestore.service';
 
 const router: Router = Router();
@@ -29,23 +28,60 @@ interface CustomField {
 /**
  * POST /api/bot/link
  * Link WhatsApp number to user via magic link token
+ *
+ * Accepts multiple body formats for flexibility:
+ * - {"token": "LT_xxx", "whatsappNumber": "+55..."}
+ * - {"linkToken": "LT_xxx"} (whatsappNumber from header)
+ * - {"inviteCode": "LT_xxx"} (whatsappNumber from header)
  */
 router.post('/', async (req: AuthenticatedRequest, res: Response) => {
   try {
-    // Validate input
-    const validation = validateInput(linkWhatsAppSchema, req.body);
-    if (!validation.success) {
+    // Accept multiple field names for token
+    const token = req.body.token || req.body.linkToken || req.body.inviteCode;
+    // Accept whatsappNumber from body or header
+    const whatsappNumber = req.body.whatsappNumber || req.headers['x-whatsapp-number'] as string;
+
+    console.log(`[LINK] POST /bot/link - token=${token ? token.substring(0, 10) + '...' : 'missing'}, whatsappNumber=${whatsappNumber || 'missing'}`);
+
+    // Validate token
+    if (!token) {
+      console.log('[LINK] Validation failed: token is required');
       res.status(400).json({
         success: false,
         error: {
           code: 'VALIDATION_ERROR',
-          message: validation.errors.join(', '),
+          message: 'Token is required (use "token", "linkToken", or "inviteCode" field)',
         },
       });
       return;
     }
 
-    const { token, whatsappNumber } = validation.data;
+    // Validate whatsappNumber
+    if (!whatsappNumber) {
+      console.log('[LINK] Validation failed: whatsappNumber is required');
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'WhatsApp number is required (in body or X-WhatsApp-Number header)',
+        },
+      });
+      return;
+    }
+
+    // Validate E.164 format
+    const e164Regex = /^\+[1-9]\d{6,14}$/;
+    if (!e164Regex.test(whatsappNumber)) {
+      console.log(`[LINK] Validation failed: invalid E.164 format: ${whatsappNumber}`);
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'WhatsApp number must be in E.164 format (e.g., +5511999999999)',
+        },
+      });
+      return;
+    }
 
     // Check if already linked
     const existingLink = await channelLinkService.getWhatsAppLink(whatsappNumber);
@@ -82,6 +118,8 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
       tokenData.userName,
       tokenData.companyName
     );
+
+    console.log(`[LINK] WhatsApp linked successfully: ${whatsappNumber} -> user=${tokenData.userId}, company=${tokenData.companyId}`);
 
     res.json({
       success: true,
