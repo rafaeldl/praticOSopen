@@ -12,6 +12,7 @@ import * as commentService from '../../services/comment.service';
 import * as orderService from '../../services/order.service';
 import * as notificationService from '../../services/notification.service';
 import { timestampToDate } from '../../utils/date.utils';
+import { maskName, maskPhone, maskSerial } from '../../utils/mask.utils';
 
 const router: Router = Router();
 
@@ -42,14 +43,24 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
 
     const remainingBalance = orderService.calculateRemainingBalance(order);
 
+    // Prepare masked customer data (LGPD compliance)
+    const maskedCustomer = {
+      name: maskName(order.customer?.name || customer.name),
+      phone: maskPhone(order.customer?.phone || customer.phone),
+    };
+
     res.json({
       success: true,
       data: {
         order: {
-          id: order.id,
+          // IDs removed for LGPD compliance
           number: order.number,
-          customer: order.customer,
-          device: order.device,
+          customer: maskedCustomer,
+          device: order.device ? {
+            name: order.device.name,
+            serial: maskSerial(order.device.serial),
+            // Other internal device fields removed
+          } : null,
           services: order.services?.map((s) => ({
             name: s.service.name,
             value: s.value,
@@ -69,11 +80,16 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
           dueDate: timestampToDate(order.dueDate)?.toISOString(),
           createdAt: timestampToDate(order.createdAt)?.toISOString(),
           photos: order.photos?.map((p) => ({
-            id: p.id,
+            // IDs removed for LGPD compliance
             url: p.url,
             description: p.description,
           })),
-          rating: order.rating,
+          rating: order.rating ? {
+            score: order.rating.score,
+            comment: order.rating.comment,
+            createdAt: order.rating.createdAt,
+            customerName: maskName(order.rating.customerName),
+          } : null,
         },
         company: company ? {
           name: company.name,
@@ -83,14 +99,16 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
           address: company.address,
         } : null,
         comments: comments.map((c) => ({
-          id: c.id,
+          // IDs removed for LGPD compliance
           text: c.text,
           authorType: c.authorType,
-          authorName: c.author.name,
+          authorName: c.authorType === 'customer'
+            ? maskName(c.author.name)
+            : c.author.name, // Team member names are public/visible
           createdAt: c.createdAt,
         })),
         permissions: req.shareTokenAuth!.permissions,
-        customer,
+        customer: maskedCustomer,
       },
     });
   } catch (error) {
@@ -319,10 +337,10 @@ router.post(
       res.status(201).json({
         success: true,
         data: {
-          id: comment.id,
+          // ID removed for LGPD compliance
           text: comment.text,
           authorType: comment.authorType,
-          authorName: comment.author.name,
+          authorName: maskName(comment.author.name),
           createdAt: comment.createdAt,
         },
       });
@@ -350,10 +368,12 @@ router.get('/:token/comments', shareTokenAuth, async (req: AuthenticatedRequest,
     res.json({
       success: true,
       data: comments.map((c) => ({
-        id: c.id,
+        // ID removed for LGPD compliance
         text: c.text,
         authorType: c.authorType,
-        authorName: c.author.name,
+        authorName: c.authorType === 'customer'
+          ? maskName(c.author.name)
+          : c.author.name, // Team member names are public/visible
         createdAt: c.createdAt,
       })),
     });
@@ -476,7 +496,12 @@ router.post(
         success: true,
         data: {
           message: 'Rating submitted successfully',
-          rating,
+          rating: {
+            score: rating.score,
+            comment: rating.comment,
+            createdAt: rating.createdAt,
+            customerName: maskName(rating.customerName),
+          },
         },
       });
     } catch (error) {
