@@ -135,6 +135,42 @@ function normalizePhone(phone: string): string {
   return normalized;
 }
 
+/**
+ * Normalize Brazilian phone number for Firebase Auth
+ *
+ * WhatsApp sometimes uses old 8-digit format for Brazilian mobiles.
+ * Real format has 9 digits (starting with 9).
+ *
+ * Example:
+ * - WhatsApp: +554884090709 (13 chars) → +55 48 84090709 (8 digits)
+ * - Real:     +5548984090709 (14 chars) → +55 48 984090709 (9 digits)
+ *
+ * Rule: If Brazilian number (+55) has 12 digits and subscriber starts with 7/8/9,
+ * insert "9" after area code to get the real mobile number.
+ */
+function normalizeBrazilianPhone(phone: string): string {
+  const normalized = normalizePhone(phone);
+
+  // Check if Brazilian number: +55 + 12 digits = 13 chars total
+  if (!normalized.startsWith('+55') || normalized.length !== 13) {
+    return normalized;
+  }
+
+  // Extract parts: +55 (3) + area code (2) + subscriber (8)
+  const areaCode = normalized.substring(3, 5);
+  const subscriber = normalized.substring(5);
+
+  // Check if subscriber starts with 7, 8, or 9 (mobile indicators)
+  // These numbers need the 9th digit prefix
+  const firstDigit = subscriber.charAt(0);
+  if (['7', '8', '9'].includes(firstDigit)) {
+    // Insert "9" after area code: +55 + area + 9 + subscriber
+    return `+55${areaCode}9${subscriber}`;
+  }
+
+  return normalized;
+}
+
 // ============================================================================
 // Rate Limiting
 // ============================================================================
@@ -378,24 +414,47 @@ export async function completeRegistration(
     };
   }
 
-  console.log(`[REGISTRATION] Completing registration for ${registration.whatsappNumber}`);
+  // For Auth, use normalized Brazilian phone (adds 9th digit if missing)
+  // For WhatsApp link, keep original number
+  const authPhone = normalizeBrazilianPhone(registration.whatsappNumber);
+  const whatsappPhone = registration.whatsappNumber;
+
+  console.log(`[REGISTRATION] Completing registration for ${whatsappPhone} (auth: ${authPhone})`);
 
   try {
     // Check if user already exists in Firebase Auth
+    // Try both formats for Brazilian numbers
     let userRecord;
     let isExistingUser = false;
 
+    // Try to find user by normalized phone (with 9th digit)
     try {
-      userRecord = await auth.getUserByPhoneNumber(registration.whatsappNumber);
+      userRecord = await auth.getUserByPhoneNumber(authPhone);
       isExistingUser = true;
-      console.log(`[REGISTRATION] Found existing Auth user: ${userRecord.uid}`);
+      console.log(`[REGISTRATION] Found existing Auth user by normalized phone: ${userRecord.uid}`);
+    } catch (e: unknown) {
+      const err = e as { code?: string };
+      if (err.code !== 'auth/user-not-found') throw e;
+    }
 
-      // Check if this user already has companies
+    // If not found and phones differ, try original WhatsApp format
+    if (!userRecord && authPhone !== whatsappPhone) {
+      try {
+        userRecord = await auth.getUserByPhoneNumber(whatsappPhone);
+        isExistingUser = true;
+        console.log(`[REGISTRATION] Found existing Auth user by WhatsApp phone: ${userRecord.uid}`);
+      } catch (e: unknown) {
+        const err = e as { code?: string };
+        if (err.code !== 'auth/user-not-found') throw e;
+      }
+    }
+
+    // Check if existing user already has companies
+    if (userRecord) {
       const userDoc = await db.collection('users').doc(userRecord.uid).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
         if (userData?.companies && userData.companies.length > 0) {
-          // User already has a company - they should use link flow instead
           return {
             success: false,
             error: 'This phone already has an account. Use the link flow to connect.',
@@ -403,30 +462,35 @@ export async function completeRegistration(
           };
         }
       }
-    } catch (lookupError: unknown) {
-      // User doesn't exist - create new one
-      const firebaseError = lookupError as { code?: string };
-      if (firebaseError.code === 'auth/user-not-found') {
-        userRecord = await auth.createUser({
-          phoneNumber: registration.whatsappNumber,
-          displayName: companyName,
-        });
-        console.log(`[REGISTRATION] Created new Auth user: ${userRecord.uid}`);
-      } else {
-        throw lookupError;
-      }
+    }
+
+    // Create new user if not found
+    if (!userRecord) {
+      userRecord = await auth.createUser({
+        phoneNumber: authPhone, // Use normalized phone for Auth
+        displayName: companyName,
+      });
+      console.log(`[REGISTRATION] Created new Auth user: ${userRecord.uid} with phone ${authPhone}`);
     }
 
     const userId = userRecord.uid;
     const userName = companyName;
 
     // Create or update user document
+    // Build phone data - store both if different
+    const phoneData: Record<string, string> = {
+      phone: authPhone, // Real phone number (for Auth/SMS)
+    };
+    if (authPhone !== whatsappPhone) {
+      phoneData.whatsappPhone = whatsappPhone; // WhatsApp format (for link lookup)
+    }
+
     if (isExistingUser) {
       // Update existing user doc (or create if missing)
       await db.collection('users').doc(userId).set({
         id: userId,
         name: userName,
-        phone: registration.whatsappNumber,
+        ...phoneData,
         updatedAt: new Date().toISOString(),
         companies: [],
       }, { merge: true });
@@ -435,7 +499,7 @@ export async function completeRegistration(
       await db.collection('users').doc(userId).set({
         id: userId,
         name: userName,
-        phone: registration.whatsappNumber,
+        ...phoneData,
         createdAt: new Date().toISOString(),
         createdVia: 'whatsapp_self_registration',
         companies: [],
@@ -477,9 +541,9 @@ export async function completeRegistration(
     // Add company to user's companies array
     await addCompanyToUserDoc(userId, { id: companyId, name: companyName }, 'owner');
 
-    // Link WhatsApp
+    // Link WhatsApp (use original WhatsApp format for link lookup)
     await channelLinkService.linkWhatsApp(
-      registration.whatsappNumber,
+      whatsappPhone,
       userId,
       companyId,
       'owner' as RoleType,
