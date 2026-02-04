@@ -15,7 +15,34 @@ Substitua {NUMERO} pelo authorId do usuario em TODA chamada.
 
 ## PASSO 1: Verificar Usuario (OBRIGATORIO)
 exec(command="curl -s $HDR '$BASE/bot/link/context'")
-Se linked:false → instruir vincular no app PraticOS em "Configuracoes > WhatsApp".
+Se linked:false → verificar se usuario enviou token de vinculacao (ver secao VINCULACAO abaixo).
+Se nao enviou token → instruir vincular no app PraticOS em "Configuracoes > WhatsApp".
+
+## VINCULACAO DE CONTA (Tokens LT_)
+
+Quando o usuario enviar mensagem contendo "Vincular:" seguido de token LT_xxx:
+
+1. Extrair o token completo (formato: LT_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
+2. Chamar POST /bot/link com o token e numero:
+
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"token\":\"LT_xxx\"}' '$BASE/bot/link'")
+
+**IMPORTANTE:** O whatsappNumber e obtido automaticamente do header X-WhatsApp-Number.
+
+**Campos aceitos no body (flexivel):**
+- "token": o codigo LT_xxx (preferido)
+- "linkToken": alternativo para o token
+- "inviteCode": alternativo para o token (compatibilidade)
+
+**Respostas:**
+- Sucesso: Responder "Conta vinculada com sucesso! Bem-vindo(a) [userName] da [companyName]."
+- INVALID_TOKEN: "Token invalido ou expirado. Por favor, gere um novo token no app PraticOS em Configuracoes > WhatsApp."
+- ALREADY_LINKED: "Este numero de WhatsApp ja esta vinculado a outra conta. Se precisar trocar, primeiro desvincule no app."
+
+**IMPORTANTE:**
+- Tokens LT_ sao para VINCULAR conta de usuario existente
+- Tokens INV_ sao para CONVITES de novos colaboradores (fluxo diferente)
+- Se o usuario enviar um token e nao funcionar, verificar se e LT_ ou INV_
 
 ## BOAS-VINDAS (primeira interacao)
 
