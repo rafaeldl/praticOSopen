@@ -25,9 +25,14 @@ export function maskName(name: string | null | undefined): string | null {
 }
 
 /**
- * Masks a phone number, showing only area code and last 4 digits
- * Example: "(11) 98765-7766" -> "(11) *****-7766"
- * Example: "11987657766" -> "(11) *****-7766"
+ * Masks a phone number, showing only area code (DDD) and last 4 digits
+ * Handles Brazilian phones with or without country code (+55)
+ *
+ * Examples:
+ * - "+5548988264694" (13 digits) -> "(48) *****-4694"
+ * - "5548988264694" (13 digits)  -> "(48) *****-4694"
+ * - "48988264694" (11 digits)    -> "(48) *****-4694"
+ * - "4832214694" (10 digits)     -> "(48) ****-4694"
  */
 export function maskPhone(phone: string | null | undefined): string | null {
   if (!phone || typeof phone !== 'string') return null;
@@ -36,9 +41,19 @@ export function maskPhone(phone: string | null | undefined): string | null {
   const digits = phone.replace(/\D/g, '');
   if (digits.length < 10) return null;
 
-  // Extract area code and last 4 digits
-  const areaCode = digits.substring(0, 2);
-  const lastFour = digits.substring(digits.length - 4);
+  let areaCode: string;
+  let lastFour: string;
+
+  // Handle Brazilian country code (55)
+  if (digits.length >= 12 && digits.startsWith('55')) {
+    // Format: 55 + DDD (2) + number (8-9)
+    areaCode = digits.substring(2, 4);
+  } else {
+    // Format: DDD (2) + number (8-9)
+    areaCode = digits.substring(0, 2);
+  }
+
+  lastFour = digits.substring(digits.length - 4);
 
   return `(${areaCode}) *****-${lastFour}`;
 }
