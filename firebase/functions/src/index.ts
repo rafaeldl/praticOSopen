@@ -151,6 +151,7 @@ import botUnifiedSearchRoutes from './routes/bot/unified-search.routes';
 import botEntitiesRoutes from './routes/bot/entities.routes';
 import botFormsRoutes from './routes/bot/forms.routes';
 import botShareRoutes from './routes/bot/share.routes';
+import botRegistrationRoutes from './routes/bot/registration.routes';
 
 // Initialize Express app
 const app = express();
@@ -298,6 +299,7 @@ app.use('/bot/analytics', botLimiter, botAuth, botAnalyticsRoutes);
 app.use('/bot/catalog', botLimiter, botAuth, botCatalogRoutes);
 app.use('/bot/search', botLimiter, botAuth, botUnifiedSearchRoutes);
 app.use('/bot', botLimiter, botAuth, botEntitiesRoutes);
+app.use('/bot/registration', botLimiter, botAuth, botRegistrationRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

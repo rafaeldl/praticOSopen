@@ -15,15 +15,22 @@ Substitua {NUMERO} pelo authorId do usuario em TODA chamada.
 
 ## PASSO 1: Verificar Usuario (OBRIGATORIO)
 exec(command="curl -s $HDR '$BASE/bot/link/context'")
-Se linked:false → verificar se usuario enviou token (LT_ ou INV_).
-Se nao enviou token → instruir vincular no app PraticOS em "Configuracoes > WhatsApp".
 
-## TOKENS: LT_ vs INV_
+Se linked:false:
+- Verificar se `pendingRegistration` existe → continuar cadastro em andamento (ver AUTO-CADASTRO)
+- Se usuario enviou token (LT_ ou INV_) → processar token
+- Se nao enviou token → oferecer tres opcoes:
+  1. Ja tem conta no app → gerar token LT_ em "Configuracoes > WhatsApp"
+  2. Recebeu convite → informar codigo INV_
+  3. Quer criar empresa → iniciar auto-cadastro (ver AUTO-CADASTRO)
+
+## TOKENS: LT_ vs INV_ vs RG_
 
 | Tipo | Uso | Quem gera |
 |------|-----|-----------|
 | `LT_` | Vincular conta existente | Usuario no app (Configuracoes > WhatsApp) |
 | `INV_` | Convite para novo colaborador | Admin/Supervisor via bot ou app |
+| `RG_` | Auto-cadastro nova empresa | Sistema (via /bot/registration/start) |
 
 **Ao receber token LT_ ou INV_:**
 exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"token\":\"TOKEN_AQUI\"}' '$BASE/bot/link'")
@@ -32,6 +39,113 @@ exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"to
 - Sucesso → Dar boas-vindas (ver secao BOAS-VINDAS)
 - INVALID_TOKEN → "Token invalido ou expirado. Gere um novo no app."
 - ALREADY_LINKED → "Este WhatsApp ja esta vinculado. Desvincule primeiro no app."
+
+## AUTO-CADASTRO (usuarios novos sem app)
+
+Quando um usuario NAO vinculado entra em contato e NAO tem token, oferecer tres opcoes:
+1. Ja tenho conta no app → Instruir a gerar token LT_ em Configuracoes > WhatsApp
+2. Recebi um convite → Pedir para informar o codigo INV_
+3. Quero criar minha empresa → Iniciar fluxo de auto-cadastro (RG_)
+
+### Fluxo de Auto-Cadastro
+
+**Verificar contexto primeiro:**
+exec(command="curl -s $HDR '$BASE/bot/link/context'")
+
+Se `linked:false` E `pendingRegistration` existir → continuar cadastro em andamento.
+Se `linked:false` E `pendingRegistration:null` → perguntar opcoes acima.
+
+**Passo 1: Iniciar cadastro**
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"locale\":\"pt-BR\"}' '$BASE/bot/registration/start'")
+
+Retorna lista de segmentos disponiveis. Perguntar o nome da empresa.
+
+**Passo 2: Informar nome da empresa**
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"companyName\":\"Nome da Empresa\"}' '$BASE/bot/registration/update'")
+
+Retorna lista de segmentos. Apresentar opcoes numeradas:
+```
+Qual o segmento da sua empresa?
+
+1. 📱 Assistencia Tecnica
+2. 🔧 Mecanica Automotiva
+3. 💻 Informatica
+4. ❄️ Refrigeracao
+5. 🔌 Eletrica
+...
+
+Responda com o numero:
+```
+
+**Passo 3: Selecionar segmento**
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"segmentId\":\"ID_DO_SEGMENTO\"}' '$BASE/bot/registration/update'")
+
+Se segmento tem subspecialties, apresentar opcoes:
+```
+Quais suas especialidades? (responda com numeros separados por virgula, ex: 1,3)
+
+1. Mecanica geral
+2. Eletrica automotiva
+3. Injecao eletronica
+4. Freios e suspensao
+...
+
+Ou responda "pular" para continuar sem selecionar.
+```
+
+**Passo 4: Selecionar subspecialties (se aplicavel)**
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"subspecialties\":[\"mechanical\",\"electrical\"]}' '$BASE/bot/registration/update'")
+
+**Passo 5: Dados de exemplo (bootstrap)**
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"includeBootstrap\":true}' '$BASE/bot/registration/update'")
+
+Perguntar:
+```
+Deseja criar dados de exemplo (servicos, produtos, cliente demo)?
+
+1. ✅ Sim, criar dados de exemplo
+2. ❌ Nao, comecar do zero
+
+Recomendamos a opcao 1 para conhecer o sistema!
+```
+
+**Passo 6: Confirmar e finalizar**
+Mostrar resumo e pedir confirmacao:
+```
+📋 Confirma o cadastro?
+
+• Empresa: Auto Mecanica Silva
+• Segmento: Mecanica Automotiva
+• Especialidades: Mecanica geral, Injecao eletronica
+• Dados exemplo: Sim
+
+Responda "sim" para confirmar ou "cancelar" para desistir.
+```
+
+exec(command="curl -s -X POST $HDR '$BASE/bot/registration/complete'")
+
+**Sucesso:**
+```
+✅ Cadastro concluido! Bem-vindo ao PraticOS!
+
+Sua empresa "Auto Mecanica Silva" foi criada com sucesso.
+
+Agora voce pode:
+• Criar ordens de servico
+• Cadastrar clientes
+• Consultar o faturamento
+
+Me envie "criar OS" para comecar!
+```
+
+### Cancelar cadastro em andamento
+exec(command="curl -s -X DELETE $HDR '$BASE/bot/registration'")
+
+### Consultar status do cadastro
+exec(command="curl -s $HDR '$BASE/bot/registration/status'")
+
+### Listar segmentos disponiveis
+exec(command="curl -s $HDR '$BASE/bot/registration/segments?locale=pt-BR'")
 
 ## BOAS-VINDAS (primeira interacao)
 
@@ -257,6 +371,14 @@ POST   /bot/orders/{NUM}/share         - gerar link para cliente
 GET    /bot/orders/{NUM}/share         - listar links ativos
 DELETE /bot/orders/{NUM}/share/{TOKEN} - revogar link
 
+### Auto-Cadastro (Novos Usuarios)
+POST   /bot/registration/start    - iniciar cadastro, retorna segmentos
+POST   /bot/registration/update   - atualizar dados (companyName, segmentId, subspecialties, includeBootstrap)
+POST   /bot/registration/complete - finalizar cadastro (cria user, company, link)
+DELETE /bot/registration          - cancelar cadastro em andamento
+GET    /bot/registration/status   - verificar status do cadastro
+GET    /bot/registration/segments - listar segmentos disponiveis
+
 **POST - Gerar link:**
 Body (opcional): {"permissions":["view","approve","comment"],"expiresInDays":7}
 - permissions: view (sempre incluso), approve, comment
@@ -358,6 +480,33 @@ exec(command="curl -s $HDR '$BASE/bot/invite/list'")
 
 # Convites - Cancelar
 exec(command="curl -s -X DELETE $HDR '$BASE/bot/invite/INV_xxx'")
+
+# Auto-Cadastro - Iniciar
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"locale\":\"pt-BR\"}' '$BASE/bot/registration/start'")
+
+# Auto-Cadastro - Informar nome da empresa
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"companyName\":\"Minha Empresa\"}' '$BASE/bot/registration/update'")
+
+# Auto-Cadastro - Selecionar segmento
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"segmentId\":\"automotive\"}' '$BASE/bot/registration/update'")
+
+# Auto-Cadastro - Selecionar subspecialties
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"subspecialties\":[\"mechanical\",\"electrical\"]}' '$BASE/bot/registration/update'")
+
+# Auto-Cadastro - Escolher bootstrap
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"includeBootstrap\":true}' '$BASE/bot/registration/update'")
+
+# Auto-Cadastro - Finalizar
+exec(command="curl -s -X POST $HDR '$BASE/bot/registration/complete'")
+
+# Auto-Cadastro - Cancelar
+exec(command="curl -s -X DELETE $HDR '$BASE/bot/registration'")
+
+# Auto-Cadastro - Status
+exec(command="curl -s $HDR '$BASE/bot/registration/status'")
+
+# Auto-Cadastro - Listar segmentos
+exec(command="curl -s $HDR '$BASE/bot/registration/segments?locale=pt-BR'")
 
 ---
 
