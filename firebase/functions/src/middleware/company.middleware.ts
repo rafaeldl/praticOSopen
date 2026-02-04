@@ -6,7 +6,7 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest, UserAggr, CompanyAggr } from '../models/types';
 import { db } from '../services/firestore.service';
-import { getRolePermissions } from './auth.middleware';
+import { getRolePermissions, normalizeRole } from './auth.middleware';
 
 /**
  * Middleware to resolve full company context
@@ -120,13 +120,15 @@ export async function resolveCompanyContext(
         return;
       }
 
+      const normalizedRole = normalizeRole(companyRole.role);
+
       req.userContext = {
         userId: userId,
         userName: userData?.name || '',
         companyId: companyId,
         companyName: companyData?.name || '',
-        role: companyRole.role,
-        permissions: getRolePermissions(companyRole.role),
+        role: normalizedRole,
+        permissions: getRolePermissions(normalizedRole),
       };
 
       next();

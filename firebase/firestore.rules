@@ -145,7 +145,7 @@ service cloud.firestore {
     // Path: /links/share/tokens/{tokenId}
     // Acesso principal é via Cloud Functions (Admin SDK)
     // Usuários autenticados podem ler tokens das suas empresas
-    match /links/{linkType}/tokens/{tokenId} {
+    match /links/share/tokens/{tokenId} {
       // Leitura: membro da empresa pode ver tokens da empresa
       allow read: if request.auth != null
         && resource.data.companyId != null
@@ -154,6 +154,56 @@ service cloud.firestore {
       // Escrita: apenas via Cloud Functions (Admin SDK)
       // Usuários não podem criar/editar tokens diretamente
       allow write: if false;
+    }
+
+    // Invite Tokens - convites unificados para colaboradores
+    // Path: /links/invites/tokens/{token}
+    // Suporta convites via app e WhatsApp
+    match /links/invites/tokens/{token} {
+      // Criação: membro da empresa com permissão de gerenciar usuários (admin)
+      // Também permite se o usuário pertence à empresa do convite
+      allow create: if request.auth != null
+        && request.resource.data.company != null
+        && request.resource.data.company.id != null
+        && belongsToCompany(request.resource.data.company.id);
+
+      // Leitura: membro da empresa OU destinatário (por email/phone)
+      allow read: if request.auth != null
+        && (
+          // Membro da empresa pode ver convites da empresa
+          (resource.data.company != null
+            && resource.data.company.id != null
+            && belongsToCompany(resource.data.company.id))
+          // Destinatário pode ver convites pelo seu email
+          || request.auth.token.email == resource.data.email
+        );
+
+      // Atualização: destinatário pode aceitar/rejeitar, membro da empresa pode cancelar
+      allow update: if request.auth != null
+        && (
+          // Destinatário pode mudar status para accepted/rejected
+          (request.auth.token.email == resource.data.email
+            && request.resource.data.diff(resource.data).affectedKeys()
+                .hasOnly(['status', 'acceptedAt', 'acceptedByUserId', 'acceptedByUserName']))
+          // Membro da empresa pode cancelar
+          || (resource.data.company != null
+              && resource.data.company.id != null
+              && belongsToCompany(resource.data.company.id))
+        );
+
+      // Deleção: apenas admin da empresa
+      allow delete: if request.auth != null
+        && resource.data.company != null
+        && resource.data.company.id != null
+        && canManageUsers(resource.data.company.id);
+    }
+
+    // Auth Tokens - login tokens para WhatsApp -> App
+    // Path: /links/auth/tokens/{token}
+    // Escrita apenas via Cloud Functions (Admin SDK)
+    match /links/auth/tokens/{token} {
+      allow read: if false;  // Apenas via Cloud Functions
+      allow write: if false; // Apenas via Cloud Functions
     }
 
     // Segments - global collection (read-only para usuários autenticados)

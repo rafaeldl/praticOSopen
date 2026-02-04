@@ -243,8 +243,13 @@ export async function bearerAuth(
     const userData = userDoc.data();
     const companies = userData?.companies || [];
 
+    console.log(`[BearerAuth] User ${userId} - Companies count: ${companies.length}`);
+    console.log(`[BearerAuth] Companies data:`, JSON.stringify(companies, null, 2));
+
     // Use first company or get from header
     const requestedCompanyId = req.headers['x-company-id'] as string;
+    console.log(`[BearerAuth] Requested company ID from header: ${requestedCompanyId || 'not provided'}`);
+
     let activeCompany = companies[0];
 
     if (requestedCompanyId) {
@@ -253,7 +258,10 @@ export async function bearerAuth(
       );
     }
 
+    console.log(`[BearerAuth] Active company:`, JSON.stringify(activeCompany, null, 2));
+
     if (!activeCompany) {
+      console.log(`[BearerAuth] REJECTED - No company access for user ${userId}`);
       res.status(403).json({
         success: false,
         error: {
@@ -264,12 +272,18 @@ export async function bearerAuth(
       return;
     }
 
+    // Normalize role (handles legacy 'user' role)
+    const normalizedRole = normalizeRole(activeCompany.role);
+    const permissions = getRolePermissions(normalizedRole);
+
+    console.log(`[BearerAuth] User ${userId} - Company: ${activeCompany.company.id}, Role: ${activeCompany.role} -> ${normalizedRole}, Permissions: ${permissions.join(', ')}`);
+
     // Set auth context
     req.auth = {
       type: 'bearer',
       companyId: activeCompany.company.id,
       userId: userId,
-      permissions: getRolePermissions(activeCompany.role),
+      permissions: permissions,
     };
 
     req.userContext = {
@@ -277,8 +291,8 @@ export async function bearerAuth(
       userName: userData?.name || '',
       companyId: activeCompany.company.id,
       companyName: activeCompany.company.name || '',
-      role: activeCompany.role,
-      permissions: getRolePermissions(activeCompany.role),
+      role: normalizedRole,
+      permissions: permissions,
     };
 
     next();
@@ -336,9 +350,33 @@ async function getWhatsAppLink(number: string): Promise<ChannelLink | null> {
 }
 
 /**
+ * Normalize role to valid RoleType
+ * Handles legacy roles like 'user' by mapping to 'technician'
+ */
+export function normalizeRole(role: string): RoleType {
+  const validRoles: RoleType[] = ['owner', 'admin', 'supervisor', 'manager', 'consultant', 'technician'];
+
+  if (validRoles.includes(role as RoleType)) {
+    return role as RoleType;
+  }
+
+  // Map legacy roles
+  if (role === 'user') {
+    console.warn(`[Auth] Legacy role 'user' mapped to 'technician'`);
+    return 'technician';
+  }
+
+  console.warn(`[Auth] Unknown role '${role}' mapped to 'technician'`);
+  return 'technician';
+}
+
+/**
  * Get permissions for a role
  */
-export function getRolePermissions(role: RoleType): string[] {
+export function getRolePermissions(role: RoleType | string): string[] {
+  // Normalize role first
+  const normalizedRole = normalizeRole(role as string);
+
   const permissions: Record<RoleType, string[]> = {
     owner: [
       'read:all',
@@ -380,7 +418,7 @@ export function getRolePermissions(role: RoleType): string[] {
     ],
   };
 
-  return permissions[role] || [];
+  return permissions[normalizedRole] || [];
 }
 
 /**

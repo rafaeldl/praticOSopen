@@ -80,7 +80,7 @@
   },
   "messages": {
     "tts": {
-      "auto": "tagged",
+      "auto": "always",
       "provider": "edge",
       "edge": {
         "enabled": true,

@@ -6,7 +6,7 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest, toDate } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
-import * as botInviteService from '../../services/bot-invite.service';
+import * as inviteService from '../../services/invite.service';
 import { validateInput, createInviteSchema, acceptInviteSchema } from '../../utils/validation.utils';
 
 const router: Router = Router();
@@ -43,7 +43,7 @@ router.post('/create', requireLinked, async (req: AuthenticatedRequest, res: Res
       return;
     }
 
-    const { collaboratorName, role: inviteRole } = validation.data;
+    const { collaboratorName, role: inviteRole, email, phone } = validation.data;
 
     // Supervisors can only invite technicians
     if (role === 'supervisor' && inviteRole !== 'technician') {
@@ -57,14 +57,16 @@ router.post('/create', requireLinked, async (req: AuthenticatedRequest, res: Res
       return;
     }
 
-    const result = await botInviteService.createInvite(
-      req.userContext!.companyId,
-      req.userContext!.companyName,
-      req.userContext!.userId,
-      req.userContext!.userName,
-      collaboratorName,
-      inviteRole
-    );
+    const result = await inviteService.createInviteWithWhatsAppLink({
+      companyId: req.userContext!.companyId,
+      companyName: req.userContext!.companyName,
+      name: collaboratorName,
+      phone,
+      email,
+      role: inviteRole,
+      invitedBy: { id: req.userContext!.userId, name: req.userContext!.userName },
+      channel: 'whatsapp',
+    });
 
     res.status(201).json({
       success: true,
@@ -104,14 +106,14 @@ router.post('/accept', async (req: AuthenticatedRequest, res: Response) => {
 
     const { inviteCode, whatsappNumber, name } = validation.data;
 
-    const result = await botInviteService.acceptInvite(inviteCode, whatsappNumber, name);
+    const result = await inviteService.acceptInviteViaWhatsApp(inviteCode, whatsappNumber, name);
 
     if (!result.success) {
       res.status(400).json({
         success: false,
         error: {
           code: 'INVALID_INVITE',
-          message: (result as { error: string }).error,
+          message: result.error,
         },
       });
       return;
@@ -143,18 +145,18 @@ router.post('/accept', async (req: AuthenticatedRequest, res: Response) => {
  */
 router.get('/list', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const invites = await botInviteService.listInvitesByUser(req.userContext!.userId);
+    const invites = await inviteService.listByInviter(req.userContext!.userId);
 
     res.json({
       success: true,
       data: {
         invites: invites.map((inv) => ({
-          code: inv.code,
-          collaboratorName: inv.collaboratorName,
+          code: inv.token,
+          collaboratorName: inv.name || '',
           role: inv.role,
           createdAt: toDate(inv.createdAt)?.toISOString(),
           expiresAt: toDate(inv.expiresAt)?.toISOString(),
-          accepted: inv.accepted,
+          accepted: inv.status === 'accepted',
         })),
       },
     });
@@ -173,8 +175,9 @@ router.get('/list', requireLinked, async (req: AuthenticatedRequest, res: Respon
  */
 router.delete('/:code', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const deleted = await botInviteService.deleteInvite(
-      String(req.params.code),
+    const normalizedCode = inviteService.normalizeInviteCode(String(req.params.code));
+    const deleted = await inviteService.cancelInvite(
+      normalizedCode,
       req.userContext!.userId
     );
 

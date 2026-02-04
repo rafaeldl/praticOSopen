@@ -151,6 +151,10 @@ export const linkWhatsAppSchema = z.object({
 export const createInviteSchema = z.object({
   collaboratorName: z.string().min(1, 'Name is required').max(100),
   role: z.enum(['technician', 'consultant', 'supervisor', 'manager']),
+  email: z.string().email().optional(),
+  phone: z.string().min(1).max(50).optional(),
+}).refine((data) => data.email || data.phone, {
+  message: 'Either email or phone is required',
 });
 
 export const acceptInviteSchema = z.object({

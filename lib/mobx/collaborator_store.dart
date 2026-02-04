@@ -8,6 +8,7 @@ import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 import 'package:praticos/repositories/user_repository.dart';
+import 'package:praticos/services/invite_api_service.dart';
 
 part 'collaborator_store.g.dart';
 
@@ -29,8 +30,8 @@ class CollaboratorStore extends _CollaboratorStore with _$CollaboratorStore {
 abstract class _CollaboratorStore with Store {
   final TenantMembershipRepository _membershipRepo = TenantMembershipRepository();
   final UserRepository _userRepository = UserRepository();
-  final InviteRepository _inviteRepository = InviteRepository();
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  // Note: InviteApiService is used instead of InviteRepository for API-based operations
 
   @observable
   ObservableList<Membership> collaborators = ObservableList<Membership>();
@@ -158,15 +159,14 @@ abstract class _CollaboratorStore with Store {
     }
   }
 
-  /// Carrega os convites pendentes da empresa atual.
+  /// Carrega os convites pendentes da empresa atual diretamente do Firestore.
   @action
   Future<void> loadPendingInvites() async {
     if (Global.companyAggr?.id == null) return;
 
     try {
-      final invites = await _inviteRepository.getPendingByCompany(
-        Global.companyAggr!.id!,
-      );
+      final inviteRepo = InviteRepository();
+      final invites = await inviteRepo.getPendingByCompany(Global.companyAggr!.id!);
 
       pendingInvites.clear();
       pendingInvites.addAll(invites);
@@ -187,26 +187,65 @@ abstract class _CollaboratorStore with Store {
   /// 3. Se houver inconsistência, corrige automaticamente
   ///
   /// Se o usuário não existir:
-  /// 1. Cria um convite pendente na collection `/invites`
+  /// 1. Cria um convite pendente na collection `/links/invites/{token}`
   /// 2. Quando o usuário se registrar, verá o convite para aceitar
   ///
-  /// Retorna `true` se foi adicionado diretamente, `false` se foi criado convite.
+  /// Retorna uma tupla (wasAddedDirectly, inviteToken):
+  /// - `wasAddedDirectly`: true se foi adicionado diretamente, false se foi criado convite
+  /// - `inviteToken`: o token do convite criado (null se adicionado diretamente)
   @action
-  Future<bool> addCollaborator(String email, RolesType roleType) async {
-    if (Global.companyAggr?.id == null) return false;
+  Future<(bool wasAdded, String? token)> addCollaborator(
+    String? name,
+    String? email,
+    String? phone,
+    RolesType roleType,
+  ) async {
+    print('[CollaboratorStore] addCollaborator called - name: $name, email: $email, phone: $phone, role: ${roleType.name}');
+
+    if (Global.companyAggr?.id == null) {
+      print('[CollaboratorStore] Error: companyAggr is null');
+      return (false, null);
+    }
 
     isLoading = true;
     try {
       final companyId = Global.companyAggr!.id!;
-      final normalizedEmail = email.toLowerCase().trim();
+      final normalizedEmail = email?.toLowerCase().trim();
+      final normalizedPhone = phone?.replaceAll(RegExp(r'\D'), '').trim();
+      print('[CollaboratorStore] Normalized - email: $normalizedEmail, phone: $normalizedPhone');
 
-      // 1. Busca o usuário pelo email
-      final user = await _userRepository.findUserByEmail(normalizedEmail);
+      // 1. Busca o usuário pelo email ou telefone
+      dynamic user;
+      try {
+        if (normalizedEmail != null && normalizedEmail.isNotEmpty) {
+          print('[CollaboratorStore] Searching user by email: $normalizedEmail');
+          user = await _userRepository.findUserByEmail(normalizedEmail);
+        }
+        if (user == null && normalizedPhone != null && normalizedPhone.isNotEmpty) {
+          print('[CollaboratorStore] Searching user by phone: $normalizedPhone');
+          user = await _userRepository.findUserByPhone(normalizedPhone);
+        }
+        print('[CollaboratorStore] User search result: ${user?.id ?? 'not found'}');
+      } catch (e) {
+        print('[CollaboratorStore] Error searching user: $e');
+        // Se falhar a busca, assume que usuário não existe e cria convite
+        user = null;
+      }
 
       // Se o usuário não existe, cria um convite
       if (user == null) {
-        return await _createInvite(normalizedEmail, roleType);
+        print('[CollaboratorStore] User not found, creating invite...');
+        final inviteToken = await _createInvite(
+          name,
+          normalizedEmail,
+          normalizedPhone,
+          roleType,
+        );
+        print('[CollaboratorStore] Invite created with token: $inviteToken');
+        return (false, inviteToken);
       }
+
+      print('[CollaboratorStore] User found: ${user.id}');
 
       // 2. Verifica se o usuário já está na empresa
       final existingCompanyIndex = user.companies?.indexWhere(
@@ -252,7 +291,7 @@ abstract class _CollaboratorStore with Store {
       // 4. Commit atômico
       await batch.commit();
 
-      return true; // Adicionado diretamente
+      return (true, null); // Adicionado diretamente
 
     } catch (e) {
       errorMessage = e.toString();
@@ -264,40 +303,43 @@ abstract class _CollaboratorStore with Store {
     }
   }
 
-  /// Cria um convite para um email que ainda não é usuário do sistema.
-  Future<bool> _createInvite(String email, RolesType roleType) async {
-    final companyId = Global.companyAggr!.id!;
+  /// Cria um convite para um email/telefone que ainda não é usuário do sistema.
+  /// Usa a API (Admin SDK) para evitar problemas de permissão do Firestore.
+  /// Retorna o token do convite criado.
+  Future<String> _createInvite(
+    String? name,
+    String? email,
+    String? phone,
+    RolesType roleType,
+  ) async {
+    print('[CollaboratorStore] Creating invite via API - name: $name, email: $email, phone: $phone, role: ${roleType.name}');
 
-    // Verifica se já existe um convite pendente para este email nesta empresa
-    final existingInvite = await _inviteRepository.existsPendingInvite(
-      email,
-      companyId,
-    );
-    if (existingInvite) {
-      throw Exception('Já existe um convite pendente para este email.');
+    try {
+      final result = await InviteApiService.instance.createInvite(
+        name: name,
+        email: email,
+        phone: phone,
+        role: roleType.name,
+      );
+
+      print('[CollaboratorStore] Invite created via API - token: ${result.token}');
+
+      // Recarrega lista de convites
+      await loadPendingInvites();
+
+      return result.token;
+    } on InviteApiException catch (e) {
+      print('[CollaboratorStore] API error: ${e.message}');
+      throw Exception(e.message);
     }
-
-    // Cria o convite
-    final invite = Invite()
-      ..email = email
-      ..company = Global.companyAggr
-      ..role = roleType
-      ..invitedBy = Global.userAggr;
-
-    await _inviteRepository.create(invite);
-
-    // Recarrega lista de convites
-    await loadPendingInvites();
-
-    return false; // Convite criado (não adicionado diretamente)
   }
 
-  /// Cancela um convite pendente.
+  /// Cancela um convite pendente via API.
   @action
-  Future<void> cancelInvite(String inviteId) async {
+  Future<void> cancelInvite(String inviteToken) async {
     isLoading = true;
     try {
-      await _inviteRepository.delete(inviteId);
+      await InviteApiService.instance.cancelInvite(inviteToken);
       await loadPendingInvites();
     } catch (e) {
       errorMessage = e.toString();

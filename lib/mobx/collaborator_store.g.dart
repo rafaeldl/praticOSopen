@@ -109,9 +109,14 @@ mixin _$CollaboratorStore on _CollaboratorStore, Store {
   );
 
   @override
-  Future<bool> addCollaborator(String email, RolesType roleType) {
+  Future<(bool, String?)> addCollaborator(
+    String? name,
+    String? email,
+    String? phone,
+    RolesType roleType,
+  ) {
     return _$addCollaboratorAsyncAction.run(
-      () => super.addCollaborator(email, roleType),
+      () => super.addCollaborator(name, email, phone, roleType),
     );
   }
 

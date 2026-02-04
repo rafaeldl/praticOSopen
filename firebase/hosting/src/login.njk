@@ -1,0 +1,396 @@
+---
+permalink: /login/index.html
+---
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - PraticOS</title>
+    <meta name="description" content="Acesse o PraticOS - Sistema de gestao de ordens de servico">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background orbs */
+        .login-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .login-bg .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+        }
+
+        .login-bg .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--color-primary);
+            top: -150px;
+            right: -100px;
+        }
+
+        .login-bg .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--color-yellow);
+            bottom: -100px;
+            left: -100px;
+        }
+
+        .login-content {
+            max-width: 400px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .login-title {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            font-size: 1rem;
+        }
+
+        .login-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 32px;
+            font-family: var(--font-body);
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: var(--radius-full);
+            border: none;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            text-decoration: none;
+        }
+
+        .login-btn-primary {
+            background: var(--gradient-primary);
+            color: var(--bg-primary);
+            box-shadow: 0 4px 20px rgba(74, 155, 217, 0.4);
+        }
+
+        .login-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(74, 155, 217, 0.5);
+        }
+
+        .login-btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .login-btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-color-hover);
+        }
+
+        .login-btn svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 8px 0;
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+
+        /* Error state */
+        .login-error {
+            display: none;
+        }
+
+        .login-error.visible {
+            display: block;
+        }
+
+        .error-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 59, 48, 0.15);
+            border-radius: 50%;
+            color: var(--color-error);
+        }
+
+        .error-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .error-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        /* Loading state */
+        .login-loading {
+            display: none;
+        }
+
+        .login-loading.visible {
+            display: block;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 24px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+        }
+
+        /* Footer link */
+        .login-footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .login-footer a {
+            color: var(--text-tertiary);
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .login-footer a:hover {
+            color: var(--text-secondary);
+        }
+
+        .login-footer svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .login-title {
+                font-size: 1.5rem;
+            }
+
+            .login-btn {
+                padding: 14px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-page">
+        <!-- Background -->
+        <div class="login-bg">
+            <div class="gradient-orb orb-1"></div>
+            <div class="gradient-orb orb-2"></div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="login-content" id="loginContent">
+            <img src="/assets/images/logo.png" alt="PraticOS" class="login-logo">
+            <h1 class="login-title">Acessar <span class="gradient-text">PraticOS</span></h1>
+            <p class="login-subtitle">Escolha como deseja acessar sua conta</p>
+
+            <div class="login-buttons">
+                <a href="#" id="openAppBtn" class="login-btn login-btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                        <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                    </svg>
+                    Abrir no App
+                </a>
+
+                <div class="login-divider">ou</div>
+
+                <a href="#" id="continueWebBtn" class="login-btn login-btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                    Continuar na Web
+                </a>
+            </div>
+
+            <div class="login-footer">
+                <a href="/">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                    Voltar ao site
+                </a>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="login-content login-loading" id="loginLoading">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Abrindo o aplicativo...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="login-content login-error" id="loginError">
+            <div class="error-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </div>
+            <h2 class="error-title">Link invalido</h2>
+            <p class="error-message">O link de acesso e invalido ou expirou. Solicite um novo link de acesso.</p>
+            <a href="/" class="login-btn login-btn-secondary">Voltar ao inicio</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Get token from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+
+            // DOM elements
+            const loginContent = document.getElementById('loginContent');
+            const loginLoading = document.getElementById('loginLoading');
+            const loginError = document.getElementById('loginError');
+            const openAppBtn = document.getElementById('openAppBtn');
+            const continueWebBtn = document.getElementById('continueWebBtn');
+
+            // Validate token format (should start with LT_)
+            function isValidToken(token) {
+                return token && token.startsWith('LT_') && token.length > 3;
+            }
+
+            // Show error state
+            function showError() {
+                loginContent.style.display = 'none';
+                loginLoading.classList.remove('visible');
+                loginError.classList.add('visible');
+            }
+
+            // Show loading state
+            function showLoading() {
+                loginContent.style.display = 'none';
+                loginLoading.classList.add('visible');
+            }
+
+            // Check if token is valid
+            if (!isValidToken(token)) {
+                showError();
+                return;
+            }
+
+            // Set up button URLs
+            const appUrl = 'praticos://login?token=' + encodeURIComponent(token);
+            const webUrl = 'https://praticos.web.app/login?token=' + encodeURIComponent(token);
+
+            // Open in app button
+            openAppBtn.href = appUrl;
+            openAppBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                showLoading();
+
+                // Try to open the app
+                window.location.href = appUrl;
+
+                // If app doesn't open after 2.5 seconds, show options again
+                setTimeout(function() {
+                    // If we're still on this page, the app didn't open
+                    loginLoading.classList.remove('visible');
+                    loginContent.style.display = 'block';
+                }, 2500);
+            });
+
+            // Continue on web button
+            continueWebBtn.href = webUrl;
+            continueWebBtn.addEventListener('click', function(e) {
+                // Let the default link behavior happen
+                // The href is already set correctly
+            });
+        })();
+    </script>
+</body>
+
+</html>
