@@ -381,24 +381,66 @@ export async function completeRegistration(
   console.log(`[REGISTRATION] Completing registration for ${registration.whatsappNumber}`);
 
   try {
-    // Create user in Firebase Auth
-    const userRecord = await auth.createUser({
-      phoneNumber: registration.whatsappNumber,
-      displayName: companyName, // Use company name as display name initially
-    });
+    // Check if user already exists in Firebase Auth
+    let userRecord;
+    let isExistingUser = false;
+
+    try {
+      userRecord = await auth.getUserByPhoneNumber(registration.whatsappNumber);
+      isExistingUser = true;
+      console.log(`[REGISTRATION] Found existing Auth user: ${userRecord.uid}`);
+
+      // Check if this user already has companies
+      const userDoc = await db.collection('users').doc(userRecord.uid).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        if (userData?.companies && userData.companies.length > 0) {
+          // User already has a company - they should use link flow instead
+          return {
+            success: false,
+            error: 'This phone already has an account. Use the link flow to connect.',
+            code: 'PHONE_HAS_ACCOUNT',
+          };
+        }
+      }
+    } catch (lookupError: unknown) {
+      // User doesn't exist - create new one
+      const firebaseError = lookupError as { code?: string };
+      if (firebaseError.code === 'auth/user-not-found') {
+        userRecord = await auth.createUser({
+          phoneNumber: registration.whatsappNumber,
+          displayName: companyName,
+        });
+        console.log(`[REGISTRATION] Created new Auth user: ${userRecord.uid}`);
+      } else {
+        throw lookupError;
+      }
+    }
 
     const userId = userRecord.uid;
     const userName = companyName;
 
-    // Create user document
-    await db.collection('users').doc(userId).set({
-      id: userId,
-      name: userName,
-      phone: registration.whatsappNumber,
-      createdAt: new Date().toISOString(),
-      createdVia: 'whatsapp_self_registration',
-      companies: [],
-    });
+    // Create or update user document
+    if (isExistingUser) {
+      // Update existing user doc (or create if missing)
+      await db.collection('users').doc(userId).set({
+        id: userId,
+        name: userName,
+        phone: registration.whatsappNumber,
+        updatedAt: new Date().toISOString(),
+        companies: [],
+      }, { merge: true });
+    } else {
+      // Create new user document
+      await db.collection('users').doc(userId).set({
+        id: userId,
+        name: userName,
+        phone: registration.whatsappNumber,
+        createdAt: new Date().toISOString(),
+        createdVia: 'whatsapp_self_registration',
+        companies: [],
+      });
+    }
 
     const userAggr: UserAggr = {
       id: userId,
@@ -489,11 +531,19 @@ export async function completeRegistration(
       companyName,
       bootstrapResult,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[REGISTRATION] Error completing registration:', error);
 
-    // If Auth user was created, try to clean up
-    // (We don't have the uid here if it failed partway through)
+    const firebaseError = error as { code?: string; message?: string };
+
+    // Handle specific Firebase Auth errors
+    if (firebaseError.code === 'auth/phone-number-already-exists') {
+      return {
+        success: false,
+        error: 'This phone already has an account. Use the link flow to connect.',
+        code: 'PHONE_HAS_ACCOUNT',
+      };
+    }
 
     return {
       success: false,
