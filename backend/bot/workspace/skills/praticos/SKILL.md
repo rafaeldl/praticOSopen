@@ -15,34 +15,23 @@ Substitua {NUMERO} pelo authorId do usuario em TODA chamada.
 
 ## PASSO 1: Verificar Usuario (OBRIGATORIO)
 exec(command="curl -s $HDR '$BASE/bot/link/context'")
-Se linked:false → verificar se usuario enviou token de vinculacao (ver secao VINCULACAO abaixo).
+Se linked:false → verificar se usuario enviou token (LT_ ou INV_).
 Se nao enviou token → instruir vincular no app PraticOS em "Configuracoes > WhatsApp".
 
-## VINCULACAO DE CONTA (Tokens LT_)
+## TOKENS: LT_ vs INV_
 
-Quando o usuario enviar mensagem contendo "Vincular:" seguido de token LT_xxx:
+| Tipo | Uso | Quem gera |
+|------|-----|-----------|
+| `LT_` | Vincular conta existente | Usuario no app (Configuracoes > WhatsApp) |
+| `INV_` | Convite para novo colaborador | Admin/Supervisor via bot ou app |
 
-1. Extrair o token completo (formato: LT_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx)
-2. Chamar POST /bot/link com o token e numero:
-
-exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"token\":\"LT_xxx\"}' '$BASE/bot/link'")
-
-**IMPORTANTE:** O whatsappNumber e obtido automaticamente do header X-WhatsApp-Number.
-
-**Campos aceitos no body (flexivel):**
-- "token": o codigo LT_xxx (preferido)
-- "linkToken": alternativo para o token
-- "inviteCode": alternativo para o token (compatibilidade)
+**Ao receber token LT_ ou INV_:**
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"token\":\"TOKEN_AQUI\"}' '$BASE/bot/link'")
 
 **Respostas:**
-- Sucesso: Responder "Conta vinculada com sucesso! Bem-vindo(a) [userName] da [companyName]."
-- INVALID_TOKEN: "Token invalido ou expirado. Por favor, gere um novo token no app PraticOS em Configuracoes > WhatsApp."
-- ALREADY_LINKED: "Este numero de WhatsApp ja esta vinculado a outra conta. Se precisar trocar, primeiro desvincule no app."
-
-**IMPORTANTE:**
-- Tokens LT_ sao para VINCULAR conta de usuario existente
-- Tokens INV_ sao para CONVITES de novos colaboradores (fluxo diferente)
-- Se o usuario enviar um token e nao funcionar, verificar se e LT_ ou INV_
+- Sucesso → Dar boas-vindas (ver secao BOAS-VINDAS)
+- INVALID_TOKEN → "Token invalido ou expirado. Gere um novo no app."
+- ALREADY_LINKED → "Este WhatsApp ja esta vinculado. Desvincule primeiro no app."
 
 ## BOAS-VINDAS (primeira interacao)
 
@@ -246,44 +235,22 @@ Body: {"status":"completed"}
 Status possiveis: pending, in_progress, completed
 - "completed" so funciona se todos os itens obrigatorios estiverem preenchidos
 
-### Convites de Colaboradores
-POST   /bot/invite/create  - criar convite (admin/supervisor)
-POST   /bot/invite/accept  - aceitar convite (novo usuario)
+### Convites de Colaboradores (INV_)
+POST   /bot/invite/create  - criar convite
 GET    /bot/invite/list    - listar convites criados
 DELETE /bot/invite/{CODE}  - cancelar convite
 
-**POST /bot/invite/create** (requer usuario vinculado com permissao):
+**Criar convite** (admin/supervisor):
 Body: {"collaboratorName":"Nome","role":"technician","phone":"+5511999999999"}
-- **OBRIGATORIO:** email OU phone (pelo menos um)
-- Roles permitidos: admin, supervisor, manager, technician
-- Supervisors so podem convidar technicians
-- Retorna: {inviteCode, inviteLink, expiresAt}
+Roles: admin, supervisor, manager, technician
+Retorna: {inviteCode, inviteLink, expiresAt}
 
-Campos:
-- collaboratorName: nome do colaborador (obrigatorio)
-- role: perfil de acesso (obrigatorio)
-- phone: telefone no formato internacional (opcional se email)
-- email: email do colaborador (opcional se phone)
-
-**POST /bot/invite/accept** (para novos usuarios):
-Body: {"inviteCode":"INV_XXXXXXXX","whatsappNumber":"+5511999999999","name":"Nome"}
-- whatsappNumber: numero de quem esta aceitando
-- name: opcional (usa nome do convite se nao fornecido)
-- Retorna: {userId, userName, companyId, companyName, role}
-
-**Fluxo de convite:**
-1. Admin envia "convidar Joao como tecnico"
-2. Bot chama POST /bot/invite/create
-3. Bot responde com codigo INV_XXXXXXXX e link
-4. Admin compartilha link/codigo com Joao
-5. Joao envia o codigo para o bot
-6. Bot detecta formato INV_XXXXXXXX e chama POST /bot/invite/accept
-7. Joao e vinculado a empresa
-
-**Detectar codigo de convite:**
-Se usuario NAO vinculado enviar mensagem no formato INV_XXXXXXXX:
-- Extrair codigo e chamar POST /bot/invite/accept automaticamente
-- Usar numero do remetente como whatsappNumber
+**Fluxo:**
+1. Admin: "convidar Joao como tecnico"
+2. Bot cria convite e retorna codigo INV_xxx + link
+3. Admin compartilha com Joao
+4. Joao envia INV_xxx para o bot
+5. Bot chama POST /bot/link com o token (ver secao TOKENS)
 
 ### Magic Link (Compartilhamento com Cliente)
 POST   /bot/orders/{NUM}/share         - gerar link para cliente
@@ -380,17 +347,17 @@ exec(command="curl -s $HDR '$BASE/bot/orders/42/share'")
 # Magic Link - Revogar
 exec(command="curl -s -X DELETE $HDR '$BASE/bot/orders/42/share/ST_xxx'")
 
-# Convites - Criar (admin/supervisor) - phone OU email obrigatorio
-exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"collaboratorName\":\"Joao Silva\",\"role\":\"technician\",\"phone\":\"+5511999999999\"}' '$BASE/bot/invite/create'")
+# Vincular conta (LT_ ou INV_)
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"token\":\"LT_xxx\"}' '$BASE/bot/link'")
 
-# Convites - Aceitar (novo usuario)
-exec(command="curl -s -X POST -H 'Content-Type: application/json' -d '{\"inviteCode\":\"INV_XXXXXXXX\",\"whatsappNumber\":\"+5511999999999\",\"name\":\"Joao Silva\"}' '$BASE/bot/invite/accept'")
+# Convites - Criar
+exec(command="curl -s -X POST $HDR -H 'Content-Type: application/json' -d '{\"collaboratorName\":\"Joao\",\"role\":\"technician\",\"phone\":\"+5511999999999\"}' '$BASE/bot/invite/create'")
 
-# Convites - Listar meus convites
+# Convites - Listar
 exec(command="curl -s $HDR '$BASE/bot/invite/list'")
 
 # Convites - Cancelar
-exec(command="curl -s -X DELETE $HDR '$BASE/bot/invite/INV_XXXXXXXX'")
+exec(command="curl -s -X DELETE $HDR '$BASE/bot/invite/INV_xxx'")
 
 ---
 
