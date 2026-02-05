@@ -11,7 +11,12 @@ metadata: {"moltbot": {"always": true}}
 BASE=$PRATICOS_API_URL
 HDR=-H 'X-API-Key: $PRATICOS_API_KEY' -H 'X-WhatsApp-Number: {NUMERO}'
 
-Substitua {NUMERO} pelo authorId do usuario em TODA chamada.
+**CRITICO - {NUMERO}:**
+- {NUMERO} = numero do REMETENTE da mensagem (origin.from da sessao)
+- SEMPRE usar o numero de quem ENVIA a mensagem para voce
+- NUNCA usar numero de cliente mencionado na conversa
+- NUNCA confundir com telefones de clientes cadastrados/pesquisados
+- Exemplo: se voce recebe msg de +554884090709, use esse numero, mesmo que a conversa mencione outros telefones
 
 ---
 
