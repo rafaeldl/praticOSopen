@@ -80,7 +80,7 @@ setup-vm:
 sync:
 	@echo "Copiando configs para a VM..."
 	gcloud compute scp clawdbot.prod.json praticos-bot:/tmp/openclaw.json --zone=$(ZONE) $(SSH_KEY_FLAG)
-	gcloud compute scp workspace/IDENTITY.md workspace/SOUL.md workspace/HEARTBEAT.md workspace/USER.md workspace/AGENTS.md workspace/TOOLS.md workspace/MEMORY.md praticos-bot:/tmp/ --zone=$(ZONE) $(SSH_KEY_FLAG)
+	gcloud compute scp workspace/IDENTITY.md workspace/SOUL.md workspace/HEARTBEAT.md workspace/USER.md workspace/AGENTS.md workspace/TOOLS.md praticos-bot:/tmp/ --zone=$(ZONE) $(SSH_KEY_FLAG)
 	gcloud compute scp --recurse workspace/skills praticos-bot:/tmp/skills --zone=$(ZONE) $(SSH_KEY_FLAG)
 	@echo "Copiando para dentro do container..."
 	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- \
@@ -92,7 +92,6 @@ sync:
 		sudo docker cp /tmp/USER.md $$CONTAINER:/root/.openclaw/USER.md && \
 		sudo docker cp /tmp/AGENTS.md $$CONTAINER:/root/.openclaw/AGENTS.md && \
 		sudo docker cp /tmp/TOOLS.md $$CONTAINER:/root/.openclaw/TOOLS.md && \
-		sudo docker cp /tmp/MEMORY.md $$CONTAINER:/root/.openclaw/MEMORY.md && \
 		sudo docker cp /tmp/skills $$CONTAINER:/root/.openclaw/ && \
 		sudo rm -rf /tmp/openclaw.json /tmp/*.md /tmp/skills'
 	@echo "✅ Sincronização concluída. Reiniciando container..."

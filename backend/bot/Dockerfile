@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     ffmpeg \
+    jq \
     libnss3 \
     libatk-bridge2.0-0 \
     libxcomposite1 \
