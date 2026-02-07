@@ -1,6 +1,9 @@
 {
   "session": {
-    "dmScope": "per-channel-peer"
+    "dmScope": "per-channel-peer",
+    "reset": {
+      "mode": "daily"
+    }
   },
   "auth": {
     "profiles": {
@@ -16,23 +19,30 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "google/gemini-3-flash-preview",
-        "fallbacks": [
-          "google/gemini-2.5-flash"
-        ]
+        "primary": "google/gemini-2.5-flash"
       },
-      "workspace": "/root/.clawdbot",
+      "workspace": "/root/.openclaw",
+      "bootstrapMaxChars": 8000,
       "contextPruning": {
-        "softTrimRatio": 0.3,
-        "hardClearRatio": 0.55,
+        "keepLastAssistants": 2,
+        "softTrimRatio": 0.25,
+        "hardClearRatio": 0.4,
+        "minPrunableToolChars": 5000,
         "softTrim": {
-          "maxChars": 3500,
-          "headChars": 1000,
-          "tailChars": 1500
+          "maxChars": 2000,
+          "headChars": 500,
+          "tailChars": 1000
         },
         "hardClear": {
           "enabled": true,
-          "placeholder": "[older context cleared]"
+          "placeholder": "[contexto anterior limpo]"
+        }
+      },
+      "compaction": {
+        "mode": "default",
+        "reserveTokensFloor": 10000,
+        "memoryFlush": {
+          "enabled": true
         }
       }
     }
@@ -53,7 +63,8 @@
     "whatsapp": {
       "selfChatMode": false,
       "dmPolicy": "open",
-      "allowFrom": ["*"]
+      "allowFrom": ["*"],
+      "dmHistoryLimit": 20
     }
   },
   "plugins": {
@@ -77,8 +88,11 @@
     }
   },
   "messages": {
+    "inbound": {
+      "debounceMs": 3000
+    },
     "tts": {
-      "auto": "always",
+      "auto": "inbound",
       "provider": "edge",
       "edge": {
         "enabled": true,

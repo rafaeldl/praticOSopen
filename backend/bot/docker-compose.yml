@@ -9,13 +9,14 @@ services:
     ports:
       - "18790:18789"
     volumes:
-      - ./clawdbot.dev.json:/root/.clawdbot/clawdbot.json
-      - ./data/.openclaw/credentials:/root/.clawdbot/credentials
-      - ./data/.openclaw/agents:/root/.clawdbot/agents
-      - ./workspace/skills:/root/.clawdbot/skills
-      - ./workspace/AGENTS.md:/root/.clawdbot/AGENTS.md
-      - ./workspace/SOUL.md:/root/.clawdbot/SOUL.md
-      - ./workspace/cron:/root/.clawdbot/cron
+      - ./clawdbot.dev.json:/root/.openclaw/openclaw.json
+      - ./data/.openclaw/credentials:/root/.openclaw/credentials
+      - ./data/.openclaw/agents:/root/.openclaw/agents
+      - ./data/.openclaw/memory:/root/.openclaw/memory
+      - ./workspace/skills:/root/.openclaw/skills
+      - ./workspace/AGENTS.md:/root/.openclaw/AGENTS.md
+      - ./workspace/SOUL.md:/root/.openclaw/SOUL.md
+      - ./workspace/cron:/root/.openclaw/cron
     env_file:
       - .env
     extra_hosts:
