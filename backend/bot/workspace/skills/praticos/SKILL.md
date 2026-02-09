@@ -21,6 +21,11 @@ Todas as chamadas usam estas env vars (ja configuradas no sistema):
 - Usar o numero COM "+" em paths de arquivo (memory/users/+55...) e em headers X-WhatsApp-Number
 - 🔴 NUNCA INVENTAR {NUMERO}: O numero DEVE ser EXATAMENTE o origin.from da sessao. Se nao souber o numero, NAO faca a chamada. Numeros como +5511999999999 sao FALSOS e causam operacoes na empresa ERRADA.
 
+**Números brasileiros (+55) no WhatsApp:**
+- WhatsApp usa formato SEM o nono dígito: +55{DDD}{8 dígitos} (total 13 chars)
+- Se receber número da API com 9 após o DDD (+55489XXXXXXXX, 14 chars), remover o "9" antes de usar no WhatsApp
+- origin.from já vem no formato correto (sem o 9) — não precisa ajustar
+
 **CRON / AGENDAMENTOS — REGRAS DE SEGURANCA:**
 Cron perde o contexto do usuario (origin.from). Para garantir entrega CORRETA:
 1. ANTES de agendar: anotar {NUMERO} e dados da operacao em memory/users/{NUMERO}.md (## Pendentes)
