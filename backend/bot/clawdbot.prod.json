@@ -19,7 +19,10 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "google/gemini-2.5-flash"
+        "primary": "google/gemini-3-flash",
+        "fallbacks": [
+          "google/gemini-2.5-flash"
+        ]
       },
       "workspace": "/root/.openclaw",
       "bootstrapMaxChars": 8000,
@@ -92,7 +95,7 @@
       "debounceMs": 3000
     },
     "tts": {
-      "auto": "inbound",
+      "auto": "tagged",
       "provider": "edge",
       "edge": {
         "enabled": true,
