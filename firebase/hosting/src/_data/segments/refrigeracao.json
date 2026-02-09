@@ -14,7 +14,7 @@
       "titleHighlight": "cresça seu negócio",
       "subtitle": "Acabou a papelada! Histórico completo de cada equipamento, agenda inteligente que nunca esquece um agendamento e controle financeiro para saber quanto você realmente ganha.",
       "ctaPrimary": "Testar Grátis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Começar pelo WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Técnicos ativos" },
         "orders": { "value": "10k+", "label": "OS criadas" },
@@ -140,7 +140,7 @@
       "titleHighlight": "grow your company",
       "subtitle": "No more paperwork! Complete history of each equipment, smart scheduling that never forgets an appointment and financial control to know how much you really make.",
       "ctaPrimary": "Try Free",
-      "ctaSecondary": "Watch Demo",
+      "ctaWhatsapp": "Start on WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Active technicians" },
         "orders": { "value": "10k+", "label": "WOs created" },
@@ -266,7 +266,7 @@
       "titleHighlight": "crece tu negocio",
       "subtitle": "¡Se acabó el papeleo! Historial completo de cada equipo, agenda inteligente que nunca olvida una cita y control financiero para saber cuánto realmente ganas.",
       "ctaPrimary": "Probar Gratis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Empezar por WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Técnicos activos" },
         "orders": { "value": "10k+", "label": "OS creadas" },

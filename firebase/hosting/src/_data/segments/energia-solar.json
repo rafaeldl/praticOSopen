@@ -14,7 +14,7 @@
       "titleHighlight": "organize sua empresa em 5 minutos",
       "subtitle": "Acabe com o caos do WhatsApp e saiba exatamente quanto você lucrou. Documentação completa de projetos, checklist de instalação com fotos e cliente acompanhando pelo celular.",
       "ctaPrimary": "Testar Grátis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Começar pelo WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Integradores ativos" },
         "orders": { "value": "10k+", "label": "OS criadas" },
@@ -140,7 +140,7 @@
       "titleHighlight": "organize your business in 5 minutes",
       "subtitle": "End the WhatsApp chaos and know exactly how much you made. Complete project documentation, installation checklist with photos and customer tracking on their phone.",
       "ctaPrimary": "Try Free",
-      "ctaSecondary": "Watch Demo",
+      "ctaWhatsapp": "Start on WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Active installers" },
         "orders": { "value": "10k+", "label": "WOs created" },
@@ -266,7 +266,7 @@
       "titleHighlight": "organiza tu empresa en 5 minutos",
       "subtitle": "Acaba con el caos del WhatsApp y sabe exactamente cuánto ganaste. Documentación completa de proyectos, checklist de instalación con fotos y cliente siguiendo por el celular.",
       "ctaPrimary": "Probar Gratis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Empezar por WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Instaladores activos" },
         "orders": { "value": "10k+", "label": "OS creadas" },

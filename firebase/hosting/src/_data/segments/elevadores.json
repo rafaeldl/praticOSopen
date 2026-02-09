@@ -14,7 +14,7 @@
       "titleHighlight": "organize sua empresa em 5 minutos",
       "subtitle": "Acabe com a planilha e nunca mais esqueça uma manutenção preventiva. Histórico completo por elevador, checklist conforme ABNT NBR 16083 e alertas de vencimento de contrato.",
       "ctaPrimary": "Testar Grátis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Começar pelo WhatsApp",
       "stats": {
         "users": { "value": "200+", "label": "Técnicos ativos" },
         "orders": { "value": "5k+", "label": "OS criadas" },
@@ -140,7 +140,7 @@
       "titleHighlight": "organize your company in 5 minutes",
       "subtitle": "Ditch the spreadsheet and never miss a preventive maintenance. Complete history by elevator, compliance checklists and contract expiration alerts.",
       "ctaPrimary": "Try Free",
-      "ctaSecondary": "Watch Demo",
+      "ctaWhatsapp": "Start on WhatsApp",
       "stats": {
         "users": { "value": "200+", "label": "Active technicians" },
         "orders": { "value": "5k+", "label": "WOs created" },
@@ -266,7 +266,7 @@
       "titleHighlight": "organiza tu empresa en 5 minutos",
       "subtitle": "Acaba con la planilla y nunca más olvides un mantenimiento preventivo. Historial completo por ascensor, checklist según normas técnicas y alertas de vencimiento de contrato.",
       "ctaPrimary": "Probar Gratis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Empezar por WhatsApp",
       "stats": {
         "users": { "value": "200+", "label": "Técnicos activos" },
         "orders": { "value": "5k+", "label": "OS creadas" },

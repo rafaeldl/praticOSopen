@@ -14,7 +14,7 @@
       "titleHighlight": "organize sua assistência em 5 minutos",
       "subtitle": "Acabe com o caderninho e com as ligações de \"já ficou pronto?\". Documente cada equipamento com foto e número de série, e deixe o cliente acompanhar sozinho pelo link mágico.",
       "ctaPrimary": "Testar Grátis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Começar pelo WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Técnicos ativos" },
         "orders": { "value": "10k+", "label": "OS criadas" },
@@ -140,7 +140,7 @@
       "titleHighlight": "organize your shop in 5 minutes",
       "subtitle": "End the notebook chaos and the \"is it ready yet?\" calls. Document every device with photos and serial numbers, and let customers track status themselves with the magic link.",
       "ctaPrimary": "Try Free",
-      "ctaSecondary": "Watch Demo",
+      "ctaWhatsapp": "Start on WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Active technicians" },
         "orders": { "value": "10k+", "label": "WOs created" },
@@ -266,7 +266,7 @@
       "titleHighlight": "organiza tu asistencia en 5 minutos",
       "subtitle": "Acaba con el cuaderno y con las llamadas de \"¿ya está listo?\". Documenta cada equipo con foto y número de serie, y deja que el cliente lo siga solo por el link mágico.",
       "ctaPrimary": "Probar Gratis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Empezar por WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Técnicos activos" },
         "orders": { "value": "10k+", "label": "OS creadas" },

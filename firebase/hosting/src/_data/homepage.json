@@ -14,7 +14,7 @@
       "subtitle": "de forma simples e eficiente",
       "text": "Sistema completo para prestadores de serviço. Controle clientes, ordens de serviço e finanças em um só lugar.",
       "ctaPrimary": { "text": "Baixar Grátis", "href": "#download" },
-      "ctaSecondary": { "text": "Ver Demo", "href": "#screenshots" },
+      "ctaWhatsapp": { "text": "Começar pelo WhatsApp" },
       "stats": [
         { "value": "500+", "label": "Usuários ativos" },
         { "value": "10k+", "label": "OS criadas" },
@@ -125,7 +125,7 @@
       "subtitle": "simply and efficiently",
       "text": "Complete system for service providers. Control customers, service orders, and finances in one place.",
       "ctaPrimary": { "text": "Download Free", "href": "#download" },
-      "ctaSecondary": { "text": "See Demo", "href": "#screenshots" },
+      "ctaWhatsapp": { "text": "Start on WhatsApp" },
       "stats": [
         { "value": "500+", "label": "Active users" },
         { "value": "10k+", "label": "Orders created" },
@@ -236,7 +236,7 @@
       "subtitle": "de forma simple y eficiente",
       "text": "Sistema completo para proveedores de servicios. Controle clientes, órdenes de servicio y finanzas en un solo lugar.",
       "ctaPrimary": { "text": "Descargar Gratis", "href": "#download" },
-      "ctaSecondary": { "text": "Ver Demo", "href": "#screenshots" },
+      "ctaWhatsapp": { "text": "Empezar por WhatsApp" },
       "stats": [
         { "value": "500+", "label": "Usuarios activos" },
         { "value": "10k+", "label": "OS creadas" },

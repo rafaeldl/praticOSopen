@@ -14,7 +14,7 @@
       "titleHighlight": "saiba onde sua equipe está em tempo real",
       "subtitle": "Check-in por geolocalização, checklist digital para cada tipo de serviço e fotos antes/depois para provar ao cliente. Relatórios automáticos sem esforço.",
       "ctaPrimary": "Testar Grátis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Começar pelo WhatsApp",
       "stats": {
         "users": { "value": "300+", "label": "Equipes ativas" },
         "orders": { "value": "8k+", "label": "Serviços realizados" },
@@ -140,7 +140,7 @@
       "titleHighlight": "know where your team is in real time",
       "subtitle": "Geolocation check-in, digital checklists for each service type and before/after photos to prove to the client. Automatic reports effortlessly.",
       "ctaPrimary": "Try Free",
-      "ctaSecondary": "Watch Demo",
+      "ctaWhatsapp": "Start on WhatsApp",
       "stats": {
         "users": { "value": "300+", "label": "Active teams" },
         "orders": { "value": "8k+", "label": "Services completed" },
@@ -266,7 +266,7 @@
       "titleHighlight": "sabe dónde está tu equipo en tiempo real",
       "subtitle": "Check-in por geolocalización, checklist digital para cada tipo de servicio y fotos antes/después para probar al cliente. Informes automáticos sin esfuerzo.",
       "ctaPrimary": "Probar Gratis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Empezar por WhatsApp",
       "stats": {
         "users": { "value": "300+", "label": "Equipos activos" },
         "orders": { "value": "8k+", "label": "Servicios realizados" },
