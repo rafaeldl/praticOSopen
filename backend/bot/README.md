@@ -490,7 +490,7 @@ Após cada ação completada, o bot sugere o próximo passo lógico. Apenas **1 
 | Marcou OS como concluída | "Quer notificar o cliente pelo link?" |
 | Adicionou serviço à OS | "Quer adicionar mais algum serviço ou produto?" |
 | Compartilhou OS | "Precisa de mais alguma coisa?" |
-| Quer indicar pra colega | "Compartilha meu contato no WhatsApp! Ele cria a conta direto aqui comigo" |
+| Quer indicar pra colega | Enviar msg encaminhável com links wa.me + site (ver Indicação / Referral) |
 
 **Regra:** A sugestão deve ser natural, como um parceiro de trabalho perguntaria. Nunca bombardear com várias opções.
 
@@ -536,6 +536,30 @@ Perguntar ao usuário:
 4. **"Quero conhecer"** → Sugerir https://praticos.web.app ou compartilhar o contato do bot no WhatsApp (auto-cadastro direto no chat)
 
 **Regra:** Mensagens curtas, 1-2 frases. Tom casual.
+
+### Indicação / Referral
+
+Quando o usuário quer indicar o PraticOS para um colega, o bot envia uma **mensagem formatada pronta para encaminhar** contendo os links diretos, e depois orienta a compartilhar o contato como complemento.
+
+**Fluxo:**
+
+1. Bot envia mensagem encaminhável via `message()`:
+   ```
+   message(action="send", message="Conheça o *PraticOS* — gestão de O.S. direto no celular!\n\n📱 Chama no WhatsApp: https://wa.me/554888794742\n🌐 Ou acesse: https://praticos.web.app\n\nÉ só mandar um oi que eu ajudo a criar sua conta na hora!")
+   ```
+2. Bot orienta: "Encaminha essa mensagem pro seu colega! Se quiser, compartilha meu contato também (toca no meu nome > Encaminhar Contato)"
+
+**Dados do bot:**
+- **Número WhatsApp:** +554888794742
+- **Link wa.me:** https://wa.me/554888794742
+- **Site:** https://praticos.web.app
+
+**Regras:**
+- SEMPRE enviar a mensagem formatada via `message()` — ela é o "cartão de visita" encaminhável
+- Depois sugerir compartilhar o contato do bot como complemento
+- Tom casual, máx 2 mensagens (o cartão + a orientação)
+
+> **Nota técnica:** O OpenClaw não suporta envio de contact cards nativos via `message()`. O envio de .vcf via `filePath` chega como documento genérico, não como contato do WhatsApp. Por isso o workaround é: texto encaminhável + orientar o usuário a compartilhar o contato manualmente (1 toque).
 
 ### Auto-cadastro
 

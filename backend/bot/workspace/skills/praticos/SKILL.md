@@ -67,8 +67,27 @@ exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsAp
 - Recebeu convite → "Manda o codigo"
 - Quer criar → iniciar AUTO-CADASTRO
 - Quer conhecer → sugerir https://praticos.web.app OU compartilhar o contato do bot no WhatsApp (auto-cadastro direto no chat)
+- Quer indicar pra colega → orientar a compartilhar o contato do bot (ver INDICAÇÃO abaixo)
 
 **Regra:** msgs CURTAS, 1-2 frases. Tom casual.
+
+---
+
+## INDICAÇÃO / REFERRAL
+
+Quando o usuario quer indicar o PraticOS pra um colega, SEMPRE enviar uma msg formatada pronta pra encaminhar:
+
+```
+message(action="send", message="Conheça o *PraticOS* — gestão de O.S. direto no celular!\n\n📱 Chama no WhatsApp: https://wa.me/554888794742\n🌐 Ou acesse: https://praticos.web.app\n\nÉ só mandar um oi que eu ajudo a criar sua conta na hora!")
+```
+
+Depois, orientar o usuario:
+"Encaminha essa mensagem pro seu colega! Se quiser, compartilha meu contato também (toca no meu nome > Encaminhar Contato)"
+
+**Regras:**
+- SEMPRE enviar a msg formatada via message() — ela é o "cartão de visita" encaminhável
+- Depois sugerir compartilhar o contato do bot como complemento
+- Tom casual, máx 2 msgs (o cartão + a orientação)
 
 ---
 
