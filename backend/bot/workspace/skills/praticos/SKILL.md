@@ -19,6 +19,36 @@ Todas as chamadas usam estas env vars (ja configuradas no sistema):
 - NUNCA usar numero de cliente mencionado na conversa
 - origin.from pode vir SEM "+". SEMPRE normalizar: se nao comeca com "+", adicionar. Ex: "554884090709" → "+554884090709"
 - Usar o numero COM "+" em paths de arquivo (memory/users/+55...) e em headers X-WhatsApp-Number
+- 🔴 NUNCA INVENTAR {NUMERO}: O numero DEVE ser EXATAMENTE o origin.from da sessao. Se nao souber o numero, NAO faca a chamada. Numeros como +5511999999999 sao FALSOS e causam operacoes na empresa ERRADA.
+
+**CRON / AGENDAMENTOS — REGRAS DE SEGURANCA:**
+Cron perde o contexto do usuario (origin.from). Para garantir entrega CORRETA:
+1. ANTES de agendar: anotar {NUMERO} e dados da operacao em memory/users/{NUMERO}.md (## Pendentes)
+2. No job: ler memoria para recuperar {NUMERO} e dados
+3. Em TODA chamada API no cron: usar o {NUMERO} salvo no header X-WhatsApp-Number
+4. 🔴 Para enviar resposta: SEMPRE usar sessions_send com sessionKey="agent:main:whatsapp:dm:{NUMERO}". NUNCA usar message() no cron — message() envia para a sessao do cron (webchat), NAO para o WhatsApp do usuario
+5. Se NAO conseguir determinar {NUMERO}: NAO executar — esperar proxima msg do usuario
+
+---
+
+## ENDPOINTS RAPIDO — DECORAR ANTES DE QUALQUER CHAMADA
+
+**Buscar entidades:** POST /bot/search/unified (UNICO endpoint de busca)
+**Criar OS completa:** POST /bot/orders/full (requer IDs, nao nomes)
+**CRUD entidades:** /bot/entities/{customers|devices|services|products}
+**Status OS:** PATCH /bot/orders/{NUM}/status
+**Detalhes OS:** GET /bot/orders/{NUM}/details
+**Listar OS:** GET /bot/orders/list
+**Fotos:** POST /bot/orders/{NUM}/photos/upload (multipart)
+
+⚠️ ENDPOINTS QUE NAO EXISTEM (nunca usar):
+- /bot/customers, /bot/customer/*
+- /bot/devices, /bot/services, /bot/products
+- /bot/orders (sem /full, /list ou /{NUM})
+- /bot/*/search, /bot/search (sem /unified)
+- Qualquer GET com ?q= que NAO seja /bot/entities/{tipo}
+
+🔴 REGRA ANTI-LOOP: Se receber NOT_FOUND em qualquer chamada, PARE e releia esta secao. NUNCA tente variacoes de URL. Se o endpoint nao esta listado aqui, ELE NAO EXISTE. Maximo 3 tentativas por operacao.
 
 ---
 
@@ -140,6 +170,8 @@ Se label nao existir, usar termo generico.
 ---
 
 ## ENDPOINTS
+
+**CRITICO:** Os endpoints abaixo sao os UNICOS que existem. Qualquer outro path retorna NOT_FOUND. NAO inventar URLs. Se receber NOT_FOUND, releia a secao "ENDPOINTS RAPIDO" no topo.
 
 Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" e base "$PRATICOS_API_URL"
 
