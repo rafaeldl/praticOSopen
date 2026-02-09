@@ -17,7 +17,8 @@ Todas as chamadas usam estas env vars (ja configuradas no sistema):
 **CRITICO sobre {NUMERO}:**
 - SEMPRE usar o numero de quem ENVIA a mensagem para voce
 - NUNCA usar numero de cliente mencionado na conversa
-- Exemplo: se voce recebe msg de +554884090709, use esse numero
+- origin.from pode vir SEM "+". SEMPRE normalizar: se nao comeca com "+", adicionar. Ex: "554884090709" → "+554884090709"
+- Usar o numero COM "+" em paths de arquivo (memory/users/+55...) e em headers X-WhatsApp-Number
 
 ---
 
@@ -125,7 +126,8 @@ Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number
 
 ### Busca Unificada (USAR SEMPRE)
 POST /bot/search/unified
-Parametros JSON: customer, customerPhone, device, deviceSerial, service, product
+Parametros JSON (string OU array de strings): customer, customerPhone, device, deviceSerial, service, product
+Exemplo com arrays: {"service":["tela","bateria"],"product":["película"]}
 Resposta: {exact, suggestions, available}
 exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\",\"service\":\"tela\"}' \"$PRATICOS_API_URL/bot/search/unified\"")
 
@@ -194,10 +196,13 @@ GET /bot/orders/{NUM}/share | DELETE /bot/orders/{NUM}/share/{TOKEN}
 
 ## CARD DE OS (OBRIGATORIO)
 
-1. GET /bot/orders/{NUM}/details (retorna photosCount)
-2. Se photosCount > 0: GET /bot/orders/{NUM}/photos → baixar 1a foto → enviar imagem com card como `message`
-3. Se sem foto: enviar apenas texto
-4. GET /bot/orders/{NUM}/share para link ativo
+### Passo a passo:
+1. GET /bot/orders/{NUM}/details (retorna photosCount, NAO o array)
+2. Montar texto do card conforme modelo abaixo
+3. **Se photosCount > 0:** GET /bot/orders/{NUM}/photos para obter lista com downloadUrl
+4. **Se tiver foto:** baixar 1a foto e enviar IMAGEM com card como `message`
+5. **Se NAO houver foto:** enviar apenas o texto
+6. GET /bot/orders/{NUM}/share para link ativo
 
 **Modelo:**
 ```
@@ -228,8 +233,12 @@ _[Z] foto(s)_
 **Regras:** omitir device/servicos/produtos/fotos/rating/link se null/vazio. done+paid → "*Pago*" em vez de A receber. remaining = total - paidAmount.
 
 **Envio da imagem (se photosCount > 0):**
-1. Baixar: curl com "$PRATICOS_API_URL{downloadUrl}" --output foto.jpg
-2. Enviar imagem com card como `message` (NAO usar campo `caption`)
+1. GET /bot/orders/{NUM}/photos → obter lista com downloadUrl
+2. Baixar 1a foto: curl com "$PRATICOS_API_URL{downloadUrl}" --output foto.jpg
+3. Enviar imagem com:
+   - **filePath**: caminho da imagem baixada (ex: foto.jpg)
+   - **message**: texto do card formatado (este e o campo que aparece no WhatsApp)
+   - **NAO usar campo `caption`** — usar SEMPRE `message` para o texto
 
 ---
 

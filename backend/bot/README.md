@@ -615,7 +615,8 @@ Todas as chamadas usam estas variáveis de ambiente (já configuradas no sistema
 **CRÍTICO sobre {NUMERO}:**
 - SEMPRE usar o número de quem **envia** a mensagem para o bot
 - NUNCA usar número de cliente mencionado na conversa
-- Exemplo: se recebe mensagem de +554884090709, usar esse número
+- `origin.from` pode vir **sem o `+`** (ex: `554884090709`). SEMPRE normalizar: se não começa com `+`, adicionar. Ex: `554884090709` → `+554884090709`
+- Usar o número COM `+` em paths de arquivo (`memory/users/+55...`) e em headers `X-WhatsApp-Number`
 
 ### Formato padrão de chamada
 
@@ -682,15 +683,17 @@ curl -s -X POST \
 
 **`POST /bot/search/unified`** — Busca principal para encontrar IDs de entidades.
 
+Cada parâmetro aceita **string** ou **array de strings** para buscar múltiplos valores de uma vez.
+
 ```json
-// Request body (todos os campos opcionais)
+// Request body (todos os campos opcionais, aceitam string ou array)
 {
   "customer": "João",
   "customerPhone": "+5548999...",
   "device": "iPhone",
   "deviceSerial": "IMEI123",
-  "service": "tela",
-  "product": "película"
+  "service": ["tela", "bateria"],
+  "product": ["película"]
 }
 ```
 
@@ -976,8 +979,10 @@ _[Z] foto(s)_
 2. Se `photosCount > 0`:
    - Listar fotos: `GET /bot/orders/{NUM}/photos` → obtém `downloadUrl`
    - Baixar primeira foto: `curl "$PRATICOS_API_URL{downloadUrl}" --output foto.jpg`
-   - Enviar a imagem como message separada com o card como texto
-   - NÃO usar campo `caption` (se aplicável)
+   - Enviar a imagem usando:
+     - `filePath`: caminho da imagem baixada (ex: `foto.jpg`)
+     - `message`: texto do card formatado (este é o campo que aparece no WhatsApp)
+     - **NÃO usar campo `caption`** — usar SEMPRE `message` para o texto do card
 3. Se sem foto: enviar apenas texto do card
 
 **Regra de link:**
