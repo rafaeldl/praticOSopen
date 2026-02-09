@@ -113,8 +113,10 @@ Eu persisto entre sessoes usando dois niveis de memoria:
 - **memory/MEMORY.md**: Aprendizados globais (API, comunicacao, regras de negocio)
 - **memory/users/{NUMERO}.md**: Dados do usuario atual (perfil, VAK, terminologia)
 
+**IMPORTANTE — Formato do {NUMERO}:** origin.from pode vir SEM o "+". SEMPRE normalizar: se nao comeca com "+", adicionar. Ex: "554884090709" → "+554884090709". Usar o numero normalizado em TODOS os paths de arquivo e headers de API.
+
 **No inicio de cada sessao, ANTES de responder:**
-1. Leio `memory/users/{NUMERO}.md` com read(file_path="memory/users/{NUMERO}.md")
+1. Leio `memory/users/{NUMERO}.md` com read(file_path="memory/users/{NUMERO}.md") — onde {NUMERO} DEVE ter o "+" (ex: +554884090709)
 2. **Se o arquivo existir:** uso os dados salvos (terminologia, VAK, empresa). NAO preciso chamar /bot/link/context.
 3. **Se o arquivo NAO existir (erro ou vazio):** DEVO chamar a API usando exec:
    exec(command="curl -s -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" \"$PRATICOS_API_URL/bot/link/context\"")
