@@ -120,6 +120,9 @@ export async function getWhatsAppLink(number: string): Promise<ChannelLink | nul
 
 /**
  * Link WhatsApp number to user
+ * - Creates link document in /links/whatsapp/numbers/
+ * - Updates user doc with whatsappPhone
+ * - Adds phone to Firebase Auth (for SMS login)
  */
 export async function linkWhatsApp(
   whatsappNumber: string,
@@ -130,7 +133,9 @@ export async function linkWhatsApp(
   companyName?: string
 ): Promise<void> {
   const normalizedNumber = normalizeWhatsAppNumber(whatsappNumber);
+  const authPhone = normalizeBrazilianPhoneForAuth(whatsappNumber);
 
+  // 1. Create link document
   const linkData: ChannelLink = {
     channel: 'whatsapp',
     identifier: normalizedNumber,
@@ -148,6 +153,33 @@ export async function linkWhatsApp(
     .collection('numbers')
     .doc(normalizedNumber)
     .set(linkData);
+
+  // 2. Update user doc with WhatsApp phone
+  const userUpdateData: Record<string, string> = {
+    whatsappPhone: normalizedNumber, // 13 chars (WhatsApp format)
+  };
+  // Also store Auth phone if different
+  if (authPhone !== normalizedNumber) {
+    userUpdateData.phone = authPhone; // 14 chars (real format)
+  }
+
+  await db.collection('users').doc(userId).set(userUpdateData, { merge: true });
+
+  // 3. Add phone to Firebase Auth (for SMS login)
+  try {
+    const userRecord = await auth.getUser(userId);
+
+    // Only update if user doesn't have a phone or has a different one
+    if (!userRecord.phoneNumber || userRecord.phoneNumber !== authPhone) {
+      await auth.updateUser(userId, {
+        phoneNumber: authPhone,
+      });
+      console.log(`[LINK] Added phone ${authPhone} to Auth user ${userId}`);
+    }
+  } catch (error) {
+    // Non-fatal: user can still use WhatsApp, just won't have SMS login
+    console.warn(`[LINK] Could not update Auth phone for user ${userId}:`, error);
+  }
 }
 
 /**
@@ -275,6 +307,38 @@ function normalizeWhatsAppNumber(number: string): string {
   // Ensure it starts with +
   if (!normalized.startsWith('+')) {
     normalized = '+' + normalized;
+  }
+
+  return normalized;
+}
+
+/**
+ * Normalize Brazilian phone number for Firebase Auth
+ *
+ * WhatsApp uses old 8-digit format for Brazilian mobiles.
+ * Real format has 9 digits (starting with 9).
+ *
+ * Example:
+ * - WhatsApp: +554884090709 (13 chars) → +55 48 84090709 (8 digits)
+ * - Auth:     +5548984090709 (14 chars) → +55 48 984090709 (9 digits)
+ */
+function normalizeBrazilianPhoneForAuth(phone: string): string {
+  const normalized = normalizeWhatsAppNumber(phone);
+
+  // Check if Brazilian number: +55 + 10 digits = 13 chars total
+  if (!normalized.startsWith('+55') || normalized.length !== 13) {
+    return normalized;
+  }
+
+  // Extract parts: +55 (3) + area code (2) + subscriber (8)
+  const areaCode = normalized.substring(3, 5);
+  const subscriber = normalized.substring(5);
+
+  // Check if subscriber starts with 7, 8, or 9 (mobile indicators)
+  const firstDigit = subscriber.charAt(0);
+  if (['7', '8', '9'].includes(firstDigit)) {
+    // Insert "9" after area code: +55 + area + 9 + subscriber
+    return `+55${areaCode}9${subscriber}`;
   }
 
   return normalized;

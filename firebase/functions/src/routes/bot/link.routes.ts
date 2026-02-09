@@ -7,6 +7,7 @@ import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import * as channelLinkService from '../../services/channel-link.service';
+import * as registrationService from '../../services/registration.service';
 import { db } from '../../services/firestore.service';
 
 const router: Router = Router();
@@ -162,10 +163,28 @@ router.get('/context', async (req: AuthenticatedRequest, res: Response) => {
     const link = await channelLinkService.getWhatsAppLink(whatsappNumber);
 
     if (!link) {
+      // Check for pending registration (non-blocking - if it fails, just return null)
+      let pendingRegistration = null;
+      try {
+        const reg = await registrationService.getActiveByPhone(whatsappNumber);
+        if (reg) {
+          pendingRegistration = {
+            token: reg.token,
+            state: reg.state,
+            data: reg.data,
+            expiresAt: reg.expiresAt,
+          };
+        }
+      } catch (error) {
+        console.warn('[LINK] Failed to check pending registration:', error);
+        // Continue without pending registration info
+      }
+
       res.json({
         success: true,
         data: {
           linked: false,
+          pendingRegistration,
         },
       });
       return;

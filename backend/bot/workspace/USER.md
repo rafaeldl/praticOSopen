@@ -1,17 +1,14 @@
-# USER.md - About Your Human
+# USER.md - Sobre Seus Usuarios
 
-*Learn about the person you're helping. Update this as you go.*
+Este bot atende multiplos usuarios via WhatsApp.
+Cada usuario e identificado pelo numero de telefone ({NUMERO} / origin.from).
 
-- **Name:** 
-- **What to call them:** 
-- **Pronouns:** *(optional)*
-- **Timezone:** 
-- **Notes:** 
+## Memoria em Dois Niveis
 
-## Context
+**Global (memory/MEMORY.md):** Aprendizados sobre API, comunicacao e regras de negocio.
+Atualizar quando descobrir algo util para TODOS os usuarios.
 
-*(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)*
+**Por usuario (memory/users/{NUMERO}.md):** Perfil, preferencias, VAK e terminologia.
+Ler ao iniciar sessao. Criar/atualizar ao detectar preferencias.
 
----
-
-The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+Consulte SOUL.md secao "Memoria" para detalhes.
