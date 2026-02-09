@@ -66,7 +66,7 @@ exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsAp
 - Ja usa → "Gera codigo em Configuracoes > WhatsApp e manda aqui"
 - Recebeu convite → "Manda o codigo"
 - Quer criar → iniciar AUTO-CADASTRO
-- Quer conhecer → sugerir https://praticos.web.app e oferecer conta teste
+- Quer conhecer → sugerir https://praticos.web.app OU compartilhar o contato do bot no WhatsApp (auto-cadastro direto no chat)
 
 **Regra:** msgs CURTAS, 1-2 frases. Tom casual.
 

@@ -490,6 +490,7 @@ Após cada ação completada, o bot sugere o próximo passo lógico. Apenas **1 
 | Marcou OS como concluída | "Quer notificar o cliente pelo link?" |
 | Adicionou serviço à OS | "Quer adicionar mais algum serviço ou produto?" |
 | Compartilhou OS | "Precisa de mais alguma coisa?" |
+| Quer indicar pra colega | "Compartilha meu contato no WhatsApp! Ele cria a conta direto aqui comigo" |
 
 **Regra:** A sugestão deve ser natural, como um parceiro de trabalho perguntaria. Nunca bombardear com várias opções.
 
@@ -532,7 +533,7 @@ Perguntar ao usuário:
 1. **"Já uso o PraticOS"** → "Gera o código em Configurações > WhatsApp e manda aqui"
 2. **"Recebi um convite"** → "Manda o código que eu vinculo"
 3. **"Quero criar uma conta"** → Iniciar auto-cadastro
-4. **"Quero conhecer"** → Sugerir https://praticos.web.app e oferecer conta teste
+4. **"Quero conhecer"** → Sugerir https://praticos.web.app ou compartilhar o contato do bot no WhatsApp (auto-cadastro direto no chat)
 
 **Regra:** Mensagens curtas, 1-2 frases. Tom casual.
 
