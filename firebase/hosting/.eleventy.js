@@ -51,6 +51,11 @@ module.exports = function(eleventyConfig) {
     return (path || "").replace(/^\/+/, "");
   });
 
+  // Format a date as YYYY-MM-DD for sitemap <lastmod>
+  eleventyConfig.addFilter("dateToISO", function(date) {
+    return date.toISOString().split('T')[0];
+  });
+
   return {
     dir: {
       input: "src",
