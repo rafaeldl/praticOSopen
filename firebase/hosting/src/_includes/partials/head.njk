@@ -3,12 +3,34 @@
 <title>{{ title }}</title>
 <meta name="description" content="{{ description }}">
 <meta name="keywords" content="{{ keywords }}">
+<meta name="robots" content="index, follow">
+
+<!-- Canonical URL -->
+<link rel="canonical" href="{{ site.baseUrl }}/{{ permalink | stripLeadingSlash }}">
+
+<!-- hreflang alternate language links -->
+{% if langSwitch %}
+{% set hreflangMap = { "PT": "pt-BR", "EN": "en", "ES": "es" } %}
+{% for langItem in langSwitch %}
+<link rel="alternate" hreflang="{{ hreflangMap[langItem.code] }}" href="{{ site.baseUrl }}/{{ langItem.href | resolveUrl(permalink) }}">
+{% endfor %}
+<link rel="alternate" hreflang="x-default" href="{{ site.baseUrl }}/{{ langSwitch[0].href | resolveUrl(permalink) }}">
+{% endif %}
 
 <!-- Open Graph -->
 <meta property="og:title" content="{{ ogTitle | default(title) }}">
 <meta property="og:description" content="{{ ogDescription | default(description) }}">
-<meta property="og:image" content="{{ relPath }}assets/images/logo.png">
+<meta property="og:image" content="{{ site.baseUrl }}/assets/images/logo.png">
 <meta property="og:type" content="website">
+<meta property="og:url" content="{{ site.baseUrl }}/{{ permalink | stripLeadingSlash }}">
+<meta property="og:locale" content="{{ lang | replace('-', '_') | default('pt_BR') }}">
+<meta property="og:site_name" content="PraticOS">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ ogTitle | default(title) }}">
+<meta name="twitter:description" content="{{ ogDescription | default(description) }}">
+<meta name="twitter:image" content="{{ site.baseUrl }}/assets/images/logo.png">
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,4 +67,28 @@
     page_type: '{{ pageType | default("other") }}',
     segment: '{{ segmentSlug | default("none") }}'
   });
+</script>
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PraticOS",
+  "description": "{{ description }}",
+  "url": "{{ site.baseUrl }}",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "iOS, Android",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "BRL"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "bestRating": "5",
+    "ratingCount": "500"
+  }
+}
 </script>

@@ -1,4 +1,5 @@
 {
+  "baseUrl": "https://praticos.web.app",
   "name": "PraticOS",
   "logoText": "Prát<span class=\"yellow\">ic</span><span class=\"accent\">OS</span>",
   "email": "praticos@rafsoft.com.br",
