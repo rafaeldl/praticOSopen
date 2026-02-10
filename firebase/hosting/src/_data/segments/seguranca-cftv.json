@@ -14,7 +14,7 @@
       "titleHighlight": "organize sua empresa em 5 minutos",
       "subtitle": "Acabe com a planilha e saiba exatamente onde cada equipamento está instalado. Histórico completo por QR code, rota otimizada e cliente acompanhando pelo celular.",
       "ctaPrimary": "Testar Grátis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Começar pelo WhatsApp",
       "stats": {
         "users": { "value": "300+", "label": "Técnicos ativos" },
         "orders": { "value": "8k+", "label": "OS criadas" },
@@ -140,7 +140,7 @@
       "titleHighlight": "organize your company in 5 minutes",
       "subtitle": "Ditch the spreadsheet and know exactly where each equipment is installed. Complete history by QR code, optimized routes and customer tracking on their phone.",
       "ctaPrimary": "Try Free",
-      "ctaSecondary": "Watch Demo",
+      "ctaWhatsapp": "Start on WhatsApp",
       "stats": {
         "users": { "value": "300+", "label": "Active technicians" },
         "orders": { "value": "8k+", "label": "WOs created" },
@@ -266,7 +266,7 @@
       "titleHighlight": "organiza tu empresa en 5 minutos",
       "subtitle": "Acaba con la planilla y sabe exactamente donde cada equipo está instalado. Historial completo por código QR, ruta optimizada y cliente siguiendo por el celular.",
       "ctaPrimary": "Probar Gratis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Empezar por WhatsApp",
       "stats": {
         "users": { "value": "300+", "label": "Técnicos activos" },
         "orders": { "value": "8k+", "label": "OS creadas" },

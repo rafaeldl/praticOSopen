@@ -4,6 +4,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/js");
   eleventyConfig.addPassthroughCopy("src/assets");
   eleventyConfig.addPassthroughCopy("src/style.css");
+  eleventyConfig.addPassthroughCopy("src/robots.txt");
 
   // Watch for changes
   eleventyConfig.addWatchTarget("src/css/");
@@ -23,6 +24,31 @@ module.exports = function(eleventyConfig) {
     const depth = (url.match(/\//g) || []).length - 1;
     if (depth <= 0) return "./";
     return "../".repeat(depth);
+  });
+
+  // Resolve a relative href (from langSwitch) against the current page's permalink directory
+  // Returns a clean path without leading slash (e.g. "segmentos/automotivo.html")
+  eleventyConfig.addFilter("resolveUrl", function(href, permalink) {
+    if (!href) return (permalink || "").replace(/^\/+/, "");
+    // If href is already absolute, return as-is
+    if (href.startsWith("http")) return href;
+    // Normalize permalink: strip leading slash
+    var cleanPermalink = (permalink || "").replace(/^\/+/, "");
+    // Get the directory from the current page's permalink
+    var dir = "";
+    if (cleanPermalink && cleanPermalink.includes("/")) {
+      dir = cleanPermalink.substring(0, cleanPermalink.lastIndexOf("/") + 1);
+    }
+    // Resolve relative href against directory
+    if (href.startsWith("../")) {
+      return href.replace("../", "");
+    }
+    return dir + href;
+  });
+
+  // Strip leading slash from a path for building absolute URLs
+  eleventyConfig.addFilter("stripLeadingSlash", function(path) {
+    return (path || "").replace(/^\/+/, "");
   });
 
   return {

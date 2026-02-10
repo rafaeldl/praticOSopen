@@ -40,14 +40,14 @@
                     </li>
                     {% endfor %}
                 </ul>
-                <a href="#download" class="btn btn-{{ plan.ctaStyle }} btn-full">{{ plan.cta }}</a>
+                <a href="#download" class="btn btn-{{ plan.ctaStyle }} btn-full" data-ga="select_content" data-ga-detail="pricing_{{ plan.name | lower | replace(' ', '_') }}">{{ plan.cta }}</a>
             </div>
             {% endfor %}
         </div>
 
         <!-- Footer with single CTA -->
         <div class="pricing-footer">
-            <a href="{{ relPath }}{{ price.detailsLink }}" class="pricing-details-link">
+            <a href="{{ relPath }}{{ price.detailsLink }}" class="pricing-details-link" data-ga="select_content" data-ga-detail="pricing_details_link">
                 {{ price.detailsText }}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="9 18 15 12 9 6"></polyline>

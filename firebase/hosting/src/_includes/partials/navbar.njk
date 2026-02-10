@@ -35,10 +35,10 @@
         <div class="nav-actions">
             <div class="lang-switch">
                 {% for langItem in langSwitch %}
-                <a href="{{ langItem.href }}"{% if langItem.active %} class="active"{% endif %}>{{ langItem.code }}</a>
+                <a href="{{ langItem.href }}"{% if langItem.active %} class="active"{% endif %} data-ga="select_content" data-ga-detail="lang_{{ langItem.code | lower }}">{{ langItem.code }}</a>
                 {% endfor %}
             </div>
-            <a href="{% if not isHomepage and not segmentSlug %}{{ relPath }}{{ indexPage | default('index.html') }}{% endif %}#download" class="btn btn-primary">{{ nav.cta }}</a>
+            <a href="{% if not isHomepage and not segmentSlug %}{{ relPath }}{{ indexPage | default('index.html') }}{% endif %}#download" class="btn btn-primary" data-ga="select_content" data-ga-detail="navbar_cta">{{ nav.cta }}</a>
         </div>
         <button class="nav-toggle" aria-label="Menu">
             <span></span>

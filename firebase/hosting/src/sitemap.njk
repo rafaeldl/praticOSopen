@@ -1,0 +1,22 @@
+---
+permalink: /sitemap.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+{%- for page in collections.all %}
+{%- if page.url and page.url != '/404.html' and not page.url.startsWith('/login') and not page.url.startsWith('/order') and page.url != '/sitemap.xml' %}
+  <url>
+    <loc>{{ site.baseUrl }}{{ page.url }}</loc>
+    {%- if page.data.langSwitch %}
+    {%- set hreflangMap = { "PT": "pt-BR", "EN": "en", "ES": "es" } %}
+    {%- for langItem in page.data.langSwitch %}
+    <xhtml:link rel="alternate" hreflang="{{ hreflangMap[langItem.code] }}" href="{{ site.baseUrl }}/{{ langItem.href | resolveUrl(page.data.permalink) }}"/>
+    {%- endfor %}
+    <xhtml:link rel="alternate" hreflang="x-default" href="{{ site.baseUrl }}/{{ page.data.langSwitch[0].href | resolveUrl(page.data.permalink) }}"/>
+    {%- endif %}
+  </url>
+{%- endif %}
+{%- endfor %}
+</urlset>

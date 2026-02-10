@@ -87,7 +87,28 @@
         });
     }, observerOptions);
 
-    document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card').forEach(el => {
+    document.querySelectorAll('.feature-card, .pricing-card, .screenshot-item, .contact-card, .segment-problem-card, .segment-solution-card, .feature-grid-card, .feature-media-card, .feature-highlight-card').forEach(el => {
         observer.observe(el);
     });
+</script>
+<script>
+// GA4 Event Tracking
+(function() {
+  document.addEventListener('click', function(e) {
+    var el = e.target.closest('[data-ga]');
+    if (!el || typeof gtag !== 'function') return;
+    gtag('event', el.getAttribute('data-ga'), {
+      event_detail: el.getAttribute('data-ga-detail') || ''
+    });
+  });
+
+  var form = document.querySelector('.contact-form');
+  if (form) {
+    form.addEventListener('submit', function() {
+      if (typeof gtag === 'function') {
+        gtag('event', 'generate_lead', { event_detail: 'contact_form' });
+      }
+    });
+  }
+})();
 </script>

@@ -26,9 +26,9 @@
         {% endfor %}
         <div class="mobile-lang">
             {% for langItem in langSwitch %}
-            <a href="{{ langItem.href }}"{% if langItem.active %} class="active"{% endif %}>{{ langItem.code }}</a>
+            <a href="{{ langItem.href }}"{% if langItem.active %} class="active"{% endif %} data-ga="select_content" data-ga-detail="lang_{{ langItem.code | lower }}">{{ langItem.code }}</a>
             {% endfor %}
         </div>
-        <a href="{% if not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') }}{% endif %}#download" class="btn btn-primary">{{ nav.cta }}</a>
+        <a href="{% if not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') }}{% endif %}#download" class="btn btn-primary" data-ga="select_content" data-ga-detail="navbar_cta_mobile">{{ nav.cta }}</a>
     </div>
 </div>

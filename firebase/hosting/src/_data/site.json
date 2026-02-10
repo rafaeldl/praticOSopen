@@ -1,4 +1,5 @@
 {
+  "baseUrl": "https://praticos.web.app",
   "name": "PraticOS",
   "logoText": "Prát<span class=\"yellow\">ic</span><span class=\"accent\">OS</span>",
   "email": "praticos@rafsoft.com.br",
@@ -11,5 +12,13 @@
     "users": "500+",
     "orders": "10k+",
     "rating": "4.8"
+  },
+  "whatsapp": {
+    "number": "554888794742",
+    "messages": {
+      "pt": "Olá! Quero começar a usar o PraticOS",
+      "en": "Hello! I want to start using PraticOS",
+      "es": "¡Hola! Quiero empezar a usar PraticOS"
+    }
   }
 }

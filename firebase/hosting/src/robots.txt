@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /login
+Disallow: /order/
+
+Sitemap: https://praticos.web.app/sitemap.xml

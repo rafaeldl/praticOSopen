@@ -1,6 +1,7 @@
 ---
 layout: layouts/base.njk
 navbarScrolled: true
+pageType: faq
 ---
 {# Get FAQ data #}
 {% set faqData = faq[langCode] %}
@@ -24,3 +25,23 @@ navbarScrolled: true
         {% endfor %}
     </div>
 </main>
+
+<!-- FAQ Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for item in faqData.items %}
+    {
+      "@type": "Question",
+      "name": "{{ item.question }}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ item.answer | striptags }}"
+      }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>

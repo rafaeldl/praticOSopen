@@ -14,7 +14,7 @@
       "titleHighlight": "técnicos de linha branca na palma da mão",
       "subtitle": "70% dos atendimentos são na casa do cliente. Controle rotas, veja onde cada técnico está e envie status automático pelo WhatsApp. Histórico completo de cada cliente e aparelho.",
       "ctaPrimary": "Testar Grátis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Começar pelo WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Técnicos ativos" },
         "orders": { "value": "10k+", "label": "OS criadas" },
@@ -140,7 +140,7 @@
       "titleHighlight": "appliance technicians at your fingertips",
       "subtitle": "70% of services are at the customer's home. Control routes, see where each technician is and send automatic WhatsApp updates. Complete history of each customer and appliance.",
       "ctaPrimary": "Try Free",
-      "ctaSecondary": "Watch Demo",
+      "ctaWhatsapp": "Start on WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Active technicians" },
         "orders": { "value": "10k+", "label": "WOs created" },
@@ -266,7 +266,7 @@
       "titleHighlight": "técnicos de línea blanca en la palma de tu mano",
       "subtitle": "70% de los atendimientos son en casa del cliente. Controla rutas, mira dónde está cada técnico y envía estado automático por WhatsApp. Historial completo de cada cliente y aparato.",
       "ctaPrimary": "Probar Gratis",
-      "ctaSecondary": "Ver Demo",
+      "ctaWhatsapp": "Empezar por WhatsApp",
       "stats": {
         "users": { "value": "500+", "label": "Técnicos activos" },
         "orders": { "value": "10k+", "label": "OS creadas" },

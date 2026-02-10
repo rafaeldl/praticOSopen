@@ -5,6 +5,7 @@
       "title": "Produto",
       "links": [
         { "href": "#features", "label": "Funcionalidades" },
+        { "href": "funcionalidades/whatsapp-bot.html", "label": "Assistente WhatsApp" },
         { "href": "#pricing", "label": "Planos" },
         { "href": "#download", "label": "Download" }
       ]
@@ -32,6 +33,7 @@
       "title": "Product",
       "links": [
         { "href": "#features", "label": "Features" },
+        { "href": "funcionalidades/whatsapp-bot-en.html", "label": "WhatsApp Assistant" },
         { "href": "#pricing", "label": "Pricing" },
         { "href": "#download", "label": "Download" }
       ]
@@ -59,6 +61,7 @@
       "title": "Producto",
       "links": [
         { "href": "#features", "label": "Funciones" },
+        { "href": "funcionalidades/whatsapp-bot-es.html", "label": "Asistente WhatsApp" },
         { "href": "#pricing", "label": "Planes" },
         { "href": "#download", "label": "Descargar" }
       ]

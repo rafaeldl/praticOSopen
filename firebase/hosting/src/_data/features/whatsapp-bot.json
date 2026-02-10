@@ -1,0 +1,581 @@
+{
+  "pt": {
+    "meta": {
+      "title": "Assistente WhatsApp com IA - PraticOS",
+      "description": "Crie ordens de serviço, envie fotos, áudios e gerencie seu negócio direto pelo WhatsApp com inteligência artificial.",
+      "keywords": "assistente whatsapp, ordem de serviço, gestão, automação, inteligência artificial"
+    },
+    "hero": {
+      "badge": "Assistente WhatsApp com IA",
+      "title": "Seu negócio no",
+      "titleHighlight": "WhatsApp",
+      "subtitle": "Crie ordens de serviço, envie fotos e áudios, e gerencie tudo pelo chat. Sem formulários, sem app extra — seu assistente de gestão funciona 24/7.",
+      "ctaPrimary": "Começar Grátis",
+      "ctaWhatsapp": "Testar o Assistente",
+      "demoAlt": "Demo do assistente criando uma OS pelo WhatsApp"
+    },
+    "features": {
+      "tag": "Recursos",
+      "title": "Tudo pelo",
+      "titleHighlight": "Chat",
+      "subtitle": "O assistente transforma conversas naturais em gestão profissional. Sem treinamento, sem complicação.",
+      "items": [
+        {
+          "icon": "chat",
+          "color": "green",
+          "title": "OS por Conversa",
+          "text": "O assistente guia passo a passo: cliente, dispositivo, serviços e preço. Tudo por mensagem de texto.",
+          "highlight": "Demo ao vivo"
+        },
+        {
+          "icon": "camera",
+          "color": "blue",
+          "title": "Fotos Inteligentes",
+          "text": "Envie fotos do veículo ou aparelho. O assistente faz upload e anexa automaticamente à OS."
+        },
+        {
+          "icon": "ai",
+          "color": "purple",
+          "title": "IA de Reconhecimento",
+          "text": "Foto do carro? A IA identifica marca, modelo e placa automaticamente. Zero digitação."
+        },
+        {
+          "icon": "mic",
+          "color": "orange",
+          "title": "Áudio para Texto",
+          "text": "Mãos ocupadas? Envie áudio e o assistente transcreve para texto automaticamente."
+        },
+        {
+          "icon": "contact",
+          "color": "cyan",
+          "title": "Importar Contatos",
+          "text": "Compartilhe um contato do WhatsApp e o assistente importa nome e telefone como novo cliente."
+        },
+        {
+          "icon": "link",
+          "color": "yellow",
+          "title": "Links Mágicos",
+          "text": "Gere um link de acompanhamento para o cliente. Ele acompanha status e aprova orçamentos sem instalar nada."
+        },
+        {
+          "icon": "checklist",
+          "color": "green",
+          "title": "Checklists pelo Chat",
+          "text": "Preencha vistorias e formulários por conversa. Texto, fotos, sim/não, múltipla escolha."
+        },
+        {
+          "icon": "chart",
+          "color": "blue",
+          "title": "Resumo Financeiro",
+          "text": "Pergunte \"Quanto fiz hoje?\" e receba o faturamento. Fechamento de caixa automático."
+        },
+        {
+          "icon": "users",
+          "color": "purple",
+          "title": "Gestão de Equipe",
+          "text": "Convide membros por código. O novo usuário envia ao assistente e já entra com o role configurado."
+        }
+      ]
+    },
+    "demo": {
+      "tag": "Veja em Ação",
+      "title": "Criando uma OS em",
+      "titleHighlight": "Segundos",
+      "subtitle": "Assista o fluxo completo: do primeiro \"oi\" até a OS criada com cliente, serviços e preço.",
+      "caption": "Fluxo real de criação de OS pelo WhatsApp"
+    },
+    "media": {
+      "tag": "Mídia Inteligente",
+      "title": "Muito além do",
+      "titleHighlight": "Texto",
+      "subtitle": "Fotos, áudios, contatos e inteligência artificial trabalhando juntos.",
+      "items": [
+        {
+          "emoji": "\ud83d\udcf8",
+          "title": "Fotos",
+          "text": "Envie foto do veículo ou aparelho",
+          "result": "Upload e anexo automático na OS"
+        },
+        {
+          "emoji": "\ud83e\udd16",
+          "title": "IA Visual",
+          "text": "Foto do carro",
+          "result": "Identifica marca, modelo e placa"
+        },
+        {
+          "emoji": "\ud83c\udfa4",
+          "title": "Áudio",
+          "text": "Mensagem de voz",
+          "result": "Transcrição automática para texto"
+        },
+        {
+          "emoji": "\ud83d\udc64",
+          "title": "Contatos",
+          "text": "Compartilhe um contato (vCard)",
+          "result": "Importa nome e telefone como cliente"
+        }
+      ]
+    },
+    "highlights": {
+      "tag": "Diferenciais",
+      "title": "Por que escolher o",
+      "titleHighlight": "Assistente PraticOS",
+      "items": [
+        {
+          "icon": "clock",
+          "title": "Funciona 24/7",
+          "text": "O assistente atende fora do horário. Seus clientes nunca ficam sem resposta."
+        },
+        {
+          "icon": "segment",
+          "title": "Adaptável ao Segmento",
+          "text": "Usa a terminologia do seu negócio: Veículo, Aparelho, Equipamento."
+        },
+        {
+          "icon": "globe",
+          "title": "Multi-idioma",
+          "text": "Português, Inglês e Espanhol. O assistente detecta o idioma automaticamente."
+        },
+        {
+          "icon": "shield",
+          "title": "Seguro e Isolado",
+          "text": "Dados isolados por empresa. Controle de acesso por roles."
+        },
+        {
+          "icon": "zap",
+          "title": "Zero Instalação",
+          "text": "Links mágicos funcionam no navegador. Seu cliente não instala nada."
+        },
+        {
+          "icon": "search",
+          "title": "Busca Inteligente",
+          "text": "Encontre clientes, dispositivos e serviços por nome, telefone, placa ou IMEI."
+        }
+      ]
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "Frequentes",
+      "items": [
+        {
+          "question": "Preciso instalar algo?",
+          "answer": "Não! O assistente funciona direto no WhatsApp. Basta adicionar o número e começar a conversar."
+        },
+        {
+          "question": "O assistente substitui o app?",
+          "answer": "O assistente complementa o app. Ele é ideal para criar OS rapidamente e acompanhar o dia a dia. O app oferece a experiência completa com dashboards e relatórios."
+        },
+        {
+          "question": "Funciona com vários funcionários?",
+          "answer": "Sim! Cada membro da equipe conecta seu próprio WhatsApp ao assistente com convites e roles (admin, supervisor, técnico)."
+        },
+        {
+          "question": "Meus dados estão seguros?",
+          "answer": "Totalmente. Cada empresa tem dados isolados (multi-tenant). O acesso é controlado por roles e o assistente opera sobre a mesma infraestrutura segura do app."
+        },
+        {
+          "question": "O cliente precisa ter o app?",
+          "answer": "Não! O assistente gera links mágicos que abrem no navegador. O cliente acompanha a OS, aprova orçamentos e avalia o serviço sem instalar nada."
+        },
+        {
+          "question": "Que idiomas o assistente suporta?",
+          "answer": "Português (BR), Inglês e Espanhol. O assistente detecta o idioma do usuário automaticamente."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Pronto para automatizar seu",
+      "titleHighlight": "WhatsApp?",
+      "subtitle": "Comece a criar ordens de serviço pelo chat agora mesmo.",
+      "primary": "Começar Grátis",
+      "whatsapp": "Falar com o Assistente"
+    }
+  },
+  "en": {
+    "meta": {
+      "title": "WhatsApp AI Assistant - PraticOS",
+      "description": "Create work orders, send photos, audio and manage your business directly through WhatsApp with artificial intelligence.",
+      "keywords": "whatsapp assistant, work order, management, automation, artificial intelligence"
+    },
+    "hero": {
+      "badge": "WhatsApp AI Assistant",
+      "title": "Your business on",
+      "titleHighlight": "WhatsApp",
+      "subtitle": "Create work orders, send photos and audio, and manage everything through chat. No forms, no extra app — your management assistant works 24/7.",
+      "ctaPrimary": "Start Free",
+      "ctaWhatsapp": "Try the Assistant",
+      "demoAlt": "Demo of the assistant creating a work order via WhatsApp"
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything via",
+      "titleHighlight": "Chat",
+      "subtitle": "The assistant turns natural conversations into professional management. No training, no complications.",
+      "items": [
+        {
+          "icon": "chat",
+          "color": "green",
+          "title": "WO by Conversation",
+          "text": "The assistant guides step by step: customer, device, services and price. All through text messages.",
+          "highlight": "Live demo"
+        },
+        {
+          "icon": "camera",
+          "color": "blue",
+          "title": "Smart Photos",
+          "text": "Send photos of the vehicle or device. The assistant uploads and attaches them to the WO automatically."
+        },
+        {
+          "icon": "ai",
+          "color": "purple",
+          "title": "AI Recognition",
+          "text": "Photo of a car? AI identifies make, model and license plate automatically. Zero typing."
+        },
+        {
+          "icon": "mic",
+          "color": "orange",
+          "title": "Audio to Text",
+          "text": "Hands busy? Send a voice message and the assistant transcribes it to text automatically."
+        },
+        {
+          "icon": "contact",
+          "color": "cyan",
+          "title": "Import Contacts",
+          "text": "Share a WhatsApp contact and the assistant imports name and phone as a new customer."
+        },
+        {
+          "icon": "link",
+          "color": "yellow",
+          "title": "Magic Links",
+          "text": "Generate a tracking link for the customer. They track status and approve quotes without installing anything."
+        },
+        {
+          "icon": "checklist",
+          "color": "green",
+          "title": "Checklists via Chat",
+          "text": "Fill inspections and forms through conversation. Text, photos, yes/no, multiple choice."
+        },
+        {
+          "icon": "chart",
+          "color": "blue",
+          "title": "Financial Summary",
+          "text": "Ask \"How much did I make today?\" and get your revenue. Automatic cash closing."
+        },
+        {
+          "icon": "users",
+          "color": "purple",
+          "title": "Team Management",
+          "text": "Invite members by code. The new user sends it to the assistant and joins with the configured role."
+        }
+      ]
+    },
+    "demo": {
+      "tag": "See it in Action",
+      "title": "Creating a WO in",
+      "titleHighlight": "Seconds",
+      "subtitle": "Watch the complete flow: from the first \"hi\" to a work order created with customer, services and price.",
+      "caption": "Real work order creation flow via WhatsApp"
+    },
+    "media": {
+      "tag": "Smart Media",
+      "title": "Way beyond",
+      "titleHighlight": "Text",
+      "subtitle": "Photos, audio, contacts and artificial intelligence working together.",
+      "items": [
+        {
+          "emoji": "\ud83d\udcf8",
+          "title": "Photos",
+          "text": "Send photo of vehicle or device",
+          "result": "Automatic upload and attachment to WO"
+        },
+        {
+          "emoji": "\ud83e\udd16",
+          "title": "Visual AI",
+          "text": "Photo of a car",
+          "result": "Identifies make, model and plate"
+        },
+        {
+          "emoji": "\ud83c\udfa4",
+          "title": "Audio",
+          "text": "Voice message",
+          "result": "Automatic transcription to text"
+        },
+        {
+          "emoji": "\ud83d\udc64",
+          "title": "Contacts",
+          "text": "Share a contact (vCard)",
+          "result": "Imports name and phone as customer"
+        }
+      ]
+    },
+    "highlights": {
+      "tag": "Advantages",
+      "title": "Why choose the",
+      "titleHighlight": "PraticOS Assistant",
+      "items": [
+        {
+          "icon": "clock",
+          "title": "Works 24/7",
+          "text": "The assistant answers outside business hours. Your customers never go unanswered."
+        },
+        {
+          "icon": "segment",
+          "title": "Adapts to Your Segment",
+          "text": "Uses your business terminology: Vehicle, Device, Equipment."
+        },
+        {
+          "icon": "globe",
+          "title": "Multi-language",
+          "text": "Portuguese, English and Spanish. The assistant detects the language automatically."
+        },
+        {
+          "icon": "shield",
+          "title": "Secure & Isolated",
+          "text": "Data isolated per company. Role-based access control."
+        },
+        {
+          "icon": "zap",
+          "title": "Zero Installation",
+          "text": "Magic links work in the browser. Your customer installs nothing."
+        },
+        {
+          "icon": "search",
+          "title": "Smart Search",
+          "text": "Find customers, devices and services by name, phone, plate or IMEI."
+        }
+      ]
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently Asked",
+      "titleHighlight": "Questions",
+      "items": [
+        {
+          "question": "Do I need to install anything?",
+          "answer": "No! The assistant works directly on WhatsApp. Just add the number and start chatting."
+        },
+        {
+          "question": "Does the assistant replace the app?",
+          "answer": "The assistant complements the app. It's ideal for quickly creating WOs and tracking day-to-day tasks. The app offers the full experience with dashboards and reports."
+        },
+        {
+          "question": "Does it work with multiple employees?",
+          "answer": "Yes! Each team member connects their own WhatsApp to the assistant with invites and roles (admin, supervisor, technician)."
+        },
+        {
+          "question": "Is my data secure?",
+          "answer": "Absolutely. Each company has isolated data (multi-tenant). Access is controlled by roles and the assistant runs on the same secure infrastructure as the app."
+        },
+        {
+          "question": "Does the customer need the app?",
+          "answer": "No! The assistant generates magic links that open in the browser. The customer tracks the WO, approves quotes and rates the service without installing anything."
+        },
+        {
+          "question": "What languages does the assistant support?",
+          "answer": "Portuguese (BR), English and Spanish. The assistant detects the user's language automatically."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Ready to automate your",
+      "titleHighlight": "WhatsApp?",
+      "subtitle": "Start creating work orders via chat right now.",
+      "primary": "Start Free",
+      "whatsapp": "Talk to the Assistant"
+    }
+  },
+  "es": {
+    "meta": {
+      "title": "Asistente WhatsApp con IA - PraticOS",
+      "description": "Cree órdenes de servicio, envíe fotos, audios y gestione su negocio directamente por WhatsApp con inteligencia artificial.",
+      "keywords": "asistente whatsapp, orden de servicio, gestión, automatización, inteligencia artificial"
+    },
+    "hero": {
+      "badge": "Asistente WhatsApp con IA",
+      "title": "Su negocio en",
+      "titleHighlight": "WhatsApp",
+      "subtitle": "Cree órdenes de servicio, envíe fotos y audios, y gestione todo por chat. Sin formularios, sin app extra — su asistente de gestión funciona 24/7.",
+      "ctaPrimary": "Empezar Gratis",
+      "ctaWhatsapp": "Probar el Asistente",
+      "demoAlt": "Demo del asistente creando una OS por WhatsApp"
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo por",
+      "titleHighlight": "Chat",
+      "subtitle": "El asistente convierte conversaciones naturales en gestión profesional. Sin entrenamiento, sin complicaciones.",
+      "items": [
+        {
+          "icon": "chat",
+          "color": "green",
+          "title": "OS por Conversación",
+          "text": "El asistente guía paso a paso: cliente, dispositivo, servicios y precio. Todo por mensajes de texto.",
+          "highlight": "Demo en vivo"
+        },
+        {
+          "icon": "camera",
+          "color": "blue",
+          "title": "Fotos Inteligentes",
+          "text": "Envíe fotos del vehículo o aparato. El asistente sube y adjunta automáticamente a la OS."
+        },
+        {
+          "icon": "ai",
+          "color": "purple",
+          "title": "IA de Reconocimiento",
+          "text": "¿Foto del auto? La IA identifica marca, modelo y placa automáticamente. Cero digitación."
+        },
+        {
+          "icon": "mic",
+          "color": "orange",
+          "title": "Audio a Texto",
+          "text": "¿Manos ocupadas? Envíe audio y el asistente transcribe a texto automáticamente."
+        },
+        {
+          "icon": "contact",
+          "color": "cyan",
+          "title": "Importar Contactos",
+          "text": "Comparta un contacto de WhatsApp y el asistente importa nombre y teléfono como nuevo cliente."
+        },
+        {
+          "icon": "link",
+          "color": "yellow",
+          "title": "Links Mágicos",
+          "text": "Genere un link de seguimiento para el cliente. Él sigue el estado y aprueba presupuestos sin instalar nada."
+        },
+        {
+          "icon": "checklist",
+          "color": "green",
+          "title": "Checklists por Chat",
+          "text": "Complete inspecciones y formularios por conversación. Texto, fotos, sí/no, selección múltiple."
+        },
+        {
+          "icon": "chart",
+          "color": "blue",
+          "title": "Resumen Financiero",
+          "text": "Pregunte \"¿Cuánto hice hoy?\" y reciba la facturación. Cierre de caja automático."
+        },
+        {
+          "icon": "users",
+          "color": "purple",
+          "title": "Gestión de Equipo",
+          "text": "Invite miembros por código. El nuevo usuario lo envía al asistente y entra con el rol configurado."
+        }
+      ]
+    },
+    "demo": {
+      "tag": "Vea en Acción",
+      "title": "Creando una OS en",
+      "titleHighlight": "Segundos",
+      "subtitle": "Mire el flujo completo: del primer \"hola\" a una OS creada con cliente, servicios y precio.",
+      "caption": "Flujo real de creación de OS por WhatsApp"
+    },
+    "media": {
+      "tag": "Medios Inteligentes",
+      "title": "Mucho más allá del",
+      "titleHighlight": "Texto",
+      "subtitle": "Fotos, audios, contactos e inteligencia artificial trabajando juntos.",
+      "items": [
+        {
+          "emoji": "\ud83d\udcf8",
+          "title": "Fotos",
+          "text": "Envíe foto del vehículo o aparato",
+          "result": "Subida y adjunto automático en la OS"
+        },
+        {
+          "emoji": "\ud83e\udd16",
+          "title": "IA Visual",
+          "text": "Foto del auto",
+          "result": "Identifica marca, modelo y placa"
+        },
+        {
+          "emoji": "\ud83c\udfa4",
+          "title": "Audio",
+          "text": "Mensaje de voz",
+          "result": "Transcripción automática a texto"
+        },
+        {
+          "emoji": "\ud83d\udc64",
+          "title": "Contactos",
+          "text": "Comparta un contacto (vCard)",
+          "result": "Importa nombre y teléfono como cliente"
+        }
+      ]
+    },
+    "highlights": {
+      "tag": "Ventajas",
+      "title": "¿Por qué elegir el",
+      "titleHighlight": "Asistente PraticOS?",
+      "items": [
+        {
+          "icon": "clock",
+          "title": "Funciona 24/7",
+          "text": "El asistente atiende fuera del horario. Sus clientes nunca quedan sin respuesta."
+        },
+        {
+          "icon": "segment",
+          "title": "Adaptable al Segmento",
+          "text": "Usa la terminología de su negocio: Vehículo, Aparato, Equipo."
+        },
+        {
+          "icon": "globe",
+          "title": "Multi-idioma",
+          "text": "Portugués, Inglés y Español. El asistente detecta el idioma automáticamente."
+        },
+        {
+          "icon": "shield",
+          "title": "Seguro y Aislado",
+          "text": "Datos aislados por empresa. Control de acceso por roles."
+        },
+        {
+          "icon": "zap",
+          "title": "Cero Instalación",
+          "text": "Los links mágicos funcionan en el navegador. Su cliente no instala nada."
+        },
+        {
+          "icon": "search",
+          "title": "Búsqueda Inteligente",
+          "text": "Encuentre clientes, dispositivos y servicios por nombre, teléfono, placa o IMEI."
+        }
+      ]
+    },
+    "faq": {
+      "tag": "Preguntas",
+      "title": "Preguntas",
+      "titleHighlight": "Frecuentes",
+      "items": [
+        {
+          "question": "¿Necesito instalar algo?",
+          "answer": "¡No! El asistente funciona directamente en WhatsApp. Solo agregue el número y empiece a conversar."
+        },
+        {
+          "question": "¿El asistente reemplaza la app?",
+          "answer": "El asistente complementa la app. Es ideal para crear OS rápidamente y seguir el día a día. La app ofrece la experiencia completa con dashboards y reportes."
+        },
+        {
+          "question": "¿Funciona con varios empleados?",
+          "answer": "¡Sí! Cada miembro del equipo conecta su propio WhatsApp al asistente con invitaciones y roles (admin, supervisor, técnico)."
+        },
+        {
+          "question": "¿Mis datos están seguros?",
+          "answer": "Totalmente. Cada empresa tiene datos aislados (multi-tenant). El acceso es controlado por roles y el asistente opera sobre la misma infraestructura segura de la app."
+        },
+        {
+          "question": "¿El cliente necesita la app?",
+          "answer": "¡No! El asistente genera links mágicos que abren en el navegador. El cliente sigue la OS, aprueba presupuestos y evalúa el servicio sin instalar nada."
+        },
+        {
+          "question": "¿Qué idiomas soporta el asistente?",
+          "answer": "Portugués (BR), Inglés y Español. El asistente detecta el idioma del usuario automáticamente."
+        }
+      ]
+    },
+    "cta": {
+      "title": "¿Listo para automatizar su",
+      "titleHighlight": "WhatsApp?",
+      "subtitle": "Empiece a crear órdenes de servicio por chat ahora mismo.",
+      "primary": "Empezar Gratis",
+      "whatsapp": "Hablar con el Asistente"
+    }
+  }
+}
