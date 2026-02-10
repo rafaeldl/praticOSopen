@@ -921,6 +921,181 @@ h4 { font-size: 1.125rem; }
 }
 
 /* ============================================
+   WhatsApp Assistant Section (Homepage)
+   ============================================ */
+.whatsapp-assistant {
+    padding: var(--section-padding) 0;
+    background: var(--bg-secondary);
+    position: relative;
+    overflow: hidden;
+}
+
+.whatsapp-assistant::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -200px;
+    transform: translateY(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(37, 211, 102, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.wa-section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+}
+
+.wa-section-content {
+    position: relative;
+    z-index: 1;
+}
+
+.wa-tag {
+    background: rgba(37, 211, 102, 0.1);
+    border-color: rgba(37, 211, 102, 0.25);
+    color: #25D366;
+    gap: 6px;
+}
+
+.wa-tag svg {
+    flex-shrink: 0;
+}
+
+.gradient-text-wa {
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 50%, var(--color-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.wa-section-content h2 {
+    margin-top: 20px;
+    margin-bottom: 16px;
+}
+
+.wa-section-text {
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+    line-height: 1.7;
+    margin-bottom: 28px;
+}
+
+.wa-feature-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 36px;
+}
+
+.wa-feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.wa-feature-list li svg {
+    flex-shrink: 0;
+}
+
+.wa-section-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.wa-section-demo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.wa-phone-glow {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: #25D366;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.15;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+}
+
+.wa-phone-mockup {
+    position: relative;
+    z-index: 1;
+}
+
+.wa-phone-frame {
+    background: var(--bg-card);
+    border-radius: 32px;
+    padding: 8px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 60px rgba(37, 211, 102, 0.1);
+    border: 1px solid var(--border-color);
+    width: 260px;
+    overflow: hidden;
+    transition: var(--transition-slow);
+}
+
+.wa-phone-frame:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.5), 0 0 80px rgba(37, 211, 102, 0.15);
+}
+
+.wa-phone-frame picture,
+.wa-phone-frame img {
+    border-radius: 24px;
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+@media (max-width: 1024px) {
+    .wa-section-grid {
+        grid-template-columns: 1fr;
+        gap: 48px;
+        text-align: center;
+    }
+
+    .wa-feature-list {
+        justify-items: center;
+    }
+
+    .wa-section-cta {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .wa-feature-list {
+        grid-template-columns: 1fr;
+    }
+
+    .wa-section-cta {
+        flex-direction: column;
+    }
+
+    .wa-section-cta .btn {
+        width: 100%;
+    }
+
+    .wa-phone-frame {
+        width: 230px;
+    }
+}
+
+/* ============================================
    Screenshots Section
    ============================================ */
 .screenshots {

@@ -69,6 +69,21 @@
         }
       ]
     },
+    "whatsappAssistant": {
+      "tag": "Assistente WhatsApp",
+      "title": "Gerencie pelo",
+      "titleHighlight": "WhatsApp",
+      "text": "Crie ordens de serviço, envie fotos e áudios, e acompanhe seu negócio direto pelo chat. Seu assistente com IA funciona 24/7.",
+      "cta": { "text": "Saiba mais", "href": "funcionalidades/whatsapp-bot.html" },
+      "ctaWhatsapp": "Testar o Assistente",
+      "features": [
+        "OS por conversa natural",
+        "Fotos e áudios inteligentes",
+        "Links mágicos para clientes",
+        "Resumo financeiro por chat"
+      ],
+      "demoAlt": "Demo do assistente WhatsApp"
+    },
     "screenshots": {
       "tag": "Screenshots",
       "title": "Conheça a",
@@ -180,6 +195,21 @@
         }
       ]
     },
+    "whatsappAssistant": {
+      "tag": "WhatsApp Assistant",
+      "title": "Manage via",
+      "titleHighlight": "WhatsApp",
+      "text": "Create work orders, send photos and audio, and track your business directly through chat. Your AI assistant works 24/7.",
+      "cta": { "text": "Learn more", "href": "funcionalidades/whatsapp-bot-en.html" },
+      "ctaWhatsapp": "Try the Assistant",
+      "features": [
+        "WO by natural conversation",
+        "Smart photos and audio",
+        "Magic links for customers",
+        "Financial summary via chat"
+      ],
+      "demoAlt": "WhatsApp assistant demo"
+    },
     "screenshots": {
       "tag": "Screenshots",
       "title": "Discover the",
@@ -290,6 +320,21 @@
           "color": "cyan"
         }
       ]
+    },
+    "whatsappAssistant": {
+      "tag": "Asistente WhatsApp",
+      "title": "Gestione por",
+      "titleHighlight": "WhatsApp",
+      "text": "Cree órdenes de servicio, envíe fotos y audios, y acompañe su negocio directo por chat. Su asistente con IA funciona 24/7.",
+      "cta": { "text": "Saber más", "href": "funcionalidades/whatsapp-bot-es.html" },
+      "ctaWhatsapp": "Probar el Asistente",
+      "features": [
+        "OS por conversación natural",
+        "Fotos y audios inteligentes",
+        "Links mágicos para clientes",
+        "Resumen financiero por chat"
+      ],
+      "demoAlt": "Demo del asistente WhatsApp"
     },
     "screenshots": {
       "tag": "Capturas",
