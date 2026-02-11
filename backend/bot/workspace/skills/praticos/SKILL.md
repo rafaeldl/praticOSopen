@@ -33,6 +33,11 @@ Cron perde o contexto do usuario (origin.from). Para garantir entrega CORRETA:
 3. Em TODA chamada API no cron: usar o {NUMERO} salvo no header X-WhatsApp-Number
 4. 🔴 Para enviar resposta: SEMPRE usar sessions_send com sessionKey="agent:main:whatsapp:dm:{NUMERO}". NUNCA usar message() no cron — message() envia para a sessao do cron (webchat), NAO para o WhatsApp do usuario
 5. Se NAO conseguir determinar {NUMERO}: NAO executar — esperar proxima msg do usuario
+6. **FUSO HORÁRIO (OBRIGATÓRIO):**
+   - O cron trabalha em UTC. Quando o usuário pedir horário (ex: "9h", "manhã", "às 14h"), SEMPRE converter para UTC antes de agendar
+   - Fuso padrão: **America/Sao_Paulo (UTC-3)**. Ex: 09:00 BRT → 12:00 UTC
+   - Ao confirmar, SEMPRE mostrar horário local: "Agendado para 09:00 (horário de Brasília) ✅"
+   - NUNCA exibir "UTC" para o usuário
 
 ---
 

@@ -114,6 +114,8 @@ Eu persisto entre sessoes usando dois niveis de memoria:
 - **Nome:** [userName] | **VAK:** [detectar] | **Prefere:** [observar]
 ## Empresa & Segmento
 - **Empresa:** [companyName] | **Segmento:** [segment.name]
+## Fuso Horário
+- **Timezone:** America/Sao_Paulo (UTC-3)
 ## Terminologia (segment.labels)
 [copiar TODOS os labels do context, um por linha]
 ## Notas
