@@ -35,7 +35,6 @@ import {
   formatProductAdded,
   formatServiceRemoved,
   formatProductRemoved,
-  formatOrderFullDetails,
   formatDeviceUpdated,
   formatCustomerUpdated,
 } from '../../utils/format.utils';
@@ -762,21 +761,34 @@ router.get('/:number/details', async (req: AuthenticatedRequest, res: Response) 
       return;
     }
 
-    const message = formatOrderFullDetails(order);
-
-    // Optimize payload: replace photos array with photosCount
+    // Optimize payload: replace photos array with photosCount + mainPhotoUrl
+    // AI formats the card via os-card.md template (sends photo as cover image)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { photos, ...orderWithoutPhotos } = order;
+    const photosCount = photos?.length || 0;
+    const mainPhotoUrl = photosCount > 0
+      ? `/bot/orders/${orderNumber}/photos/${photos![0].id}`
+      : null;
+
+    // Include existing share URL if available and not expired
+    const shareLink = (order as unknown as Record<string, unknown>).shareLink as
+      { token?: string; expiresAt?: string } | undefined;
+    const shareUrl = shareLink?.token && shareLink?.expiresAt &&
+      new Date(shareLink.expiresAt) > new Date()
+      ? `https://praticos.web.app/q/${shareLink.token}`
+      : null;
+
     const orderData = {
       ...orderWithoutPhotos,
-      photosCount: photos?.length || 0,
+      photosCount,
+      mainPhotoUrl,
+      shareUrl,
     };
 
     res.json({
       success: true,
       data: {
         order: orderData,
-        message,
       },
     });
   } catch (error) {

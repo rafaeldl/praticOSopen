@@ -7,7 +7,7 @@ import { Router, Response } from 'express';
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import * as orderService from '../../services/order.service';
 import { timestampToDate } from '../../utils/date.utils';
-import { formatOrderDetails, formatStatusUpdate, formatStatus } from '../../utils/format.utils';
+import { formatOrderDetails, formatStatusUpdate, formatStatus, formatCurrency } from '../../utils/format.utils';
 import { getUserAggr } from '../../middleware/company.middleware';
 
 const router: Router = Router();
@@ -49,15 +49,23 @@ router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
     const orders = result.data.map((o) => {
       const date = timestampToDate(o.createdAt)?.toLocaleDateString('pt-BR');
       const customerName = o.customer?.name || 'Cliente não informado';
-      return `OS #${o.number} - ${customerName}\n🔹 ${o.device?.name || 'Aparelho'}\n💰 R$ ${o.total.toFixed(2)}\n📅 ${date}\nStatus: ${o.status}`;
+      const deviceLine = o.device?.name ? `\n🔧 ${o.device.name}` : '';
+      return `📋 *OS #${o.number}* - ${formatStatus(o.status)}\n👤 ${customerName}${deviceLine}\n💰 ${formatCurrency(o.total)}\n📅 ${date}`;
     });
+
+    // Strip heavy fields (photos, transactions) to save tokens in list view
+    // Bot should use GET /bot/orders/{NUM}/details for full order data + photo
+    const lightOrders = result.data.map(({ photos, transactions, ...rest }) => ({
+      ...rest,
+      photosCount: photos?.length || 0,
+    }));
 
     res.json({
       success: true,
       data: {
         count: result.total,
         formattedList: orders.length > 0 ? orders.join('\n\n') : 'Nenhuma OS encontrada.',
-        orders: result.data // Dados puros caso a IA queira processar
+        orders: lightOrders,
       },
     });
   } catch (error) {

@@ -62,3 +62,4 @@ firebase/hosting/public/
 backend/bot/credentials/
 backend/bot/workspace/agents/main/sessions/
 backend/bot/workspace/media/
+backend/bot/workspace/cron/runs/

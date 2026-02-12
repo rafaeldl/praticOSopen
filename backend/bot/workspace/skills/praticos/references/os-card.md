@@ -1,45 +1,75 @@
 # CARD DE OS (OBRIGATORIO)
 
-## Passo a passo:
-1. GET /bot/orders/{NUM}/details (retorna photosCount, NAO o array)
-2. Montar texto do card conforme modelo abaixo
-3. **Se photosCount > 0:** GET /bot/orders/{NUM}/photos para obter lista com downloadUrl
-4. **Se tiver foto:** baixar 1a foto e enviar IMAGEM com card como `message`
-5. **Se NAO houver foto:** enviar apenas o texto
-6. GET /bot/orders/{NUM}/share para link ativo
+Quando precisar mostrar uma OS, seguir TODOS os passos abaixo.
 
-## Modelo:
+## Passo 1 — Buscar dados
 ```
-*OS #[number]* - [STATUS_TRADUZIDO]
+exec: GET /bot/orders/{NUM}/details
+```
+Retorna `order` (dados brutos) com:
+- `photosCount` e `mainPhotoUrl` (URL da foto de capa, pronta p/ download)
+- `shareUrl` (link de compartilhamento, se ja existir e nao expirado)
 
-*Cliente:* [customer.name]
-*[DEVICE_LABEL]:* [device.name] - [device.serial]
+## Passo 2 — Link de compartilhamento
+Se `shareUrl` ja veio no passo 1, usar direto. Se nao:
+```
+exec: POST /bot/orders/{NUM}/share
+```
+Retorna `url` do link.
 
-*Servicos:*
-• [service.name] - R$ [value]
+## Passo 3 — Formatar o card
 
-*Produtos:*
-• [product.name] (x[qty]) - R$ [value]
+Montar o texto a partir dos campos do `order`:
+```
+📋 *O.S. #{number}* - {STATUS}
 
-*Total:* R$ [total]
-*A receber:* R$ [remaining]
+👤 *Cliente:* {customer.name}
+📞 *Telefone:* {customer.phone}
+🔧 *{DEVICE_LABEL}:* {device.name} ({device.serial})
 
-*Avaliacao:* ⭐x[score] ([score]/5)
-_"[rating.comment]"_
+🛠️ *Serviços:*
+• {service.name} - R$ {value}
 
-🔗 Link cliente: [URL]
+📦 *Produtos:*
+• {product.name} (x{qty}) - R$ {value}
 
-_[Z] foto(s)_
+💰 *Total:* R$ {total}
+🏷️ *Desconto:* R$ {discount}
+✅ *Pago:* R$ {paidAmount}
+⏳ *A receber:* R$ {remaining}
+📅 *Previsão:* {dueDate}
+🗓️ *Aberto em:* {createdAt}
+
+⭐ *Avaliação:* {score}/5
+_"{rating.comment}"_
+
+🔗 *Link:* {url do share}
 ```
 
-**[DEVICE_LABEL]** = labels["device._entity"] ou "Dispositivo"
-**Status:** pending=Pendente | approved=Aprovado | progress=Em andamento | done=Concluido | canceled=Cancelado
-**Regras:** omitir device/servicos/produtos/fotos/rating/link se null/vazio. done+paid → "*Pago*" em vez de A receber. remaining = total - paidAmount.
+**Status:** quote=Orçamento | approved=Aprovado | progress=Em andamento | done=Concluído | canceled=Cancelado
+**{DEVICE_LABEL}:** usar labels do segmento (memoria do usuario) ou "Dispositivo"
+**Regras:** omitir campos null/vazio. done+paid → "Pago" em vez de A receber. remaining = total - discount - paidAmount.
 
-## Envio da imagem (se photosCount > 0):
-1. GET /bot/orders/{NUM}/photos → obter lista com downloadUrl
-2. Baixar 1a foto: curl com "$PRATICOS_API_URL{downloadUrl}" --output foto.jpg
-3. Enviar imagem com:
-   - **filePath**: caminho da imagem baixada (ex: foto.jpg)
-   - **message**: texto do card formatado (este e o campo que aparece no WhatsApp)
-   - **NAO usar campo `caption`** — usar SEMPRE `message` para o texto
+## Passo 4 — Enviar (COM ou SEM foto)
+
+O `/details` retorna `mainPhotoUrl` (URL da foto de capa) e `photosCount`.
+
+🔴 **Se mainPhotoUrl existir → OBRIGATORIO enviar foto como IMAGEM com card de legenda:**
+```
+exec: curl -s -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" "$PRATICOS_API_URL{mainPhotoUrl}" --output /tmp/os-{NUM}.jpg
+message(filePath="/tmp/os-{NUM}.jpg", message="{card formatado no passo 3}")
+```
+
+🔴 NUNCA apenas mencionar "possui X fotos". SEMPRE baixar e enviar a foto como imagem.
+A foto de capa transforma o card — o texto vira legenda da imagem no WhatsApp.
+
+**Se mainPhotoUrl for null → enviar apenas texto:**
+```
+message("{card formatado no passo 3}")
+```
+
+## Regras finais
+- **NAO usar campo `caption`** — usar SEMPRE `message` para o texto do card.
+- `mainPhotoUrl` ja vem no response do `/details`. Baixar com curl --output.
+- Formatar valores com R$ e pontuacao BR (1.234,56).
+- 🔴 `/list` NAO traz fotos. Para card com foto, SEMPRE usar `/details`.

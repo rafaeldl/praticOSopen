@@ -184,30 +184,30 @@ export function formatPendingSummary(data: PendingItems): string {
  */
 export function formatOrderDetails(order: Order): string {
   const lines = [
-    `*OS #${order.number}*`,
+    `📋 *OS #${order.number}* - ${formatStatus(order.status)}`,
     '',
-    `*Cliente:* ${order.customer?.name || 'Não informado'}`,
+    `👤 *Cliente:* ${order.customer?.name || 'Não informado'}`,
   ];
 
   if (order.device?.name) {
-    lines.push(`*Dispositivo:* ${order.device.name}`);
+    const serial = order.device.serial ? ` (${order.device.serial})` : '';
+    lines.push(`🔧 *Dispositivo:* ${order.device.name}${serial}`);
   }
 
-  lines.push(`*Status:* ${formatStatus(order.status)}`);
-  lines.push(`*Total:* ${formatCurrency(order.total)}`);
+  lines.push(`💰 *Total:* ${formatCurrency(order.total)}`);
 
   if (order.paidAmount > 0) {
-    lines.push(`*Pago:* ${formatCurrency(order.paidAmount)}`);
+    lines.push(`✅ *Pago:* ${formatCurrency(order.paidAmount)}`);
     const remaining = order.total - order.discount - order.paidAmount;
     if (remaining > 0) {
-      lines.push(`*Restante:* ${formatCurrency(remaining)}`);
+      lines.push(`⏳ *A receber:* ${formatCurrency(remaining)}`);
     }
   }
 
   if (order.dueDate) {
     const dueDate = toDate(order.dueDate);
     if (dueDate) {
-      lines.push(`*Previsão:* ${formatDate(dueDate)}`);
+      lines.push(`📅 *Previsão:* ${formatDate(dueDate)}`);
     }
   }
 
@@ -245,7 +245,7 @@ export function formatStatusUpdate(
   newStatus: string
 ): string {
   return [
-    `*OS #${orderNumber}* atualizada!`,
+    `📋 *OS #${orderNumber}* atualizada!`,
     '',
     `${formatStatus(oldStatus)} ➜ ${formatStatus(newStatus)}`,
   ].join('\n');
@@ -444,39 +444,37 @@ export interface CreatedEntities {
  */
 export function formatOrderCreated(order: Order, created: CreatedEntities): string {
   const lines = [
-    `*OS #${order.number} criada!*`,
+    `✅ *OS #${order.number} criada!* - ${formatStatus(order.status)}`,
     '',
+    `👤 *Cliente:* ${order.customer?.name || 'Não informado'}`,
   ];
 
-  lines.push(`*Cliente:* ${order.customer?.name || 'Não informado'}`);
-
   if (order.device?.name) {
-    lines.push(`*Dispositivo:* ${order.device.name}`);
+    const serial = order.device.serial ? ` (${order.device.serial})` : '';
+    lines.push(`🔧 *Dispositivo:* ${order.device.name}${serial}`);
   }
-
-  lines.push(`*Status:* ${formatStatus(order.status)}`);
 
   // Services
   if (order.services && order.services.length > 0) {
     lines.push('');
-    lines.push(`*Serviços (${order.services.length}):*`);
+    lines.push(`🛠️ *Serviços:*`);
     order.services.forEach((s) => {
-      lines.push(`• ${s.service?.name || s.description}: ${formatCurrency(s.value)}`);
+      lines.push(`• ${s.service?.name || s.description} - ${formatCurrency(s.value)}`);
     });
   }
 
   // Products
   if (order.products && order.products.length > 0) {
     lines.push('');
-    lines.push(`*Produtos (${order.products.length}):*`);
+    lines.push(`📦 *Produtos:*`);
     order.products.forEach((p) => {
       const qty = p.quantity > 1 ? ` (x${p.quantity})` : '';
-      lines.push(`• ${p.product?.name || p.description}: ${formatCurrency(p.value)}${qty}`);
+      lines.push(`• ${p.product?.name || p.description}${qty} - ${formatCurrency(p.value)}`);
     });
   }
 
   lines.push('');
-  lines.push(`*Total:* ${formatCurrency(order.total)}`);
+  lines.push(`💰 *Total:* ${formatCurrency(order.total)}`);
 
   // Created entities info
   const createdItems: string[] = [];
@@ -507,11 +505,11 @@ export function formatServiceAdded(
   newTotal: number
 ): string {
   return [
-    `*Serviço adicionado à OS #${orderNumber}!*`,
+    `🛠️ *Serviço adicionado à OS #${orderNumber}!*`,
     '',
-    `• ${serviceName}: ${formatCurrency(value)}`,
+    `• ${serviceName} - ${formatCurrency(value)}`,
     '',
-    `*Novo total:* ${formatCurrency(newTotal)}`,
+    `💰 *Novo total:* ${formatCurrency(newTotal)}`,
   ].join('\n');
 }
 
@@ -527,11 +525,11 @@ export function formatProductAdded(
 ): string {
   const qty = quantity > 1 ? ` (x${quantity})` : '';
   return [
-    `*Produto adicionado à OS #${orderNumber}!*`,
+    `📦 *Produto adicionado à OS #${orderNumber}!*`,
     '',
-    `• ${productName}: ${formatCurrency(value)}${qty}`,
+    `• ${productName}${qty} - ${formatCurrency(value)}`,
     '',
-    `*Novo total:* ${formatCurrency(newTotal)}`,
+    `💰 *Novo total:* ${formatCurrency(newTotal)}`,
   ].join('\n');
 }
 
@@ -544,11 +542,11 @@ export function formatServiceRemoved(
   newTotal: number
 ): string {
   return [
-    `*Serviço removido da OS #${orderNumber}!*`,
+    `🛠️ *Serviço removido da OS #${orderNumber}!*`,
     '',
     `Removido: ${serviceName}`,
     '',
-    `*Novo total:* ${formatCurrency(newTotal)}`,
+    `💰 *Novo total:* ${formatCurrency(newTotal)}`,
   ].join('\n');
 }
 
@@ -561,11 +559,11 @@ export function formatProductRemoved(
   newTotal: number
 ): string {
   return [
-    `*Produto removido da OS #${orderNumber}!*`,
+    `📦 *Produto removido da OS #${orderNumber}!*`,
     '',
     `Removido: ${productName}`,
     '',
-    `*Novo total:* ${formatCurrency(newTotal)}`,
+    `💰 *Novo total:* ${formatCurrency(newTotal)}`,
   ].join('\n');
 }
 
@@ -574,71 +572,66 @@ export function formatProductRemoved(
  */
 export function formatOrderFullDetails(order: Order): string {
   const lines = [
-    `*OS #${order.number}*`,
+    `📋 *OS #${order.number}* - ${formatStatus(order.status)}`,
     '',
-    `*Cliente:* ${order.customer?.name || 'Não informado'}`,
+    `👤 *Cliente:* ${order.customer?.name || 'Não informado'}`,
   ];
 
   if (order.customer?.phone) {
-    lines.push(`*Telefone:* ${formatPhone(order.customer.phone)}`);
+    lines.push(`📞 *Telefone:* ${formatPhone(order.customer.phone)}`);
   }
 
   if (order.device?.name) {
-    lines.push(`*Dispositivo:* ${order.device.name}`);
-    if (order.device.serial) {
-      lines.push(`*Serial:* ${order.device.serial}`);
-    }
+    const serial = order.device.serial ? ` (${order.device.serial})` : '';
+    lines.push(`🔧 *Dispositivo:* ${order.device.name}${serial}`);
   }
-
-  lines.push(`*Status:* ${formatStatus(order.status)}`);
 
   // Services
   if (order.services && order.services.length > 0) {
     lines.push('');
-    lines.push(`*Serviços (${order.services.length}):*`);
-    order.services.forEach((s, i) => {
-      lines.push(`${i + 1}. ${s.service?.name || s.description}: ${formatCurrency(s.value)}`);
+    lines.push(`🛠️ *Serviços:*`);
+    order.services.forEach((s) => {
+      lines.push(`• ${s.service?.name || s.description} - ${formatCurrency(s.value)}`);
     });
-  } else {
-    lines.push('');
-    lines.push('*Serviços:* Nenhum');
   }
 
   // Products
   if (order.products && order.products.length > 0) {
     lines.push('');
-    lines.push(`*Produtos (${order.products.length}):*`);
-    order.products.forEach((p, i) => {
+    lines.push(`📦 *Produtos:*`);
+    order.products.forEach((p) => {
       const qty = p.quantity > 1 ? ` (x${p.quantity})` : '';
-      const subtotal = p.value * (p.quantity || 1);
-      lines.push(`${i + 1}. ${p.product?.name || p.description}: ${formatCurrency(p.value)}${qty} = ${formatCurrency(subtotal)}`);
+      lines.push(`• ${p.product?.name || p.description}${qty} - ${formatCurrency(p.value * (p.quantity || 1))}`);
     });
-  } else {
-    lines.push('');
-    lines.push('*Produtos:* Nenhum');
   }
 
   // Totals
   lines.push('');
-  lines.push(`*Total:* ${formatCurrency(order.total)}`);
+  lines.push(`💰 *Total:* ${formatCurrency(order.total)}`);
 
   if (order.discount > 0) {
-    lines.push(`*Desconto:* ${formatCurrency(order.discount)}`);
+    lines.push(`🏷️ *Desconto:* ${formatCurrency(order.discount)}`);
   }
 
   if (order.paidAmount > 0) {
-    lines.push(`*Pago:* ${formatCurrency(order.paidAmount)}`);
+    lines.push(`✅ *Pago:* ${formatCurrency(order.paidAmount)}`);
     const remaining = order.total - order.discount - order.paidAmount;
     if (remaining > 0) {
-      lines.push(`*A receber:* ${formatCurrency(remaining)}`);
+      lines.push(`⏳ *A receber:* ${formatCurrency(remaining)}`);
     }
   }
 
   if (order.dueDate) {
     const dueDate = toDate(order.dueDate);
     if (dueDate) {
-      lines.push(`*Previsão:* ${formatDate(dueDate)}`);
+      lines.push(`📅 *Previsão:* ${formatDate(dueDate)}`);
     }
+  }
+
+  // Created date
+  const createdAt = toDate(order.createdAt);
+  if (createdAt) {
+    lines.push(`🗓️ *Aberto em:* ${formatDate(createdAt)}`);
   }
 
   // Customer rating (if available)
@@ -662,7 +655,7 @@ export function formatDeviceUpdated(
   deviceName: string
 ): string {
   return [
-    `*Dispositivo atualizado na OS #${orderNumber}!*`,
+    `🔧 *Dispositivo atualizado na OS #${orderNumber}!*`,
     '',
     `*Novo dispositivo:* ${deviceName}`,
   ].join('\n');
@@ -676,7 +669,7 @@ export function formatCustomerUpdated(
   customerName: string
 ): string {
   return [
-    `*Cliente atualizado na OS #${orderNumber}!*`,
+    `👤 *Cliente atualizado na OS #${orderNumber}!*`,
     '',
     `*Novo cliente:* ${customerName}`,
   ].join('\n');
