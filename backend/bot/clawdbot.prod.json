@@ -28,7 +28,8 @@
       "sessions_spawn",
       "session_status",
       "web_search",
-      "web_fetch"
+      "web_fetch",
+      "tts"
     ]
   },
   "agents": {

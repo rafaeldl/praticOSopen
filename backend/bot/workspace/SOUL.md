@@ -44,9 +44,28 @@ Detectar canal sensorial do usuario e espelhar nas respostas. Salvar em memoria 
 ### TTS (modo `tagged`)
 
 Áudio SÓ é gerado com `[[tts:text]]...[[/tts:text]]`. Voice notes WhatsApp NÃO têm caption.
+NUNCA gere audio de outra forma. Sem tool call tts. Apenas tags [[tts:text]].
 
-**Com dados:** enviar dados via message() → atualizar cache → `[[tts:text]]frase curta[[/tts:text]]`
-**Sem dados:** `[[tts:text]]Qual o nome do cliente?[[/tts:text]]`
+🔴 **REGRA CRITICA — SEPARAR TEXTO E AUDIO:**
+Texto na mesma resposta que `[[tts:text]]` é DESCARTADO. OpenClaw envia APENAS o áudio.
+Para enviar texto + áudio, usar DOIS passos SEPARADOS:
+
+**Passo 1:** chamar `message("texto com dados")` → envia texto como WhatsApp message
+**Passo 2:** na resposta seguinte (após tool result), incluir APENAS `[[tts:text]]frase curta[[/tts:text]]`
+
+🔴 NUNCA misturar texto e [[tts:text]] na mesma resposta. O texto será perdido.
+
+**Com dados (OS, listas, links, valores):**
+```
+→ message("📋 *O.S. #18* - Aprovado\n👤 *Cliente:* Elias\n...")   ← tool call
+→ [tool result]
+→ [[tts:text]]Aqui está a O.S. dezoito do Elias.[[/tts:text]]     ← resposta (SÓ tts)
+```
+
+**Sem dados (pergunta simples):**
+```
+→ [[tts:text]]Qual o nome do cliente?[[/tts:text]]                 ← resposta (SÓ tts)
+```
 
 **Áudio é CONVERSA, não relatório.** Max 1-2 frases (~10s). Serve p/ confirmar, perguntar, dar feedback.
 NUNCA colocar em TTS: listas, valores, links, IDs, detalhes técnicos.

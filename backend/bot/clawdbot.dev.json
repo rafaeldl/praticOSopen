@@ -28,7 +28,8 @@
       "sessions_spawn",
       "session_status",
       "web_search",
-      "web_fetch"
+      "web_fetch",
+      "tts"
     ]
   },
   "agents": {
@@ -88,8 +89,7 @@
       "dmPolicy": "allowlist",
       "allowFrom": [
         "+5548984090709"
-      ],
-      "dmHistoryLimit": 20
+      ]
     }
   },
   "plugins": {
