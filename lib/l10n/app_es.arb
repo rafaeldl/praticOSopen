@@ -1129,5 +1129,27 @@
         "type": "int"
       }
     }
-  }
+  },
+
+  "notifyCustomerQuestion": "¿Notificar al cliente?",
+  "notifyCustomerDescription": "¿Desea enviar la actualización a {customerName} vía WhatsApp?",
+  "@notifyCustomerDescription": {
+    "placeholders": {
+      "customerName": {
+        "type": "String"
+      }
+    }
+  },
+  "notNow": "Ahora no",
+
+  "connectWhatsApp": "Conecta tu WhatsApp",
+  "connectWhatsAppBannerDescription": "Recibe notificaciones, gestiona órdenes de servicio y envía actualizaciones a clientes por WhatsApp.",
+
+  "whatsappOnboardingTitle": "Conecta tu WhatsApp",
+  "whatsappOnboardingSubtitle": "Aprovecha al máximo PraticOS conectando tu WhatsApp",
+  "whatsappBenefitNotifications": "Recibe notificaciones de nuevas órdenes de servicio",
+  "whatsappBenefitManage": "Gestiona órdenes de servicio directamente por chat",
+  "whatsappBenefitClients": "Envía actualizaciones a clientes",
+  "linkNow": "Vincular ahora",
+  "maybeLater": "Quizás después"
 }

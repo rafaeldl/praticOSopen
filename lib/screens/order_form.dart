@@ -1298,6 +1298,7 @@ class _OrderFormState extends State<OrderForm> {
     // Se não for "done", permite alterar diretamente
     if (newStatus != 'done') {
       _store.setStatus(newStatus);
+      _promptShareAfterStatusChange(newStatus);
       return;
     }
 
@@ -1310,6 +1311,7 @@ class _OrderFormState extends State<OrderForm> {
     if (pendingForms.isEmpty) {
       // Todos os formulários estão concluídos, permite alterar
       _store.setStatus(newStatus);
+      _promptShareAfterStatusChange(newStatus);
       return;
     }
 
@@ -1331,6 +1333,46 @@ class _OrderFormState extends State<OrderForm> {
         ],
       ),
     );
+  }
+
+  /// Prompt user to share status update with customer via WhatsApp
+  void _promptShareAfterStatusChange(String newStatus) {
+    final order = _store.order;
+    if (order == null || order.id == null) return;
+
+    // Only prompt for relevant statuses
+    if (newStatus != 'approved' && newStatus != 'progress' && newStatus != 'done') return;
+
+    // Only prompt if customer has a phone
+    final customerName = order.customer?.name;
+    final customerPhone = order.customer?.phone;
+    if (customerPhone == null || customerPhone.isEmpty) return;
+
+    // Show dialog after a brief delay to let the status update settle
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text(ctx.l10n.notifyCustomerQuestion),
+          content: Text(ctx.l10n.notifyCustomerDescription(customerName ?? ctx.l10n.customer)),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(ctx.l10n.notNow),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openShareLinkSheet();
+              },
+              child: Text(ctx.l10n.sendViaWhatsApp),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   void _openPaymentManagement() {

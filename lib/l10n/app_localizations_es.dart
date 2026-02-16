@@ -2773,4 +2773,46 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$count $_temp0';
   }
+
+  @override
+  String get notifyCustomerQuestion => '¿Notificar al cliente?';
+
+  @override
+  String notifyCustomerDescription(String customerName) {
+    return '¿Desea enviar la actualización a $customerName vía WhatsApp?';
+  }
+
+  @override
+  String get notNow => 'Ahora no';
+
+  @override
+  String get connectWhatsApp => 'Conecta tu WhatsApp';
+
+  @override
+  String get connectWhatsAppBannerDescription =>
+      'Recibe notificaciones, gestiona órdenes de servicio y envía actualizaciones a clientes por WhatsApp.';
+
+  @override
+  String get whatsappOnboardingTitle => 'Conecta tu WhatsApp';
+
+  @override
+  String get whatsappOnboardingSubtitle =>
+      'Aprovecha al máximo PraticOS conectando tu WhatsApp';
+
+  @override
+  String get whatsappBenefitNotifications =>
+      'Recibe notificaciones de nuevas órdenes de servicio';
+
+  @override
+  String get whatsappBenefitManage =>
+      'Gestiona órdenes de servicio directamente por chat';
+
+  @override
+  String get whatsappBenefitClients => 'Envía actualizaciones a clientes';
+
+  @override
+  String get linkNow => 'Vincular ahora';
+
+  @override
+  String get maybeLater => 'Quizás después';
 }

@@ -1174,5 +1174,27 @@
         "type": "int"
       }
     }
-  }
+  },
+
+  "notifyCustomerQuestion": "Notificar cliente?",
+  "notifyCustomerDescription": "Deseja enviar a atualização para {customerName} via WhatsApp?",
+  "@notifyCustomerDescription": {
+    "placeholders": {
+      "customerName": {
+        "type": "String"
+      }
+    }
+  },
+  "notNow": "Agora não",
+
+  "connectWhatsApp": "Conecte seu WhatsApp",
+  "connectWhatsAppBannerDescription": "Receba notificações, gerencie OS e envie atualizações para clientes pelo WhatsApp.",
+
+  "whatsappOnboardingTitle": "Conecte seu WhatsApp",
+  "whatsappOnboardingSubtitle": "Aproveite ao máximo o PraticOS conectando seu WhatsApp",
+  "whatsappBenefitNotifications": "Receba notificações de novas OS",
+  "whatsappBenefitManage": "Gerencie OS diretamente pelo chat",
+  "whatsappBenefitClients": "Envie atualizações para clientes",
+  "linkNow": "Vincular agora",
+  "maybeLater": "Talvez depois"
 }
