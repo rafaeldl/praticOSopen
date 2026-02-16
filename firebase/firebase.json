@@ -34,10 +34,7 @@
         "source": "/q/**",
         "destination": "/order/index.html"
       }
-    ],
-    "i18n": {
-      "root": "/"
-    }
+    ]
   },
   "emulators": {
     "functions": {
