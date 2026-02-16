@@ -93,49 +93,6 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 
 🔴 USAR `/details` (NAO `/list`). `/list` nao traz foto nem link.
 
-**Passo 1 — Buscar dados:**
-exec: GET /bot/orders/{NUM}/details
-→ retorna `order` com `mainPhotoUrl`, `photosCount`, `shareUrl`
-
-**Passo 2 — Link:** se `shareUrl` veio no passo 1, usar. Se nao: POST /bot/orders/{NUM}/share → retorna `url`.
-
-**Passo 3 — Formatar card** a partir dos campos do `order`:
-```
-📋 *O.S. #{number}* - {STATUS}
-
-👤 *Cliente:* {customer.name}
-📞 *Telefone:* {customer.phone}
-🔧 *{DEVICE_LABEL}:* {device.name} ({device.serial})
-
-🛠️ *Serviços:*
-• {service.name} - R$ {value}
-
-📦 *Produtos:*
-• {product.name} (x{qty}) - R$ {value}
-
-💰 *Total:* R$ {total}
-🏷️ *Desconto:* R$ {discount}
-✅ *Pago:* R$ {paidAmount}
-⏳ *A receber:* R$ {remaining}
-📅 *Previsão:* {dueDate}
-🗓️ *Aberto em:* {createdAt}
-
-🔗 *Link:* {shareUrl}
-```
-Status: quote=Orçamento | approved=Aprovado | progress=Em andamento | done=Concluído | canceled=Cancelado
-Omitir campos null/vazio. remaining = total - discount - paidAmount.
-
-**Passo 4 — Enviar:**
-
-🔴 Se `mainPhotoUrl` existir → BAIXAR foto e enviar como IMAGEM com card de legenda:
-```
-exec: curl -s -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" "$PRATICOS_API_URL{mainPhotoUrl}" --output /tmp/os-{NUM}.jpg
-message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
-```
-
-Se `mainPhotoUrl` for null → enviar apenas texto:
-```
-message("{card}")
-```
-
-🔴 NUNCA mencionar "possui X fotos" sem enviar. SEMPRE baixar e enviar a foto.
+🔴 OBRIGATORIO: antes de formatar qualquer OS, executar:
+`read(file_path="skills/praticos/references/os-card.md")`
+Seguir o template LITERALMENTE — mesmos emojis, mesma ordem, bold com asteriscos. NAO resumir, NAO omitir passos.

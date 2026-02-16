@@ -21,6 +21,7 @@ import * as orderService from '../../services/order.service';
 import * as customerService from '../../services/customer.service';
 import * as deviceService from '../../services/device.service';
 import * as catalogService from '../../services/catalog.service';
+import * as shareTokenService from '../../services/share-token.service';
 import {
   validateInput,
   createFullOrderSchema,
@@ -763,23 +764,38 @@ router.get('/:number/details', async (req: AuthenticatedRequest, res: Response) 
 
     // Optimize payload: replace photos array with photosCount + mainPhotoUrl
     // AI formats the card via os-card.md template (sends photo as cover image)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { photos, ...orderWithoutPhotos } = order;
-    const photosCount = photos?.length || 0;
+    const photosCount = order.photos?.length || 0;
     const mainPhotoUrl = photosCount > 0
-      ? `/bot/orders/${orderNumber}/photos/${photos![0].id}`
+      ? `/bot/orders/${orderNumber}/photos/${order.photos![0].id}`
       : null;
 
-    // Include existing share URL if available and not expired
-    const shareLink = (order as unknown as Record<string, unknown>).shareLink as
-      { token?: string; expiresAt?: string } | undefined;
-    const shareUrl = shareLink?.token && shareLink?.expiresAt &&
-      new Date(shareLink.expiresAt) > new Date()
-      ? `https://praticos.web.app/q/${shareLink.token}`
-      : null;
+    // Fetch active share token from tokens collection
+    const tokens = await shareTokenService.getTokensForOrder(order.id, companyId);
+    const activeToken = tokens.find(t => new Date(t.expiresAt) > new Date());
+    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
+    const shareUrl = activeToken ? `${baseUrl}/q/${activeToken.token}` : null;
 
+    // Allowlist: only fields the bot card needs (saves ~45% tokens)
     const orderData = {
-      ...orderWithoutPhotos,
+      number: order.number,
+      status: order.status,
+      customer: order.customer ? { name: order.customer.name, phone: order.customer.phone } : null,
+      device: order.device ? { name: order.device.name, serial: order.device.serial } : null,
+      services: order.services?.map(s => ({
+        name: s.service?.name || s.description,
+        value: s.value,
+      })),
+      products: order.products?.map(p => ({
+        name: p.product?.name || p.description,
+        quantity: p.quantity,
+        value: p.value,
+      })),
+      total: order.total,
+      discount: order.discount,
+      paidAmount: order.paidAmount,
+      dueDate: order.dueDate,
+      createdAt: order.createdAt,
+      rating: order.rating,
       photosCount,
       mainPhotoUrl,
       shareUrl,

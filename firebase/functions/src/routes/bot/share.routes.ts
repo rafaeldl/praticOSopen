@@ -82,6 +82,13 @@ router.post('/:number/share', async (req: AuthenticatedRequest, res: Response) =
       expiresInDays
     );
 
+    // Persist shareLink on the order document (consistent with v1 route)
+    await orderService.updateOrderShareLink(companyId, order.id, {
+      token: shareToken.token,
+      expiresAt: shareToken.expiresAt,
+      permissions: requestedPermissions,
+    });
+
     // Build share URL
     const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
     const shareUrl = `${baseUrl}/q/${shareToken.token}`;
