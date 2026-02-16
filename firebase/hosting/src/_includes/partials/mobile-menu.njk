@@ -6,7 +6,7 @@
 <div class="mobile-menu">
     <div class="mobile-menu-content">
         {% for link in nav.mobileLinks %}
-        <a href="{% if link.external %}{{ relPath }}{{ link.href }}{% elif (link.href | first) == '#' and not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') }}{{ link.href }}{% else %}{{ link.href }}{% endif %}">{{ link.label }}</a>
+        <a href="{% if link.external %}{{ relPath }}{{ link.href | prettyUrl }}{% elif (link.href | first) == '#' and not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') | prettyUrl }}{{ link.href }}{% else %}{{ link.href }}{% endif %}">{{ link.label }}</a>
         {# Mobile Segments Accordion - After Screenshots (2nd item) #}
         {% if loop.index == 2 and seg.links %}
         <div class="mobile-segments">
@@ -18,7 +18,7 @@
             </button>
             <div class="mobile-segments-content">
                 {% for segment in seg.links %}
-                <a href="{{ relPath }}{{ segment.href }}">{{ segment.label }}</a>
+                <a href="{{ relPath }}{{ segment.href | prettyUrl }}">{{ segment.label }}</a>
                 {% endfor %}
             </div>
         </div>
@@ -26,9 +26,9 @@
         {% endfor %}
         <div class="mobile-lang">
             {% for langItem in langSwitch %}
-            <a href="{{ langItem.href }}"{% if langItem.active %} class="active"{% endif %} data-ga="select_content" data-ga-detail="lang_{{ langItem.code | lower }}">{{ langItem.code }}</a>
+            <a href="{{ langItem.href | prettyUrl }}"{% if langItem.active %} class="active"{% endif %} data-ga="select_content" data-ga-detail="lang_{{ langItem.code | lower }}">{{ langItem.code }}</a>
             {% endfor %}
         </div>
-        <a href="{% if not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') }}{% endif %}#download" class="btn btn-primary" data-ga="select_content" data-ga-detail="navbar_cta_mobile">{{ nav.cta }}</a>
+        <a href="{% if not isHomepage %}{{ relPath }}{{ indexPage | default('index.html') | prettyUrl }}{% endif %}#download" class="btn btn-primary" data-ga="select_content" data-ga-detail="navbar_cta_mobile">{{ nav.cta }}</a>
     </div>
 </div>

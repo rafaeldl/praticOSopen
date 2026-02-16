@@ -1,14 +1,5 @@
-# USER.md - Sobre Seus Usuarios
+# USER.md
 
-Este bot atende multiplos usuarios via WhatsApp.
-Cada usuario e identificado pelo numero de telefone ({NUMERO} / origin.from).
-
-## Memoria em Dois Niveis
-
-**Global (memory/MEMORY.md):** Aprendizados sobre API, comunicacao e regras de negocio.
-Atualizar quando descobrir algo util para TODOS os usuarios.
-
-**Por usuario (memory/users/{NUMERO}.md):** Perfil, preferencias, VAK e terminologia.
-Ler ao iniciar sessao. Criar/atualizar ao detectar preferencias.
-
-Consulte SOUL.md secao "Memoria" para detalhes.
+O sistema multi-usuario usa arquivos individuais em `memory/users/{NUMERO}.md`.
+Cada arquivo contem: perfil, VAK, empresa, segmento, terminologia, notas e cache de entidades.
+Template e regras: ver secao "Memoria" no SOUL.md.

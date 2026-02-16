@@ -6,23 +6,23 @@
 <meta name="robots" content="index, follow">
 
 <!-- Canonical URL -->
-<link rel="canonical" href="{{ site.baseUrl }}/{{ permalink | stripLeadingSlash }}">
+<link rel="canonical" href="{{ permalink | prettyUrl | siteUrl(site.baseUrl) }}">
 
 <!-- hreflang alternate language links -->
 {% if langSwitch %}
 {% set hreflangMap = { "PT": "pt-BR", "EN": "en", "ES": "es" } %}
 {% for langItem in langSwitch %}
-<link rel="alternate" hreflang="{{ hreflangMap[langItem.code] }}" href="{{ site.baseUrl }}/{{ langItem.href | resolveUrl(permalink) }}">
+<link rel="alternate" hreflang="{{ hreflangMap[langItem.code] }}" href="{{ langItem.href | resolveUrl(permalink) | prettyUrl | siteUrl(site.baseUrl) }}">
 {% endfor %}
-<link rel="alternate" hreflang="x-default" href="{{ site.baseUrl }}/{{ langSwitch[0].href | resolveUrl(permalink) }}">
+<link rel="alternate" hreflang="x-default" href="{{ langSwitch[0].href | resolveUrl(permalink) | prettyUrl | siteUrl(site.baseUrl) }}">
 {% endif %}
 
 <!-- Open Graph -->
 <meta property="og:title" content="{{ ogTitle | default(title) }}">
 <meta property="og:description" content="{{ ogDescription | default(description) }}">
-<meta property="og:image" content="{{ site.baseUrl }}/assets/images/logo.png">
+<meta property="og:image" content="{{ '/assets/images/logo.png' | siteUrl(site.baseUrl) }}">
 <meta property="og:type" content="website">
-<meta property="og:url" content="{{ site.baseUrl }}/{{ permalink | stripLeadingSlash }}">
+<meta property="og:url" content="{{ permalink | prettyUrl | siteUrl(site.baseUrl) }}">
 <meta property="og:locale" content="{{ lang | replace('-', '_') | default('pt_BR') }}">
 <meta property="og:site_name" content="PraticOS">
 

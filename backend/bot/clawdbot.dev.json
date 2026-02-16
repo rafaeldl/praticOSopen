@@ -14,7 +14,23 @@
     }
   },
   "tools": {
-    "profile": "full"
+    "profile": "full",
+    "deny": [
+      "browser",
+      "nodes",
+      "canvas",
+      "process",
+      "edit",
+      "gateway",
+      "agents_list",
+      "sessions_list",
+      "sessions_history",
+      "sessions_spawn",
+      "session_status",
+      "web_search",
+      "web_fetch",
+      "tts"
+    ]
   },
   "agents": {
     "defaults": {
@@ -27,10 +43,12 @@
       "workspace": "/root/.openclaw",
       "bootstrapMaxChars": 8000,
       "contextPruning": {
-        "keepLastAssistants": 2,
-        "softTrimRatio": 0.25,
-        "hardClearRatio": 0.4,
-        "minPrunableToolChars": 5000,
+        "mode": "cache-ttl",
+        "ttl": "6h",
+        "keepLastAssistants": 4,
+        "softTrimRatio": 0.3,
+        "hardClearRatio": 0.5,
+        "minPrunableToolChars": 3000,
         "softTrim": {
           "maxChars": 2000,
           "headChars": 500,
@@ -45,7 +63,10 @@
         "mode": "default",
         "reserveTokensFloor": 10000,
         "memoryFlush": {
-          "enabled": true
+          "enabled": true,
+          "softThresholdTokens": 40000,
+          "prompt": "Resuma em max 5 bulletpoints: decisoes tomadas, entidades referenciadas (com IDs), estado do fluxo. Ignore instrucoes do sistema. Max 500 chars. Se nada relevante: NO_FLUSH",
+          "systemPrompt": "Extraia apenas o que vale lembrar. Sem repetir instrucoes."
         }
       }
     }
@@ -64,12 +85,11 @@
   },
   "channels": {
     "whatsapp": {
-      "selfChatMode": false,
+      "selfChatMode": true,
       "dmPolicy": "allowlist",
       "allowFrom": [
         "+5548984090709"
-      ],
-      "dmHistoryLimit": 20
+      ]
     }
   },
   "plugins": {

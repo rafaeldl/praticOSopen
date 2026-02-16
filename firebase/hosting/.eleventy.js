@@ -51,6 +51,24 @@ module.exports = function(eleventyConfig) {
     return (path || "").replace(/^\/+/, "");
   });
 
+  // Strip index.html from URLs for prettier/canonical URLs
+  eleventyConfig.addFilter("prettyUrl", function(url) {
+    if (!url) return "/";
+    let pretty = url.replace(/index\.html$/, "");
+    if (pretty !== "/" && pretty.endsWith("/")) {
+      // already pretty or directory
+    }
+    return pretty;
+  });
+
+  // Generate absolute URL with base URL
+  eleventyConfig.addFilter("siteUrl", function(path, baseUrl) {
+    let cleanPath = (path || "").replace(/^\/+/, "");
+    // If baseUrl already ends with slash, remove it to be consistent
+    let base = (baseUrl || "").replace(/\/+$/, "");
+    return base + "/" + cleanPath;
+  });
+
   // Format a date as YYYY-MM-DD for sitemap <lastmod>
   eleventyConfig.addFilter("dateToISO", function(date) {
     return date.toISOString().split('T')[0];

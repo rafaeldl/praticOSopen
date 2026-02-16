@@ -48,7 +48,7 @@ pageType: pricing
                     {% endif %}
                     {% endfor %}
                 </ul>
-                <a href="{{ relPath }}{{ indexPage | default('index.html') }}#download" class="btn btn-{{ plan.ctaStyle }} btn-full" data-ga="select_content" data-ga-detail="pricing_{{ plan.name | lower | replace(' ', '_') }}">{{ plan.cta }}</a>
+                <a href="{{ relPath }}{{ indexPage | default('index.html') | prettyUrl }}#download" class="btn btn-{{ plan.ctaStyle }} btn-full" data-ga="select_content" data-ga-detail="pricing_{{ plan.name | lower | replace(' ', '_') }}">{{ plan.cta }}</a>
             </div>
             {% endfor %}
         </div>
