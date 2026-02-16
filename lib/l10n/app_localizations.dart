@@ -4516,11 +4516,11 @@ abstract class AppLocalizations {
   /// **'Compartilhar Convite'**
   String get shareInvite;
 
-  /// No description provided for @copyInviteLink.
+  /// No description provided for @copyInviteCode.
   ///
   /// In pt, this message translates to:
-  /// **'Copiar Link do Convite'**
-  String get copyInviteLink;
+  /// **'Copiar Código do Convite'**
+  String get copyInviteCode;
 
   /// No description provided for @sendViaWhatsAppInvite.
   ///
@@ -4528,11 +4528,11 @@ abstract class AppLocalizations {
   /// **'Enviar convite via WhatsApp'**
   String get sendViaWhatsAppInvite;
 
-  /// No description provided for @inviteLinkCopied.
+  /// No description provided for @inviteCodeCopied.
   ///
   /// In pt, this message translates to:
-  /// **'Link do convite copiado!'**
-  String get inviteLinkCopied;
+  /// **'Código do convite copiado!'**
+  String get inviteCodeCopied;
 
   /// No description provided for @phoneOptional.
   ///
@@ -5313,6 +5313,90 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{count} {count, plural, =1{estrela} other{estrelas}}'**
   String ratingWithStars(int count);
+
+  /// No description provided for @inviteWhatsAppMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você foi convidado para a equipe no PraticOS!\n\nCódigo do convite: {code}\n\nBaixe o app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos'**
+  String inviteWhatsAppMessage(String code);
+
+  /// No description provided for @downloadApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Baixe o app'**
+  String get downloadApp;
+
+  /// No description provided for @cannotRemoveOnlyAdmin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não é possível remover o único administrador da empresa. Promova outro colaborador a administrador antes de remover este.'**
+  String get cannotRemoveOnlyAdmin;
+
+  /// No description provided for @cannotChangeOnlyAdminRole.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não é possível alterar o perfil do único administrador. Promova outro colaborador a administrador antes de alterar este.'**
+  String get cannotChangeOnlyAdminRole;
+
+  /// No description provided for @cannotRemoveSelf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você não pode remover a si mesmo da empresa.'**
+  String get cannotRemoveSelf;
+
+  /// No description provided for @invalidInviteCompanyNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite inválido: empresa não encontrada.'**
+  String get invalidInviteCompanyNotFound;
+
+  /// No description provided for @shareInviteAction.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compartilhar Convite'**
+  String get shareInviteAction;
+
+  /// No description provided for @inviteExpiresInDays.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Expira em 1 dia} other{Expira em {count} dias}}'**
+  String inviteExpiresInDays(int count);
+
+  /// No description provided for @inviteExpiresInHours.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count, plural, =1{Expira em 1 hora} other{Expira em {count} horas}}'**
+  String inviteExpiresInHours(int count);
+
+  /// No description provided for @inviteExpiresSoon.
+  ///
+  /// In pt, this message translates to:
+  /// **'Expira em breve'**
+  String get inviteExpiresSoon;
+
+  /// No description provided for @duplicateInviteTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Convite Existente'**
+  String get duplicateInviteTitle;
+
+  /// No description provided for @duplicateInviteMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já existe um convite pendente para este email/telefone.'**
+  String get duplicateInviteMessage;
+
+  /// No description provided for @resendExistingInvite.
+  ///
+  /// In pt, this message translates to:
+  /// **'Reenviar Existente'**
+  String get resendExistingInvite;
+
+  /// No description provided for @cancelAndCreateNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar e Criar Novo'**
+  String get cancelAndCreateNew;
 }
 
 class _AppLocalizationsDelegate

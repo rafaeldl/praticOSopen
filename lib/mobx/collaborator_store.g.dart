@@ -126,8 +126,8 @@ mixin _$CollaboratorStore on _CollaboratorStore, Store {
   );
 
   @override
-  Future<void> cancelInvite(String inviteId) {
-    return _$cancelInviteAsyncAction.run(() => super.cancelInvite(inviteId));
+  Future<void> cancelInvite(String inviteToken) {
+    return _$cancelInviteAsyncAction.run(() => super.cancelInvite(inviteToken));
   }
 
   late final _$updateCollaboratorRoleAsyncAction = AsyncAction(

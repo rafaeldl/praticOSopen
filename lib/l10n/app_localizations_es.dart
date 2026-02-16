@@ -2298,13 +2298,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get shareInvite => 'Compartir Invitación';
 
   @override
-  String get copyInviteLink => 'Copiar Enlace de Invitación';
+  String get copyInviteCode => 'Copiar Código de Invitación';
 
   @override
   String get sendViaWhatsAppInvite => 'Enviar invitación vía WhatsApp';
 
   @override
-  String get inviteLinkCopied => '¡Enlace de invitación copiado!';
+  String get inviteCodeCopied => '¡Código de invitación copiado!';
 
   @override
   String get phoneOptional => 'Teléfono (opcional)';
@@ -2773,4 +2773,69 @@ class AppLocalizationsEs extends AppLocalizations {
     );
     return '$count $_temp0';
   }
+
+  @override
+  String inviteWhatsAppMessage(String code) {
+    return '¡Has sido invitado al equipo en PraticOS!\n\nCódigo de invitación: $code\n\nDescarga la app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos';
+  }
+
+  @override
+  String get downloadApp => 'Descarga la app';
+
+  @override
+  String get cannotRemoveOnlyAdmin =>
+      'No es posible eliminar al único administrador de la empresa. Promueva a otro colaborador a administrador primero.';
+
+  @override
+  String get cannotChangeOnlyAdminRole =>
+      'No es posible cambiar el perfil del único administrador. Promueva a otro colaborador a administrador primero.';
+
+  @override
+  String get cannotRemoveSelf =>
+      'No puede eliminarse a sí mismo de la empresa.';
+
+  @override
+  String get invalidInviteCompanyNotFound =>
+      'Invitación inválida: empresa no encontrada.';
+
+  @override
+  String get shareInviteAction => 'Compartir Invitación';
+
+  @override
+  String inviteExpiresInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Expira en $count días',
+      one: 'Expira en 1 día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String inviteExpiresInHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Expira en $count horas',
+      one: 'Expira en 1 hora',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inviteExpiresSoon => 'Expira pronto';
+
+  @override
+  String get duplicateInviteTitle => 'Invitación Existente';
+
+  @override
+  String get duplicateInviteMessage =>
+      'Ya existe una invitación pendiente para este correo/teléfono.';
+
+  @override
+  String get resendExistingInvite => 'Reenviar Existente';
+
+  @override
+  String get cancelAndCreateNew => 'Cancelar y Crear Nueva';
 }

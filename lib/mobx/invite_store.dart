@@ -1,13 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/invite.dart';
-import 'package:praticos/models/membership.dart';
-import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/invite_repository.dart';
-import 'package:praticos/repositories/user_repository.dart';
 import 'package:praticos/services/claims_service.dart';
+import 'package:praticos/services/invite_api_service.dart';
 
 part 'invite_store.g.dart';
 
@@ -26,8 +23,6 @@ class InviteStore extends _InviteStore with _$InviteStore {
 
 abstract class _InviteStore with Store {
   final InviteRepository _inviteRepository = InviteRepository();
-  final UserRepository _userRepository = UserRepository();
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   @observable
   ObservableList<Invite> pendingInvites = ObservableList<Invite>();
@@ -78,7 +73,7 @@ abstract class _InviteStore with Store {
       }
 
       pendingInvites.clear();
-      pendingInvites.addAll(allInvites);
+      pendingInvites.addAll(allInvites.where((i) => !i.isExpired));
     } catch (e) {
       errorMessage = e.toString();
       print('[InviteStore] Error loading pending invites: $e');
@@ -87,7 +82,7 @@ abstract class _InviteStore with Store {
     }
   }
 
-  /// Aceita um convite e adiciona o usuário como membro da empresa.
+  /// Aceita um convite via API e aguarda claims serem atualizados.
   @action
   Future<void> acceptInvite(Invite invite) async {
     if (Global.currentUser == null) return;
@@ -96,74 +91,19 @@ abstract class _InviteStore with Store {
     errorMessage = null;
 
     try {
-      final userId = Global.currentUser!.uid;
       final companyId = invite.company?.id;
-      final role = invite.role ?? RolesType.technician;
 
       if (companyId == null) {
-        throw Exception('Convite inválido: empresa não encontrada.');
+        throw Exception('invalidInviteCompanyNotFound');
       }
 
-      // 1. Busca o usuário atual
-      final user = await _userRepository.findUserById(userId);
-      if (user == null) {
-        throw Exception('Usuário não encontrado.');
-      }
+      // 1. Aceita via API (Admin SDK cuida de user.companies + membership + invite status)
+      await InviteApiService.instance.acceptInvite(invite.token!);
 
-      // 2. Verifica se já é membro
-      final alreadyMember = user.companies?.any(
-        (c) => c.company?.id == companyId
-      ) ?? false;
-      if (alreadyMember) {
-        // Se já é membro, apenas atualiza status do convite (usa token como ID)
-        await _inviteRepository.updateStatus(invite.token!, InviteStatus.accepted);
-        await loadPendingInvites();
-        return;
-      }
-
-      // 3. Usa batch para garantir atomicidade
-      final batch = _db.batch();
-
-      // 3a. Atualiza user.companies
-      final userRef = _db.collection('users').doc(userId);
-      final newCompanyRole = CompanyRoleAggr()
-        ..company = invite.company
-        ..role = role;
-
-      user.companies ??= [];
-      user.companies!.add(newCompanyRole);
-      batch.update(userRef, {'companies': user.companies!.map((c) => c.toJson()).toList()});
-
-      // 3b. Cria membership
-      final membershipRef = _db
-          .collection('companies')
-          .doc(companyId)
-          .collection('memberships')
-          .doc(userId);
-
-      final membership = Membership(
-        userId: userId,
-        user: user.toAggr(),
-        role: role,
-      );
-      batch.set(membershipRef, membership.toFirestore());
-
-      // 3c. Atualiza status do convite (path: /links/invites/tokens/{token})
-      final inviteRef = _db.collection('links').doc('invites').collection('tokens').doc(invite.token);
-      batch.update(inviteRef, {
-        'status': InviteStatus.accepted.name,
-        'acceptedAt': FieldValue.serverTimestamp(),
-        'acceptedByUserId': userId,
-      });
-
-      // 4. Commit atômico
-      await batch.commit();
-
-      // 5. Wait for Cloud Function to update custom claims
-      // This prevents "permission denied" errors on first access
+      // 2. Wait for Cloud Function to update custom claims
       await ClaimsService.instance.waitForCompanyClaim(companyId);
 
-      // 6. Recarrega convites
+      // 3. Recarrega convites
       await loadPendingInvites();
 
     } catch (e) {

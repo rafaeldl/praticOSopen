@@ -843,9 +843,9 @@
   "searchAnotherCode": "Search another code",
   "joinAnotherCompany": "Join another company",
   "shareInvite": "Share Invite",
-  "copyInviteLink": "Copy Invite Link",
+  "copyInviteCode": "Copy Invite Code",
   "sendViaWhatsAppInvite": "Send invite via WhatsApp",
-  "inviteLinkCopied": "Invite link copied!",
+  "inviteCodeCopied": "Invite code copied!",
   "phoneOptional": "Phone (optional)",
   "emailOrPhone": "Enter email or phone",
   "inviteExpiresIn": "Invite valid for {days} days",
@@ -1129,5 +1129,45 @@
         "type": "int"
       }
     }
-  }
+  },
+
+  "inviteWhatsAppMessage": "You have been invited to the team on PraticOS!\n\nInvite code: {code}\n\nDownload the app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos",
+  "@inviteWhatsAppMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadApp": "Download the app",
+
+  "cannotRemoveOnlyAdmin": "Cannot remove the only administrator of the company. Promote another collaborator to administrator first.",
+  "cannotChangeOnlyAdminRole": "Cannot change the only administrator's role. Promote another collaborator to administrator first.",
+  "cannotRemoveSelf": "You cannot remove yourself from the company.",
+  "invalidInviteCompanyNotFound": "Invalid invite: company not found.",
+
+  "shareInviteAction": "Share Invite",
+
+  "inviteExpiresInDays": "{count, plural, =1{Expires in 1 day} other{Expires in {count} days}}",
+  "@inviteExpiresInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteExpiresInHours": "{count, plural, =1{Expires in 1 hour} other{Expires in {count} hours}}",
+  "@inviteExpiresInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteExpiresSoon": "Expires soon",
+
+  "duplicateInviteTitle": "Existing Invite",
+  "duplicateInviteMessage": "There is already a pending invite for this email/phone.",
+  "resendExistingInvite": "Resend Existing",
+  "cancelAndCreateNew": "Cancel and Create New"
 }
