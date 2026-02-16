@@ -2784,6 +2784,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String get notNow => 'Agora não';
 
   @override
+  String get statusUpdateApproved => 'Orçamento aprovado!';
+
+  @override
+  String get statusUpdateProgress => 'Serviço em andamento!';
+
+  @override
+  String get statusUpdateDone => 'Serviço concluído!';
+
+  @override
   String get connectWhatsApp => 'Conecte seu WhatsApp';
 
   @override

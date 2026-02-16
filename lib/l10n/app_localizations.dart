@@ -5332,6 +5332,24 @@ abstract class AppLocalizations {
   /// **'Agora não'**
   String get notNow;
 
+  /// No description provided for @statusUpdateApproved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamento aprovado!'**
+  String get statusUpdateApproved;
+
+  /// No description provided for @statusUpdateProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço em andamento!'**
+  String get statusUpdateProgress;
+
+  /// No description provided for @statusUpdateDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço concluído!'**
+  String get statusUpdateDone;
+
   /// No description provided for @connectWhatsApp.
   ///
   /// In pt, this message translates to:

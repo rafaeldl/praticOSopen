@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:io' show Platform;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:praticos/models/share_token.dart';
@@ -14,15 +12,9 @@ class ShareLinkService {
   static ShareLinkService get instance => _instance;
   ShareLinkService._internal();
 
-  // API base URL - uses emulator in debug mode, production otherwise
-  static String get _baseUrl {
-    if (kDebugMode) {
-      // Use 10.0.2.2 for Android emulator, localhost for iOS simulator
-      final host = Platform.isAndroid ? '10.0.2.2' : 'localhost';
-      return 'http://$host:5000/praticos/southamerica-east1/api';
-    }
-    return 'https://southamerica-east1-praticos.cloudfunctions.net/api';
-  }
+  // API base URL - always uses production Cloud Functions
+  static const String _baseUrl =
+      'https://southamerica-east1-praticos.cloudfunctions.net/api';
 
   /// Get Firebase Auth token for API requests
   Future<String?> _getAuthToken() async {
@@ -73,7 +65,16 @@ class ShareLinkService {
         data['error']?['message'] ?? 'Invalid request',
       );
     } else {
-      throw ShareLinkException('Failed to generate share link: ${response.statusCode}');
+      // Decode server error message for better debugging
+      String serverMessage = 'Failed to generate share link: ${response.statusCode}';
+      try {
+        final data = json.decode(response.body);
+        final errorMsg = data['error']?['message'];
+        if (errorMsg != null) {
+          serverMessage = '$errorMsg (${response.statusCode})';
+        }
+      } catch (_) {}
+      throw ShareLinkException(serverMessage);
     }
   }
 
@@ -188,21 +189,66 @@ class ShareLinkService {
   }
 
   /// Build a share message for the customer
+  /// If [statusContext] is provided, builds a status-specific message
   String buildShareMessage({
     required String customerName,
     required int orderNumber,
     String? companyName,
     String? locale,
+    String? statusContext,
   }) {
     final loc = locale ?? 'pt';
+    final company = companyName != null
+        ? (loc.startsWith('en') ? ' at $companyName' : (loc.startsWith('es') ? ' en $companyName' : ' na $companyName'))
+        : '';
+
+    if (statusContext != null) {
+      return _buildStatusMessage(loc, statusContext, customerName, orderNumber, company);
+    }
 
     if (loc.startsWith('en')) {
-      return 'Hi $customerName! Here is the link to track your service order #$orderNumber${companyName != null ? ' at $companyName' : ''}. You can view details, approve quotes, and leave comments:';
+      return 'Hi $customerName! Here is the link to track your service order #$orderNumber$company. You can view details, approve quotes, and leave comments:';
     } else if (loc.startsWith('es')) {
-      return 'Hola $customerName! Aquí está el enlace para seguir tu orden de servicio #$orderNumber${companyName != null ? ' en $companyName' : ''}. Puedes ver detalles, aprobar presupuestos y dejar comentarios:';
+      return 'Hola $customerName! Aquí está el enlace para seguir tu orden de servicio #$orderNumber$company. Puedes ver detalles, aprobar presupuestos y dejar comentarios:';
     } else {
-      // Portuguese (default)
-      return 'Olá $customerName! Segue o link para acompanhar sua OS #$orderNumber${companyName != null ? ' na $companyName' : ''}. Você pode ver os detalhes, aprovar orçamentos e deixar comentários:';
+      return 'Olá $customerName! Segue o link para acompanhar sua OS #$orderNumber$company. Você pode ver os detalhes, aprovar orçamentos e deixar comentários:';
+    }
+  }
+
+  String _buildStatusMessage(String loc, String status, String name, int number, String company) {
+    if (loc.startsWith('en')) {
+      switch (status) {
+        case 'approved':
+          return 'Hi $name! The quote for your service order #$number$company has been approved! Track the details:';
+        case 'progress':
+          return 'Hi $name! Your service order #$number$company is now in progress! Follow along:';
+        case 'done':
+          return 'Hi $name! Your service order #$number$company has been completed! Check the details:';
+        default:
+          return 'Hi $name! There is an update on your service order #$number$company:';
+      }
+    } else if (loc.startsWith('es')) {
+      switch (status) {
+        case 'approved':
+          return 'Hola $name! El presupuesto de tu orden de servicio #$number$company fue aprobado! Acompaña los detalles:';
+        case 'progress':
+          return 'Hola $name! Tu orden de servicio #$number$company está en progreso! Sigue el avance:';
+        case 'done':
+          return 'Hola $name! El servicio de tu orden #$number$company fue completado! Confiere los detalles:';
+        default:
+          return 'Hola $name! Hay una actualización en tu orden de servicio #$number$company:';
+      }
+    } else {
+      switch (status) {
+        case 'approved':
+          return 'Olá $name! O orçamento da sua OS #$number$company foi aprovado! Acompanhe os detalhes:';
+        case 'progress':
+          return 'Olá $name! Sua OS #$number$company está em andamento! Acompanhe o progresso:';
+        case 'done':
+          return 'Olá $name! O serviço da sua OS #$number$company foi concluído! Confira os detalhes:';
+        default:
+          return 'Olá $name! Há uma atualização na sua OS #$number$company:';
+      }
     }
   }
 }

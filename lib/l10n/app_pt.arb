@@ -1186,6 +1186,9 @@
     }
   },
   "notNow": "Agora não",
+  "statusUpdateApproved": "Orçamento aprovado!",
+  "statusUpdateProgress": "Serviço em andamento!",
+  "statusUpdateDone": "Serviço concluído!",
 
   "connectWhatsApp": "Conecte seu WhatsApp",
   "connectWhatsAppBannerDescription": "Receba notificações, gerencie OS e envie atualizações para clientes pelo WhatsApp.",
