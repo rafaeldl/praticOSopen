@@ -1216,7 +1216,7 @@ class _OrderFormState extends State<OrderForm> {
           top: false,
           child: CupertinoDatePicker(
             initialDateTime: (_store.order?.dueDate != null) ? _store.order!.dueDate! : DateTime.now(),
-            mode: CupertinoDatePickerMode.date,
+            mode: CupertinoDatePickerMode.dateAndTime,
             use24hFormat: true,
             onDateTimeChanged: (DateTime newDate) {
               _store.setDueDate(newDate);

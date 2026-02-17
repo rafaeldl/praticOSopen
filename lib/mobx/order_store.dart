@@ -308,7 +308,9 @@ abstract class _OrderStore with Store {
     photos = order.photos?.asObservable() ?? ObservableList<OrderPhoto>();
     transactions = order.transactions?.asObservable() ?? ObservableList<PaymentTransaction>();
     paidAmount = order.paidAmount ?? 0.0;
-    dueDate = dateToString(order.dueDate);
+    dueDate = order.dueDate != null
+        ? FormatService().formatDateTime(order.dueDate!)
+        : dateToString(order.dueDate);
     scheduledDate = order.scheduledDate != null
         ? FormatService().formatDateTime(order.scheduledDate!)
         : null;
@@ -339,7 +341,7 @@ abstract class _OrderStore with Store {
 
   setDueDate(DateTime date) {
     order!.dueDate = date;
-    dueDate = dateToString(date);
+    dueDate = FormatService().formatDateTime(date);
     createItem();
   }
 
