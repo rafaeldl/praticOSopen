@@ -1324,9 +1324,8 @@ class _OrderFormState extends State<OrderForm> {
           child: CupertinoDatePicker(
             initialDateTime: (_store.order?.scheduledDate != null)
                 ? _store.order!.scheduledDate!
-                : _roundToNext15(DateTime.now()),
+                : DateTime.now(),
             mode: CupertinoDatePickerMode.dateAndTime,
-            minuteInterval: 15,
             use24hFormat: true,
             onDateTimeChanged: (DateTime newDate) {
               final reminderStore = Provider.of<ReminderStore>(context, listen: false);
@@ -1338,13 +1337,6 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  /// Rounds a DateTime up to the next 15-minute interval.
-  DateTime _roundToNext15(DateTime dt) {
-    final minutes = dt.minute;
-    final remainder = minutes % 15;
-    if (remainder == 0) return dt;
-    return dt.add(Duration(minutes: 15 - remainder)).copyWith(second: 0, millisecond: 0, microsecond: 0);
-  }
 
   void _selectStatus(SegmentConfigProvider config) {
      // Obter apenas os status disponíveis para o perfil do usuário
