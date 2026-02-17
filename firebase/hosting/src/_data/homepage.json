@@ -50,6 +50,12 @@
           "color": "orange"
         },
         {
+          "icon": "calendar",
+          "title": "Agenda",
+          "text": "Visualize OS agendadas em um calendário mensal. Configure lembretes e filtre por técnico.",
+          "color": "teal"
+        },
+        {
           "icon": "lock",
           "title": "Múltiplas Empresas",
           "text": "Gerencie várias empresas ou filiais em uma única conta. Ideal para franquias e grupos.",
@@ -176,6 +182,12 @@
           "color": "orange"
         },
         {
+          "icon": "calendar",
+          "title": "Agenda",
+          "text": "View scheduled orders on a monthly calendar. Configure reminders and filter by technician.",
+          "color": "teal"
+        },
+        {
           "icon": "lock",
           "title": "Multiple Companies",
           "text": "Manage multiple companies or branches in a single account. Ideal for franchises and groups.",
@@ -300,6 +312,12 @@
           "title": "Dashboard Financiero",
           "text": "Visualice facturación, valores recibidos y por recibir. Gráficos e informes por período.",
           "color": "orange"
+        },
+        {
+          "icon": "calendar",
+          "title": "Agenda",
+          "text": "Visualice OS programadas en un calendario mensual. Configure recordatorios y filtre por técnico.",
+          "color": "teal"
         },
         {
           "icon": "lock",
