@@ -125,24 +125,6 @@ mixin _$WhatsAppLinkStore on _WhatsAppLinkStore, Store {
     });
   }
 
-  late final _$botNumberAtom = Atom(
-    name: '_WhatsAppLinkStore.botNumber',
-    context: context,
-  );
-
-  @override
-  String? get botNumber {
-    _$botNumberAtom.reportRead();
-    return super.botNumber;
-  }
-
-  @override
-  set botNumber(String? value) {
-    _$botNumberAtom.reportWrite(value, super.botNumber, () {
-      super.botNumber = value;
-    });
-  }
-
   late final _$loadStatusAsyncAction = AsyncAction(
     '_WhatsAppLinkStore.loadStatus',
     context: context,
@@ -211,7 +193,6 @@ linkedNumber: ${linkedNumber},
 linkedAt: ${linkedAt},
 currentToken: ${currentToken},
 error: ${error},
-botNumber: ${botNumber},
 hasToken: ${hasToken}
     ''';
   }

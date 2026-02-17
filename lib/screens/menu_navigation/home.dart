@@ -269,7 +269,7 @@ class _HomeState extends State<Home> {
               ),
               onPressed: () {
                 HapticFeedback.lightImpact();
-                if (isLinked && _whatsappStore.botNumber != null) {
+                if (isLinked) {
                   final uri = Uri.parse('https://wa.me/${_whatsappStore.botNumber}');
                   launchUrl(uri, mode: LaunchMode.externalApplication);
                 } else {

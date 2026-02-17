@@ -12,6 +12,9 @@ class WhatsAppLinkService {
   static const String _baseUrl =
       'https://southamerica-east1-praticos.cloudfunctions.net/api';
 
+  /// Fixed bot WhatsApp number (matches backend BOT_WHATSAPP_NUMBER)
+  static const String botNumber = '+5548988794742';
+
   /// Get Firebase Auth token for API requests
   Future<String?> _getAuthToken() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -142,13 +145,11 @@ class WhatsAppLinkStatus {
   final bool linked;
   final String? number;
   final DateTime? linkedAt;
-  final String? botNumber;
 
   WhatsAppLinkStatus({
     required this.linked,
     this.number,
     this.linkedAt,
-    this.botNumber,
   });
 
   factory WhatsAppLinkStatus.fromJson(Map<String, dynamic> json) {
@@ -169,7 +170,6 @@ class WhatsAppLinkStatus {
       linked: json['linked'] as bool? ?? false,
       number: json['number'] as String?,
       linkedAt: linkedAt,
-      botNumber: json['botNumber'] as String?,
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:mobx/mobx.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:praticos/services/whatsapp_link_service.dart';
 
 part 'whatsapp_link_store.g.dart';
@@ -8,8 +7,6 @@ class WhatsAppLinkStore = _WhatsAppLinkStore with _$WhatsAppLinkStore;
 
 abstract class _WhatsAppLinkStore with Store {
   final WhatsAppLinkService _service = WhatsAppLinkService.instance;
-
-  static const String _botNumberKey = 'whatsapp_bot_number';
 
   @observable
   bool isLoading = false;
@@ -29,8 +26,8 @@ abstract class _WhatsAppLinkStore with Store {
   @observable
   String? error;
 
-  @observable
-  String? botNumber;
+  /// Bot number from API, with constant fallback
+  String get botNumber => WhatsAppLinkService.botNumber;
 
   @computed
   bool get hasToken => currentToken != null;
@@ -46,15 +43,6 @@ abstract class _WhatsAppLinkStore with Store {
       isLinked = status.linked;
       linkedNumber = status.number;
       linkedAt = status.linkedAt;
-
-      // Update botNumber from status response or SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      if (status.botNumber != null && status.botNumber!.isNotEmpty) {
-        botNumber = status.botNumber;
-        await prefs.setString(_botNumberKey, status.botNumber!);
-      } else {
-        botNumber = prefs.getString(_botNumberKey);
-      }
     } on WhatsAppLinkException catch (e) {
       error = e.message;
     } catch (e) {
@@ -74,14 +62,6 @@ abstract class _WhatsAppLinkStore with Store {
     try {
       final token = await _service.generateToken();
       currentToken = token;
-
-      // Save botNumber to SharedPreferences
-      if (token.botNumber.isNotEmpty) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(_botNumberKey, token.botNumber);
-        botNumber = token.botNumber;
-      }
-
       return token;
     } on WhatsAppLinkException catch (e) {
       error = e.message;
