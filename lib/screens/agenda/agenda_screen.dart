@@ -4,6 +4,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:praticos/mobx/agenda_store.dart';
+import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/services/format_service.dart';
@@ -34,6 +35,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _agendaStore = Provider.of<AgendaStore>(context);
+    _agendaStore.setReminderStore(Provider.of<ReminderStore>(context, listen: false));
     _agendaStore.loadMonth(DateTime.now());
   }
 
@@ -183,18 +185,14 @@ class _AgendaScreenState extends State<AgendaScreen> {
               weekendTextStyle: TextStyle(
                 color: CupertinoColors.label.resolveFrom(context),
               ),
-              markersMaxCount: 1,
-              markerDecoration: const BoxDecoration(
-                color: CupertinoColors.activeBlue,
-                shape: BoxShape.circle,
-              ),
+              markersMaxCount: 4,
               markerSize: 6,
-              markerMargin: const EdgeInsets.only(top: 1),
+              markerMargin: const EdgeInsets.symmetric(horizontal: 0.5),
             ),
             eventLoader: (day) {
               final dayKey = DateTime(day.year, day.month, day.day);
               final count = markers[dayKey] ?? 0;
-              return List.generate(count > 0 ? 1 : 0, (_) => null);
+              return List.generate(count.clamp(0, 4), (_) => null);
             },
             calendarBuilders: CalendarBuilders(
               markerBuilder: (context, date, events) {
@@ -202,19 +200,21 @@ class _AgendaScreenState extends State<AgendaScreen> {
                 final count = markers[dayKey] ?? 0;
                 if (count == 0) return null;
 
-                final isSelected = isSameDay(date, selectedDay);
+                final dotCount = count.clamp(1, 4);
 
                 return Positioned(
                   bottom: 1,
-                  child: Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isSelected
-                          ? CupertinoColors.white
-                          : CupertinoColors.activeBlue,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(dotCount, (_) => Container(
+                      width: 6,
+                      height: 6,
+                      margin: const EdgeInsets.symmetric(horizontal: 0.5),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: CupertinoColors.activeBlue,
+                      ),
+                    )),
                   ),
                 );
               },

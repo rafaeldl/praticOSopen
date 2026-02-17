@@ -962,12 +962,12 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
-  dynamic setScheduledDate(DateTime date) {
+  dynamic setScheduledDate(DateTime date, {ReminderStore? reminderStore}) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setScheduledDate',
     );
     try {
-      return super.setScheduledDate(date);
+      return super.setScheduledDate(date, reminderStore: reminderStore);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }

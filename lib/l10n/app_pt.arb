@@ -1246,5 +1246,29 @@
   "allTeam": "Toda a Equipe",
   "filterByTechnician": "Filtrar por técnico",
   "allDay": "Dia todo",
-  "clearSchedule": "Remover agendamento"
+  "clearSchedule": "Remover agendamento",
+
+  "scheduleReminder": "Lembrete de agendamento",
+  "reminderDisabled": "Desativado",
+  "reminderMinutesBefore": "{minutes} min antes",
+  "@reminderMinutesBefore": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "reminderHourBefore": "1 hora antes",
+  "reminderHoursBefore": "{hours} horas antes",
+  "@reminderHoursBefore": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "reminderTitle": "Agendamento em breve",
+  "reminderBodyOrder": "OS #{orderNumber} - {customerName}",
+  "@reminderBodyOrder": {
+    "placeholders": {
+      "orderNumber": { "type": "String" },
+      "customerName": { "type": "String" }
+    }
+  }
 }

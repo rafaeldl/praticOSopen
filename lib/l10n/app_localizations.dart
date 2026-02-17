@@ -5523,6 +5523,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Remover agendamento'**
   String get clearSchedule;
+
+  /// No description provided for @scheduleReminder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete de agendamento'**
+  String get scheduleReminder;
+
+  /// No description provided for @reminderDisabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desativado'**
+  String get reminderDisabled;
+
+  /// No description provided for @reminderMinutesBefore.
+  ///
+  /// In pt, this message translates to:
+  /// **'{minutes} min antes'**
+  String reminderMinutesBefore(int minutes);
+
+  /// No description provided for @reminderHourBefore.
+  ///
+  /// In pt, this message translates to:
+  /// **'1 hora antes'**
+  String get reminderHourBefore;
+
+  /// No description provided for @reminderHoursBefore.
+  ///
+  /// In pt, this message translates to:
+  /// **'{hours} horas antes'**
+  String reminderHoursBefore(int hours);
+
+  /// No description provided for @reminderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agendamento em breve'**
+  String get reminderTitle;
+
+  /// No description provided for @reminderBodyOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS #{orderNumber} - {customerName}'**
+  String reminderBodyOrder(String orderNumber, String customerName);
 }
 
 class _AppLocalizationsDelegate

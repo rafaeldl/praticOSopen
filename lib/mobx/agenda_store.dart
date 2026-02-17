@@ -5,6 +5,8 @@ import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/global.dart';
 import 'package:mobx/mobx.dart';
+import 'package:praticos/services/notification_service.dart';
+import 'package:praticos/mobx/reminder_store.dart';
 
 part 'agenda_store.g.dart';
 
@@ -14,6 +16,12 @@ abstract class _AgendaStore with Store {
   final TenantOrderRepository repository = TenantOrderRepository();
   final AuthorizationService _authService = AuthorizationService.instance;
   StreamSubscription<List<Order?>>? _monthSubscription;
+  ReminderStore? _reminderStore;
+
+  /// Set the reminder store reference (call from UI after provider is available)
+  void setReminderStore(ReminderStore store) {
+    _reminderStore = store;
+  }
 
   @observable
   DateTime selectedDate = DateTime.now();
@@ -108,12 +116,37 @@ abstract class _AgendaStore with Store {
         orders.clear();
         orders.addAll(result);
         isLoading = false;
+        _rescheduleReminders(result);
       },
       onError: (e) {
         print('Erro ao carregar agenda: $e');
         isLoading = false;
       },
     );
+  }
+
+  /// Reschedule reminders for all future orders with a scheduledDate
+  void _rescheduleReminders(List<Order?> loadedOrders) {
+    final minutes = _reminderStore?.reminderMinutes ?? 0;
+    if (minutes <= 0) return;
+
+    final now = DateTime.now();
+    for (final order in loadedOrders) {
+      if (order == null || order.id == null || order.scheduledDate == null) continue;
+      if (order.scheduledDate!.isBefore(now)) continue;
+
+      final orderNumber = order.number?.toString() ?? '';
+      final customerName = order.customer?.name ?? '';
+
+      NotificationService.instance.scheduleOrderReminder(
+        orderId: order.id!,
+        title: 'Agendamento em breve',
+        body: 'OS #$orderNumber - $customerName',
+        scheduledDate: order.scheduledDate!,
+        minutesBefore: minutes,
+        companyId: companyId,
+      );
+    }
   }
 
   void dispose() {

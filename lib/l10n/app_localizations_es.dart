@@ -2907,4 +2907,31 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get clearSchedule => 'Quitar programación';
+
+  @override
+  String get scheduleReminder => 'Recordatorio de cita';
+
+  @override
+  String get reminderDisabled => 'Desactivado';
+
+  @override
+  String reminderMinutesBefore(int minutes) {
+    return '$minutes min antes';
+  }
+
+  @override
+  String get reminderHourBefore => '1 hora antes';
+
+  @override
+  String reminderHoursBefore(int hours) {
+    return '$hours horas antes';
+  }
+
+  @override
+  String get reminderTitle => 'Cita próxima';
+
+  @override
+  String reminderBodyOrder(String orderNumber, String customerName) {
+    return 'OS #$orderNumber - $customerName';
+  }
 }

@@ -2902,4 +2902,31 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get clearSchedule => 'Remover agendamento';
+
+  @override
+  String get scheduleReminder => 'Lembrete de agendamento';
+
+  @override
+  String get reminderDisabled => 'Desativado';
+
+  @override
+  String reminderMinutesBefore(int minutes) {
+    return '$minutes min antes';
+  }
+
+  @override
+  String get reminderHourBefore => '1 hora antes';
+
+  @override
+  String reminderHoursBefore(int hours) {
+    return '$hours horas antes';
+  }
+
+  @override
+  String get reminderTitle => 'Agendamento em breve';
+
+  @override
+  String reminderBodyOrder(String orderNumber, String customerName) {
+    return 'OS #$orderNumber - $customerName';
+  }
 }

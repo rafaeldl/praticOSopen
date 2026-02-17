@@ -1201,5 +1201,29 @@
   "allTeam": "All Team",
   "filterByTechnician": "Filter by technician",
   "allDay": "All day",
-  "clearSchedule": "Clear schedule"
+  "clearSchedule": "Clear schedule",
+
+  "scheduleReminder": "Schedule reminder",
+  "reminderDisabled": "Disabled",
+  "reminderMinutesBefore": "{minutes} min before",
+  "@reminderMinutesBefore": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "reminderHourBefore": "1 hour before",
+  "reminderHoursBefore": "{hours} hours before",
+  "@reminderHoursBefore": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "reminderTitle": "Upcoming appointment",
+  "reminderBodyOrder": "WO #{orderNumber} - {customerName}",
+  "@reminderBodyOrder": {
+    "placeholders": {
+      "orderNumber": { "type": "String" },
+      "customerName": { "type": "String" }
+    }
+  }
 }

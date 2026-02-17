@@ -16,6 +16,8 @@ import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 
 import 'package:praticos/global.dart';
+import 'package:praticos/services/notification_service.dart';
+import 'package:praticos/mobx/reminder_store.dart';
 part 'order_store.g.dart';
 
 class OrderStore = _OrderStore with _$OrderStore;
@@ -342,17 +344,42 @@ abstract class _OrderStore with Store {
   }
 
   @action
-  setScheduledDate(DateTime date) {
+  setScheduledDate(DateTime date, {ReminderStore? reminderStore}) {
     order!.scheduledDate = date;
     scheduledDate = FormatService().formatDateTime(date);
     createItem();
+    _scheduleReminder(reminderStore);
   }
 
   @action
   clearScheduledDate() {
+    if (order?.id != null) {
+      NotificationService.instance.cancelOrderReminder(order!.id!);
+    }
     order!.scheduledDate = null;
     scheduledDate = null;
     createItem();
+  }
+
+  /// Schedule a local reminder for the current order
+  void _scheduleReminder(ReminderStore? reminderStore) {
+    final orderId = order?.id;
+    final date = order?.scheduledDate;
+    final minutes = reminderStore?.reminderMinutes ?? 0;
+    if (orderId == null || date == null || minutes <= 0) return;
+
+    final orderNumber = order?.number?.toString() ?? '';
+    final customerName = order?.customer?.name ?? '';
+    final companyId = Global.companyAggr?.id;
+
+    NotificationService.instance.scheduleOrderReminder(
+      orderId: orderId,
+      title: 'Agendamento em breve',
+      body: 'OS #$orderNumber - $customerName',
+      scheduledDate: date,
+      minutesBefore: minutes,
+      companyId: companyId,
+    );
   }
 
   @action

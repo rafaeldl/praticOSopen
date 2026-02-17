@@ -21,6 +21,7 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/mobx/reminder_store.dart';
 
 // Formulários Dinâmicos
 import 'package:praticos/models/order_form.dart' as of_model; // Alias para evitar conflito com esta classe OrderForm
@@ -1328,7 +1329,8 @@ class _OrderFormState extends State<OrderForm> {
             minuteInterval: 15,
             use24hFormat: true,
             onDateTimeChanged: (DateTime newDate) {
-              _store.setScheduledDate(newDate);
+              final reminderStore = Provider.of<ReminderStore>(context, listen: false);
+              _store.setScheduledDate(newDate, reminderStore: reminderStore);
             },
           ),
         ),

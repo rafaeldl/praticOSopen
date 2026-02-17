@@ -11,6 +11,7 @@ import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/agenda_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
+import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/login.dart';
@@ -61,6 +62,7 @@ Future<void> main() async {
           create: (_) => BottomNavigationBarStore(),
         ),
         Provider<ThemeStore>(create: (_) => ThemeStore()),
+        Provider<ReminderStore>(create: (_) => ReminderStore()),
         Provider<NotificationStore>(create: (_) => NotificationStore()),
         ChangeNotifierProvider<SegmentConfigProvider>(
           create: (_) => SegmentConfigProvider(),
