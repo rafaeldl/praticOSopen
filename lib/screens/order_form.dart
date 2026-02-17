@@ -388,7 +388,7 @@ class _OrderFormState extends State<OrderForm> {
           stream: _store.formsStream,
           initialData: _store.formsStream?.value,
           builder: (context, snapshot) {
-            final isLoading = hasOrder && snapshot.connectionState == ConnectionState.waiting;
+            final isLoading = hasOrder && !snapshot.hasData;
             final forms = snapshot.data ?? [];
 
             return _buildGroupedSection(
