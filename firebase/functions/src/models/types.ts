@@ -241,6 +241,7 @@ export interface Order {
   total: number;
   discount: number;
   dueDate?: DateValue;
+  scheduledDate?: DateValue;
   status: OrderStatus;
   done: boolean;
   paid: boolean;
