@@ -99,6 +99,7 @@
         { "image": "login.png", "alt": "Tela de Login", "label": "Login" },
         { "image": "home.png", "alt": "Ordens de Serviço", "label": "Ordens de Serviço" },
         { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
+        { "image": "agenda.png", "alt": "Agenda", "label": "Agenda" },
         { "image": "customers.png", "alt": "Clientes", "label": "Clientes" },
         { "image": "settings.png", "alt": "Configurações", "label": "Configurações" }
       ]
@@ -231,6 +232,7 @@
         { "image": "login.png", "alt": "Login Screen", "label": "Login" },
         { "image": "home.png", "alt": "Service Orders", "label": "Service Orders" },
         { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
+        { "image": "agenda.png", "alt": "Agenda", "label": "Agenda" },
         { "image": "customers.png", "alt": "Customers", "label": "Customers" },
         { "image": "settings.png", "alt": "Settings", "label": "Settings" }
       ]
@@ -363,6 +365,7 @@
         { "image": "login.png", "alt": "Pantalla de Login", "label": "Login" },
         { "image": "home.png", "alt": "Órdenes de Servicio", "label": "Órdenes de Servicio" },
         { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
+        { "image": "agenda.png", "alt": "Agenda", "label": "Agenda" },
         { "image": "customers.png", "alt": "Clientes", "label": "Clientes" },
         { "image": "settings.png", "alt": "Configuraciones", "label": "Configuraciones" }
       ]

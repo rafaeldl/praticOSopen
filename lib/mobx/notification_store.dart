@@ -35,6 +35,13 @@ abstract class _NotificationStore with Store {
   Future<void> initialize() async {
     if (isInitialized) return;
 
+    // Skip notifications in screenshot mode to avoid native permission dialog
+    const isScreenshotMode = bool.fromEnvironment('SCREENSHOT_MODE');
+    if (isScreenshotMode) {
+      isInitialized = true;
+      return;
+    }
+
     isLoading = true;
 
     try {

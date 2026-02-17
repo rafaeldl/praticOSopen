@@ -7,7 +7,7 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Screenshot Tests', () {
-    testWidgets('capture all 8 screenshots for App Store', (WidgetTester tester) async {
+    testWidgets('capture all 9 screenshots for App Store', (WidgetTester tester) async {
       // Get locale from environment (default: pt-BR)
       const locale = String.fromEnvironment('TEST_LOCALE', defaultValue: 'pt-BR');
 
@@ -358,8 +358,52 @@ void main() {
         print('⚠️ Dashboard button not found, skipping screenshot 4');
       }
 
-      // ========== SCREENSHOT 3: Segments Screen (Onboarding) ==========
-      print('\n--- Screenshot 3: Segments Screen ---');
+      // ========== SCREENSHOT 3: Agenda ==========
+      print('\n--- Screenshot 3: Agenda ---');
+      print('Looking for agenda tab...');
+
+      final allSemanticsTabsForAgenda = find.byType(Semantics);
+      Finder? agendaTab;
+
+      for (var i = 0; i < allSemanticsTabsForAgenda.evaluate().length; i++) {
+        final widget = tester.widget<Semantics>(allSemanticsTabsForAgenda.at(i));
+        final identifier = widget.properties.identifier?.toString() ?? '';
+        if (identifier == 'tab_agenda') {
+          agendaTab = allSemanticsTabsForAgenda.at(i);
+          print('Found agenda tab with semantic identifier');
+          break;
+        }
+      }
+
+      if (agendaTab != null) {
+        await tester.tap(agendaTab);
+        await tester.pumpAndSettle();
+        await Future.delayed(const Duration(seconds: 3));
+        print('Agenda tab opened');
+
+        print('📸 Capturing Screenshot 3: Agenda');
+        await binding.takeScreenshot('03_agenda');
+
+        // Navigate back to home tab
+        print('Navigating back to home tab...');
+        final allSemanticsTabsBackHome = find.byType(Semantics);
+        for (var i = 0; i < allSemanticsTabsBackHome.evaluate().length; i++) {
+          final widget = tester.widget<Semantics>(allSemanticsTabsBackHome.at(i));
+          final identifier = widget.properties.identifier?.toString() ?? '';
+          if (identifier == 'tab_home') {
+            await tester.tap(allSemanticsTabsBackHome.at(i));
+            await tester.pumpAndSettle();
+            await Future.delayed(const Duration(seconds: 1));
+            print('✅ Back to home tab');
+            break;
+          }
+        }
+      } else {
+        print('⚠️ Agenda tab not found, skipping screenshot 3');
+      }
+
+      // ========== SCREENSHOT 9: Segments Screen (Onboarding) ==========
+      print('\n--- Screenshot 9: Segments Screen ---');
       print('Navigating to settings to trigger re-onboarding...');
 
       // Go to settings tab using semantic identifier
@@ -455,8 +499,8 @@ void main() {
               print('Waiting for segments screen to fully load...');
               await Future.delayed(const Duration(seconds: 2));
 
-              print('📸 Capturing Screenshot 3: Segments Screen');
-              await binding.takeScreenshot('03_segments');
+              print('📸 Capturing Screenshot 9: Segments Screen');
+              await binding.takeScreenshot('09_segments');
 
               print('✅ Segments screenshot captured');
             } else {
