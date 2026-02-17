@@ -1,4 +1,4 @@
-Simplifique a gestão do seu negócio com o PraticOS, o app completo para gerenciar ordens de serviço, clientes e finanças em um só lugar.
+PraticOS é o app de gestão de ordens de serviço mais prático do mercado. Controle OS, clientes e finanças em um só lugar. Ideal para oficinas, assistências técnicas e prestadores de serviço.
 
 GESTÃO DE ORDENS DE SERVIÇO
 • Crie e acompanhe ordens de serviço com facilidade

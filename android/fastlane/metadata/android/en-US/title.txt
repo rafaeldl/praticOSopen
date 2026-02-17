@@ -1,1 +1,1 @@
-PraticOS
+PraticOS - Work Order App

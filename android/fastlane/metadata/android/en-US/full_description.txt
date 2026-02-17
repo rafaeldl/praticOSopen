@@ -1,4 +1,4 @@
-Simplify your business management with PraticOS, the complete app for managing work orders, customers, and finances in one place.
+PraticOS is the most practical work order management app on the market. Track work orders, customers, and finances all in one place. Built for repair shops, field service teams, and independent professionals.
 
 WORK ORDER MANAGEMENT
 • Create and track work orders with ease
