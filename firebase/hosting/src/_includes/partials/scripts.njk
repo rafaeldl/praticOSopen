@@ -112,3 +112,38 @@
   }
 })();
 </script>
+{% if site.facebookPixelId %}
+<script>
+// Facebook Pixel Event Tracking
+(function() {
+  if (typeof fbq !== 'function') return;
+
+  // Track CTA clicks (download buttons, store links)
+  document.addEventListener('click', function(e) {
+    var storeLink = e.target.closest('a[href*="apps.apple.com"], a[href*="play.google.com"]');
+    if (storeLink) {
+      var store = storeLink.href.indexOf('apple') !== -1 ? 'app_store' : 'play_store';
+      fbq('track', 'Lead', { content_name: 'app_download', content_category: store });
+    }
+
+    var whatsappLink = e.target.closest('a[href*="wa.me"], a[href*="whatsapp"]');
+    if (whatsappLink) {
+      fbq('track', 'Contact', { content_name: 'whatsapp' });
+    }
+
+    var ctaBtn = e.target.closest('[data-ga="cta_click"]');
+    if (ctaBtn) {
+      fbq('track', 'InitiateCheckout', { content_name: ctaBtn.getAttribute('data-ga-detail') || 'cta' });
+    }
+  });
+
+  // Track contact form submission
+  var form = document.querySelector('.contact-form');
+  if (form) {
+    form.addEventListener('submit', function() {
+      fbq('track', 'Lead', { content_name: 'contact_form' });
+    });
+  }
+})();
+</script>
+{% endif %}
