@@ -53,7 +53,10 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         Provider<OrderStore>(create: (_) => OrderStore()),
-        Provider<AgendaStore>(create: (_) => AgendaStore()),
+        Provider<AgendaStore>(
+          create: (_) => AgendaStore(),
+          dispose: (_, store) => store.dispose(),
+        ),
         Provider<BottomNavigationBarStore>(
           create: (_) => BottomNavigationBarStore(),
         ),

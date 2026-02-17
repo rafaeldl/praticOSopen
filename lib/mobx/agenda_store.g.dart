@@ -125,20 +125,22 @@ mixin _$AgendaStore on _AgendaStore, Store {
     });
   }
 
-  late final _$loadMonthAsyncAction = AsyncAction(
-    '_AgendaStore.loadMonth',
-    context: context,
-  );
-
-  @override
-  Future<void> loadMonth(DateTime month) {
-    return _$loadMonthAsyncAction.run(() => super.loadMonth(month));
-  }
-
   late final _$_AgendaStoreActionController = ActionController(
     name: '_AgendaStore',
     context: context,
   );
+
+  @override
+  void loadMonth(DateTime month) {
+    final _$actionInfo = _$_AgendaStoreActionController.startAction(
+      name: '_AgendaStore.loadMonth',
+    );
+    try {
+      return super.loadMonth(month);
+    } finally {
+      _$_AgendaStoreActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void selectDate(DateTime date) {

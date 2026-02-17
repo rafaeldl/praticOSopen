@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:praticos/models/order.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -11,6 +13,7 @@ class AgendaStore = _AgendaStore with _$AgendaStore;
 abstract class _AgendaStore with Store {
   final TenantOrderRepository repository = TenantOrderRepository();
   final AuthorizationService _authService = AuthorizationService.instance;
+  StreamSubscription<List<Order?>>? _monthSubscription;
 
   @observable
   DateTime selectedDate = DateTime.now();
@@ -88,7 +91,7 @@ abstract class _AgendaStore with Store {
   String? get companyId => Global.companyAggr?.id;
 
   @action
-  Future<void> loadMonth(DateTime month) async {
+  void loadMonth(DateTime month) {
     if (companyId == null) return;
 
     isLoading = true;
@@ -97,20 +100,24 @@ abstract class _AgendaStore with Store {
     final startDate = DateTime(month.year, month.month, 1);
     final endDate = DateTime(month.year, month.month + 1, 1);
 
-    try {
-      final result = await repository.getOrdersByScheduledDateRange(
-        companyId!,
-        startDate,
-        endDate,
-      );
+    _monthSubscription?.cancel();
+    _monthSubscription = repository
+        .streamOrdersByScheduledDateRange(companyId!, startDate, endDate)
+        .listen(
+      (result) {
+        orders.clear();
+        orders.addAll(result);
+        isLoading = false;
+      },
+      onError: (e) {
+        print('Erro ao carregar agenda: $e');
+        isLoading = false;
+      },
+    );
+  }
 
-      orders.clear();
-      orders.addAll(result);
-    } catch (e) {
-      print('Erro ao carregar agenda: $e');
-    }
-
-    isLoading = false;
+  void dispose() {
+    _monthSubscription?.cancel();
   }
 
   @action
