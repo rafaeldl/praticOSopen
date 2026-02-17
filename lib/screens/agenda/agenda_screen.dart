@@ -115,6 +115,7 @@ class _AgendaScreenState extends State<AgendaScreen> {
             borderRadius: BorderRadius.circular(10),
           ),
           child: TableCalendar(
+            locale: Localizations.localeOf(context).toString(),
             firstDay: DateTime(2020, 1, 1),
             lastDay: DateTime(2030, 12, 31),
             focusedDay: focusedDay,
