@@ -171,6 +171,24 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$scheduledDateAtom = Atom(
+    name: '_OrderStore.scheduledDate',
+    context: context,
+  );
+
+  @override
+  String? get scheduledDate {
+    _$scheduledDateAtom.reportRead();
+    return super.scheduledDate;
+  }
+
+  @override
+  set scheduledDate(String? value) {
+    _$scheduledDateAtom.reportWrite(value, super.scheduledDate, () {
+      super.scheduledDate = value;
+    });
+  }
+
   late final _$statusAtom = Atom(name: '_OrderStore.status', context: context);
 
   @override
@@ -944,6 +962,30 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  dynamic setScheduledDate(DateTime date, {ReminderStore? reminderStore}) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setScheduledDate',
+    );
+    try {
+      return super.setScheduledDate(date, reminderStore: reminderStore);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  dynamic clearScheduledDate() {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.clearScheduledDate',
+    );
+    try {
+      return super.clearScheduledDate();
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic setStatus(String? status) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setStatus',
@@ -1214,6 +1256,7 @@ orderList: ${orderList},
 orderStream: ${orderStream},
 formsStream: ${formsStream},
 dueDate: ${dueDate},
+scheduledDate: ${scheduledDate},
 status: ${status},
 createdAt: ${createdAt},
 total: ${total},

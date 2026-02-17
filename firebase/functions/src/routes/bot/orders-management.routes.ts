@@ -8,6 +8,7 @@
  * - POST /bot/orders/:number/products - Add product to order
  * - DELETE /bot/orders/:number/services/:index - Remove service from order
  * - DELETE /bot/orders/:number/products/:index - Remove product from order
+ * - PATCH /bot/orders/:number - Update order fields (status, dueDate, scheduledDate, assignedTo)
  * - PATCH /bot/orders/:number/device - Update order device
  * - PATCH /bot/orders/:number/customer - Update order customer
  * - GET /bot/orders/:number/details - Get full order details
@@ -25,6 +26,7 @@ import * as shareTokenService from '../../services/share-token.service';
 import {
   validateInput,
   createFullOrderSchema,
+  updateBotOrderSchema,
   addServiceToOrderSchema,
   addProductToOrderSchema,
   updateOrderDeviceSchema,
@@ -151,6 +153,7 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         services: orderServices,
         products: orderProducts,
         dueDate: data.dueDate,
+        scheduledDate: data.scheduledDate,
         status: data.status as OrderStatus,
       },
       createdBy,
@@ -556,6 +559,112 @@ router.delete('/:number/products/:index', requireLinked, async (req: Authenticat
 });
 
 /**
+ * PATCH /api/bot/orders/:number
+ * Update order fields (status, dueDate, scheduledDate, assignedTo)
+ */
+router.patch('/:number', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const companyId = req.userContext?.companyId;
+    if (!companyId) {
+      res.status(401).json({
+        success: false,
+        error: { code: 'UNAUTHORIZED', message: 'Company context required' },
+      });
+      return;
+    }
+
+    const numberParam = Array.isArray(req.params.number) ? req.params.number[0] : req.params.number;
+    const orderNumber = parseInt(numberParam, 10);
+    if (isNaN(orderNumber)) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_NUMBER', message: 'Número da OS inválido' },
+      });
+      return;
+    }
+
+    // Validate input
+    const validation = validateInput(updateBotOrderSchema, req.body);
+    if (!validation.success) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: validation.errors.join(', '),
+        },
+      });
+      return;
+    }
+
+    const data = validation.data;
+    const updatedBy = getUserAggr(req);
+
+    // Find order by number
+    const order = await orderService.getOrderByNumber(companyId, orderNumber);
+    if (!order) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: `OS #${orderNumber} não encontrada` },
+      });
+      return;
+    }
+
+    // Build update input
+    const updateInput: orderService.UpdateOrderInput = {};
+
+    if (data.status !== undefined) {
+      updateInput.status = data.status as OrderStatus;
+    }
+    if (data.dueDate !== undefined) {
+      updateInput.dueDate = data.dueDate ?? undefined;
+    }
+    if (data.scheduledDate !== undefined) {
+      updateInput.scheduledDate = data.scheduledDate;
+    }
+    if (data.assignedTo !== undefined) {
+      updateInput.assignedTo = data.assignedTo ? { id: data.assignedTo, name: '' } : null;
+    }
+
+    const updated = await orderService.updateOrder(
+      companyId,
+      order.id,
+      updateInput,
+      updatedBy
+    );
+
+    if (!updated) {
+      res.status(500).json({
+        success: false,
+        error: { code: 'UPDATE_FAILED', message: 'Falha ao atualizar OS' },
+      });
+      return;
+    }
+
+    // Build response with updated fields
+    const updatedFields: Record<string, unknown> = {};
+    if (data.status !== undefined) updatedFields.status = data.status;
+    if (data.dueDate !== undefined) updatedFields.dueDate = data.dueDate;
+    if (data.scheduledDate !== undefined) updatedFields.scheduledDate = data.scheduledDate;
+    if (data.assignedTo !== undefined) updatedFields.assignedTo = data.assignedTo;
+
+    res.json({
+      success: true,
+      data: {
+        orderNumber,
+        updated: updatedFields,
+        message: `OS #${orderNumber} atualizada`,
+      },
+    });
+  } catch (error) {
+    console.error('Update order error:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'INTERNAL_ERROR', message: 'Erro ao atualizar OS' },
+    });
+  }
+});
+
+/**
  * PATCH /api/bot/orders/:number/device
  * Update order device
  */
@@ -794,6 +903,7 @@ router.get('/:number/details', async (req: AuthenticatedRequest, res: Response) 
       discount: order.discount,
       paidAmount: order.paidAmount,
       dueDate: order.dueDate,
+      scheduledDate: order.scheduledDate,
       createdAt: order.createdAt,
       rating: order.rating,
       photosCount,

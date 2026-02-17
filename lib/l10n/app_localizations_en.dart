@@ -447,7 +447,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thisYear => 'This Year';
 
   @override
-  String get scheduledDate => 'Scheduled Date';
+  String get scheduledDate => 'Scheduled';
 
   @override
   String get createdAt => 'Created at';
@@ -2873,4 +2873,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelAndCreateNew => 'Cancel and Create New';
+
+  @override
+  String get agenda => 'Schedule';
+
+  @override
+  String get noScheduledOrders => 'No orders scheduled for this day';
+
+  @override
+  String get allTeam => 'All Team';
+
+  @override
+  String get filterByTechnician => 'Filter by technician';
+
+  @override
+  String get allDay => 'All day';
+
+  @override
+  String get clearSchedule => 'Clear schedule';
+
+  @override
+  String get scheduleReminder => 'Schedule reminder';
+
+  @override
+  String get reminderDisabled => 'Disabled';
+
+  @override
+  String reminderMinutesBefore(int minutes) {
+    return '$minutes min before';
+  }
+
+  @override
+  String get reminderHourBefore => '1 hour before';
+
+  @override
+  String reminderHoursBefore(int hours) {
+    return '$hours hours before';
+  }
+
+  @override
+  String get reminderTitle => 'Upcoming appointment';
+
+  @override
+  String reminderBodyOrder(String orderNumber, String customerName) {
+    return 'WO #$orderNumber - $customerName';
+  }
 }

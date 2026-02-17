@@ -21,6 +21,7 @@ class Order extends BaseAuditCompany {
   double? total;
   double? discount;
   DateTime? dueDate;
+  DateTime? scheduledDate;
   bool? done;
   bool? paid;
   String? payment; // unpaid, paid (partial is calculated in memory based on paidAmount)

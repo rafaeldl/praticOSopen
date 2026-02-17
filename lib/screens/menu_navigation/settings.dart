@@ -6,6 +6,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
+import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/mobx/whatsapp_link_store.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -40,6 +41,7 @@ class _SettingsState extends State<Settings> {
     // Set the UserStore instance for AuthorizationService to use
     AuthorizationService.setUserStore(_userStore);
     final themeStore = Provider.of<ThemeStore>(context);
+    final reminderStore = Provider.of<ReminderStore>(context);
     final config = context.watch<SegmentConfigProvider>();
 
     return CupertinoPageScaffold(
@@ -291,6 +293,22 @@ class _SettingsState extends State<Settings> {
                     trailing: const CupertinoListTileChevron(),
                     onTap: () => _showThemeSelectionDialog(context, themeStore, config),
                   ),
+                  Observer(builder: (_) {
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemYellow,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.bell_fill, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.scheduleReminder),
+                      additionalInfo: Text(_getReminderText(context, reminderStore.reminderMinutes)),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showReminderSelectionDialog(context, reminderStore),
+                    );
+                  }),
                   // Reabrir Onboarding - para reconfigurar empresa e capturar screenshots
                   Observer(builder: (_) {
                     if (_authService.hasPermission(PermissionType.manageCompany)) {
@@ -430,6 +448,48 @@ class _SettingsState extends State<Settings> {
           CupertinoActionSheetAction(
             child: Text(context.l10n.dark),
             onPressed: () { themeStore.setThemeMode(ThemeMode.dark); Navigator.pop(dialogContext); },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
+      ),
+    );
+  }
+
+  String _getReminderText(BuildContext context, int minutes) {
+    if (minutes == 0) return context.l10n.reminderDisabled;
+    if (minutes == 60) return context.l10n.reminderHourBefore;
+    if (minutes == 120) return context.l10n.reminderHoursBefore(2);
+    return context.l10n.reminderMinutesBefore(minutes);
+  }
+
+  void _showReminderSelectionDialog(BuildContext context, ReminderStore reminderStore) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext dialogContext) => CupertinoActionSheet(
+        title: Text(context.l10n.scheduleReminder),
+        actions: [
+          CupertinoActionSheetAction(
+            child: Text(context.l10n.reminderDisabled),
+            onPressed: () { reminderStore.setReminderMinutes(0); Navigator.pop(dialogContext); },
+          ),
+          CupertinoActionSheetAction(
+            child: Text(context.l10n.reminderMinutesBefore(15)),
+            onPressed: () { reminderStore.setReminderMinutes(15); Navigator.pop(dialogContext); },
+          ),
+          CupertinoActionSheetAction(
+            child: Text(context.l10n.reminderMinutesBefore(30)),
+            onPressed: () { reminderStore.setReminderMinutes(30); Navigator.pop(dialogContext); },
+          ),
+          CupertinoActionSheetAction(
+            child: Text(context.l10n.reminderHourBefore),
+            onPressed: () { reminderStore.setReminderMinutes(60); Navigator.pop(dialogContext); },
+          ),
+          CupertinoActionSheetAction(
+            child: Text(context.l10n.reminderHoursBefore(2)),
+            onPressed: () { reminderStore.setReminderMinutes(120); Navigator.pop(dialogContext); },
           ),
         ],
         cancelButton: CupertinoActionSheetAction(

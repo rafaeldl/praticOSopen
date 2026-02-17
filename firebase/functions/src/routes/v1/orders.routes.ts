@@ -255,6 +255,7 @@ router.patch('/:id', async (req: AuthenticatedRequest, res: Response) => {
     const updateInput: orderService.UpdateOrderInput = {
       status: validation.data.status,
       dueDate: validation.data.dueDate,
+      scheduledDate: validation.data.scheduledDate,
     };
     if (validation.data.assignedTo) {
       // Note: In a real implementation, we would look up the user to get the full UserAggr

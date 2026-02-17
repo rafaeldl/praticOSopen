@@ -165,7 +165,7 @@
   "thisMonth": "Este Mes",
   "lastMonth": "Mes Pasado",
   "thisYear": "Este Año",
-  "scheduledDate": "Fecha Programada",
+  "scheduledDate": "Programado",
   "createdAt": "Creado en",
   "updatedAt": "Actualizado en",
   "date": "Fecha",
@@ -1194,5 +1194,36 @@
   "duplicateInviteTitle": "Invitación Existente",
   "duplicateInviteMessage": "Ya existe una invitación pendiente para este correo/teléfono.",
   "resendExistingInvite": "Reenviar Existente",
-  "cancelAndCreateNew": "Cancelar y Crear Nueva"
+  "cancelAndCreateNew": "Cancelar y Crear Nueva",
+
+  "agenda": "Agenda",
+  "noScheduledOrders": "No hay OS programadas para este día",
+  "allTeam": "Todo el Equipo",
+  "filterByTechnician": "Filtrar por técnico",
+  "allDay": "Todo el día",
+  "clearSchedule": "Quitar programación",
+
+  "scheduleReminder": "Recordatorio de cita",
+  "reminderDisabled": "Desactivado",
+  "reminderMinutesBefore": "{minutes} min antes",
+  "@reminderMinutesBefore": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
+  "reminderHourBefore": "1 hora antes",
+  "reminderHoursBefore": "{hours} horas antes",
+  "@reminderHoursBefore": {
+    "placeholders": {
+      "hours": { "type": "int" }
+    }
+  },
+  "reminderTitle": "Cita próxima",
+  "reminderBodyOrder": "OS #{orderNumber} - {customerName}",
+  "@reminderBodyOrder": {
+    "placeholders": {
+      "orderNumber": { "type": "String" },
+      "customerName": { "type": "String" }
+    }
+  }
 }

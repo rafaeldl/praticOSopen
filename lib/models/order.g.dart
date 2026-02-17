@@ -43,6 +43,9 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..dueDate = json['dueDate'] == null
       ? null
       : DateTime.parse(json['dueDate'] as String)
+  ..scheduledDate = json['scheduledDate'] == null
+      ? null
+      : DateTime.parse(json['scheduledDate'] as String)
   ..done = json['done'] as bool?
   ..paid = json['paid'] as bool?
   ..payment = json['payment'] as String?
@@ -77,6 +80,7 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'total': instance.total,
   'discount': instance.discount,
   'dueDate': instance.dueDate?.toIso8601String(),
+  'scheduledDate': instance.scheduledDate?.toIso8601String(),
   'done': instance.done,
   'paid': instance.paid,
   'payment': instance.payment,

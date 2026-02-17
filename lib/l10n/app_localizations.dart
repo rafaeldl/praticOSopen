@@ -967,7 +967,7 @@ abstract class AppLocalizations {
   /// No description provided for @scheduledDate.
   ///
   /// In pt, this message translates to:
-  /// **'Data Agendada'**
+  /// **'Agendado'**
   String get scheduledDate;
 
   /// No description provided for @createdAt.
@@ -5487,6 +5487,84 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Cancelar e Criar Novo'**
   String get cancelAndCreateNew;
+
+  /// No description provided for @agenda.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agenda'**
+  String get agenda;
+
+  /// No description provided for @noScheduledOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS agendada para este dia'**
+  String get noScheduledOrders;
+
+  /// No description provided for @allTeam.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toda a Equipe'**
+  String get allTeam;
+
+  /// No description provided for @filterByTechnician.
+  ///
+  /// In pt, this message translates to:
+  /// **'Filtrar por técnico'**
+  String get filterByTechnician;
+
+  /// No description provided for @allDay.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dia todo'**
+  String get allDay;
+
+  /// No description provided for @clearSchedule.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover agendamento'**
+  String get clearSchedule;
+
+  /// No description provided for @scheduleReminder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete de agendamento'**
+  String get scheduleReminder;
+
+  /// No description provided for @reminderDisabled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desativado'**
+  String get reminderDisabled;
+
+  /// No description provided for @reminderMinutesBefore.
+  ///
+  /// In pt, this message translates to:
+  /// **'{minutes} min antes'**
+  String reminderMinutesBefore(int minutes);
+
+  /// No description provided for @reminderHourBefore.
+  ///
+  /// In pt, this message translates to:
+  /// **'1 hora antes'**
+  String get reminderHourBefore;
+
+  /// No description provided for @reminderHoursBefore.
+  ///
+  /// In pt, this message translates to:
+  /// **'{hours} horas antes'**
+  String reminderHoursBefore(int hours);
+
+  /// No description provided for @reminderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agendamento em breve'**
+  String get reminderTitle;
+
+  /// No description provided for @reminderBodyOrder.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS #{orderNumber} - {customerName}'**
+  String reminderBodyOrder(String orderNumber, String customerName);
 }
 
 class _AppLocalizationsDelegate

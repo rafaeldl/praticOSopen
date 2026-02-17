@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/fcm_token.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest_all.dart' as tz_data;
 
 /// Background message handler - must be a top-level function
 @pragma('vm:entry-point')
@@ -38,12 +40,21 @@ class NotificationService {
   static const String _channelDescription =
       'Notificações sobre ordens de serviço';
 
+  /// Reminders notification channel
+  static const String _remindersChannelId = 'reminders_channel';
+  static const String _remindersChannelName = 'Lembretes';
+  static const String _remindersChannelDescription =
+      'Lembretes de agendamento';
+
   /// Callback for handling notification taps - set this from your app
   void Function(String? orderId, String? companyId)? onNotificationTap;
 
   /// Initialize the notification service
   Future<void> initialize() async {
     if (_isInitialized) return;
+
+    // Initialize timezone data
+    tz_data.initializeTimeZones();
 
     // Set up background message handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -186,6 +197,21 @@ class NotificationService {
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
+
+    // Reminders channel
+    const remindersChannel = AndroidNotificationChannel(
+      _remindersChannelId,
+      _remindersChannelName,
+      description: _remindersChannelDescription,
+      importance: Importance.high,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(remindersChannel);
   }
 
   /// Handle foreground messages
@@ -306,6 +332,61 @@ class NotificationService {
       debugPrint('[NotificationService] Error getting device ID: $e');
     }
     return 'unknown_device';
+  }
+
+  /// Schedule a local reminder notification for an order
+  Future<void> scheduleOrderReminder({
+    required String orderId,
+    required String title,
+    required String body,
+    required DateTime scheduledDate,
+    required int minutesBefore,
+    String? companyId,
+  }) async {
+    if (minutesBefore <= 0) return;
+
+    final reminderTime = scheduledDate.subtract(Duration(minutes: minutesBefore));
+    if (reminderTime.isBefore(DateTime.now())) return;
+
+    final notificationId = orderId.hashCode.abs() % 2147483647;
+    final tzReminderTime = tz.TZDateTime.from(reminderTime, tz.local);
+
+    final payload = 'orderId=$orderId${companyId != null ? '&companyId=$companyId' : ''}';
+
+    await _localNotifications.zonedSchedule(
+      notificationId,
+      title,
+      body,
+      tzReminderTime,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          _remindersChannelId,
+          _remindersChannelName,
+          channelDescription: _remindersChannelDescription,
+          importance: Importance.high,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        ),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: payload,
+    );
+
+    debugPrint('[NotificationService] Scheduled reminder for order $orderId at $reminderTime');
+  }
+
+  /// Cancel a previously scheduled reminder for an order
+  Future<void> cancelOrderReminder(String orderId) async {
+    final notificationId = orderId.hashCode.abs() % 2147483647;
+    await _localNotifications.cancel(notificationId);
+    debugPrint('[NotificationService] Cancelled reminder for order $orderId');
   }
 
   /// Encode notification data to payload string

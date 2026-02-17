@@ -5,6 +5,7 @@ import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/menu_navigation/settings.dart';
 import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
+import 'package:praticos/screens/agenda/agenda_screen.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
@@ -27,6 +28,7 @@ class _NavigationControllerState extends State<NavigationController> {
     return <Widget>[
       Home(),
       HomeCustomerList(),
+      const AgendaScreen(),
       FinancialDashboardSimple(),
       Settings(),
     ];
@@ -50,6 +52,14 @@ class _NavigationControllerState extends State<NavigationController> {
         ),
         activeIcon: const Icon(CupertinoIcons.person_2_fill),
         label: context.l10n.customers,
+      ),
+      BottomNavigationBarItem(
+        icon: Semantics(
+          identifier: 'tab_agenda',
+          child: const Icon(CupertinoIcons.calendar),
+        ),
+        activeIcon: const Icon(CupertinoIcons.calendar_today),
+        label: context.l10n.agenda,
       ),
       BottomNavigationBarItem(
         icon: Semantics(

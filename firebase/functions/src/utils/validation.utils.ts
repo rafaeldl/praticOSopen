@@ -114,6 +114,7 @@ export const createOrderSchema = z.object({
 export const updateOrderSchema = z.object({
   status: z.enum(['quote', 'approved', 'progress', 'done', 'canceled']).optional(),
   dueDate: z.string().datetime().optional(),
+  scheduledDate: z.string().datetime().optional(),
   assignedTo: idSchema.optional(),
 });
 
@@ -222,7 +223,21 @@ export const createFullOrderSchema = z.object({
   })).optional(),
 
   dueDate: z.string().optional(),
+  scheduledDate: z.string().optional(),
   status: z.enum(['quote', 'approved', 'progress']).default('quote'),
+});
+
+/**
+ * Schema for updating an order via bot (generic PATCH)
+ * All fields optional, but at least one must be provided
+ */
+export const updateBotOrderSchema = z.object({
+  status: z.enum(['quote', 'approved', 'progress', 'done', 'canceled']).optional(),
+  dueDate: z.string().optional().nullable(),
+  scheduledDate: z.string().optional().nullable(),
+  assignedTo: idSchema.optional().nullable(),
+}).refine(data => Object.values(data).some(v => v !== undefined), {
+  message: 'At least one field must be provided',
 });
 
 /**

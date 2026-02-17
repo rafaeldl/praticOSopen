@@ -238,6 +238,7 @@ export interface CreateOrderInput {
     description?: string;
   }>;
   dueDate?: string;
+  scheduledDate?: string;
   status?: OrderStatus;
 }
 
@@ -334,6 +335,7 @@ export async function createOrder(
     total,
     discount: 0,
     dueDate: input.dueDate ? new Date(input.dueDate).toISOString() : null,
+    scheduledDate: input.scheduledDate ? new Date(input.scheduledDate).toISOString() : null,
     status,
     done: status === 'done',
     paid: false,
@@ -354,7 +356,8 @@ export async function createOrder(
 export interface UpdateOrderInput {
   status?: OrderStatus;
   dueDate?: string;
-  assignedTo?: UserAggr;
+  scheduledDate?: string | null;
+  assignedTo?: UserAggr | null;
 }
 
 /**
@@ -383,7 +386,11 @@ export async function updateOrder(
   }
 
   if (input.dueDate !== undefined) {
-    updateData.dueDate = new Date(input.dueDate).toISOString();
+    updateData.dueDate = input.dueDate ? new Date(input.dueDate).toISOString() : null;
+  }
+
+  if (input.scheduledDate !== undefined) {
+    updateData.scheduledDate = input.scheduledDate ? new Date(input.scheduledDate).toISOString() : null;
   }
 
   if (input.assignedTo !== undefined) {
