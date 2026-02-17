@@ -9,11 +9,13 @@ import 'package:praticos/services/share_link_service.dart';
 class ShareLinkSheet extends StatefulWidget {
   final Order order;
   final String? companyName;
+  final String? statusContext;
 
   const ShareLinkSheet({
     super.key,
     required this.order,
     this.companyName,
+    this.statusContext,
   });
 
   @override
@@ -24,12 +26,14 @@ class ShareLinkSheet extends StatefulWidget {
     BuildContext context,
     Order order, {
     String? companyName,
+    String? statusContext,
   }) {
     return showCupertinoModalPopup(
       context: context,
       builder: (context) => ShareLinkSheet(
         order: order,
         companyName: companyName,
+        statusContext: statusContext,
       ),
     );
   }
@@ -196,6 +200,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
       orderNumber: widget.order.number ?? 0,
       companyName: widget.companyName,
       locale: context.l10n.localeName,
+      statusContext: widget.statusContext,
     );
 
     // Get the share position for iPad
@@ -226,6 +231,7 @@ class _ShareLinkSheetState extends State<ShareLinkSheet> {
       orderNumber: widget.order.number ?? 0,
       companyName: widget.companyName,
       locale: context.l10n.localeName,
+      statusContext: widget.statusContext,
     );
 
     _service.shareViaWhatsApp(

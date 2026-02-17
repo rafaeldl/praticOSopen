@@ -45,6 +45,7 @@ class _OrderFormState extends State<OrderForm> {
   final ScrollController _scrollController = ScrollController();
   bool _shouldScrollToComments = false;
   String? _highlightCommentId;
+  final Set<String> _dismissedSharePrompts = {};
 
   /// Gets the current locale code for i18n (e.g., 'pt', 'en', 'es')
   String? get _localeCode => context.l10n.localeName;
@@ -1168,10 +1169,10 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   /// Open the share link sheet
-  void _openShareLinkSheet() {
+  void _openShareLinkSheet({String? statusContext}) {
     final order = _store.order;
     if (order?.id == null) return;
-    ShareLinkSheet.show(context, order!);
+    ShareLinkSheet.show(context, order!, statusContext: statusContext);
   }
 
   void _selectCustomer() {
@@ -1298,6 +1299,7 @@ class _OrderFormState extends State<OrderForm> {
     // Se não for "done", permite alterar diretamente
     if (newStatus != 'done') {
       _store.setStatus(newStatus);
+      _promptShareAfterStatusChange(newStatus);
       return;
     }
 
@@ -1310,6 +1312,7 @@ class _OrderFormState extends State<OrderForm> {
     if (pendingForms.isEmpty) {
       // Todos os formulários estão concluídos, permite alterar
       _store.setStatus(newStatus);
+      _promptShareAfterStatusChange(newStatus);
       return;
     }
 
@@ -1331,6 +1334,70 @@ class _OrderFormState extends State<OrderForm> {
         ],
       ),
     );
+  }
+
+  /// Prompt user to share status update with customer via WhatsApp
+  void _promptShareAfterStatusChange(String newStatus) {
+    final order = _store.order;
+    if (order == null || order.id == null) return;
+
+    // Only prompt for relevant statuses
+    if (newStatus != 'approved' && newStatus != 'progress' && newStatus != 'done') return;
+
+    // Skip if customer already has an active share link
+    final existingLink = order.shareLink;
+    if (existingLink != null && !existingLink.isExpired && existingLink.token != null) return;
+
+    // Skip if user already dismissed for this order in this session
+    if (_dismissedSharePrompts.contains(order.id)) return;
+
+    // Only prompt if customer has a phone
+    final customerName = order.customer?.name;
+    final customerPhone = order.customer?.phone;
+    if (customerPhone == null || customerPhone.isEmpty) return;
+
+    // Status-specific dialog title
+    String statusTitle(BuildContext ctx) {
+      switch (newStatus) {
+        case 'approved':
+          return ctx.l10n.statusUpdateApproved;
+        case 'progress':
+          return ctx.l10n.statusUpdateProgress;
+        case 'done':
+          return ctx.l10n.statusUpdateDone;
+        default:
+          return ctx.l10n.notifyCustomerQuestion;
+      }
+    }
+
+    // Show dialog after a brief delay to let the status update settle
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text(statusTitle(ctx)),
+          content: Text(ctx.l10n.notifyCustomerDescription(customerName ?? ctx.l10n.customer)),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () {
+                _dismissedSharePrompts.add(order.id!);
+                Navigator.pop(ctx);
+              },
+              child: Text(ctx.l10n.notNow),
+            ),
+            CupertinoDialogAction(
+              onPressed: () {
+                Navigator.pop(ctx);
+                _openShareLinkSheet(statusContext: newStatus);
+              },
+              child: Text(ctx.l10n.sendViaWhatsApp),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   void _openPaymentManagement() {

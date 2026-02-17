@@ -2773,6 +2773,55 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get notifyCustomerQuestion => 'Notificar cliente?';
+
+  @override
+  String notifyCustomerDescription(String customerName) {
+    return 'Deseja enviar a atualização para $customerName via WhatsApp?';
+  }
+
+  @override
+  String get notNow => 'Agora não';
+
+  @override
+  String get statusUpdateApproved => 'Orçamento aprovado!';
+
+  @override
+  String get statusUpdateProgress => 'Serviço em andamento!';
+
+  @override
+  String get statusUpdateDone => 'Serviço concluído!';
+
+  @override
+  String get connectWhatsApp => 'Conecte seu WhatsApp';
+
+  @override
+  String get connectWhatsAppBannerDescription =>
+      'Receba notificações, gerencie OS e envie atualizações para clientes pelo WhatsApp.';
+
+  @override
+  String get whatsappOnboardingTitle => 'Conecte seu WhatsApp';
+
+  @override
+  String get whatsappOnboardingSubtitle =>
+      'Aproveite ao máximo o PraticOS conectando seu WhatsApp';
+
+  @override
+  String get whatsappBenefitNotifications => 'Receba notificações de novas OS';
+
+  @override
+  String get whatsappBenefitManage => 'Gerencie OS diretamente pelo chat';
+
+  @override
+  String get whatsappBenefitClients => 'Envie atualizações para clientes';
+
+  @override
+  String get linkNow => 'Vincular agora';
+
+  @override
+  String get maybeLater => 'Talvez depois';
+
+  @override
   String inviteWhatsAppMessage(String code) {
     return 'Você foi convidado para a equipe no PraticOS!\n\nCódigo do convite: $code\n\nBaixe o app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos';
   }

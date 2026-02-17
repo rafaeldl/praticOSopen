@@ -7,11 +7,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/mobx/whatsapp_link_store.dart';
+import 'package:praticos/mobx/whatsapp_setup_banner_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
+import 'package:praticos/screens/widgets/whatsapp_setup_banner.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
@@ -32,6 +38,9 @@ class _HomeState extends State<Home> {
   final AuthorizationService _authService = AuthorizationService.instance;
   late OrderStore orderStore;
   bool _showFilterChips = false;
+  final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
+  final WhatsAppSetupBannerStore _bannerStore = WhatsAppSetupBannerStore();
+  bool _whatsappStatusLoaded = false;
 
   List<Map<String, dynamic>> _getFilters(SegmentConfigProvider config) {
     final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
@@ -79,6 +88,15 @@ class _HomeState extends State<Home> {
       });
     } else {
       _loadOrders(_getFilters(config));
+    }
+
+    // Load WhatsApp status once for navbar button and banner
+    if (!_whatsappStatusLoaded) {
+      _whatsappStatusLoaded = true;
+      _whatsappStore.loadStatus().then((_) {
+        _bannerStore.updateLinkStatus(_whatsappStore.isLinked);
+        _bannerStore.checkVisibility();
+      });
     }
   }
 
@@ -154,6 +172,7 @@ class _HomeState extends State<Home> {
               _buildActiveFilterHeader(config),
               _buildSearchField(config),
               _buildFilterChips(config),
+              _buildWhatsAppBanner(),
               _buildOrdersList(config),
             SliverToBoxAdapter(
                child: Observer(builder: (_) {
@@ -213,6 +232,57 @@ class _HomeState extends State<Home> {
       largeTitle: Semantics(
         identifier: 'home_title',
         child: Text(config.serviceOrderPlural),
+      ),
+      leading: Observer(
+        builder: (_) {
+          final isLinked = _whatsappStore.isLinked;
+          return Semantics(
+            identifier: 'whatsapp_button',
+            button: true,
+            label: 'WhatsApp',
+            child: CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  FaIcon(
+                    FontAwesomeIcons.whatsapp,
+                    size: 24,
+                    color: isLinked
+                        ? const Color(0xFF25D366)
+                        : CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                  if (!isLinked)
+                    Positioned(
+                      right: -4,
+                      top: -4,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: CupertinoColors.systemRed,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                if (isLinked) {
+                  final uri = Uri.parse('https://wa.me/${_whatsappStore.botNumber}');
+                  launchUrl(uri, mode: LaunchMode.externalApplication);
+                } else {
+                  LinkWhatsAppSheet.show(context, _whatsappStore).then((_) {
+                    _whatsappStore.loadStatus().then((_) {
+                      _bannerStore.updateLinkStatus(_whatsappStore.isLinked);
+                    });
+                  });
+                }
+              },
+            ),
+          );
+        },
       ),
       trailing: Observer(
         builder: (_) => Row(
@@ -459,6 +529,28 @@ class _HomeState extends State<Home> {
       default:
         return CupertinoColors.activeBlue;
     }
+  }
+
+  Widget _buildWhatsAppBanner() {
+    return SliverToBoxAdapter(
+      child: Observer(
+        builder: (_) {
+          if (!_bannerStore.isVisible) return const SizedBox.shrink();
+          return WhatsAppSetupBanner(
+            onConnect: () {
+              LinkWhatsAppSheet.show(context, _whatsappStore).then((_) {
+                _whatsappStore.loadStatus().then((_) {
+                  _bannerStore.updateLinkStatus(_whatsappStore.isLinked);
+                });
+              });
+            },
+            onDismiss: () {
+              _bannerStore.dismiss();
+            },
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildOrdersList(SegmentConfigProvider config) {

@@ -5314,6 +5314,96 @@ abstract class AppLocalizations {
   /// **'{count} {count, plural, =1{estrela} other{estrelas}}'**
   String ratingWithStars(int count);
 
+  /// No description provided for @notifyCustomerQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Notificar cliente?'**
+  String get notifyCustomerQuestion;
+
+  /// No description provided for @notifyCustomerDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja enviar a atualização para {customerName} via WhatsApp?'**
+  String notifyCustomerDescription(String customerName);
+
+  /// No description provided for @notNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agora não'**
+  String get notNow;
+
+  /// No description provided for @statusUpdateApproved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Orçamento aprovado!'**
+  String get statusUpdateApproved;
+
+  /// No description provided for @statusUpdateProgress.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço em andamento!'**
+  String get statusUpdateProgress;
+
+  /// No description provided for @statusUpdateDone.
+  ///
+  /// In pt, this message translates to:
+  /// **'Serviço concluído!'**
+  String get statusUpdateDone;
+
+  /// No description provided for @connectWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conecte seu WhatsApp'**
+  String get connectWhatsApp;
+
+  /// No description provided for @connectWhatsAppBannerDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receba notificações, gerencie OS e envie atualizações para clientes pelo WhatsApp.'**
+  String get connectWhatsAppBannerDescription;
+
+  /// No description provided for @whatsappOnboardingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conecte seu WhatsApp'**
+  String get whatsappOnboardingTitle;
+
+  /// No description provided for @whatsappOnboardingSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Aproveite ao máximo o PraticOS conectando seu WhatsApp'**
+  String get whatsappOnboardingSubtitle;
+
+  /// No description provided for @whatsappBenefitNotifications.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receba notificações de novas OS'**
+  String get whatsappBenefitNotifications;
+
+  /// No description provided for @whatsappBenefitManage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerencie OS diretamente pelo chat'**
+  String get whatsappBenefitManage;
+
+  /// No description provided for @whatsappBenefitClients.
+  ///
+  /// In pt, this message translates to:
+  /// **'Envie atualizações para clientes'**
+  String get whatsappBenefitClients;
+
+  /// No description provided for @linkNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vincular agora'**
+  String get linkNow;
+
+  /// No description provided for @maybeLater.
+  ///
+  /// In pt, this message translates to:
+  /// **'Talvez depois'**
+  String get maybeLater;
+
   /// No description provided for @inviteWhatsAppMessage.
   ///
   /// In pt, this message translates to:

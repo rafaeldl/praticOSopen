@@ -12,6 +12,9 @@ class WhatsAppLinkService {
   static const String _baseUrl =
       'https://southamerica-east1-praticos.cloudfunctions.net/api';
 
+  /// Fixed bot WhatsApp number (matches backend BOT_WHATSAPP_NUMBER)
+  static const String botNumber = '+5548988794742';
+
   /// Get Firebase Auth token for API requests
   Future<String?> _getAuthToken() async {
     final user = FirebaseAuth.instance.currentUser;

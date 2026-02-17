@@ -11,6 +11,7 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/services/bootstrap_service.dart';
 import 'package:praticos/services/claims_service.dart';
+import 'package:praticos/screens/onboarding/whatsapp_onboarding_screen.dart';
 
 class ConfirmBootstrapScreen extends StatefulWidget {
   final AuthStore authStore;
@@ -216,8 +217,13 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
         // Reload AuthStore BEFORE navigating to update companyAggr
         await widget.authStore.reloadUserAndCompany();
 
-        // Navigate to home
-        Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        // Navigate to WhatsApp onboarding screen
+        Navigator.of(context).pushAndRemoveUntil(
+          CupertinoPageRoute(
+            builder: (_) => const WhatsAppOnboardingScreen(),
+          ),
+          (route) => false,
+        );
       }
     } catch (e, stack) {
       debugPrint('❌ Error in _saveCompany: $e');

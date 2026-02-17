@@ -1131,6 +1131,31 @@
     }
   },
 
+  "notifyCustomerQuestion": "Notify customer?",
+  "notifyCustomerDescription": "Do you want to send the update to {customerName} via WhatsApp?",
+  "@notifyCustomerDescription": {
+    "placeholders": {
+      "customerName": {
+        "type": "String"
+      }
+    }
+  },
+  "notNow": "Not now",
+  "statusUpdateApproved": "Quote approved!",
+  "statusUpdateProgress": "Service in progress!",
+  "statusUpdateDone": "Service completed!",
+
+  "connectWhatsApp": "Connect your WhatsApp",
+  "connectWhatsAppBannerDescription": "Receive notifications, manage work orders and send updates to customers via WhatsApp.",
+
+  "whatsappOnboardingTitle": "Connect your WhatsApp",
+  "whatsappOnboardingSubtitle": "Get the most out of PraticOS by connecting your WhatsApp",
+  "whatsappBenefitNotifications": "Receive notifications for new work orders",
+  "whatsappBenefitManage": "Manage work orders directly via chat",
+  "whatsappBenefitClients": "Send updates to customers",
+  "linkNow": "Link now",
+  "maybeLater": "Maybe later",
+
   "inviteWhatsAppMessage": "You have been invited to the team on PraticOS!\n\nInvite code: {code}\n\nDownload the app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos",
   "@inviteWhatsAppMessage": {
     "placeholders": {

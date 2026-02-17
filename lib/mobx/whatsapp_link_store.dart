@@ -26,6 +26,9 @@ abstract class _WhatsAppLinkStore with Store {
   @observable
   String? error;
 
+  /// Bot number from API, with constant fallback
+  String get botNumber => WhatsAppLinkService.botNumber;
+
   @computed
   bool get hasToken => currentToken != null;
 
