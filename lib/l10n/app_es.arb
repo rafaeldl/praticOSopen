@@ -843,9 +843,9 @@
   "searchAnotherCode": "Buscar otro código",
   "joinAnotherCompany": "Unirse a otra empresa",
   "shareInvite": "Compartir Invitación",
-  "copyInviteLink": "Copiar Enlace de Invitación",
+  "copyInviteCode": "Copiar Código de Invitación",
   "sendViaWhatsAppInvite": "Enviar invitación vía WhatsApp",
-  "inviteLinkCopied": "¡Enlace de invitación copiado!",
+  "inviteCodeCopied": "¡Código de invitación copiado!",
   "phoneOptional": "Teléfono (opcional)",
   "emailOrPhone": "Ingrese email o teléfono",
   "inviteExpiresIn": "Invitación válida por {days} días",
@@ -1129,5 +1129,45 @@
         "type": "int"
       }
     }
-  }
+  },
+
+  "inviteWhatsAppMessage": "¡Has sido invitado al equipo en PraticOS!\n\nCódigo de invitación: {code}\n\nDescarga la app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos",
+  "@inviteWhatsAppMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadApp": "Descarga la app",
+
+  "cannotRemoveOnlyAdmin": "No es posible eliminar al único administrador de la empresa. Promueva a otro colaborador a administrador primero.",
+  "cannotChangeOnlyAdminRole": "No es posible cambiar el perfil del único administrador. Promueva a otro colaborador a administrador primero.",
+  "cannotRemoveSelf": "No puede eliminarse a sí mismo de la empresa.",
+  "invalidInviteCompanyNotFound": "Invitación inválida: empresa no encontrada.",
+
+  "shareInviteAction": "Compartir Invitación",
+
+  "inviteExpiresInDays": "{count, plural, =1{Expira en 1 día} other{Expira en {count} días}}",
+  "@inviteExpiresInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteExpiresInHours": "{count, plural, =1{Expira en 1 hora} other{Expira en {count} horas}}",
+  "@inviteExpiresInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteExpiresSoon": "Expira pronto",
+
+  "duplicateInviteTitle": "Invitación Existente",
+  "duplicateInviteMessage": "Ya existe una invitación pendiente para este correo/teléfono.",
+  "resendExistingInvite": "Reenviar Existente",
+  "cancelAndCreateNew": "Cancelar y Crear Nueva"
 }

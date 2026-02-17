@@ -2284,13 +2284,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareInvite => 'Share Invite';
 
   @override
-  String get copyInviteLink => 'Copy Invite Link';
+  String get copyInviteCode => 'Copy Invite Code';
 
   @override
   String get sendViaWhatsAppInvite => 'Send invite via WhatsApp';
 
   @override
-  String get inviteLinkCopied => 'Invite link copied!';
+  String get inviteCodeCopied => 'Invite code copied!';
 
   @override
   String get phoneOptional => 'Phone (optional)';
@@ -2759,4 +2759,68 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$count $_temp0';
   }
+
+  @override
+  String inviteWhatsAppMessage(String code) {
+    return 'You have been invited to the team on PraticOS!\n\nInvite code: $code\n\nDownload the app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos';
+  }
+
+  @override
+  String get downloadApp => 'Download the app';
+
+  @override
+  String get cannotRemoveOnlyAdmin =>
+      'Cannot remove the only administrator of the company. Promote another collaborator to administrator first.';
+
+  @override
+  String get cannotChangeOnlyAdminRole =>
+      'Cannot change the only administrator\'s role. Promote another collaborator to administrator first.';
+
+  @override
+  String get cannotRemoveSelf => 'You cannot remove yourself from the company.';
+
+  @override
+  String get invalidInviteCompanyNotFound =>
+      'Invalid invite: company not found.';
+
+  @override
+  String get shareInviteAction => 'Share Invite';
+
+  @override
+  String inviteExpiresInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Expires in $count days',
+      one: 'Expires in 1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String inviteExpiresInHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Expires in $count hours',
+      one: 'Expires in 1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inviteExpiresSoon => 'Expires soon';
+
+  @override
+  String get duplicateInviteTitle => 'Existing Invite';
+
+  @override
+  String get duplicateInviteMessage =>
+      'There is already a pending invite for this email/phone.';
+
+  @override
+  String get resendExistingInvite => 'Resend Existing';
+
+  @override
+  String get cancelAndCreateNew => 'Cancel and Create New';
 }

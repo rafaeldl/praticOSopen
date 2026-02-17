@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/mobx/collaborator_store.dart';
+import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -33,29 +34,6 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     return digitsOnly.length >= 10 && digitsOnly.length <= 15;
   }
 
-  /// Generates the WhatsApp link for the invite.
-  /// If phone is provided, opens chat with that number. Otherwise, opens share dialog.
-  String _getWhatsAppLink(String token, {String? phone}) {
-    final inviteLink = _getInviteLink(token);
-    final message = Uri.encodeComponent(
-      'Você foi convidado para se juntar à nossa equipe no PraticOS!\n\n'
-      'Use este link para aceitar o convite:\n$inviteLink\n\n'
-      'Ou digite o código: $token',
-    );
-
-    if (phone != null && phone.isNotEmpty) {
-      final cleanNumber = phone.replaceAll(RegExp(r'\D'), '');
-      return 'https://wa.me/$cleanNumber?text=$message';
-    }
-    // No phone - let user choose recipient
-    return 'https://wa.me/?text=$message';
-  }
-
-  /// Generates the web link for the invite.
-  String _getInviteLink(String token) {
-    return 'https://praticos.web.app/invite?token=$token';
-  }
-
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -67,6 +45,25 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     if (email.isEmpty && phone.isEmpty) {
       _showErrorDialog(context.l10n.emailOrPhone);
       return;
+    }
+
+    // Check for existing pending invite with same email/phone
+    final existingInvite = _collaboratorStore.findExistingPendingInvite(
+      email: email.isNotEmpty ? email : null,
+      phone: phone.isNotEmpty ? phone : null,
+    );
+    if (existingInvite != null) {
+      final shouldResend = await _showDuplicateInviteDialog(existingInvite);
+      if (shouldResend == true) {
+        // Resend existing invite via share sheet
+        await _showInviteShareSheet(existingInvite.token!);
+        return;
+      } else if (shouldResend == null) {
+        // User cancelled
+        return;
+      }
+      // shouldResend == false → cancel existing and create new (falls through)
+      await _collaboratorStore.cancelInvite(existingInvite.id!);
     }
 
     setState(() => _isLoading = true);
@@ -107,8 +104,7 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     await InviteShareSheet.show(
       context,
       token: token,
-      inviteLink: _getInviteLink(token),
-      whatsappLink: _getWhatsAppLink(token, phone: phone.isNotEmpty ? phone : null),
+      whatsappPhone: phone.isNotEmpty ? phone : null,
       expirationDays: _inviteExpirationDays,
     );
     if (mounted) {
@@ -129,6 +125,33 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
               Navigator.pop(context); // Fecha o dialog
               Navigator.pop(this.context, true); // Volta para a lista
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shows a dialog when a duplicate invite is found.
+  /// Returns: true = resend existing, false = cancel and create new, null = cancelled
+  Future<bool?> _showDuplicateInviteDialog(Invite existingInvite) {
+    return showCupertinoDialog<bool>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: Text(context.l10n.duplicateInviteTitle),
+        content: Text(context.l10n.duplicateInviteMessage),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.resendExistingInvite),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text(context.l10n.cancelAndCreateNew),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          CupertinoDialogAction(
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(context, null),
           ),
         ],
       ),

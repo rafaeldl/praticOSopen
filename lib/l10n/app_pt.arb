@@ -910,9 +910,9 @@
   "searchAnotherCode": "Buscar outro código",
   "joinAnotherCompany": "Entrar em outra empresa",
   "shareInvite": "Compartilhar Convite",
-  "copyInviteLink": "Copiar Link do Convite",
+  "copyInviteCode": "Copiar Código do Convite",
   "sendViaWhatsAppInvite": "Enviar convite via WhatsApp",
-  "inviteLinkCopied": "Link do convite copiado!",
+  "inviteCodeCopied": "Código do convite copiado!",
   "phoneOptional": "Telefone (opcional)",
   "emailOrPhone": "Informe email ou telefone",
   "inviteExpiresIn": "Convite válido por {days} dias",
@@ -1174,5 +1174,45 @@
         "type": "int"
       }
     }
-  }
+  },
+
+  "inviteWhatsAppMessage": "Você foi convidado para a equipe no PraticOS!\n\nCódigo do convite: {code}\n\nBaixe o app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos",
+  "@inviteWhatsAppMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "downloadApp": "Baixe o app",
+
+  "cannotRemoveOnlyAdmin": "Não é possível remover o único administrador da empresa. Promova outro colaborador a administrador antes de remover este.",
+  "cannotChangeOnlyAdminRole": "Não é possível alterar o perfil do único administrador. Promova outro colaborador a administrador antes de alterar este.",
+  "cannotRemoveSelf": "Você não pode remover a si mesmo da empresa.",
+  "invalidInviteCompanyNotFound": "Convite inválido: empresa não encontrada.",
+
+  "shareInviteAction": "Compartilhar Convite",
+
+  "inviteExpiresInDays": "{count, plural, =1{Expira em 1 dia} other{Expira em {count} dias}}",
+  "@inviteExpiresInDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteExpiresInHours": "{count, plural, =1{Expira em 1 hora} other{Expira em {count} horas}}",
+  "@inviteExpiresInHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inviteExpiresSoon": "Expira em breve",
+
+  "duplicateInviteTitle": "Convite Existente",
+  "duplicateInviteMessage": "Já existe um convite pendente para este email/telefone.",
+  "resendExistingInvite": "Reenviar Existente",
+  "cancelAndCreateNew": "Cancelar e Criar Novo"
 }

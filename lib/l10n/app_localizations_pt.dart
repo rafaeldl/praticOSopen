@@ -2297,13 +2297,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get shareInvite => 'Compartilhar Convite';
 
   @override
-  String get copyInviteLink => 'Copiar Link do Convite';
+  String get copyInviteCode => 'Copiar Código do Convite';
 
   @override
   String get sendViaWhatsAppInvite => 'Enviar convite via WhatsApp';
 
   @override
-  String get inviteLinkCopied => 'Link do convite copiado!';
+  String get inviteCodeCopied => 'Código do convite copiado!';
 
   @override
   String get phoneOptional => 'Telefone (opcional)';
@@ -2771,4 +2771,68 @@ class AppLocalizationsPt extends AppLocalizations {
     );
     return '$count $_temp0';
   }
+
+  @override
+  String inviteWhatsAppMessage(String code) {
+    return 'Você foi convidado para a equipe no PraticOS!\n\nCódigo do convite: $code\n\nBaixe o app:\niOS: https://apps.apple.com/br/app/praticos/id1534604555\nAndroid: https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos';
+  }
+
+  @override
+  String get downloadApp => 'Baixe o app';
+
+  @override
+  String get cannotRemoveOnlyAdmin =>
+      'Não é possível remover o único administrador da empresa. Promova outro colaborador a administrador antes de remover este.';
+
+  @override
+  String get cannotChangeOnlyAdminRole =>
+      'Não é possível alterar o perfil do único administrador. Promova outro colaborador a administrador antes de alterar este.';
+
+  @override
+  String get cannotRemoveSelf => 'Você não pode remover a si mesmo da empresa.';
+
+  @override
+  String get invalidInviteCompanyNotFound =>
+      'Convite inválido: empresa não encontrada.';
+
+  @override
+  String get shareInviteAction => 'Compartilhar Convite';
+
+  @override
+  String inviteExpiresInDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Expira em $count dias',
+      one: 'Expira em 1 dia',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String inviteExpiresInHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Expira em $count horas',
+      one: 'Expira em 1 hora',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get inviteExpiresSoon => 'Expira em breve';
+
+  @override
+  String get duplicateInviteTitle => 'Convite Existente';
+
+  @override
+  String get duplicateInviteMessage =>
+      'Já existe um convite pendente para este email/telefone.';
+
+  @override
+  String get resendExistingInvite => 'Reenviar Existente';
+
+  @override
+  String get cancelAndCreateNew => 'Cancelar e Criar Novo';
 }

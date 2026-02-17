@@ -2,11 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider, InkWell, DismissDirection;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
+import 'package:praticos/models/collaborator_exception.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/screens/widgets/invite_share_sheet.dart';
 
 class CollaboratorListScreen extends StatefulWidget {
   @override
@@ -17,6 +19,9 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
   final CollaboratorStore _collaboratorStore = CollaboratorStore.instance;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+
+  // Default invite expiration days (must match collaborator_form_screen)
+  static const int _inviteExpirationDays = 7;
 
   @override
   void initState() {
@@ -99,8 +104,12 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     final filteredInvites = _searchQuery.isEmpty
         ? _collaboratorStore.pendingInvites.toList()
         : _collaboratorStore.pendingInvites.where((invite) {
+            final name = invite.name?.toLowerCase() ?? '';
             final email = invite.email?.toLowerCase() ?? '';
-            return email.contains(_searchQuery);
+            final phone = invite.phone?.toLowerCase() ?? '';
+            return name.contains(_searchQuery) ||
+                email.contains(_searchQuery) ||
+                phone.contains(_searchQuery);
           }).toList();
 
     if (filteredList.isEmpty && filteredInvites.isEmpty) {
@@ -158,7 +167,37 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     );
   }
 
+  /// Returns the expiration label and color for an invite.
+  (String, Color) _getExpirationInfo(Invite invite) {
+    if (invite.expiresAt == null) {
+      return ('', CupertinoColors.secondaryLabel);
+    }
+
+    final now = DateTime.now();
+    final diff = invite.expiresAt!.difference(now);
+
+    if (diff.isNegative) {
+      return (context.l10n.expired, CupertinoColors.systemRed);
+    }
+
+    if (diff.inHours < 1) {
+      return (context.l10n.inviteExpiresSoon, CupertinoColors.systemOrange);
+    }
+
+    if (diff.inDays < 1) {
+      final hours = diff.inHours;
+      return (context.l10n.inviteExpiresInHours(hours), CupertinoColors.systemOrange);
+    }
+
+    final days = diff.inDays;
+    final color = days <= 2 ? CupertinoColors.systemOrange : CupertinoColors.secondaryLabel;
+    return (context.l10n.inviteExpiresInDays(days), color);
+  }
+
   Widget _buildInviteRow(Invite invite, bool canManage, bool isLast) {
+    final (expirationLabel, expirationColor) = _getExpirationInfo(invite);
+    final primaryText = invite.name ?? invite.email ?? context.l10n.emailNotProvided;
+
     Widget content = Container(
       color: CupertinoColors.systemBackground.resolveFrom(context),
       child: InkWell(
@@ -189,13 +228,23 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          invite.email ?? context.l10n.emailNotProvided,
+                          primaryText,
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
                             color: CupertinoColors.label.resolveFrom(context),
                           ),
                         ),
+                        if (invite.name != null && invite.email != null) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            invite.email!,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 2),
                         Row(
                           children: [
@@ -224,13 +273,16 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                             ),
                           ],
                         ),
-                        Text(
-                          _getRoleDescription(invite.role ?? RolesType.technician),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                        if (expirationLabel.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            expirationLabel,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: expirationColor,
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),
@@ -273,9 +325,16 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => CupertinoActionSheet(
-        title: Text('${context.l10n.inviteTo} ${invite.email}'),
+        title: Text('${context.l10n.inviteTo} ${invite.name ?? invite.email}'),
         message: Text(context.l10n.invitePendingMessage),
         actions: [
+          CupertinoActionSheetAction(
+            child: Text(context.l10n.shareInviteAction),
+            onPressed: () {
+              Navigator.pop(context);
+              _reshareInvite(invite);
+            },
+          ),
           CupertinoActionSheetAction(
             isDestructiveAction: true,
             child: Text(context.l10n.cancelInvite),
@@ -293,13 +352,23 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
     );
   }
 
+  void _reshareInvite(Invite invite) {
+    if (invite.token == null) return;
+    InviteShareSheet.show(
+      context,
+      token: invite.token!,
+      whatsappPhone: invite.phone,
+      expirationDays: _inviteExpirationDays,
+    );
+  }
+
   void _showCancelInviteConfirmation(Invite invite) {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: Text(context.l10n.cancelInvite),
         content: Text(
-            '${context.l10n.confirmCancelInvite} ${invite.email}?'),
+            '${context.l10n.confirmCancelInvite} ${invite.name ?? invite.email}?'),
         actions: [
           CupertinoDialogAction(
             child: Text(context.l10n.no),
@@ -512,6 +581,8 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
                 try {
                   await _collaboratorStore.updateCollaboratorRole(
                       membership.userId!, role);
+                } on CollaboratorException catch (e) {
+                  _showError(_getLocalizedErrorMessage(e.code));
                 } catch (e) {
                   _showError(e.toString());
                 }
@@ -545,6 +616,8 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
               Navigator.pop(context);
               try {
                 await _collaboratorStore.removeCollaborator(membership.userId!);
+              } on CollaboratorException catch (e) {
+                _showError(_getLocalizedErrorMessage(e.code));
               } catch (e) {
                 _showError(e.toString());
               }
@@ -554,6 +627,22 @@ class _CollaboratorListScreenState extends State<CollaboratorListScreen> {
         ],
       ),
     );
+  }
+
+  /// Maps a [CollaboratorErrorCode] to a localized message.
+  String _getLocalizedErrorMessage(CollaboratorErrorCode code) {
+    switch (code) {
+      case CollaboratorErrorCode.cannotRemoveOnlyAdmin:
+        return context.l10n.cannotRemoveOnlyAdmin;
+      case CollaboratorErrorCode.cannotChangeOnlyAdminRole:
+        return context.l10n.cannotChangeOnlyAdminRole;
+      case CollaboratorErrorCode.cannotRemoveSelf:
+        return context.l10n.cannotRemoveSelf;
+      case CollaboratorErrorCode.invalidInvite:
+        return context.l10n.invalidInviteCompanyNotFound;
+      case CollaboratorErrorCode.userNotFound:
+        return context.l10n.userNotFound;
+    }
   }
 
   void _showError(String message) {
