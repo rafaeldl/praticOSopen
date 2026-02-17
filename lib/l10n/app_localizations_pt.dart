@@ -449,7 +449,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get thisYear => 'Este Ano';
 
   @override
-  String get scheduledDate => 'Data Agendada';
+  String get scheduledDate => 'Agendado';
 
   @override
   String get createdAt => 'Criado em';
@@ -2884,4 +2884,22 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get cancelAndCreateNew => 'Cancelar e Criar Novo';
+
+  @override
+  String get agenda => 'Agenda';
+
+  @override
+  String get noScheduledOrders => 'Nenhuma OS agendada para este dia';
+
+  @override
+  String get allTeam => 'Toda a Equipe';
+
+  @override
+  String get filterByTechnician => 'Filtrar por técnico';
+
+  @override
+  String get allDay => 'Dia todo';
+
+  @override
+  String get clearSchedule => 'Remover agendamento';
 }

@@ -270,6 +270,16 @@ class _OrderFormState extends State<OrderForm> {
 
         return _buildGroupedSection(
           header: context.l10n.overview.toUpperCase(),
+          trailing: hasCreatedDate
+              ? Text(
+                  '${context.l10n.createdAt} ${_store.formattedCreatedDate}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                    fontWeight: FontWeight.w400,
+                  ),
+                )
+              : null,
           children: [
             _buildListTile(
               context: context,
@@ -280,15 +290,7 @@ class _OrderFormState extends State<OrderForm> {
               showChevron: true,
               valueColor: _getStatusColorCupertino(_store.status),
             ),
-            if (hasCreatedDate)
-              _buildListTile(
-                context: context,
-                icon: CupertinoIcons.clock,
-                title: context.l10n.createdAt,
-                value: _store.formattedCreatedDate,
-                onTap: () {},
-                showChevron: false,
-              ),
+            _buildScheduledDateTile(context),
             _buildListTile(
               context: context,
               icon: CupertinoIcons.calendar,
@@ -1222,6 +1224,124 @@ class _OrderFormState extends State<OrderForm> {
         ),
       ),
     );
+  }
+
+  Widget _buildScheduledDateTile(BuildContext context) {
+    return Observer(
+      builder: (_) {
+        final hasScheduledDate = _store.scheduledDate != null;
+        final canEdit = _store.order != null
+            ? _authService.canEditOrderMainFields(_store.order!)
+            : true;
+
+        return GestureDetector(
+          onTap: canEdit ? _selectScheduledDate : null,
+          child: Container(
+            color: CupertinoColors.systemBackground.resolveFrom(context).withValues(alpha: 0),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(CupertinoIcons.calendar_badge_plus,
+                          color: CupertinoTheme.of(context).primaryColor, size: 22),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          context.l10n.scheduledDate,
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: canEdit
+                                ? CupertinoColors.label.resolveFrom(context)
+                                : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            hasScheduledDate ? _store.scheduledDate! : context.l10n.select,
+                            style: TextStyle(
+                              fontSize: 17,
+                              color: canEdit
+                                  ? (hasScheduledDate
+                                      ? CupertinoColors.secondaryLabel.resolveFrom(context)
+                                      : CupertinoColors.placeholderText.resolveFrom(context))
+                                  : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                            ),
+                            textAlign: TextAlign.end,
+                          ),
+                        ),
+                      ),
+                      if (hasScheduledDate && canEdit) ...[
+                        const SizedBox(width: 6),
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(24, 24),
+                          onPressed: () => _store.clearScheduledDate(),
+                          child: Icon(
+                            CupertinoIcons.xmark_circle_fill,
+                            size: 18,
+                            color: CupertinoColors.systemGrey3.resolveFrom(context),
+                          ),
+                        ),
+                      ] else if (canEdit) ...[
+                        const SizedBox(width: 6),
+                        Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 16,
+                          color: CupertinoColors.systemGrey3.resolveFrom(context),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                // No divider - this is before other items that have their own divider
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _selectScheduledDate() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => Container(
+        height: 216,
+        padding: const EdgeInsets.only(top: 6.0),
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: SafeArea(
+          top: false,
+          child: CupertinoDatePicker(
+            initialDateTime: (_store.order?.scheduledDate != null)
+                ? _store.order!.scheduledDate!
+                : _roundToNext15(DateTime.now()),
+            mode: CupertinoDatePickerMode.dateAndTime,
+            minuteInterval: 15,
+            use24hFormat: true,
+            onDateTimeChanged: (DateTime newDate) {
+              _store.setScheduledDate(newDate);
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Rounds a DateTime up to the next 15-minute interval.
+  DateTime _roundToNext15(DateTime dt) {
+    final minutes = dt.minute;
+    final remainder = minutes % 15;
+    if (remainder == 0) return dt;
+    return dt.add(Duration(minutes: 15 - remainder)).copyWith(second: 0, millisecond: 0, microsecond: 0);
   }
 
   void _selectStatus(SegmentConfigProvider config) {

@@ -447,7 +447,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thisYear => 'This Year';
 
   @override
-  String get scheduledDate => 'Scheduled Date';
+  String get scheduledDate => 'Scheduled';
 
   @override
   String get createdAt => 'Created at';
@@ -2873,4 +2873,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelAndCreateNew => 'Cancel and Create New';
+
+  @override
+  String get agenda => 'Schedule';
+
+  @override
+  String get noScheduledOrders => 'No orders scheduled for this day';
+
+  @override
+  String get allTeam => 'All Team';
+
+  @override
+  String get filterByTechnician => 'Filter by technician';
+
+  @override
+  String get allDay => 'All day';
+
+  @override
+  String get clearSchedule => 'Clear schedule';
 }

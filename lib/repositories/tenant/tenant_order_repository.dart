@@ -119,6 +119,59 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     }
   }
 
+  /// Busca orders por intervalo de scheduledDate.
+  Future<List<Order?>> getOrdersByScheduledDateRange(
+    String companyId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final List<QueryArgs> filterList = [
+        QueryArgs(
+          'scheduledDate',
+          startDate.toIso8601String(),
+          oper: 'isGreaterThanOrEqualTo',
+        ),
+        QueryArgs(
+          'scheduledDate',
+          endDate.toIso8601String(),
+          oper: 'isLessThan',
+        ),
+      ];
+
+      final List<OrderBy> orderBy = [OrderBy('scheduledDate')];
+
+      return getQueryList(companyId, orderBy: orderBy, args: filterList);
+    } catch (e) {
+      print('Erro ao buscar ordens por scheduledDate: $e');
+      return [];
+    }
+  }
+
+  /// Stream de orders por intervalo de scheduledDate.
+  Stream<List<Order?>> streamOrdersByScheduledDateRange(
+    String companyId,
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    final List<QueryArgs> filterList = [
+      QueryArgs(
+        'scheduledDate',
+        startDate.toIso8601String(),
+        oper: 'isGreaterThanOrEqualTo',
+      ),
+      QueryArgs(
+        'scheduledDate',
+        endDate.toIso8601String(),
+        oper: 'isLessThan',
+      ),
+    ];
+
+    final List<OrderBy> orderBy = [OrderBy('scheduledDate')];
+
+    return streamQueryList(companyId, orderBy: orderBy, args: filterList);
+  }
+
   /// Stream de orders com filtros opcionais.
   Stream<List<Order?>> streamOrders(
     String companyId, {

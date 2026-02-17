@@ -165,7 +165,7 @@
   "thisMonth": "This Month",
   "lastMonth": "Last Month",
   "thisYear": "This Year",
-  "scheduledDate": "Scheduled Date",
+  "scheduledDate": "Scheduled",
   "createdAt": "Created at",
   "updatedAt": "Updated at",
   "date": "Date",
@@ -1194,5 +1194,12 @@
   "duplicateInviteTitle": "Existing Invite",
   "duplicateInviteMessage": "There is already a pending invite for this email/phone.",
   "resendExistingInvite": "Resend Existing",
-  "cancelAndCreateNew": "Cancel and Create New"
+  "cancelAndCreateNew": "Cancel and Create New",
+
+  "agenda": "Schedule",
+  "noScheduledOrders": "No orders scheduled for this day",
+  "allTeam": "All Team",
+  "filterByTechnician": "Filter by technician",
+  "allDay": "All day",
+  "clearSchedule": "Clear schedule"
 }
