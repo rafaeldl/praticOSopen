@@ -142,11 +142,13 @@ class WhatsAppLinkStatus {
   final bool linked;
   final String? number;
   final DateTime? linkedAt;
+  final String? botNumber;
 
   WhatsAppLinkStatus({
     required this.linked,
     this.number,
     this.linkedAt,
+    this.botNumber,
   });
 
   factory WhatsAppLinkStatus.fromJson(Map<String, dynamic> json) {
@@ -167,6 +169,7 @@ class WhatsAppLinkStatus {
       linked: json['linked'] as bool? ?? false,
       number: json['number'] as String?,
       linkedAt: linkedAt,
+      botNumber: json['botNumber'] as String?,
     );
   }
 }

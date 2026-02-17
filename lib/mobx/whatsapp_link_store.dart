@@ -42,14 +42,19 @@ abstract class _WhatsAppLinkStore with Store {
     error = null;
 
     try {
-      // Load botNumber from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      botNumber = prefs.getString(_botNumberKey);
-
       final status = await _service.getStatus();
       isLinked = status.linked;
       linkedNumber = status.number;
       linkedAt = status.linkedAt;
+
+      // Update botNumber from status response or SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      if (status.botNumber != null && status.botNumber!.isNotEmpty) {
+        botNumber = status.botNumber;
+        await prefs.setString(_botNumberKey, status.botNumber!);
+      } else {
+        botNumber = prefs.getString(_botNumberKey);
+      }
     } on WhatsAppLinkException catch (e) {
       error = e.message;
     } catch (e) {

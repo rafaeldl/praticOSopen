@@ -100,6 +100,7 @@ router.get('/whatsapp/status', async (req: AuthenticatedRequest, res: Response) 
         linked: !!whatsappLink,
         number: whatsappLink?.identifier,
         linkedAt: whatsappLink?.linkedAt,
+        botNumber: BOT_WHATSAPP_NUMBER,
       },
     });
   } catch (error) {

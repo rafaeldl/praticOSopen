@@ -40,6 +40,7 @@ class _HomeState extends State<Home> {
   bool _showFilterChips = false;
   final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
   final WhatsAppSetupBannerStore _bannerStore = WhatsAppSetupBannerStore();
+  bool _whatsappStatusLoaded = false;
 
   List<Map<String, dynamic>> _getFilters(SegmentConfigProvider config) {
     final canViewPrices = _authService.hasPermission(PermissionType.viewPrices);
@@ -89,11 +90,14 @@ class _HomeState extends State<Home> {
       _loadOrders(_getFilters(config));
     }
 
-    // Load WhatsApp status for navbar button and banner
-    _whatsappStore.loadStatus().then((_) {
-      _bannerStore.updateLinkStatus(_whatsappStore.isLinked);
-      _bannerStore.checkVisibility();
-    });
+    // Load WhatsApp status once for navbar button and banner
+    if (!_whatsappStatusLoaded) {
+      _whatsappStatusLoaded = true;
+      _whatsappStore.loadStatus().then((_) {
+        _bannerStore.updateLinkStatus(_whatsappStore.isLinked);
+        _bannerStore.checkVisibility();
+      });
+    }
   }
 
   void _loadOrders(List<Map<String, dynamic>> filters) {

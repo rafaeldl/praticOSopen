@@ -20,7 +20,13 @@ class _WhatsAppOnboardingScreenState extends State<WhatsAppOnboardingScreen> {
 
   void _linkNow() {
     LinkWhatsAppSheet.show(context, _whatsappStore).then((_) {
-      _navigateToHome();
+      // Reload status to check if user actually linked
+      _whatsappStore.loadStatus().then((_) {
+        if (_whatsappStore.isLinked) {
+          _navigateToHome();
+        }
+        // If not linked, stay on onboarding screen so user can try again
+      });
     });
   }
 
