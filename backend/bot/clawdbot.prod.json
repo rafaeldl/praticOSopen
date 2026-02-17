@@ -83,9 +83,6 @@
       "allowInsecureAuth": false
     }
   },
-  "logging": {
-    "redactSensitive": "tools"
-  },
   "channels": {
     "whatsapp": {
       "selfChatMode": false,
@@ -111,17 +108,9 @@
           "PRATICOS_API_URL": "${PRATICOS_API_URL}",
           "PRATICOS_API_KEY": "${PRATICOS_API_KEY}"
         }
-      },
-      "healthcheck": { "enabled": false },
-      "skill-creator": { "enabled": false },
-      "video-frames": { "enabled": false },
-      "weather": { "enabled": false }
+      }
     }
   },
-  "heartbeat": {
-    "model": "google/gemini-2.5-flash"
-  },
-  "maxConcurrent": 4,
   "messages": {
     "inbound": {
       "debounceMs": 3000

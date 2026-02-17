@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:mobx/mobx.dart';
 import 'package:praticos/global.dart';
+import 'package:praticos/models/collaborator_exception.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/membership.dart';
 import 'package:praticos/models/user_role.dart';
@@ -9,6 +10,7 @@ import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 import 'package:praticos/repositories/user_repository.dart';
 import 'package:praticos/services/invite_api_service.dart';
+import 'package:praticos/utils/invite_utils.dart' as invite_utils;
 
 part 'collaborator_store.g.dart';
 
@@ -104,8 +106,8 @@ abstract class _CollaboratorStore with Store {
   }
 
   /// Verifica se a operação deixaria a empresa sem admin.
-  /// Retorna mensagem de erro ou null se a operação é permitida.
-  String? validateAdminRequirement(String userId, {RolesType? newRole, bool isRemoval = false}) {
+  /// Retorna [CollaboratorErrorCode] ou null se a operação é permitida.
+  CollaboratorErrorCode? validateAdminRequirement(String userId, {RolesType? newRole, bool isRemoval = false}) {
     final membership = collaborators.cast<Membership?>().firstWhere(
       (m) => m?.userId == userId,
       orElse: () => null,
@@ -117,12 +119,10 @@ abstract class _CollaboratorStore with Store {
     // Se é o único admin
     if (getAdminCount() == 1) {
       if (isRemoval) {
-        return 'Não é possível remover o único administrador da empresa. '
-            'Promova outro colaborador a administrador antes de remover este.';
+        return CollaboratorErrorCode.cannotRemoveOnlyAdmin;
       }
       if (newRole != null && newRole != RolesType.admin) {
-        return 'Não é possível alterar o perfil do único administrador. '
-            'Promova outro colaborador a administrador antes de alterar este.';
+        return CollaboratorErrorCode.cannotChangeOnlyAdminRole;
       }
     }
 
@@ -169,10 +169,19 @@ abstract class _CollaboratorStore with Store {
       final invites = await inviteRepo.getPendingByCompany(Global.companyAggr!.id!);
 
       pendingInvites.clear();
-      pendingInvites.addAll(invites);
+      pendingInvites.addAll(invites.where((i) => !i.isExpired));
     } catch (e) {
       print('[CollaboratorStore] Erro ao carregar convites: $e');
     }
+  }
+
+  /// Finds an existing pending invite matching the given email or phone.
+  Invite? findExistingPendingInvite({String? email, String? phone}) {
+    return invite_utils.findExistingPendingInvite(
+      pendingInvites.toList(),
+      email: email,
+      phone: phone,
+    );
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -360,7 +369,7 @@ abstract class _CollaboratorStore with Store {
     // Valida se a operação deixaria a empresa sem admin
     final validationError = validateAdminRequirement(userId, newRole: newRoleType);
     if (validationError != null) {
-      throw Exception(validationError);
+      throw CollaboratorException(validationError);
     }
 
     isLoading = true;
@@ -370,7 +379,7 @@ abstract class _CollaboratorStore with Store {
       // 1. Busca o usuário
       final user = await _userRepository.findUserById(userId);
       if (user == null) {
-        throw Exception('Usuário não encontrado.');
+        throw CollaboratorException(CollaboratorErrorCode.userNotFound);
       }
 
       // 2. Usa batch para garantir atomicidade
@@ -425,13 +434,13 @@ abstract class _CollaboratorStore with Store {
 
     // Não permite remover a si mesmo
     if (userId == Global.currentUser?.uid) {
-      throw Exception('Você não pode remover a si mesmo da empresa.');
+      throw CollaboratorException(CollaboratorErrorCode.cannotRemoveSelf);
     }
 
     // Valida se a operação deixaria a empresa sem admin
     final validationError = validateAdminRequirement(userId, isRemoval: true);
     if (validationError != null) {
-      throw Exception(validationError);
+      throw CollaboratorException(validationError);
     }
 
     isLoading = true;
@@ -441,7 +450,7 @@ abstract class _CollaboratorStore with Store {
       // 1. Busca o usuário
       final user = await _userRepository.findUserById(userId);
       if (user == null) {
-        throw Exception('Usuário não encontrado.');
+        throw CollaboratorException(CollaboratorErrorCode.userNotFound);
       }
 
       // 2. Usa batch para garantir atomicidade

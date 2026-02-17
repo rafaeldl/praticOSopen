@@ -1,9 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/models/user_role.dart';
+import 'package:praticos/services/claims_service.dart';
 import 'package:praticos/services/invite_api_service.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
@@ -104,13 +104,8 @@ class _AcceptInviteScreenState extends State<AcceptInviteScreen> {
     try {
       final result = await InviteApiService.instance.acceptInvite(_invite!.token!);
 
-      // Wait for updateUserClaims trigger to execute
-      // The backend updated the user's companies array, which triggers the Cloud Function
-      // We need to wait a moment for the trigger to update the Auth claims
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Force token refresh to get updated claims
-      await FirebaseAuth.instance.currentUser?.getIdToken(true);
+      // Wait for Cloud Function to update custom claims (polls until ready)
+      await ClaimsService.instance.waitForCompanyClaim(result.companyId);
 
       if (mounted) {
         _showSuccessDialog(

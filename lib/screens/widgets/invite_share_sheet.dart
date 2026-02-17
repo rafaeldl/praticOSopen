@@ -5,19 +5,17 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Sheet for sharing an invite link with a new collaborator
+/// Sheet for sharing an invite code with a new collaborator
 class InviteShareSheet extends StatelessWidget {
   final String token;
-  final String inviteLink;
-  final String whatsappLink;
+  final String? whatsappPhone;
   final int expirationDays;
   final VoidCallback? onDone;
 
   const InviteShareSheet({
     super.key,
     required this.token,
-    required this.inviteLink,
-    required this.whatsappLink,
+    this.whatsappPhone,
     required this.expirationDays,
     this.onDone,
   });
@@ -88,8 +86,8 @@ class InviteShareSheet extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // Copy Link button
-              _buildCopyLinkButton(context),
+              // Copy Code button
+              _buildCopyCodeButton(context),
 
               const SizedBox(height: 10),
 
@@ -129,7 +127,7 @@ class InviteShareSheet extends StatelessWidget {
             ),
             child: const Center(
               child: Icon(
-                CupertinoIcons.link,
+                CupertinoIcons.ticket,
                 size: 22,
                 color: CupertinoColors.activeBlue,
               ),
@@ -138,29 +136,14 @@ class InviteShareSheet extends StatelessWidget {
           const SizedBox(width: 12),
           // Token info
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  token,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    fontFamily: 'Menlo',
-                    color: CupertinoColors.label.resolveFrom(context),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  inviteLink,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+            child: Text(
+              token,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Menlo',
+                color: CupertinoColors.label.resolveFrom(context),
+              ),
             ),
           ),
         ],
@@ -198,7 +181,7 @@ class InviteShareSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildCopyLinkButton(BuildContext context) {
+  Widget _buildCopyCodeButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: SizedBox(
@@ -208,14 +191,14 @@ class InviteShareSheet extends StatelessWidget {
           color: CupertinoColors.activeBlue,
           borderRadius: BorderRadius.circular(12),
           padding: EdgeInsets.zero,
-          onPressed: () => _copyLink(context),
+          onPressed: () => _copyCode(context),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(CupertinoIcons.doc_on_clipboard, color: Colors.white),
               const SizedBox(width: 8),
               Text(
-                context.l10n.copyInviteLink,
+                context.l10n.copyInviteCode,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -238,7 +221,7 @@ class InviteShareSheet extends StatelessWidget {
           color: CupertinoColors.systemGrey5.resolveFrom(context),
           borderRadius: BorderRadius.circular(12),
           padding: EdgeInsets.zero,
-          onPressed: () => _shareLink(context),
+          onPressed: () => _shareCode(context),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -285,20 +268,33 @@ class InviteShareSheet extends StatelessWidget {
     );
   }
 
-  void _sendViaWhatsApp(BuildContext context) async {
-    final whatsappUrl = Uri.parse(whatsappLink);
+  String _buildShareMessage(BuildContext context) {
+    return context.l10n.inviteWhatsAppMessage(token);
+  }
 
-    if (await canLaunchUrl(whatsappUrl)) {
-      await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+  void _sendViaWhatsApp(BuildContext context) async {
+    final message = Uri.encodeComponent(_buildShareMessage(context));
+
+    final String whatsappUrl;
+    if (whatsappPhone != null && whatsappPhone!.isNotEmpty) {
+      final cleanNumber = whatsappPhone!.replaceAll(RegExp(r'\D'), '');
+      whatsappUrl = 'https://wa.me/$cleanNumber?text=$message';
+    } else {
+      whatsappUrl = 'https://wa.me/?text=$message';
+    }
+
+    final url = Uri.parse(whatsappUrl);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
     }
   }
 
-  void _copyLink(BuildContext context) async {
-    await Clipboard.setData(ClipboardData(text: inviteLink));
-    _showCupertinoToast(context, context.l10n.inviteLinkCopied);
+  void _copyCode(BuildContext context) async {
+    await Clipboard.setData(ClipboardData(text: token));
+    _showCupertinoToast(context, context.l10n.inviteCodeCopied);
   }
 
-  void _shareLink(BuildContext context) async {
+  void _shareCode(BuildContext context) async {
     // Get the share position for iPad
     final box = context.findRenderObject() as RenderBox?;
     final sharePositionOrigin = box != null
@@ -307,7 +303,7 @@ class InviteShareSheet extends StatelessWidget {
 
     await SharePlus.instance.share(
       ShareParams(
-        text: inviteLink,
+        text: _buildShareMessage(context),
         subject: context.l10n.shareInvite,
         sharePositionOrigin: sharePositionOrigin,
       ),
@@ -353,8 +349,7 @@ class InviteShareSheet extends StatelessWidget {
   static Future<void> show(
     BuildContext context, {
     required String token,
-    required String inviteLink,
-    required String whatsappLink,
+    String? whatsappPhone,
     required int expirationDays,
     VoidCallback? onDone,
   }) {
@@ -362,8 +357,7 @@ class InviteShareSheet extends StatelessWidget {
       context: context,
       builder: (context) => InviteShareSheet(
         token: token,
-        inviteLink: inviteLink,
-        whatsappLink: whatsappLink,
+        whatsappPhone: whatsappPhone,
         expirationDays: expirationDays,
         onDone: onDone,
       ),

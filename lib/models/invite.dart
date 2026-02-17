@@ -89,11 +89,6 @@ class Invite {
     return 'https://wa.me/$cleanNumber?text=$message';
   }
 
-  /// Gera o link web para aceitar o convite.
-  String getWebLink() {
-    return 'https://praticos.web.app/invite?token=$token';
-  }
-
   factory Invite.fromJson(Map<String, dynamic> json) => _$InviteFromJson(json);
   Map<String, dynamic> toJson() => _$InviteToJson(this);
 }
