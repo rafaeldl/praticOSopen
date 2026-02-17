@@ -160,7 +160,7 @@ jobs:
 
           git add pubspec.yaml
           git commit -m "chore(release): bump version to ${{ steps.version.outputs.version }} [skip ci]"
-          git push origin master
+          git push origin HEAD:refs/heads/master
 
       - name: Create and push tag
         env:
