@@ -165,3 +165,59 @@
     color: rgba(255, 255, 255, 0.7);
     margin-bottom: 24px;
 }
+
+/* ============================================
+   Light Theme Overrides
+   ============================================ */
+[data-theme="light"] .support-card {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.04));
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+[data-theme="light"] .support-card:hover {
+    border-color: rgba(255, 111, 15, 0.3);
+    box-shadow: 0 8px 24px rgba(255, 111, 15, 0.12);
+}
+
+[data-theme="light"] .support-card h3,
+[data-theme="light"] .contact-methods h3,
+[data-theme="light"] .faq-preview h3,
+[data-theme="light"] .faq-quick-item h4,
+[data-theme="light"] .need-help-section h3,
+[data-theme="light"] .contact-item-content h4 {
+    color: var(--text-primary);
+}
+
+[data-theme="light"] .support-card p,
+[data-theme="light"] .contact-item-content p,
+[data-theme="light"] .faq-quick-item p,
+[data-theme="light"] .need-help-section p {
+    color: var(--text-secondary);
+}
+
+[data-theme="light"] .contact-methods {
+    background: linear-gradient(135deg, rgba(255, 111, 15, 0.06), rgba(255, 212, 58, 0.06));
+    border-color: rgba(255, 111, 15, 0.15);
+}
+
+[data-theme="light"] .contact-item {
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .contact-item-icon {
+    background: rgba(255, 111, 15, 0.1);
+}
+
+[data-theme="light"] .faq-preview {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.01));
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .faq-quick-item {
+    border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .need-help-section {
+    background: linear-gradient(135deg, rgba(255, 111, 15, 0.06), rgba(255, 212, 58, 0.06));
+}

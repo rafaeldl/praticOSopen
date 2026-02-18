@@ -46,6 +46,13 @@
     --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
     --shadow-glow: 0 0 60px rgba(74, 155, 217, 0.3);
 
+    /* Theme-specific */
+    --navbar-bg: rgba(10, 14, 23, 0.95);
+    --dropdown-bg: rgba(10, 14, 23, 0.98);
+    --orb-opacity: 0.4;
+    --grid-line-color: rgba(255, 255, 255, 0.015);
+    --btn-primary-text: var(--bg-primary);
+
     /* Typography */
     --font-heading: 'Outfit', sans-serif;
     --font-body: 'DM Sans', sans-serif;
@@ -65,6 +72,212 @@
     --radius-lg: 20px;
     --radius-xl: 28px;
     --radius-full: 9999px;
+}
+
+/* ============================================
+   Light Theme
+   ============================================ */
+[data-theme="light"] {
+    --color-primary: #2B7BC0;
+    --color-primary-light: #4A9BD9;
+    --color-primary-dark: #1E5A8A;
+
+    --bg-primary: #EDF1F9;
+    --bg-secondary: #E3E8F4;
+    --bg-tertiary: #D9DFEE;
+    --bg-card: #FAFBFE;
+    --bg-card-hover: #FFFFFF;
+
+    --text-primary: #2D3748;
+    --text-secondary: #4A5568;
+    --text-tertiary: #718096;
+    --text-muted: #A0AEC0;
+
+    --border-color: rgba(30, 60, 120, 0.08);
+    --border-color-hover: rgba(30, 60, 120, 0.15);
+
+    --gradient-hero: linear-gradient(180deg, #EDF1F9 0%, #E3E8F4 100%);
+    --gradient-card: linear-gradient(145deg, #FAFBFE 0%, #EDF1F9 100%);
+
+    --shadow-sm: 0 1px 3px rgba(30,50,100,0.07), 0 1px 2px rgba(30,50,100,0.05);
+    --shadow-md: 0 4px 14px rgba(30,50,100,0.09), 0 2px 4px rgba(30,50,100,0.05);
+    --shadow-lg: 0 8px 28px rgba(30,50,100,0.11), 0 4px 8px rgba(30,50,100,0.06);
+    --shadow-glow: 0 0 40px rgba(43,123,192,0.18);
+
+    --gradient-primary: linear-gradient(135deg, #2B7BC0 0%, #1E5A8A 100%);
+
+    --navbar-bg: rgba(237, 241, 249, 0.88);
+    --dropdown-bg: rgba(237, 241, 249, 0.96);
+    --orb-opacity: 0.20;
+    --grid-line-color: rgba(30, 60, 120, 0.025);
+    --btn-primary-text: #FFFFFF;
+}
+
+/* Smooth theme transition */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, background 0.35s ease !important;
+}
+
+/* Light theme - card elevation via shadow + white background */
+[data-theme="light"] .feature-card,
+[data-theme="light"] .pricing-card,
+[data-theme="light"] .contact-card,
+[data-theme="light"] .faq-item,
+[data-theme="light"] .store-button,
+[data-theme="light"] .phone-mockup,
+[data-theme="light"] .contact-form,
+[data-theme="light"] .support-form {
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .phone-frame {
+    box-shadow: 0 12px 40px rgba(30,50,100,0.12), 0 4px 12px rgba(30,50,100,0.08);
+}
+
+[data-theme="light"] .feature-card:hover,
+[data-theme="light"] .pricing-card:hover,
+[data-theme="light"] .contact-card:hover,
+[data-theme="light"] .store-button:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Light theme - hero depth: radial blue glow */
+[data-theme="light"] .hero-bg::after {
+    content: '';
+    position: absolute;
+    top: -15%;
+    right: -10%;
+    width: 65%;
+    height: 65%;
+    background: radial-gradient(ellipse, rgba(43,123,192,0.07) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Light theme - button shadow: blue-tinted */
+[data-theme="light"] .btn-primary {
+    box-shadow: 0 4px 20px rgba(30, 90, 138, 0.35);
+}
+
+[data-theme="light"] .btn-primary:hover {
+    box-shadow: 0 8px 30px rgba(30, 90, 138, 0.45);
+}
+
+/* Light theme - gradient text: deep blue → teal */
+[data-theme="light"] .gradient-text {
+    background: linear-gradient(135deg, #1E5A8A 0%, #0E7C6B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Light theme - stat numbers */
+[data-theme="light"] .stat-number {
+    background: linear-gradient(135deg, #2B7BC0 0%, #0E7C6B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Light theme - featured pricing card */
+[data-theme="light"] .pricing-card.featured {
+    background: linear-gradient(165deg, #FFFFFF 0%, rgba(43,123,192,0.08) 100%);
+    box-shadow: 0 8px 40px rgba(43,123,192,0.14);
+}
+
+/* Light theme - phone glow: blue tint instead of hide */
+[data-theme="light"] .phone-glow,
+[data-theme="light"] .wa-phone-glow {
+    opacity: 0.10;
+}
+
+/* Light theme - pricing page header */
+[data-theme="light"] .pricing-page-header {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+}
+
+/* Light theme - differentials card */
+[data-theme="light"] .differentials-card {
+    background: linear-gradient(165deg, #FFFFFF 0%, rgba(43,123,192,0.06) 100%);
+}
+
+/* Light theme - section tag / badge visibility */
+[data-theme="light"] .section-tag {
+    background: rgba(43, 123, 192, 0.10);
+    border-color: rgba(43, 123, 192, 0.22);
+}
+
+[data-theme="light"] .badge {
+    background: rgba(43, 123, 192, 0.10);
+    border-color: rgba(43, 123, 192, 0.22);
+}
+
+/* Light theme - logo yellow too bright on light bg */
+[data-theme="light"] .logo-text .yellow,
+[data-theme="light"] .logo-text .accent {
+    color: #B8860B;
+}
+
+/* Light theme - navbar subtle bottom line before scroll */
+[data-theme="light"] .navbar {
+    border-bottom: 1px solid rgba(30, 60, 120, 0.04);
+}
+
+[data-theme="light"] .navbar.scrolled {
+    box-shadow: 0 1px 8px rgba(30,50,100,0.06);
+}
+
+/* Light theme - tinted elements for harmony */
+[data-theme="light"] .store-button {
+    background: #FAFBFE;
+    border-color: rgba(30, 60, 120, 0.12);
+    box-shadow: 0 2px 8px rgba(30,50,100,0.06);
+}
+
+[data-theme="light"] .store-button:hover {
+    background: #FFFFFF;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+}
+
+[data-theme="light"] .phone-frame,
+[data-theme="light"] .phone-mockup,
+[data-theme="light"] .wa-phone-frame {
+    background: linear-gradient(165deg, #C8CED9 0%, #B0B8C7 50%, #C2C9D6 100%);
+    border-color: rgba(30, 60, 120, 0.15);
+}
+
+[data-theme="light"] .lang-switch a:hover,
+[data-theme="light"] .lang-switch a.active {
+    background: #E3E8F4;
+}
+
+[data-theme="light"] .contact-card {
+    background: #FAFBFE;
+    border-color: rgba(30, 60, 120, 0.10);
+}
+
+[data-theme="light"] .contact-form,
+[data-theme="light"] .support-form {
+    background: #FAFBFE;
+    border-color: rgba(30, 60, 120, 0.10);
+}
+
+[data-theme="light"] .contact-card:hover {
+    background: #FFFFFF;
+    border-color: var(--color-primary);
+}
+
+[data-theme="light"] .pricing-card {
+    background: #FAFBFE;
+    border-color: rgba(30, 60, 120, 0.10);
+}
+
+[data-theme="light"] .faq-item {
+    background: #FAFBFE;
+    border-color: rgba(30, 60, 120, 0.10);
 }
 
 /* Reset & Base */
@@ -153,7 +366,7 @@ h4 { font-size: 1.125rem; }
 
 .btn-primary {
     background: var(--gradient-primary);
-    color: var(--bg-primary);
+    color: var(--btn-primary-text);
     box-shadow: 0 4px 20px rgba(74, 155, 217, 0.4);
 }
 
@@ -219,7 +432,7 @@ h4 { font-size: 1.125rem; }
 }
 
 .navbar.scrolled {
-    background: rgba(10, 14, 23, 0.95);
+    background: var(--navbar-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     padding: 12px 0;
@@ -318,6 +531,77 @@ h4 { font-size: 1.125rem; }
     color: var(--text-primary);
     background: var(--bg-card);
 }
+
+/* Theme Toggle Button */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    color: var(--text-secondary);
+    padding: 0;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border-color: var(--border-color-hover);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover svg {
+    transform: rotate(15deg);
+}
+
+/* Show sun in dark mode, moon in light mode */
+.theme-icon-sun { display: block; }
+.theme-icon-moon { display: none; }
+
+[data-theme="light"] .theme-icon-sun { display: none; }
+[data-theme="light"] .theme-icon-moon { display: block; }
+
+/* Mobile theme toggle */
+.mobile-theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    color: var(--text-secondary);
+    padding: 0;
+}
+
+.mobile-theme-toggle:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.mobile-theme-toggle svg {
+    width: 22px;
+    height: 22px;
+}
+
+.mobile-theme-toggle .theme-icon-sun { display: block; }
+.mobile-theme-toggle .theme-icon-moon { display: none; }
+
+[data-theme="light"] .mobile-theme-toggle .theme-icon-sun { display: none; }
+[data-theme="light"] .mobile-theme-toggle .theme-icon-moon { display: block; }
 
 /* Mobile Navigation Toggle */
 .nav-toggle {
@@ -448,7 +732,7 @@ h4 { font-size: 1.125rem; }
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(10, 14, 23, 0.98);
+    background: var(--dropdown-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--border-color);
@@ -592,7 +876,7 @@ h4 { font-size: 1.125rem; }
     position: absolute;
     border-radius: 50%;
     filter: blur(80px);
-    opacity: 0.4;
+    opacity: var(--orb-opacity);
     animation: float 8s ease-in-out infinite;
 }
 
@@ -622,7 +906,7 @@ h4 { font-size: 1.125rem; }
     left: 50%;
     transform: translate(-50%, -50%);
     animation-delay: -4s;
-    opacity: 0.2;
+    opacity: calc(var(--orb-opacity) * 0.5);
 }
 
 @keyframes float {
@@ -1269,7 +1553,7 @@ h4 { font-size: 1.125rem; }
     transform: translateX(-50%);
     padding: 6px 16px;
     background: var(--gradient-primary);
-    color: var(--bg-primary);
+    color: var(--btn-primary-text);
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -2149,7 +2433,7 @@ h4 { font-size: 1.125rem; }
 
 .support-form button {
     background: var(--gradient-primary);
-    color: var(--bg-primary);
+    color: var(--btn-primary-text);
     border: none;
     padding: 14px 28px;
     font-family: var(--font-body);

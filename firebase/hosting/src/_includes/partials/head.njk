@@ -5,6 +5,16 @@
 <meta name="keywords" content="{{ keywords }}">
 <meta name="robots" content="index, follow">
 
+<!-- Anti-FOUC: apply saved theme before CSS loads -->
+<script>
+(function(){
+  try{var s=localStorage.getItem('theme')}catch(e){var s=null}
+  var t=s||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
+<meta name="theme-color" content="#0A0E17" id="meta-theme-color">
+
 <!-- Canonical URL -->
 <link rel="canonical" href="{{ permalink | prettyUrl | siteUrl(site.baseUrl) }}">
 

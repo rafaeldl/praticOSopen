@@ -1167,3 +1167,30 @@
         padding-bottom: calc(100px + env(safe-area-inset-bottom));
     }
 }
+
+/* ============================================
+   Light Theme Overrides
+   ============================================ */
+[data-theme="light"] .order-header::before {
+    background: radial-gradient(circle, rgba(43, 123, 192, 0.06) 0%, transparent 70%);
+}
+
+[data-theme="light"] .modal-overlay {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .lightbox-overlay {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="light"] .order-card {
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .total-section {
+    background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-card) 100%);
+}
+
+[data-theme="light"] .photo-item:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
