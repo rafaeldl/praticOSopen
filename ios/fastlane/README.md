@@ -103,6 +103,14 @@ Gera screenshots automaticamente usando Flutter integration tests
 
 Gera screenshots para todos dispositivos e idiomas
 
+### ios screenshots_website
+
+```sh
+[bundle exec] fastlane ios screenshots_website
+```
+
+Gera screenshots dark para o site (iPhone 16e, 3 idiomas) e copia light+dark para o site
+
 ### ios screenshots_pt_br
 
 ```sh
