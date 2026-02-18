@@ -82,34 +82,34 @@
     --color-primary-light: #4A9BD9;
     --color-primary-dark: #1E5A8A;
 
-    --bg-primary: #EDF1F9;
-    --bg-secondary: #E3E8F4;
-    --bg-tertiary: #D9DFEE;
-    --bg-card: #FAFBFE;
+    --bg-primary: #F5F7FC;
+    --bg-secondary: #E8ECF5;
+    --bg-tertiary: #D6DCE9;
+    --bg-card: #FFFFFF;
     --bg-card-hover: #FFFFFF;
 
-    --text-primary: #2D3748;
-    --text-secondary: #4A5568;
-    --text-tertiary: #718096;
-    --text-muted: #A0AEC0;
+    --text-primary: #1A202C;
+    --text-secondary: #3D4A5C;
+    --text-tertiary: #64748B;
+    --text-muted: #94A3B8;
 
-    --border-color: rgba(30, 60, 120, 0.08);
-    --border-color-hover: rgba(30, 60, 120, 0.15);
+    --border-color: rgba(30, 60, 120, 0.10);
+    --border-color-hover: rgba(30, 60, 120, 0.20);
 
-    --gradient-hero: linear-gradient(180deg, #EDF1F9 0%, #E3E8F4 100%);
-    --gradient-card: linear-gradient(145deg, #FAFBFE 0%, #EDF1F9 100%);
+    --gradient-hero: linear-gradient(180deg, #F5F7FC 0%, #EBF0F8 50%, #E2E8F3 100%);
+    --gradient-card: linear-gradient(145deg, #FFFFFF 0%, #F5F7FC 100%);
 
-    --shadow-sm: 0 1px 3px rgba(30,50,100,0.07), 0 1px 2px rgba(30,50,100,0.05);
-    --shadow-md: 0 4px 14px rgba(30,50,100,0.09), 0 2px 4px rgba(30,50,100,0.05);
-    --shadow-lg: 0 8px 28px rgba(30,50,100,0.11), 0 4px 8px rgba(30,50,100,0.06);
-    --shadow-glow: 0 0 40px rgba(43,123,192,0.18);
+    --shadow-sm: 0 1px 3px rgba(15,30,60,0.08), 0 1px 2px rgba(15,30,60,0.06);
+    --shadow-md: 0 4px 16px rgba(15,30,60,0.10), 0 2px 4px rgba(15,30,60,0.06);
+    --shadow-lg: 0 12px 36px rgba(15,30,60,0.14), 0 4px 10px rgba(15,30,60,0.08);
+    --shadow-glow: 0 0 50px rgba(43,123,192,0.22);
 
     --gradient-primary: linear-gradient(135deg, #2B7BC0 0%, #1E5A8A 100%);
 
-    --navbar-bg: rgba(237, 241, 249, 0.88);
-    --dropdown-bg: rgba(237, 241, 249, 0.96);
-    --orb-opacity: 0.20;
-    --grid-line-color: rgba(30, 60, 120, 0.025);
+    --navbar-bg: rgba(245, 247, 252, 0.92);
+    --dropdown-bg: rgba(245, 247, 252, 0.96);
+    --orb-opacity: 0.25;
+    --grid-line-color: rgba(30, 60, 120, 0.035);
     --btn-primary-text: #FFFFFF;
 }
 
@@ -121,42 +121,111 @@ html.theme-transitioning *::after {
     transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, background 0.35s ease !important;
 }
 
-/* Light theme - card elevation via shadow + white background */
+/* ---- Light theme: Card elevation ---- */
 [data-theme="light"] .feature-card,
 [data-theme="light"] .pricing-card,
 [data-theme="light"] .contact-card,
 [data-theme="light"] .faq-item,
 [data-theme="light"] .store-button,
-[data-theme="light"] .phone-mockup,
 [data-theme="light"] .contact-form,
 [data-theme="light"] .support-form {
-    box-shadow: var(--shadow-sm);
-}
-
-[data-theme="light"] .phone-frame {
-    box-shadow: 0 12px 40px rgba(30,50,100,0.12), 0 4px 12px rgba(30,50,100,0.08);
+    box-shadow: 0 2px 8px rgba(15,30,60,0.07), 0 1px 3px rgba(15,30,60,0.05);
 }
 
 [data-theme="light"] .feature-card:hover,
 [data-theme="light"] .pricing-card:hover,
 [data-theme="light"] .contact-card:hover,
 [data-theme="light"] .store-button:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 8px 28px rgba(15,30,60,0.12), 0 3px 8px rgba(15,30,60,0.06);
 }
 
-/* Light theme - hero depth: radial blue glow */
+/* ---- Light theme: Phone frames — dark bezels for contrast ---- */
+[data-theme="light"] .phone-frame,
+[data-theme="light"] .wa-phone-frame {
+    background: linear-gradient(165deg, #6B7280 0%, #4B5563 50%, #5C6370 100%);
+    border-color: rgba(15, 25, 50, 0.30);
+}
+
+[data-theme="light"] .phone-mockup {
+    background: linear-gradient(165deg, #6B7280 0%, #4B5563 50%, #5C6370 100%);
+    border-color: rgba(15, 25, 50, 0.30);
+}
+
+/* ---- Light theme: Hero phone shadows ---- */
+[data-theme="light"] .phone-frame {
+    box-shadow:
+        0 20px 60px rgba(15,25,50,0.22),
+        0 8px 20px rgba(15,25,50,0.14),
+        inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+/* ---- Light theme: Gallery phone shadows ---- */
+[data-theme="light"] .phone-mockup {
+    box-shadow:
+        0 10px 30px rgba(15,25,50,0.16),
+        0 4px 10px rgba(15,25,50,0.10);
+}
+
+[data-theme="light"] .screenshot-item:hover .phone-mockup {
+    box-shadow:
+        0 16px 44px rgba(15,25,50,0.20),
+        0 6px 14px rgba(15,25,50,0.12);
+}
+
+[data-theme="light"] .screenshot-item.featured .phone-mockup {
+    box-shadow:
+        0 14px 40px rgba(15,25,50,0.18),
+        0 6px 14px rgba(15,25,50,0.10),
+        0 0 40px rgba(43,123,192,0.12);
+}
+
+/* ---- Light theme: Hero — rich glow & atmosphere ---- */
 [data-theme="light"] .hero-bg::after {
     content: '';
     position: absolute;
-    top: -15%;
-    right: -10%;
-    width: 65%;
-    height: 65%;
-    background: radial-gradient(ellipse, rgba(43,123,192,0.07) 0%, transparent 70%);
+    top: -20%;
+    right: -15%;
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(ellipse, rgba(43,123,192,0.12) 0%, transparent 65%);
     pointer-events: none;
 }
 
-/* Light theme - button shadow: blue-tinted */
+[data-theme="light"] .hero-bg::before {
+    content: '';
+    position: absolute;
+    bottom: -10%;
+    left: -10%;
+    width: 50%;
+    height: 50%;
+    background: radial-gradient(ellipse, rgba(30,90,138,0.06) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ---- Light theme: Screenshots section — subtle contrast background ---- */
+[data-theme="light"] .screenshots {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, #E0E6F1 50%, var(--bg-secondary) 100%);
+    position: relative;
+}
+
+[data-theme="light"] .screenshots::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at 50% 60%, rgba(43,123,192,0.06) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+/* ---- Light theme: Features section — richer background ---- */
+[data-theme="light"] .features {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, #E2E8F3 100%);
+}
+
+/* ---- Light theme: Buttons ---- */
 [data-theme="light"] .btn-primary {
     box-shadow: 0 4px 20px rgba(30, 90, 138, 0.35);
 }
@@ -165,103 +234,101 @@ html.theme-transitioning *::after {
     box-shadow: 0 8px 30px rgba(30, 90, 138, 0.45);
 }
 
-/* Light theme - gradient text: deep blue → teal */
+/* ---- Light theme: Gradient text — deep blue → teal ---- */
 [data-theme="light"] .gradient-text {
-    background: linear-gradient(135deg, #1E5A8A 0%, #0E7C6B 100%);
+    background: linear-gradient(135deg, #1A5A92 0%, #0C6F5E 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-/* Light theme - stat numbers */
+/* ---- Light theme: Stat numbers ---- */
 [data-theme="light"] .stat-number {
-    background: linear-gradient(135deg, #2B7BC0 0%, #0E7C6B 100%);
+    background: linear-gradient(135deg, #2467A8 0%, #0C6F5E 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-/* Light theme - featured pricing card */
+/* ---- Light theme: Featured pricing card ---- */
 [data-theme="light"] .pricing-card.featured {
-    background: linear-gradient(165deg, #FFFFFF 0%, rgba(43,123,192,0.08) 100%);
-    box-shadow: 0 8px 40px rgba(43,123,192,0.14);
+    background: linear-gradient(165deg, #FFFFFF 0%, rgba(43,123,192,0.10) 100%);
+    box-shadow: 0 12px 44px rgba(43,123,192,0.18), 0 4px 12px rgba(43,123,192,0.08);
+    border-color: rgba(43,123,192,0.30);
 }
 
-/* Light theme - phone glow: blue tint instead of hide */
+/* ---- Light theme: Phone glow ---- */
 [data-theme="light"] .phone-glow,
 [data-theme="light"] .wa-phone-glow {
-    opacity: 0.10;
+    opacity: 0.18;
 }
 
-/* Light theme - pricing page header */
+/* ---- Light theme: Pricing page header ---- */
 [data-theme="light"] .pricing-page-header {
     background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
 }
 
-/* Light theme - differentials card */
+/* ---- Light theme: Differentials card ---- */
 [data-theme="light"] .differentials-card {
     background: linear-gradient(165deg, #FFFFFF 0%, rgba(43,123,192,0.06) 100%);
 }
 
-/* Light theme - section tag / badge visibility */
+/* ---- Light theme: Section tags & badges ---- */
 [data-theme="light"] .section-tag {
     background: rgba(43, 123, 192, 0.10);
-    border-color: rgba(43, 123, 192, 0.22);
+    border-color: rgba(43, 123, 192, 0.25);
+    color: #1E5A8A;
 }
 
 [data-theme="light"] .badge {
     background: rgba(43, 123, 192, 0.10);
-    border-color: rgba(43, 123, 192, 0.22);
+    border-color: rgba(43, 123, 192, 0.25);
+    color: #1E5A8A;
 }
 
-/* Light theme - logo yellow too bright on light bg */
+/* ---- Light theme: Logo accent ---- */
 [data-theme="light"] .logo-text .yellow,
 [data-theme="light"] .logo-text .accent {
     color: #B8860B;
 }
 
-/* Light theme - navbar subtle bottom line before scroll */
+/* ---- Light theme: Navbar ---- */
 [data-theme="light"] .navbar {
-    border-bottom: 1px solid rgba(30, 60, 120, 0.04);
+    border-bottom: 1px solid rgba(30, 60, 120, 0.05);
 }
 
 [data-theme="light"] .navbar.scrolled {
-    box-shadow: 0 1px 8px rgba(30,50,100,0.06);
+    box-shadow: 0 1px 12px rgba(15,30,60,0.10), 0 1px 3px rgba(15,30,60,0.06);
 }
 
-/* Light theme - tinted elements for harmony */
+/* ---- Light theme: Store buttons ---- */
 [data-theme="light"] .store-button {
-    background: #FAFBFE;
+    background: #FFFFFF;
     border-color: rgba(30, 60, 120, 0.12);
-    box-shadow: 0 2px 8px rgba(30,50,100,0.06);
+    box-shadow: 0 2px 8px rgba(15,30,60,0.06);
 }
 
 [data-theme="light"] .store-button:hover {
     background: #FFFFFF;
     border-color: var(--color-primary);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 6px 24px rgba(15,30,60,0.12);
 }
 
-[data-theme="light"] .phone-frame,
-[data-theme="light"] .phone-mockup,
-[data-theme="light"] .wa-phone-frame {
-    background: linear-gradient(165deg, #C8CED9 0%, #B0B8C7 50%, #C2C9D6 100%);
-    border-color: rgba(30, 60, 120, 0.15);
-}
-
+/* ---- Light theme: Lang switch ---- */
 [data-theme="light"] .lang-switch a:hover,
 [data-theme="light"] .lang-switch a.active {
-    background: #E3E8F4;
+    background: #E8ECF5;
 }
 
+/* ---- Light theme: Contact cards ---- */
 [data-theme="light"] .contact-card {
-    background: #FAFBFE;
+    background: #FFFFFF;
     border-color: rgba(30, 60, 120, 0.10);
 }
 
 [data-theme="light"] .contact-form,
 [data-theme="light"] .support-form {
-    background: #FAFBFE;
+    background: #FFFFFF;
     border-color: rgba(30, 60, 120, 0.10);
 }
 
@@ -270,14 +337,65 @@ html.theme-transitioning *::after {
     border-color: var(--color-primary);
 }
 
+/* ---- Light theme: Pricing & FAQ cards ---- */
 [data-theme="light"] .pricing-card {
-    background: #FAFBFE;
+    background: #FFFFFF;
     border-color: rgba(30, 60, 120, 0.10);
 }
 
 [data-theme="light"] .faq-item {
-    background: #FAFBFE;
+    background: #FFFFFF;
     border-color: rgba(30, 60, 120, 0.10);
+}
+
+/* ---- Light theme: Feature card icons — more vivid backgrounds ---- */
+[data-theme="light"] .feature-icon {
+    background: rgba(43, 123, 192, 0.12);
+}
+
+[data-theme="light"] .feature-icon.icon-yellow {
+    background: rgba(200, 160, 0, 0.14);
+    color: #B8930B;
+}
+
+[data-theme="light"] .feature-icon.icon-orange {
+    background: rgba(220, 140, 20, 0.14);
+    color: #D08A15;
+}
+
+[data-theme="light"] .feature-icon.icon-green {
+    background: rgba(34, 160, 72, 0.12);
+    color: #1D8B44;
+}
+
+[data-theme="light"] .feature-icon.icon-purple {
+    background: rgba(140, 60, 190, 0.12);
+    color: #8A3CC0;
+}
+
+[data-theme="light"] .feature-icon.icon-cyan {
+    background: rgba(30, 140, 200, 0.12);
+    color: #1A80B8;
+}
+
+/* ---- Light theme: Download section — subtle gradient ---- */
+[data-theme="light"] .download {
+    background: linear-gradient(180deg, var(--bg-primary) 0%, #EDF1F8 100%);
+}
+
+/* ---- Light theme: WhatsApp assistant — subtle green atmosphere ---- */
+[data-theme="light"] .whatsapp-assistant::before {
+    background: radial-gradient(circle, rgba(37, 211, 102, 0.08) 0%, transparent 70%);
+}
+
+/* ---- Light theme: Pricing section ---- */
+[data-theme="light"] .pricing {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, #E2E8F3 100%);
+}
+
+/* ---- Light theme: Contact section ---- */
+[data-theme="light"] .contact {
+    background: linear-gradient(180deg, var(--bg-secondary) 0%, #E2E8F3 100%);
 }
 
 /* Reset & Base */
@@ -570,6 +688,15 @@ h4 { font-size: 1.125rem; }
 
 [data-theme="light"] .theme-icon-sun { display: none; }
 [data-theme="light"] .theme-icon-moon { display: block; }
+
+/* Screenshot theme toggle - dark shown by default */
+.phone-mockup .theme-light,
+.phone-frame .theme-light { display: none; }
+
+[data-theme="light"] .phone-mockup .theme-dark,
+[data-theme="light"] .phone-frame .theme-dark { display: none; }
+[data-theme="light"] .phone-mockup .theme-light,
+[data-theme="light"] .phone-frame .theme-light { display: block; }
 
 /* Mobile theme toggle */
 .mobile-theme-toggle {

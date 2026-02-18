@@ -43,12 +43,14 @@
         <div class="hero-phones">
             <div class="phone phone-back">
                 <div class="phone-frame">
-                    <img src="{{ relPath }}assets/screenshots/{{ hero.phones.back.image }}" alt="{{ hero.phones.back.alt }}" loading="lazy">
+                    <img class="theme-dark" src="{{ relPath }}assets/screenshots/{{ langCode }}/dark/{{ hero.phones.back.image }}" alt="{{ hero.phones.back.alt }}" loading="lazy">
+                    <img class="theme-light" src="{{ relPath }}assets/screenshots/{{ langCode }}/light/{{ hero.phones.back.image }}" alt="{{ hero.phones.back.alt }}" loading="lazy">
                 </div>
             </div>
             <div class="phone phone-front">
                 <div class="phone-frame">
-                    <img src="{{ relPath }}assets/screenshots/{{ hero.phones.front.image }}" alt="{{ hero.phones.front.alt }}" loading="lazy">
+                    <img class="theme-dark" src="{{ relPath }}assets/screenshots/{{ langCode }}/dark/{{ hero.phones.front.image }}" alt="{{ hero.phones.front.alt }}" loading="lazy">
+                    <img class="theme-light" src="{{ relPath }}assets/screenshots/{{ langCode }}/light/{{ hero.phones.front.image }}" alt="{{ hero.phones.front.alt }}" loading="lazy">
                 </div>
             </div>
         </div>
