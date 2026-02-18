@@ -1247,6 +1247,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get role => 'Rol';
 
   @override
+  String get noRole => 'Sin perfil';
+
+  @override
   String get roles => 'Roles';
 
   @override

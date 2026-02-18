@@ -123,7 +123,8 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
         await tester.pump(const Duration(milliseconds: 500));
-        await Future.delayed(const Duration(seconds: 3));
+        // Wait for Firestore data + Firebase Storage images to load
+        await Future.delayed(const Duration(seconds: 8));
         await tester.pump();
         print('Order detail opened');
 
@@ -289,9 +290,24 @@ void main() {
       if (financialTab != null) {
         print('Tapping financial tab...');
         await tester.tap(financialTab);
-        await tester.pumpAndSettle();
+        // Dashboard has continuous Firestore streams, avoid pumpAndSettle
         await Future.delayed(const Duration(seconds: 3));
+        await tester.pump();
         print('Dashboard opened');
+
+        // Select "Year" period to show annual values
+        print('Selecting year period...');
+        final yearTexts = ['Ano', 'Year', 'Año'];
+        for (final text in yearTexts) {
+          final yearButton = find.text(text);
+          if (yearButton.evaluate().isNotEmpty) {
+            await tester.tap(yearButton.first);
+            await tester.pumpAndSettle();
+            await Future.delayed(const Duration(seconds: 2));
+            print('✅ Year period selected ($text)');
+            break;
+          }
+        }
 
         print('Waiting for dashboard to load data...');
         await Future.delayed(const Duration(seconds: 2));
@@ -336,8 +352,9 @@ void main() {
 
       if (agendaTab != null) {
         await tester.tap(agendaTab);
-        await tester.pumpAndSettle();
+        // Agenda has continuous Firestore streams, avoid pumpAndSettle
         await Future.delayed(const Duration(seconds: 3));
+        await tester.pump();
         print('Agenda tab opened');
 
         print('📸 Capturing Screenshot 3: Agenda');
@@ -382,9 +399,18 @@ void main() {
 
       if (settingsTabForSegments != null) {
         await tester.tap(settingsTabForSegments);
-        await tester.pumpAndSettle();
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 2));
+        await tester.pump();
         print('Settings tab opened');
+
+        // Scroll down to reveal the Reopen Onboarding button (off-screen)
+        print('Scrolling down in settings...');
+        final settingsScroll = find.byType(CustomScrollView);
+        if (settingsScroll.evaluate().isNotEmpty) {
+          await tester.drag(settingsScroll.first, const Offset(0, -300));
+          await Future.delayed(const Duration(seconds: 1));
+          await tester.pump();
+        }
 
         // Find "Reopen Onboarding" button using semantic identifier
         print('Looking for Reopen Onboarding button by semantic identifier...');
@@ -403,15 +429,26 @@ void main() {
 
         if (reopenButton != null) {
           print('Tapping Reopen Onboarding button...');
+          await tester.ensureVisible(reopenButton);
+          await tester.pump();
           await tester.tap(reopenButton);
-          await tester.pumpAndSettle();
           await Future.delayed(const Duration(seconds: 2));
+          await tester.pump();
           print('Company Info screen opened');
 
           // Navigate through onboarding: Company Info -> Company Contact -> Segments
 
-          // Step 1: Company Info Screen - tap "Next" button using semantic identifier
+          // Step 1: Company Info Screen - scroll down and tap "Next" button
           print('Step 1: Looking for Next button in Company Info by semantic identifier...');
+
+          // Scroll down to reveal Next button (may be off-screen)
+          final companyInfoScroll = find.byType(CustomScrollView);
+          if (companyInfoScroll.evaluate().isNotEmpty) {
+            await tester.drag(companyInfoScroll.first, const Offset(0, -300));
+            await Future.delayed(const Duration(seconds: 1));
+            await tester.pump();
+          }
+
           final allSemanticsInfo = find.byType(Semantics);
           Finder? nextButton1;
 
@@ -427,13 +464,24 @@ void main() {
 
           if (nextButton1 != null) {
             print('Tapping Next button (Company Info)...');
+            await tester.ensureVisible(nextButton1);
+            await tester.pump();
             await tester.tap(nextButton1);
-            await tester.pumpAndSettle();
             await Future.delayed(const Duration(seconds: 2));
+            await tester.pump();
             print('Company Contact screen opened');
 
-            // Step 2: Company Contact Screen - tap "Next" button using semantic identifier
+            // Step 2: Company Contact Screen - scroll down and tap "Next" button
             print('Step 2: Looking for Next button in Company Contact by semantic identifier...');
+
+            // Scroll down to reveal Next button
+            final companyContactScroll = find.byType(CustomScrollView);
+            if (companyContactScroll.evaluate().isNotEmpty) {
+              await tester.drag(companyContactScroll.first, const Offset(0, -300));
+              await Future.delayed(const Duration(seconds: 1));
+              await tester.pump();
+            }
+
             final allSemanticsContact = find.byType(Semantics);
             Finder? nextButton2;
 
@@ -449,9 +497,11 @@ void main() {
 
             if (nextButton2 != null) {
               print('Tapping Next button (Company Contact)...');
+              await tester.ensureVisible(nextButton2);
+              await tester.pump();
               await tester.tap(nextButton2);
-              await tester.pumpAndSettle();
               await Future.delayed(const Duration(seconds: 2));
+              await tester.pump();
               print('Segments screen opened!');
 
               // Now we're on the Segments screen - capture it!

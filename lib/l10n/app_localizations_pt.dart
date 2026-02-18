@@ -1248,6 +1248,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get role => 'Função';
 
   @override
+  String get noRole => 'Sem perfil';
+
+  @override
   String get roles => 'Funções';
 
   @override
