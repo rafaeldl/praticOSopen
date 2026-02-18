@@ -238,9 +238,9 @@ void main() {
           await tester.pump();
           print('Form opened');
 
-          // Wait for form to fully render (forms can have many fields and images)
-          print('Waiting for form to fully render...');
-          await Future.delayed(const Duration(seconds: 4));
+          // Wait for form to fully render (forms can have many fields and images from Firebase Storage)
+          print('Waiting for form to fully render and images to load...');
+          await Future.delayed(const Duration(seconds: 8));
           await tester.pump();
 
           print('Form fully rendered, ready to capture');
