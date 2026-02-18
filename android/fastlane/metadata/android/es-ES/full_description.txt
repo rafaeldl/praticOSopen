@@ -1,10 +1,11 @@
-PraticOS es la app de gestión de órdenes de servicio más práctica del mercado. Controle OS, clientes y finanzas en un solo lugar. Ideal para talleres, asistencia técnica y proveedores de servicios.
+PraticOS es la app de gestión de órdenes de servicio más práctica del mercado. Controle OS, clientes, agenda y finanzas en un solo lugar. Con integración WhatsApp y enlaces de seguimiento, sus clientes acompañan todo en tiempo real.
 
 GESTIÓN DE ÓRDENES DE SERVICIO
 • Cree y rastree órdenes de servicio con facilidad
 • Controle el estado: presupuesto, aprobado, en progreso, completado
 • Agregue servicios, productos y observaciones
 • Visualice el historial completo de cada orden
+• Adjunte fotos con compresión inteligente
 
 REGISTRO DE CLIENTES
 • Mantenga su base de clientes organizada
@@ -12,10 +13,27 @@ REGISTRO DE CLIENTES
 • Visualice el historial de servicios por cliente
 • Búsqueda rápida e intuitiva
 
+AGENDA Y RECORDATORIOS
+• Visualice sus citas en el calendario
+• Reciba recordatorios automáticos antes de los horarios
+• Filtre por técnico para organizar el equipo
+• Programe servicios con fecha y hora definidos
+
+WHATSAPP Y COMPARTIR
+• Comparta órdenes de servicio por WhatsApp
+• Envíe enlaces seguros para que los clientes sigan el servicio
+• Reciba evaluaciones de los clientes tras la finalización
+• Asistente de IA para comunicación con clientes
+
 PANEL FINANCIERO
 • Acompañe sus resultados en tiempo real
 • Visualice ingresos y métricas importantes
 • Tenga control total sobre su facturación
+
+FORMULARIOS Y CHECKLISTS
+• Cree checklists personalizados para inspecciones
+• Adjunte fotos con compresión automática
+• Control de permisos por perfil de acceso
 
 INTERFAZ MODERNA
 • Diseño limpio e intuitivo

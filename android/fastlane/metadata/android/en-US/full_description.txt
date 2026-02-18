@@ -1,10 +1,11 @@
-PraticOS is the most practical work order management app on the market. Track work orders, customers, and finances all in one place. Built for repair shops, field service teams, and independent professionals.
+PraticOS is the most practical work order management app on the market. Track work orders, customers, scheduling, and finances all in one place. With WhatsApp integration and share links, your customers can follow along in real time.
 
 WORK ORDER MANAGEMENT
 • Create and track work orders with ease
 • Control status: quote, approved, in progress, completed
 • Add services, products, and notes
 • View complete history of each order
+• Attach photos with smart compression
 
 CUSTOMER REGISTRATION
 • Keep your customer base organized
@@ -12,10 +13,27 @@ CUSTOMER REGISTRATION
 • View service history per customer
 • Fast and intuitive search
 
+SCHEDULING & REMINDERS
+• View your appointments on the calendar
+• Receive automatic reminders before scheduled times
+• Filter by technician to organize your team
+• Schedule services with specific date and time
+
+WHATSAPP & SHARING
+• Share work orders via WhatsApp
+• Send secure links so customers can track their service
+• Receive customer ratings after completion
+• AI assistant for customer communication
+
 FINANCIAL DASHBOARD
 • Track your results in real time
 • View revenue and important metrics
 • Have total control over your billing
+
+FORMS & CHECKLISTS
+• Create custom checklists for inspections
+• Attach photos with automatic compression
+• Permission control by access profile
 
 MODERN INTERFACE
 • Clean and intuitive design

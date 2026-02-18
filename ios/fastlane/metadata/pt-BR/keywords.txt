@@ -1,1 +1,1 @@
-ordem de serviço,OS,gestão,clientes,oficina,assistência técnica,orçamento,serviços,PDV,controle
+ordem de serviço,OS,gestão,clientes,agenda,calendário,whatsapp,lembretes,checklist,vistoria

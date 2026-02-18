@@ -1,1 +1,1 @@
-work order,management,customers,repair shop,technical service,quote,services
+work order,management,customers,schedule,calendar,whatsapp,reminders,checklist,inspection

@@ -1,15 +1,13 @@
 What's new:
 
-• User Profiles: Permission control by role (Owner, Admin, Manager, Technician, etc.)
+• Calendar Scheduling: View and manage appointments with technician filter
 
-• Partial Payments: Multiple payments per order with history in PDF
+• Smart Reminders: Automatic notifications before scheduled appointments
 
-• Improved Search: Infinite scroll, filters, and highlight for overdue orders
+• WhatsApp Integration: Share work orders via WhatsApp with AI assistant
 
-• Dynamic Forms: Custom checklists with photos
+• Share Links: Customers can track service progress and leave ratings
 
-• Invitations: Add collaborators by email
+• Performance Improvements: Faster loading and various fixes
 
-• Interface: iOS redesign, dark mode, and visual fixes
-
-Thank you for using PraticOS!
+Congratulations on choosing the best work order management app!
