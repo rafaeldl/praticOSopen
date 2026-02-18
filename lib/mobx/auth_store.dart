@@ -50,7 +50,11 @@ abstract class _AuthStore with Store {
   }
 
   Future<void> _onAuthStateChanged(User? user) async {
-    if (user == null || logout) return;
+    if (user == null) return;
+
+    // Reset logout flag on new login — a new user means a fresh session
+    logout = false;
+
     if (_isCompanyLoaded) return;
 
     try {
@@ -166,6 +170,7 @@ abstract class _AuthStore with Store {
     logout = true;
     _isCompanyLoaded = false;
     hasCompanyLoadError = false;
+    companyAggr = null;
     await prefs.remove("userId");
     await prefs.remove("userDisplayName");
     await prefs.remove("userEmail");
@@ -221,6 +226,7 @@ abstract class _AuthStore with Store {
       // 4. Clear global state
       Global.currentUser = null;
       Global.companyAggr = null;
+      companyAggr = null;
 
       logout = true;
       _isCompanyLoaded = false;
