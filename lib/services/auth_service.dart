@@ -28,7 +28,7 @@ class AuthService {
 
     // 1. Criar documento do User
     var userRef = _db.collection('users').doc(user.id);
-    batch.set(userRef, user.toJson());
+    batch.set(userRef, user.toJson(), SetOptions(merge: true));
 
     // 2. Criar documento da Company
     var companyRef = _db.collection('companies').doc(company.id);

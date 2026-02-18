@@ -53,6 +53,7 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        Provider<AuthStore>(create: (_) => _authStore),
         Provider<OrderStore>(create: (_) => OrderStore()),
         Provider<AgendaStore>(
           create: (_) => AgendaStore(),

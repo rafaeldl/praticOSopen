@@ -469,6 +469,7 @@
   "recentCustomers": "Clientes Recentes",
 
   "role": "Função",
+  "noRole": "Sem perfil",
   "roles": "Funções",
   "owner": "Proprietário",
   "admin": "Administrador",

@@ -444,6 +444,7 @@
   "recentCustomers": "Clientes Recientes",
 
   "role": "Rol",
+  "noRole": "Sin perfil",
   "roles": "Roles",
   "owner": "Propietario",
   "admin": "Administrador",

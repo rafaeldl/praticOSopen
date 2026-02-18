@@ -25,17 +25,41 @@ abstract class _AuthStore with Store {
   @observable
   CompanyAggr? companyAggr;
 
+  @observable
+  bool hasCompanyLoadError = false;
+
   Observable<bool> changed = Observable(false);
 
   bool logout = false;
 
+  /// Guards against concurrent/duplicate processing of auth state
+  bool _isCompanyLoaded = false;
+
+  /// Keeps the reaction disposer so we can clean up if needed
+  // ignore: unused_field
+  ReactionDisposer? _authReactionDisposer;
+
   _AuthStore() {
     currentUser = _auth.onAuthStateChanged().asObservable();
 
-    when((_) => currentUser!.value != null, () async {
-      if (logout) return;
+    _authReactionDisposer = reaction(
+      (_) => currentUser?.value,
+      (User? user) => _onAuthStateChanged(user),
+      fireImmediately: true,
+    );
+  }
 
-      User user = currentUser!.value!;
+  Future<void> _onAuthStateChanged(User? user) async {
+    if (user == null) return;
+
+    // Reset logout flag on new login — a new user means a fresh session
+    logout = false;
+
+    if (_isCompanyLoaded) return;
+
+    try {
+      hasCompanyLoadError = false;
+
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await userStore.createUserIfNotExist(user);
 
@@ -77,6 +101,7 @@ abstract class _AuthStore with Store {
       if (company == null) {
         companyAggr = null;
         Global.companyAggr = null;
+        _isCompanyLoaded = true;
         return;
       }
 
@@ -88,7 +113,11 @@ abstract class _AuthStore with Store {
       }
       companyAggr = company.toAggr();
       Global.companyAggr = companyAggr;
-    });
+      _isCompanyLoaded = true;
+    } catch (e) {
+      print('AuthStore: error loading company data: $e');
+      hasCompanyLoadError = true;
+    }
   }
 
   @action
@@ -107,55 +136,17 @@ abstract class _AuthStore with Store {
   }
 
   /// Recarrega os dados do usuário e empresa do Firestore
-  /// Útil após criar uma nova empresa no onboarding
+  /// Útil após criar uma nova empresa no onboarding ou para retry após erro
   @action
   Future<void> reloadUserAndCompany() async {
+    _isCompanyLoaded = false;
+    hasCompanyLoadError = false;
+
     User? user = currentUser?.value;
     if (user == null) return;
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    // Busca o usuário atualizado do Firestore
-    var dbUser = await userStore.findUserById(user.uid);
-    Company? company;
-
-    // Check if there is a last selected company saved
-    String? lastCompanyId = prefs.getString('companyId');
-
-    if (lastCompanyId != null &&
-        dbUser != null &&
-        dbUser.companies != null &&
-        dbUser.companies!.any((c) => c.company?.id == lastCompanyId)) {
-      // Load the saved company if the user still belongs to it
-      company = await companyStore.retrieveCompany(lastCompanyId);
-    } else if (dbUser != null &&
-        dbUser.companies != null &&
-        dbUser.companies!.isNotEmpty &&
-        dbUser.companies!.first.company != null &&
-        dbUser.companies!.first.company!.id != null) {
-      // Retrieve the first company associated with the user
-      company = await companyStore
-          .retrieveCompany(dbUser.companies!.first.company!.id!);
-    } else {
-      // Fallback for legacy or owner-only logic
-      company = await companyStore.getCompanyByOwnerId(user.uid);
-    }
-
-    // Se não encontrou empresa, mantém null
-    if (company == null) {
-      companyAggr = null;
-      Global.companyAggr = null;
-      return;
-    }
-
-    if (company.id != null) {
-      prefs.setString('companyId', company.id!);
-    }
-    if (company.name != null) {
-      prefs.setString('companyName', company.name!);
-    }
-    companyAggr = company.toAggr();
-    Global.companyAggr = companyAggr;
+    // Re-trigger the same logic
+    await _onAuthStateChanged(user);
   }
 
   @action
@@ -177,6 +168,9 @@ abstract class _AuthStore with Store {
   signOutGoogle() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     logout = true;
+    _isCompanyLoaded = false;
+    hasCompanyLoadError = false;
+    companyAggr = null;
     await prefs.remove("userId");
     await prefs.remove("userDisplayName");
     await prefs.remove("userEmail");
@@ -232,8 +226,11 @@ abstract class _AuthStore with Store {
       // 4. Clear global state
       Global.currentUser = null;
       Global.companyAggr = null;
+      companyAggr = null;
 
       logout = true;
+      _isCompanyLoaded = false;
+      hasCompanyLoadError = false;
     } catch (e) {
       print('Error deleting account: $e');
       rethrow;

@@ -444,6 +444,7 @@
   "recentCustomers": "Recent Customers",
 
   "role": "Role",
+  "noRole": "No role",
   "roles": "Roles",
   "owner": "Owner",
   "admin": "Administrator",

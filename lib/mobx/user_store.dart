@@ -64,7 +64,10 @@ abstract class _UserStore with Store {
     User newUser = _fillUserFields(firebaseUser);
     newUser.companies = []; // Começa sem empresas
 
-    await _db.collection('users').doc(newUser.id).set(newUser.toJson());
+    await _db.collection('users').doc(newUser.id).set(
+      newUser.toJson(),
+      SetOptions(merge: true),
+    );
   }
 
   /// Cria uma empresa para o usuário atual (usado no onboarding).

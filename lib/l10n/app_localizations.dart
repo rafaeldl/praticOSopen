@@ -2554,6 +2554,12 @@ abstract class AppLocalizations {
   /// **'Função'**
   String get role;
 
+  /// No description provided for @noRole.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem perfil'**
+  String get noRole;
+
   /// No description provided for @roles.
   ///
   /// In pt, this message translates to:

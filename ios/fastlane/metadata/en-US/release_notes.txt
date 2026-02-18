@@ -1,19 +1,15 @@
 What's new in this version:
 
-• User Profiles System: Complete permission control by role (Owner, Administrator, Manager, Supervisor, Technician, and Viewer). Each role has specific access to app features.
+• Calendar Scheduling: View and manage appointments on the calendar, with technician filter and day, week, and month navigation.
 
-• Partial Payments: Record and track multiple payments for a single work order, with full transaction history in the PDF.
+• Smart Reminders: Receive automatic notifications before scheduled appointments (15, 30, or 60 minutes).
 
-• Improved Search: New search with infinite scroll, chip filters, and due date indicator with visual highlight for overdue orders.
+• WhatsApp Integration: Share work orders directly via WhatsApp, with AI assistant for messages.
 
-• Dynamic Forms: Create custom checklists and procedures, with multiple photo selection and swipe navigation in the gallery.
+• Share Links: Send secure links so customers can track service progress and leave ratings.
 
-• Profile Editing: Update your profile data and photo directly in the app.
+• HEIC/HEIF Photos: Native iOS photo support with smart compression for storage savings.
 
-• Invitation System: Invite collaborators by email to your company.
+• Performance Improvements: Faster loading, memory optimizations, and various fixes.
 
-• Interface Improvements: Work order list redesign following Apple HIG, fully functional dark mode, and several visual fixes.
-
-• Enhanced PDF: Optimized layout with store links and highlights for paid amounts.
-
-Thank you for using PraticOS!
+Congratulations on choosing the best work order management app!

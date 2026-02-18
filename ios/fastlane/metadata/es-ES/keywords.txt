@@ -1,1 +1,1 @@
-orden de servicio,gestión,clientes,taller,servicio técnico,presupuesto,servicios,reparación
+orden de servicio,gestión,clientes,agenda,calendario,whatsapp,recordatorios,checklist,inspección

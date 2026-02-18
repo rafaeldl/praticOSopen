@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/models/user.dart';
@@ -16,7 +17,7 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   User? _user;
   final UserStore _userStore = UserStore();
-  final AuthStore _authStore = AuthStore();
+  late AuthStore _authStore;
   bool _isLoading = false;
   bool _isLoadingUser = true;
 
@@ -24,6 +25,12 @@ class _UserProfileEditScreenState extends State<UserProfileEditScreen> {
   void initState() {
     super.initState();
     _loadCurrentUser();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _authStore = context.read<AuthStore>();
   }
 
   Future<void> _loadCurrentUser() async {

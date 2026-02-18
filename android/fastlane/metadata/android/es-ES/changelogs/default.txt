@@ -1,15 +1,13 @@
 Novedades:
 
-• Perfiles de Usuario: Control de permisos por rol (Propietario, Admin, Gerente, Técnico, etc.)
+• Agenda con Calendario: Visualice y gestione citas con filtro por técnico
 
-• Pagos Parciales: Múltiples pagos por orden con historial en PDF
+• Recordatorios Inteligentes: Notificaciones automáticas antes de las citas
 
-• Búsqueda Mejorada: Scroll infinito, filtros y destacado para órdenes atrasadas
+• Integración WhatsApp: Comparta órdenes por WhatsApp con asistente de IA
 
-• Formularios Dinámicos: Checklists personalizados con fotos
+• Enlaces de Seguimiento: Clientes siguen el servicio y dejan evaluaciones
 
-• Invitaciones: Agregue colaboradores por correo electrónico
+• Mejoras de Rendimiento: Carga más rápida y diversas correcciones
 
-• Interfaz: Rediseño iOS, modo oscuro y correcciones visuales
-
-¡Gracias por usar PraticOS!
+¡Felicidades por elegir la mejor app de gestión de órdenes de servicio!

@@ -63,6 +63,14 @@ Upload do IPA gerado pelo Flutter build
 
 Build + Upload para App Store (com metadados e screenshots)
 
+### ios fix_screenshots_alpha
+
+```sh
+[bundle exec] fastlane ios fix_screenshots_alpha
+```
+
+Remove alpha channel from all screenshots (required by App Store)
+
 ### ios promote
 
 ```sh
@@ -70,6 +78,14 @@ Build + Upload para App Store (com metadados e screenshots)
 ```
 
 Promote TestFlight build to App Store (no re-upload)
+
+### ios clear_screenshots
+
+```sh
+[bundle exec] fastlane ios clear_screenshots
+```
+
+Clear all screenshots from App Store Connect (useful before fresh upload)
 
 ### ios screenshots
 

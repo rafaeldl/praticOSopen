@@ -3,6 +3,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/app_notification.dart';
 import 'package:praticos/repositories/tenant/notification_repository.dart';
 import 'package:praticos/services/notification_service.dart';
+import 'package:timezone/data/latest_all.dart' as tz_data;
 
 part 'notification_store.g.dart';
 
@@ -34,6 +35,15 @@ abstract class _NotificationStore with Store {
   @action
   Future<void> initialize() async {
     if (isInitialized) return;
+
+    // Skip notifications in screenshot mode to avoid native permission dialog
+    // but still initialize timezone (needed by agenda reminders)
+    const isScreenshotMode = bool.fromEnvironment('SCREENSHOT_MODE');
+    if (isScreenshotMode) {
+      tz_data.initializeTimeZones();
+      isInitialized = true;
+      return;
+    }
 
     isLoading = true;
 

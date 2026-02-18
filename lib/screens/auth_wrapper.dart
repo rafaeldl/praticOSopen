@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -27,21 +28,49 @@ class AuthWrapper extends StatefulWidget {
 }
 
 class _AuthWrapperState extends State<AuthWrapper> {
+  Future<_CompanyCheckResult>? _companyCheckFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _companyCheckFuture = _checkUserCompany();
+  }
+
+  void _retryLoad() {
+    widget.authStore.reloadUserAndCompany();
+    setState(() {
+      _companyCheckFuture = _checkUserCompany();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) {
+        // If the AuthStore had an error loading company data, show retry screen
+        if (widget.authStore.hasCompanyLoadError) {
+          return _buildErrorRetryScreen(context);
+        }
+
         // Aguarda carregar companyAggr
         if (widget.authStore.companyAggr == null) {
           return FutureBuilder<_CompanyCheckResult>(
-            future: _checkUserCompany(),
+            future: _companyCheckFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const LoadingScreen();
               }
 
+              if (snapshot.hasError) {
+                return _buildErrorRetryScreen(context, error: snapshot.error.toString());
+              }
+
               if (snapshot.hasData) {
                 final result = snapshot.data!;
+
+                if (result.error != null) {
+                  return _buildErrorRetryScreen(context, error: result.error);
+                }
 
                 if (result.hasCompany && !result.needsOnboarding) {
                   // Tem empresa com segmento, aguarda o store carregar
@@ -77,25 +106,36 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
         // Tem companyAggr mas precisa verificar segmento
         return FutureBuilder<_CompanyCheckResult>(
-          future: _checkUserCompany(),
+          future: _companyCheckFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const LoadingScreen();
             }
 
-            if (snapshot.hasData && snapshot.data!.needsOnboarding) {
-              // Empresa existe mas não tem segmento → Onboarding com dados
+            if (snapshot.hasError) {
+              return _buildErrorRetryScreen(context, error: snapshot.error.toString());
+            }
+
+            if (snapshot.hasData) {
               final result = snapshot.data!;
-              return WelcomeScreen(
-                authStore: widget.authStore,
-                companyId: result.companyId,
-                initialName: result.companyName,
-                initialAddress: result.companyAddress,
-                initialLogoUrl: result.companyLogo,
-                initialPhone: result.companyPhone,
-                initialEmail: result.companyEmail,
-                initialSite: result.companySite,
-              );
+
+              if (result.error != null) {
+                return _buildErrorRetryScreen(context, error: result.error);
+              }
+
+              if (result.needsOnboarding) {
+                // Empresa existe mas não tem segmento → Onboarding com dados
+                return WelcomeScreen(
+                  authStore: widget.authStore,
+                  companyId: result.companyId,
+                  initialName: result.companyName,
+                  initialAddress: result.companyAddress,
+                  initialLogoUrl: result.companyLogo,
+                  initialPhone: result.companyPhone,
+                  initialEmail: result.companyEmail,
+                  initialSite: result.companySite,
+                );
+              }
             }
 
             // Tudo OK → Carregar segmento e depois Home
@@ -106,6 +146,65 @@ class _AuthWrapperState extends State<AuthWrapper> {
           },
         );
       },
+    );
+  }
+
+  /// Tela de erro com botão de retry
+  Widget _buildErrorRetryScreen(BuildContext context, {String? error}) {
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                CupertinoIcons.exclamationmark_triangle_fill,
+                size: 48,
+                color: CupertinoColors.systemOrange.resolveFrom(context),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                context.l10n.errorLoadingData,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: CupertinoColors.label.resolveFrom(context),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.l10n.networkError,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (error != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  error,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+              const SizedBox(height: 24),
+              CupertinoButton.filled(
+                onPressed: _retryLoad,
+                child: Text(context.l10n.tryAgain),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -217,7 +316,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
 
       final companyData = companyDoc.data()!;
-      
+
       final segment = companyData['segment'] as String?;
       final needsOnboarding = segment == null || segment.isEmpty;
 
@@ -233,7 +332,12 @@ class _AuthWrapperState extends State<AuthWrapper> {
         companyLogo: companyData['logo'] as String?,
       );
     } catch (e) {
-      return _CompanyCheckResult(hasCompany: false, needsOnboarding: true);
+      // Return error instead of silently redirecting to onboarding
+      return _CompanyCheckResult(
+        hasCompany: false,
+        needsOnboarding: false,
+        error: e.toString(),
+      );
     }
   }
 }
@@ -248,6 +352,7 @@ class _CompanyCheckResult {
   final String? companyEmail;
   final String? companySite;
   final String? companyLogo;
+  final String? error;
 
   _CompanyCheckResult({
     required this.hasCompany,
@@ -259,6 +364,7 @@ class _CompanyCheckResult {
     this.companyEmail,
     this.companySite,
     this.companyLogo,
+    this.error,
   });
 }
 
