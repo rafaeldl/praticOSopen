@@ -571,6 +571,15 @@ h4 { font-size: 1.125rem; }
 [data-theme="light"] .theme-icon-sun { display: none; }
 [data-theme="light"] .theme-icon-moon { display: block; }
 
+/* Screenshot theme toggle - dark shown by default */
+.phone-mockup .theme-light,
+.phone-frame .theme-light { display: none; }
+
+[data-theme="light"] .phone-mockup .theme-dark,
+[data-theme="light"] .phone-frame .theme-dark { display: none; }
+[data-theme="light"] .phone-mockup .theme-light,
+[data-theme="light"] .phone-frame .theme-light { display: block; }
+
 /* Mobile theme toggle */
 .mobile-theme-toggle {
     display: flex;

@@ -13,7 +13,8 @@
             {% for item in ss.items %}
             <div class="screenshot-item{% if item.featured %} featured{% endif %}">
                 <div class="phone-mockup">
-                    <img src="{{ relPath }}assets/screenshots/{{ item.image }}" alt="{{ item.alt }}" loading="lazy">
+                    <img class="theme-dark" src="{{ relPath }}assets/screenshots/{{ langCode }}/dark/{{ item.image }}" alt="{{ item.alt }}" loading="lazy">
+                    <img class="theme-light" src="{{ relPath }}assets/screenshots/{{ langCode }}/light/{{ item.image }}" alt="{{ item.alt }}" loading="lazy">
                 </div>
                 <span class="screenshot-label">{{ item.label }}</span>
             </div>

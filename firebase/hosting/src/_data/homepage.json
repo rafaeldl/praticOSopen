@@ -22,7 +22,7 @@
       ],
       "phones": {
         "back": { "image": "dashboard.png", "alt": "Dashboard PraticOS" },
-        "front": { "image": "home.png", "alt": "Lista de Ordens de Serviço" }
+        "front": { "image": "order-detail.png", "alt": "Detalhe da Ordem de Serviço" }
       },
       "scroll": "Scroll"
     },
@@ -96,12 +96,11 @@
       "titleHighlight": "interface do app",
       "subtitle": "Design moderno e intuitivo para a melhor experiência",
       "items": [
-        { "image": "login.png", "alt": "Tela de Login", "label": "Login" },
         { "image": "home.png", "alt": "Ordens de Serviço", "label": "Ordens de Serviço" },
         { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
         { "image": "agenda.png", "alt": "Agenda", "label": "Agenda" },
-        { "image": "customers.png", "alt": "Clientes", "label": "Clientes" },
-        { "image": "settings.png", "alt": "Configurações", "label": "Configurações" }
+        { "image": "payments.png", "alt": "Pagamentos", "label": "Pagamentos" },
+        { "image": "forms.png", "alt": "Formulários", "label": "Formulários" }
       ]
     },
     "download": {
@@ -155,7 +154,7 @@
       ],
       "phones": {
         "back": { "image": "dashboard.png", "alt": "PraticOS Dashboard" },
-        "front": { "image": "home.png", "alt": "Service Orders List" }
+        "front": { "image": "order-detail.png", "alt": "Service Order Detail" }
       },
       "scroll": "Scroll"
     },
@@ -229,12 +228,11 @@
       "titleHighlight": "app interface",
       "subtitle": "Modern and intuitive design for the best experience",
       "items": [
-        { "image": "login.png", "alt": "Login Screen", "label": "Login" },
         { "image": "home.png", "alt": "Service Orders", "label": "Service Orders" },
         { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
         { "image": "agenda.png", "alt": "Agenda", "label": "Agenda" },
-        { "image": "customers.png", "alt": "Customers", "label": "Customers" },
-        { "image": "settings.png", "alt": "Settings", "label": "Settings" }
+        { "image": "payments.png", "alt": "Payments", "label": "Payments" },
+        { "image": "forms.png", "alt": "Forms", "label": "Forms" }
       ]
     },
     "download": {
@@ -288,7 +286,7 @@
       ],
       "phones": {
         "back": { "image": "dashboard.png", "alt": "Dashboard PraticOS" },
-        "front": { "image": "home.png", "alt": "Lista de Órdenes de Servicio" }
+        "front": { "image": "order-detail.png", "alt": "Detalle de la Orden de Servicio" }
       },
       "scroll": "Scroll"
     },
@@ -362,12 +360,11 @@
       "titleHighlight": "interfaz de la app",
       "subtitle": "Diseño moderno e intuitivo para la mejor experiencia",
       "items": [
-        { "image": "login.png", "alt": "Pantalla de Login", "label": "Login" },
         { "image": "home.png", "alt": "Órdenes de Servicio", "label": "Órdenes de Servicio" },
         { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard", "featured": true },
         { "image": "agenda.png", "alt": "Agenda", "label": "Agenda" },
-        { "image": "customers.png", "alt": "Clientes", "label": "Clientes" },
-        { "image": "settings.png", "alt": "Configuraciones", "label": "Configuraciones" }
+        { "image": "payments.png", "alt": "Pagos", "label": "Pagos" },
+        { "image": "forms.png", "alt": "Formularios", "label": "Formularios" }
       ]
     },
     "download": {

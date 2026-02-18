@@ -17,8 +17,10 @@ void main() {
       print('🌍 Locale: $locale');
       print('========================================\n');
 
-      // Always use light mode for screenshots
-      tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+      // Get brightness from environment (default: light)
+      const themeBrightness = String.fromEnvironment('TEST_BRIGHTNESS', defaultValue: 'light');
+      tester.platformDispatcher.platformBrightnessTestValue =
+          themeBrightness == 'dark' ? Brightness.dark : Brightness.light;
 
       // Initialize the app
       print('🚀 Initializing app...');
