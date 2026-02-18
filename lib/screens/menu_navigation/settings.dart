@@ -25,7 +25,7 @@ class Settings extends StatefulWidget {
 
 class _SettingsState extends State<Settings> {
   final UserStore _userStore = UserStore();
-  final AuthStore _authStore = AuthStore();
+  late AuthStore _authStore;
   final AuthorizationService _authService = AuthorizationService.instance;
   final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
 
@@ -33,6 +33,12 @@ class _SettingsState extends State<Settings> {
   void initState() {
     super.initState();
     _whatsappStore.loadStatus();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _authStore = context.read<AuthStore>();
   }
 
   @override

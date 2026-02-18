@@ -45,6 +45,24 @@ mixin _$AuthStore on _AuthStore, Store {
     });
   }
 
+  late final _$hasCompanyLoadErrorAtom = Atom(
+    name: '_AuthStore.hasCompanyLoadError',
+    context: context,
+  );
+
+  @override
+  bool get hasCompanyLoadError {
+    _$hasCompanyLoadErrorAtom.reportRead();
+    return super.hasCompanyLoadError;
+  }
+
+  @override
+  set hasCompanyLoadError(bool value) {
+    _$hasCompanyLoadErrorAtom.reportWrite(value, super.hasCompanyLoadError, () {
+      super.hasCompanyLoadError = value;
+    });
+  }
+
   late final _$switchCompanyAsyncAction = AsyncAction(
     '_AuthStore.switchCompany',
     context: context,
@@ -154,7 +172,8 @@ mixin _$AuthStore on _AuthStore, Store {
   String toString() {
     return '''
 currentUser: ${currentUser},
-companyAggr: ${companyAggr}
+companyAggr: ${companyAggr},
+hasCompanyLoadError: ${hasCompanyLoadError}
     ''';
   }
 }
