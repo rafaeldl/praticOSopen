@@ -64,8 +64,8 @@
     position: absolute;
     inset: 0;
     background-image:
-        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+        linear-gradient(var(--grid-line-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line-color) 1px, transparent 1px);
     background-size: 60px 60px;
     mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
     -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
@@ -738,4 +738,41 @@
     .feature-demo-content .feature-demo-cta .btn {
         width: 100%;
     }
+}
+
+/* ============================================
+   Light Theme Overrides
+   ============================================ */
+[data-theme="light"] .feature-hero .gradient-orb {
+    opacity: 0.1;
+}
+
+[data-theme="light"] .feature-phone-frame {
+    box-shadow:
+        0 24px 64px rgba(0, 0, 0, 0.12),
+        0 0 0 1px var(--border-color),
+        0 0 80px rgba(37, 211, 102, 0.06);
+}
+
+[data-theme="light"] .feature-phone-frame:hover {
+    box-shadow:
+        0 32px 80px rgba(0, 0, 0, 0.16),
+        0 0 0 1px var(--border-color-hover),
+        0 0 120px rgba(37, 211, 102, 0.08);
+}
+
+[data-theme="light"] .feature-phone-glow {
+    opacity: 0.06;
+}
+
+[data-theme="light"] .feature-grid-card:hover,
+[data-theme="light"] .feature-media-card:hover,
+[data-theme="light"] .feature-highlight-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .feature-grid-card,
+[data-theme="light"] .feature-media-card,
+[data-theme="light"] .feature-highlight-card {
+    box-shadow: var(--shadow-sm);
 }

@@ -1,4 +1,52 @@
 <script>
+    // Theme toggle logic
+    (function() {
+        var html = document.documentElement;
+        var metaTheme = document.getElementById('meta-theme-color');
+
+        function getTheme() {
+            return html.getAttribute('data-theme') || 'dark';
+        }
+
+        function setTheme(theme) {
+            html.classList.add('theme-transitioning');
+            html.setAttribute('data-theme', theme);
+            if (metaTheme) {
+                metaTheme.setAttribute('content', theme === 'light' ? '#EDF1F9' : '#0A0E17');
+            }
+            try { localStorage.setItem('theme', theme); } catch(e) {}
+            setTimeout(function() {
+                html.classList.remove('theme-transitioning');
+            }, 350);
+        }
+
+        function toggleTheme() {
+            setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+        }
+
+        // Bind all toggle buttons
+        document.querySelectorAll('.theme-toggle, .mobile-theme-toggle').forEach(function(btn) {
+            btn.addEventListener('click', toggleTheme);
+        });
+
+        // Listen for OS theme changes (only when no saved preference)
+        try {
+            if (!localStorage.getItem('theme')) {
+                window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(e) {
+                    if (!localStorage.getItem('theme')) {
+                        setTheme(e.matches ? 'light' : 'dark');
+                    }
+                });
+            }
+        } catch(e) {}
+
+        // Set initial meta theme-color
+        if (metaTheme) {
+            metaTheme.setAttribute('content', getTheme() === 'light' ? '#EDF1F9' : '#0A0E17');
+        }
+    })();
+</script>
+<script>
     // Mobile menu toggle
     const navToggle = document.querySelector('.nav-toggle');
     const mobileMenu = document.querySelector('.mobile-menu');

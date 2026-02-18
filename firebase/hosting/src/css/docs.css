@@ -1372,3 +1372,30 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ============================================
+   Light Theme Overrides
+   ============================================ */
+[data-theme="light"] .docs-search:focus-within {
+    box-shadow: 0 0 0 3px rgba(43, 123, 192, 0.15);
+}
+
+[data-theme="light"] .category-card,
+[data-theme="light"] .quick-link,
+[data-theme="light"] .profile-card,
+[data-theme="light"] .permission-category,
+[data-theme="light"] .metric-card,
+[data-theme="light"] .feature-item,
+[data-theme="light"] .feature-block,
+[data-theme="light"] .status-card,
+[data-theme="light"] .pdf-preview {
+    box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .category-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+[data-theme="light"] .category-badge {
+    color: #FFFFFF;
+}
