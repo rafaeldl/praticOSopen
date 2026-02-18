@@ -55,6 +55,7 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addFilter("prettyUrl", function(url) {
     if (!url) return "/";
     let pretty = url.replace(/index\.html$/, "");
+    if (pretty === "") return "./";
     if (pretty !== "/" && pretty.endsWith("/")) {
       // already pretty or directory
     }
