@@ -1,1 +1,1 @@
-Gestione órdenes de servicio, agenda y clientes con integración WhatsApp. Recordatorios automáticos, enlaces de seguimiento y evaluaciones. Ideal para proveedores de servicios y pequeñas empresas.
+Gestione órdenes de servicio, agenda y clientes con WhatsApp. Recordatorios automáticos, enlaces de seguimiento y evaluaciones. Ideal para negocios de servicios.
