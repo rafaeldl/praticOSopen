@@ -748,21 +748,23 @@
 }
 
 [data-theme="light"] .feature-phone-frame {
+    background: linear-gradient(165deg, #6B7280 0%, #4B5563 50%, #5C6370 100%);
+    border-color: rgba(15, 25, 50, 0.30);
     box-shadow:
-        0 24px 64px rgba(0, 0, 0, 0.12),
-        0 0 0 1px var(--border-color),
-        0 0 80px rgba(37, 211, 102, 0.06);
+        0 24px 64px rgba(15, 25, 50, 0.18),
+        0 0 0 1px rgba(15, 25, 50, 0.12),
+        0 0 80px rgba(37, 211, 102, 0.08);
 }
 
 [data-theme="light"] .feature-phone-frame:hover {
     box-shadow:
-        0 32px 80px rgba(0, 0, 0, 0.16),
-        0 0 0 1px var(--border-color-hover),
-        0 0 120px rgba(37, 211, 102, 0.08);
+        0 32px 80px rgba(15, 25, 50, 0.22),
+        0 0 0 1px rgba(15, 25, 50, 0.16),
+        0 0 120px rgba(37, 211, 102, 0.10);
 }
 
 [data-theme="light"] .feature-phone-glow {
-    opacity: 0.06;
+    opacity: 0.08;
 }
 
 [data-theme="light"] .feature-grid-card:hover,
