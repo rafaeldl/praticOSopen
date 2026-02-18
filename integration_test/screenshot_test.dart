@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show CircularProgressIndicator;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:praticos/main.dart' as app;
@@ -123,10 +124,39 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 500));
         await tester.pump(const Duration(milliseconds: 500));
-        // Wait for Firestore data + Firebase Storage images to load
-        await Future.delayed(const Duration(seconds: 8));
+        // Wait for Firestore data + Firebase Storage images to load.
+        // First wait a minimum time for the page to render and CachedNetworkImage
+        // to start downloading (avoids race condition where polling exits early
+        // before the placeholder spinner even appears).
+        print('Waiting for order data and images to start loading...');
+        await Future.delayed(const Duration(seconds: 5));
         await tester.pump();
+
+        // Now poll for CircularProgressIndicator (CachedNetworkImage placeholder)
+        // to disappear, meaning images have finished loading.
+        print('Polling for image loading completion...');
+        int imgAttempts = 0;
+        const maxImgAttempts = 15; // max ~15 more seconds (total ~20s)
+        while (imgAttempts < maxImgAttempts) {
+          final spinners = find.byType(CircularProgressIndicator);
+          final count = spinners.evaluate().length;
+          if (count == 0) {
+            print('✅ Order images loaded (no CircularProgressIndicator)');
+            break;
+          }
+          imgAttempts++;
+          print('  Still loading images... ($count spinners, attempt $imgAttempts/$maxImgAttempts)');
+          await Future.delayed(const Duration(seconds: 1));
+          await tester.pump();
+        }
+        if (imgAttempts >= maxImgAttempts) {
+          print('⚠️ Timed out waiting for order images, capturing anyway');
+        }
         print('Order detail opened');
+
+          // Extra delay to ensure fade-in animation completes and image fully renders
+          await Future.delayed(const Duration(seconds: 3));
+          await tester.pump();
 
           // SCREENSHOT 2: Order Detail (top of screen)
           print('📸 Capturing Screenshot 2: Order Detail');
@@ -238,9 +268,32 @@ void main() {
           await tester.pump();
           print('Form opened');
 
-          // Wait for form to fully render (forms can have many fields and images from Firebase Storage)
-          print('Waiting for form to fully render and images to load...');
-          await Future.delayed(const Duration(seconds: 8));
+          // Wait for form to render and images to start downloading
+          print('Waiting for form data and images to start loading...');
+          await Future.delayed(const Duration(seconds: 5));
+          await tester.pump();
+
+          // Poll for CupertinoActivityIndicator (Image.network loadingBuilder)
+          // to disappear, meaning images have finished loading.
+          print('Polling for form image loading completion...');
+          int attempts = 0;
+          const maxAttempts = 15; // max ~15 more seconds (total ~20s)
+          while (attempts < maxAttempts) {
+            final indicators = find.byType(CupertinoActivityIndicator);
+            final count = indicators.evaluate().length;
+            if (count == 0) {
+              print('✅ All form images loaded (no activity indicators)');
+              break;
+            }
+            attempts++;
+            print('  Still loading... ($count activity indicators, attempt $attempts/$maxAttempts)');
+          }
+          if (attempts >= maxAttempts) {
+            print('⚠️ Timed out waiting for images, capturing anyway');
+          }
+
+          // Extra delay to ensure fade-in animation completes and image fully renders
+          await Future.delayed(const Duration(seconds: 3));
           await tester.pump();
 
           print('Form fully rendered, ready to capture');
@@ -532,24 +585,31 @@ void main() {
 
 /// Performs logout flow
 Future<void> _performLogout(WidgetTester tester) async {
-  // Find CupertinoTabBar and tap third item (Settings)
-  final tabBar = find.byType(CupertinoTabBar);
-  if (tabBar.evaluate().isNotEmpty) {
-    final tabBarBox = tester.getRect(tabBar);
-    final settingsTabX = tabBarBox.left + (tabBarBox.width / 3) * 2.5;
-    final tabY = tabBarBox.center.dy;
+  // Navigate to settings tab using semantic identifier
+  final allSemantics = find.byType(Semantics);
+  Finder? settingsTab;
+  for (var i = 0; i < allSemantics.evaluate().length; i++) {
+    final widget = tester.widget<Semantics>(allSemantics.at(i));
+    final identifier = widget.properties.identifier?.toString() ?? '';
+    if (identifier == 'tab_settings') {
+      settingsTab = allSemantics.at(i);
+      break;
+    }
+  }
 
-    await tester.tapAt(Offset(settingsTabX, tabY));
+  if (settingsTab != null) {
+    await tester.tap(settingsTab);
     await tester.pumpAndSettle();
     await Future.delayed(const Duration(seconds: 2));
 
-    // Find logout button (try multiple possible texts)
-    final logoutTexts = ['Sair', 'Logout', 'Cerrar sesión'];
+    // Find logout button (try multiple possible texts for all locales)
+    final logoutTexts = ['Sair', 'Sign Out', 'Cerrar Sesión', 'Logout', 'Cerrar sesión'];
     Finder? logoutTile;
     for (final text in logoutTexts) {
       final finder = find.text(text);
       if (finder.evaluate().isNotEmpty) {
         logoutTile = finder;
+        print('Found logout button: "$text"');
         break;
       }
     }
@@ -559,21 +619,30 @@ Future<void> _performLogout(WidgetTester tester) async {
       await tester.pumpAndSettle();
       await Future.delayed(const Duration(seconds: 1));
 
-      // Confirm logout in CupertinoAlertDialog
-      final confirmButton = find.descendant(
-        of: find.byType(CupertinoAlertDialog),
-        matching: find.textContaining('Sai', skipOffstage: false),
-      );
+      // Confirm logout in CupertinoAlertDialog - the confirm button
+      // uses the same l10n.logout text: "Sair", "Sign Out", "Cerrar Sesión"
+      final dialog = find.byType(CupertinoAlertDialog);
+      if (dialog.evaluate().isNotEmpty) {
+        // The destructive action button is the last CupertinoDialogAction
+        final actions = find.descendant(
+          of: dialog,
+          matching: find.byType(CupertinoDialogAction),
+        );
+        if (actions.evaluate().length >= 2) {
+          // Last action is the confirm/destructive button
+          await tester.tap(actions.last);
+          await tester.pumpAndSettle();
+          print('✅ Logged out successfully');
 
-      if (confirmButton.evaluate().isNotEmpty) {
-        await tester.tap(confirmButton.last);
-        await tester.pumpAndSettle();
-        print('✅ Logged out successfully');
-
-        await Future.delayed(const Duration(seconds: 3));
-        await tester.pumpAndSettle();
+          await Future.delayed(const Duration(seconds: 3));
+          await tester.pumpAndSettle();
+        }
       }
+    } else {
+      print('⚠️ Logout button not found');
     }
+  } else {
+    print('⚠️ Settings tab not found for logout');
   }
 }
 
@@ -605,17 +674,33 @@ Future<void> _performLogin(WidgetTester tester, String locale) async {
   final password = _getPasswordByLocale(locale);
   print('Using account: $email');
 
-  // Find and tap "Entrar com email" link (try multiple languages)
-  print('Step 1: Looking for email login link...');
-  final emailTexts = ['email', 'e-mail', 'correo'];
+  // Find email login link by semantic identifier (locale-independent)
+  print('Step 1: Looking for email login link by semantic identifier...');
+  final allSemantics = find.byType(Semantics);
   Finder? emailLink;
-  for (final text in emailTexts) {
-    final finder = find.textContaining(text, skipOffstage: false);
-    print('  Searching for text containing "$text": found ${finder.evaluate().length}');
-    if (finder.evaluate().isNotEmpty) {
-      emailLink = finder;
-      print('  ✅ Found email link with text: "$text"');
+
+  for (var i = 0; i < allSemantics.evaluate().length; i++) {
+    final widget = tester.widget<Semantics>(allSemantics.at(i));
+    final identifier = widget.properties.identifier?.toString() ?? '';
+    if (identifier == 'email_login_link') {
+      emailLink = allSemantics.at(i);
+      print('  ✅ Found email login link with semantic identifier');
       break;
+    }
+  }
+
+  // Fallback: search by text if semantic identifier not found
+  if (emailLink == null) {
+    print('  Semantic identifier not found, trying text search...');
+    final emailTexts = ['email', 'e-mail', 'correo'];
+    for (final text in emailTexts) {
+      final finder = find.textContaining(text, skipOffstage: false);
+      print('  Searching for text containing "$text": found ${finder.evaluate().length}');
+      if (finder.evaluate().isNotEmpty) {
+        emailLink = finder;
+        print('  ✅ Found email link with text: "$text"');
+        break;
+      }
     }
   }
 

@@ -172,6 +172,11 @@ platform :android do
     UI.message("   📟 Tablet 7\": #{tablet7_avd}")
     UI.message("   💻 Tablet 10\": #{tablet10_avd}")
 
+    same_tablet_avd = (tablet7_avd == tablet10_avd)
+    if same_tablet_avd
+      UI.important("⚠️ 7\" and 10\" tablet use the same AVD (#{tablet7_avd}). Will copy 7\" screenshots to 10\" folder.")
+    end
+
     locales.each do |locale|
       UI.message("🌍 Generating screenshots for locale: #{locale}")
       UI.message("🐌 Running devices in SEQUENTIAL mode (auto-boot)")
@@ -195,13 +200,37 @@ platform :android do
       )
 
       # 10-inch Tablet
-      capture_screenshots_for_device(
-        device: nil,
-        folder_name: "tenInchScreenshots",
-        locale: locale,
-        force_logout: force_logout,
-        avd_name: tablet10_avd
-      )
+      if same_tablet_avd
+        # Same AVD as 7" — copy screenshots instead of re-running
+        # Use absolute paths to avoid working directory ambiguity
+        project_root = File.expand_path("../..", __FILE__)  # android/fastlane/Fastfile -> project root
+        src_dir = File.join(project_root, "android", "fastlane", "metadata", "android", locale, "images", "sevenInchScreenshots")
+        dst_dir = File.join(project_root, "android", "fastlane", "metadata", "android", locale, "images", "tenInchScreenshots")
+
+        UI.message("📋 Copying 7\" screenshots to 10\" folder for #{locale}")
+        UI.message("   Source: #{src_dir}")
+        UI.message("   Dest:   #{dst_dir}")
+
+        FileUtils.mkdir_p(dst_dir)
+        FileUtils.rm_rf(Dir.glob("#{dst_dir}/*.png"))
+        screenshots = Dir.glob("#{src_dir}/*.png")
+        UI.message("   Found #{screenshots.length} screenshots to copy")
+        screenshots.each { |f| FileUtils.cp(f, dst_dir) }
+
+        if screenshots.length > 0
+          UI.success("📋 Copied #{screenshots.length} screenshots from 7\" to 10\" folder (#{locale})")
+        else
+          UI.error("⚠️ No 7\" screenshots found to copy for #{locale}. Check if sevenInchScreenshots ran successfully.")
+        end
+      else
+        capture_screenshots_for_device(
+          device: nil,
+          folder_name: "tenInchScreenshots",
+          locale: locale,
+          force_logout: force_logout,
+          avd_name: tablet10_avd
+        )
+      end
     end
 
     UI.success("✅ All screenshots generated for #{locales.length} locales!")
