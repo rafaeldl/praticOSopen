@@ -547,6 +547,48 @@ bundle exec fastlane beta               # TestFlight (manual)
 - **Promote Release**: Workflow manual para promover RC para produção
 - **Artefatos**: Salvos no GitHub Releases (AAB + IPA)
 
+## Bot (OpenClaw)
+
+Bot WhatsApp rodando em GCE VM `praticos-bot` (zona `southamerica-east1-b`). Todos os comandos em `backend/bot/`.
+
+### Comandos Essenciais
+
+```bash
+make dev              # Dev local (Docker)
+make deploy           # Build + deploy produção
+make sync             # Atualiza configs/skills sem rebuild
+make logs             # Logs produção
+make restart          # Reinicia VM
+make clear-sessions   # Limpa sessões e reinicia
+```
+
+### Memória (Produção)
+
+Paths na VM: `/var/openclaw/memory/`
+- Global: `MEMORY.md`
+- Por usuário: `users/+55XXXXXXXXXXX.md`
+
+```bash
+# SSH usa --ssh-key-file=~/.ssh/id_ed25519
+# Listar memórias
+gcloud compute ssh praticos-bot --zone=southamerica-east1-b --ssh-key-file=~/.ssh/id_ed25519 -- 'ls -la /var/openclaw/memory/users/'
+
+# Ler memória de usuário
+gcloud compute ssh praticos-bot --zone=southamerica-east1-b --ssh-key-file=~/.ssh/id_ed25519 -- 'cat /var/openclaw/memory/users/+55XXXXXXXXXXX.md'
+
+# Apagar memória (reset do usuário)
+gcloud compute ssh praticos-bot --zone=southamerica-east1-b --ssh-key-file=~/.ssh/id_ed25519 -- 'sudo rm /var/openclaw/memory/users/+55XXXXXXXXXXX.md'
+
+# Reiniciar container
+gcloud compute ssh praticos-bot --zone=southamerica-east1-b --ssh-key-file=~/.ssh/id_ed25519 -- 'sudo docker restart $(sudo docker ps -q)'
+```
+
+### Documentação Completa
+
+- `docs/praticos-bot-central.md` - Arquitetura, features e segurança
+- `docs/BOT_WORKSPACE_CONFIG.md` - Configuração do workspace OpenClaw
+- `backend/bot/README.md` - Setup, deploy e referência completa
+
 ## Regras Importantes
 
 1. **Inglês no Código**: SEMPRE usar inglês para classes, variáveis, constantes, enums, chaves JSON e valores no banco
@@ -695,3 +737,5 @@ Antes de finalizar uma feature, verificar:
 - `docs/MULTI_TENANCY.md` - Detalhes da arquitetura multi-tenant
 - `docs/formularios_dinamicos.md` - Especificação de checklists/vistorias
 - `docs/DEPLOYMENT.md` - Guia completo de deploy
+- `docs/praticos-bot-central.md` - Bot WhatsApp: arquitetura e features
+- `docs/BOT_WORKSPACE_CONFIG.md` - Configuração do workspace OpenClaw
