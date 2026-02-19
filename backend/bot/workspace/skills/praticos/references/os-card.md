@@ -28,6 +28,7 @@ Montar o texto a partir dos campos do `order`:
 🏷️ *Desconto:* R$ {discount}
 ✅ *Pago:* R$ {paidAmount}
 ⏳ *A receber:* R$ {remaining}
+🗓️ *Agendado:* {scheduledDate}
 📅 *Previsão:* {dueDate}
 
 🔗 *Link:* {shareUrl}
@@ -35,6 +36,7 @@ Montar o texto a partir dos campos do `order`:
 **Status:** quote=Orçamento | approved=Aprovado | progress=Em andamento | done=Concluído | canceled=Cancelado
 **Omitir:** campos null, vazio ou com valor 0. Ex: paidAmount=0 → nao mostrar "Pago". discount=0 → nao mostrar "Desconto".
 **Valores R$:** SEMPRE formato BR com virgula decimal e ponto milhar. Ex: R$ 1.234,56 — NUNCA R$ 1234.56.
+**Datas:** formato BR dia/mes/ano + hora. Ex: 20/02/2026 09:00 — NUNCA ISO 8601 no card. Se hora for 00:00, mostrar so data.
 **remaining** = total - discount - paidAmount.
 
 ## Passo 4 — Enviar

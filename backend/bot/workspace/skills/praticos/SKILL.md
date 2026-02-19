@@ -84,13 +84,20 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 
 ### REGRAS
 1. **IDs OBRIGATORIOS** — API NAO aceita nomes. Usar POST /bot/search/unified.
-2. **Criar OS:** busca unificada → exact? usar ID → suggestions? confirmar → nao encontrou? oferecer criar
+2. **Criar OS:** busca unificada → exact? usar ID → suggestions? confirmar → nao encontrou? oferecer criar → antes de finalizar, oferecer agendamento (regra 9)
 3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
 4. **Fotos:** multipart `-F "file=@/path"` (NAO base64)
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
 6. **Exibir OS:** ver CARD DE OS abaixo
 7. **Apos criar OS:** oferecer link → POST /bot/orders/{NUM}/share
 8. **Checklists:** `read(file_path="skills/praticos/references/checklists.md")`
+9. **Datas & Agendamento:** `scheduledDate` SEMPRE vai no POST /bot/orders/full. Comportamento depende do perfil do usuario (salvar em memoria campo **Agenda:** `sim` ou `nao`):
+   - **Perfil desconhecido (1as interacoes):** perguntar "Quer agendar pra quando?". Se informar data → `Agenda: sim`. Se recusar 2+ vezes → `Agenda: nao`.
+   - **Agenda: sim** → SEMPRE perguntar data/hora antes de criar. Se usuario informar → `scheduledDate` = ISO 8601. Se pular dessa vez → `scheduledDate` = data/hora atual.
+   - **Agenda: nao** (pronto atendimento) → NAO perguntar. `scheduledDate` = data/hora atual silenciosamente.
+   - Se usuario ja mencionou data na conversa, usar sem perguntar de novo (independente do perfil).
+   - `dueDate` = prazo de entrega, so incluir se usuario mencionar prazo espontaneamente.
+   - Converter linguagem natural: "amanha 14h" → calcular ISO; "segunda" → proxima segunda; "daqui 3 dias" → somar.
 
 ---
 
