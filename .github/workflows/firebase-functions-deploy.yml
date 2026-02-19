@@ -37,10 +37,8 @@ jobs:
         with:
           credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRATICOS }}'
 
-      - name: Setup Firebase CLI
-        uses: FirebaseExtended/action-setup-firebase@v0
-        with:
-          version: latest
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
 
       - name: Deploy to Firebase Functions
         working-directory: firebase
