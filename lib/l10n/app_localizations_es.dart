@@ -2937,4 +2937,20 @@ class AppLocalizationsEs extends AppLocalizations {
   String reminderBodyOrder(String orderNumber, String customerName) {
     return 'OS #$orderNumber - $customerName';
   }
+
+  @override
+  String get inviteWhatsAppSuccessTitle => 'Colaborador Invitado';
+
+  @override
+  String inviteWhatsAppSuccessMessage(String name) {
+    return '$name recibirá la invitación automáticamente al contactar al bot PraticOS en WhatsApp.';
+  }
+
+  @override
+  String get sendWhatsApp => 'Enviar WhatsApp';
+
+  @override
+  String inviteWhatsAppBotMessage(String company) {
+    return '¡Hola! Has sido agregado al equipo de $company en PraticOS. Envía un \"hola\" al bot para comenzar: https://wa.me/5548988794742';
+  }
 }

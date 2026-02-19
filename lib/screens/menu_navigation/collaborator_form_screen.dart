@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/permission.dart';
@@ -81,8 +83,15 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
             context.l10n.collaboratorAdded,
             context.l10n.collaboratorAddedSuccess,
           );
+        } else if (inviteToken != null && phone.isNotEmpty) {
+          // Invite created with phone → show WhatsApp success dialog
+          await _showWhatsAppInviteSuccess(
+            inviteToken,
+            name.isNotEmpty ? name : phone,
+            phone,
+          );
         } else {
-          // Usuário não existia, convite foi criado - show share sheet
+          // Invite created with email only → show share sheet
           if (inviteToken != null) {
             await _showInviteShareSheet(inviteToken);
           }
@@ -109,6 +118,44 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
     );
     if (mounted) {
       Navigator.pop(context, true); // Volta para a lista após compartilhar
+    }
+  }
+
+  Future<void> _showWhatsAppInviteSuccess(
+    String token,
+    String displayName,
+    String phone,
+  ) async {
+    final companyName = Global.companyAggr?.name ?? '';
+    await showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(ctx.l10n.inviteWhatsAppSuccessTitle),
+        content: Text(ctx.l10n.inviteWhatsAppSuccessMessage(displayName)),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(ctx.l10n.sendWhatsApp),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final message = Uri.encodeComponent(
+                context.l10n.inviteWhatsAppBotMessage(companyName),
+              );
+              final cleanNumber = phone.replaceAll(RegExp(r'\D'), '');
+              final url = Uri.parse('https://wa.me/$cleanNumber?text=$message');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(url, mode: LaunchMode.externalApplication);
+              }
+            },
+          ),
+          CupertinoDialogAction(
+            child: Text(ctx.l10n.ok),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+        ],
+      ),
+    );
+    if (mounted) {
+      Navigator.pop(context, true);
     }
   }
 

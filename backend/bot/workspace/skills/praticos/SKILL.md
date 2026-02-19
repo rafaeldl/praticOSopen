@@ -66,7 +66,8 @@ exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsAp
 ## PRIMEIRO CONTATO
 
 Verificar vinculo: GET /bot/link/context. Se `linked:true` → PARTE 2.
-Se NAO vinculado, codigo recebido, ou auto-cadastro: `read(file_path="skills/praticos/references/registration.md")`
+Se NAO vinculado: verificar `pendingInvites` (convites feitos pelo admin com telefone do usuario) e `pendingRegistration`.
+Para detalhes do fluxo: `read(file_path="skills/praticos/references/registration.md")`
 
 ---
 

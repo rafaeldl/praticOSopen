@@ -452,6 +452,96 @@ export async function listAllByCompany(companyId: string): Promise<Invite[]> {
 }
 
 // ============================================================================
+// Phone Lookup Functions
+// ============================================================================
+
+/**
+ * Normalize a phone number to E.164 format
+ */
+function normalizePhone(number: string): string {
+  let normalized = number.replace(/[^\d+]/g, '');
+  if (!normalized.startsWith('+')) {
+    normalized = '+' + normalized;
+  }
+  return normalized;
+}
+
+/**
+ * Generate Brazilian phone variants (8 vs 9 digit mobile numbers).
+ *
+ * WhatsApp often stores BR mobiles with 8 digits (+55 48 8409-0709),
+ * while the invite may have been saved with 9 digits (+55 48 98409-0709)
+ * or vice-versa.
+ *
+ * Returns an array of unique E.164 variants to query against.
+ */
+function getBrazilianPhoneVariants(phone: string): string[] {
+  const normalized = normalizePhone(phone);
+  const variants = new Set<string>([normalized]);
+
+  if (!normalized.startsWith('+55')) {
+    return [normalized];
+  }
+
+  const digits = normalized.substring(3); // everything after +55
+
+  if (digits.length === 11) {
+    // 9-digit subscriber: +55 XX 9XXXXXXXX → also try without the leading 9
+    const areaCode = digits.substring(0, 2);
+    const subscriber = digits.substring(2);
+    if (subscriber.startsWith('9') && subscriber.length === 9) {
+      variants.add(`+55${areaCode}${subscriber.substring(1)}`);
+    }
+  } else if (digits.length === 10) {
+    // 8-digit subscriber: +55 XX XXXXXXXX → also try with leading 9
+    const areaCode = digits.substring(0, 2);
+    const subscriber = digits.substring(2);
+    const firstDigit = subscriber.charAt(0);
+    if (['7', '8', '9'].includes(firstDigit)) {
+      variants.add(`+55${areaCode}9${subscriber}`);
+    }
+  }
+
+  return Array.from(variants);
+}
+
+/**
+ * Find pending, non-expired invites by phone number.
+ * Handles Brazilian 8/9-digit mobile variants automatically.
+ */
+export async function findPendingInvitesByPhone(phone: string): Promise<Invite[]> {
+  const variants = getBrazilianPhoneVariants(phone);
+  const invites: Invite[] = [];
+  const seenTokens = new Set<string>();
+
+  for (const variant of variants) {
+    const snapshot = await getInvitesCollection()
+      .where('phone', '==', variant)
+      .where('status', '==', 'pending')
+      .get();
+
+    for (const doc of snapshot.docs) {
+      const invite = doc.data() as Invite;
+      if (seenTokens.has(invite.token)) continue;
+
+      // Check expiration
+      const expiresAt = toDate(invite.expiresAt);
+      if (expiresAt && expiresAt < new Date()) continue;
+
+      invites.push(invite);
+      seenTokens.add(invite.token);
+    }
+  }
+
+  // Sort by createdAt descending
+  invites.sort((a, b) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
+  return invites;
+}
+
+// ============================================================================
 // WhatsApp Bot Functions
 // ============================================================================
 

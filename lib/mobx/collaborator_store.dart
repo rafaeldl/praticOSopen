@@ -223,21 +223,18 @@ abstract class _CollaboratorStore with Store {
       final normalizedPhone = phone?.replaceAll(RegExp(r'\D'), '').trim();
       print('[CollaboratorStore] Normalized - email: $normalizedEmail, phone: $normalizedPhone');
 
-      // 1. Busca o usuário pelo email ou telefone
+      // 1. Search user by email (phone-only search skipped — security rules
+      //    don't allow client-side queries on the users collection by phone;
+      //    phone-based invites are resolved server-side by the bot).
       dynamic user;
       try {
         if (normalizedEmail != null && normalizedEmail.isNotEmpty) {
           print('[CollaboratorStore] Searching user by email: $normalizedEmail');
           user = await _userRepository.findUserByEmail(normalizedEmail);
         }
-        if (user == null && normalizedPhone != null && normalizedPhone.isNotEmpty) {
-          print('[CollaboratorStore] Searching user by phone: $normalizedPhone');
-          user = await _userRepository.findUserByPhone(normalizedPhone);
-        }
         print('[CollaboratorStore] User search result: ${user?.id ?? 'not found'}');
       } catch (e) {
         print('[CollaboratorStore] Error searching user: $e');
-        // Se falhar a busca, assume que usuário não existe e cria convite
         user = null;
       }
 
