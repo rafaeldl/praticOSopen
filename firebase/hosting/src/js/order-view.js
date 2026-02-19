@@ -22,6 +22,32 @@
     let orderData = null;
     let token = null;
 
+    // Language detection: use early-detection from HTML inline script, fallback to navigator
+    const lang = window.__orderLang || (navigator.language || 'pt').split('-')[0];
+
+    // Country-to-currency mapping for company-based currency formatting
+    const countryCurrencyMap = {
+        BR: { currency: 'BRL', locale: 'pt-BR' },
+        US: { currency: 'USD', locale: 'en-US' },
+        PT: { currency: 'EUR', locale: 'pt-PT' },
+        ES: { currency: 'EUR', locale: 'es-ES' },
+        MX: { currency: 'MXN', locale: 'es-MX' },
+        AR: { currency: 'ARS', locale: 'es-AR' },
+        CL: { currency: 'CLP', locale: 'es-CL' },
+        CO: { currency: 'COP', locale: 'es-CO' },
+        PE: { currency: 'PEN', locale: 'es-PE' },
+        UY: { currency: 'UYU', locale: 'es-UY' },
+        PY: { currency: 'PYG', locale: 'es-PY' },
+        BO: { currency: 'BOB', locale: 'es-BO' },
+        GB: { currency: 'GBP', locale: 'en-GB' },
+        CA: { currency: 'CAD', locale: 'en-CA' },
+        AO: { currency: 'AOA', locale: 'pt-AO' },
+        MZ: { currency: 'MZN', locale: 'pt-MZ' },
+    };
+
+    // Company currency config — set when order data arrives
+    let companyCurrency = { currency: 'BRL', locale: 'pt-BR' };
+
     // Status translations
     const statusLabels = {
         'pt': {
@@ -47,18 +73,26 @@
         }
     };
 
-    // Get browser language
-    const lang = (navigator.language || 'pt').split('-')[0];
     const t = statusLabels[lang] || statusLabels['pt'];
 
     // Translations for UI text
     const ui = {
         pt: {
+            pageTitle: 'Acompanhe sua OS - PraticOS',
+            pageDescription: 'Acompanhe o status da sua ordem de serviço',
             loading: 'Carregando...',
             errorTitle: 'Link inválido',
-            errorMessage: 'Este link expirou ou é inválido.',
+            errorMessage: 'Este link expirou ou é inválido. Por favor, solicite um novo link.',
             customer: 'Cliente',
             device: 'Equipamento',
+            name: 'Nome',
+            phone: 'Telefone',
+            forecast: 'Previsão',
+            serviceDefault: 'Serviço',
+            productDefault: 'Produto',
+            qty: 'Qtd',
+            photo: 'Foto',
+            you: 'Você',
             services: 'Serviços',
             products: 'Produtos',
             photos: 'Fotos',
@@ -96,11 +130,21 @@
             yourRating: 'Sua Avaliação'
         },
         en: {
+            pageTitle: 'Track your Order - PraticOS',
+            pageDescription: 'Track the status of your service order',
             loading: 'Loading...',
             errorTitle: 'Invalid link',
-            errorMessage: 'This link has expired or is invalid.',
+            errorMessage: 'This link has expired or is invalid. Please request a new link.',
             customer: 'Customer',
             device: 'Device',
+            name: 'Name',
+            phone: 'Phone',
+            forecast: 'Expected',
+            serviceDefault: 'Service',
+            productDefault: 'Product',
+            qty: 'Qty',
+            photo: 'Photo',
+            you: 'You',
             services: 'Services',
             products: 'Products',
             photos: 'Photos',
@@ -138,11 +182,21 @@
             yourRating: 'Your Rating'
         },
         es: {
+            pageTitle: 'Seguí tu OS - PraticOS',
+            pageDescription: 'Seguí el estado de tu orden de servicio',
             loading: 'Cargando...',
             errorTitle: 'Enlace inválido',
-            errorMessage: 'Este enlace ha expirado o es inválido.',
+            errorMessage: 'Este enlace ha expirado o es inválido. Por favor, solicita un nuevo enlace.',
             customer: 'Cliente',
             device: 'Dispositivo',
+            name: 'Nombre',
+            phone: 'Teléfono',
+            forecast: 'Previsión',
+            serviceDefault: 'Servicio',
+            productDefault: 'Producto',
+            qty: 'Cant',
+            photo: 'Foto',
+            you: 'Usted',
             services: 'Servicios',
             products: 'Productos',
             photos: 'Fotos',
@@ -184,6 +238,15 @@
 
     // Initialize
     function init() {
+        // Translate static HTML elements immediately
+        document.title = text.pageTitle;
+        const loadingText = document.getElementById('loading-text');
+        if (loadingText) loadingText.textContent = text.loading;
+        const errorTitle = document.getElementById('error-title');
+        if (errorTitle) errorTitle.textContent = text.errorTitle;
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) errorMessage.textContent = text.errorMessage;
+
         // Extract token from URL path (/q/TOKEN) or query param (?token=TOKEN for local dev)
         const path = window.location.pathname;
         const match = path.match(/\/q\/([^/]+)/);
@@ -224,17 +287,18 @@
         errorState.style.display = 'flex';
         orderContent.style.display = 'none';
 
-        if (message) {
-            errorState.querySelector('p').textContent = message;
-        }
+        const titleEl = document.getElementById('error-title');
+        if (titleEl) titleEl.textContent = text.errorTitle;
+        const msgEl = document.getElementById('error-message');
+        if (msgEl) msgEl.textContent = message || text.errorMessage;
     }
 
-    // Format currency
-    function formatCurrency(value, locale = 'pt-BR') {
+    // Format currency using company's country (not viewer's locale)
+    function formatCurrency(value) {
         const num = typeof value === 'number' ? value : parseFloat(value) || 0;
-        return new Intl.NumberFormat(locale, {
+        return new Intl.NumberFormat(companyCurrency.locale, {
             style: 'currency',
-            currency: locale === 'en-US' ? 'USD' : locale === 'es-ES' ? 'EUR' : 'BRL'
+            currency: companyCurrency.currency
         }).format(num);
     }
 
@@ -262,6 +326,11 @@
         orderContent.style.display = 'block';
 
         const { order, company, comments, permissions, customer } = orderData;
+
+        // Set company currency from country
+        if (company?.country && countryCurrencyMap[company.country]) {
+            companyCurrency = countryCurrencyMap[company.country];
+        }
 
         // Render header
         renderHeader(order, company);
@@ -295,6 +364,9 @@
 
         // Render footer
         renderFooter();
+
+        // Render language switcher
+        renderLanguageSwitcher();
     }
 
     // Render header
@@ -348,12 +420,12 @@
             <div class="card-body">
                 <div class="info-grid">
                     <div class="info-item">
-                        <span class="info-label">Nome</span>
+                        <span class="info-label">${text.name}</span>
                         <span class="info-value">${customerName}</span>
                     </div>
                     ${customerPhone ? `
                     <div class="info-item">
-                        <span class="info-label">Telefone</span>
+                        <span class="info-label">${text.phone}</span>
                         <span class="info-value highlight">${customerPhone}</span>
                     </div>
                     ` : ''}
@@ -365,7 +437,7 @@
                     ` : ''}
                     ${order.dueDate ? `
                     <div class="info-item">
-                        <span class="info-label">Previsão</span>
+                        <span class="info-label">${text.forecast}</span>
                         <span class="info-value">${formatDate(order.dueDate)}</span>
                     </div>
                     ` : ''}
@@ -386,7 +458,7 @@
         const itemsHtml = order.services.map(s => `
             <div class="item-row">
                 <div class="item-info">
-                    <div class="item-name">${s.name || 'Serviço'}</div>
+                    <div class="item-name">${s.name || text.serviceDefault}</div>
                     ${s.description ? `<div class="item-description">${s.description}</div>` : ''}
                 </div>
                 <div class="item-value">${formatCurrency(s.value)}</div>
@@ -418,9 +490,9 @@
         const itemsHtml = order.products.map(p => `
             <div class="item-row">
                 <div class="item-info">
-                    <div class="item-name">${p.name || 'Produto'}</div>
+                    <div class="item-name">${p.name || text.productDefault}</div>
                     ${p.description ? `<div class="item-description">${p.description}</div>` : ''}
-                    <div class="item-qty">Qtd: ${p.quantity || 1}</div>
+                    <div class="item-qty">${text.qty}: ${p.quantity || 1}</div>
                 </div>
                 <div class="item-value">${formatCurrency(p.value * (p.quantity || 1))}</div>
             </div>
@@ -452,7 +524,7 @@
 
         const photosHtml = order.photos.map((p, index) => `
             <div class="photo-item" onclick="orderView.openLightbox(${index})">
-                <img src="${p.url}" alt="${p.description || 'Foto'}" loading="lazy">
+                <img src="${p.url}" alt="${p.description || text.photo}" loading="lazy">
                 ${p.description ? `<div class="photo-description">${p.description}</div>` : ''}
             </div>
         `).join('');
@@ -505,7 +577,7 @@
                         <polyline points="15 18 9 12 15 6"/>
                     </svg>
                 </button>
-                <img class="lightbox-image" src="${lightboxPhotos[index].url}" alt="${lightboxPhotos[index].description || 'Foto'}">
+                <img class="lightbox-image" src="${lightboxPhotos[index].url}" alt="${lightboxPhotos[index].description || text.photo}">
                 <button class="lightbox-nav lightbox-next" onclick="orderView.nextPhoto()" ${index === lightboxPhotos.length - 1 ? 'disabled' : ''}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="9 18 15 12 9 6"/>
@@ -549,7 +621,7 @@
         const photo = lightboxPhotos[lightboxIndex];
         overlay.querySelector('.lightbox-counter').textContent = `${lightboxIndex + 1} / ${lightboxPhotos.length}`;
         overlay.querySelector('.lightbox-image').src = photo.url;
-        overlay.querySelector('.lightbox-image').alt = photo.description || 'Foto';
+        overlay.querySelector('.lightbox-image').alt = photo.description || text.photo;
         overlay.querySelector('.lightbox-description').textContent = photo.description || '';
         overlay.querySelector('.lightbox-prev').disabled = lightboxIndex === 0;
         overlay.querySelector('.lightbox-next').disabled = lightboxIndex === lightboxPhotos.length - 1;
@@ -887,6 +959,33 @@
         orderContent.appendChild(footer);
     }
 
+    // Render language switcher
+    function renderLanguageSwitcher() {
+        const switcher = document.createElement('div');
+        switcher.className = 'lang-switcher';
+
+        const languages = [
+            { code: 'pt', label: 'PT' },
+            { code: 'en', label: 'EN' },
+            { code: 'es', label: 'ES' }
+        ];
+
+        switcher.innerHTML = languages.map(l =>
+            `<button class="lang-btn ${l.code === lang ? 'active' : ''}" data-lang="${l.code}">${l.label}</button>`
+        ).join('');
+
+        document.body.appendChild(switcher);
+
+        switcher.addEventListener('click', (e) => {
+            const btn = e.target.closest('.lang-btn');
+            if (!btn || btn.classList.contains('active')) return;
+            const newLang = btn.dataset.lang;
+            const url = new URL(window.location);
+            url.searchParams.set('lang', newLang);
+            window.location.href = url.toString();
+        });
+    }
+
     // Show approve modal
     function showApproveModal() {
         showModal({
@@ -1040,7 +1139,7 @@
                 newComment.innerHTML = `
                     <div class="comment-author">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>
-                        ${orderData.customer?.name || 'Você'}
+                        ${orderData.customer?.name || text.you}
                     </div>
                     <div class="comment-text">${commentText}</div>
                     <div class="comment-time">${formatDate(new Date().toISOString())}</div>

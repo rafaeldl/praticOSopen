@@ -11,6 +11,15 @@ layout: false
       document.documentElement.setAttribute('data-theme',t);
     })();
     </script>
+    <script>
+    (function(){
+      var p=new URLSearchParams(window.location.search).get('lang');
+      var n=(navigator.language||'pt').split('-')[0];
+      var l=(p&&['pt','en','es'].indexOf(p)!==-1)?p:(['pt','en','es'].indexOf(n)!==-1?n:'pt');
+      window.__orderLang=l;
+      document.documentElement.lang=l==='pt'?'pt-BR':l==='es'?'es-ES':'en-US';
+    })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Acompanhe sua OS - PraticOS</title>
@@ -29,7 +38,7 @@ layout: false
     <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="/css/order-view.css">
 
-    <!-- Open Graph -->
+    <!-- Open Graph (PT for crawlers — they don't execute JS) -->
     <meta property="og:title" content="Acompanhe sua OS - PraticOS">
     <meta property="og:description" content="Visualize detalhes, aprove orçamentos e deixe comentários">
     <meta property="og:type" content="website">
@@ -43,7 +52,7 @@ layout: false
         <!-- Loading State -->
         <div class="order-loading" id="loading-state">
             <div class="spinner"></div>
-            <p>Carregando...</p>
+            <p id="loading-text">Carregando...</p>
         </div>
 
         <!-- Error State -->
@@ -55,8 +64,8 @@ layout: false
                     <line x1="12" y1="16" x2="12.01" y2="16"/>
                 </svg>
             </div>
-            <h2>Link inválido</h2>
-            <p>Este link expirou ou é inválido. Por favor, solicite um novo link.</p>
+            <h2 id="error-title">Link inválido</h2>
+            <p id="error-message">Este link expirou ou é inválido. Por favor, solicite um novo link.</p>
         </div>
 
         <!-- Order Content -->

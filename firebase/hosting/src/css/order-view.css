@@ -1194,3 +1194,52 @@
 [data-theme="light"] .photo-item:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
+
+/* ============================================
+   Language Switcher
+   ============================================ */
+.lang-switcher {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
+    padding: 4px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+}
+
+.lang-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.lang-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.lang-btn.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* Position above toast */
+@supports (bottom: env(safe-area-inset-bottom)) {
+    .lang-switcher {
+        bottom: calc(24px + env(safe-area-inset-bottom));
+    }
+}
