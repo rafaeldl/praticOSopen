@@ -5571,6 +5571,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'OS #{orderNumber} - {customerName}'**
   String reminderBodyOrder(String orderNumber, String customerName);
+
+  /// No description provided for @inviteWhatsAppSuccessTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Colaborador Convidado'**
+  String get inviteWhatsAppSuccessTitle;
+
+  /// No description provided for @inviteWhatsAppSuccessMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'{name} receberá o convite automaticamente ao entrar em contato com o bot PraticOS no WhatsApp.'**
+  String inviteWhatsAppSuccessMessage(String name);
+
+  /// No description provided for @sendWhatsApp.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviar WhatsApp'**
+  String get sendWhatsApp;
+
+  /// No description provided for @inviteWhatsAppBotMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Olá! Você foi adicionado à equipe da {company} no PraticOS. Mande um \"oi\" para o bot para começar: https://wa.me/5548988794742'**
+  String inviteWhatsAppBotMessage(String company);
 }
 
 class _AppLocalizationsDelegate

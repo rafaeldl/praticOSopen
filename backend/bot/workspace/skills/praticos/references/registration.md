@@ -13,9 +13,18 @@ exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsAp
 - INVALID_TOKEN → pedir verificar codigo
 - ALREADY_LINKED → orientar desconectar no app
 
+**Se tem `pendingInvites` (array não vazio):**
+O admin da empresa já convidou esse número. Aceitar automaticamente via endpoint existente.
+
+- **1 convite:** "[invitedByName] da empresa [companyName] te adicionou como [role]. Aceita o convite?"
+  - Sim → aceitar:
+    exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"inviteCode\":\"TOKEN_AQUI\",\"whatsappNumber\":\"{NUMERO}\"}' \"$PRATICOS_API_URL/bot/invite/accept\"")
+  - Não → "Sem problemas! Qualquer coisa é só mandar mensagem."
+- **Múltiplos convites:** listar todos com numero (1, 2, 3...) e perguntar qual aceitar. Aceitar o escolhido com o mesmo endpoint acima.
+
 **Se tem `pendingRegistration`:** retomar AUTO-CADASTRO pelo `state`.
 
-**Se nenhum dos dois:** perguntar se ja usa, recebeu convite, quer criar ou conhecer.
+**Se nenhum dos anteriores:** perguntar se ja usa, recebeu convite, quer criar ou conhecer.
 - Ja usa → "Gera codigo em Configuracoes > WhatsApp e manda aqui"
 - Recebeu convite → "Manda o codigo"
 - Quer criar → iniciar AUTO-CADASTRO

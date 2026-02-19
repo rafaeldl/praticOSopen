@@ -1226,5 +1226,24 @@
       "orderNumber": { "type": "String" },
       "customerName": { "type": "String" }
     }
+  },
+
+  "inviteWhatsAppSuccessTitle": "Collaborator Invited",
+  "inviteWhatsAppSuccessMessage": "{name} will automatically receive the invite when they contact the PraticOS bot on WhatsApp.",
+  "@inviteWhatsAppSuccessMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "sendWhatsApp": "Send WhatsApp",
+  "inviteWhatsAppBotMessage": "Hello! You have been added to the {company} team on PraticOS. Send a \"hi\" to the bot to get started: https://wa.me/5548988794742",
+  "@inviteWhatsAppBotMessage": {
+    "placeholders": {
+      "company": {
+        "type": "String"
+      }
+    }
   }
 }

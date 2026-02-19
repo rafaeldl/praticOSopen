@@ -8,6 +8,7 @@ import { AuthenticatedRequest } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import * as channelLinkService from '../../services/channel-link.service';
 import * as registrationService from '../../services/registration.service';
+import * as inviteService from '../../services/invite.service';
 import { db } from '../../services/firestore.service';
 
 const router: Router = Router();
@@ -180,11 +181,29 @@ router.get('/context', async (req: AuthenticatedRequest, res: Response) => {
         // Continue without pending registration info
       }
 
+      // Check for pending invites by phone (non-blocking)
+      let pendingInvites = null;
+      try {
+        const invites = await inviteService.findPendingInvitesByPhone(whatsappNumber);
+        if (invites.length > 0) {
+          pendingInvites = invites.map(inv => ({
+            token: inv.token,
+            companyName: inv.company.name,
+            role: inv.role,
+            invitedByName: inv.invitedBy?.name || '',
+            name: inv.name || '',
+          }));
+        }
+      } catch (error) {
+        console.warn('[LINK] Failed to check pending invites:', error);
+      }
+
       res.json({
         success: true,
         data: {
           linked: false,
           pendingRegistration,
+          pendingInvites,
         },
       });
       return;
