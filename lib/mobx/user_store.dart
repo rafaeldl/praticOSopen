@@ -56,13 +56,16 @@ abstract class _UserStore with Store {
   /// O usuário vai para o onboarding onde pode:
   /// - Aceitar convites pendentes de outras empresas
   /// - Criar sua própria empresa
-  createUserIfNotExist(auth.User firebaseUser) async {
+  ///
+  /// [initialLocale] is the real device locale (BCP47, e.g. "fr-FR").
+  createUserIfNotExist(auth.User firebaseUser, {String? initialLocale}) async {
     User? existingUser = await repository.findUserById(firebaseUser.uid);
     if (existingUser != null) return;
 
     // Cria apenas o documento do usuário (sem empresa)
     User newUser = _fillUserFields(firebaseUser);
     newUser.companies = []; // Começa sem empresas
+    newUser.preferredLanguage = initialLocale;
 
     await _db.collection('users').doc(newUser.id).set(
       newUser.toJson(),

@@ -27,8 +27,8 @@ import 'package:praticos/theme/app_theme.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 
-AuthStore _authStore = AuthStore();
 LocaleStore _localeStore = LocaleStore();
+AuthStore _authStore = AuthStore();
 
 // Test locale override (set via --dart-define=TEST_LOCALE=pt-BR)
 const String? _testLocale = String.fromEnvironment('TEST_LOCALE') == ''
@@ -42,6 +42,9 @@ Future<void> main() async {
   await Firebase.initializeApp();
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   FirebaseCrashlytics.instance.log("iniciando a aplicação");
+
+  // Wire localeStore into authStore so language syncs on login
+  _authStore.localeStore = _localeStore;
 
   // If TEST_LOCALE is set (screenshot tests), force that locale
   if (_testLocale != null) {

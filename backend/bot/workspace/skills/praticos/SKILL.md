@@ -43,6 +43,7 @@ Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KE
 | Resumo | GET /bot/summary/today \| /pending |
 | Faturamento | GET /bot/analytics/financial |
 | Compartilhar | POST /bot/orders/{NUM}/share |
+| Atualizar idioma | PATCH /bot/user/language |
 
 ⚠️ NAO EXISTEM: /bot/customers, /bot/devices, /bot/services, /bot/products, /bot/orders (sem /full /list /{NUM}), /bot/*/search, /bot/search (sem /unified)
 
@@ -72,6 +73,12 @@ exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsAp
 Verificar vinculo: GET /bot/link/context. Se `linked:true` → PARTE 2.
 Se NAO vinculado: verificar `pendingInvites` (convites feitos pelo admin com telefone do usuario) e `pendingRegistration`.
 Para detalhes do fluxo: `read(file_path="skills/praticos/references/registration.md")`
+
+### Idioma no primeiro contato
+- Se `linked:true` e `preferredLanguage` veio no contexto → salvar no memory e responder nesse idioma
+- Se `linked:true` e `preferredLanguage` NAO veio → detectar do texto da primeira mensagem, salvar no memory e chamar:
+  `PATCH /api/bot/user/language {"preferredLanguage":"[codigo]"}`
+- Se NAO vinculado → detectar idioma do texto e salvar no memory. Ao vincular, chamar PATCH para persistir
 
 ---
 
