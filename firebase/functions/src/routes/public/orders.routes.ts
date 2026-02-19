@@ -97,6 +97,7 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
           phone: company.phone,
           email: company.email,
           address: company.address,
+          country: company.country,
         } : null,
         comments: comments.map((c) => ({
           // IDs removed for LGPD compliance
