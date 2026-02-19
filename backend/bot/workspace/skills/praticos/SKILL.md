@@ -12,7 +12,11 @@ metadata: {"moltbot": {"always": true}}
 Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KEY** (auth key)
 **{NUMERO}** = origin.from da sessao (remetente). Normalizar: se nao comeca com "+", adicionar.
 
-🔴 NUNCA INVENTAR {NUMERO}. DEVE ser EXATAMENTE origin.from. Se nao souber, NAO faca chamadas.
+🔴 **IDENTIDADE vs DADOS — NUNCA CONFUNDIR:**
+- {NUMERO} = IDENTIDADE DA SESSAO. SEMPRE origin.from. IMUTAVEL.
+- Telefones em vCards, contatos compartilhados, resultados de busca = DADOS DE CLIENTE. NUNCA usar como {NUMERO}.
+- Se o usuario enviar um contato/vCard, o telefone dentro e do CLIENTE, NAO e origin.from.
+- NUNCA INVENTAR {NUMERO}. Se nao souber origin.from, NAO faca chamadas.
 
 **Numeros BR (+55):** WhatsApp usa +55{DDD}{8dig} (13 chars). Se API retornar 14 chars (+55489XXXXXXXX), remover o "9" apos DDD.
 
@@ -81,7 +85,7 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 ### REGRAS
 1. **IDs OBRIGATORIOS** — API NAO aceita nomes. Usar POST /bot/search/unified.
 2. **Criar OS:** busca unificada → exact? usar ID → suggestions? confirmar → nao encontrou? oferecer criar
-3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard).
+3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
 4. **Fotos:** multipart `-F "file=@/path"` (NAO base64)
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
 6. **Exibir OS:** ver CARD DE OS abaixo

@@ -80,7 +80,7 @@ Criou OS→compartilhar? | Listou pendentes→atualizar? | Cadastrou cliente→a
 
 Dois niveis: **memory/MEMORY.md** (global) e **memory/users/{NUMERO}.md** (por usuario).
 
-**{NUMERO}:** normalizar origin.from com "+". Ex: "554884090709" → "+554884090709".
+**{NUMERO}:** normalizar origin.from com "+". Ex: "554884090709" → "+554884090709". Telefones de vCards/contatos = dados de cliente, NAO {NUMERO}.
 
 **Inicio de sessao:** ler `memory/users/{NUMERO}.md`. Se existir, usar dados salvos. Se NAO existir, chamar /bot/link/context e criar arquivo.
 
@@ -122,7 +122,7 @@ Responda quando mencionado ou pode adicionar valor. Fique em silêncio (HEARTBEA
 
 - Nunca invento dados — sempre consulto API
 - NOT_FOUND → releio SKILL.md. Max 3 tentativas.
-- 🔴 NUNCA invento {NUMERO}. Em cron: leio memoria p/ recuperar. Uso sessions_send, NUNCA message().
+- 🔴 {NUMERO} = origin.from. FIXO na sessao inteira. Telefones de vCards/contatos compartilhados sao DADOS DE CLIENTE, nunca {NUMERO}. Em cron: leio memoria p/ recuperar. Uso sessions_send, NUNCA message().
 - Dados sigilosos ficam sigilosos. Ações destrutivas só com confirmação.
 
 ---
