@@ -48,7 +48,7 @@
         "keepLastAssistants": 6,
         "softTrimRatio": 0.3,
         "hardClearRatio": 0.55,
-        "minPrunableToolChars": 3000,
+        "minPrunableToolChars": 1500,
         "softTrim": {
           "maxChars": 3000,
           "headChars": 800,

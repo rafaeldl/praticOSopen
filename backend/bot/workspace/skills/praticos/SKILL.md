@@ -49,7 +49,7 @@ Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KE
 
 🔴 ANTI-LOOP: NOT_FOUND → releia esta tabela. NUNCA tente variacoes de URL. Max 3 tentativas.
 
-Para endpoints detalhados com exemplos curl: `read(file_path="skills/praticos/references/api-endpoints.md")`
+**formatContext:** Endpoints retornam `formatContext: { country, currency, locale }`. Usar para formatar moedas e datas (ver SOUL.md).
 
 ---
 
@@ -97,7 +97,21 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
 6. **Exibir OS:** ver CARD DE OS abaixo
 7. **Apos criar OS:** oferecer link → POST /bot/orders/{NUM}/share
-8. **Checklists:** `read(file_path="skills/praticos/references/checklists.md")`
+
+---
+
+## CHECKLISTS
+
+Apresentar item por item. Status: ⏳pending 🔄in_progress ✅completed
+Tipos: text(string) | number(num/string) | boolean(true/false/yes/no/sim/não/sí/no — aceitar no idioma do usuario) | select(indice 1-N ou valor) | checklist("1,3,5" ou [1,3,5]) | photo_only(so foto)
+Status flow: pending → in_progress → completed (completed requer obrigatorios preenchidos)
+
+Endpoints:
+- GET /bot/forms/templates | GET /bot/orders/{NUM}/forms | GET /bot/orders/{NUM}/forms/{FID}
+- POST /bot/orders/{NUM}/forms `{"templateId":"ID"}`
+- POST /bot/orders/{NUM}/forms/{FID}/items/{IID} `{"value":"resposta"}`
+- POST /bot/orders/{NUM}/forms/{FID}/items/{IID}/photos - multipart
+- PATCH /bot/orders/{NUM}/forms/{FID}/status `{"status":"completed"}`
 
 ---
 
@@ -105,6 +119,32 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 
 🔴 USAR `/details` (NAO `/list`). `/list` nao traz foto nem link.
 
-🔴 OBRIGATORIO: antes de formatar qualquer OS, executar:
-`read(file_path="skills/praticos/references/os-card.md")`
-Seguir o template LITERALMENTE — mesmos emojis, mesma ordem, bold com asteriscos. NAO resumir, NAO omitir passos.
+### Passo 1 — Buscar dados
+exec: GET /bot/orders/{NUM}/details → retorna `order` com `mainPhotoUrl`, `photosCount`, `shareUrl`
+
+### Passo 2 — Link
+Se `shareUrl` veio, usar. Se nao: POST /bot/orders/{NUM}/share → retorna `url`.
+
+### Passo 3 — Formatar card
+🌐 Traduzir TODOS os labels/status para o idioma do usuario.
+Montar texto a partir dos campos do `order`:
+```
+📋 *O.S. #{number}* - {createdAt} - {STATUS}
+👤 *Cliente:* {customer.name}
+🔧 *{DEVICE_LABEL}:* {device.name} ({device.serial})
+🛠️ *Serviços:* • {service.name} - {VALOR}
+📦 *Produtos:* • {product.name} (x{qty}) - {VALOR}
+💰 *Total:* {VALOR} | 🏷️ *Desconto:* {VALOR} | ✅ *Pago:* {VALOR} | ⏳ *A receber:* {VALOR}
+📅 *Previsão:* {dueDate}
+🔗 *Link:* {shareUrl}
+```
+**Omitir** campos null/vazio/0. **Moeda:** usar `formatContext` do endpoint (currency+locale). **remaining** = total - discount - paidAmount.
+Status internos: quote|approved|progress|done|canceled → traduzir.
+
+### Passo 4 — Enviar
+Se `mainPhotoUrl` existir → baixar e enviar como imagem com card de legenda:
+```
+exec: curl -s -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" "$PRATICOS_API_URL{mainPhotoUrl}" --output /tmp/os-{NUM}.jpg
+message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
+```
+Se null → `message("{card}")`. 🔴 NUNCA mencionar fotos sem enviar.
