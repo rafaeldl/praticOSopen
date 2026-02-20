@@ -6,7 +6,7 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
 import * as catalogService from '../../services/catalog.service';
-import { formatCatalogResults, formatCatalogList } from '../../utils/format.utils';
+import { getFormatContext } from '../../utils/format.utils';
 
 const router: Router = Router();
 
@@ -104,18 +104,15 @@ router.get('/search', async (req: AuthenticatedRequest, res: Response) => {
       }
     }
 
-    // Use different formatting for search vs list
-    const message = query
-      ? formatCatalogResults(query, services, products)
-      : formatCatalogList(type, services, products);
-
     res.json({
       success: true,
       data: {
-        message,
+        query: query || null,
+        type,
         services,
         products,
         totalResults: services.length + products.length,
+        formatContext: getFormatContext(req.auth?.companyCountry),
       },
     });
   } catch (error) {

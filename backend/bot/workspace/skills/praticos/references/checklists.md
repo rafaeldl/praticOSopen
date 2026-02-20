@@ -19,7 +19,7 @@ PATCH /bot/orders/{NUM}/forms/{FID}/status `{"status":"completed"}`
 ## Tipos de campo
 - text: string livre
 - number: num ou string
-- boolean: true/false/sim/nao
+- boolean: true/false/yes/no/sim/não/sí/no (aceitar no idioma do usuario)
 - select: indice 1-N ou valor
 - checklist: "1,3,5" ou [1,3,5]
 - photo_only: so foto

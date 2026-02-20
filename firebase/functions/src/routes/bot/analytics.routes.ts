@@ -8,10 +8,10 @@ import { AuthenticatedRequest } from '../../models/types';
 import * as analyticsService from '../../services/analytics.service';
 import { PeriodType, startOfMonth, endOfDay, startOfDay, parseLocalDate } from '../../utils/date.utils';
 import {
-  formatFinancialSummary,
   getPeriodLabel,
   formatCurrentMonthLabel,
   formatDateRangeLabel,
+  getFormatContext,
 } from '../../utils/format.utils';
 
 const router: Router = Router();
@@ -113,19 +113,9 @@ router.get('/financial', async (req: AuthenticatedRequest, res: Response) => {
       periodLabel = formatCurrentMonthLabel();
     }
 
-    const message = formatFinancialSummary({
-      period: periodLabel,
-      total: summary.revenue.total,
-      paid: summary.revenue.paid,
-      unpaid: summary.revenue.unpaid,
-      discount: summary.revenue.discount,
-      ordersCount: summary.orders.total,
-    });
-
     res.json({
       success: true,
       data: {
-        message,
         summary: {
           period: {
             ...summary.period,
@@ -137,6 +127,7 @@ router.get('/financial', async (req: AuthenticatedRequest, res: Response) => {
           topCustomers: summary.topCustomers,
           topServices: summary.topServices,
         },
+        formatContext: getFormatContext(req.auth?.companyCountry),
       },
     });
   } catch (error) {

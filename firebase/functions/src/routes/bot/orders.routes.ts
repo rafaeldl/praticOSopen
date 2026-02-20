@@ -6,8 +6,7 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import * as orderService from '../../services/order.service';
-import { timestampToDate } from '../../utils/date.utils';
-import { formatOrderDetails, formatStatusUpdate, formatStatus, formatCurrency } from '../../utils/format.utils';
+import { getFormatContext } from '../../utils/format.utils';
 import { getUserAggr } from '../../middleware/company.middleware';
 
 const router: Router = Router();
@@ -45,14 +44,6 @@ router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
       offset: 0,
     });
 
-    // Formatação amigável para o Bot
-    const orders = result.data.map((o) => {
-      const date = timestampToDate(o.createdAt)?.toLocaleDateString('pt-BR');
-      const customerName = o.customer?.name || 'Cliente não informado';
-      const deviceLine = o.device?.name ? `\n🔧 ${o.device.name}` : '';
-      return `📋 *OS #${o.number}* - ${formatStatus(o.status)}\n👤 ${customerName}${deviceLine}\n💰 ${formatCurrency(o.total)}\n📅 ${date}`;
-    });
-
     // Strip heavy fields (photos, transactions) to save tokens in list view
     // Bot should use GET /bot/orders/{NUM}/details for full order data + photo
     const lightOrders = result.data.map(({ photos, transactions, ...rest }) => ({
@@ -64,8 +55,8 @@ router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
       success: true,
       data: {
         count: result.total,
-        formattedList: orders.length > 0 ? orders.join('\n\n') : 'Nenhuma OS encontrada.',
         orders: lightOrders,
+        formatContext: getFormatContext(req.auth?.companyCountry),
       },
     });
   } catch (error) {
@@ -114,13 +105,11 @@ router.get('/:number', async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
-    const message = formatOrderDetails(order);
-
     res.json({
       success: true,
       data: {
-        message,
         order,
+        formatContext: getFormatContext(req.auth?.companyCountry),
       },
     });
   } catch (error) {
@@ -190,7 +179,8 @@ router.patch('/:number/status', async (req: AuthenticatedRequest, res: Response)
         success: false,
         error: {
           code: 'INVALID_TRANSITION',
-          message: `Não é possível mudar de "${formatStatus(currentStatus)}" para "${formatStatus(newStatus)}".`,
+          message: `Invalid transition: ${currentStatus} → ${newStatus}`,
+          allowedTransitions: validTransitions[currentStatus] || [],
         },
       });
       return;
@@ -215,15 +205,13 @@ router.patch('/:number/status', async (req: AuthenticatedRequest, res: Response)
       return;
     }
 
-    const message = formatStatusUpdate(orderNumber, currentStatus, newStatus);
-
     res.json({
       success: true,
       data: {
-        message,
         orderNumber,
         previousStatus: currentStatus,
         newStatus,
+        formatContext: getFormatContext(req.auth?.companyCountry),
       },
     });
   } catch (error) {

@@ -423,6 +423,7 @@ export interface AuthenticatedRequest extends Request {
     companyId: string;
     userId?: string;
     permissions?: string[];
+    companyCountry?: string;
   };
   userContext?: UserContext;
   shareTokenAuth?: ShareTokenAuth;

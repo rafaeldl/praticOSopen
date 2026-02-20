@@ -2,6 +2,8 @@
 
 Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" e base "$PRATICOS_API_URL"
 
+**formatContext:** Todos os endpoints bot retornam `formatContext: { country, currency, locale }`. Usar para formatar moedas e datas. Ver SOUL.md > Dados da API.
+
 ## Busca Unificada (USAR SEMPRE)
 POST /bot/search/unified
 Parametros JSON (string OU array de strings): customer, customerPhone, device, deviceSerial, service, product
@@ -72,5 +74,5 @@ POST /bot/orders/{NUM}/forms/{FID}/items/{IID} `{"value":"resposta"}`
 POST /bot/orders/{NUM}/forms/{FID}/items/{IID}/photos - multipart
 PATCH /bot/orders/{NUM}/forms/{FID}/status `{"status":"completed"}`
 
-Tipos: text(string) | number(num/string) | boolean(true/false/sim/nao) | select(indice 1-N ou valor) | checklist("1,3,5" ou [1,3,5]) | photo_only(so foto)
+Tipos: text(string) | number(num/string) | boolean(true/false/yes/no/sim/não/sí/no — aceitar no idioma do usuario) | select(indice 1-N ou valor) | checklist("1,3,5" ou [1,3,5]) | photo_only(so foto)
 Status: pending → in_progress → completed (completed requer obrigatorios preenchidos)
