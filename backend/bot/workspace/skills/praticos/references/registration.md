@@ -31,6 +31,8 @@ O admin da empresa já convidou esse número. Aceitar automaticamente via endpoi
 - Quer conhecer → sugerir https://praticos.web.app OU compartilhar o contato do bot no WhatsApp
 - Quer indicar pra colega → orientar a compartilhar o contato do bot (ver INDICAÇÃO abaixo)
 
+**Idioma:** para usuarios NAO vinculados, detectar o idioma da primeira mensagem. Responder nesse idioma durante todo o fluxo. Ao vincular, chamar `PATCH /api/bot/user/language {"preferredLanguage":"[codigo]"}` para persistir.
+
 **Regra:** msgs CURTAS, 1-2 frases. Tom casual.
 
 ---
@@ -59,7 +61,7 @@ Depois, orientar o usuario:
 
 Todas as chamadas abaixo usam os mesmos headers: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}"
 
-1. POST /bot/registration/start `{"locale":"pt-BR"}` → perguntar nome da empresa
+1. POST /bot/registration/start `{"locale":"[idioma-detectado]"}` → usar idioma detectado da primeira mensagem do usuario (ex: "fr-FR", "en-US"). Se nao detectou, usar "pt-BR". Perguntar nome da empresa
 2. POST /bot/registration/update `{"companyName":"NOME"}` → mostrar segmentos
 3. POST /bot/registration/update `{"segmentId":"ID"}` → mostrar especialidades (se houver, senao pular p/ 5)
 4. POST /bot/registration/update `{"subspecialties":["id1","id2"]}`

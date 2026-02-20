@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/mobx/company_store.dart';
+import 'package:praticos/mobx/locale_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/repositories/auth_repository.dart';
@@ -18,6 +20,9 @@ abstract class _AuthStore with Store {
 
   CompanyStore companyStore = CompanyStore();
   UserStore userStore = UserStore();
+
+  /// Injected from main.dart to sync locale on login
+  LocaleStore? localeStore;
 
   @observable
   ObservableStream<User?>? currentUser;
@@ -61,9 +66,26 @@ abstract class _AuthStore with Store {
       hasCompanyLoadError = false;
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await userStore.createUserIfNotExist(user);
+      final deviceLocale = localeStore?.deviceLocaleCode;
+      await userStore.createUserIfNotExist(user, initialLocale: deviceLocale);
 
       var dbUser = await userStore.findUserById(user.uid);
+
+      // Sync preferredLanguage between Firestore and app
+      if (dbUser != null) {
+        if (dbUser.preferredLanguage != null) {
+          // Firestore has a language → sync to app UI
+          await localeStore?.syncFromFirestore(dbUser.preferredLanguage);
+        } else if (deviceLocale != null) {
+          // Backfill: user has no preferredLanguage, write device locale
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({'preferredLanguage': deviceLocale}).catchError((e) {
+            print('AuthStore: failed to backfill preferredLanguage: $e');
+          });
+        }
+      }
       Company? company;
 
       // Check if there is a last selected company saved

@@ -209,6 +209,11 @@ router.get('/context', async (req: AuthenticatedRequest, res: Response) => {
       return;
     }
 
+    // Fetch user doc to get preferredLanguage
+    const userDoc = await db.collection('users').doc(link.userId).get();
+    const userData = userDoc.data();
+    const preferredLanguage: string | null = userData?.preferredLanguage || null;
+
     // Fetch company data to get segment information
     const companyDoc = await db.collection('companies').doc(link.companyId).get();
     const company = companyDoc.data();
@@ -219,12 +224,20 @@ router.get('/context', async (req: AuthenticatedRequest, res: Response) => {
     const segmentData = segmentDoc.data();
     const segmentName = segmentData?.name || segmentId;
 
-    // Extract labels from customFields
+    // Extract labels from customFields using preferredLanguage (fallback pt-BR)
+    const labelLocale = preferredLanguage || 'pt-BR';
     const segmentLabels: Record<string, string> = {};
     const customFields = (segmentData?.customFields || []) as CustomField[];
     for (const field of customFields) {
-      if (field.type === 'label' && field.labels?.['pt-BR']) {
-        segmentLabels[field.key] = field.labels['pt-BR'];
+      if (field.type === 'label') {
+        // Try user's language, then base language (e.g. "fr" from "fr-FR"), then pt-BR
+        const baseLang = labelLocale.split('-')[0];
+        const label = field.labels?.[labelLocale]
+          || field.labels?.[baseLang]
+          || field.labels?.['pt-BR'];
+        if (label) {
+          segmentLabels[field.key] = label;
+        }
       }
     }
 
@@ -237,6 +250,7 @@ router.get('/context', async (req: AuthenticatedRequest, res: Response) => {
         companyId: link.companyId,
         companyName: link.companyName,
         role: link.role,
+        preferredLanguage,
         permissions: [], // Would be resolved from role
         segment: {
           id: segmentId,

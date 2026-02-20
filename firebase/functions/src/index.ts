@@ -152,6 +152,7 @@ import botEntitiesRoutes from './routes/bot/entities.routes';
 import botFormsRoutes from './routes/bot/forms.routes';
 import botShareRoutes from './routes/bot/share.routes';
 import botRegistrationRoutes from './routes/bot/registration.routes';
+import botUserRoutes from './routes/bot/user.routes';
 
 // Initialize Express app
 const app = express();
@@ -300,6 +301,7 @@ app.use('/bot/catalog', botLimiter, botAuth, botCatalogRoutes);
 app.use('/bot/search', botLimiter, botAuth, botUnifiedSearchRoutes);
 app.use('/bot', botLimiter, botAuth, botEntitiesRoutes);
 app.use('/bot/registration', botLimiter, botAuth, botRegistrationRoutes);
+app.use('/bot/user', botLimiter, botAuth, botUserRoutes);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {

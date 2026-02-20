@@ -4,6 +4,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/auth_store.dart';
+import 'package:praticos/mobx/locale_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/mobx/reminder_store.dart';
@@ -285,6 +286,23 @@ class _SettingsState extends State<Settings> {
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.interface_.toUpperCase()),
                 children: [
+                  Observer(builder: (_) {
+                    final localeStore = Provider.of<LocaleStore>(context, listen: false);
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemBlue,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.globe, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.language),
+                      additionalInfo: Text(localeStore.currentLocaleDisplayName),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showLanguageSelectionDialog(context, localeStore),
+                    );
+                  }),
                   CupertinoListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(4),
@@ -456,6 +474,28 @@ class _SettingsState extends State<Settings> {
             onPressed: () { themeStore.setThemeMode(ThemeMode.dark); Navigator.pop(dialogContext); },
           ),
         ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
+      ),
+    );
+  }
+
+  void _showLanguageSelectionDialog(BuildContext context, LocaleStore localeStore) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext dialogContext) => CupertinoActionSheet(
+        title: Text(context.l10n.selectLanguage),
+        actions: localeStore.availableLocales.map((locale) {
+          return CupertinoActionSheetAction(
+            child: Text('${locale['flag']} ${locale['name']}'),
+            onPressed: () {
+              localeStore.setLocale(locale['code']!);
+              Navigator.pop(dialogContext);
+            },
+          );
+        }).toList(),
         cancelButton: CupertinoActionSheetAction(
           child: Text(context.l10n.cancel),
           onPressed: () => Navigator.pop(dialogContext),

@@ -17,6 +17,9 @@ class User extends BaseAudit {
   /// FCM tokens for push notifications (multi-device support)
   List<FcmToken>? fcmTokens;
 
+  /// BCP47 language code (e.g., "pt-BR", "fr-FR", "de-DE")
+  String? preferredLanguage;
+
   User();
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
   @override
@@ -29,6 +32,7 @@ class UserAggr extends Base {
   String? name;
   String? email;
   String? photo;
+  String? preferredLanguage;
 
   UserAggr();
   factory UserAggr.fromJson(Map<String, dynamic> json) =>

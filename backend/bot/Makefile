@@ -141,6 +141,12 @@ status:
 restart:
 	gcloud compute instances reset praticos-bot --zone=$(ZONE)
 
+# Token usage and cost report (últimos N dias, default 7)
+USAGE_DAYS ?= 7
+usage:
+	gcloud compute ssh praticos-bot --zone=$(ZONE) $(SSH_KEY_FLAG) -- \
+		'sudo docker exec $$(sudo docker ps -q) openclaw gateway usage-cost --days $(USAGE_DAYS) --json'
+
 # Limpar sessões e reiniciar container (produção)
 clear-sessions:
 	@echo "Limpando sessões na produção..."
@@ -155,4 +161,4 @@ clear-sessions-local:
 	docker compose restart
 	@echo "✅ Sessões locais limpas e container reiniciado"
 
-.PHONY: dev build-dev run-dev build push deploy setup-vm sync setup-directories setup-credentials destroy-vm recreate-vm verify-mounts up down logs-local logs ssh status restart clear-sessions clear-sessions-local
+.PHONY: dev build-dev run-dev build push deploy setup-vm sync setup-directories setup-credentials destroy-vm recreate-vm verify-mounts up down logs-local logs ssh status restart usage clear-sessions clear-sessions-local

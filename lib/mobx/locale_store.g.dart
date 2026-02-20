@@ -82,6 +82,18 @@ mixin _$LocaleStore on _LocaleStore, Store {
     return _$setLocaleAsyncAction.run(() => super.setLocale(localeCode));
   }
 
+  late final _$syncFromFirestoreAsyncAction = AsyncAction(
+    '_LocaleStore.syncFromFirestore',
+    context: context,
+  );
+
+  @override
+  Future<void> syncFromFirestore(String? firestoreLocale) {
+    return _$syncFromFirestoreAsyncAction.run(
+      () => super.syncFromFirestore(firestoreLocale),
+    );
+  }
+
   @override
   String toString() {
     return '''
