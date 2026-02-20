@@ -15,7 +15,6 @@ import {
   saveFormItemResponseSchema,
   updateFormStatusSchema,
 } from '../../utils/validation.utils';
-
 const router: Router = Router();
 
 // ============================================================================
@@ -52,6 +51,7 @@ router.get('/templates', requireLinked, async (req: AuthenticatedRequest, res: R
           descriptionI18n: t.descriptionI18n,
         })),
         count: templates.length,
+
       },
     });
   } catch (error) {
@@ -120,27 +120,13 @@ router.get('/:number/forms', requireLinked, async (req: AuthenticatedRequest, re
       };
     });
 
-    // Build formatted list for bot
-    let formattedList = `*Checklists da OS #${orderNumber}*\n\n`;
-    if (formattedForms.length === 0) {
-      formattedList += 'Nenhum checklist adicionado.';
-    } else {
-      formattedForms.forEach((form, index) => {
-        const progressText = form.status === 'completed'
-          ? ''
-          : ` (${form.progress.filled}/${form.progress.total} itens)`;
-        formattedList += `${index + 1}. ${form.statusEmoji} ${form.title}${progressText}\n`;
-      });
-      formattedList += '\nResponda com o número para ver/preencher.';
-    }
-
     res.json({
       success: true,
       data: {
         forms: formattedForms,
         count: forms.length,
-        formattedList,
         orderNumber,
+
       },
     });
   } catch (error) {
@@ -242,6 +228,7 @@ router.get('/:number/forms/:formId', requireLinked, async (req: AuthenticatedReq
         })),
         titleI18n: form.titleI18n,
         orderNumber,
+
       },
     });
   } catch (error) {
@@ -320,7 +307,8 @@ router.post('/:number/forms', requireLinked, async (req: AuthenticatedRequest, r
         title: form.title,
         status: form.status,
         itemCount: form.items.length,
-        message: `Checklist "${form.title}" adicionado à OS #${orderNumber}`,
+        orderNumber,
+
       },
     });
   } catch (error) {
@@ -406,7 +394,7 @@ router.post('/:number/forms/:formId/items/:itemId', requireLinked, async (req: A
         itemId: itemIdParam,
         status: updatedForm.status,
         progress,
-        message: 'Resposta salva',
+
       },
     });
   } catch (error) {
@@ -543,7 +531,7 @@ router.post('/:number/forms/:formId/items/:itemId/photos', requireLinked, async 
           itemId: itemIdParam,
           photoCount,
           progress,
-          message: `Foto adicionada (${photoCount} foto${photoCount > 1 ? 's' : ''} no item)`,
+  
         },
       });
     } catch (error) {
@@ -642,9 +630,11 @@ router.patch('/:number/forms/:formId/status', requireLinked, async (req: Authent
       success: true,
       data: {
         formId: updatedForm.id,
+        title: updatedForm.title,
         status: updatedForm.status,
         statusLabel,
-        message: `${statusEmoji} Checklist "${updatedForm.title}" - ${statusLabel}`,
+        statusEmoji,
+
       },
     });
   } catch (error) {

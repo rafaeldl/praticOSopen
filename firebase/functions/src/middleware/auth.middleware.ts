@@ -147,6 +147,11 @@ export async function botAuth(
       if (link) {
         req.auth.companyId = link.companyId;
         req.auth.userId = link.userId;
+
+        // Resolve company country for format context
+        const companyDoc = await db.collection('companies').doc(link.companyId).get();
+        req.auth.companyCountry = companyDoc.data()?.country || 'BR';
+
         req.userContext = {
           userId: link.userId,
           userName: link.userName || '',

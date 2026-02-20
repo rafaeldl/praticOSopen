@@ -11,6 +11,8 @@ Se `shareUrl` veio no passo 1, usar. Se nao: POST /bot/orders/{NUM}/share → re
 
 ## Passo 3 — Formatar card
 
+🌐 **REGRA MULTILÍNGUE:** Traduzir TODOS os labels e status do card para o idioma do usuário (do memory/preferredLanguage). Os exemplos abaixo são em pt-BR como referência.
+
 Montar o texto a partir dos campos do `order`:
 ```
 📋 *O.S. #{number}* - {createdAt} - {STATUS}
@@ -19,22 +21,23 @@ Montar o texto a partir dos campos do `order`:
 🔧 *{DEVICE_LABEL}:* {device.name} ({device.serial})
 
 🛠️ *Serviços:*
-• {service.name} - R$ {value}
+• {service.name} - {VALOR_FORMATADO}
 
 📦 *Produtos:*
-• {product.name} (x{qty}) - R$ {value}
+• {product.name} (x{qty}) - {VALOR_FORMATADO}
 
-💰 *Total:* R$ {total}
-🏷️ *Desconto:* R$ {discount}
-✅ *Pago:* R$ {paidAmount}
-⏳ *A receber:* R$ {remaining}
+💰 *Total:* {VALOR_FORMATADO}
+🏷️ *Desconto:* {VALOR_FORMATADO}
+✅ *Pago:* {VALOR_FORMATADO}
+⏳ *A receber:* {VALOR_FORMATADO}
 📅 *Previsão:* {dueDate}
 
 🔗 *Link:* {shareUrl}
 ```
-**Status:** quote=Orçamento | approved=Aprovado | progress=Em andamento | done=Concluído | canceled=Cancelado
+**Labels:** Traduzir no idioma do usuario. Referência pt-BR: Cliente, Serviços, Produtos, Total, Desconto, Pago, A receber, Previsão, Link. Ex en: Customer, Services, Products, Total, Discount, Paid, Balance, Due date, Link.
+**Status:** Traduzir no idioma do usuario. Valores internos e referência pt-BR: quote=Orçamento | approved=Aprovado | progress=Em andamento | done=Concluído | canceled=Cancelado. Ex en: Quote | Approved | In progress | Completed | Canceled.
 **Omitir:** campos null, vazio ou com valor 0. Ex: paidAmount=0 → nao mostrar "Pago". discount=0 → nao mostrar "Desconto".
-**Valores R$:** SEMPRE formato BR com virgula decimal e ponto milhar. Ex: R$ 1.234,56 — NUNCA R$ 1234.56.
+**Moeda/Valores:** Usar `formatContext` retornado pelo endpoint `/bot/orders/{NUM}/details`. O `currency` define o simbolo (BRL=R$, EUR=€, USD=$) e o `locale` define o formato numerico: pt-BR → R$ 1.234,56 | en-US → $1,234.56 | fr-FR → 1 234,56 €. A API retorna valores raw (numeros).
 **remaining** = total - discount - paidAmount.
 
 ## Passo 4 — Enviar

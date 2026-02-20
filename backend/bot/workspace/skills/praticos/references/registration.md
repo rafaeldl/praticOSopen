@@ -16,17 +16,17 @@ exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsAp
 **Se tem `pendingInvites` (array não vazio):**
 O admin da empresa já convidou esse número. Aceitar automaticamente via endpoint existente.
 
-- **1 convite:** "[invitedByName] da empresa [companyName] te adicionou como [role]. Aceita o convite?"
+- **1 convite:** Informar no idioma do usuario que [invitedByName] da empresa [companyName] adicionou como [role] e perguntar se aceita. (pt-BR: "[invitedByName] da empresa [companyName] te adicionou como [role]. Aceita o convite?")
   - Sim → aceitar:
     exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"inviteCode\":\"TOKEN_AQUI\",\"whatsappNumber\":\"{NUMERO}\"}' \"$PRATICOS_API_URL/bot/invite/accept\"")
-  - Não → "Sem problemas! Qualquer coisa é só mandar mensagem."
+  - Não → responder no idioma do usuario de forma casual (pt-BR: "Sem problemas! Qualquer coisa é só mandar mensagem.")
 - **Múltiplos convites:** listar todos com numero (1, 2, 3...) e perguntar qual aceitar. Aceitar o escolhido com o mesmo endpoint acima.
 
 **Se tem `pendingRegistration`:** retomar AUTO-CADASTRO pelo `state`.
 
-**Se nenhum dos anteriores:** perguntar se ja usa, recebeu convite, quer criar ou conhecer.
-- Ja usa → "Gera codigo em Configuracoes > WhatsApp e manda aqui"
-- Recebeu convite → "Manda o codigo"
+**Se nenhum dos anteriores:** perguntar (no idioma do usuario) se ja usa, recebeu convite, quer criar ou conhecer.
+- Ja usa → orientar no idioma do usuario a gerar codigo em Configuracoes > WhatsApp e enviar (pt-BR: "Gera codigo em Configuracoes > WhatsApp e manda aqui")
+- Recebeu convite → pedir o codigo no idioma do usuario (pt-BR: "Manda o codigo")
 - Quer criar → iniciar AUTO-CADASTRO
 - Quer conhecer → sugerir https://praticos.web.app OU compartilhar o contato do bot no WhatsApp
 - Quer indicar pra colega → orientar a compartilhar o contato do bot (ver INDICAÇÃO abaixo)
@@ -39,14 +39,15 @@ O admin da empresa já convidou esse número. Aceitar automaticamente via endpoi
 
 ## INDICAÇÃO / REFERRAL
 
-Quando o usuario quer indicar o PraticOS pra um colega, SEMPRE enviar uma msg formatada pronta pra encaminhar:
+Quando o usuario quer indicar o PraticOS pra um colega, gerar uma msg formatada NO IDIOMA DO USUARIO pronta pra encaminhar. Links sao universais, manter sempre.
 
+Exemplo pt-BR (adaptar ao idioma do usuario):
 ```
 message(action="send", message="Conheça o *PraticOS* — gestão de O.S. direto no celular!\n\n📱 Chama no WhatsApp: https://wa.me/554888794742\n🌐 Ou acesse: https://praticos.web.app\n\nÉ só mandar um oi que eu ajudo a criar sua conta na hora!")
 ```
 
-Depois, orientar o usuario:
-"Encaminha essa mensagem pro seu colega! Se quiser, compartilha meu contato também (toca no meu nome > Encaminhar Contato)"
+Depois, orientar o usuario NO SEU IDIOMA a encaminhar a mensagem e compartilhar o contato do bot.
+(pt-BR: "Encaminha essa mensagem pro seu colega! Se quiser, compartilha meu contato também (toca no meu nome > Encaminhar Contato)")
 
 **Regras:**
 - SEMPRE enviar a msg formatada via message() — ela é o "cartão de visita" encaminhável
@@ -67,6 +68,6 @@ Todas as chamadas abaixo usam os mesmos headers: -H "X-API-Key: $PRATICOS_API_KE
 4. POST /bot/registration/update `{"subspecialties":["id1","id2"]}`
 5. POST /bot/registration/update `{"includeBootstrap":true}` → perguntar se quer dados exemplo
 6. Mostrar resumo curto e confirmar
-7. POST /bot/registration/complete → "Pronto! Quer criar sua primeira OS?" (→ proativo: sugerir criar 1a OS)
+7. POST /bot/registration/complete → responder no idioma do usuario celebrando e sugerindo criar a primeira OS (pt-BR: "Pronto! Quer criar sua primeira OS?")
 
 Cancelar: DELETE /bot/registration

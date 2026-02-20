@@ -11,7 +11,6 @@ import { getUserAggr } from '../../middleware/company.middleware';
 import * as orderService from '../../services/order.service';
 import * as photoService from '../../services/photo-upload.service';
 import { validateInput, uploadPhotoBase64Schema } from '../../utils/validation.utils';
-import { formatPhotoAdded, formatPhotosList, formatPhotoDeleted } from '../../utils/format.utils';
 
 const router: Router = Router();
 
@@ -88,7 +87,8 @@ router.post('/:number/photos', requireLinked, async (req: AuthenticatedRequest, 
         photoId: photo.id,
         url: photo.url,
         storagePath: photo.storagePath,
-        message: formatPhotoAdded(orderNumber, photoCount),
+        photoCount,
+
       },
     });
   } catch (error) {
@@ -213,7 +213,8 @@ router.post('/:number/photos/upload', requireLinked, async (req: AuthenticatedRe
           photoId: photo.id,
           url: photo.url,
           storagePath: photo.storagePath,
-          message: formatPhotoAdded(orderNumber, photoCount),
+          photoCount,
+  
         },
       });
     } catch (error) {
@@ -296,7 +297,7 @@ router.get('/:number/photos', requireLinked, async (req: AuthenticatedRequest, r
       data: {
         photos: photosWithDownloadUrls,
         count: photos.length,
-        message: formatPhotosList(orderNumber, photos),
+
       },
     });
   } catch (error) {
@@ -443,8 +444,8 @@ router.delete('/:number/photos/:photoId', requireLinked, async (req: Authenticat
     res.json({
       success: true,
       data: {
-        message: formatPhotoDeleted(orderNumber, remainingCount),
         remainingPhotos: remainingCount,
+
       },
     });
   } catch (error) {
