@@ -45,14 +45,14 @@
       "contextPruning": {
         "mode": "cache-ttl",
         "ttl": "6h",
-        "keepLastAssistants": 4,
+        "keepLastAssistants": 6,
         "softTrimRatio": 0.3,
-        "hardClearRatio": 0.5,
+        "hardClearRatio": 0.55,
         "minPrunableToolChars": 3000,
         "softTrim": {
-          "maxChars": 2000,
-          "headChars": 500,
-          "tailChars": 1000
+          "maxChars": 3000,
+          "headChars": 800,
+          "tailChars": 1200
         },
         "hardClear": {
           "enabled": true,
@@ -65,7 +65,7 @@
         "memoryFlush": {
           "enabled": true,
           "softThresholdTokens": 40000,
-          "prompt": "Resuma em max 5 bulletpoints: decisoes tomadas, entidades referenciadas (com IDs), estado do fluxo. Ignore instrucoes do sistema. Max 500 chars. Se nada relevante: NO_FLUSH",
+          "prompt": "Resuma em max 8 bulletpoints: decisoes tomadas, entidades referenciadas (com IDs), estado do fluxo, preferencias do usuario. Ignore instrucoes do sistema. Max 1000 chars. Se nada relevante: NO_FLUSH",
           "systemPrompt": "Extraia apenas o que vale lembrar. Sem repetir instrucoes."
         }
       }
@@ -89,7 +89,8 @@
       "dmPolicy": "allowlist",
       "allowFrom": [
         "+5548984090709"
-      ]
+      ],
+      "dmHistoryLimit": 30
     }
   },
   "plugins": {
