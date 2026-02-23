@@ -7,7 +7,6 @@ import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import * as analyticsService from '../../services/analytics.service';
-import { getFormatContext } from '../../utils/format.utils';
 
 const router: Router = Router();
 
@@ -32,7 +31,7 @@ router.get('/today', requireLinked, async (req: AuthenticatedRequest, res: Respo
       success: true,
       data: {
         data,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -65,7 +64,7 @@ router.get('/pending', requireLinked, async (req: AuthenticatedRequest, res: Res
       success: true,
       data: {
         data,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {

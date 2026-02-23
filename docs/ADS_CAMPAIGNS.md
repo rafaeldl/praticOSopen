@@ -4,7 +4,7 @@
 
 | Plataforma | Acesso | Credenciais | Escrita via API |
 |------------|--------|-------------|-----------------|
-| Google Ads | Conectado | `~/.google-ads.yaml` | Pendente (Acesso Padrão) |
+| Google Ads | Conectado | `~/.google-ads.yaml` | Ativo |
 | Meta Ads | Conectado | `~/.meta-ads.yaml` | Ativo |
 
 ## Contas
@@ -15,7 +15,7 @@
 - **Moeda**: BRL
 - **Fuso**: America/Sao_Paulo
 - **Developer Token**: Configurado
-- **Nível de acesso**: Acesso às Análises (somente leitura) - upgrade solicitado
+- **Nível de acesso**: Acesso Padrão (leitura e escrita) - aprovado em 23/02/2026
 
 ### Meta Ads
 - **App ID**: 2156455528501761 (PraticOS Ads)
@@ -55,7 +55,32 @@
   - Organize entradas e saídas e evite retrabalho. Baixe e teste grátis.
   - Funciona offline e facilita o atendimento. Gestão prática no dia a dia.
 
-#### 2. Website traffic-Search-1 (ID: 23582521389)
+#### 2. App-iOS (ID: 23598117814)
+- **Status**: ENABLED / SERVING
+- **Tipo**: Multi-channel (App Install)
+- **Bidding**: Maximize Conversions (OPTIMIZE_INSTALLS_WITHOUT_TARGET_INSTALL_COST)
+- **Budget**: R$10/dia (Budget ID: 15389228376)
+- **App**: 1534604555 (Apple App Store)
+- **Segmentação**: Brasil, Português
+- **Ad Group**: Ad group 1 (ID: 192294584543)
+- **Ad**: App Ad (ID: 798163564252)
+- **Headlines**:
+  - Ordem de serviço no app
+  - Controle sua assistência
+  - OS, clientes e histórico
+  - Checklist e fotos na OS
+  - App para assistência técnica
+- **Descriptions**:
+  - Crie OS, registre serviços e acompanhe o status. Organização na rotina.
+  - Clientes, aparelhos e histórico em um só lugar. Simples e rápido.
+  - Faça orçamento, registre fotos e finalize serviços com agilidade.
+  - Organize entradas e saídas e evite retrabalho. Baixe e teste grátis.
+  - Funciona offline e facilita o atendimento. Gestão prática no dia a dia.
+- **Nota**: Sem conversion actions iOS dedicadas no Google Ads. Usa conversões modeladas (SKAdNetwork + sinais on-device) via OPTIMIZE_INSTALLS_WITHOUT_TARGET_INSTALL_COST.
+- **Script de criação**: `business/campaigns/google-ads/create_ios_campaign.py`
+- **Criada**: 23/02/2026 via API
+
+#### 3. Website traffic-Search-1 (ID: 23582521389)
 - **Status**: ENABLED / SERVING / LEARNING
 - **Tipo**: Search
 - **Bidding**: Maximize Conversions
@@ -65,7 +90,8 @@
 - **Anúncio**: RSA (Responsive Search Ad) - APPROVED
 - **Sitelinks**: 6 configurados
 - **Callouts**: 15 configurados
-- **Keywords**: 58 (todas BROAD match)
+- **Keywords**: 56 (18 PHRASE + 38 BROAD)
+- **Negative Keywords**: 25 (nível de campanha)
 - **Headlines (15)**:
   1. PraticOS - Gestão de OS
   2. App de Ordem de Serviço
@@ -222,18 +248,19 @@
 
 ### Prioridade Alta
 
-- [ ] **Google Ads - Vinculação Analytics/iOS**: Verificar se a revinculação do Google Analytics sincronizou o stream iOS (br.com.rafsoft.praticos, stream 2070858457). Necessário para criar ação de conversão `first_open` do iOS.
-- [ ] **Google Ads - Criar campanha App-iOS**: Replicar a campanha App-Android para iOS. Depende da ação de conversão iOS estar disponível.
+- [x] **Google Ads - Vinculação Analytics/iOS**: Revinculação do Google Analytics sincronizou o stream iOS. Concluída em 22/02/2026.
+- [x] **Google Ads - Criar campanha App-iOS**: Campanha App-iOS criada (ID: 23598117814) via API em 23/02/2026. Mesmos criativos do Android. Status: ENABLED/SERVING.
 - [x] **Meta Ads - Criar campanha de instalações**: Campanha Facebook/Instagram para installs do PraticOS (Android). Criada em 23/02/2026.
 - [x] **Meta Ads - Criar ad sets iOS**: Ad sets iOS criados em 23/02/2026.
 - [x] **Meta Ads - Ativar campanha**: Campanha ativada em 23/02/2026 (Android + iOS).
 
 ### Prioridade Média
 
+- [ ] **Google Ads - Monitorar App-iOS**: Monitorar impressões e conversões do App-iOS nas primeiras 48h. Verificar se o app icon aparece corretamente na UI do Google Ads.
 - [ ] **Meta Ads - Monitorar CTR criativos v2**: Monitorar CTR nas primeiras 24-48h dos novos criativos. Comparar WhatsApp GIF vs WhatsApp Estático vs App Completo. Pausar variações com CTR baixo após 72h.
 - [ ] **Meta Ads - Criativos Stories dedicados**: As imagens 1080x1920 (Stories) foram geradas mas não vinculadas a creatives separados. Considerar criar ad creatives específicos para Stories/Reels com as imagens verticais.
-- [ ] **Google Ads - Acesso Padrão**: Aguardar aprovação do upgrade de "Acesso às Análises" para "Acesso Padrão". Formulário enviado em 22/02/2026. Prazo: ~3 dias úteis. Necessário para criar/editar campanhas via API.
-- [ ] **Google Ads - Keywords negativas**: Adicionar palavras-chave negativas (emprego, vaga, concurso, curso, gratuito download, modelo word, excel, template) para evitar clicks irrelevantes.
+- [x] **Google Ads - Acesso Padrão**: Aprovado em 23/02/2026. Escrita via API funcionando.
+- [x] **Google Ads - Keywords negativas**: 25 keywords negativas adicionadas + 18 keywords convertidas para PHRASE match (23/02/2026).
 - [ ] **Google Ads - Campanhas por segmento**: Considerar criar campanhas separadas por nicho (mecânica, refrigeração, CFTV, etc.) com sitelinks específicos de cada segmento.
 
 ### Prioridade Baixa
@@ -243,6 +270,36 @@
 - [ ] **Google Ads - Otimização contínua**: Depois de 2 semanas de dados, analisar termos de busca, pausar keywords ruins, ajustar bids.
 
 ## Histórico de Alterações
+
+### 23/02/2026 (Campanha App-iOS - Google Ads)
+- Criada campanha **App-iOS** (ID: 23598117814) via Google Ads API
+  - Budget: R$10/dia (ID: 15389228376)
+  - Tipo: MULTI_CHANNEL / APP_CAMPAIGN
+  - App: 1534604555 (Apple App Store)
+  - Bidding: Maximize Conversions (OPTIMIZE_INSTALLS_WITHOUT_TARGET_INSTALL_COST)
+  - Targeting: Brasil + Português
+  - Ad Group: Ad group 1 (ID: 192294584543)
+  - App Ad: ID 798163564252 (5 headlines + 5 descriptions, mesmos do Android)
+  - Status: ENABLED / SERVING
+  - Sem conversion actions iOS dedicadas; usa conversões modeladas (SKAdNetwork)
+  - Script: `business/campaigns/google-ads/create_ios_campaign.py`
+  - 2 orphaned budgets de tentativas anteriores (22/02) removidos via API
+
+### 23/02/2026 (Otimização Keywords - Search)
+- **Adicionou 25 keywords negativas** (nível de campanha) para eliminar tráfego irrelevante:
+  - Termos genéricos: consultoria, qualidade, erp, estoque, vendas, planilha, template
+  - Educação/emprego: curso, emprego, vaga, concurso, faculdade, graduação
+  - Fora do produto: fotovoltaico, proposta comercial, procedimentos operacionais, redução de custos, gestão da qualidade
+  - Concorrentes: gestãoclick, gestaoclick
+  - Downloads: gratuito download, download gratis
+- **Converteu 18 keywords de BROAD → PHRASE** (as genéricas que geravam search terms irrelevantes):
+  - Inclui: gestão de serviços, sistema de OS, sistema ordem de serviço, gerenciamento de serviços, controle de serviços, software de gestão de serviços, gestão de ordens de serviço, ordem de serviço digital/online, etc.
+  - 38 keywords de nicho mantidas como BROAD (app para mecânico, sistema para refrigeração, etc.)
+- **2 keywords removidas** por violação de política do Google ("empréstimos pessoais"):
+  - controle financeiro prestador de serviço
+  - sistema para prestador de serviço
+- Total: 56 keywords (18 PHRASE + 38 BROAD) + 25 negativas
+- Motivação: campanha gastou R$20,90 sem conversões; termos de busca ativados eram completamente fora do target (consultoria em sistemas, gestão da qualidade de produtos, planilha fotovoltaico, etc.)
 
 ### 23/02/2026 (Otimização de Targeting)
 - Consolidou 4 ad sets em 2 (Android + iOS) para concentrar orçamento

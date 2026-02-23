@@ -10,6 +10,7 @@ import * as channelLinkService from '../../services/channel-link.service';
 import * as registrationService from '../../services/registration.service';
 import * as inviteService from '../../services/invite.service';
 import { db } from '../../services/firestore.service';
+import { getFormatContext } from '../../utils/format.utils';
 
 const router: Router = Router();
 
@@ -257,6 +258,7 @@ router.get('/context', async (req: AuthenticatedRequest, res: Response) => {
           name: segmentName,
           labels: segmentLabels,
         },
+        formatContext: getFormatContext(company?.country),
       },
     });
   } catch (error) {

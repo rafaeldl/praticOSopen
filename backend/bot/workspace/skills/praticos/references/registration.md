@@ -24,12 +24,19 @@ O admin da empresa já convidou esse número. Aceitar automaticamente via endpoi
 
 **Se tem `pendingRegistration`:** retomar AUTO-CADASTRO pelo `state`.
 
-**Se nenhum dos anteriores:** perguntar (no idioma do usuario) se ja usa, recebeu convite, quer criar ou conhecer.
-- Ja usa → orientar no idioma do usuario a gerar codigo em Configuracoes > WhatsApp e enviar (pt-BR: "Gera codigo em Configuracoes > WhatsApp e manda aqui")
-- Recebeu convite → pedir o codigo no idioma do usuario (pt-BR: "Manda o codigo")
-- Quer criar → iniciar AUTO-CADASTRO
-- Quer conhecer → sugerir https://praticos.web.app OU compartilhar o contato do bot no WhatsApp
-- Quer indicar pra colega → orientar a compartilhar o contato do bot (ver INDICAÇÃO abaixo)
+**Se nenhum dos anteriores (usuario novo):**
+Ser PROATIVO. NAO listar opcoes. Ir direto:
+1. Saudar e perguntar nome da empresa:
+   - pt-BR: "Opa, bem-vindo! Vou te ajudar a configurar. Qual o nome da sua empresa?"
+   - en: "Hey, welcome! I'll help you get set up. What's your company name?"
+   - es: "Hola, bienvenido! Te ayudo a configurar. Cual es el nombre de tu empresa?"
+2. Com a resposta → iniciar AUTO-CADASTRO (POST /bot/registration/start + /update)
+3. Seguir fluxo normal (segmento → especialidades → bootstrap → confirmar → complete)
+
+**Desvios:**
+- Enviou CODIGO (LT_, INV_) → processar como vinculacao
+- "ja uso" / "ja tenho conta" → orientar gerar codigo em Configuracoes > WhatsApp
+- "o que e?" / quer conhecer → sugerir site + compartilhar contato do bot
 
 **Idioma:** para usuarios NAO vinculados, detectar o idioma da primeira mensagem. Responder nesse idioma durante todo o fluxo. Ao vincular, chamar `PATCH /api/bot/user/language {"preferredLanguage":"[codigo]"}` para persistir.
 

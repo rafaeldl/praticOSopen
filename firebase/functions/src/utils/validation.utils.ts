@@ -201,6 +201,9 @@ export const unifiedSearchSchema = z.object({
  * Value is optional - falls back to catalog value if not provided
  */
 export const createFullOrderSchema = z.object({
+  // Existing order ID: if provided, update instead of create (upsert)
+  orderId: idSchema.optional(),
+
   // Customer: ID required
   customerId: idSchema,
 
