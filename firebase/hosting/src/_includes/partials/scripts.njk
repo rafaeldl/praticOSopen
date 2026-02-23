@@ -140,14 +140,30 @@
     });
 </script>
 <script>
-// GA4 Event Tracking
+// GA4 + Google Ads Event Tracking
 (function() {
   document.addEventListener('click', function(e) {
+    if (typeof gtag !== 'function') return;
+
+    // GA4 custom events
     var el = e.target.closest('[data-ga]');
-    if (!el || typeof gtag !== 'function') return;
-    gtag('event', el.getAttribute('data-ga'), {
-      event_detail: el.getAttribute('data-ga-detail') || ''
-    });
+    if (el) {
+      gtag('event', el.getAttribute('data-ga'), {
+        event_detail: el.getAttribute('data-ga-detail') || ''
+      });
+    }
+
+    // Google Ads conversion — store link clicks (App Store / Play Store)
+    var storeLink = e.target.closest('a[href*="apps.apple.com"], a[href*="play.google.com"]');
+    if (storeLink) {
+      var store = storeLink.href.indexOf('apple') !== -1 ? 'app_store' : 'play_store';
+      gtag('event', 'conversion', {
+        'send_to': 'AW-17943077133/iN-aCJ7fu_wbEI3C9utC',
+        'value': 1.0,
+        'currency': 'BRL',
+        'event_label': store
+      });
+    }
   });
 
   var form = document.querySelector('.contact-form');
