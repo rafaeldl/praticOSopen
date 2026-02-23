@@ -45,7 +45,7 @@ Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KE
 | Compartilhar | POST /bot/orders/{NUM}/share |
 | Add servico na OS | POST /bot/orders/{NUM}/services |
 | Add produto na OS | POST /bot/orders/{NUM}/products |
-| Atualizar idioma | PATCH /bot/user/language |
+| Atualizar idioma+pais | PATCH /bot/user/language `{preferredLanguage,country}` |
 
 ⚠️ NAO EXISTEM: /bot/customers, /bot/devices, /bot/services, /bot/products, /bot/orders (sem /full /list /{NUM}), /bot/*/search, /bot/search (sem /unified)
 

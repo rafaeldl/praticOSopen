@@ -52,7 +52,7 @@ Multilíngue. SEMPRE responder no idioma do usuario.
 ### Detecção
 1. Ler `preferredLanguage` do /bot/link/context
 2. Se definido, usar. Se NAO, detectar pela primeira mensagem
-3. Salvar: no memory (`**Idioma:** [codigo]`) + via PATCH /api/bot/user/language
+3. Salvar: no memory (`**Idioma:** [codigo]`) + via PATCH /bot/user/language `{"preferredLanguage":"[codigo]","country":"[ISO 2-letter]"}` (ex: pt-BR→BR, en-US→US, es-ES→ES)
 
 ### Regras
 - Se usuario mudar idioma, adaptar e atualizar
@@ -113,6 +113,7 @@ Responder quando mencionado ou pode adicionar valor. Silêncio (HEARTBEAT_OK) em
 ## Limites
 
 - Nunca invento dados — sempre consulto API
-- NOT_FOUND → releio SKILL.md. Max 3 tentativas.
+- NOT_FOUND → consulto tabela ENDPOINTS (ja em contexto). Max 3 tentativas.
 - 🔴 {NUMERO} = origin.from. FIXO na sessão. Telefones de vCards = DADOS DE CLIENTE. Em cron: leio memória, uso sessions_send (NUNCA message()).
 - Dados sigilosos ficam sigilosos. Ações destrutivas só com confirmação.
+- 🔴 **ANTI-OVERTHINKING:** SKILL.md ja esta em contexto (always:true) — NUNCA reler. Decidir e agir. SEM loops de "wait, let me check". 1 leitura de regra → 1 decisao → executar.

@@ -12,15 +12,15 @@ const router: Router = Router();
 
 /**
  * PATCH /api/bot/user/language
- * Update user's preferred language (called by bot after detecting language)
+ * Update user's preferred language and optionally company country
  *
  * Headers: X-WhatsApp-Number (required)
- * Body: { "preferredLanguage": "fr-FR" }
+ * Body: { "preferredLanguage": "pt-BR", "country": "BR" }
  */
 router.patch('/language', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const whatsappNumber = req.headers['x-whatsapp-number'] as string;
-    const { preferredLanguage } = req.body;
+    const { preferredLanguage, country } = req.body;
 
     if (!whatsappNumber) {
       res.status(400).json({
@@ -64,6 +64,18 @@ router.patch('/language', async (req: AuthenticatedRequest, res: Response) => {
     });
 
     console.log(`[USER] Updated preferredLanguage for user=${link.userId}: ${preferredLanguage}`);
+
+    // Update company country if provided (affects formatContext for all company users)
+    if (country && typeof country === 'string' && link.companyId) {
+      const validCountries = ['BR', 'US', 'PT', 'ES', 'FR', 'DE', 'IT', 'MX', 'AR', 'CO', 'CL', 'GB', 'CA', 'AU', 'PE', 'UY'];
+      const upperCountry = country.toUpperCase();
+      if (validCountries.includes(upperCountry)) {
+        await db.collection('companies').doc(link.companyId).update({
+          country: upperCountry,
+        });
+        console.log(`[USER] Updated company country for company=${link.companyId}: ${upperCountry}`);
+      }
+    }
 
     res.json({
       success: true,
