@@ -51,8 +51,16 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
       return;
     }
 
+    // Normalize common bot field name variations before validation
+    const body = { ...req.body };
+    if (body.id && !body.orderId) body.orderId = body.id;
+    if (body.device?.id && !body.deviceId) body.deviceId = body.device.id;
+    delete body.id;
+    delete body.device;
+    delete body.paidAmount; // Not supported on creation, bot sometimes sends it
+
     // Validate input
-    const validation = validateInput(createFullOrderSchema, req.body);
+    const validation = validateInput(createFullOrderSchema, body);
     if (!validation.success) {
       res.status(400).json({
         success: false,
