@@ -42,18 +42,16 @@ Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KE
 | Fotos upload | POST /bot/orders/{NUM}/photos/upload (multipart) |
 | Resumo | GET /bot/summary/today \| /pending |
 | Faturamento | GET /bot/analytics/financial |
-| Compartilhar | POST /bot/orders/{NUM}/share |
 | Add servico na OS | POST /bot/orders/{NUM}/services |
 | Add produto na OS | POST /bot/orders/{NUM}/products |
-| Atualizar idioma+pais | PATCH /bot/user/language `{preferredLanguage,country}` |
+| Compartilhar | POST /bot/orders/{NUM}/share |
+| Atualizar idioma | PATCH /bot/user/language |
 
 ⚠️ NAO EXISTEM: /bot/customers, /bot/devices, /bot/services, /bot/products, /bot/orders (sem /full /list /{NUM}), /bot/*/search, /bot/search (sem /unified)
 
 🔴 ANTI-LOOP: NOT_FOUND → releia api-endpoints.md: `read(file_path="skills/praticos/references/api-endpoints.md")`. NUNCA tente variacoes de URL. Max 3 tentativas.
 
-Erros: 400=dados invalidos (corrigir) | 401=auth errada | 500=informar usuario, tentar depois.
-
-**formatContext:** /bot/link/context retorna `formatContext: { country, currency, locale }`. Salvar no memory e usar para formatar moedas/datas (ver SOUL.md). Os demais endpoints NAO retornam formatContext.
+**formatContext:** Endpoints retornam `formatContext: { country, currency, locale }`. Usar para formatar moedas e datas (ver SOUL.md).
 
 ---
 
@@ -74,8 +72,14 @@ Exemplos completos (multipart, etc): `read(file_path="skills/praticos/references
 ## PRIMEIRO CONTATO
 
 Verificar vinculo: GET /bot/link/context. Se `linked:true` → PARTE 2.
-Se NAO vinculado: verificar `pendingInvites` e `pendingRegistration`. Se nenhum → ser PROATIVO (ver registration.md).
+Se NAO vinculado: verificar `pendingInvites` e `pendingRegistration`. Se nenhum → ser PROATIVO: cumprimentar e perguntar nome da empresa direto.
 Para detalhes do fluxo: `read(file_path="skills/praticos/references/registration.md")`
+
+### Idioma no primeiro contato
+- Se `linked:true` e `preferredLanguage` veio no contexto → salvar no memory e responder nesse idioma
+- Se `linked:true` e `preferredLanguage` NAO veio → detectar do texto da primeira mensagem, salvar no memory e chamar:
+  `PATCH /api/bot/user/language {"preferredLanguage":"[codigo]"}`
+- Se NAO vinculado → detectar idioma do texto e salvar no memory. Ao vincular, chamar PATCH para persistir
 
 ---
 
@@ -87,51 +91,38 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 /bot/link/context retorna `segment.labels`. SEMPRE usar: device._entity, device.serial, device.brand, customer._entity, service_order._entity, status.in_progress. Se label nao existir, usar generico.
 
 ### REGRAS
-0. **OS ATIVA** — POST /bot/orders/full com sucesso → salvar em memory `## OS Ativa`: `#NUM (id: X, cliente: Y)`. "adicionar/incluir servico/produto" → se OS Ativa existe, usar POST /bot/orders/{NUM}/services ou /products; se nao, perguntar qual OS. "nova OS"/"abrir outra" → criar nova. Apos adicionar → card atualizado.
 1. **IDs OBRIGATORIOS** — API NAO aceita nomes. Usar POST /bot/search/unified.
-2. **Criar OS:** busca → IDs → criar. Apos criar → salvar como OS Ativa. Adicionar item → usar OS Ativa se existir.
+2. **Criar OS:** busca → IDs → criar. Apos criar → OS ativa. Adicionar item: se ha OS ativa, usar /services ou /products. So criar nova se pedido explicitamente.
 3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
 4. **Fotos:** multipart `-F "file=@/path"` (NAO base64)
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
-6. **Exibir OS:** ver CARD DE OS abaixo. 🔴 Se tem foto (`mainPhotoUrl`), OBRIGATORIO enviar como imagem.
+6. **Exibir OS:** ver CARD DE OS abaixo
 7. **Apos criar OS:** oferecer link → POST /bot/orders/{NUM}/share
 
 ---
 
-## CHECKLISTS
-Preenchimento guiado: `read(file_path="skills/praticos/references/checklists.md")`. Item por item, emojis: ⏳🔄✅
+## OS ATIVA (CONTEXTO DE CONVERSA)
+
+Apos criar OS, ela vira a **OS ativa**. Salvar no memory:
+`## Sessao` → `- **OS ativa:** #NUM (id: X)`
+
+Regras:
+1. POST /bot/orders/full com sucesso → anotar como OS ativa no memory
+2. "adicionar/incluir/colocar servico/produto" → verificar OS ativa
+   - Existe → POST /bot/orders/{NUM}/services ou /products. Confirmar: "Adicionei X na OS #{NUM}"
+   - Nao existe → perguntar em qual OS ou criar nova
+3. "nova OS", "abrir outra", "criar OS" → SEMPRE criar nova
+4. Apos adicionar item → mostrar card atualizado (GET /details)
 
 ---
 
-## CARD DE OS (OBRIGATORIO ao exibir qualquer OS)
+## CHECKLISTS
 
-🔴 USAR `/details` (NAO `/list`). `/list` nao traz foto nem link.
+Para preencher checklists: `read(file_path="skills/praticos/references/checklists.md")`
 
-**Fluxo completo (SEGUIR NA ORDEM, NAO pular passo):**
-1. GET /bot/orders/{NUM}/details → `order` com `mainPhotoUrl`, `photosCount`, `shareUrl`
-2. 🔴 **FOTO PRIMEIRO (antes de tudo):** Se `mainPhotoUrl` NAO e null → IMEDIATAMENTE baixar:
-   `exec(command="curl -s -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" \"$PRATICOS_API_URL{mainPhotoUrl}\" --output /tmp/os-{NUM}.jpg")`
-   ⚠️ A URL e `$PRATICOS_API_URL` + o valor EXATO de `mainPhotoUrl` do response. NUNCA inventar URL.
-3. Link: se `shareUrl` veio, usar. Se nao: POST /bot/orders/{NUM}/share → `url`
-4. Formatar card (🌐 traduzir labels/status para idioma do usuario):
-```
-📋 *O.S. #{number}* - {createdAt} - {STATUS}
+---
 
-👤 *Cliente:* {customer.name}
-🔧 *{DEVICE_LABEL}:* {device.name} ({device.serial})
-🛠️ *Serviços:*
-• {service.name} - {VALOR}
-• {service.name} - {VALOR}
+## CARD DE OS
 
-📦 *Produtos:*
-• {product.name} (x{qty}) - {VALOR}
-
-💰 *Total:* {VALOR}
-🏷️ *Desconto:* {VALOR}
-✅ *Pago:* {VALOR}
-⏳ *A receber:* {VALOR}
-📅 *Previsão:* {dueDate}
-🔗 *Link:* {shareUrl}
-```
-Regras: linha em branco apos header e antes de financeiro. Servicos/Produtos cada item em nova linha com `•`. Omitir campos null/vazio/0. Moeda: usar Pais/Moeda/Locale do memory. remaining = total - discount - paidAmount. Status: quote|approved|progress|done|canceled → traduzir.
-5. **ENVIAR:** Se baixou foto → `message(filePath="/tmp/os-{NUM}.jpg", message="{card}")`. Se nao tem foto → `message("{card}")`.
+🔴 Para exibir qualquer OS: `read(file_path="skills/praticos/references/os-card.md")`
+Regra critica: usar /details (NAO /list). Foto via mainPhotoUrl → baixar e enviar como imagem.
