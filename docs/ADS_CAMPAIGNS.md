@@ -102,30 +102,32 @@
 - **Status**: ACTIVE
 - **Objetivo**: OUTCOME_APP_PROMOTION (App Installs)
 - **Plataformas**: Facebook (Feed) + Instagram (Feed, Stories, Reels)
-- **Segmentação**: Brasil, Português, Android + iOS, 25-55 anos
-- **App**: br.com.rafsoft.praticos (Google Play)
+- **Segmentação**: Brasil, Português, Android + iOS, 25-65 anos
+- **App**: br.com.rafsoft.praticos (Google Play) / id1534604555 (App Store)
 - **Page ID**: 921394204400547 (Praticos - Ordem de Serviço)
-- **Budget total**: R$22/dia (R$5,50 por ad set x 4 ad sets)
+- **Budget total**: R$22/dia (CBO — Campaign Budget Optimization)
+- **Bid Strategy**: LOWEST_COST_WITHOUT_CAP
+- **Advantage Audience**: ON (expande público automaticamente)
 
-**Ad Set 1 - Prestadores de Serviço Geral - Android (ID: 6916167924375)**
-- Budget: R$5,50/dia | Store: Google Play
-- Interesses: Empreendedorismo, Pequenas e médias empresas, Gestão, Trabalho autônomo, Business software
+**Ad Set 1 - Todos os Públicos - Android (ID: 6916167924375)** — ACTIVE
+- Store: Google Play | Age: 25-65
+- Interesses (14): Empreendedorismo, Pequenas e médias empresas, Gestão, Trabalho autônomo, Business software, Mecânico de automóveis, HVAC, Refrigeração, Technician, Manutenção e reparo, Service (motor vehicle), Accounting software, Professional services, Encanamento
+- Behaviors: Proprietários de pequenas empresas
+- Placements: Facebook (Feed, Marketplace, Stories), Instagram (Feed, Stories, Reels, Explore), Audience Network
 - 3 anúncios (teste A/B)
 
-**Ad Set 2 - Segmentos Específicos - Android (ID: 6916167935975)**
-- Budget: R$5,50/dia | Store: Google Play
-- Interesses: Mecânico de automóveis, Refrigeração, HVAC, Manutenção e reparo, Technician
+**Ad Set 2 - Todos os Públicos - iOS (ID: 6916515435975)** — ACTIVE
+- Store: App Store | Age: 25-65
+- Interesses (14): mesmos do Android
+- Behaviors: Proprietários de pequenas empresas
+- Placements: mesmos do Android
 - 3 anúncios (teste A/B)
+- Nota: `user_os` travado em `iOS_ver_2.0_to_14.4` pelo Meta (cache do app registration). Com Advantage Audience ON, alcance expandido automaticamente.
 
-**Ad Set 3 - Prestadores de Serviço Geral - iOS (ID: 6916487798775)**
-- Budget: R$5,50/dia | Store: App Store
-- Interesses: Empreendedorismo, Pequenas e médias empresas, Gestão, Trabalho autônomo, Business software
-- 3 anúncios (teste A/B)
-
-**Ad Set 4 - Segmentos Específicos - iOS (ID: 6916487807175)**
-- Budget: R$5,50/dia | Store: App Store
-- Interesses: Mecânico de automóveis, Refrigeração, HVAC, Manutenção e reparo, Technician
-- 3 anúncios (teste A/B)
+**Ad Sets PAUSADOS:**
+- Segmentos Específicos - Android (ID: 6916167935975) — consolidado no Ad Set 1
+- Segmentos Específicos - iOS (ID: 6916487807175) — consolidado no Ad Set 2
+- Todos os Públicos - iOS antigo (ID: 6916487798775) — substituído pelo Ad Set 2
 
 **Anúncios v2 (12 total - 3 variações x 4 ad sets) — Criativos otimizados:**
 
@@ -241,6 +243,20 @@
 - [ ] **Google Ads - Otimização contínua**: Depois de 2 semanas de dados, analisar termos de busca, pausar keywords ruins, ajustar bids.
 
 ## Histórico de Alterações
+
+### 23/02/2026 (Otimização de Targeting)
+- Consolidou 4 ad sets em 2 (Android + iOS) para concentrar orçamento
+  - Interesses dos ad sets "Segmentos Específicos" mesclados nos "Geral"
+  - Ad sets de segmentos pausados
+- Adicionou 4 novos interesses: Service (motor vehicle), Accounting software, Professional services, Encanamento
+- Adicionou behavior "Proprietários de pequenas empresas" (OR com interesses)
+- Habilitou **Advantage Audience** (expansão automática de público pelo Meta)
+- Ampliou idade de 25-55 para 25-65 (exigido pelo Advantage+)
+- Adicionou posicionamentos: Facebook Marketplace, Facebook Stories, Instagram Explore, Audience Network
+- Criou novo ad set iOS (ID: 6916515435975) com targeting atualizado, pausou antigo
+- Corrigiu `app_install_state: not_installed` que faltava no iOS
+- Adicionou Bundle ID `br.com.rafsoft.praticos` no Meta Developer Dashboard
+- Nota: `user_os` do iOS continua travado em `14.4` por cache do Meta; Advantage Audience compensa
 
 ### 23/02/2026 (Criativos Gemini IA)
 - Criativos gerados com **Gemini 3 Pro** (image generation) com logo real do PraticOS
