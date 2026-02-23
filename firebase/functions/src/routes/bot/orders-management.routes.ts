@@ -23,6 +23,7 @@ import * as customerService from '../../services/customer.service';
 import * as deviceService from '../../services/device.service';
 import * as catalogService from '../../services/catalog.service';
 import * as shareTokenService from '../../services/share-token.service';
+import { db } from '../../services/firestore.service';
 import {
   validateInput,
   createFullOrderSchema,
@@ -133,41 +134,139 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
       }
     }
 
-    // Create order
-    const orderResult = await orderService.createOrder(
-      companyId,
-      {
-        customerId: customerAggr.id!,
+    // Upsert: if orderId provided, update existing order; otherwise create new
+    if (data.orderId) {
+      const existingOrder = await orderService.getOrder(companyId, data.orderId);
+      if (!existingOrder) {
+        res.status(404).json({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Order not found for update', orderId: data.orderId },
+        });
+        return;
+      }
+
+      // Build update payload with resolved entities
+      const updatePayload: Record<string, unknown> = {
         customer: customerAggr,
-        deviceId: deviceAggr?.id,
-        device: deviceAggr,
-        services: orderServices,
-        products: orderProducts,
-        dueDate: data.dueDate,
-        scheduledDate: data.scheduledDate,
-        status: data.status as OrderStatus,
-      },
-      createdBy,
-      company
-    );
+        updatedBy: createdBy,
+        updatedAt: new Date().toISOString(),
+      };
 
-    // Get the created order to format the response
-    const order = await orderService.getOrderByNumber(companyId, orderResult.number);
+      if (deviceAggr) {
+        updatePayload.device = deviceAggr;
+      }
 
-    res.status(201).json({
-      success: true,
-      data: {
-        orderId: orderResult.id,
-        orderNumber: orderResult.number,
-        status: orderResult.status,
-        total: order?.total || 0,
-        customer: order?.customer || null,
-        device: order?.device || null,
-        services: order?.services || [],
-        products: order?.products || [],
+      // Replace services if provided
+      if (orderServices.length > 0) {
+        const resolvedServices = [];
+        let servicesTotal = 0;
+        for (const s of orderServices) {
+          const svc = await catalogService.getService(companyId, s.serviceId);
+          if (svc) {
+            const value = s.value ?? svc.value ?? 0;
+            resolvedServices.push({
+              service: { id: svc.id, name: svc.name, value: svc.value, photo: svc.photo ?? null },
+              description: s.description || svc.name,
+              value,
+            });
+            servicesTotal += value;
+          }
+        }
+        updatePayload.services = resolvedServices;
 
-      },
-    });
+        // Recalculate total
+        const existingProductsTotal = (existingOrder.products || []).reduce(
+          (sum: number, p: { value?: number; quantity?: number }) => sum + (p.value || 0) * (p.quantity || 1), 0
+        );
+        updatePayload.total = servicesTotal + existingProductsTotal;
+      }
+
+      // Replace products if provided
+      if (orderProducts.length > 0) {
+        const resolvedProducts = [];
+        let productsTotal = 0;
+        for (const p of orderProducts) {
+          const prod = await catalogService.getProduct(companyId, p.productId);
+          if (prod) {
+            const value = p.value ?? prod.value ?? 0;
+            const quantity = p.quantity || 1;
+            resolvedProducts.push({
+              product: { id: prod.id, name: prod.name, value: prod.value, photo: prod.photo ?? null },
+              description: p.description || prod.name,
+              value,
+              quantity,
+            });
+            productsTotal += value * quantity;
+          }
+        }
+        updatePayload.products = resolvedProducts;
+
+        // Recalculate total (use updated services if both changed)
+        const svcTotal = updatePayload.services
+          ? (updatePayload.services as Array<{ value: number }>).reduce((sum, s) => sum + s.value, 0)
+          : (existingOrder.services || []).reduce((sum: number, s: { value?: number }) => sum + (s.value || 0), 0);
+        updatePayload.total = svcTotal + productsTotal;
+      }
+
+      if (data.status) updatePayload.status = data.status;
+      if (data.dueDate) updatePayload.dueDate = new Date(data.dueDate).toISOString();
+      if (data.scheduledDate) updatePayload.scheduledDate = new Date(data.scheduledDate).toISOString();
+
+      await db.collection('companies').doc(companyId).collection('orders').doc(data.orderId).update(updatePayload);
+
+      const updatedOrder = await orderService.getOrderByNumber(companyId, existingOrder.number);
+
+      console.log(`[BOT] Updated order #${existingOrder.number} (id: ${data.orderId}) via /full upsert`);
+
+      res.status(200).json({
+        success: true,
+        data: {
+          orderId: data.orderId,
+          orderNumber: existingOrder.number,
+          status: updatedOrder?.status || existingOrder.status,
+          total: updatedOrder?.total || existingOrder.total || 0,
+          customer: updatedOrder?.customer || null,
+          device: updatedOrder?.device || null,
+          services: updatedOrder?.services || [],
+          products: updatedOrder?.products || [],
+          updated: true,
+        },
+      });
+    } else {
+      // Create new order
+      const orderResult = await orderService.createOrder(
+        companyId,
+        {
+          customerId: customerAggr.id!,
+          customer: customerAggr,
+          deviceId: deviceAggr?.id,
+          device: deviceAggr,
+          services: orderServices,
+          products: orderProducts,
+          dueDate: data.dueDate,
+          scheduledDate: data.scheduledDate,
+          status: data.status as OrderStatus,
+        },
+        createdBy,
+        company
+      );
+
+      const order = await orderService.getOrderByNumber(companyId, orderResult.number);
+
+      res.status(201).json({
+        success: true,
+        data: {
+          orderId: orderResult.id,
+          orderNumber: orderResult.number,
+          status: orderResult.status,
+          total: order?.total || 0,
+          customer: order?.customer || null,
+          device: order?.device || null,
+          services: order?.services || [],
+          products: order?.products || [],
+        },
+      });
+    }
   } catch (error) {
     console.error('Create full order error:', error);
     res.status(500).json({
