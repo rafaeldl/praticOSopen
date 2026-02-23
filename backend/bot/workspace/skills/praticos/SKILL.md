@@ -42,14 +42,12 @@ Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KE
 | Fotos upload | POST /bot/orders/{NUM}/photos/upload (multipart) |
 | Resumo | GET /bot/summary/today \| /pending |
 | Faturamento | GET /bot/analytics/financial |
-| Add servico na OS | POST /bot/orders/{NUM}/services |
-| Add produto na OS | POST /bot/orders/{NUM}/products |
 | Compartilhar | POST /bot/orders/{NUM}/share |
 | Atualizar idioma | PATCH /bot/user/language |
 
 ⚠️ NAO EXISTEM: /bot/customers, /bot/devices, /bot/services, /bot/products, /bot/orders (sem /full /list /{NUM}), /bot/*/search, /bot/search (sem /unified)
 
-🔴 ANTI-LOOP: NOT_FOUND → releia api-endpoints.md: `read(file_path="skills/praticos/references/api-endpoints.md")`. NUNCA tente variacoes de URL. Max 3 tentativas.
+🔴 ANTI-LOOP: NOT_FOUND → releia esta tabela. NUNCA tente variacoes de URL. Max 3 tentativas.
 
 **formatContext:** Endpoints retornam `formatContext: { country, currency, locale }`. Usar para formatar moedas e datas (ver SOUL.md).
 
@@ -65,14 +63,15 @@ exec(command="curl -s -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number
 POST JSON:
 exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\"}' \"$PRATICOS_API_URL/bot/search/unified\"")
 
-Exemplos completos (multipart, etc): `read(file_path="skills/praticos/references/api-endpoints.md")`
+Upload multipart:
+exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -F \"file=@/workspace/media/foto.jpg\" \"$PRATICOS_API_URL/bot/orders/42/photos/upload\"")
 
 ---
 
 ## PRIMEIRO CONTATO
 
 Verificar vinculo: GET /bot/link/context. Se `linked:true` → PARTE 2.
-Se NAO vinculado: verificar `pendingInvites` e `pendingRegistration`. Se nenhum → ser PROATIVO: cumprimentar e perguntar nome da empresa direto.
+Se NAO vinculado: verificar `pendingInvites` (convites feitos pelo admin com telefone do usuario) e `pendingRegistration`.
 Para detalhes do fluxo: `read(file_path="skills/praticos/references/registration.md")`
 
 ### Idioma no primeiro contato
@@ -92,7 +91,7 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 
 ### REGRAS
 1. **IDs OBRIGATORIOS** — API NAO aceita nomes. Usar POST /bot/search/unified.
-2. **Criar OS:** busca → IDs → criar. Apos criar → OS ativa. Adicionar item: se ha OS ativa, usar /services ou /products. So criar nova se pedido explicitamente.
+2. **Criar OS:** busca unificada → exact? usar ID → suggestions? confirmar → nao encontrou? oferecer criar
 3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
 4. **Fotos:** multipart `-F "file=@/path"` (NAO base64)
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
@@ -101,28 +100,51 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 
 ---
 
-## OS ATIVA (CONTEXTO DE CONVERSA)
-
-Apos criar OS, ela vira a **OS ativa**. Salvar no memory:
-`## Sessao` → `- **OS ativa:** #NUM (id: X)`
-
-Regras:
-1. POST /bot/orders/full com sucesso → anotar como OS ativa no memory
-2. "adicionar/incluir/colocar servico/produto" → verificar OS ativa
-   - Existe → POST /bot/orders/{NUM}/services ou /products. Confirmar: "Adicionei X na OS #{NUM}"
-   - Nao existe → perguntar em qual OS ou criar nova
-3. "nova OS", "abrir outra", "criar OS" → SEMPRE criar nova
-4. Apos adicionar item → mostrar card atualizado (GET /details)
-
----
-
 ## CHECKLISTS
 
-Para preencher checklists: `read(file_path="skills/praticos/references/checklists.md")`
+Apresentar item por item. Status: ⏳pending 🔄in_progress ✅completed
+Tipos: text(string) | number(num/string) | boolean(true/false/yes/no/sim/não/sí/no — aceitar no idioma do usuario) | select(indice 1-N ou valor) | checklist("1,3,5" ou [1,3,5]) | photo_only(so foto)
+Status flow: pending → in_progress → completed (completed requer obrigatorios preenchidos)
+
+Endpoints:
+- GET /bot/forms/templates | GET /bot/orders/{NUM}/forms | GET /bot/orders/{NUM}/forms/{FID}
+- POST /bot/orders/{NUM}/forms `{"templateId":"ID"}`
+- POST /bot/orders/{NUM}/forms/{FID}/items/{IID} `{"value":"resposta"}`
+- POST /bot/orders/{NUM}/forms/{FID}/items/{IID}/photos - multipart
+- PATCH /bot/orders/{NUM}/forms/{FID}/status `{"status":"completed"}`
 
 ---
 
-## CARD DE OS
+## CARD DE OS (OBRIGATORIO ao exibir qualquer OS)
 
-🔴 Para exibir qualquer OS: `read(file_path="skills/praticos/references/os-card.md")`
-Regra critica: usar /details (NAO /list). Foto via mainPhotoUrl → baixar e enviar como imagem.
+🔴 USAR `/details` (NAO `/list`). `/list` nao traz foto nem link.
+
+### Passo 1 — Buscar dados
+exec: GET /bot/orders/{NUM}/details → retorna `order` com `mainPhotoUrl`, `photosCount`, `shareUrl`
+
+### Passo 2 — Link
+Se `shareUrl` veio, usar. Se nao: POST /bot/orders/{NUM}/share → retorna `url`.
+
+### Passo 3 — Formatar card
+🌐 Traduzir TODOS os labels/status para o idioma do usuario.
+Montar texto a partir dos campos do `order`:
+```
+📋 *O.S. #{number}* - {createdAt} - {STATUS}
+👤 *Cliente:* {customer.name}
+🔧 *{DEVICE_LABEL}:* {device.name} ({device.serial})
+🛠️ *Serviços:* • {service.name} - {VALOR}
+📦 *Produtos:* • {product.name} (x{qty}) - {VALOR}
+💰 *Total:* {VALOR} | 🏷️ *Desconto:* {VALOR} | ✅ *Pago:* {VALOR} | ⏳ *A receber:* {VALOR}
+📅 *Previsão:* {dueDate}
+🔗 *Link:* {shareUrl}
+```
+**Omitir** campos null/vazio/0. **Moeda:** usar `formatContext` do endpoint (currency+locale). **remaining** = total - discount - paidAmount.
+Status internos: quote|approved|progress|done|canceled → traduzir.
+
+### Passo 4 — Enviar
+Se `mainPhotoUrl` existir → baixar e enviar como imagem com card de legenda:
+```
+exec: curl -s -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" "$PRATICOS_API_URL{mainPhotoUrl}" --output /tmp/os-{NUM}.jpg
+message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
+```
+Se null → `message("{card}")`. 🔴 NUNCA mencionar fotos sem enviar.
