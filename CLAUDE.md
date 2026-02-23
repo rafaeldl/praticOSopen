@@ -589,6 +589,78 @@ gcloud compute ssh praticos-bot --zone=southamerica-east1-b --ssh-key-file=~/.ss
 - `docs/BOT_WORKSPACE_CONFIG.md` - Configuração do workspace OpenClaw
 - `backend/bot/README.md` - Setup, deploy e referência completa
 
+## Google Ads API
+
+Acesso direto ao Google Ads para gerenciamento de campanhas via Python.
+
+### Configuracao
+
+- **Credenciais**: `~/.google-ads.yaml` (NAO vai para o git)
+- **Lib Python**: `google-ads` (pip3 install google-ads)
+- **Manager ID**: `1569666691` (PraticOS Manager)
+- **Customer ID**: `6735014760` (PraticOS - conta de anuncios)
+
+### Uso rapido
+
+```python
+import warnings
+warnings.filterwarnings('ignore')
+from google.ads.googleads.client import GoogleAdsClient
+
+client = GoogleAdsClient.load_from_storage('/Users/rafaeldl/.google-ads.yaml')
+ga_service = client.get_service('GoogleAdsService')
+CUSTOMER_ID = '6735014760'
+```
+
+### Operacoes disponiveis
+
+- Listar e analisar campanhas, ad groups, keywords, anuncios
+- Metricas de performance (impressoes, clicks, CTR, custo, conversoes)
+- Consultas GAQL customizadas
+
+### Limitacoes
+
+- **Nivel atual**: Acesso as Analises (somente leitura)
+- Para criar/editar campanhas via API, solicitar **Acesso Padrao** no Centro de API
+
+Ver `docs/GOOGLE_ADS_API.md` para documentacao completa, exemplos de queries e instrucoes de renovacao de token.
+
+## Meta Ads API
+
+Acesso ao Meta Ads (Facebook/Instagram) para campanhas via Python.
+
+### Configuracao
+
+- **Credenciais**: `~/.meta-ads.yaml` (NAO vai para o git)
+- **Lib Python**: `facebook-business` (pip3 install facebook-business)
+- **App ID**: `2156455528501761` (PraticOS Ads)
+- **Ad Account ID**: `act_521666357871300`
+
+### Uso rapido
+
+```python
+import warnings
+warnings.filterwarnings('ignore')
+from facebook_business.api import FacebookAdsApi
+from facebook_business.adobjects.adaccount import AdAccount
+
+APP_ID = '2156455528501761'
+APP_SECRET = 'ver ~/.meta-ads.yaml'
+ACCESS_TOKEN = 'ver ~/.meta-ads.yaml'
+
+FacebookAdsApi.init(APP_ID, APP_SECRET, ACCESS_TOKEN)
+account = AdAccount('act_521666357871300')
+```
+
+### Limitacoes
+
+- **Token expira**: Access token do Graph API expira em ~1h. Necessario regerar ou usar token de longa duracao.
+- **Escrita disponivel**: Diferente do Google Ads, ja temos permissao de escrita (ads_management).
+
+### Progresso das campanhas
+
+Ver `docs/ADS_CAMPAIGNS.md` para status completo de todas as campanhas, pendencias e historico.
+
 ## Regras Importantes
 
 1. **Inglês no Código**: SEMPRE usar inglês para classes, variáveis, constantes, enums, chaves JSON e valores no banco
@@ -739,3 +811,5 @@ Antes de finalizar uma feature, verificar:
 - `docs/DEPLOYMENT.md` - Guia completo de deploy
 - `docs/praticos-bot-central.md` - Bot WhatsApp: arquitetura e features
 - `docs/BOT_WORKSPACE_CONFIG.md` - Configuração do workspace OpenClaw
+- `docs/GOOGLE_ADS_API.md` - Acesso ao Google Ads via Claude Code
+- `docs/ADS_CAMPAIGNS.md` - Status de campanhas, pendências e progresso

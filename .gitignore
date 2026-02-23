@@ -58,6 +58,14 @@ firebase/hosting/public/
 # Auto Claude data directory
 .auto-claude/
 
+# Google Ads API credentials
+google-ads.yaml
+.google-ads.yaml
+
+# Meta Ads API credentials
+meta-ads.yaml
+.meta-ads.yaml
+
 # Bot credentials (WhatsApp, Telegram sessions)
 backend/bot/credentials/
 backend/bot/workspace/agents/main/sessions/
