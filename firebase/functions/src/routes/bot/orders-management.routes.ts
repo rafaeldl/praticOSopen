@@ -32,7 +32,6 @@ import {
   updateOrderDeviceSchema,
   updateOrderCustomerSchema,
 } from '../../utils/validation.utils';
-import { getFormatContext } from '../../utils/format.utils';
 
 const router: Router = Router();
 
@@ -166,7 +165,7 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         device: order?.device || null,
         services: order?.services || [],
         products: order?.products || [],
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -271,7 +270,7 @@ router.post('/:number/services', requireLinked, async (req: AuthenticatedRequest
         serviceName: service.name || '',
         value: serviceValue,
         newTotal: result.newTotal,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -378,7 +377,7 @@ router.post('/:number/products', requireLinked, async (req: AuthenticatedRequest
         value: productValue,
         quantity: data.quantity || 1,
         newTotal: result.newTotal,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -448,7 +447,7 @@ router.delete('/:number/services/:index', requireLinked, async (req: Authenticat
       data: {
         removedServiceName: result.removedService?.service?.name || result.removedService?.description || '',
         newTotal: result.newTotal,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -518,7 +517,7 @@ router.delete('/:number/products/:index', requireLinked, async (req: Authenticat
       data: {
         removedProductName: result.removedProduct?.product?.name || result.removedProduct?.description || '',
         newTotal: result.newTotal,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -624,7 +623,7 @@ router.patch('/:number', requireLinked, async (req: AuthenticatedRequest, res: R
       data: {
         orderNumber,
         updated: updatedFields,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -708,7 +707,7 @@ router.patch('/:number/device', requireLinked, async (req: AuthenticatedRequest,
       success: true,
       data: {
         device: deviceAggr,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -792,7 +791,7 @@ router.patch('/:number/customer', requireLinked, async (req: AuthenticatedReques
       success: true,
       data: {
         customer: customerAggr,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -883,7 +882,7 @@ router.get('/:number/details', async (req: AuthenticatedRequest, res: Response) 
       success: true,
       data: {
         order: orderData,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {

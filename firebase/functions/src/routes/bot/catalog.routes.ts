@@ -6,7 +6,6 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest } from '../../models/types';
 import * as catalogService from '../../services/catalog.service';
-import { getFormatContext } from '../../utils/format.utils';
 
 const router: Router = Router();
 
@@ -112,7 +111,7 @@ router.get('/search', async (req: AuthenticatedRequest, res: Response) => {
         services,
         products,
         totalResults: services.length + products.length,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {

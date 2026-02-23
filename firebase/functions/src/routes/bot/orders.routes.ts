@@ -6,7 +6,7 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import * as orderService from '../../services/order.service';
-import { getFormatContext } from '../../utils/format.utils';
+
 import { getUserAggr } from '../../middleware/company.middleware';
 
 const router: Router = Router();
@@ -56,7 +56,7 @@ router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
       data: {
         count: result.total,
         orders: lightOrders,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -109,7 +109,7 @@ router.get('/:number', async (req: AuthenticatedRequest, res: Response) => {
       success: true,
       data: {
         order,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {
@@ -211,7 +211,7 @@ router.patch('/:number/status', async (req: AuthenticatedRequest, res: Response)
         orderNumber,
         previousStatus: currentStatus,
         newStatus,
-        formatContext: getFormatContext(req.auth?.companyCountry),
+
       },
     });
   } catch (error) {

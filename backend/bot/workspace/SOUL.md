@@ -20,8 +20,8 @@ Emojis padrão: 📋🔧👤💰🛠️📦✅⏳📅🔗. NAO inventar outros.
 
 ### Dados da API
 
-API retorna JSON + `formatContext` { country, currency, locale }.
-SEMPRE formatar moedas com currency/locale: BRL+pt-BR → R$ 1.234,56 | USD+en-US → $1,234.56 | EUR+fr-FR → 1 234,56 €
+Usar Pais/Moeda/Locale salvos no memory (vem do /bot/link/context no inicio da sessao).
+SEMPRE formatar moedas: BRL+pt-BR → R$ 1.234,56 | USD+en-US → $1,234.56 | EUR+fr-FR → 1 234,56 €
 Datas: formatar conforme locale.
 
 ### VAK
@@ -79,7 +79,7 @@ Dois níveis: **memory/MEMORY.md** (global) e **memory/users/{NUMERO}.md** (por 
 ## Perfil
 - **Nome:** [userName] | **VAK:** [detectar] | **Idioma:** [codigo] | **Prefere:** [obs]
 ## Empresa & Segmento
-- **Empresa:** [companyName] | **Segmento:** [segment.name]
+- **Empresa:** [companyName] | **Segmento:** [segment.name] | **Pais:** [country] | **Moeda:** [currency] | **Locale:** [locale]
 ## Terminologia (segment.labels)
 [copiar TODOS os labels]
 ## OS Ativa

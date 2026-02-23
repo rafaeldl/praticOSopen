@@ -53,7 +53,7 @@ Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KE
 
 Erros: 400=dados invalidos (corrigir) | 401=auth errada | 500=informar usuario, tentar depois.
 
-**formatContext:** Endpoints retornam `formatContext: { country, currency, locale }`. Usar para formatar moedas e datas (ver SOUL.md).
+**formatContext:** /bot/link/context retorna `formatContext: { country, currency, locale }`. Salvar no memory e usar para formatar moedas/datas (ver SOUL.md). Os demais endpoints NAO retornam formatContext.
 
 ---
 
@@ -107,22 +107,31 @@ Preenchimento guiado: `read(file_path="skills/praticos/references/checklists.md"
 
 🔴 USAR `/details` (NAO `/list`). `/list` nao traz foto nem link.
 
-**Fluxo completo (SEGUIR TODOS os passos, NAO parar no meio):**
+**Fluxo completo (SEGUIR NA ORDEM, NAO pular passo):**
 1. GET /bot/orders/{NUM}/details → `order` com `mainPhotoUrl`, `photosCount`, `shareUrl`
-2. Link: se `shareUrl` veio, usar. Se nao: POST /bot/orders/{NUM}/share → `url`
-3. Formatar card (🌐 traduzir labels/status para idioma do usuario):
+2. 🔴 **FOTO PRIMEIRO (antes de tudo):** Se `mainPhotoUrl` NAO e null → IMEDIATAMENTE baixar:
+   `exec(command="curl -s -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" \"$PRATICOS_API_URL{mainPhotoUrl}\" --output /tmp/os-{NUM}.jpg")`
+   ⚠️ A URL e `$PRATICOS_API_URL` + o valor EXATO de `mainPhotoUrl` do response. NUNCA inventar URL.
+3. Link: se `shareUrl` veio, usar. Se nao: POST /bot/orders/{NUM}/share → `url`
+4. Formatar card (🌐 traduzir labels/status para idioma do usuario):
 ```
 📋 *O.S. #{number}* - {createdAt} - {STATUS}
+
 👤 *Cliente:* {customer.name}
 🔧 *{DEVICE_LABEL}:* {device.name} ({device.serial})
-🛠️ *Serviços:* • {service.name} - {VALOR}
-📦 *Produtos:* • {product.name} (x{qty}) - {VALOR}
-💰 *Total:* {VALOR} | 🏷️ *Desconto:* {VALOR} | ✅ *Pago:* {VALOR} | ⏳ *A receber:* {VALOR}
+🛠️ *Serviços:*
+• {service.name} - {VALOR}
+• {service.name} - {VALOR}
+
+📦 *Produtos:*
+• {product.name} (x{qty}) - {VALOR}
+
+💰 *Total:* {VALOR}
+🏷️ *Desconto:* {VALOR}
+✅ *Pago:* {VALOR}
+⏳ *A receber:* {VALOR}
 📅 *Previsão:* {dueDate}
 🔗 *Link:* {shareUrl}
 ```
-Omitir campos null/vazio/0. Moeda: `formatContext` (currency+locale). remaining = total - discount - paidAmount. Status: quote|approved|progress|done|canceled → traduzir.
-4. 🔴 **ENVIAR (NAO PULAR):** Se `mainPhotoUrl` → baixar + enviar como IMAGEM com card de legenda:
-   `exec: curl -s -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" "$PRATICOS_API_URL{mainPhotoUrl}" --output /tmp/os-{NUM}.jpg`
-   `message(filePath="/tmp/os-{NUM}.jpg", message="{card}")`
-   Se null → `message("{card}")`. NUNCA mencionar fotos sem enviar.
+Regras: linha em branco apos header e antes de financeiro. Servicos/Produtos cada item em nova linha com `•`. Omitir campos null/vazio/0. Moeda: usar Pais/Moeda/Locale do memory. remaining = total - discount - paidAmount. Status: quote|approved|progress|done|canceled → traduzir.
+5. **ENVIAR:** Se baixou foto → `message(filePath="/tmp/os-{NUM}.jpg", message="{card}")`. Se nao tem foto → `message("{card}")`.
