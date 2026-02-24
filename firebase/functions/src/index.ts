@@ -151,6 +151,7 @@ import botUnifiedSearchRoutes from './routes/bot/unified-search.routes';
 import botEntitiesRoutes from './routes/bot/entities.routes';
 import botFormsRoutes from './routes/bot/forms.routes';
 import botShareRoutes from './routes/bot/share.routes';
+import botCommentsRoutes from './routes/bot/comments.routes';
 import botRegistrationRoutes from './routes/bot/registration.routes';
 import botUserRoutes from './routes/bot/user.routes';
 
@@ -294,6 +295,7 @@ app.use('/bot/orders', botLimiter, botAuth, botOrdersManagementRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botPhotosRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botFormsRoutes);
 app.use('/bot/orders', botLimiter, botAuth, botShareRoutes);
+app.use('/bot/orders', botLimiter, botAuth, botCommentsRoutes);
 app.use('/bot/forms', botLimiter, botAuth, botFormsRoutes);
 app.use('/bot/summary', botLimiter, botAuth, summaryRoutes);
 app.use('/bot/analytics', botLimiter, botAuth, botAnalyticsRoutes);

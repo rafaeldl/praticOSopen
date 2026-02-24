@@ -47,6 +47,13 @@ GET /bot/orders/{NUM}/photos - listar (retorna downloadUrl)
 GET /bot/orders/{NUM}/photos/{ID} - download binario
 DELETE /bot/orders/{NUM}/photos/{ID}
 
+## Comentarios
+POST /bot/orders/{NUM}/comments `{"text":"observacao aqui"}` (isInternal:true por padrao)
+Para comentario visivel ao cliente: `{"text":"mensagem","isInternal":false}`
+GET /bot/orders/{NUM}/comments - listar todos (internos + publicos)
+exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"text\":\"Peca encomendada, chega amanha\"}' \"$PRATICOS_API_URL/bot/orders/42/comments\"")
+exec(command="curl -s -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" \"$PRATICOS_API_URL/bot/orders/42/comments\"")
+
 ## Entidades CRUD
 Base: /bot/entities/{TIPO} (customers|devices|services|products)
 GET ?q=filtro&limit=20 | GET /{id} | POST | PATCH /{id} | DELETE /{id}
