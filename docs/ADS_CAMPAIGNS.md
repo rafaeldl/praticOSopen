@@ -266,10 +266,23 @@
 ### Prioridade Baixa
 
 - [x] **Meta Ads - Token de longa duração**: Token de 60 dias gerado e salvo em `~/.meta-ads.yaml` (23/02/2026).
-- [ ] **GoogleService-Info.plist**: Os flags `IS_ANALYTICS_ENABLED` e `IS_ADS_ENABLED` estão `false` no iOS. Embora o Analytics funcione via SDK, considerar atualizar para `true` em uma futura release.
+- [x] **GoogleService-Info.plist**: `IS_ANALYTICS_ENABLED` e `IS_ADS_ENABLED` alterados para `true`. SKAdNetwork IDs (Google Ads + Meta) e `NSUserTrackingUsageDescription` adicionados aos Info plists. Concluído em 24/02/2026.
+- [ ] **iOS - ATT Prompt**: Implementar diálogo App Tracking Transparency com package `app_tracking_transparency`. Pré-requisito: `NSUserTrackingUsageDescription` já adicionado ao plist.
 - [ ] **Google Ads - Otimização contínua**: Depois de 2 semanas de dados, analisar termos de busca, pausar keywords ruins, ajustar bids.
 
 ## Histórico de Alterações
+
+### 24/02/2026 (Firebase Analytics iOS + SKAdNetwork)
+- Habilitou `IS_ANALYTICS_ENABLED` e `IS_ADS_ENABLED` no `GoogleService-Info.plist`
+  - Permite Firebase Analytics enviar eventos iOS ao GA4
+  - Pré-requisito para Google Ads criar conversion action `FIREBASE_IOS_FIRST_OPEN`
+- Adicionou **SKAdNetwork IDs** em `Info-Debug.plist` e `Info-Release.plist`:
+  - `cstr6suwn9.skadnetwork` (Google Ads)
+  - `v9wttpbfkn.skadnetwork` (Meta/Facebook)
+  - `n38lu8286q.skadnetwork` (Meta/Facebook)
+- Adicionou `NSUserTrackingUsageDescription` nos Info plists
+  - Pré-requisito para ATT prompt (código Dart necessário em PR separado)
+- Motivação: campanha App-iOS (ID: 23598117814) com 1 impressão e 0 conversões desde criação
 
 ### 23/02/2026 (Campanha App-iOS - Google Ads)
 - Criada campanha **App-iOS** (ID: 23598117814) via Google Ads API
