@@ -53,9 +53,9 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
 
     // Normalize common bot field name variations before validation
     const body = { ...req.body };
-    if (body.id && !body.orderId) body.orderId = body.id;
+    if (body.orderId && !body.id) body.id = body.orderId;
     if (body.device?.id && !body.deviceId) body.deviceId = body.device.id;
-    delete body.id;
+    delete body.orderId;
     delete body.device;
     delete body.paidAmount; // Not supported on creation, bot sometimes sends it
 
@@ -143,12 +143,12 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
     }
 
     // Upsert: if orderId provided, update existing order; otherwise create new
-    if (data.orderId) {
-      const existingOrder = await orderService.getOrder(companyId, data.orderId);
+    if (data.id) {
+      const existingOrder = await orderService.getOrder(companyId, data.id);
       if (!existingOrder) {
         res.status(404).json({
           success: false,
-          error: { code: 'NOT_FOUND', message: 'Order not found for update', orderId: data.orderId },
+          error: { code: 'NOT_FOUND', message: 'Order not found for update', orderId: data.id },
         });
         return;
       }
@@ -220,16 +220,16 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
       if (data.dueDate) updatePayload.dueDate = new Date(data.dueDate).toISOString();
       if (data.scheduledDate) updatePayload.scheduledDate = new Date(data.scheduledDate).toISOString();
 
-      await db.collection('companies').doc(companyId).collection('orders').doc(data.orderId).update(updatePayload);
+      await db.collection('companies').doc(companyId).collection('orders').doc(data.id).update(updatePayload);
 
       const updatedOrder = await orderService.getOrderByNumber(companyId, existingOrder.number);
 
-      console.log(`[BOT] Updated order #${existingOrder.number} (id: ${data.orderId}) via /full upsert`);
+      console.log(`[BOT] Updated order #${existingOrder.number} (id: ${data.id}) via /full upsert`);
 
       res.status(200).json({
         success: true,
         data: {
-          orderId: data.orderId,
+          orderId: data.id,
           orderNumber: existingOrder.number,
           status: updatedOrder?.status || existingOrder.status,
           total: updatedOrder?.total || existingOrder.total || 0,
