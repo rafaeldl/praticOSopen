@@ -28,7 +28,17 @@
 				<string>com.googleusercontent.apps.940190275097-br6v80rcn7j7jdi2jljj61c0bp0vh5ct</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fb2156455528501761</string>
+			</array>
+		</dict>
 	</array>
+	<key>FacebookAppID</key>
+	<string>2156455528501761</string>
+	<key>FacebookDisplayName</key>
+	<string>PraticOS Ads</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSApplicationQueriesSchemes</key>
@@ -36,6 +46,10 @@
 		<string>instagram-stories</string>
 		<string>whatsapp</string>
 		<string>tg</string>
+		<string>fbapi</string>
+		<string>fb-messenger-api</string>
+		<string>fbauth2</string>
+		<string>fbshareextension</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
