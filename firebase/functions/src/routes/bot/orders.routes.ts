@@ -44,11 +44,18 @@ router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
       offset: 0,
     });
 
-    // Strip heavy fields (photos, transactions) to save tokens in list view
-    // Bot should use GET /bot/orders/{NUM}/details for full order data + photo
-    const lightOrders = result.data.map(({ photos, transactions, ...rest }) => ({
-      ...rest,
-      photosCount: photos?.length || 0,
+    // Allowlist: only fields the bot needs — saves ~75% tokens vs spreading everything
+    // Bot should use GET /bot/orders/{NUM}/details for full order data + photos
+    const lightOrders = result.data.map(order => ({
+      number: order.number,
+      status: order.status,
+      customer: order.customer ? { name: order.customer.name } : null,
+      device: order.device ? { name: order.device.name, serial: order.device.serial } : null,
+      total: order.total,
+      dueDate: order.dueDate,
+      scheduledDate: order.scheduledDate,
+      createdAt: order.createdAt,
+      photosCount: order.photos?.length || 0,
     }));
 
     res.json({

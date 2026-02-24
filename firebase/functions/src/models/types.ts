@@ -119,6 +119,7 @@ export interface CustomerAggr {
 
 export interface Customer extends CustomerAggr {
   address?: string;
+  keywords?: string[];
   company: CompanyAggr;
   createdAt: DateValue;
   createdBy: UserAggr;

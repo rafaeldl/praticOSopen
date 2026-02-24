@@ -84,14 +84,33 @@ export async function getCustomer(
 }
 
 /**
- * Find customer by phone number
+ * Find customer by phone number.
+ * Falls back to keyword search by last 8 digits if exact match fails.
  */
 export async function findCustomerByPhone(
   companyId: string,
   phone: string
 ): Promise<Customer | null> {
   const collection = getTenantCollection(companyId, 'customers');
-  return findByField<Customer>(collection, 'phone', phone);
+
+  // 1. Exact match on phone field
+  const exact = await findByField<Customer>(collection, 'phone', phone);
+  if (exact) return exact;
+
+  // 2. Fallback: search by last 8 digits in keywords array
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length >= 8) {
+    const snapshot = await collection
+      .where('keywords', 'array-contains', digits.slice(-8))
+      .limit(1)
+      .get();
+    if (!snapshot.empty) {
+      const doc = snapshot.docs[0];
+      return { ...doc.data(), id: doc.id } as Customer;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -122,7 +141,7 @@ export async function searchCustomers(
     })) as Customer[];
   }
 
-  // 1. Primary search: by keywords (new records with keywords field)
+  // 1. Primary search: by keywords (records with keywords field)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
@@ -135,16 +154,35 @@ export async function searchCustomers(
     })) as Customer[];
   }
 
-  // 2. Fallback: search by name or phone in memory (old records without keywords)
+  // 2. Prefix query on nameLower (works for ALL records, no keywords needed)
+  const queryLower = removeAccents(query.toLowerCase().trim());
+  if (queryLower.length >= 2) {
+    const prefixSnapshot = await collection
+      .where('nameLower', '>=', queryLower)
+      .where('nameLower', '<', queryLower + '\uf8ff')
+      .limit(limit)
+      .get();
+
+    if (!prefixSnapshot.empty) {
+      const results = prefixSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      })) as Customer[];
+      backfillKeywords(collection, results);
+      return results;
+    }
+  }
+
+  // 3. Fallback: search by name or phone in memory (broader substring match)
   const allSnapshot = await collection
     .orderBy('name')
-    .limit(100)
+    .limit(500)
     .get();
 
   const queryNormalized = removeAccents(query.toLowerCase());
   // For phone search, also try matching digits only
   const queryDigits = query.replace(/\D/g, '');
-  return allSnapshot.docs
+  const results = allSnapshot.docs
     .map((doc) => ({ ...doc.data(), id: doc.id } as Customer))
     .filter((c) => {
       const nameMatch = removeAccents(c.name?.toLowerCase() || '').includes(queryNormalized);
@@ -152,6 +190,9 @@ export async function searchCustomers(
       return nameMatch || phoneMatch;
     })
     .slice(0, limit);
+
+  backfillKeywords(collection, results);
+  return results;
 }
 
 // ============================================================================
@@ -310,6 +351,29 @@ export async function getOrCreateCustomer(
     customer: result.customer,
     created: true,
   };
+}
+
+/**
+ * Lazily backfill keywords for customers that don't have them.
+ * Runs fire-and-forget so it doesn't block the search response.
+ */
+function backfillKeywords(
+  collection: FirebaseFirestore.CollectionReference,
+  customers: Customer[]
+): void {
+  const missing = customers.filter((c) => !c.keywords?.length && c.id);
+  if (missing.length === 0) return;
+
+  Promise.all(
+    missing.map((c) =>
+      collection.doc(c.id!).update({
+        keywords: [
+          ...generateSearchKeywords(c.name),
+          ...generatePhoneKeywords(c.phone),
+        ],
+      })
+    )
+  ).catch((err) => console.error('Keyword backfill error:', err));
 }
 
 /**
