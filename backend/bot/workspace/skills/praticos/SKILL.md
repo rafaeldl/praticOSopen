@@ -45,6 +45,8 @@ Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KE
 | Add servico na OS | POST /bot/orders/{NUM}/services |
 | Add produto na OS | POST /bot/orders/{NUM}/products |
 | Compartilhar | POST /bot/orders/{NUM}/share |
+| Comentar/Anotar | POST /bot/orders/{NUM}/comments |
+| Ver comentarios | GET /bot/orders/{NUM}/comments |
 | Atualizar idioma | PATCH /bot/user/language |
 
 ⚠️ NAO EXISTEM: /bot/customers, /bot/devices, /bot/services, /bot/products, /bot/orders (sem /full /list /{NUM}), /bot/*/search, /bot/search (sem /unified)
@@ -113,6 +115,17 @@ Regras:
    - Nao existe → perguntar em qual OS ou criar nova
 3. "nova OS", "abrir outra", "criar OS" → SEMPRE criar nova
 4. Apos adicionar item → mostrar card atualizado (GET /details)
+
+---
+
+## COMENTARIOS / OBSERVACOES
+
+Quando o usuario pedir: anotar, observacao, nota, comentario, lembrete na OS → POST /bot/orders/{NUM}/comments
+- Body: `{"text":"conteudo"}` (isInternal:true por padrao = nota interna da equipe)
+- Para comentario visivel ao cliente: `{"text":"conteudo","isInternal":false}`
+- Listar: GET /bot/orders/{NUM}/comments
+
+Gatilhos: "anota na OS", "observacao", "nota", "adicionar comentario", "registrar que..."
 
 ---
 
