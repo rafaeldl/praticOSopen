@@ -97,7 +97,7 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 4. **Fotos:** multipart `-F "file=@/path"` (NAO base64)
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
 6. **Exibir OS:** ver CARD DE OS abaixo
-7. **Apos criar OS:** oferecer link → POST /bot/orders/{NUM}/share
+7. 🔴 **Apos criar OS:** SEMPRE exibir card (GET /details → formato CARD DE OS abaixo) + oferecer compartilhar → POST /bot/orders/{NUM}/share
 
 ---
 
@@ -107,7 +107,7 @@ Apos criar OS, ela vira a **OS ativa**. Salvar no memory:
 `## Sessao` → `- **OS ativa:** #NUM (id: X)`
 
 Regras:
-1. POST /bot/orders/full com sucesso → anotar como OS ativa no memory
+1. POST /bot/orders/full com sucesso → anotar como OS ativa no memory → exibir card (GET /bot/orders/{NUM}/details → formato CARD DE OS)
 2. "adicionar/incluir/colocar servico/produto" → verificar OS ativa
    - Existe → POST /bot/orders/{NUM}/services ou /products. Confirmar: "Adicionei X na OS #{NUM}"
    - Nao existe → perguntar em qual OS ou criar nova
