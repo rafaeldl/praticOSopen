@@ -189,6 +189,60 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$addressAtom = Atom(
+    name: '_OrderStore.address',
+    context: context,
+  );
+
+  @override
+  String? get address {
+    _$addressAtom.reportRead();
+    return super.address;
+  }
+
+  @override
+  set address(String? value) {
+    _$addressAtom.reportWrite(value, super.address, () {
+      super.address = value;
+    });
+  }
+
+  late final _$latitudeAtom = Atom(
+    name: '_OrderStore.latitude',
+    context: context,
+  );
+
+  @override
+  double? get latitude {
+    _$latitudeAtom.reportRead();
+    return super.latitude;
+  }
+
+  @override
+  set latitude(double? value) {
+    _$latitudeAtom.reportWrite(value, super.latitude, () {
+      super.latitude = value;
+    });
+  }
+
+  late final _$longitudeAtom = Atom(
+    name: '_OrderStore.longitude',
+    context: context,
+  );
+
+  @override
+  double? get longitude {
+    _$longitudeAtom.reportRead();
+    return super.longitude;
+  }
+
+  @override
+  set longitude(double? value) {
+    _$longitudeAtom.reportWrite(value, super.longitude, () {
+      super.longitude = value;
+    });
+  }
+
   late final _$statusAtom = Atom(name: '_OrderStore.status', context: context);
 
   @override
@@ -974,6 +1028,18 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void setAddress(String? text, {double? lat, double? lng}) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setAddress',
+    );
+    try {
+      return super.setAddress(text, lat: lat, lng: lng);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic clearScheduledDate() {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.clearScheduledDate',
@@ -1257,6 +1323,9 @@ orderStream: ${orderStream},
 formsStream: ${formsStream},
 dueDate: ${dueDate},
 scheduledDate: ${scheduledDate},
+address: ${address},
+latitude: ${latitude},
+longitude: ${longitude},
 status: ${status},
 createdAt: ${createdAt},
 total: ${total},

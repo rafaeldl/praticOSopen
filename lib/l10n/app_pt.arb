@@ -1282,6 +1282,9 @@
       }
     }
   },
+  "serviceLocation": "Local do Atendimento",
+  "openInMaps": "Abrir no Mapa",
+  "addressPlaceholder": "Rua, número, bairro, cidade",
   "sendWhatsApp": "Enviar WhatsApp",
   "inviteWhatsAppBotMessage": "Olá! Você foi adicionado à equipe da {company} no PraticOS. Mande um \"oi\" para o bot para começar: https://wa.me/5548988794742",
   "@inviteWhatsAppBotMessage": {

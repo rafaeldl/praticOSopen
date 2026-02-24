@@ -33,6 +33,7 @@ import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
+import 'package:praticos/services/location_service.dart';
 
 class OrderForm extends StatefulWidget {
   @override
@@ -44,6 +45,7 @@ class _OrderFormState extends State<OrderForm> {
   final FormsService _formsService = FormsService();
   final AuthorizationService _authService = AuthorizationService.instance;
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _addressController = TextEditingController();
   bool _shouldScrollToComments = false;
   String? _highlightCommentId;
   final Set<String> _dismissedSharePrompts = {};
@@ -109,6 +111,7 @@ class _OrderFormState extends State<OrderForm> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _addressController.dispose();
     super.dispose();
   }
 
@@ -345,6 +348,8 @@ class _OrderFormState extends State<OrderForm> {
         final canEditFields = _store.order != null
             ? _authService.canEditOrderMainFields(_store.order!)
             : true;
+        final hasAddress = _store.address != null && _store.address!.isNotEmpty;
+        final hasCoordinates = _store.latitude != null && _store.longitude != null;
 
         return _buildGroupedSection(
           header: "${config.customer.toUpperCase()} E ${config.device.toUpperCase()}",
@@ -367,14 +372,83 @@ class _OrderFormState extends State<OrderForm> {
               placeholder: "${context.l10n.select} ${config.device}",
               onTap: _selectDevice,
               showChevron: true,
-              isLast: true,
               enabled: canEditFields,
             ),
+            // Address inline text field
+            _buildAddressField(context, canEditFields, hasAddress, hasCoordinates),
           ],
         );
       },
     );
   }
+
+  Widget _buildAddressField(BuildContext context, bool canEditFields, bool hasAddress, bool hasCoordinates) {
+    // Sync controller with store (e.g. auto-fill from customer)
+    final storeAddress = _store.address ?? '';
+    if (_addressController.text != storeAddress) {
+      _addressController.text = storeAddress;
+    }
+
+    final canOpenMaps = hasAddress || hasCoordinates;
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            children: [
+              GestureDetector(
+                onTap: canOpenMaps
+                    ? () => LocationService().openInMaps(
+                          lat: _store.latitude,
+                          lng: _store.longitude,
+                          address: _store.address,
+                        )
+                    : null,
+                child: Icon(
+                  CupertinoIcons.location_solid,
+                  color: canOpenMaps
+                      ? CupertinoTheme.of(context).primaryColor
+                      : CupertinoColors.systemGrey.resolveFrom(context),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: CupertinoTextField(
+                  controller: _addressController,
+                  placeholder: context.l10n.addressPlaceholder,
+                  textCapitalization: TextCapitalization.sentences,
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
+                  decoration: null,
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: canEditFields
+                        ? CupertinoColors.label.resolveFrom(context)
+                        : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                  ),
+                  placeholderStyle: TextStyle(
+                    fontSize: 17,
+                    color: CupertinoColors.placeholderText.resolveFrom(context),
+                  ),
+                  enabled: canEditFields,
+                  onChanged: (text) {
+                    final trimmed = text.trim();
+                    _store.setAddress(
+                      trimmed.isEmpty ? null : trimmed,
+                      lat: trimmed.isEmpty ? null : _store.latitude,
+                      lng: trimmed.isEmpty ? null : _store.longitude,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFormsSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {

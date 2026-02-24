@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
+import 'package:praticos/services/location_service.dart';
 import 'package:praticos/widgets/dynamic_text_field.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
@@ -70,7 +71,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
           child: ListView(
             children: [
               const SizedBox(height: 20),
-              
+
               // Header Icon (Placeholder since no photo)
               Center(
                 child: Container(
@@ -119,12 +120,37 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                     onSaved: (val) => _customer?.email = val,
                   ),
                   CupertinoTextFormFieldRow(
-                    prefix: Text(context.l10n.address,
-                        style: const TextStyle(fontSize: 16)),
+                    prefix: GestureDetector(
+                      onTap: (_customer?.address != null && _customer!.address!.isNotEmpty) ||
+                              (_customer?.latitude != null && _customer?.longitude != null)
+                          ? () => LocationService().openInMaps(
+                                lat: _customer?.latitude,
+                                lng: _customer?.longitude,
+                                address: _customer?.address,
+                              )
+                          : null,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.location_solid,
+                            size: 16,
+                            color: (_customer?.address != null && _customer!.address!.isNotEmpty) ||
+                                    (_customer?.latitude != null && _customer?.longitude != null)
+                                ? CupertinoTheme.of(context).primaryColor
+                                : CupertinoColors.systemGrey.resolveFrom(context),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(context.l10n.address,
+                              style: const TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ),
                     initialValue: _customer?.address,
-                    placeholder: context.l10n.address,
+                    placeholder: context.l10n.addressPlaceholder,
                     textCapitalization: TextCapitalization.sentences,
                     textAlign: TextAlign.right,
+                    onChanged: (val) => _customer?.address = val,
                     onSaved: (val) => _customer?.address = val,
                   ),
                 ],

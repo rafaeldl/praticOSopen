@@ -2931,6 +2931,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get serviceLocation => 'Service Location';
+
+  @override
+  String get openInMaps => 'Open in Maps';
+
+  @override
+  String get addressPlaceholder => 'Street, number, neighborhood, city';
+
+  @override
   String get sendWhatsApp => 'Send WhatsApp';
 
   @override

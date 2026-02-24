@@ -854,6 +854,37 @@ class PdfMainOsBuilder {
         ],
       ),
 
+      // Service Location
+      if (order.address != null && order.address!.isNotEmpty)
+        pw.Container(
+          width: double.infinity,
+          margin: const pw.EdgeInsets.only(top: 8),
+          padding: const pw.EdgeInsets.all(10),
+          decoration: PdfStyles.cardDecoration(),
+          child: pw.Row(
+            children: [
+              pw.Text(
+                '${localizations.serviceLocation}: ',
+                style: pw.TextStyle(
+                  font: boldFont,
+                  fontSize: 9,
+                  color: PdfStyles.primaryDark,
+                ),
+              ),
+              pw.Expanded(
+                child: pw.Text(
+                  order.address!,
+                  style: pw.TextStyle(
+                    font: baseFont,
+                    fontSize: 9,
+                    color: PdfColors.grey800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
       pw.SizedBox(height: 20),
 
       // Services Section

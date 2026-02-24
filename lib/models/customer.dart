@@ -11,6 +11,8 @@ class Customer extends BaseAuditCompany {
   String? phone;
   String? email;
   String? address;
+  double? latitude;
+  double? longitude;
   List<String>? keywords;
 
   Customer();

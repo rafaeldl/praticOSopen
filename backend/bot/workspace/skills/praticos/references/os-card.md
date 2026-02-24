@@ -18,6 +18,7 @@ Montar o texto a partir dos campos do `order`:
 📋 *O.S. #{number}* - {createdAt} - {STATUS}
 
 👤 *Cliente:* {customer.name}
+📍 *{ADDRESS_LABEL}:* {address}
 🔧 *{DEVICE_LABEL}:* {device.name} ({device.serial})
 
 🛠️ *Serviços:*
@@ -34,9 +35,9 @@ Montar o texto a partir dos campos do `order`:
 
 🔗 *Link:* {shareUrl}
 ```
-**Labels:** Traduzir no idioma do usuario. Referência pt-BR: Cliente, Serviços, Produtos, Total, Desconto, Pago, A receber, Previsão, Link. Ex en: Customer, Services, Products, Total, Discount, Paid, Balance, Due date, Link.
+**Labels:** Traduzir no idioma do usuario. Referência pt-BR: Cliente, Endereço, Serviços, Produtos, Total, Desconto, Pago, A receber, Previsão, Link. Ex en: Customer, Address, Services, Products, Total, Discount, Paid, Balance, Due date, Link.
 **Status:** Traduzir no idioma do usuario. Valores internos e referência pt-BR: quote=Orçamento | approved=Aprovado | progress=Em andamento | done=Concluído | canceled=Cancelado. Ex en: Quote | Approved | In progress | Completed | Canceled.
-**Omitir:** campos null, vazio ou com valor 0. Ex: paidAmount=0 → nao mostrar "Pago". discount=0 → nao mostrar "Desconto".
+**Omitir:** campos null, vazio ou com valor 0. Ex: paidAmount=0 → nao mostrar "Pago". discount=0 → nao mostrar "Desconto". address=null → nao mostrar "Endereço".
 **Moeda/Valores:** Usar `formatContext` retornado pelo endpoint `/bot/orders/{NUM}/details`. O `currency` define o simbolo (BRL=R$, EUR=€, USD=$) e o `locale` define o formato numerico: pt-BR → R$ 1.234,56 | en-US → $1,234.56 | fr-FR → 1 234,56 €. A API retorna valores raw (numeros).
 **remaining** = total - discount - paidAmount.
 
