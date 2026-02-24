@@ -202,7 +202,7 @@ export const unifiedSearchSchema = z.object({
  */
 export const createFullOrderSchema = z.object({
   // Existing order ID: if provided, update instead of create (upsert)
-  orderId: idSchema.optional(),
+  id: idSchema.optional(),
 
   // Customer: ID required
   customerId: idSchema,

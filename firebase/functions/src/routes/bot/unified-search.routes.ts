@@ -237,8 +237,19 @@ router.post('/unified', requireLinked, async (req: AuthenticatedRequest, res: Re
       return;
     }
 
+    // Normalize common bot field name variations before validation
+    const body = { ...req.body };
+    if (body.query && !body.customer && !body.device && !body.service && !body.product) {
+      body.customer = body.query;
+      delete body.query;
+    }
+    if (body.q && !body.customer && !body.device && !body.service && !body.product) {
+      body.customer = body.q;
+      delete body.q;
+    }
+
     // Validate input
-    const validation = validateInput(unifiedSearchSchema, req.body);
+    const validation = validateInput(unifiedSearchSchema, body);
     if (!validation.success) {
       res.status(400).json({
         success: false,
