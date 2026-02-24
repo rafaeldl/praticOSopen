@@ -46,6 +46,15 @@ abstract class _OrderStore with Store {
   String? scheduledDate;
 
   @observable
+  String? address;
+
+  @observable
+  double? latitude;
+
+  @observable
+  double? longitude;
+
+  @observable
   String? status;
 
   @observable
@@ -260,6 +269,9 @@ abstract class _OrderStore with Store {
       order!.createdBy = Global.userAggr;
       order!.status = 'quote';
       status = order!.status;
+      address = null;
+      latitude = null;
+      longitude = null;
       order!.payment = 'unpaid';
       payment = order!.payment;
       updatePayment();
@@ -315,6 +327,9 @@ abstract class _OrderStore with Store {
         ? FormatService().formatDateTime(order.scheduledDate!)
         : null;
     status = order.status;
+    address = order.address;
+    latitude = order.latitude;
+    longitude = order.longitude;
     updateTotal();
     updatePayment();
   }
@@ -328,6 +343,12 @@ abstract class _OrderStore with Store {
 
     order!.customer = c.toAggr();
     customer = order!.customer;
+
+    // Auto-fill address from customer if OS has no address yet
+    if ((address == null || address!.isEmpty) && c.address != null && c.address!.isNotEmpty) {
+      setAddress(c.address, lat: c.latitude, lng: c.longitude);
+    }
+
     createItem();
   }
 
@@ -351,6 +372,17 @@ abstract class _OrderStore with Store {
     scheduledDate = FormatService().formatDateTime(date);
     createItem();
     _scheduleReminder(reminderStore);
+  }
+
+  @action
+  void setAddress(String? text, {double? lat, double? lng}) {
+    order!.address = text;
+    order!.latitude = lat;
+    order!.longitude = lng;
+    address = text;
+    latitude = lat;
+    longitude = lng;
+    createItem();
   }
 
   @action

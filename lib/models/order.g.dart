@@ -63,7 +63,10 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
       : OrderShareLink.fromJson(json['shareLink'] as Map<String, dynamic>)
   ..rating = json['rating'] == null
       ? null
-      : OrderRating.fromJson(json['rating'] as Map<String, dynamic>);
+      : OrderRating.fromJson(json['rating'] as Map<String, dynamic>)
+  ..address = json['address'] as String?
+  ..latitude = (json['latitude'] as num?)?.toDouble()
+  ..longitude = (json['longitude'] as num?)?.toDouble();
 
 Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'id': instance.id,
@@ -91,6 +94,9 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'assignedTo': instance.assignedTo?.toJson(),
   'shareLink': instance.shareLink?.toJson(),
   'rating': instance.rating?.toJson(),
+  'address': instance.address,
+  'latitude': instance.latitude,
+  'longitude': instance.longitude,
 };
 
 OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()

@@ -5584,6 +5584,24 @@ abstract class AppLocalizations {
   /// **'{name} receberá o convite automaticamente ao entrar em contato com o bot PraticOS no WhatsApp.'**
   String inviteWhatsAppSuccessMessage(String name);
 
+  /// No description provided for @serviceLocation.
+  ///
+  /// In pt, this message translates to:
+  /// **'Local do Atendimento'**
+  String get serviceLocation;
+
+  /// No description provided for @openInMaps.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir no Mapa'**
+  String get openInMaps;
+
+  /// No description provided for @addressPlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Rua, número, bairro, cidade'**
+  String get addressPlaceholder;
+
   /// No description provided for @sendWhatsApp.
   ///
   /// In pt, this message translates to:

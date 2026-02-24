@@ -43,6 +43,11 @@ class Order extends BaseAuditCompany {
   /// Avaliação do cliente
   OrderRating? rating;
 
+  /// Service location address
+  String? address;
+  double? latitude;
+  double? longitude;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 

@@ -55,6 +55,7 @@ class PdfLocalizations {
   final String photosAvailableDigitally;
   final String photoRecord;
   final String partsAndProducts;
+  final String serviceLocation;
 
   // Form-related strings
   final String statusCompleted;
@@ -92,6 +93,7 @@ class PdfLocalizations {
     required this.photosAvailableDigitally,
     required this.photoRecord,
     required this.partsAndProducts,
+    required this.serviceLocation,
     required this.statusCompleted,
     required this.statusInProgress,
     required this.statusPending,
@@ -130,6 +132,7 @@ class PdfLocalizations {
       photosAvailableDigitally: _latinCharactersOnly(l10n.photosAvailableDigitally),
       photoRecord: _latinCharactersOnly(l10n.photoRecord),
       partsAndProducts: _latinCharactersOnly(l10n.partsAndProducts),
+      serviceLocation: _latinCharactersOnly(l10n.serviceLocation),
       statusCompleted: _latinCharactersOnly(l10n.statusCompleted),
       statusInProgress: _latinCharactersOnly(l10n.statusInProgress),
       statusPending: _latinCharactersOnly(l10n.statusPending),
