@@ -378,6 +378,19 @@ class _OrderFormState extends State<OrderForm> {
             ),
             // Address inline text field
             _buildAddressField(context, canEditFields, hasAddress, hasCoordinates),
+            // Shortcut to add device (hidden once a device is added)
+            if (_store.devices.isEmpty)
+              _buildListTile(
+                context: context,
+                icon: config.deviceIcon,
+                title: '${context.l10n.add} ${config.device}',
+                value: '',
+                onTap: _selectDevice,
+                showChevron: true,
+                isLast: true,
+                enabled: canEditFields,
+                textColor: CupertinoTheme.of(context).primaryColor,
+              ),
           ],
         );
       },
@@ -1577,7 +1590,7 @@ class _OrderFormState extends State<OrderForm> {
       showCupertinoDialog(
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
-          title: Text(context.l10n.removeDevice),
+          title: Text('${context.l10n.remove} ${config.device}'),
           content: Text(context.l10n.confirmRemoveDevice(device.name ?? '')),
           actions: [
             CupertinoDialogAction(
@@ -1586,7 +1599,7 @@ class _OrderFormState extends State<OrderForm> {
             ),
             CupertinoDialogAction(
               isDestructiveAction: true,
-              child: Text(context.l10n.removeDevice),
+              child: Text('${context.l10n.remove} ${config.device}'),
               onPressed: () {
                 Navigator.pop(ctx);
                 _store.removeDevice(deviceId);
@@ -1600,7 +1613,7 @@ class _OrderFormState extends State<OrderForm> {
       showCupertinoDialog(
         context: context,
         builder: (ctx) => CupertinoAlertDialog(
-          title: Text(context.l10n.removeDevice),
+          title: Text('${context.l10n.remove} ${config.device}'),
           content: Text(context.l10n.removeDeviceHasItems(
             device.name ?? '', itemCount.toString(),
           )),
