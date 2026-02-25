@@ -357,6 +357,35 @@
     white-space: nowrap;
 }
 
+/* Device Group Header (multi-device orders) */
+.device-group-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    padding: 12px 0 4px;
+    border-top: 1px solid var(--border-color);
+}
+
+.device-group-header:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+/* +N badge for multi-device info card */
+.device-more {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    background: var(--bg-tertiary);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
 /* Photos Grid */
 .photos-grid {
     display: grid;
