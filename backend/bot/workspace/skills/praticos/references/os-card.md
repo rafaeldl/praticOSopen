@@ -19,13 +19,29 @@ Montar o texto a partir dos campos do `order`:
 
 👤 *Cliente:* {customer.name}
 📍 *{ADDRESS_LABEL}:* {address}
+
+**Dispositivo (single ou sem devices):**
 🔧 *{DEVICE_LABEL}:* {device.name} ({device.serial})
 
+**Multi-device (deviceCount > 1):**
+🔧 *{DEVICE_LABEL_PLURAL} ({deviceCount}):*
+1. {devices[0].name} ({devices[0].serial})
+2. {devices[1].name} ({devices[1].serial})
+3. {devices[2].name} ({devices[2].serial})
+
 🛠️ *Serviços:*
+**Se deviceCount <= 1:** lista plana
 • {service.name} - {VALOR_FORMATADO}
+**Se deviceCount > 1:** agrupar por dispositivo
+  *{device.name}:*
+  • {service.name} - {VALOR_FORMATADO}
+  *Geral:*
+  • {service.name} - {VALOR_FORMATADO}
 
 📦 *Produtos:*
+**Se deviceCount <= 1:** lista plana
 • {product.name} (x{qty}) - {VALOR_FORMATADO}
+**Se deviceCount > 1:** agrupar por dispositivo (mesmo formato dos serviços)
 
 💰 *Total:* {VALOR_FORMATADO}
 🏷️ *Desconto:* {VALOR_FORMATADO}
@@ -40,6 +56,30 @@ Montar o texto a partir dos campos do `order`:
 **Omitir:** campos null, vazio ou com valor 0. Ex: paidAmount=0 → nao mostrar "Pago". discount=0 → nao mostrar "Desconto". address=null → nao mostrar "Endereço".
 **Moeda/Valores:** Usar `formatContext` retornado pelo endpoint `/bot/orders/{NUM}/details`. O `currency` define o simbolo (BRL=R$, EUR=€, USD=$) e o `locale` define o formato numerico: pt-BR → R$ 1.234,56 | en-US → $1,234.56 | fr-FR → 1 234,56 €. A API retorna valores raw (numeros).
 **remaining** = total - discount - paidAmount.
+**Multi-device:** Usar `deviceCount` da resposta de /details. Se `deviceCount > 1`, listar todos os devices numerados e agrupar serviços/produtos por `deviceId`. Itens sem `deviceId` ficam em "Geral" (traduzir). O label plural do device vem de `segment.labels` (ex: "Veículos", "Aparelhos"). Se nao houver, usar "Dispositivos"/"Devices"/etc.
+
+### Exemplo multi-device (pt-BR)
+```
+📋 *O.S. #42* - 25/02/2026 - EM ANDAMENTO
+
+👤 *Cliente:* João Silva
+🔧 *Veículos (3):*
+1. Fiat Uno 2015 (ABC-1234)
+2. VW Gol 2018 (DEF-5678)
+3. Chevrolet Onix 2020 (GHI-9012)
+
+🛠️ *Serviços:*
+  *Fiat Uno 2015:*
+  • Troca de óleo - R$ 150,00
+  *VW Gol 2018:*
+  • Alinhamento - R$ 80,00
+  • Balanceamento - R$ 60,00
+  *Geral:*
+  • Diagnóstico - R$ 50,00
+
+💰 *Total:* R$ 340,00
+🔗 *Link:* https://praticos.web.app/q/abc123
+```
 
 ## Passo 4 — Enviar
 
