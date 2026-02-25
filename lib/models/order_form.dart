@@ -25,6 +25,9 @@ class OrderForm {
   /// i18n translations for title: {'pt': 'Título', 'en': 'Title', 'es': 'Título'}
   Map<String, String>? titleI18n;
 
+  /// ID of the linked device (null = global/no device)
+  String? deviceId;
+
   OrderForm({
     required this.id,
     required this.formDefinitionId,
@@ -36,6 +39,7 @@ class OrderForm {
     this.completedAt,
     this.updatedAt,
     this.titleI18n,
+    this.deviceId,
   });
 
   factory OrderForm.fromJson(Map<String, dynamic> json) =>

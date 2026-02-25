@@ -226,6 +226,8 @@ export interface CreateOrderInput {
   customer: CustomerAggr;
   deviceId?: string;
   device?: DeviceAggr;
+  deviceIds?: string[];
+  devices?: DeviceAggr[];
   services?: Array<{
     serviceId: string;
     value?: number;
@@ -325,10 +327,21 @@ export async function createOrder(
     photo: input.device.photo ?? null,
   } : null;
 
+  // Build devices array
+  const devicesArray: DeviceAggr[] = [];
+  if (input.devices && input.devices.length > 0) {
+    devicesArray.push(...input.devices.map(d => ({
+      id: d.id, name: d.name, serial: d.serial ?? null, photo: d.photo ?? null,
+    })));
+  } else if (sanitizedDevice) {
+    devicesArray.push(sanitizedDevice);
+  }
+
   const orderData = {
     number: orderNumber,
     customer: sanitizedCustomer,
     device: sanitizedDevice,
+    devices: devicesArray,
     services: orderServices,
     products: orderProducts,
     photos: [],
@@ -574,6 +587,8 @@ export function toOrderAggr(order: Order): OrderAggr {
     number: order.number,
     customer: order.customer,
     device: order.device,
+    devices: order.devices,
+    deviceCount: order.devices?.length || (order.device ? 1 : 0),
   };
 }
 
@@ -603,7 +618,8 @@ export async function addServiceToOrderByNumber(
   },
   value: number,
   description?: string,
-  updatedBy?: UserAggr
+  updatedBy?: UserAggr,
+  deviceId?: string
 ): Promise<{ success: boolean; newTotal: number; order?: Order }> {
   const order = await getOrderByNumber(companyId, orderNumber);
 
@@ -620,7 +636,8 @@ export async function addServiceToOrderByNumber(
     },
     description: description || service.name,
     value,
-  };
+    deviceId: deviceId || null,
+  } as OrderServiceItem;
 
   const services = [...(order.services || []), newService];
   const newTotal = order.total + value;
@@ -656,7 +673,8 @@ export async function addProductToOrderByNumber(
   quantity: number,
   value: number,
   description?: string,
-  updatedBy?: UserAggr
+  updatedBy?: UserAggr,
+  deviceId?: string
 ): Promise<{ success: boolean; newTotal: number; order?: Order }> {
   const order = await getOrderByNumber(companyId, orderNumber);
 
@@ -674,7 +692,8 @@ export async function addProductToOrderByNumber(
     description: description || product.name,
     value,
     quantity,
-  };
+    deviceId: deviceId || null,
+  } as OrderProductItem;
 
   const products = [...(order.products || []), newProduct];
   const newTotal = order.total + (value * quantity);
@@ -781,11 +800,12 @@ export async function updateOrderDevice(
   const collection = getTenantCollection(companyId, 'orders');
   await updateDocument(collection, order.id, {
     device,
+    devices: [device],
     updatedBy,
     updatedAt: new Date().toISOString(),
   });
 
-  return { success: true, order: { ...order, device } };
+  return { success: true, order: { ...order, device, devices: [device] } };
 }
 
 /**
@@ -811,6 +831,79 @@ export async function updateOrderCustomer(
   });
 
   return { success: true, order: { ...order, customer } };
+}
+
+/**
+ * Add a device to an order (multi-device support)
+ */
+export async function addDeviceToOrder(
+  companyId: string,
+  orderNumber: number,
+  device: DeviceAggr,
+  updatedBy?: UserAggr
+): Promise<{ success: boolean; devices: DeviceAggr[]; order?: Order }> {
+  const order = await getOrderByNumber(companyId, orderNumber);
+  if (!order) return { success: false, devices: [] };
+
+  const devices = [...(order.devices || [])];
+  // Avoid duplicates
+  if (devices.some(d => d.id === device.id)) {
+    return { success: true, devices, order };
+  }
+
+  const sanitizedDevice = {
+    id: device.id, name: device.name,
+    serial: device.serial ?? null, photo: device.photo ?? null,
+  };
+  devices.push(sanitizedDevice);
+
+  const collection = getTenantCollection(companyId, 'orders');
+  await updateDocument(collection, order.id, {
+    devices,
+    device: devices[0], // backward compat
+    updatedBy,
+    updatedAt: new Date().toISOString(),
+  });
+
+  return { success: true, devices, order: { ...order, devices, device: devices[0] } };
+}
+
+/**
+ * Remove a device from an order (multi-device support)
+ * Also cleans up orphaned deviceId references in services/products
+ */
+export async function removeDeviceFromOrder(
+  companyId: string,
+  orderNumber: number,
+  deviceId: string,
+  updatedBy?: UserAggr
+): Promise<{ success: boolean; devices: DeviceAggr[] }> {
+  const order = await getOrderByNumber(companyId, orderNumber);
+  if (!order) return { success: false, devices: [] };
+
+  const devices = (order.devices || []).filter(d => d.id !== deviceId);
+
+  // Orphan cleanup: clear deviceId from services/products that referenced removed device
+  const services = (order.services || []).map(s => ({
+    ...s,
+    deviceId: s.deviceId === deviceId ? null : (s.deviceId || null),
+  }));
+  const products = (order.products || []).map(p => ({
+    ...p,
+    deviceId: p.deviceId === deviceId ? null : (p.deviceId || null),
+  }));
+
+  const collection = getTenantCollection(companyId, 'orders');
+  await updateDocument(collection, order.id, {
+    devices,
+    device: devices.length > 0 ? devices[0] : null,
+    services,
+    products,
+    updatedBy,
+    updatedAt: new Date().toISOString(),
+  });
+
+  return { success: true, devices };
 }
 
 // ============================================================================

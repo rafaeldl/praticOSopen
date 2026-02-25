@@ -32,7 +32,9 @@ import {
   addProductToOrderSchema,
   updateOrderDeviceSchema,
   updateOrderCustomerSchema,
+  addDeviceToOrderSchema,
 } from '../../utils/validation.utils';
+import { DeviceAggr } from '../../models/types';
 
 const router: Router = Router();
 
@@ -99,6 +101,24 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         return;
       }
       deviceAggr = deviceService.toDeviceAggr(device);
+    }
+
+    // Get devices by IDs (optional, new multi-device support)
+    const devicesAggr: DeviceAggr[] = [];
+    if (data.deviceIds && data.deviceIds.length > 0) {
+      for (const dId of data.deviceIds) {
+        const d = await deviceService.getDevice(companyId, dId);
+        if (!d) {
+          res.status(404).json({
+            success: false,
+            error: { code: 'NOT_FOUND', message: 'Device not found', deviceId: dId },
+          });
+          return;
+        }
+        devicesAggr.push(deviceService.toDeviceAggr(d));
+      }
+    } else if (deviceAggr) {
+      devicesAggr.push(deviceAggr);
     }
 
     // Process services (IDs required)
@@ -249,6 +269,7 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
           customer: customerAggr,
           deviceId: deviceAggr?.id,
           device: deviceAggr,
+          devices: devicesAggr,
           services: orderServices,
           products: orderProducts,
           dueDate: data.dueDate,
@@ -270,6 +291,7 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
           total: order?.total || 0,
           customer: order?.customer || null,
           device: order?.device || null,
+          devices: order?.devices || devicesAggr,
           services: order?.services || [],
           products: order?.products || [],
         },
@@ -360,7 +382,8 @@ router.post('/:number/services', requireLinked, async (req: AuthenticatedRequest
       },
       serviceValue,
       data.description,
-      createdBy
+      createdBy,
+      data.deviceId
     );
 
     if (!result.success) {
@@ -466,7 +489,8 @@ router.post('/:number/products', requireLinked, async (req: AuthenticatedRequest
       data.quantity || 1,
       productValue,
       data.description,
-      createdBy
+      createdBy,
+      data.deviceId
     );
 
     if (!result.success) {
@@ -911,6 +935,89 @@ router.patch('/:number/customer', requireLinked, async (req: AuthenticatedReques
 });
 
 /**
+ * POST /api/bot/orders/:number/devices
+ * Add a device to an existing order (multi-device support)
+ */
+router.post('/:number/devices', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const companyId = req.userContext?.companyId;
+    if (!companyId) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Company context required' } });
+      return;
+    }
+
+    const numberParam = Array.isArray(req.params.number) ? req.params.number[0] : req.params.number;
+    const orderNumber = parseInt(numberParam, 10);
+    if (isNaN(orderNumber)) {
+      res.status(400).json({ success: false, error: { code: 'INVALID_NUMBER', message: 'Numero da OS invalido' } });
+      return;
+    }
+
+    const validation = validateInput(addDeviceToOrderSchema, req.body);
+    if (!validation.success) {
+      res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: validation.errors.join(', ') } });
+      return;
+    }
+
+    const data = validation.data;
+    const createdBy = getUserAggr(req);
+
+    const device = await deviceService.getDevice(companyId, data.deviceId);
+    if (!device) {
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: 'Device not found', deviceId: data.deviceId } });
+      return;
+    }
+    const deviceAggr = deviceService.toDeviceAggr(device);
+
+    const result = await orderService.addDeviceToOrder(companyId, orderNumber, deviceAggr, createdBy);
+    if (!result.success) {
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: `OS #${orderNumber} nao encontrada` } });
+      return;
+    }
+
+    res.json({ success: true, data: { devices: result.devices, deviceCount: result.devices.length } });
+  } catch (error) {
+    console.error('Add device to order error:', error);
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Erro ao adicionar dispositivo' } });
+  }
+});
+
+/**
+ * DELETE /api/bot/orders/:number/devices/:deviceId
+ * Remove a device from an existing order (multi-device support)
+ */
+router.delete('/:number/devices/:deviceId', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const companyId = req.userContext?.companyId;
+    if (!companyId) {
+      res.status(401).json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Company context required' } });
+      return;
+    }
+
+    const numberParam = Array.isArray(req.params.number) ? req.params.number[0] : req.params.number;
+    const orderNumber = parseInt(numberParam, 10);
+    if (isNaN(orderNumber)) {
+      res.status(400).json({ success: false, error: { code: 'INVALID_NUMBER', message: 'Numero da OS invalido' } });
+      return;
+    }
+
+    const deviceIdParam = Array.isArray(req.params.deviceId) ? req.params.deviceId[0] : req.params.deviceId;
+    const createdBy = getUserAggr(req);
+
+    const result = await orderService.removeDeviceFromOrder(companyId, orderNumber, deviceIdParam, createdBy);
+    if (!result.success) {
+      res.status(404).json({ success: false, error: { code: 'NOT_FOUND', message: `OS #${orderNumber} nao encontrada` } });
+      return;
+    }
+
+    res.json({ success: true, data: { devices: result.devices, deviceCount: result.devices.length } });
+  } catch (error) {
+    console.error('Remove device from order error:', error);
+    res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Erro ao remover dispositivo' } });
+  }
+});
+
+/**
  * GET /api/bot/orders/:number/details
  * Get full order details with services and products
  */
@@ -964,14 +1071,18 @@ router.get('/:number/details', async (req: AuthenticatedRequest, res: Response) 
       status: order.status,
       customer: order.customer ? { name: order.customer.name, phone: order.customer.phone } : null,
       device: order.device ? { name: order.device.name, serial: order.device.serial } : null,
+      devices: order.devices?.map(d => ({ name: d.name, serial: d.serial })) || (order.device ? [{ name: order.device.name, serial: order.device.serial }] : []),
+      deviceCount: order.devices?.length || (order.device ? 1 : 0),
       services: order.services?.map(s => ({
         name: s.service?.name || s.description,
         value: s.value,
+        deviceId: s.deviceId || null,
       })),
       products: order.products?.map(p => ({
         name: p.product?.name || p.description,
         quantity: p.quantity,
         value: p.value,
+        deviceId: p.deviceId || null,
       })),
       total: order.total,
       discount: order.discount,

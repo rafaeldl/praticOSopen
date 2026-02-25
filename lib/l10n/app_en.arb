@@ -1248,5 +1248,26 @@
         "type": "String"
       }
     }
+  },
+  "removeDevice": "Remove Device",
+  "allDevices": "All Devices",
+  "generalNoDevice": "General",
+  "selectDeviceFor": "For which device?",
+  "deviceCount": "{count} devices",
+  "@deviceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateForAll": "Duplicate for all",
+  "confirmRemoveDevice": "Remove \"{name}\" from this order?",
+  "@confirmRemoveDevice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

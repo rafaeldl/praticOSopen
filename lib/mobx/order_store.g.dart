@@ -360,6 +360,24 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$devicesAtom = Atom(
+    name: '_OrderStore.devices',
+    context: context,
+  );
+
+  @override
+  ObservableList<DeviceAggr> get devices {
+    _$devicesAtom.reportRead();
+    return super.devices;
+  }
+
+  @override
+  set devices(ObservableList<DeviceAggr> value) {
+    _$devicesAtom.reportWrite(value, super.devices, () {
+      super.devices = value;
+    });
+  }
+
   late final _$customerFilterAtom = Atom(
     name: '_OrderStore.customerFilter',
     context: context,
@@ -1016,6 +1034,30 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void addDevice(Device d) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.addDevice',
+    );
+    try {
+      return super.addDevice(d);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void removeDevice(String deviceId) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.removeDevice',
+    );
+    try {
+      return super.removeDevice(deviceId);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic setScheduledDate(DateTime date, {ReminderStore? reminderStore}) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setScheduledDate',
@@ -1333,6 +1375,7 @@ discount: ${discount},
 payment: ${payment},
 customer: ${customer},
 device: ${device},
+devices: ${devices},
 customerFilter: ${customerFilter},
 services: ${services},
 products: ${products},

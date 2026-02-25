@@ -5613,6 +5613,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Olá! Você foi adicionado à equipe da {company} no PraticOS. Mande um \"oi\" para o bot para começar: https://wa.me/5548988794742'**
   String inviteWhatsAppBotMessage(String company);
+
+  /// No description provided for @removeDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover Equipamento'**
+  String get removeDevice;
+
+  /// No description provided for @allDevices.
+  ///
+  /// In pt, this message translates to:
+  /// **'Todos os Equipamentos'**
+  String get allDevices;
+
+  /// No description provided for @generalNoDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Geral'**
+  String get generalNoDevice;
+
+  /// No description provided for @selectDeviceFor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para qual equipamento?'**
+  String get selectDeviceFor;
+
+  /// No description provided for @deviceCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} equipamentos'**
+  String deviceCount(int count);
+
+  /// No description provided for @duplicateForAll.
+  ///
+  /// In pt, this message translates to:
+  /// **'Duplicar para todos'**
+  String get duplicateForAll;
+
+  /// No description provided for @confirmRemoveDevice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover \"{name}\" desta OS?'**
+  String confirmRemoveDevice(String name);
 }
 
 class _AppLocalizationsDelegate

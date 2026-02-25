@@ -1248,5 +1248,26 @@
         "type": "String"
       }
     }
+  },
+  "removeDevice": "Eliminar Dispositivo",
+  "allDevices": "Todos los Dispositivos",
+  "generalNoDevice": "General",
+  "selectDeviceFor": "¿Para cuál dispositivo?",
+  "deviceCount": "{count} dispositivos",
+  "@deviceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateForAll": "Duplicar para todos",
+  "confirmRemoveDevice": "¿Eliminar \"{name}\" de esta OS?",
+  "@confirmRemoveDevice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }

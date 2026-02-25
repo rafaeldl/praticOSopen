@@ -1293,5 +1293,26 @@
         "type": "String"
       }
     }
+  },
+  "removeDevice": "Remover Equipamento",
+  "allDevices": "Todos os Equipamentos",
+  "generalNoDevice": "Geral",
+  "selectDeviceFor": "Para qual equipamento?",
+  "deviceCount": "{count} equipamentos",
+  "@deviceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateForAll": "Duplicar para todos",
+  "confirmRemoveDevice": "Remover \"{name}\" desta OS?",
+  "@confirmRemoveDevice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   }
 }
