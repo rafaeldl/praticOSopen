@@ -27,7 +27,8 @@ exec(command="curl -s -X PATCH -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsA
 
 ## OS - Criar
 POST /bot/orders/full
-Body: {customerId, deviceId?, services:[{serviceId,value?,description?}], products:[{productId,quantity?,value?,description?}], dueDate?, scheduledDate?}
+Body: {customerId, deviceId?, deviceIds?:["id1","id2"], services:[{serviceId,value?,description?,deviceId?}], products:[{productId,quantity?,value?,description?,deviceId?}], dueDate?, scheduledDate?}
+`deviceIds` para multi-device. Se passado, ignora `deviceId`. Cada service/product pode ter `deviceId` para vincular ao dispositivo.
 exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customerId\":\"abc\",\"services\":[{\"serviceId\":\"srv1\",\"value\":350}]}' \"$PRATICOS_API_URL/bot/orders/full\"")
 
 ## OS - Atualizar
@@ -36,10 +37,16 @@ Todos os campos opcionais. Passar `null` para limpar um campo (ex: `{"scheduledD
 exec(command="curl -s -X PATCH -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"scheduledDate\":\"2026-02-20T09:00:00.000Z\"}' \"$PRATICOS_API_URL/bot/orders/42\"")
 
 ## OS - Itens
-POST /bot/orders/{NUM}/services `{"serviceId":"ID","value":N,"description":"txt"}`
-POST /bot/orders/{NUM}/products `{"productId":"ID","quantity":N,"value":N,"description":"txt"}`
+POST /bot/orders/{NUM}/services `{"serviceId":"ID","value":N,"description":"txt","deviceId":"ID"}`
+POST /bot/orders/{NUM}/products `{"productId":"ID","quantity":N,"value":N,"description":"txt","deviceId":"ID"}`
+`deviceId` opcional — vincula item a um dispositivo especifico da OS.
 DELETE /bot/orders/{NUM}/services/{I} | DELETE /bot/orders/{NUM}/products/{I}
 PATCH /bot/orders/{NUM}/customer | PATCH /bot/orders/{NUM}/device
+
+## OS - Dispositivos
+POST /bot/orders/{NUM}/devices `{"deviceId":"ID"}` — adicionar dispositivo à OS
+DELETE /bot/orders/{NUM}/devices/{DEVICE_ID} — remover dispositivo da OS
+GET /bot/orders/{NUM}/details retorna `devices[]` (lista completa) e `deviceCount` (quantidade)
 
 ## OS - Fotos
 POST /bot/orders/{NUM}/photos/upload - multipart com -F "file=@/path"
