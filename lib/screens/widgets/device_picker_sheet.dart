@@ -123,78 +123,81 @@ class _DeviceMultiPickerScreenState extends State<DeviceMultiPickerScreen> {
           child: Text(context.l10n.cancel),
         ),
         middle: Text(context.l10n.selectDeviceFor),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: _hasSelection ? _confirm : null,
-          child: Text(
-            context.l10n.confirm,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: _hasSelection
-                  ? CupertinoTheme.of(context).primaryColor
-                  : CupertinoColors.systemGrey.resolveFrom(context),
-            ),
-          ),
-        ),
       ),
       child: SafeArea(
-        child: ListView(
+        child: Column(
           children: [
-            const SizedBox(height: 16),
-            CupertinoListSection.insetGrouped(
-              children: [
-                // "Geral" option
-                CupertinoListTile(
-                  title: Text(context.l10n.generalNoDevice),
-                  trailing: _isGeneral
-                      ? Icon(
-                          CupertinoIcons.checkmark,
-                          color: CupertinoTheme.of(context).primaryColor,
-                        )
-                      : null,
-                  onTap: _toggleGeneral,
-                ),
-              ],
-            ),
-            CupertinoListSection.insetGrouped(
-              children: [
-                // "Select All" toggle
-                CupertinoListTile(
-                  title: Text(
-                    context.l10n.selectAll,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: CupertinoColors.label.resolveFrom(context),
-                    ),
+            Expanded(
+              child: ListView(
+                children: [
+                  const SizedBox(height: 16),
+                  CupertinoListSection.insetGrouped(
+                    children: [
+                      // "Geral" option
+                      CupertinoListTile(
+                        title: Text(context.l10n.generalNoDevice),
+                        trailing: _isGeneral
+                            ? Icon(
+                                CupertinoIcons.checkmark,
+                                color: CupertinoTheme.of(context).primaryColor,
+                              )
+                            : null,
+                        onTap: _toggleGeneral,
+                      ),
+                    ],
                   ),
-                  trailing: _allSelected
-                      ? Icon(
-                          CupertinoIcons.checkmark,
-                          color: CupertinoTheme.of(context).primaryColor,
-                        )
-                      : null,
-                  onTap: _toggleSelectAll,
-                ),
-                // Individual devices
-                ...widget.devices.map((device) {
-                  final displayName =
-                      device.serial != null && device.serial!.trim().isNotEmpty
-                          ? '${device.name} - ${device.serial}'
-                          : device.name ?? '';
-                  final isSelected = _selectedDeviceIds.contains(device.id);
+                  CupertinoListSection.insetGrouped(
+                    children: [
+                      // "Select All" toggle
+                      CupertinoListTile(
+                        title: Text(
+                          context.l10n.selectAll,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: CupertinoColors.label.resolveFrom(context),
+                          ),
+                        ),
+                        trailing: _allSelected
+                            ? Icon(
+                                CupertinoIcons.checkmark,
+                                color: CupertinoTheme.of(context).primaryColor,
+                              )
+                            : null,
+                        onTap: _toggleSelectAll,
+                      ),
+                      // Individual devices
+                      ...widget.devices.map((device) {
+                        final displayName =
+                            device.serial != null && device.serial!.trim().isNotEmpty
+                                ? '${device.name} - ${device.serial}'
+                                : device.name ?? '';
+                        final isSelected = _selectedDeviceIds.contains(device.id);
 
-                  return CupertinoListTile(
-                    title: Text(displayName),
-                    trailing: isSelected
-                        ? Icon(
-                            CupertinoIcons.checkmark,
-                            color: CupertinoTheme.of(context).primaryColor,
-                          )
-                        : null,
-                    onTap: () => _toggleDevice(device),
-                  );
-                }),
-              ],
+                        return CupertinoListTile(
+                          title: Text(displayName),
+                          trailing: isSelected
+                              ? Icon(
+                                  CupertinoIcons.checkmark,
+                                  color: CupertinoTheme.of(context).primaryColor,
+                                )
+                              : null,
+                          onTap: () => _toggleDevice(device),
+                        );
+                      }),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: SizedBox(
+                width: double.infinity,
+                child: CupertinoButton.filled(
+                  onPressed: _hasSelection ? _confirm : null,
+                  child: Text(context.l10n.confirm),
+                ),
+              ),
             ),
           ],
         ),

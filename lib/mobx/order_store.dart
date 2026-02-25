@@ -420,6 +420,26 @@ abstract class _OrderStore with Store {
     createItem();
   }
 
+  @action
+  void removeDeviceAndItems(String deviceId) {
+    order!.devices?.removeWhere((d) => d.id == deviceId);
+    devices.removeWhere((d) => d.id == deviceId);
+
+    // Sync backward compat
+    order!.device =
+        order!.devices?.isNotEmpty == true ? order!.devices!.first : null;
+    device = order!.device;
+
+    // Remove items linked to this device
+    order!.services?.removeWhere((s) => s.deviceId == deviceId);
+    order!.products?.removeWhere((p) => p.deviceId == deviceId);
+    services = order!.services?.asObservable() ?? ObservableList();
+    products = order!.products?.asObservable() ?? ObservableList();
+
+    updateTotal();
+    createItem();
+  }
+
   setDueDate(DateTime date) {
     order!.dueDate = date;
     dueDate = FormatService().formatDateTime(date);

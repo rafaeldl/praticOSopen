@@ -2987,4 +2987,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String confirmRemoveDevice(String name) {
     return '¿Eliminar \"$name\" de esta OS?';
   }
+
+  @override
+  String get removeDeviceKeepItems => 'Mantener elementos';
+
+  @override
+  String get removeDeviceAndItems => 'Eliminar todo';
+
+  @override
+  String removeDeviceHasItems(String name, String count) {
+    return '\"$name\" tiene $count elementos asociados. ¿Qué desea hacer?';
+  }
 }

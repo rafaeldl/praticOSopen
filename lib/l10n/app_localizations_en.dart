@@ -2971,4 +2971,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String confirmRemoveDevice(String name) {
     return 'Remove \"$name\" from this order?';
   }
+
+  @override
+  String get removeDeviceKeepItems => 'Keep items';
+
+  @override
+  String get removeDeviceAndItems => 'Remove all';
+
+  @override
+  String removeDeviceHasItems(String name, String count) {
+    return '\"$name\" has $count associated items. What do you want to do?';
+  }
 }

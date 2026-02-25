@@ -5655,6 +5655,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Remover \"{name}\" desta OS?'**
   String confirmRemoveDevice(String name);
+
+  /// No description provided for @removeDeviceKeepItems.
+  ///
+  /// In pt, this message translates to:
+  /// **'Manter itens'**
+  String get removeDeviceKeepItems;
+
+  /// No description provided for @removeDeviceAndItems.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover tudo'**
+  String get removeDeviceAndItems;
+
+  /// No description provided for @removeDeviceHasItems.
+  ///
+  /// In pt, this message translates to:
+  /// **'\"{name}\" possui {count} itens associados. O que deseja fazer?'**
+  String removeDeviceHasItems(String name, String count);
 }
 
 class _AppLocalizationsDelegate

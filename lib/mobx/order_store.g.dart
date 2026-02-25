@@ -1058,6 +1058,18 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void removeDeviceAndItems(String deviceId) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.removeDeviceAndItems',
+    );
+    try {
+      return super.removeDeviceAndItems(deviceId);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic setScheduledDate(DateTime date, {ReminderStore? reminderStore}) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setScheduledDate',

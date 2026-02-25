@@ -1269,5 +1269,18 @@
         "type": "String"
       }
     }
+  },
+  "removeDeviceKeepItems": "Mantener elementos",
+  "removeDeviceAndItems": "Eliminar todo",
+  "removeDeviceHasItems": "\"{name}\" tiene {count} elementos asociados. ¿Qué desea hacer?",
+  "@removeDeviceHasItems": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }

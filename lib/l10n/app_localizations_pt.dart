@@ -2982,4 +2982,15 @@ class AppLocalizationsPt extends AppLocalizations {
   String confirmRemoveDevice(String name) {
     return 'Remover \"$name\" desta OS?';
   }
+
+  @override
+  String get removeDeviceKeepItems => 'Manter itens';
+
+  @override
+  String get removeDeviceAndItems => 'Remover tudo';
+
+  @override
+  String removeDeviceHasItems(String name, String count) {
+    return '\"$name\" possui $count itens associados. O que deseja fazer?';
+  }
 }

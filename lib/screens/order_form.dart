@@ -226,6 +226,12 @@ class _OrderFormState extends State<OrderForm> {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Add items button
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => _showConsolidatedAddOptions(config),
+                child: const Icon(CupertinoIcons.plus),
+              ),
               // Share button - only for saved orders
               if (isSaved)
                 Semantics(
@@ -560,6 +566,7 @@ class _OrderFormState extends State<OrderForm> {
                 orderId: _store.order!.id!,
                 companyId: _store.companyId!,
                 orderForm: form,
+                devices: _store.devices.toList(),
               ),
             ),
           );
@@ -719,6 +726,7 @@ class _OrderFormState extends State<OrderForm> {
               orderId: _store.order!.id!,
               companyId: _store.companyId!,
               orderForm: newForm,
+              devices: _store.devices.toList(),
             ),
           ),
         );
@@ -931,16 +939,18 @@ class _OrderFormState extends State<OrderForm> {
     final actions = <CupertinoActionSheetAction>[];
 
     if (canEditFields) {
-      actions.add(CupertinoActionSheetAction(
-        child: Text(config.label(LabelKeys.createService)),
-        onPressed: () {
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.wrench,
+        '${context.l10n.add} ${context.l10n.service}',
+        () {
           Navigator.pop(context);
           _addService(presetDeviceId: deviceId);
         },
       ));
-      actions.add(CupertinoActionSheetAction(
-        child: Text(config.label(LabelKeys.createProduct)),
-        onPressed: () {
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.cube_box,
+        '${context.l10n.add} ${context.l10n.product}',
+        () {
           Navigator.pop(context);
           _addProduct(presetDeviceId: deviceId);
         },
@@ -948,9 +958,10 @@ class _OrderFormState extends State<OrderForm> {
     }
 
     if (canManageForms) {
-      actions.add(CupertinoActionSheetAction(
-        child: Text('${context.l10n.add} ${context.l10n.form}'),
-        onPressed: () {
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.doc_text,
+        '${context.l10n.add} ${context.l10n.form}',
+        () {
           Navigator.pop(context);
           _addForm(config, presetDeviceId: deviceId);
         },
@@ -974,6 +985,22 @@ class _OrderFormState extends State<OrderForm> {
 
   // --- Helper Methods ---
 
+  CupertinoActionSheetAction _buildActionWithIcon(
+    IconData icon, String label, VoidCallback onPressed,
+  ) {
+    return CupertinoActionSheetAction(
+      onPressed: onPressed,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 8),
+          Text(label),
+        ],
+      ),
+    );
+  }
+
   /// Show action sheet with consolidated add options
   void _showConsolidatedAddOptions(SegmentConfigProvider config) {
     final canEditFields = _store.order != null
@@ -986,36 +1013,28 @@ class _OrderFormState extends State<OrderForm> {
     final actions = <CupertinoActionSheetAction>[];
 
     if (canEditFields) {
-      actions.add(CupertinoActionSheetAction(
-        child: Text('${context.l10n.add} ${config.device}'),
-        onPressed: () {
-          Navigator.pop(context);
-          _selectDevice();
-        },
+      actions.add(_buildActionWithIcon(
+        config.deviceIcon,
+        '${context.l10n.add} ${config.device}',
+        () { Navigator.pop(context); _selectDevice(); },
       ));
-      actions.add(CupertinoActionSheetAction(
-        child: Text(config.label(LabelKeys.createService)),
-        onPressed: () {
-          Navigator.pop(context);
-          _addService();
-        },
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.wrench,
+        '${context.l10n.add} ${context.l10n.service}',
+        () { Navigator.pop(context); _addService(); },
       ));
-      actions.add(CupertinoActionSheetAction(
-        child: Text(config.label(LabelKeys.createProduct)),
-        onPressed: () {
-          Navigator.pop(context);
-          _addProduct();
-        },
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.cube_box,
+        '${context.l10n.add} ${context.l10n.product}',
+        () { Navigator.pop(context); _addProduct(); },
       ));
     }
 
     if (canManageForms) {
-      actions.add(CupertinoActionSheetAction(
-        child: Text('${context.l10n.add} ${context.l10n.form}'),
-        onPressed: () {
-          Navigator.pop(context);
-          _addForm(config);
-        },
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.doc_text,
+        '${context.l10n.add} ${context.l10n.form}',
+        () { Navigator.pop(context); _addForm(config); },
       ));
     }
 
@@ -1243,6 +1262,7 @@ class _OrderFormState extends State<OrderForm> {
       canDelete: canEditFields,
       child: _buildItemRow(
         context: context,
+        icon: CupertinoIcons.wrench,
         title: service.service?.name ?? "Serviço",
         subtitle: service.description,
         trailing: canViewPrices ? _convertToCurrency(service.value) : "",
@@ -1267,6 +1287,7 @@ class _OrderFormState extends State<OrderForm> {
       canDelete: canEditFields,
       child: _buildItemRow(
         context: context,
+        icon: CupertinoIcons.cube_box,
         title: product.product?.name ?? "Produto",
         subtitle: "${product.quantity}x • ${product.description ?? ''}",
         trailing: canViewPrices ? _convertToCurrency(product.total) : "",
@@ -1310,6 +1331,7 @@ class _OrderFormState extends State<OrderForm> {
 
   Widget _buildItemRow({
     required BuildContext context,
+    IconData? icon,
     required String title,
     String? subtitle,
     required String trailing,
@@ -1326,6 +1348,10 @@ class _OrderFormState extends State<OrderForm> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
+                  if (icon != null) ...[
+                    Icon(icon, color: CupertinoColors.secondaryLabel.resolveFrom(context), size: 20),
+                    const SizedBox(width: 10),
+                  ],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1382,7 +1408,7 @@ class _OrderFormState extends State<OrderForm> {
             if (!isLast)
               Divider(
                 height: 1,
-                indent: 16,
+                indent: icon != null ? 46 : 16,
                 color: CupertinoColors.systemGrey5.resolveFrom(context),
               ),
           ],
@@ -1483,29 +1509,72 @@ class _OrderFormState extends State<OrderForm> {
   }
 
   void _confirmRemoveDevice(DeviceAggr device, SegmentConfigProvider config) {
-    showCupertinoDialog(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text(context.l10n.removeDevice),
-        content: Text(context.l10n.confirmRemoveDevice(device.name ?? '')),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(ctx),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            child: Text(context.l10n.removeDevice),
-            onPressed: () {
-              Navigator.pop(ctx);
-              if (device.id != null) {
-                _store.removeDevice(device.id!);
-              }
-            },
-          ),
-        ],
-      ),
-    );
+    if (device.id == null) return;
+    final deviceId = device.id!;
+
+    // Count associated items
+    final serviceCount = (_store.order?.services ?? [])
+        .where((s) => s.deviceId == deviceId).length;
+    final productCount = (_store.order?.products ?? [])
+        .where((p) => p.deviceId == deviceId).length;
+    final itemCount = serviceCount + productCount;
+
+    if (itemCount == 0) {
+      // No associated items — simple dialog
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text(context.l10n.removeDevice),
+          content: Text(context.l10n.confirmRemoveDevice(device.name ?? '')),
+          actions: [
+            CupertinoDialogAction(
+              child: Text(context.l10n.cancel),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: Text(context.l10n.removeDevice),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _store.removeDevice(deviceId);
+              },
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Has associated items — 3-option dialog
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text(context.l10n.removeDevice),
+          content: Text(context.l10n.removeDeviceHasItems(
+            device.name ?? '', itemCount.toString(),
+          )),
+          actions: [
+            CupertinoDialogAction(
+              child: Text(context.l10n.cancel),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+            CupertinoDialogAction(
+              child: Text(context.l10n.removeDeviceKeepItems),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _store.removeDevice(deviceId);
+              },
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: Text(context.l10n.removeDeviceAndItems),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _store.removeDeviceAndItems(deviceId);
+              },
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _selectDueDate() {
