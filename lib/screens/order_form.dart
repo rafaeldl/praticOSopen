@@ -480,20 +480,66 @@ class _OrderFormState extends State<OrderForm> {
             : null,
         children: devicesList.asMap().entries.map((entry) {
           final d = entry.value;
-          final displayName = d.serial != null && d.serial!.trim().isNotEmpty
-              ? '${d.name} - ${d.serial}'
-              : d.name ?? '';
-          final tile = _buildListTile(
-            context: context,
-            icon: config.deviceIcon,
-            title: displayName,
-            value: '',
-            onTap: () {
-              if (canEdit) _editDevice(d);
-            },
-            showChevron: canEdit,
-            isLast: entry.key == devicesList.length - 1,
-            enabled: canEdit,
+          final hasSerial = d.serial != null && d.serial!.trim().isNotEmpty;
+          final isLast = entry.key == devicesList.length - 1;
+          final tile = GestureDetector(
+            onTap: canEdit ? () => _editDevice(d) : null,
+            child: Container(
+              color: Colors.transparent,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      children: [
+                        Icon(config.deviceIcon, color: CupertinoTheme.of(context).primaryColor, size: 22),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                d.name ?? '',
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  color: CupertinoColors.label.resolveFrom(context),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (hasSerial)
+                                Text(
+                                  d.serial!,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (canEdit) ...[
+                          const SizedBox(width: 6),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 16,
+                            color: CupertinoColors.systemGrey3.resolveFrom(context),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (!isLast)
+                    Divider(
+                      height: 1,
+                      indent: 50,
+                      color: CupertinoColors.systemGrey5.resolveFrom(context),
+                    ),
+                ],
+              ),
+            ),
           );
           if (!canEdit || d.id == null) return tile;
           return Dismissible(
