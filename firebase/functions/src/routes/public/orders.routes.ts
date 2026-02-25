@@ -61,16 +61,28 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
             serial: maskSerial(order.device.serial),
             // Other internal device fields removed
           } : null,
+          devices: (() => {
+            const list = order.devices?.length
+              ? order.devices
+              : (order.device ? [order.device] : []);
+            return list.map((d) => ({
+              id: d.id,
+              name: d.name,
+              serial: maskSerial(d.serial),
+            }));
+          })(),
           services: order.services?.map((s) => ({
             name: s.service.name,
             value: s.value,
             description: s.description,
+            deviceId: s.deviceId || null,
           })),
           products: order.products?.map((p) => ({
             name: p.product.name,
             value: p.value,
             quantity: p.quantity,
             description: p.description,
+            deviceId: p.deviceId || null,
           })),
           status: order.status,
           total: order.total,
