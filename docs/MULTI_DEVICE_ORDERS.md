@@ -1,8 +1,8 @@
 # Multi-Device Orders (Múltiplos Dispositivos por OS)
 
 > **Issue:** [#178](https://github.com/rafaeldl/praticOSopen/issues/178)
-> **Status:** Implementado (Fase 1–3 + parcial 4–7)
-> **Última atualização:** 2026-02-24
+> **Status:** Implementado (Fase 1–5, 7 + parcial 6)
+> **Última atualização:** 2026-02-25
 
 ---
 
@@ -1680,21 +1680,24 @@ Bot: ✅ Serviço "Limpeza" adicionado para todos os dispositivos (2x)
 - [x] Adicionar strings i18n para novos labels
 - [ ] Testar dark mode em todos os novos widgets
 
-### Fase 4: Share Link & PDF — 🔧 Parcial
+### Fase 4: Share Link & PDF — ✅ Concluída
 
-- [ ] Atualizar share link para exibir múltiplos devices
+- [x] Atualizar share link API para incluir `devices[]` e `deviceId` em services/products
 - [x] Atualizar geração de PDF/orçamento com suporte a múltiplos devices
-- [ ] Atualizar página web pública de aprovação
+- [x] Atualizar página web pública: info card com +N badge, serviços/produtos agrupados por device
+- [x] Adicionar i18n (devices, general) para pt/en/es na web page
+- [x] Adicionar CSS para `.device-group-header` e `.device-more` badge
 
-### Fase 5: Bot (OpenClaw) — 🔧 Parcial
+### Fase 5: Bot (OpenClaw) — ✅ Concluída
 
 - [x] Atualizar card de OS para exibir contagem de devices
-- [ ] Atualizar visualização detalhada com agrupamento
+- [x] Atualizar visualização detalhada com agrupamento por device
 - [x] Atualizar endpoint `POST /orders` para aceitar `devices[]`
 - [x] Atualizar endpoint `GET /orders/:id` com `devices`
 - [x] Atualizar endpoints de services/products com `deviceId`
-- [ ] Implementar loop de adição de devices na criação conversacional
-- [ ] Implementar seleção de device ao adicionar serviço via bot
+- [x] Documentar endpoints de device add/remove em `api-endpoints.md`
+- [x] Implementar loop de adição de devices na criação conversacional (SKILL.md)
+- [x] Implementar seleção de device ao adicionar serviço via bot (SKILL.md)
 - [ ] Testar fluxos completos via WhatsApp
 
 ### Fase 6: Firestore & Indexes
@@ -1822,11 +1825,13 @@ As telas de edição de serviço (`OrderServiceScreen`), produto (`OrderProductS
 | `lib/services/pdf/pdf_main_os_builder.dart` | Suporte a múltiplos devices no PDF |
 | `lib/services/pdf/pdf_localizations.dart` | Labels de device no PDF |
 
-### Bot (✅ parcial)
+### Bot (✅ completo)
 
 | Arquivo | Mudança |
 |---------|---------|
-| `backend/bot/skills/praticos/references/os-card.md` | Card atualizado com contagem de devices |
+| `backend/bot/workspace/skills/praticos/references/os-card.md` | Card com multi-device: lista numerada, agrupamento por device, exemplo |
+| `backend/bot/workspace/skills/praticos/references/api-endpoints.md` | deviceIds no POST /full, deviceId em services/products, seção OS - Dispositivos |
+| `backend/bot/workspace/skills/praticos/SKILL.md` | Seção MULTI-DEVICE: loop criação, seleção device, endpoints na tabela |
 | `firebase/functions/src/routes/bot/orders-management.routes.ts` | Endpoints de add/remove device, serviços/produtos com deviceId |
 | `firebase/functions/src/services/order.service.ts` | Lógica de multi-device no backend |
 | `firebase/functions/src/models/types.ts` | Tipos atualizados |
@@ -1839,12 +1844,18 @@ As telas de edição de serviço (`OrderServiceScreen`), produto (`OrderProductS
 | `lib/services/location_service.dart` | `openInMaps` para endereço da OS |
 | `lib/services/forms_service.dart` | Suporte a `deviceId` em forms |
 
+### Share Link (✅ completo)
+
+| Arquivo | Mudança |
+|---------|---------|
+| `firebase/functions/src/routes/public/orders.routes.ts` | API retorna `devices[]` com serials mascarados, `deviceId` em services/products |
+| `firebase/hosting/src/js/order-view.js` | buildDeviceMap, renderGroupedItems, info card com +N badge, agrupamento |
+| `firebase/hosting/src/css/order-view.css` | `.device-group-header` e `.device-more` estilos |
+
 ### Pendentes
 
 | Arquivo | Descrição |
 |---------|-----------|
-| `lib/screens/share/share_link_screen.dart` | Exibir múltiplos devices no share link |
-| `firebase/hosting/src/share.njk` | Template público com multi-device |
 | `test/models/order_test.dart` | Testes de serialização |
 | `test/stores/order_store_test.dart` | Testes de computed properties |
 
