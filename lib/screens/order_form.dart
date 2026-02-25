@@ -460,6 +460,11 @@ class _OrderFormState extends State<OrderForm> {
             ],
           ),
         ),
+        Divider(
+          height: 1,
+          indent: 50,
+          color: CupertinoColors.systemGrey5.resolveFrom(context),
+        ),
       ],
     );
   }
@@ -1281,24 +1286,26 @@ class _OrderFormState extends State<OrderForm> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        hasValue ? value : placeholder,
-                        style: TextStyle(
-                          fontSize: 17,
-                          color: enabled
-                              ? (hasValue
-                                  ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
-                                  : CupertinoColors.placeholderText.resolveFrom(context))
-                              : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                  if (hasValue || placeholder.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          hasValue ? value : placeholder,
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: enabled
+                                ? (hasValue
+                                    ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
+                                    : CupertinoColors.placeholderText.resolveFrom(context))
+                                : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                          ),
+                          textAlign: TextAlign.end,
                         ),
-                        textAlign: TextAlign.end,
                       ),
                     ),
-                  ),
+                  ],
                   if (showChevron && enabled) ...[
                     const SizedBox(width: 6),
                     Icon(
@@ -1787,7 +1794,11 @@ class _OrderFormState extends State<OrderForm> {
                     ],
                   ),
                 ),
-                // No divider - this is before other items that have their own divider
+                Divider(
+                  height: 1,
+                  indent: 50,
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
+                ),
               ],
             ),
           ),
