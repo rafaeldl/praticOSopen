@@ -141,13 +141,18 @@ class _OrderFormState extends State<OrderForm> {
                       _buildPhotosSection(context, config),
                       _buildClientDeviceSection(context, config),
                       _buildSummarySection(context, config),
-                      // Only show sections that have items
-                      if (services.isNotEmpty)
-                        _buildServicesSection(context, config),
-                      if (products.isNotEmpty)
-                        _buildProductsSection(context, config),
-                      if (forms.isNotEmpty)
-                        _buildFormsSection(context, config),
+                      _buildDevicesSection(context, config),
+                      // Items sections — conditional on device grouping
+                      if (_store.devices.length >= 2) ...[
+                        _buildGroupedItemsByDevice(context, config, services, products, forms),
+                      ] else ...[
+                        if (services.isNotEmpty)
+                          _buildServicesSection(context, config),
+                        if (products.isNotEmpty)
+                          _buildProductsSection(context, config),
+                        if (forms.isNotEmpty)
+                          _buildFormsSection(context, config),
+                      ],
                       // Always show consolidated add button
                       _buildConsolidatedAddSection(context, config),
                       _buildCommentsSection(context),
@@ -351,10 +356,9 @@ class _OrderFormState extends State<OrderForm> {
             : true;
         final hasAddress = _store.address != null && _store.address!.isNotEmpty;
         final hasCoordinates = _store.latitude != null && _store.longitude != null;
-        final devicesList = _store.devices.toList();
 
         return _buildGroupedSection(
-          header: "${config.customer.toUpperCase()} E ${config.device.toUpperCase()}",
+          header: config.customer.toUpperCase(),
           children: [
             _buildListTile(
               context: context,
@@ -366,47 +370,6 @@ class _OrderFormState extends State<OrderForm> {
               showChevron: true,
               enabled: canEditFields,
             ),
-            // Multi-device: show each device + add button
-            if (devicesList.isEmpty)
-              _buildListTile(
-                context: context,
-                icon: config.deviceIcon,
-                title: config.device,
-                value: null,
-                placeholder: "${context.l10n.select} ${config.device}",
-                onTap: _selectDevice,
-                showChevron: true,
-                enabled: canEditFields,
-              )
-            else ...[
-              ...devicesList.asMap().entries.map((entry) {
-                final d = entry.value;
-                final displayName = d.serial != null && d.serial!.trim().isNotEmpty
-                    ? '${d.name} - ${d.serial}'
-                    : d.name ?? '';
-                return _buildListTile(
-                  context: context,
-                  icon: config.deviceIcon,
-                  title: config.device,
-                  value: displayName,
-                  onTap: () {
-                    if (canEditFields) _confirmRemoveDevice(d, config);
-                  },
-                  showChevron: false,
-                  enabled: canEditFields,
-                );
-              }),
-              _buildListTile(
-                context: context,
-                icon: CupertinoIcons.plus_circle,
-                title: '${context.l10n.add} ${config.device}',
-                value: '',
-                onTap: _selectDevice,
-                showChevron: true,
-                textColor: CupertinoTheme.of(context).primaryColor,
-                enabled: canEditFields,
-              ),
-            ],
             // Address inline text field
             _buildAddressField(context, canEditFields, hasAddress, hasCoordinates),
           ],
@@ -482,6 +445,42 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
+  Widget _buildDevicesSection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(builder: (_) {
+      final devicesList = _store.devices.toList();
+      if (devicesList.isEmpty) return const SizedBox.shrink();
+
+      final canEdit = _store.order != null
+          ? _authService.canEditOrderMainFields(_store.order!)
+          : true;
+
+      return _buildGroupedSection(
+        header: config.device.toUpperCase(),
+        trailing: canEdit
+            ? _buildAddButton(onTap: _selectDevice, label: context.l10n.add)
+            : null,
+        children: devicesList.asMap().entries.map((entry) {
+          final d = entry.value;
+          final displayName = d.serial != null && d.serial!.trim().isNotEmpty
+              ? '${d.name} - ${d.serial}'
+              : d.name ?? '';
+          return _buildListTile(
+            context: context,
+            icon: config.deviceIcon,
+            title: displayName,
+            value: '',
+            onTap: () {
+              if (canEdit) _confirmRemoveDevice(d, config);
+            },
+            showChevron: false,
+            isLast: entry.key == devicesList.length - 1,
+            enabled: canEdit,
+          );
+        }).toList(),
+      );
+    });
+  }
+
   Widget _buildFormsSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
@@ -548,7 +547,7 @@ class _OrderFormState extends State<OrderForm> {
 
     return _buildDismissibleItem(
       context: context,
-      index: form.id.hashCode,
+      key: ValueKey('form_${form.id}'),
       onDelete: () => _confirmDeleteForm(form),
       canDelete: canDelete,
       child: GestureDetector(
@@ -667,15 +666,18 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _addForm(SegmentConfigProvider config) async {
-    String? formDeviceId;
+  void _addForm(SegmentConfigProvider config, {String? presetDeviceId}) async {
+    String? formDeviceId = presetDeviceId;
 
-    // Multi-device: ask which device before selecting form
-    if (_store.devices.length >= 2) {
+    // Multi-device: ask which device before selecting form (unless preset)
+    if (formDeviceId == null && _store.devices.length >= 2) {
       final result = await DevicePickerSheet.show(context, _store.devices.toList());
       if (result == null) return;
       if (result.action == DevicePickerAction.specific) {
         formDeviceId = result.device?.id;
+      } else if (result.action == DevicePickerAction.multiSpecific) {
+        // For forms, use first selected device (forms don't duplicate)
+        formDeviceId = result.deviceIds?.first;
       }
       // "all" and "general" → deviceId stays null
     }
@@ -823,6 +825,153 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
+  // --- Grouped Items by Device ---
+
+  Widget _buildGroupedItemsByDevice(
+    BuildContext context,
+    SegmentConfigProvider config,
+    List<dynamic> services,
+    List<dynamic> products,
+    List<of_model.OrderForm> forms,
+  ) {
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
+    final canManageForms = _store.order != null
+        ? _authService.canManageOrderForms(_store.order!)
+        : true;
+
+    // Build list of device groups: each device + "General" (null)
+    final deviceGroups = <MapEntry<String?, String>>[];
+
+    for (final d in _store.devices) {
+      final displayName = d.serial != null && d.serial!.trim().isNotEmpty
+          ? '${d.name} - ${d.serial}'
+          : d.name ?? '';
+      deviceGroups.add(MapEntry(d.id, displayName));
+    }
+
+    // Add "General" group for items without deviceId
+    deviceGroups.add(MapEntry(null, context.l10n.generalNoDevice));
+
+    final widgets = <Widget>[];
+
+    for (final group in deviceGroups) {
+      final deviceId = group.key;
+      final groupName = group.value;
+
+      // Filter items for this device
+      final groupServices = services
+          .where((s) => s.deviceId == deviceId)
+          .toList();
+      final groupProducts = products
+          .where((p) => p.deviceId == deviceId)
+          .toList();
+      final groupForms = forms
+          .where((f) => f.deviceId == deviceId)
+          .toList();
+
+      if (groupServices.isEmpty && groupProducts.isEmpty && groupForms.isEmpty) {
+        continue;
+      }
+
+      final children = <Widget>[];
+
+      // Services in this group
+      for (var i = 0; i < groupServices.length; i++) {
+        final service = groupServices[i];
+        final globalIndex = _store.services!.indexOf(service);
+        final isLast = i == groupServices.length - 1 &&
+            groupProducts.isEmpty &&
+            groupForms.isEmpty;
+        children.add(_buildServiceRow(context, service, globalIndex, isLast, config));
+      }
+
+      // Products in this group
+      for (var i = 0; i < groupProducts.length; i++) {
+        final product = groupProducts[i];
+        final globalIndex = _store.products!.indexOf(product);
+        final isLast = i == groupProducts.length - 1 && groupForms.isEmpty;
+        children.add(_buildProductRow(context, product, globalIndex, isLast, config));
+      }
+
+      // Forms in this group
+      for (var i = 0; i < groupForms.length; i++) {
+        final form = groupForms[i];
+        final isLast = i == groupForms.length - 1;
+        children.add(_buildFormRow(context, form, isLast, canManageForms));
+      }
+
+      widgets.add(
+        _buildGroupedSection(
+          header: groupName.toUpperCase(),
+          trailing: (canEditFields || canManageForms) && deviceId != null
+              ? _buildAddButton(
+                  onTap: () => _showAddOptionsForDevice(config, deviceId),
+                  label: context.l10n.add,
+                )
+              : null,
+          children: children,
+        ),
+      );
+    }
+
+    return Column(children: widgets);
+  }
+
+  /// Show add options pre-scoped to a specific device (skips picker)
+  void _showAddOptionsForDevice(SegmentConfigProvider config, String? deviceId) {
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
+    final canManageForms = _store.order != null
+        ? _authService.canManageOrderForms(_store.order!)
+        : true;
+
+    final actions = <CupertinoActionSheetAction>[];
+
+    if (canEditFields) {
+      actions.add(CupertinoActionSheetAction(
+        child: Text(config.label(LabelKeys.createService)),
+        onPressed: () {
+          Navigator.pop(context);
+          _addService(presetDeviceId: deviceId);
+        },
+      ));
+      actions.add(CupertinoActionSheetAction(
+        child: Text(config.label(LabelKeys.createProduct)),
+        onPressed: () {
+          Navigator.pop(context);
+          _addProduct(presetDeviceId: deviceId);
+        },
+      ));
+    }
+
+    if (canManageForms) {
+      actions.add(CupertinoActionSheetAction(
+        child: Text('${context.l10n.add} ${context.l10n.form}'),
+        onPressed: () {
+          Navigator.pop(context);
+          _addForm(config, presetDeviceId: deviceId);
+        },
+      ));
+    }
+
+    if (actions.isEmpty) return;
+
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(context.l10n.add),
+        actions: actions,
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
   // --- Helper Methods ---
 
   /// Show action sheet with consolidated add options
@@ -837,6 +986,13 @@ class _OrderFormState extends State<OrderForm> {
     final actions = <CupertinoActionSheetAction>[];
 
     if (canEditFields) {
+      actions.add(CupertinoActionSheetAction(
+        child: Text('${context.l10n.add} ${config.device}'),
+        onPressed: () {
+          Navigator.pop(context);
+          _selectDevice();
+        },
+      ));
       actions.add(CupertinoActionSheetAction(
         child: Text(config.label(LabelKeys.createService)),
         onPressed: () {
@@ -1082,7 +1238,7 @@ class _OrderFormState extends State<OrderForm> {
 
     return _buildDismissibleItem(
       context: context,
-      index: index,
+      key: ValueKey('service_$index'),
       onDelete: () => _confirmDeleteService(index, config),
       canDelete: canEditFields,
       child: _buildItemRow(
@@ -1106,7 +1262,7 @@ class _OrderFormState extends State<OrderForm> {
 
     return _buildDismissibleItem(
       context: context,
-      index: index,
+      key: ValueKey('product_$index'),
       onDelete: () => _confirmDeleteProduct(index, config),
       canDelete: canEditFields,
       child: _buildItemRow(
@@ -1122,7 +1278,7 @@ class _OrderFormState extends State<OrderForm> {
 
   Widget _buildDismissibleItem({
     required BuildContext context,
-    required int index,
+    required ValueKey key,
     required VoidCallback onDelete,
     required Widget child,
     bool canDelete = true,
@@ -1133,7 +1289,7 @@ class _OrderFormState extends State<OrderForm> {
     }
 
     return Dismissible(
-      key: ValueKey('item_$index'),
+      key: key,
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) async {
         onDelete();
@@ -1672,19 +1828,30 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _addService() async {
-    if (_store.devices.length >= 2) {
+  void _addService({String? presetDeviceId}) async {
+    if (presetDeviceId != null) {
+      _store.pendingDeviceId = presetDeviceId;
+      _store.pendingDuplicateAll = false;
+      _store.pendingDeviceIds = null;
+    } else if (_store.devices.length >= 2) {
       final result = await DevicePickerSheet.show(context, _store.devices.toList());
       if (result == null) return;
       if (result.action == DevicePickerAction.specific) {
         _store.pendingDeviceId = result.device?.id;
         _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = null;
       } else if (result.action == DevicePickerAction.all) {
         _store.pendingDeviceId = null;
         _store.pendingDuplicateAll = true;
+        _store.pendingDeviceIds = null;
+      } else if (result.action == DevicePickerAction.multiSpecific) {
+        _store.pendingDeviceId = null;
+        _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = result.deviceIds;
       } else {
         _store.pendingDeviceId = null;
         _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = null;
       }
     }
     Navigator.pushNamed(
@@ -1705,19 +1872,30 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _addProduct() async {
-    if (_store.devices.length >= 2) {
+  void _addProduct({String? presetDeviceId}) async {
+    if (presetDeviceId != null) {
+      _store.pendingDeviceId = presetDeviceId;
+      _store.pendingDuplicateAll = false;
+      _store.pendingDeviceIds = null;
+    } else if (_store.devices.length >= 2) {
       final result = await DevicePickerSheet.show(context, _store.devices.toList());
       if (result == null) return;
       if (result.action == DevicePickerAction.specific) {
         _store.pendingDeviceId = result.device?.id;
         _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = null;
       } else if (result.action == DevicePickerAction.all) {
         _store.pendingDeviceId = null;
         _store.pendingDuplicateAll = true;
+        _store.pendingDeviceIds = null;
+      } else if (result.action == DevicePickerAction.multiSpecific) {
+        _store.pendingDeviceId = null;
+        _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = result.deviceIds;
       } else {
         _store.pendingDeviceId = null;
         _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = null;
       }
     }
     Navigator.pushNamed(

@@ -81,6 +81,7 @@ abstract class _OrderStore with Store {
   /// Transient state for multi-device picker flow
   String? pendingDeviceId;
   bool pendingDuplicateAll = false;
+  List<String>? pendingDeviceIds;
 
   @computed
   String? get customerName => customer?.name;
@@ -574,6 +575,21 @@ abstract class _OrderStore with Store {
       }
       pendingDuplicateAll = false;
       pendingDeviceId = null;
+      pendingDeviceIds = null;
+    } else if (pendingDeviceIds != null && pendingDeviceIds!.isNotEmpty) {
+      // Multi-specific: duplicate for selected devices
+      for (final deviceId in pendingDeviceIds!) {
+        final clone = OrderService()
+          ..service = orderService.service
+          ..description = orderService.description
+          ..value = orderService.value
+          ..photo = orderService.photo
+          ..deviceId = deviceId;
+        order!.services!.add(clone);
+        services!.add(clone);
+      }
+      pendingDeviceIds = null;
+      pendingDeviceId = null;
     } else {
       // Apply pending deviceId if set
       if (pendingDeviceId != null) {
@@ -610,6 +626,23 @@ abstract class _OrderStore with Store {
         products!.add(clone);
       }
       pendingDuplicateAll = false;
+      pendingDeviceId = null;
+      pendingDeviceIds = null;
+    } else if (pendingDeviceIds != null && pendingDeviceIds!.isNotEmpty) {
+      // Multi-specific: duplicate for selected devices
+      for (final deviceId in pendingDeviceIds!) {
+        final clone = OrderProduct()
+          ..product = orderProduct.product
+          ..description = orderProduct.description
+          ..value = orderProduct.value
+          ..quantity = orderProduct.quantity
+          ..total = orderProduct.total
+          ..photo = orderProduct.photo
+          ..deviceId = deviceId;
+        order!.products!.add(clone);
+        products!.add(clone);
+      }
+      pendingDeviceIds = null;
       pendingDeviceId = null;
     } else {
       // Apply pending deviceId if set

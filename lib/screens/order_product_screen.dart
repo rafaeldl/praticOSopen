@@ -9,6 +9,7 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/models/device.dart';
 import 'package:praticos/services/authorization_service.dart';
 
 class OrderProductScreen extends StatefulWidget {
@@ -169,6 +170,7 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   _buildProductNameField(context),
+                  _buildDeviceField(context, config),
                   // Mostrar quantidade (desabilitado se não puder editar)
                   _buildQuantityField(context, config, enabled: canEditMainFields),
                   // Apenas mostrar campos de valores se usuário pode ver preços E pode editar campos principais
@@ -193,6 +195,32 @@ class _OrderProductScreenState extends State<OrderProductScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeviceField(BuildContext context, SegmentConfigProvider config) {
+    final deviceId = _orderProduct.deviceId;
+    if (deviceId == null || _orderStore == null) return const SizedBox.shrink();
+
+    final device = _orderStore!.devices.cast<DeviceAggr?>().firstWhere(
+      (d) => d?.id == deviceId,
+      orElse: () => null,
+    );
+    if (device == null) return const SizedBox.shrink();
+
+    final displayName = device.serial != null && device.serial!.trim().isNotEmpty
+        ? '${device.name} - ${device.serial}'
+        : device.name ?? '';
+
+    return CupertinoListTile(
+      title: Text(config.device, style: const TextStyle(fontSize: 16)),
+      additionalInfo: Text(
+        displayName,
+        style: TextStyle(
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          fontSize: 16,
         ),
       ),
     );
