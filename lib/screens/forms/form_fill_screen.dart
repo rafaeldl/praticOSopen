@@ -8,17 +8,22 @@ import 'package:praticos/models/order_form.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/models/device.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:provider/provider.dart';
 
 class FormFillScreen extends StatefulWidget {
   final String orderId;
   final String companyId;
   final OrderForm orderForm;
+  final List<DeviceAggr>? devices;
 
   const FormFillScreen({
     super.key,
     required this.orderId,
     required this.companyId,
     required this.orderForm,
+    this.devices,
   });
 
   @override
@@ -542,9 +547,51 @@ class _FormFillScreenState extends State<FormFillScreen> {
                       ],
                     ),
                   ),
+                _buildDeviceBanner(context),
                 ..._currentForm.items.map((item) => _buildFormSection(item)),
                 const SizedBox(height: 40),
               ]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeviceBanner(BuildContext context) {
+    final deviceId = _currentForm.deviceId;
+    if (deviceId == null || widget.devices == null) return const SizedBox.shrink();
+
+    final device = widget.devices!.cast<DeviceAggr?>().firstWhere(
+      (d) => d?.id == deviceId,
+      orElse: () => null,
+    );
+    if (device == null) return const SizedBox.shrink();
+
+    final config = context.watch<SegmentConfigProvider>();
+    final displayName = device.serial != null && device.serial!.trim().isNotEmpty
+        ? '${device.name} - ${device.serial}'
+        : device.name ?? '';
+    final primaryColor = CupertinoTheme.of(context).primaryColor;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: primaryColor.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(config.deviceIcon, size: 20, color: primaryColor),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              displayName,
+              style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(
+                color: primaryColor,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],

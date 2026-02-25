@@ -2946,4 +2946,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String inviteWhatsAppBotMessage(String company) {
     return 'Hello! You have been added to the $company team on PraticOS. Send a \"hi\" to the bot to get started: https://wa.me/5548988794742';
   }
+
+  @override
+  String get removeDevice => 'Remove Device';
+
+  @override
+  String get allDevices => 'All Devices';
+
+  @override
+  String get generalNoDevice => 'General';
+
+  @override
+  String get selectDeviceFor => 'For which device?';
+
+  @override
+  String deviceCount(int count) {
+    return '$count devices';
+  }
+
+  @override
+  String get duplicateForAll => 'Duplicate for all';
+
+  @override
+  String confirmRemoveDevice(String name) {
+    return 'Remove \"$name\" from this order?';
+  }
+
+  @override
+  String get removeDeviceKeepItems => 'Keep items';
+
+  @override
+  String get removeDeviceAndItems => 'Remove all';
+
+  @override
+  String removeDeviceHasItems(String name, String count) {
+    return '\"$name\" has $count associated items. What do you want to do?';
+  }
 }

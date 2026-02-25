@@ -56,6 +56,7 @@ router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
       scheduledDate: order.scheduledDate,
       createdAt: order.createdAt,
       photosCount: order.photos?.length || 0,
+      deviceCount: order.devices?.length || (order.device ? 1 : 0),
     }));
 
     res.json({

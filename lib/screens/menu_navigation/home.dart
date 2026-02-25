@@ -721,16 +721,21 @@ class _HomeState extends State<Home> {
       }
     }
 
-    // Build device line: Device name • Serial (only if device has data)
+    // Build device line: Device name • Serial (+N more)
     String? deviceText;
-    if (order.device != null) {
-      final name = order.device?.name ?? '';
-      final serial = order.device?.serial ?? '';
+    final effectiveDevices = order.effectiveDevices;
+    if (effectiveDevices.isNotEmpty) {
+      final first = effectiveDevices.first;
+      final name = first.name ?? '';
+      final serial = first.serial ?? '';
       if (name.isNotEmpty || serial.isNotEmpty) {
         final parts = <String>[];
         if (name.isNotEmpty) parts.add(name);
         if (serial.isNotEmpty) parts.add(serial);
         deviceText = parts.join(' • ');
+        if (effectiveDevices.length > 1) {
+          deviceText = '$deviceText +${effectiveDevices.length - 1}';
+        }
       }
     }
 

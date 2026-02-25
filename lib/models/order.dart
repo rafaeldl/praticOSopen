@@ -15,6 +15,7 @@ part 'order.g.dart';
 class Order extends BaseAuditCompany {
   CustomerAggr? customer;
   DeviceAggr? device;
+  List<DeviceAggr>? devices = [];
   List<OrderService>? services = [];
   List<OrderProduct>? products = [];
   List<OrderPhoto>? photos = [];
@@ -92,7 +93,28 @@ class Order extends BaseAuditCompany {
 
   Order();
 
-  factory Order.fromJson(Map<String, dynamic> json) => _$OrderFromJson(json);
+  /// Returns effective devices list (fallback to singular device)
+  List<DeviceAggr> get effectiveDevices {
+    if (devices != null && devices!.isNotEmpty) return devices!;
+    if (device != null) return [device!];
+    return [];
+  }
+
+  bool get isMultiDevice => effectiveDevices.length > 1;
+
+  factory Order.fromJson(Map<String, dynamic> json) {
+    final order = _$OrderFromJson(json);
+    // Backward compat: old singular device → devices
+    if ((order.devices == null || order.devices!.isEmpty) &&
+        order.device != null) {
+      order.devices = [order.device!];
+    }
+    // Forward sync: devices → device (first)
+    if (order.devices != null && order.devices!.isNotEmpty) {
+      order.device = order.devices!.first;
+    }
+    return order;
+  }
   @override
   Map<String, dynamic> toJson() => _$OrderToJson(this);
   OrderAggr toAggr() => _$OrderAggrFromJson(toJson());
@@ -122,10 +144,22 @@ class Order extends BaseAuditCompany {
 class OrderAggr extends BaseAuditCompanyAggr {
   CustomerAggr? customer;
   DeviceAggr? device;
+  List<DeviceAggr>? devices;
 
   OrderAggr();
-  factory OrderAggr.fromJson(Map<String, dynamic> json) =>
-      _$OrderAggrFromJson(json);
+  factory OrderAggr.fromJson(Map<String, dynamic> json) {
+    final aggr = _$OrderAggrFromJson(json);
+    // Backward compat: old singular device → devices
+    if ((aggr.devices == null || aggr.devices!.isEmpty) &&
+        aggr.device != null) {
+      aggr.devices = [aggr.device!];
+    }
+    // Forward sync: devices → device (first)
+    if (aggr.devices != null && aggr.devices!.isNotEmpty) {
+      aggr.device = aggr.devices!.first;
+    }
+    return aggr;
+  }
   @override
   Map<String, dynamic> toJson() => _$OrderAggrToJson(this);
 }
@@ -138,6 +172,7 @@ class OrderProduct {
   int? quantity;
   double? total;
   String? photo;
+  String? deviceId;
 
   OrderProduct();
   factory OrderProduct.fromJson(Map<String, dynamic> json) =>
@@ -151,6 +186,7 @@ class OrderService {
   String? description;
   double? value;
   String? photo;
+  String? deviceId;
 
   OrderService();
   factory OrderService.fromJson(Map<String, dynamic> json) =>

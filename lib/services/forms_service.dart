@@ -105,7 +105,8 @@ class FormsService {
 
   /// Adiciona um novo formulário à OS baseado em um template e retorna a instância criada
   Future<OrderForm> addFormToOrder(
-      String companyId, String orderId, FormDefinition template) async {
+      String companyId, String orderId, FormDefinition template,
+      {String? deviceId}) async {
     final orderForm = OrderForm(
       id: '', // Será gerado pelo Firestore
       formDefinitionId: template.id!,
@@ -116,6 +117,7 @@ class FormsService {
       startedAt: DateTime.now(),
       updatedAt: DateTime.now(),
       responses: [],
+      deviceId: deviceId,
     );
 
     final data = orderForm.toJson();

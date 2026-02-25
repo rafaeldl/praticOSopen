@@ -17,6 +17,7 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
+import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -140,13 +141,18 @@ class _OrderFormState extends State<OrderForm> {
                       _buildPhotosSection(context, config),
                       _buildClientDeviceSection(context, config),
                       _buildSummarySection(context, config),
-                      // Only show sections that have items
-                      if (services.isNotEmpty)
-                        _buildServicesSection(context, config),
-                      if (products.isNotEmpty)
-                        _buildProductsSection(context, config),
-                      if (forms.isNotEmpty)
-                        _buildFormsSection(context, config),
+                      _buildDevicesSection(context, config),
+                      // Items sections — conditional on device grouping
+                      if (_store.devices.length >= 2) ...[
+                        _buildGroupedItemsByDevice(context, config, services, products, forms),
+                      ] else ...[
+                        if (services.isNotEmpty)
+                          _buildServicesSection(context, config),
+                        if (products.isNotEmpty)
+                          _buildProductsSection(context, config),
+                        if (forms.isNotEmpty)
+                          _buildFormsSection(context, config),
+                      ],
                       // Always show consolidated add button
                       _buildConsolidatedAddSection(context, config),
                       _buildCommentsSection(context),
@@ -220,6 +226,12 @@ class _OrderFormState extends State<OrderForm> {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Add items button
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => _showConsolidatedAddOptions(config),
+                child: const Icon(CupertinoIcons.plus),
+              ),
               // Share button - only for saved orders
               if (isSaved)
                 Semantics(
@@ -352,7 +364,7 @@ class _OrderFormState extends State<OrderForm> {
         final hasCoordinates = _store.latitude != null && _store.longitude != null;
 
         return _buildGroupedSection(
-          header: "${config.customer.toUpperCase()} E ${config.device.toUpperCase()}",
+          header: config.customer.toUpperCase(),
           children: [
             _buildListTile(
               context: context,
@@ -364,18 +376,21 @@ class _OrderFormState extends State<OrderForm> {
               showChevron: true,
               enabled: canEditFields,
             ),
-            _buildListTile(
-              context: context,
-              icon: config.deviceIcon,
-              title: config.device,
-              value: _store.deviceName,
-              placeholder: "${context.l10n.select} ${config.device}",
-              onTap: _selectDevice,
-              showChevron: true,
-              enabled: canEditFields,
-            ),
             // Address inline text field
             _buildAddressField(context, canEditFields, hasAddress, hasCoordinates),
+            // Shortcut to add device (hidden once a device is added)
+            if (_store.devices.isEmpty)
+              _buildListTile(
+                context: context,
+                icon: config.deviceIcon,
+                title: '${context.l10n.add} ${config.device}',
+                value: '',
+                onTap: _selectDevice,
+                showChevron: true,
+                isLast: true,
+                enabled: canEditFields,
+                textColor: CupertinoTheme.of(context).primaryColor,
+              ),
           ],
         );
       },
@@ -445,8 +460,111 @@ class _OrderFormState extends State<OrderForm> {
             ],
           ),
         ),
+        Divider(
+          height: 1,
+          indent: 50,
+          color: CupertinoColors.systemGrey5.resolveFrom(context),
+        ),
       ],
     );
+  }
+
+  Widget _buildDevicesSection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(builder: (_) {
+      final devicesList = _store.devices.toList();
+      if (devicesList.isEmpty) return const SizedBox.shrink();
+
+      final canEdit = _store.order != null
+          ? _authService.canEditOrderMainFields(_store.order!)
+          : true;
+
+      return _buildGroupedSection(
+        header: config.device.toUpperCase(),
+        trailing: canEdit
+            ? _buildAddButton(onTap: _selectDevice, label: context.l10n.add)
+            : null,
+        children: devicesList.asMap().entries.map((entry) {
+          final d = entry.value;
+          final hasSerial = d.serial != null && d.serial!.trim().isNotEmpty;
+          final isLast = entry.key == devicesList.length - 1;
+          final tile = GestureDetector(
+            onTap: canEdit ? () => _editDevice(d) : null,
+            child: Container(
+              color: Colors.transparent,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      children: [
+                        Icon(config.deviceIcon, color: CupertinoTheme.of(context).primaryColor, size: 22),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                d.name ?? '',
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  color: CupertinoColors.label.resolveFrom(context),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              if (hasSerial)
+                                Text(
+                                  d.serial!,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                            ],
+                          ),
+                        ),
+                        if (canEdit) ...[
+                          const SizedBox(width: 6),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 16,
+                            color: CupertinoColors.systemGrey3.resolveFrom(context),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (!isLast)
+                    Divider(
+                      height: 1,
+                      indent: 50,
+                      color: CupertinoColors.systemGrey5.resolveFrom(context),
+                    ),
+                ],
+              ),
+            ),
+          );
+          if (!canEdit || d.id == null) return tile;
+          return Dismissible(
+            key: ValueKey(d.id),
+            direction: DismissDirection.endToStart,
+            confirmDismiss: (_) async {
+              _confirmRemoveDevice(d, config);
+              return false;
+            },
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              color: CupertinoColors.systemRed,
+              child: const Icon(CupertinoIcons.delete, color: CupertinoColors.white),
+            ),
+            child: tile,
+          );
+        }).toList(),
+      );
+    });
   }
 
   Widget _buildFormsSection(BuildContext context, SegmentConfigProvider config) {
@@ -515,7 +633,7 @@ class _OrderFormState extends State<OrderForm> {
 
     return _buildDismissibleItem(
       context: context,
-      index: form.id.hashCode,
+      key: ValueKey('form_${form.id}'),
       onDelete: () => _confirmDeleteForm(form),
       canDelete: canDelete,
       child: GestureDetector(
@@ -528,6 +646,7 @@ class _OrderFormState extends State<OrderForm> {
                 orderId: _store.order!.id!,
                 companyId: _store.companyId!,
                 orderForm: form,
+                devices: _store.devices.toList(),
               ),
             ),
           );
@@ -634,11 +753,26 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _addForm(SegmentConfigProvider config) async {
+  void _addForm(SegmentConfigProvider config, {String? presetDeviceId}) async {
+    String? formDeviceId = presetDeviceId;
+
+    // Multi-device: ask which device before selecting form (unless preset)
+    if (formDeviceId == null && _store.devices.length >= 2) {
+      final result = await DevicePickerSheet.show(context, _store.devices.toList());
+      if (result == null) return;
+      if (result.action == DevicePickerAction.specific) {
+        formDeviceId = result.device?.id;
+      } else if (result.action == DevicePickerAction.multiSpecific) {
+        // For forms, use first selected device (forms don't duplicate)
+        formDeviceId = result.deviceIds?.first;
+      }
+      // "all" and "general" → deviceId stays null
+    }
+
     // Se a OS ainda não foi salva, salva automaticamente
     if (_store.order?.id == null) {
       if (_store.companyId == null) return;
-      
+
       await _store.repository.createItem(_store.companyId!, _store.order!);
       _store.setOrder(_store.order); // Atualiza estado com novo ID
     }
@@ -656,8 +790,13 @@ class _OrderFormState extends State<OrderForm> {
     );
 
     if (template != null && _store.order?.id != null && _store.companyId != null) {
-      final newForm = await _formsService.addFormToOrder(_store.companyId!, _store.order!.id!, template);
-      
+      final newForm = await _formsService.addFormToOrder(
+        _store.companyId!,
+        _store.order!.id!,
+        template,
+        deviceId: formDeviceId,
+      );
+
       if (mounted) {
         Navigator.push(
           context,
@@ -667,6 +806,7 @@ class _OrderFormState extends State<OrderForm> {
               orderId: _store.order!.id!,
               companyId: _store.companyId!,
               orderForm: newForm,
+              devices: _store.devices.toList(),
             ),
           ),
         );
@@ -773,7 +913,180 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
+  // --- Grouped Items by Device ---
+
+  Widget _buildGroupedItemsByDevice(
+    BuildContext context,
+    SegmentConfigProvider config,
+    List<dynamic> services,
+    List<dynamic> products,
+    List<of_model.OrderForm> forms,
+  ) {
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
+    final canManageForms = _store.order != null
+        ? _authService.canManageOrderForms(_store.order!)
+        : true;
+
+    // Build list of device groups: each device + "General" (null)
+    final deviceGroups = <MapEntry<String?, String>>[];
+
+    for (final d in _store.devices) {
+      final displayName = d.serial != null && d.serial!.trim().isNotEmpty
+          ? '${d.name} - ${d.serial}'
+          : d.name ?? '';
+      deviceGroups.add(MapEntry(d.id, displayName));
+    }
+
+    // Add "General" group for items without deviceId
+    deviceGroups.add(MapEntry(null, context.l10n.generalNoDevice));
+
+    final widgets = <Widget>[];
+
+    for (final group in deviceGroups) {
+      final deviceId = group.key;
+      final groupName = group.value;
+
+      // Filter items for this device
+      final groupServices = services
+          .where((s) => s.deviceId == deviceId)
+          .toList();
+      final groupProducts = products
+          .where((p) => p.deviceId == deviceId)
+          .toList();
+      final groupForms = forms
+          .where((f) => f.deviceId == deviceId)
+          .toList();
+
+      if (groupServices.isEmpty && groupProducts.isEmpty && groupForms.isEmpty) {
+        continue;
+      }
+
+      final children = <Widget>[];
+
+      // Services in this group
+      for (var i = 0; i < groupServices.length; i++) {
+        final service = groupServices[i];
+        final globalIndex = _store.services!.indexOf(service);
+        final isLast = i == groupServices.length - 1 &&
+            groupProducts.isEmpty &&
+            groupForms.isEmpty;
+        children.add(_buildServiceRow(context, service, globalIndex, isLast, config));
+      }
+
+      // Products in this group
+      for (var i = 0; i < groupProducts.length; i++) {
+        final product = groupProducts[i];
+        final globalIndex = _store.products!.indexOf(product);
+        final isLast = i == groupProducts.length - 1 && groupForms.isEmpty;
+        children.add(_buildProductRow(context, product, globalIndex, isLast, config));
+      }
+
+      // Forms in this group
+      for (var i = 0; i < groupForms.length; i++) {
+        final form = groupForms[i];
+        final isLast = i == groupForms.length - 1;
+        children.add(_buildFormRow(context, form, isLast, canManageForms));
+      }
+
+      widgets.add(
+        _buildGroupedSection(
+          header: groupName.toUpperCase(),
+          trailing: (canEditFields || canManageForms)
+              ? _buildAddButton(
+                  onTap: () => _showAddOptionsForDevice(config, deviceId),
+                  label: context.l10n.add,
+                )
+              : null,
+          children: children,
+        ),
+      );
+    }
+
+    return Column(children: widgets);
+  }
+
+  /// Show add options pre-scoped to a specific device (skips picker)
+  void _showAddOptionsForDevice(SegmentConfigProvider config, String? deviceId) {
+    final canEditFields = _store.order != null
+        ? _authService.canEditOrderMainFields(_store.order!)
+        : true;
+    final canManageForms = _store.order != null
+        ? _authService.canManageOrderForms(_store.order!)
+        : true;
+
+    final actions = <CupertinoActionSheetAction>[];
+
+    if (canEditFields) {
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.wrench,
+        '${context.l10n.add} ${context.l10n.service}',
+        () {
+          Navigator.pop(context);
+          _addService(presetDeviceId: deviceId);
+        },
+      ));
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.cube_box,
+        '${context.l10n.add} ${context.l10n.product}',
+        () {
+          Navigator.pop(context);
+          _addProduct(presetDeviceId: deviceId);
+        },
+      ));
+    }
+
+    if (canManageForms) {
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.doc_text,
+        '${context.l10n.add} ${context.l10n.form}',
+        () {
+          Navigator.pop(context);
+          _addForm(config, presetDeviceId: deviceId);
+        },
+      ));
+    }
+
+    actions.add(_buildActionWithIcon(
+      CupertinoIcons.camera,
+      context.l10n.addPhoto,
+      () {
+        Navigator.pop(context);
+        _showAddPhotoOptions(config);
+      },
+    ));
+
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(context.l10n.add),
+        actions: actions,
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
   // --- Helper Methods ---
+
+  CupertinoActionSheetAction _buildActionWithIcon(
+    IconData icon, String label, VoidCallback onPressed,
+  ) {
+    return CupertinoActionSheetAction(
+      onPressed: onPressed,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 20),
+          const SizedBox(width: 8),
+          Text(label),
+        ],
+      ),
+    );
+  }
 
   /// Show action sheet with consolidated add options
   void _showConsolidatedAddOptions(SegmentConfigProvider config) {
@@ -787,33 +1100,36 @@ class _OrderFormState extends State<OrderForm> {
     final actions = <CupertinoActionSheetAction>[];
 
     if (canEditFields) {
-      actions.add(CupertinoActionSheetAction(
-        child: Text(config.label(LabelKeys.createService)),
-        onPressed: () {
-          Navigator.pop(context);
-          _addService();
-        },
+      actions.add(_buildActionWithIcon(
+        config.deviceIcon,
+        '${context.l10n.add} ${config.device}',
+        () { Navigator.pop(context); _selectDevice(); },
       ));
-      actions.add(CupertinoActionSheetAction(
-        child: Text(config.label(LabelKeys.createProduct)),
-        onPressed: () {
-          Navigator.pop(context);
-          _addProduct();
-        },
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.wrench,
+        '${context.l10n.add} ${context.l10n.service}',
+        () { Navigator.pop(context); _addService(); },
+      ));
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.cube_box,
+        '${context.l10n.add} ${context.l10n.product}',
+        () { Navigator.pop(context); _addProduct(); },
       ));
     }
 
     if (canManageForms) {
-      actions.add(CupertinoActionSheetAction(
-        child: Text('${context.l10n.add} ${context.l10n.form}'),
-        onPressed: () {
-          Navigator.pop(context);
-          _addForm(config);
-        },
+      actions.add(_buildActionWithIcon(
+        CupertinoIcons.doc_text,
+        '${context.l10n.add} ${context.l10n.form}',
+        () { Navigator.pop(context); _addForm(config); },
       ));
     }
 
-    if (actions.isEmpty) return;
+    actions.add(_buildActionWithIcon(
+      CupertinoIcons.camera,
+      context.l10n.addPhoto,
+      () { Navigator.pop(context); _showAddPhotoOptions(config); },
+    ));
 
     showCupertinoModalPopup<void>(
       context: context,
@@ -970,24 +1286,26 @@ class _OrderFormState extends State<OrderForm> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        hasValue ? value : placeholder,
-                        style: TextStyle(
-                          fontSize: 17,
-                          color: enabled
-                              ? (hasValue
-                                  ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
-                                  : CupertinoColors.placeholderText.resolveFrom(context))
-                              : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                  if (hasValue || placeholder.isNotEmpty) ...[
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          hasValue ? value : placeholder,
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: enabled
+                                ? (hasValue
+                                    ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
+                                    : CupertinoColors.placeholderText.resolveFrom(context))
+                                : CupertinoColors.tertiaryLabel.resolveFrom(context),
+                          ),
+                          textAlign: TextAlign.end,
                         ),
-                        textAlign: TextAlign.end,
                       ),
                     ),
-                  ),
+                  ],
                   if (showChevron && enabled) ...[
                     const SizedBox(width: 6),
                     Icon(
@@ -1032,11 +1350,12 @@ class _OrderFormState extends State<OrderForm> {
 
     return _buildDismissibleItem(
       context: context,
-      index: index,
+      key: ValueKey('service_$index'),
       onDelete: () => _confirmDeleteService(index, config),
       canDelete: canEditFields,
       child: _buildItemRow(
         context: context,
+        icon: CupertinoIcons.wrench,
         title: service.service?.name ?? "Serviço",
         subtitle: service.description,
         trailing: canViewPrices ? _convertToCurrency(service.value) : "",
@@ -1056,11 +1375,12 @@ class _OrderFormState extends State<OrderForm> {
 
     return _buildDismissibleItem(
       context: context,
-      index: index,
+      key: ValueKey('product_$index'),
       onDelete: () => _confirmDeleteProduct(index, config),
       canDelete: canEditFields,
       child: _buildItemRow(
         context: context,
+        icon: CupertinoIcons.cube_box,
         title: product.product?.name ?? "Produto",
         subtitle: "${product.quantity}x • ${product.description ?? ''}",
         trailing: canViewPrices ? _convertToCurrency(product.total) : "",
@@ -1072,7 +1392,7 @@ class _OrderFormState extends State<OrderForm> {
 
   Widget _buildDismissibleItem({
     required BuildContext context,
-    required int index,
+    required ValueKey key,
     required VoidCallback onDelete,
     required Widget child,
     bool canDelete = true,
@@ -1083,7 +1403,7 @@ class _OrderFormState extends State<OrderForm> {
     }
 
     return Dismissible(
-      key: ValueKey('item_$index'),
+      key: key,
       direction: DismissDirection.endToStart,
       confirmDismiss: (direction) async {
         onDelete();
@@ -1104,6 +1424,7 @@ class _OrderFormState extends State<OrderForm> {
 
   Widget _buildItemRow({
     required BuildContext context,
+    IconData? icon,
     required String title,
     String? subtitle,
     required String trailing,
@@ -1120,6 +1441,10 @@ class _OrderFormState extends State<OrderForm> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
+                  if (icon != null) ...[
+                    Icon(icon, color: CupertinoColors.secondaryLabel.resolveFrom(context), size: 20),
+                    const SizedBox(width: 10),
+                  ],
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1176,7 +1501,7 @@ class _OrderFormState extends State<OrderForm> {
             if (!isLast)
               Divider(
                 height: 1,
-                indent: 16,
+                indent: icon != null ? 46 : 16,
                 color: CupertinoColors.systemGrey5.resolveFrom(context),
               ),
           ],
@@ -1264,6 +1589,32 @@ class _OrderFormState extends State<OrderForm> {
     });
   }
 
+  void _editDevice(DeviceAggr deviceAggr) {
+    // Convert DeviceAggr to Device for the form screen
+    final device = Device.fromJson(deviceAggr.toJson());
+    Navigator.pushNamed(
+      context,
+      '/device_form',
+      arguments: {'device': device},
+    ).then((result) {
+      if (result != null && result is Device) {
+        // Update the device in the order
+        final aggr = result.toAggr();
+        final idx = _store.order!.devices?.indexWhere((d) => d.id == aggr.id) ?? -1;
+        if (idx >= 0) {
+          _store.order!.devices![idx] = aggr;
+          _store.devices[idx] = aggr;
+          // Sync backward compat
+          if (_store.order!.devices!.first.id == aggr.id) {
+            _store.order!.device = aggr;
+            _store.device = aggr;
+          }
+          _store.createItem();
+        }
+      }
+    });
+  }
+
   void _selectDevice() {
     Navigator.pushNamed(
       context,
@@ -1271,9 +1622,78 @@ class _OrderFormState extends State<OrderForm> {
       arguments: {'order': _store.order},
     ).then((device) {
       if (device != null) {
-        _store.setDevice(device as Device);
+        _store.addDevice(device as Device);
       }
     });
+  }
+
+  void _confirmRemoveDevice(DeviceAggr device, SegmentConfigProvider config) {
+    if (device.id == null) return;
+    final deviceId = device.id!;
+
+    // Count associated items
+    final serviceCount = (_store.order?.services ?? [])
+        .where((s) => s.deviceId == deviceId).length;
+    final productCount = (_store.order?.products ?? [])
+        .where((p) => p.deviceId == deviceId).length;
+    final itemCount = serviceCount + productCount;
+
+    if (itemCount == 0) {
+      // No associated items — simple dialog
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text('${context.l10n.remove} ${config.device}'),
+          content: Text(context.l10n.confirmRemoveDevice(device.name ?? '')),
+          actions: [
+            CupertinoDialogAction(
+              child: Text(context.l10n.cancel),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: Text('${context.l10n.remove} ${config.device}'),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _store.removeDevice(deviceId);
+              },
+            ),
+          ],
+        ),
+      );
+    } else {
+      // Has associated items — 3-option dialog
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: Text('${context.l10n.remove} ${config.device}'),
+          content: Text(context.l10n.removeDeviceHasItems(
+            device.name ?? '', itemCount.toString(),
+          )),
+          actions: [
+            CupertinoDialogAction(
+              child: Text(context.l10n.cancel),
+              onPressed: () => Navigator.pop(ctx),
+            ),
+            CupertinoDialogAction(
+              child: Text(context.l10n.removeDeviceKeepItems),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _store.removeDevice(deviceId);
+              },
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              child: Text(context.l10n.removeDeviceAndItems),
+              onPressed: () {
+                Navigator.pop(ctx);
+                _store.removeDeviceAndItems(deviceId);
+              },
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _selectDueDate() {
@@ -1374,7 +1794,11 @@ class _OrderFormState extends State<OrderForm> {
                     ],
                   ),
                 ),
-                // No divider - this is before other items that have their own divider
+                Divider(
+                  height: 1,
+                  indent: 50,
+                  color: CupertinoColors.systemGrey5.resolveFrom(context),
+                ),
               ],
             ),
           ),
@@ -1596,7 +2020,32 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _addService() {
+  void _addService({String? presetDeviceId}) async {
+    if (presetDeviceId != null) {
+      _store.pendingDeviceId = presetDeviceId;
+      _store.pendingDuplicateAll = false;
+      _store.pendingDeviceIds = null;
+    } else if (_store.devices.length >= 2) {
+      final result = await DevicePickerSheet.show(context, _store.devices.toList());
+      if (result == null) return;
+      if (result.action == DevicePickerAction.specific) {
+        _store.pendingDeviceId = result.device?.id;
+        _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = null;
+      } else if (result.action == DevicePickerAction.all) {
+        _store.pendingDeviceId = null;
+        _store.pendingDuplicateAll = true;
+        _store.pendingDeviceIds = null;
+      } else if (result.action == DevicePickerAction.multiSpecific) {
+        _store.pendingDeviceId = null;
+        _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = result.deviceIds;
+      } else {
+        _store.pendingDeviceId = null;
+        _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = null;
+      }
+    }
     Navigator.pushNamed(
       context,
       '/service_list',
@@ -1615,7 +2064,32 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  void _addProduct() {
+  void _addProduct({String? presetDeviceId}) async {
+    if (presetDeviceId != null) {
+      _store.pendingDeviceId = presetDeviceId;
+      _store.pendingDuplicateAll = false;
+      _store.pendingDeviceIds = null;
+    } else if (_store.devices.length >= 2) {
+      final result = await DevicePickerSheet.show(context, _store.devices.toList());
+      if (result == null) return;
+      if (result.action == DevicePickerAction.specific) {
+        _store.pendingDeviceId = result.device?.id;
+        _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = null;
+      } else if (result.action == DevicePickerAction.all) {
+        _store.pendingDeviceId = null;
+        _store.pendingDuplicateAll = true;
+        _store.pendingDeviceIds = null;
+      } else if (result.action == DevicePickerAction.multiSpecific) {
+        _store.pendingDeviceId = null;
+        _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = result.deviceIds;
+      } else {
+        _store.pendingDeviceId = null;
+        _store.pendingDuplicateAll = false;
+        _store.pendingDeviceIds = null;
+      }
+    }
     Navigator.pushNamed(
       context,
       '/product_list',

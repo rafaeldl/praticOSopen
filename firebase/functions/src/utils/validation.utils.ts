@@ -210,6 +210,9 @@ export const createFullOrderSchema = z.object({
   // Device: optional but only by ID
   deviceId: idSchema.optional(),
 
+  // Multiple devices: optional array of device IDs
+  deviceIds: z.array(idSchema).optional(),
+
   // Services: by ID only, value optional (falls back to catalog)
   services: z.array(z.object({
     serviceId: idSchema,
@@ -252,6 +255,7 @@ export const addServiceToOrderSchema = z.object({
   serviceId: idSchema,
   value: z.number().min(0).optional(),
   description: z.string().max(500).optional(),
+  deviceId: idSchema.optional(),
 });
 
 /**
@@ -264,6 +268,7 @@ export const addProductToOrderSchema = z.object({
   value: z.number().min(0).optional(),
   quantity: z.number().min(1).default(1),
   description: z.string().max(500).optional(),
+  deviceId: idSchema.optional(),
 });
 
 /**
@@ -280,6 +285,14 @@ export const updateOrderDeviceSchema = z.object({
  */
 export const updateOrderCustomerSchema = z.object({
   customerId: idSchema,
+});
+
+/**
+ * Schema for adding a device to an existing order
+ * REQUIRES existing device ID
+ */
+export const addDeviceToOrderSchema = z.object({
+  deviceId: idSchema,
 });
 
 // ============================================================================
@@ -304,6 +317,7 @@ export const uploadPhotoBase64Schema = z.object({
  */
 export const addFormToOrderSchema = z.object({
   templateId: idSchema,
+  deviceId: idSchema.optional(),
 });
 
 /**

@@ -29,6 +29,9 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..device = json['device'] == null
       ? null
       : DeviceAggr.fromJson(json['device'] as Map<String, dynamic>)
+  ..devices = (json['devices'] as List<dynamic>?)
+      ?.map((e) => DeviceAggr.fromJson(e as Map<String, dynamic>))
+      .toList()
   ..services = (json['services'] as List<dynamic>?)
       ?.map((e) => OrderService.fromJson(e as Map<String, dynamic>))
       .toList()
@@ -77,6 +80,7 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'company': instance.company?.toJson(),
   'customer': instance.customer?.toJson(),
   'device': instance.device?.toJson(),
+  'devices': instance.devices?.map((e) => e.toJson()).toList(),
   'services': instance.services?.map((e) => e.toJson()).toList(),
   'products': instance.products?.map((e) => e.toJson()).toList(),
   'photos': instance.photos?.map((e) => e.toJson()).toList(),
@@ -106,12 +110,16 @@ OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()
       : CustomerAggr.fromJson(json['customer'] as Map<String, dynamic>)
   ..device = json['device'] == null
       ? null
-      : DeviceAggr.fromJson(json['device'] as Map<String, dynamic>);
+      : DeviceAggr.fromJson(json['device'] as Map<String, dynamic>)
+  ..devices = (json['devices'] as List<dynamic>?)
+      ?.map((e) => DeviceAggr.fromJson(e as Map<String, dynamic>))
+      .toList();
 
 Map<String, dynamic> _$OrderAggrToJson(OrderAggr instance) => <String, dynamic>{
   'id': instance.id,
   'customer': instance.customer?.toJson(),
   'device': instance.device?.toJson(),
+  'devices': instance.devices?.map((e) => e.toJson()).toList(),
 };
 
 OrderProduct _$OrderProductFromJson(Map<String, dynamic> json) => OrderProduct()
@@ -122,7 +130,8 @@ OrderProduct _$OrderProductFromJson(Map<String, dynamic> json) => OrderProduct()
   ..value = (json['value'] as num?)?.toDouble()
   ..quantity = (json['quantity'] as num?)?.toInt()
   ..total = (json['total'] as num?)?.toDouble()
-  ..photo = json['photo'] as String?;
+  ..photo = json['photo'] as String?
+  ..deviceId = json['deviceId'] as String?;
 
 Map<String, dynamic> _$OrderProductToJson(OrderProduct instance) =>
     <String, dynamic>{
@@ -132,6 +141,7 @@ Map<String, dynamic> _$OrderProductToJson(OrderProduct instance) =>
       'quantity': instance.quantity,
       'total': instance.total,
       'photo': instance.photo,
+      'deviceId': instance.deviceId,
     };
 
 OrderService _$OrderServiceFromJson(Map<String, dynamic> json) => OrderService()
@@ -140,7 +150,8 @@ OrderService _$OrderServiceFromJson(Map<String, dynamic> json) => OrderService()
       : ServiceAggr.fromJson(json['service'] as Map<String, dynamic>)
   ..description = json['description'] as String?
   ..value = (json['value'] as num?)?.toDouble()
-  ..photo = json['photo'] as String?;
+  ..photo = json['photo'] as String?
+  ..deviceId = json['deviceId'] as String?;
 
 Map<String, dynamic> _$OrderServiceToJson(OrderService instance) =>
     <String, dynamic>{
@@ -148,6 +159,7 @@ Map<String, dynamic> _$OrderServiceToJson(OrderService instance) =>
       'description': instance.description,
       'value': instance.value,
       'photo': instance.photo,
+      'deviceId': instance.deviceId,
     };
 
 OrderShareLink _$OrderShareLinkFromJson(Map<String, dynamic> json) =>

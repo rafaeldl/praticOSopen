@@ -196,6 +196,7 @@ export interface OrderService {
   description?: string;
   value: number;
   photo?: string;
+  deviceId?: string;
 }
 
 export interface OrderProduct {
@@ -204,6 +205,7 @@ export interface OrderProduct {
   value: number;
   quantity: number;
   photo?: string;
+  deviceId?: string;
 }
 
 export interface OrderPhoto {
@@ -229,6 +231,8 @@ export interface OrderAggr {
   number: number;
   customer?: CustomerAggr;
   device?: DeviceAggr;
+  devices?: DeviceAggr[];
+  deviceCount?: number;
 }
 
 export interface Order {
@@ -236,6 +240,7 @@ export interface Order {
   number: number;
   customer?: CustomerAggr;
   device?: DeviceAggr;
+  devices?: DeviceAggr[];
   services?: OrderService[];
   products?: OrderProduct[];
   photos?: OrderPhoto[];
@@ -308,6 +313,7 @@ export interface OrderForm {
   completedAt?: DateValue;
   updatedAt?: DateValue;
   titleI18n?: Record<string, string>;
+  deviceId?: string;
 }
 
 export interface FormItemPhoto {

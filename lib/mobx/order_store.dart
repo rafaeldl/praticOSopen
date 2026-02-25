@@ -75,6 +75,14 @@ abstract class _OrderStore with Store {
   @observable
   DeviceAggr? device;
 
+  @observable
+  ObservableList<DeviceAggr> devices = ObservableList<DeviceAggr>();
+
+  /// Transient state for multi-device picker flow
+  String? pendingDeviceId;
+  bool pendingDuplicateAll = false;
+  List<String>? pendingDeviceIds;
+
   @computed
   String? get customerName => customer?.name;
 
@@ -264,6 +272,8 @@ abstract class _OrderStore with Store {
       transactions = ObservableList<PaymentTransaction>();
       order!.photos = [];
       photos = ObservableList<OrderPhoto>();
+      order!.devices = [];
+      devices = ObservableList<DeviceAggr>();
       order!.createdAt = DateTime.now();
       createdAt = order!.createdAt;
       order!.createdBy = Global.userAggr;
@@ -314,7 +324,8 @@ abstract class _OrderStore with Store {
     }
 
     customer = order.customer;
-    device = order.device;
+    devices = order.effectiveDevices.asObservable();
+    device = devices.isNotEmpty ? devices.first : null;
     services = order.services?.asObservable() ?? ObservableList<OrderService>();
     products = order.products?.asObservable() ?? ObservableList<OrderProduct>();
     photos = order.photos?.asObservable() ?? ObservableList<OrderPhoto>();
@@ -355,8 +366,77 @@ abstract class _OrderStore with Store {
   @action
   setDevice(Device? d) {
     if (d == null) return;
-    order!.device = d.toAggr();
+    // If no devices yet, add as first
+    if (devices.isEmpty) {
+      addDevice(d);
+      return;
+    }
+    // If already has devices, replace the first (legacy behavior)
+    final aggr = d.toAggr();
+    order!.devices = [aggr, ...order!.devices!.skip(1)];
+    devices = order!.devices!.asObservable();
+    order!.device = aggr;
+    device = aggr;
+    createItem();
+  }
+
+  @action
+  void addDevice(Device d) {
+    final aggr = d.toAggr();
+    if (devices.any((e) => e.id == aggr.id)) return; // Prevent duplicates
+
+    order!.devices ??= [];
+    order!.devices!.add(aggr);
+    devices.add(aggr);
+
+    // Sync backward compat
+    order!.device = order!.devices!.first;
     device = order!.device;
+
+    createItem();
+  }
+
+  @action
+  void removeDevice(String deviceId) {
+    order!.devices?.removeWhere((d) => d.id == deviceId);
+    devices.removeWhere((d) => d.id == deviceId);
+
+    // Sync backward compat
+    order!.device =
+        order!.devices?.isNotEmpty == true ? order!.devices!.first : null;
+    device = order!.device;
+
+    // Orphan cleanup: items linked to removed device become global
+    for (final s in order!.services ?? <OrderService>[]) {
+      if (s.deviceId == deviceId) s.deviceId = null;
+    }
+    for (final p in order!.products ?? <OrderProduct>[]) {
+      if (p.deviceId == deviceId) p.deviceId = null;
+    }
+    services = order!.services?.asObservable() ?? ObservableList();
+    products = order!.products?.asObservable() ?? ObservableList();
+
+    updateTotal();
+    createItem();
+  }
+
+  @action
+  void removeDeviceAndItems(String deviceId) {
+    order!.devices?.removeWhere((d) => d.id == deviceId);
+    devices.removeWhere((d) => d.id == deviceId);
+
+    // Sync backward compat
+    order!.device =
+        order!.devices?.isNotEmpty == true ? order!.devices!.first : null;
+    device = order!.device;
+
+    // Remove items linked to this device
+    order!.services?.removeWhere((s) => s.deviceId == deviceId);
+    order!.products?.removeWhere((p) => p.deviceId == deviceId);
+    services = order!.services?.asObservable() ?? ObservableList();
+    products = order!.products?.asObservable() ?? ObservableList();
+
+    updateTotal();
     createItem();
   }
 
@@ -500,8 +580,46 @@ abstract class _OrderStore with Store {
     if (orderService.service?.photo != null) {
       orderService.photo = orderService.service?.photo;
     }
-    order!.services!.add(orderService);
-    services!.add(orderService);
+
+    if (pendingDuplicateAll && devices.isNotEmpty) {
+      // Duplicate service for each device
+      for (final d in devices) {
+        final clone = OrderService()
+          ..service = orderService.service
+          ..description = orderService.description
+          ..value = orderService.value
+          ..photo = orderService.photo
+          ..deviceId = d.id;
+        order!.services!.add(clone);
+        services!.add(clone);
+      }
+      pendingDuplicateAll = false;
+      pendingDeviceId = null;
+      pendingDeviceIds = null;
+    } else if (pendingDeviceIds != null && pendingDeviceIds!.isNotEmpty) {
+      // Multi-specific: duplicate for selected devices
+      for (final deviceId in pendingDeviceIds!) {
+        final clone = OrderService()
+          ..service = orderService.service
+          ..description = orderService.description
+          ..value = orderService.value
+          ..photo = orderService.photo
+          ..deviceId = deviceId;
+        order!.services!.add(clone);
+        services!.add(clone);
+      }
+      pendingDeviceIds = null;
+      pendingDeviceId = null;
+    } else {
+      // Apply pending deviceId if set
+      if (pendingDeviceId != null) {
+        orderService.deviceId = pendingDeviceId;
+        pendingDeviceId = null;
+      }
+      order!.services!.add(orderService);
+      services!.add(orderService);
+    }
+
     updateTotal();
     createItem();
   }
@@ -512,8 +630,50 @@ abstract class _OrderStore with Store {
     if (orderProduct.product?.photo != null) {
       orderProduct.photo = orderProduct.product?.photo;
     }
-    order!.products!.add(orderProduct);
-    products!.add(orderProduct);
+
+    if (pendingDuplicateAll && devices.isNotEmpty) {
+      // Duplicate product for each device
+      for (final d in devices) {
+        final clone = OrderProduct()
+          ..product = orderProduct.product
+          ..description = orderProduct.description
+          ..value = orderProduct.value
+          ..quantity = orderProduct.quantity
+          ..total = orderProduct.total
+          ..photo = orderProduct.photo
+          ..deviceId = d.id;
+        order!.products!.add(clone);
+        products!.add(clone);
+      }
+      pendingDuplicateAll = false;
+      pendingDeviceId = null;
+      pendingDeviceIds = null;
+    } else if (pendingDeviceIds != null && pendingDeviceIds!.isNotEmpty) {
+      // Multi-specific: duplicate for selected devices
+      for (final deviceId in pendingDeviceIds!) {
+        final clone = OrderProduct()
+          ..product = orderProduct.product
+          ..description = orderProduct.description
+          ..value = orderProduct.value
+          ..quantity = orderProduct.quantity
+          ..total = orderProduct.total
+          ..photo = orderProduct.photo
+          ..deviceId = deviceId;
+        order!.products!.add(clone);
+        products!.add(clone);
+      }
+      pendingDeviceIds = null;
+      pendingDeviceId = null;
+    } else {
+      // Apply pending deviceId if set
+      if (pendingDeviceId != null) {
+        orderProduct.deviceId = pendingDeviceId;
+        pendingDeviceId = null;
+      }
+      order!.products!.add(orderProduct);
+      products!.add(orderProduct);
+    }
+
     updateTotal();
     createItem();
   }

@@ -1248,5 +1248,39 @@
         "type": "String"
       }
     }
+  },
+  "removeDevice": "Remove Device",
+  "allDevices": "All Devices",
+  "generalNoDevice": "General",
+  "selectDeviceFor": "For which device?",
+  "deviceCount": "{count} devices",
+  "@deviceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateForAll": "Duplicate for all",
+  "confirmRemoveDevice": "Remove \"{name}\" from this order?",
+  "@confirmRemoveDevice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removeDeviceKeepItems": "Keep items",
+  "removeDeviceAndItems": "Remove all",
+  "removeDeviceHasItems": "\"{name}\" has {count} associated items. What do you want to do?",
+  "@removeDeviceHasItems": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -1293,5 +1293,39 @@
         "type": "String"
       }
     }
+  },
+  "removeDevice": "Remover Equipamento",
+  "allDevices": "Todos os Equipamentos",
+  "generalNoDevice": "Geral",
+  "selectDeviceFor": "Para qual equipamento?",
+  "deviceCount": "{count} equipamentos",
+  "@deviceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duplicateForAll": "Duplicar para todos",
+  "confirmRemoveDevice": "Remover \"{name}\" desta OS?",
+  "@confirmRemoveDevice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removeDeviceKeepItems": "Manter itens",
+  "removeDeviceAndItems": "Remover tudo",
+  "removeDeviceHasItems": "\"{name}\" possui {count} itens associados. O que deseja fazer?",
+  "@removeDeviceHasItems": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
+    }
   }
 }

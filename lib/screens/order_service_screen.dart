@@ -9,7 +9,9 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
+import 'package:praticos/models/device.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/extensions/context_extensions.dart';
 
 class OrderServiceScreen extends StatefulWidget {
   const OrderServiceScreen({super.key});
@@ -122,6 +124,7 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
               CupertinoListSection.insetGrouped(
                 children: [
                   _buildServiceNameField(context),
+                  _buildDeviceField(context, config, enabled: canEditMainFields),
                   // Apenas mostrar campo de valor se usuário pode ver/editar preços E pode editar campos principais
                   if (_authService.hasPermission(PermissionType.viewPrices) && canEditMainFields)
                     _buildValueField(context, config),
@@ -142,6 +145,79 @@ class _OrderServiceScreenState extends State<OrderServiceScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDeviceField(BuildContext context, SegmentConfigProvider config, {bool enabled = true}) {
+    if (_orderStore == null || _orderStore!.devices.length < 2) {
+      return const SizedBox.shrink();
+    }
+
+    final deviceId = _orderService.deviceId;
+    String displayName;
+
+    if (deviceId != null) {
+      final device = _orderStore!.devices.cast<DeviceAggr?>().firstWhere(
+        (d) => d?.id == deviceId,
+        orElse: () => null,
+      );
+      if (device != null) {
+        displayName = device.serial != null && device.serial!.trim().isNotEmpty
+            ? '${device.name} - ${device.serial}'
+            : device.name ?? '';
+      } else {
+        displayName = context.l10n.generalNoDevice;
+      }
+    } else {
+      displayName = context.l10n.generalNoDevice;
+    }
+
+    return CupertinoListTile(
+      title: Text(config.device, style: const TextStyle(fontSize: 16)),
+      additionalInfo: Text(
+        displayName,
+        style: TextStyle(
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          fontSize: 16,
+        ),
+      ),
+      trailing: enabled ? const CupertinoListTileChevron() : null,
+      onTap: enabled ? () => _changeDevice(config) : null,
+    );
+  }
+
+  void _changeDevice(SegmentConfigProvider config) {
+    final devices = _orderStore!.devices.toList();
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(context.l10n.selectDeviceFor),
+        actions: [
+          CupertinoActionSheetAction(
+            child: Text(context.l10n.generalNoDevice),
+            onPressed: () {
+              Navigator.pop(ctx);
+              setState(() => _orderService.deviceId = null);
+            },
+          ),
+          ...devices.map((d) {
+            final name = d.serial != null && d.serial!.trim().isNotEmpty
+                ? '${d.name} - ${d.serial}'
+                : d.name ?? '';
+            return CupertinoActionSheetAction(
+              child: Text(name),
+              onPressed: () {
+                Navigator.pop(ctx);
+                setState(() => _orderService.deviceId = d.id);
+              },
+            );
+          }),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
         ),
       ),
     );
