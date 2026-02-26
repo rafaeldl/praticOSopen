@@ -100,6 +100,8 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
 4. **Fotos:** multipart `-F "file=@/path"` (NAO base64)
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
+   - 🔴 Valor na OS = serviço ou produto. Se usuario pedir para "colocar/registrar/atualizar valor" na OS → buscar servico no catalogo (POST /bot/search/unified) e adicionar via /services. Se nao encontrar → listar servicos disponiveis e pedir para escolher ou criar novo. NUNCA usar /comments para definir valor da OS.
+   - Comentario com valor so se usuario pedir EXPLICITAMENTE para anotar/observar (ex: "anota que o valor combinado foi 700").
 6. **Exibir OS:** ver CARD DE OS abaixo
 7. 🔴 **Apos criar OS:** SEMPRE exibir card (GET /details → formato CARD DE OS abaixo) + oferecer compartilhar → POST /bot/orders/{NUM}/share
 
