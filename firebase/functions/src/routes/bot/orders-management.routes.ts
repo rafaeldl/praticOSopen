@@ -117,6 +117,10 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         }
         devicesAggr.push(deviceService.toDeviceAggr(d));
       }
+      // Backward compat: set singular device to first for older app versions
+      if (!deviceAggr && devicesAggr.length > 0) {
+        deviceAggr = devicesAggr[0];
+      }
     } else if (deviceAggr) {
       devicesAggr.push(deviceAggr);
     }
