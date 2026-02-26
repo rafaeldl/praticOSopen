@@ -39,6 +39,21 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Código do país (ISO 3166-1 alpha-2)
   String? get countryCode => _service.countryCode;
 
+  /// Whether the company does field service (attends at customer location)
+  bool get fieldService => _service.fieldService;
+
+  /// Whether the company uses scheduling (scheduledDate in orders)
+  bool get useScheduling => _service.useScheduling;
+
+  /// Default fieldService value from the segment document
+  bool get segmentFieldServiceDefault => _service.segmentFieldServiceDefault;
+
+  /// Sets resolved company config values and notifies listeners
+  void setCompanyConfig({required bool fieldService, required bool useScheduling}) {
+    _service.setCompanyConfig(fieldService: fieldService, useScheduling: useScheduling);
+    notifyListeners();
+  }
+
   /// Define se o device deve ser exibido na listagem de OS
   /// Por enquanto, true para todos os segmentos
   bool get showDeviceInOrderList {

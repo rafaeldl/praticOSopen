@@ -1282,5 +1282,12 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "features": "Funcionalidades",
+  "fieldServiceLabel": "Servicio externo",
+  "fieldServiceDescription": "Mostrar campo de ubicación del servicio",
+  "schedulingLabel": "Programación",
+  "schedulingDescription": "Usar fecha programada en las OS",
+  "noOrdersDueOnDate": "Ninguna OS con vencimiento en este día"
 }

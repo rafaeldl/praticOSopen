@@ -425,6 +425,31 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         segmentProvider.setCountry(country);
       }
 
+      // Resolve feature toggles (company > segment default > hardcoded default)
+      final bool fieldService = companyData?['fieldService'] as bool?
+          ?? segmentProvider.segmentFieldServiceDefault;
+      final bool useScheduling = companyData?['useScheduling'] as bool? ?? true;
+
+      // Backfill: persist resolved values on first access
+      final needsUpdate = companyData?['fieldService'] == null
+          || companyData?['useScheduling'] == null;
+      if (needsUpdate) {
+        FirebaseFirestore.instance
+            .collection('companies')
+            .doc(widget.companyId)
+            .update({
+          if (companyData?['fieldService'] == null) 'fieldService': fieldService,
+          if (companyData?['useScheduling'] == null) 'useScheduling': useScheduling,
+        });
+        // Fire-and-forget, does not block startup
+      }
+
+      // Set resolved values for direct runtime access
+      segmentProvider.setCompanyConfig(
+        fieldService: fieldService,
+        useScheduling: useScheduling,
+      );
+
       // Initialize notifications after user is fully authenticated
       final notificationStore = context.read<NotificationStore>();
       notificationStore.initialize();

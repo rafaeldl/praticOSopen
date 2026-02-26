@@ -199,8 +199,16 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
         if (mounted && _company!.country != null) {
           provider.setCountry(_company!.country!);
         }
+
+        // Sync feature toggles to the provider
+        if (mounted) {
+          provider.setCompanyConfig(
+            fieldService: _company!.fieldService ?? true,
+            useScheduling: _company!.useScheduling ?? true,
+          );
+        }
       }
-      
+
       if (mounted) {
         Navigator.pop(context);
       }
@@ -678,6 +686,41 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     keyboardType: TextInputType.url,
                     textAlign: TextAlign.right,
                     onSaved: (val) => _company?.site = val,
+                  ),
+                ],
+              ),
+
+              // Feature toggles
+              CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.features),
+                children: [
+                  CupertinoFormRow(
+                    prefix: Text(context.l10n.fieldServiceLabel),
+                    helper: Text(
+                      context.l10n.fieldServiceDescription,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                    child: CupertinoSwitch(
+                      value: _company?.fieldService ?? true,
+                      onChanged: (val) => setState(() => _company?.fieldService = val),
+                    ),
+                  ),
+                  CupertinoFormRow(
+                    prefix: Text(context.l10n.schedulingLabel),
+                    helper: Text(
+                      context.l10n.schedulingDescription,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                    child: CupertinoSwitch(
+                      value: _company?.useScheduling ?? true,
+                      onChanged: (val) => setState(() => _company?.useScheduling = val),
+                    ),
                   ),
                 ],
               ),

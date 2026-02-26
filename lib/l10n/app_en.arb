@@ -1282,5 +1282,12 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "features": "Features",
+  "fieldServiceLabel": "Field Service",
+  "fieldServiceDescription": "Show service location field",
+  "schedulingLabel": "Scheduling",
+  "schedulingDescription": "Use scheduled date in orders",
+  "noOrdersDueOnDate": "No orders due on this day"
 }

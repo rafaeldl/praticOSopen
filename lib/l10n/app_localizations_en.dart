@@ -2982,4 +2982,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String removeDeviceHasItems(String name, String count) {
     return '\"$name\" has $count associated items. What do you want to do?';
   }
+
+  @override
+  String get features => 'Features';
+
+  @override
+  String get fieldServiceLabel => 'Field Service';
+
+  @override
+  String get fieldServiceDescription => 'Show service location field';
+
+  @override
+  String get schedulingLabel => 'Scheduling';
+
+  @override
+  String get schedulingDescription => 'Use scheduled date in orders';
+
+  @override
+  String get noOrdersDueOnDate => 'No orders due on this day';
 }

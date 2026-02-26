@@ -5673,6 +5673,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'\"{name}\" possui {count} itens associados. O que deseja fazer?'**
   String removeDeviceHasItems(String name, String count);
+
+  /// No description provided for @features.
+  ///
+  /// In pt, this message translates to:
+  /// **'Funcionalidades'**
+  String get features;
+
+  /// No description provided for @fieldServiceLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Atendimento externo'**
+  String get fieldServiceLabel;
+
+  /// No description provided for @fieldServiceDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exibir campo de local do atendimento'**
+  String get fieldServiceDescription;
+
+  /// No description provided for @schedulingLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Agendamento'**
+  String get schedulingLabel;
+
+  /// No description provided for @schedulingDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar data agendada nas OS'**
+  String get schedulingDescription;
+
+  /// No description provided for @noOrdersDueOnDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma OS com vencimento neste dia'**
+  String get noOrdersDueOnDate;
 }
 
 class _AppLocalizationsDelegate
