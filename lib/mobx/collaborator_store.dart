@@ -10,6 +10,7 @@ import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 import 'package:praticos/repositories/user_repository.dart';
 import 'package:praticos/services/invite_api_service.dart';
+import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/utils/invite_utils.dart' as invite_utils;
 
 part 'collaborator_store.g.dart';
@@ -248,6 +249,10 @@ abstract class _CollaboratorStore with Store {
           roleType,
         );
         print('[CollaboratorStore] Invite created with token: $inviteToken');
+        AnalyticsService.instance.logCollaboratorInvited(
+          method: 'invite',
+          role: roleType.name,
+        );
         return (false, inviteToken);
       }
 
@@ -297,6 +302,10 @@ abstract class _CollaboratorStore with Store {
       // 4. Commit atômico
       await batch.commit();
 
+      AnalyticsService.instance.logCollaboratorInvited(
+        method: 'direct',
+        role: roleType.name,
+      );
       return (true, null); // Adicionado diretamente
 
     } catch (e) {

@@ -7,6 +7,7 @@ import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/claims_service.dart';
 import 'company_info_screen.dart';
 
@@ -40,6 +41,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   bool _isCreatingDefaultCompany = false;
 
   void _startSetup(BuildContext context) {
+    AnalyticsService.instance.logTutorialBegin(variant: 'setup');
     Navigator.push(
       context,
       CupertinoPageRoute(
@@ -62,6 +64,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     if (_isCreatingDefaultCompany) return;
 
     setState(() => _isCreatingDefaultCompany = true);
+    AnalyticsService.instance.logTutorialBegin(variant: 'skip');
 
     try {
       final user = FirebaseAuth.instance.currentUser;

@@ -10,6 +10,7 @@ import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/services/bootstrap_service.dart';
+import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/claims_service.dart';
 import 'package:praticos/screens/onboarding/whatsapp_onboarding_screen.dart';
 
@@ -184,6 +185,11 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         await userStore.createCompanyForUser(company);
 
+        AnalyticsService.instance.logCompanyCreated(
+          companyId: targetCompanyId,
+          segment: widget.segmentId,
+        );
+
         // Wait for Cloud Function to update custom claims BEFORE any other operations
         // This prevents "permission denied" errors when creating sample data
         setState(() => _statusMessage = context.l10n.preparing);
@@ -216,6 +222,8 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
       if (mounted) {
         // Reload AuthStore BEFORE navigating to update companyAggr
         await widget.authStore.reloadUserAndCompany();
+
+        AnalyticsService.instance.logTutorialComplete();
 
         // Navigate to WhatsApp onboarding screen
         Navigator.of(context).pushAndRemoveUntil(

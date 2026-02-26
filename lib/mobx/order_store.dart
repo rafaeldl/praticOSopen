@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
@@ -701,7 +702,7 @@ abstract class _OrderStore with Store {
     if (files.isEmpty) return false;
 
     if (files.length == 1) {
-      return await _uploadPhoto(files.first);
+      return await _uploadPhoto(files.first, source: 'gallery');
     } else {
       return await _uploadMultiplePhotos(files);
     }
@@ -712,13 +713,13 @@ abstract class _OrderStore with Store {
   Future<bool> addPhotoFromCamera() async {
     final File? file = await photoService.takePhoto();
     if (file != null) {
-      return await _uploadPhoto(file);
+      return await _uploadPhoto(file, source: 'camera');
     }
     return false;
   }
 
   /// Faz o upload de uma foto
-  Future<bool> _uploadPhoto(File file) async {
+  Future<bool> _uploadPhoto(File file, {String source = 'unknown'}) async {
     if (order == null || companyId == null) return false;
 
     // Garante que a OS seja salva antes do upload
@@ -746,6 +747,7 @@ abstract class _OrderStore with Store {
         order!.photos!.add(photo);
         photos.add(photo);
         createItem();
+        AnalyticsService.instance.logPhotoUploaded(source: source);
         return true;
       }
       return false;
@@ -878,6 +880,7 @@ abstract class _OrderStore with Store {
     _updatePaymentStatus();
 
     createItem();
+    AnalyticsService.instance.logPaymentAdded(amount: amount);
   }
 
   /// Adiciona um desconto como transação
@@ -1015,6 +1018,7 @@ abstract class _OrderStore with Store {
               if (order!.id != null) {
                 orderStream =
                     repository.streamSingle(companyId!, order!.id).asObservable();
+                _logOrderCreated();
               }
             });
           }
@@ -1025,6 +1029,7 @@ abstract class _OrderStore with Store {
           if (order!.id != null) {
             orderStream =
                 repository.streamSingle(companyId!, order!.id).asObservable();
+            _logOrderCreated();
           }
         });
       }
@@ -1037,6 +1042,16 @@ abstract class _OrderStore with Store {
         }
       });
     }
+  }
+
+  void _logOrderCreated() {
+    AnalyticsService.instance.logOrderCreated(
+      orderId: order?.id,
+      customerId: order?.customer?.id,
+      deviceCount: order?.devices?.length ?? 0,
+      itemCount: (order?.services?.length ?? 0) + (order?.products?.length ?? 0),
+      totalValue: order?.total,
+    );
   }
 
   @action

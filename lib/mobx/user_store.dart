@@ -12,6 +12,7 @@ import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:mobx/mobx.dart';
 
 import 'package:praticos/global.dart';
+import 'package:praticos/services/analytics_service.dart';
 
 part 'user_store.g.dart';
 
@@ -70,6 +71,10 @@ abstract class _UserStore with Store {
     await _db.collection('users').doc(newUser.id).set(
       newUser.toJson(),
       SetOptions(merge: true),
+    );
+
+    AnalyticsService.instance.logSignUp(
+      method: AnalyticsService.getAuthMethod(),
     );
   }
 
