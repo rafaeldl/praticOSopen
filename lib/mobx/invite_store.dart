@@ -4,6 +4,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/services/claims_service.dart';
+import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/invite_api_service.dart';
 
 part 'invite_store.g.dart';
@@ -102,6 +103,8 @@ abstract class _InviteStore with Store {
 
       // 2. Wait for Cloud Function to update custom claims
       await ClaimsService.instance.waitForCompanyClaim(companyId);
+
+      AnalyticsService.instance.logInviteAccepted(companyId: companyId);
 
       // 3. Recarrega convites
       await loadPendingInvites();

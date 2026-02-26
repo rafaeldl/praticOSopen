@@ -7,6 +7,7 @@ import 'package:praticos/utils/search_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:praticos/services/analytics_service.dart';
 import 'user_store.dart';
 part 'customer_store.g.dart';
 
@@ -51,6 +52,7 @@ abstract class _CustomerStore with Store {
     customer.updatedBy = user?.toAggr();
     customer.keywords = generateKeywords(customer.name);
     await repository.createItem(companyId!, customer);
+    AnalyticsService.instance.logCustomerCreated(customerId: customer.id);
   }
 
   @action

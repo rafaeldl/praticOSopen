@@ -127,7 +127,9 @@
             rateSubmit: 'Enviar Avaliação',
             rateSuccess: 'Obrigado pela sua avaliação!',
             rateAlreadyRated: 'Este serviço já foi avaliado',
-            yourRating: 'Sua Avaliação'
+            yourRating: 'Sua Avaliação',
+            devices: 'Equipamentos',
+            general: 'Geral'
         },
         en: {
             pageTitle: 'Track your Order - PraticOS',
@@ -179,7 +181,9 @@
             rateSubmit: 'Submit Rating',
             rateSuccess: 'Thank you for your rating!',
             rateAlreadyRated: 'This service has already been rated',
-            yourRating: 'Your Rating'
+            yourRating: 'Your Rating',
+            devices: 'Devices',
+            general: 'General'
         },
         es: {
             pageTitle: 'Seguí tu OS - PraticOS',
@@ -231,7 +235,9 @@
             rateSubmit: 'Enviar Calificación',
             rateSuccess: '¡Gracias por tu calificación!',
             rateAlreadyRated: 'Este servicio ya ha sido calificado',
-            yourRating: 'Tu Calificación'
+            yourRating: 'Tu Calificación',
+            devices: 'Dispositivos',
+            general: 'General'
         }
     };
     const text = ui[lang] || ui['pt'];
@@ -399,13 +405,70 @@
         `;
     }
 
+    // Build device map from order data
+    function buildDeviceMap(order) {
+        const devices = order.devices?.length
+            ? order.devices
+            : (order.device ? [{ id: order.device.id || '_single', name: order.device.name, serial: order.device.serial }] : []);
+        const map = {};
+        devices.forEach(d => { map[d.id] = d.name; });
+        return { map, isMulti: devices.length >= 2 };
+    }
+
+    // Render grouped items (services or products) by device
+    function renderGroupedItems(items, deviceMap, renderFn) {
+        const groups = {};
+        items.forEach(item => {
+            const key = item.deviceId || '_general';
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(item);
+        });
+
+        let html = '';
+        // Render items by device order, then general at the end
+        const deviceIds = Object.keys(deviceMap.map);
+        const orderedKeys = [...deviceIds.filter(k => groups[k]), ...(['_general' in groups ? ['_general'] : []])];
+
+        // Add any deviceId keys not in the map (safety)
+        Object.keys(groups).forEach(k => {
+            if (!orderedKeys.includes(k)) orderedKeys.push(k);
+        });
+
+        orderedKeys.forEach(key => {
+            if (!groups[key]) return;
+            const label = key === '_general' ? text.general : (deviceMap.map[key] || text.general);
+            html += `<div class="device-group-header">${label}</div>`;
+            html += groups[key].map(renderFn).join('');
+        });
+
+        return html;
+    }
+
     // Render info card
     function renderInfoCard(order, customer) {
         const container = document.querySelector('.order-cards');
 
         const customerName = order.customer?.name || customer?.name || '-';
         const customerPhone = order.customer?.phone || customer?.phone || '';
-        const deviceName = order.device?.name || '-';
+        const { map: deviceNameMap, isMulti } = buildDeviceMap(order);
+        const deviceNames = Object.values(deviceNameMap);
+
+        // Build device display
+        let deviceHtml = '';
+        if (deviceNames.length === 1) {
+            deviceHtml = `
+                    <div class="info-item">
+                        <span class="info-label">${text.device}</span>
+                        <span class="info-value">${deviceNames[0]}</span>
+                    </div>`;
+        } else if (deviceNames.length >= 2) {
+            const extra = deviceNames.length - 1;
+            deviceHtml = `
+                    <div class="info-item">
+                        <span class="info-label">${text.devices}</span>
+                        <span class="info-value">${deviceNames[0]} <span class="device-more">+${extra}</span></span>
+                    </div>`;
+        }
 
         const card = document.createElement('div');
         card.className = 'order-card';
@@ -429,12 +492,7 @@
                         <span class="info-value highlight">${customerPhone}</span>
                     </div>
                     ` : ''}
-                    ${order.device ? `
-                    <div class="info-item">
-                        <span class="info-label">${text.device}</span>
-                        <span class="info-value">${deviceName}</span>
-                    </div>
-                    ` : ''}
+                    ${deviceHtml}
                     ${order.dueDate ? `
                     <div class="info-item">
                         <span class="info-label">${text.forecast}</span>
@@ -455,7 +513,8 @@
         const card = document.createElement('div');
         card.className = 'order-card';
 
-        const itemsHtml = order.services.map(s => `
+        const { map: deviceNameMap, isMulti } = buildDeviceMap(order);
+        const renderServiceItem = s => `
             <div class="item-row">
                 <div class="item-info">
                     <div class="item-name">${s.name || text.serviceDefault}</div>
@@ -463,7 +522,11 @@
                 </div>
                 <div class="item-value">${formatCurrency(s.value)}</div>
             </div>
-        `).join('');
+        `;
+
+        const itemsHtml = isMulti
+            ? renderGroupedItems(order.services, { map: deviceNameMap }, renderServiceItem)
+            : order.services.map(renderServiceItem).join('');
 
         card.innerHTML = `
             <div class="card-header">
@@ -487,7 +550,8 @@
         const card = document.createElement('div');
         card.className = 'order-card';
 
-        const itemsHtml = order.products.map(p => `
+        const { map: deviceNameMap, isMulti } = buildDeviceMap(order);
+        const renderProductItem = p => `
             <div class="item-row">
                 <div class="item-info">
                     <div class="item-name">${p.name || text.productDefault}</div>
@@ -496,7 +560,11 @@
                 </div>
                 <div class="item-value">${formatCurrency(p.value * (p.quantity || 1))}</div>
             </div>
-        `).join('');
+        `;
+
+        const itemsHtml = isMulti
+            ? renderGroupedItems(order.products, { map: deviceNameMap }, renderProductItem)
+            : order.products.map(renderProductItem).join('');
 
         card.innerHTML = `
             <div class="card-header">

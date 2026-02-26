@@ -44,6 +44,8 @@ Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KE
 | Faturamento | GET /bot/analytics/financial |
 | Add servico na OS | POST /bot/orders/{NUM}/services |
 | Add produto na OS | POST /bot/orders/{NUM}/products |
+| Add dispositivo | POST /bot/orders/{NUM}/devices |
+| Remover dispositivo | DELETE /bot/orders/{NUM}/devices/{ID} |
 | Compartilhar | POST /bot/orders/{NUM}/share |
 | Comentar/Anotar | POST /bot/orders/{NUM}/comments |
 | Ver comentarios | GET /bot/orders/{NUM}/comments |
@@ -100,6 +102,27 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
 6. **Exibir OS:** ver CARD DE OS abaixo
 7. 🔴 **Apos criar OS:** SEMPRE exibir card (GET /details → formato CARD DE OS abaixo) + oferecer compartilhar → POST /bot/orders/{NUM}/share
+
+---
+
+## MULTI-DEVICE
+
+### Criar OS com múltiplos dispositivos
+1. Após selecionar o primeiro {DEVICE_LABEL}, perguntar: "Adicionar outro {DEVICE_LABEL}?"
+2. Se sim → buscar proximo dispositivo (POST /bot/search/unified) → repetir pergunta
+3. Se nao → prosseguir com criacao
+4. Ao criar: POST /bot/orders/full com `deviceIds: ["id1", "id2", ...]` (em vez de `deviceId`)
+
+### Adicionar item a OS multi-device
+1. Antes de POST /services ou /products, verificar `deviceCount` do GET /details
+2. Se `deviceCount >= 2`: perguntar "Para qual {DEVICE_LABEL}?" com lista numerada dos devices + opcao "Geral"
+3. Passar `deviceId` no body se usuario escolheu um dispositivo especifico
+4. Se usuario escolheu "Geral" → nao passar `deviceId`
+
+### Adicionar/Remover dispositivo de OS existente
+- Adicionar: POST /bot/orders/{NUM}/devices `{"deviceId":"ID"}`
+- Remover: DELETE /bot/orders/{NUM}/devices/{DEVICE_ID}
+- Sempre confirmar antes de remover
 
 ---
 

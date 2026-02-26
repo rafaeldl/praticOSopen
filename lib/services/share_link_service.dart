@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:praticos/models/share_token.dart';
+import 'package:praticos/services/analytics_service.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -158,6 +159,7 @@ class ShareLinkService {
         sharePositionOrigin: sharePositionOrigin,
       ),
     );
+    AnalyticsService.instance.logShare(method: 'sheet', contentType: 'order');
   }
 
   /// Share via WhatsApp
@@ -178,6 +180,7 @@ class ShareLinkService {
 
     if (await canLaunchUrl(whatsappUrl)) {
       await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+      AnalyticsService.instance.logShare(method: 'whatsapp', contentType: 'order');
     } else {
       throw ShareLinkException('Could not open WhatsApp');
     }
@@ -186,6 +189,7 @@ class ShareLinkService {
   /// Copy link to clipboard
   Future<void> copyToClipboard(String url) async {
     await Clipboard.setData(ClipboardData(text: url));
+    AnalyticsService.instance.logShare(method: 'clipboard', contentType: 'order');
   }
 
   /// Build a share message for the customer

@@ -4,6 +4,7 @@ import 'package:praticos/mobx/locale_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/repositories/auth_repository.dart';
+import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
@@ -124,6 +125,10 @@ abstract class _AuthStore with Store {
         companyAggr = null;
         Global.companyAggr = null;
         _isCompanyLoaded = true;
+        AnalyticsService.instance.logLogin(
+          method: AnalyticsService.getAuthMethod(),
+          hasCompany: false,
+        );
         return;
       }
 
@@ -136,6 +141,20 @@ abstract class _AuthStore with Store {
       companyAggr = company.toAggr();
       Global.companyAggr = companyAggr;
       _isCompanyLoaded = true;
+
+      final authMethod = AnalyticsService.getAuthMethod();
+      AnalyticsService.instance.logLogin(method: authMethod);
+      final companyId = company.id;
+      AnalyticsService.instance.identifyUser(
+        userId: user.uid,
+        companyId: companyId,
+        segment: company.segment,
+        userRole: dbUser?.companies
+            ?.where((c) => c.company?.id == companyId)
+            .firstOrNull
+            ?.role
+            ?.name,
+      );
     } catch (e) {
       print('AuthStore: error loading company data: $e');
       hasCompanyLoadError = true;
@@ -201,6 +220,7 @@ abstract class _AuthStore with Store {
     await prefs.remove("companyName");
     Global.currentUser = null;
     Global.companyAggr = null;
+    AnalyticsService.instance.clearUser();
     _auth.signOutGoogle();
   }
 
@@ -249,6 +269,7 @@ abstract class _AuthStore with Store {
       Global.currentUser = null;
       Global.companyAggr = null;
       companyAggr = null;
+      AnalyticsService.instance.clearUser();
 
       logout = true;
       _isCompanyLoaded = false;
