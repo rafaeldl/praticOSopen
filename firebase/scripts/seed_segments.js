@@ -1174,6 +1174,145 @@ const SEGMENTS = [
   },
 
   // ═══════════════════════════════════════════════════════════
+  // MANUTENÇÃO PREDIAL (Construtoras + Administradoras + Facilities)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'building_maintenance',
+    name: 'Manutenção Predial',
+    nameI18n: { 'pt-BR': 'Manutenção Predial', 'en-US': 'Building Maintenance', 'es-ES': 'Mantenimiento de Edificios' },
+    icon: '🏢',
+    active: true,
+    subspecialties: [
+      {
+        id: 'post_delivery_warranty',
+        icon: '🏗️',
+        name: { 'pt-BR': 'Garantia Pós-Entrega', 'en-US': 'Post-Delivery Warranty', 'es-ES': 'Garantía Post-Entrega' },
+        description: { 'pt-BR': 'Assistência técnica de construtoras (NBR 15575)', 'en-US': 'Builder technical assistance (warranty)', 'es-ES': 'Asistencia técnica de constructoras (garantía)' },
+      },
+      {
+        id: 'corrective_maintenance',
+        icon: '🔧',
+        name: { 'pt-BR': 'Manutenção Corretiva', 'en-US': 'Corrective Maintenance', 'es-ES': 'Mantenimiento Correctivo' },
+        description: { 'pt-BR': 'Reparos em unidades e áreas comuns', 'en-US': 'Repairs in units and common areas', 'es-ES': 'Reparaciones en unidades y áreas comunes' },
+      },
+      {
+        id: 'preventive_maintenance',
+        icon: '📋',
+        name: { 'pt-BR': 'Manutenção Preventiva', 'en-US': 'Preventive Maintenance', 'es-ES': 'Mantenimiento Preventivo' },
+        description: { 'pt-BR': 'Inspeções programadas (NBR 5674)', 'en-US': 'Scheduled inspections', 'es-ES': 'Inspecciones programadas' },
+      },
+      {
+        id: 'common_areas',
+        icon: '🏊',
+        name: { 'pt-BR': 'Áreas Comuns', 'en-US': 'Common Areas', 'es-ES': 'Áreas Comunes' },
+        description: { 'pt-BR': 'Piscina, salão, playground, garagem', 'en-US': 'Pool, lounge, playground, garage', 'es-ES': 'Piscina, salón, playground, cochera' },
+      },
+    ],
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Unidade', 'en-US': 'Unit', 'es-ES': 'Unidad' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Unidades', 'en-US': 'Units', 'es-ES': 'Unidades' }
+      },
+      {
+        key: 'device.brand',
+        type: 'label',
+        labels: { 'pt-BR': 'Empreendimento/Condomínio', 'en-US': 'Development/Building', 'es-ES': 'Proyecto/Condominio' }
+      },
+      {
+        key: 'device.model',
+        type: 'label',
+        labels: { 'pt-BR': 'Bloco/Torre', 'en-US': 'Block/Tower', 'es-ES': 'Bloque/Torre' }
+      },
+      {
+        key: 'device.serialNumber',
+        type: 'label',
+        labels: { 'pt-BR': 'Nº da Unidade', 'en-US': 'Unit Number', 'es-ES': 'Nº de Unidad' }
+      },
+      {
+        key: 'device.serialNumber.mask',
+        type: 'config',
+        value: 'none',
+      },
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Unidade', 'en-US': 'Add Unit', 'es-ES': 'Agregar Unidad' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Reparo', 'en-US': 'Under Repair', 'es-ES': 'En Reparación' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Resolvido', 'en-US': 'Resolved', 'es-ES': 'Resuelto' }
+      },
+
+      // Campos customizados do domínio
+      {
+        key: 'device.unitType',
+        type: 'select',
+        labels: { 'pt-BR': 'Tipo de Unidade', 'en-US': 'Unit Type', 'es-ES': 'Tipo de Unidad' },
+        options: ['Apartamento', 'Garagem', 'Hobby Box', 'Sala Comercial', 'Área Comum'],
+        optionsI18n: [
+          { value: 'Apartamento', labels: { 'pt-BR': 'Apartamento', 'en-US': 'Apartment', 'es-ES': 'Departamento' } },
+          { value: 'Garagem', labels: { 'pt-BR': 'Garagem', 'en-US': 'Garage', 'es-ES': 'Cochera' } },
+          { value: 'Hobby Box', labels: { 'pt-BR': 'Hobby Box', 'en-US': 'Storage Unit', 'es-ES': 'Depósito' } },
+          { value: 'Sala Comercial', labels: { 'pt-BR': 'Sala Comercial', 'en-US': 'Commercial Office', 'es-ES': 'Oficina Comercial' } },
+          { value: 'Área Comum', labels: { 'pt-BR': 'Área Comum', 'en-US': 'Common Area', 'es-ES': 'Área Común' } },
+        ],
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 1,
+      },
+      {
+        key: 'device.affectedSystem',
+        type: 'select',
+        labels: { 'pt-BR': 'Sistema Afetado', 'en-US': 'Affected System', 'es-ES': 'Sistema Afectado' },
+        options: ['Hidráulico', 'Elétrico', 'Estrutural', 'Impermeabilização', 'Acabamento', 'Esquadrias', 'Pintura'],
+        optionsI18n: [
+          { value: 'Hidráulico', labels: { 'pt-BR': 'Hidráulico', 'en-US': 'Plumbing', 'es-ES': 'Hidráulico' } },
+          { value: 'Elétrico', labels: { 'pt-BR': 'Elétrico', 'en-US': 'Electrical', 'es-ES': 'Eléctrico' } },
+          { value: 'Estrutural', labels: { 'pt-BR': 'Estrutural', 'en-US': 'Structural', 'es-ES': 'Estructural' } },
+          { value: 'Impermeabilização', labels: { 'pt-BR': 'Impermeabilização', 'en-US': 'Waterproofing', 'es-ES': 'Impermeabilización' } },
+          { value: 'Acabamento', labels: { 'pt-BR': 'Acabamento', 'en-US': 'Finishing', 'es-ES': 'Acabado' } },
+          { value: 'Esquadrias', labels: { 'pt-BR': 'Esquadrias', 'en-US': 'Frames & Windows', 'es-ES': 'Carpintería' } },
+          { value: 'Pintura', labels: { 'pt-BR': 'Pintura', 'en-US': 'Painting', 'es-ES': 'Pintura' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 2,
+      },
+      {
+        key: 'device.deliveryDate',
+        type: 'date',
+        labels: { 'pt-BR': 'Data de Entrega', 'en-US': 'Delivery Date', 'es-ES': 'Fecha de Entrega' },
+        section: 'Garantia',
+        sectionI18n: { 'pt-BR': 'Garantia', 'en-US': 'Warranty', 'es-ES': 'Garantía' },
+        order: 3,
+      },
+      {
+        key: 'device.floor',
+        type: 'number',
+        labels: { 'pt-BR': 'Andar', 'en-US': 'Floor', 'es-ES': 'Piso' },
+        min: -5,
+        max: 99,
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 4,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // OUTRO (Genérico)
   // ═══════════════════════════════════════════════════════════
   {
