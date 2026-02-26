@@ -269,6 +269,7 @@ abstract class _AuthStore with Store {
       Global.currentUser = null;
       Global.companyAggr = null;
       companyAggr = null;
+      AnalyticsService.instance.clearUser();
 
       logout = true;
       _isCompanyLoaded = false;

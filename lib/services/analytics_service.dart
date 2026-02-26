@@ -83,6 +83,9 @@ class AnalyticsService {
   void clearUser() {
     _safe(() async {
       await _analytics.setUserId(id: null);
+      await _analytics.setUserProperty(name: 'company_id', value: null);
+      await _analytics.setUserProperty(name: 'segment', value: null);
+      await _analytics.setUserProperty(name: 'user_role', value: null);
       await _analytics.setDefaultEventParameters({
         'company_id': null,
         'segment': null,

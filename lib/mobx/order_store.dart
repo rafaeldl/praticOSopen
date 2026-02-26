@@ -789,6 +789,7 @@ abstract class _OrderStore with Store {
             order!.photos!.add(photo);
             photos.add(photo);
             successCount++;
+            AnalyticsService.instance.logPhotoUploaded(source: 'gallery');
           }
         } catch (e) {
           print('Erro no upload de uma foto: $e');
