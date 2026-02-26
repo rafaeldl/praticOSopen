@@ -59,16 +59,39 @@ export function maskPhone(phone: string | null | undefined): string | null {
 }
 
 /**
- * Masks a serial number, showing only first 3 and last 3 characters
- * Example: "SN123456789XYZ" -> "SN1******XYZ"
+ * Masks a serial number, preserving original length.
+ * - Serials ≤6 chars: mask all except last character
+ * - Serials >6 chars: show ~30% of characters (min 2), split start/end
+ *
+ * Examples:
+ * - "AB3" (3) -> "**3"
+ * - "ABC123" (6) -> "*****3"
+ * - "ABCDEFGH" (8) -> "A******H"
+ * - "1234567890" (10) -> "12*******0"
+ * - "SN123456789XYZ" (14) -> "SN**********34"  (note: 14 chars → visible=4)
+ * - "IMEI359876543210987" (19) -> "IME*************987"
  */
 export function maskSerial(serial: string | null | undefined): string | null {
   if (!serial || typeof serial !== 'string') return null;
 
   const trimmed = serial.trim();
-  if (trimmed.length <= 6) return trimmed;
+  if (!trimmed) return null;
 
-  const first3 = trimmed.substring(0, 3);
-  const last3 = trimmed.substring(trimmed.length - 3);
-  return `${first3}******${last3}`;
+  const len = trimmed.length;
+
+  if (len === 1) return trimmed;
+
+  if (len <= 6) {
+    return '*'.repeat(len - 1) + trimmed[len - 1];
+  }
+
+  const visible = Math.max(2, Math.round(len * 0.3));
+  const start = Math.ceil(visible / 2);
+  const end = visible - start;
+
+  const firstPart = trimmed.substring(0, start);
+  const lastPart = trimmed.substring(len - end);
+  const masked = '*'.repeat(len - visible);
+
+  return `${firstPart}${masked}${lastPart}`;
 }
