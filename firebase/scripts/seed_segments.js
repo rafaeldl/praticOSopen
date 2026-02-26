@@ -308,6 +308,7 @@ const SEGMENTS = [
     nameI18n: { 'pt-BR': 'Automotivo', 'en-US': 'Automotive', 'es-ES': 'Automotriz' },
     icon: '🚗',
     active: true,
+    fieldService: false, // Workshop: cliente traz o veículo
     subspecialties: [
       {
         id: 'mechanical',
@@ -446,6 +447,7 @@ const SEGMENTS = [
     },
     icon: '❄️',
     active: true,
+    fieldService: true, // Atendimento no local do cliente
     subspecialties: [
       {
         id: 'residential',
@@ -565,6 +567,7 @@ const SEGMENTS = [
     nameI18n: { 'pt-BR': 'Assistência Técnica - Celulares', 'en-US': 'Phone Repair', 'es-ES': 'Servicio Técnico - Celulares' },
     icon: '📱',
     active: true,
+    fieldService: false, // Workshop: cliente traz o aparelho
     customFields: [
       // Labels customizados
       {
@@ -678,6 +681,7 @@ const SEGMENTS = [
     nameI18n: { 'pt-BR': 'Informática', 'en-US': 'Computers', 'es-ES': 'Informática' },
     icon: '💻',
     active: true,
+    fieldService: false, // Workshop: cliente traz o equipamento
     subspecialties: [
       {
         id: 'desktop',
@@ -759,6 +763,7 @@ const SEGMENTS = [
     nameI18n: { 'pt-BR': 'Eletrodomésticos', 'en-US': 'Appliances', 'es-ES': 'Electrodomésticos' },
     icon: '🔌',
     active: true,
+    fieldService: true, // Assistência busca/atende no local do cliente
     customFields: [
       // Labels customizados
       {
@@ -804,6 +809,7 @@ const SEGMENTS = [
     },
     icon: '⚡️',
     active: true,
+    fieldService: true, // Atendimento no local do cliente
     customFields: [
       // Labels customizados
       {
@@ -870,6 +876,7 @@ const SEGMENTS = [
     nameI18n: { 'pt-BR': 'Hidráulica (Encanador)', 'en-US': 'Plumbing', 'es-ES': 'Fontanería (Fontanero)' },
     icon: '💧',
     active: true,
+    fieldService: true, // Atendimento no local do cliente
     customFields: [
       // Labels customizados
       {
@@ -940,6 +947,7 @@ const SEGMENTS = [
     nameI18n: { 'pt-BR': 'Segurança Eletrônica', 'en-US': 'Electronic Security', 'es-ES': 'Seguridad Electrónica' },
     icon: '📹',
     active: true,
+    fieldService: true, // Atendimento no local do cliente
     subspecialties: [
       {
         id: 'cctv',
@@ -1038,6 +1046,7 @@ const SEGMENTS = [
     nameI18n: { 'pt-BR': 'Energia Solar', 'en-US': 'Solar Energy', 'es-ES': 'Energía Solar' },
     icon: '☀️',
     active: true,
+    fieldService: true, // Atendimento no local do cliente
     customFields: [
       // Labels customizados
       {
@@ -1107,6 +1116,7 @@ const SEGMENTS = [
     nameI18n: { 'pt-BR': 'Impressoras / Copiadoras', 'en-US': 'Printers / Copiers', 'es-ES': 'Impresoras / Fotocopiadoras' },
     icon: '🖨️',
     active: true,
+    fieldService: false, // Workshop: cliente traz a impressora
     customFields: [
       // Labels customizados
       {
@@ -1172,6 +1182,7 @@ const SEGMENTS = [
     nameI18n: { 'pt-BR': 'Outro', 'en-US': 'Other', 'es-ES': 'Otro' },
     icon: '🔧',
     active: true,
+    fieldService: true, // Default: assume atendimento externo
     customFields: [], // Sem customizações, usa padrões do sistema
   },
 ];

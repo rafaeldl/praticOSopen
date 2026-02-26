@@ -172,6 +172,30 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return streamQueryList(companyId, orderBy: orderBy, args: filterList);
   }
 
+  /// Stream de orders por intervalo de dueDate.
+  Stream<List<Order?>> streamOrdersByDueDateRange(
+    String companyId,
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    final List<QueryArgs> filterList = [
+      QueryArgs(
+        'dueDate',
+        startDate.toIso8601String(),
+        oper: 'isGreaterThanOrEqualTo',
+      ),
+      QueryArgs(
+        'dueDate',
+        endDate.toIso8601String(),
+        oper: 'isLessThan',
+      ),
+    ];
+
+    final List<OrderBy> orderBy = [OrderBy('dueDate')];
+
+    return streamQueryList(companyId, orderBy: orderBy, args: filterList);
+  }
+
   /// Stream de orders com filtros opcionais.
   Stream<List<Order?>> streamOrders(
     String companyId, {

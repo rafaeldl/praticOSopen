@@ -25,6 +25,13 @@ class SegmentConfigService {
   final Map<String, String> _labelCache = {};
   final List<CustomField> _customFields = [];
 
+  // Segment-level default for fieldService
+  bool _segmentFieldService = true;
+
+  // Resolved company config (set once at startup, read directly in runtime)
+  bool _fieldService = true;
+  bool _useScheduling = true;
+
   // Mapeamento de chaves técnicas de status para label keys
   static const Map<String, String> _statusKeyMapping = {
     'quote': 'status.quote',
@@ -129,6 +136,10 @@ class SegmentConfigService {
       }
 
       final data = doc.data()!;
+
+      // Read segment-level fieldService default
+      _segmentFieldService = data['fieldService'] as bool? ?? true;
+
       final customFieldsJson = data['customFields'] as List? ?? [];
 
       // Parse dos customFields
@@ -481,11 +492,29 @@ class SegmentConfigService {
     return grouped;
   }
 
+  /// Sets resolved company config values (called once at startup)
+  void setCompanyConfig({required bool fieldService, required bool useScheduling}) {
+    _fieldService = fieldService;
+    _useScheduling = useScheduling;
+  }
+
+  /// Whether the company does field service (attends at customer location)
+  bool get fieldService => _fieldService;
+
+  /// Whether the company uses scheduling (scheduledDate in orders)
+  bool get useScheduling => _useScheduling;
+
+  /// Default fieldService value from the segment document
+  bool get segmentFieldServiceDefault => _segmentFieldService;
+
   /// Limpa todo o cache
   void clear() {
     _segmentId = null;
     _labelCache.clear();
     _customFields.clear();
+    _segmentFieldService = true;
+    _fieldService = true;
+    _useScheduling = true;
   }
 
   /// Getters de estado

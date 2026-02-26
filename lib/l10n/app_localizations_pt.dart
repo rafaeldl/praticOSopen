@@ -2993,4 +2993,28 @@ class AppLocalizationsPt extends AppLocalizations {
   String removeDeviceHasItems(String name, String count) {
     return '\"$name\" possui $count itens associados. O que deseja fazer?';
   }
+
+  @override
+  String get features => 'Funcionalidades';
+
+  @override
+  String get fieldServiceLabel => 'Atendimento externo';
+
+  @override
+  String get fieldServiceDescription => 'Exibir campo de local do atendimento';
+
+  @override
+  String get schedulingLabel => 'Agendamento';
+
+  @override
+  String get schedulingDescription => 'Usar data agendada nas OS';
+
+  @override
+  String get noOrdersDueOnDate => 'Nenhuma OS com vencimento neste dia';
+
+  @override
+  String get companyFeatures => 'Funcionalidades da empresa';
+
+  @override
+  String get youCanChangeThisLater => 'Pode alterar depois nas configurações';
 }

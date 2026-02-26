@@ -19,6 +19,7 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/authorization_service.dart';
@@ -306,7 +307,8 @@ class _OrderFormState extends State<OrderForm> {
               showChevron: true,
               valueColor: _getStatusColorCupertino(_store.status),
             ),
-            _buildScheduledDateTile(context),
+            if (SegmentConfigService().useScheduling)
+              _buildScheduledDateTile(context),
             _buildListTile(
               context: context,
               icon: CupertinoIcons.calendar,
@@ -377,7 +379,8 @@ class _OrderFormState extends State<OrderForm> {
               enabled: canEditFields,
             ),
             // Address inline text field
-            _buildAddressField(context, canEditFields, hasAddress, hasCoordinates),
+            if (SegmentConfigService().fieldService)
+              _buildAddressField(context, canEditFields, hasAddress, hasCoordinates),
             // Shortcut to add device (hidden once a device is added)
             if (_store.devices.isEmpty)
               _buildListTile(

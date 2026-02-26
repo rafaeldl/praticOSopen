@@ -676,6 +676,7 @@ Ver `docs/ADS_CAMPAIGNS.md` para status completo de todas as campanhas, pendenci
 11. **Dark Mode**: Sempre usar `.resolveFrom(context)` para cores dinâmicas
 12. **Documentação Obrigatória**: Documentar toda nova funcionalidade (ver seção abaixo)
 13. **Site Eleventy**: Editar APENAS em `src/`, nunca em `public/`. Executar `npm run build` após alterações
+14. **Branch obrigatória**: Sempre criar branch `tipo/descricao-curta` a partir da master antes de implementar. Nunca commitar direto na master. Tipos são os mesmos do Conventional Commits (ver seção Deploy)
 
 ---
 
