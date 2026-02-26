@@ -1289,5 +1289,7 @@
   "fieldServiceDescription": "Show service location field",
   "schedulingLabel": "Scheduling",
   "schedulingDescription": "Use scheduled date in orders",
-  "noOrdersDueOnDate": "No orders due on this day"
+  "noOrdersDueOnDate": "No orders due on this day",
+  "companyFeatures": "Company features",
+  "youCanChangeThisLater": "You can change this later in settings"
 }

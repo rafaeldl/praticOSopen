@@ -3000,4 +3000,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noOrdersDueOnDate => 'No orders due on this day';
+
+  @override
+  String get companyFeatures => 'Company features';
+
+  @override
+  String get youCanChangeThisLater => 'You can change this later in settings';
 }

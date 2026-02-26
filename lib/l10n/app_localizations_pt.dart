@@ -3011,4 +3011,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noOrdersDueOnDate => 'Nenhuma OS com vencimento neste dia';
+
+  @override
+  String get companyFeatures => 'Funcionalidades da empresa';
+
+  @override
+  String get youCanChangeThisLater => 'Pode alterar depois nas configurações';
 }

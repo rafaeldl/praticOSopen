@@ -88,6 +88,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         ..id = companyId
         ..name = "Minha Empresa"
         ..segment = "other" // segmento padrão
+        ..fieldService = true
+        ..useScheduling = true
         ..owner = userAggr
         ..createdAt = DateTime.now()
         ..createdBy = userAggr

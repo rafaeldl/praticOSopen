@@ -5709,6 +5709,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nenhuma OS com vencimento neste dia'**
   String get noOrdersDueOnDate;
+
+  /// No description provided for @companyFeatures.
+  ///
+  /// In pt, this message translates to:
+  /// **'Funcionalidades da empresa'**
+  String get companyFeatures;
+
+  /// No description provided for @youCanChangeThisLater.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pode alterar depois nas configurações'**
+  String get youCanChangeThisLater;
 }
 
 class _AppLocalizationsDelegate

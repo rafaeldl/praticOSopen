@@ -1289,5 +1289,7 @@
   "fieldServiceDescription": "Mostrar campo de ubicación del servicio",
   "schedulingLabel": "Programación",
   "schedulingDescription": "Usar fecha programada en las OS",
-  "noOrdersDueOnDate": "Ninguna OS con vencimiento en este día"
+  "noOrdersDueOnDate": "Ninguna OS con vencimiento en este día",
+  "companyFeatures": "Funcionalidades de la empresa",
+  "youCanChangeThisLater": "Puede cambiar esto después en configuraciones"
 }

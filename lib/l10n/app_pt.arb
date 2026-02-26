@@ -1334,5 +1334,7 @@
   "fieldServiceDescription": "Exibir campo de local do atendimento",
   "schedulingLabel": "Agendamento",
   "schedulingDescription": "Usar data agendada nas OS",
-  "noOrdersDueOnDate": "Nenhuma OS com vencimento neste dia"
+  "noOrdersDueOnDate": "Nenhuma OS com vencimento neste dia",
+  "companyFeatures": "Funcionalidades da empresa",
+  "youCanChangeThisLater": "Pode alterar depois nas configurações"
 }
