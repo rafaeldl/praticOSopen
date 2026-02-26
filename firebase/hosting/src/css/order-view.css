@@ -240,6 +240,8 @@
 .order-card:nth-child(2) { animation-delay: 0.2s; }
 .order-card:nth-child(3) { animation-delay: 0.3s; }
 .order-card:nth-child(4) { animation-delay: 0.4s; }
+.order-card:nth-child(5) { animation-delay: 0.5s; }
+.order-card:nth-child(6) { animation-delay: 0.6s; }
 
 @keyframes fadeInUp {
     from {
@@ -357,14 +359,9 @@
     white-space: nowrap;
 }
 
-/* Device Group Header (multi-device orders) */
+/* Device Group Header (multi-device orders) — pill/tag style */
 .device-group-header {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-secondary);
-    padding: 12px 0 4px;
+    padding: 14px 0 6px;
     border-top: 1px solid var(--border-color);
 }
 
@@ -373,17 +370,79 @@
     padding-top: 0;
 }
 
-/* +N badge for multi-device info card */
-.device-more {
+.device-group-name {
     display: inline-block;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
-    color: var(--text-tertiary);
-    background: var(--bg-tertiary);
-    padding: 2px 8px;
+    color: var(--color-primary);
+    background: rgba(74, 155, 217, 0.12);
+    padding: 4px 12px;
     border-radius: var(--radius-full);
-    margin-left: 6px;
-    vertical-align: middle;
+    letter-spacing: 0.3px;
+}
+
+/* Devices Card (multi-device: 2+ devices) */
+.devices-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.device-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.device-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.device-row:first-child {
+    padding-top: 0;
+}
+
+.device-index {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(74, 155, 217, 0.12);
+    color: var(--color-primary);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.device-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.device-name {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.device-serial {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    letter-spacing: 0.5px;
+}
+
+/* Single-device serial in info card */
+.info-serial {
+    font-size: 0.8125rem;
+    color: var(--text-tertiary);
+    font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    letter-spacing: 0.5px;
 }
 
 /* Photos Grid */
@@ -1214,6 +1273,14 @@
 
 [data-theme="light"] .order-card {
     box-shadow: var(--shadow-sm);
+}
+
+[data-theme="light"] .device-index {
+    background: rgba(43, 123, 192, 0.10);
+}
+
+[data-theme="light"] .device-group-name {
+    background: rgba(43, 123, 192, 0.08);
 }
 
 [data-theme="light"] .total-section {
