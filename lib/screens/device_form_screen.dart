@@ -284,8 +284,21 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     );
   }
 
+  /// Keys dos campos hardcoded que já são renderizados acima.
+  /// O segmento pode configurar esses campos (label, mask, validation)
+  /// mas eles não devem aparecer como campos dinâmicos duplicados.
+  static const _builtInFieldKeys = {
+    'device.category',
+    'device.brand',
+    'device.model',
+    'device.serial',
+  };
+
   List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
-    final grouped = config.fieldsGroupedBySectionLocalized('device');
+    final grouped = config.fieldsGroupedBySectionLocalized(
+      'device',
+      exclude: _builtInFieldKeys,
+    );
     if (grouped.isEmpty) return [];
 
     final locale = config.locale;

@@ -498,9 +498,18 @@ class SegmentConfigService {
   ///
   /// Filtra campos 'config' e 'label', agrupa por seção traduzida,
   /// e ordena por [order] dentro de cada seção.
-  Map<String, List<CustomField>> fieldsGroupedBySectionLocalized(String namespace) {
+  ///
+  /// [exclude] permite excluir keys de campos já renderizados pelo form
+  /// (campos hardcoded como device.serial, device.brand, etc).
+  /// O campo continua acessível via getField()/getMasks()/label() para
+  /// configurar o campo hardcoded, mas não aparece como campo dinâmico.
+  Map<String, List<CustomField>> fieldsGroupedBySectionLocalized(
+    String namespace, {
+    Set<String>? exclude,
+  }) {
     final fields = fieldsFor(namespace)
         .where((f) => f.isField && f.type != 'config')
+        .where((f) => exclude == null || !exclude.contains(f.key))
         .toList();
 
     final grouped = <String, List<CustomField>>{};
