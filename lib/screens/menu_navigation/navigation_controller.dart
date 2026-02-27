@@ -8,6 +8,8 @@ import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
 import 'package:praticos/screens/agenda/agenda_screen.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/responsive/adaptive_scaffold.dart';
+import 'package:praticos/responsive/desktop_sidebar.dart';
 
 import 'home.dart';
 
@@ -34,7 +36,7 @@ class _NavigationControllerState extends State<NavigationController> {
     ];
   }
 
-  /// Build tab items - Financial tab is always included
+  /// Build tab items for mobile bottom bar
   List<BottomNavigationBarItem> _buildTabItems(BuildContext context) {
     return <BottomNavigationBarItem>[
       BottomNavigationBarItem(
@@ -79,11 +81,42 @@ class _NavigationControllerState extends State<NavigationController> {
     ];
   }
 
+  /// Build sidebar destinations for desktop layout
+  List<SidebarDestination> _buildSidebarDestinations(BuildContext context) {
+    return [
+      SidebarDestination(
+        icon: CupertinoIcons.house,
+        activeIcon: CupertinoIcons.house_fill,
+        label: context.l10n.home,
+      ),
+      SidebarDestination(
+        icon: CupertinoIcons.person_2,
+        activeIcon: CupertinoIcons.person_2_fill,
+        label: context.l10n.customers,
+      ),
+      SidebarDestination(
+        icon: CupertinoIcons.calendar,
+        activeIcon: CupertinoIcons.calendar_today,
+        label: context.l10n.agenda,
+      ),
+      SidebarDestination(
+        icon: CupertinoIcons.chart_pie,
+        activeIcon: CupertinoIcons.chart_pie_fill,
+        label: context.l10n.financial,
+      ),
+      SidebarDestination(
+        icon: CupertinoIcons.ellipsis,
+        activeIcon: CupertinoIcons.ellipsis,
+        label: context.l10n.more,
+      ),
+    ];
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final navigationStore = Provider.of<BottomNavigationBarStore>(context);
-    
+
     // Dispose previous reaction if dependencies change
     _disposer?.call();
 
@@ -110,23 +143,16 @@ class _NavigationControllerState extends State<NavigationController> {
     final navigationStore = Provider.of<BottomNavigationBarStore>(context);
     final pageOptions = _buildPageOptions();
     final tabItems = _buildTabItems(context);
+    final sidebarDestinations = _buildSidebarDestinations(context);
 
-    return CupertinoTabScaffold(
-      controller: _tabController,
-      tabBar: CupertinoTabBar(
-        // currentIndex is handled by the controller
-        onTap: (index) {
-          navigationStore.setCurrentIndex(index);
-        },
-        items: tabItems,
-      ),
-      tabBuilder: (BuildContext context, int index) {
-        return CupertinoTabView(
-          routes: appRoutes,
-          builder: (BuildContext context) {
-            return pageOptions[index];
-          },
-        );
+    return AdaptiveScaffold(
+      tabController: _tabController,
+      destinations: sidebarDestinations,
+      tabItems: tabItems,
+      pages: pageOptions,
+      routes: appRoutes,
+      onTabChanged: (index) {
+        navigationStore.setCurrentIndex(index);
       },
     );
   }

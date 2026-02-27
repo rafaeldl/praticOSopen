@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/fcm_token.dart';
@@ -117,10 +117,17 @@ class NotificationService {
 
       _currentToken = token;
 
+      final String platform;
+      if (kIsWeb) {
+        platform = 'web';
+      } else {
+        platform = Platform.isIOS ? 'ios' : 'android';
+      }
+
       final fcmToken = FcmToken(
         token: token,
         deviceId: _deviceId,
-        platform: Platform.isIOS ? 'ios' : 'android',
+        platform: platform,
         createdAt: DateTime.now(),
         lastUsedAt: DateTime.now(),
       );
@@ -177,7 +184,7 @@ class NotificationService {
     );
 
     await _localNotifications.initialize(
-      initSettings,
+      settings: initSettings,
       onDidReceiveNotificationResponse: _onNotificationResponse,
     );
   }
@@ -223,10 +230,10 @@ class NotificationService {
 
     // Show local notification when app is in foreground
     await _localNotifications.show(
-      message.hashCode,
-      notification.title,
-      notification.body,
-      NotificationDetails(
+      id: message.hashCode,
+      title: notification.title,
+      body: notification.body,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _channelId,
           _channelName,
@@ -278,10 +285,17 @@ class NotificationService {
     if (userId != null) {
       _currentToken = newToken;
 
+      final String platform;
+      if (kIsWeb) {
+        platform = 'web';
+      } else {
+        platform = Platform.isIOS ? 'ios' : 'android';
+      }
+
       final fcmToken = FcmToken(
         token: newToken,
         deviceId: _deviceId,
-        platform: Platform.isIOS ? 'ios' : 'android',
+        platform: platform,
         createdAt: DateTime.now(),
         lastUsedAt: DateTime.now(),
       );
@@ -320,6 +334,7 @@ class NotificationService {
 
   /// Get unique device identifier
   Future<String> _getDeviceId() async {
+    if (kIsWeb) return 'web_device';
     try {
       if (Platform.isIOS) {
         final iosInfo = await _deviceInfo.iosInfo;
@@ -354,11 +369,11 @@ class NotificationService {
     final payload = 'orderId=$orderId${companyId != null ? '&companyId=$companyId' : ''}';
 
     await _localNotifications.zonedSchedule(
-      notificationId,
-      title,
-      body,
-      tzReminderTime,
-      NotificationDetails(
+      id: notificationId,
+      title: title,
+      body: body,
+      scheduledDate: tzReminderTime,
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           _remindersChannelId,
           _remindersChannelName,
@@ -373,8 +388,6 @@ class NotificationService {
           presentSound: true,
         ),
       ),
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       payload: payload,
     );
@@ -385,7 +398,7 @@ class NotificationService {
   /// Cancel a previously scheduled reminder for an order
   Future<void> cancelOrderReminder(String orderId) async {
     final notificationId = orderId.hashCode.abs() % 2147483647;
-    await _localNotifications.cancel(notificationId);
+    await _localNotifications.cancel(id: notificationId);
     debugPrint('[NotificationService] Cancelled reminder for order $orderId');
   }
 

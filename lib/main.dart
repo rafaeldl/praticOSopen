@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:praticos/mobx/auth_store.dart';
@@ -26,6 +27,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/firebase_options.dart';
 
 LocaleStore _localeStore = LocaleStore();
 AuthStore _authStore = AuthStore();
@@ -39,9 +41,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PackageInfo info = await PackageInfo.fromPlatform();
   Global.version = "${info.version} (${info.buildNumber})";
-  await Firebase.initializeApp();
-  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
-  FirebaseCrashlytics.instance.log("iniciando a aplicação");
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  if (!kIsWeb) {
+    await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+    FirebaseCrashlytics.instance.log("iniciando a aplicação");
+  }
 
   // Wire localeStore into authStore so language syncs on login
   _authStore.localeStore = _localeStore;
