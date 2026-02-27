@@ -31,12 +31,14 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAQplCVRqUqJkmYxLr-jdQKIKR8cnXFal0',
-    appId: '1:839332459506:web:907b70ea129edf52',
-    messagingSenderId: '839332459506',
-    projectId: 'caaac-dev',
-    authDomain: 'caaac-dev.firebaseapp.com',
-    databaseURL: 'https://caaac-dev.firebaseio.com',
-    storageBucket: 'caaac-dev.appspot.com',
+    apiKey: 'AIzaSyAd93aSERNbfNt7QU_ki1duzd7zppF6SvA',
+    appId: '1:940190275097:web:e627978b56523419a2fc88',
+    messagingSenderId: '940190275097',
+    projectId: 'praticos',
+    authDomain: 'praticos.firebaseapp.com',
+    databaseURL: 'https://praticos.firebaseio.com',
+    storageBucket: 'praticos.appspot.com',
+    measurementId: 'G-5L7Z0GSM2W',
   );
+
 }
