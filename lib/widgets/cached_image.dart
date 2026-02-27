@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-/// Cache manager customizado para imagens do PraticOS
-/// Configura limites de cache para melhor performance
+/// Cache manager customizado para imagens do PraticOS (mobile only)
+/// Na web, o CachedNetworkImage usa o cache padrão do browser.
 class PraticOSCacheManager {
   static const key = 'praticos_image_cache';
 
@@ -102,7 +103,9 @@ class CachedImage extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget image = CachedNetworkImage(
       imageUrl: imageUrl,
-      cacheManager: PraticOSCacheManager.instance,
+      // On web, skip custom cache manager (it depends on path_provider).
+      // The default CachedNetworkImage handles web via browser caching.
+      cacheManager: kIsWeb ? null : PraticOSCacheManager.instance,
       fit: fit,
       width: width,
       height: height,
@@ -179,11 +182,11 @@ class ImageCacheUtils {
   /// Pré-carrega uma lista de URLs para o cache
   /// Útil para fazer prefetch ao abrir tela de detalhes
   static Future<void> precacheImages(List<String> urls) async {
+    if (kIsWeb) return;
     for (final url in urls) {
       try {
         await PraticOSCacheManager.instance.downloadFile(url);
       } catch (e) {
-        // Ignora erros silenciosamente - é apenas prefetch
         print('Prefetch falhou para: $url');
       }
     }
@@ -191,11 +194,13 @@ class ImageCacheUtils {
 
   /// Limpa todo o cache de imagens
   static Future<void> clearCache() async {
+    if (kIsWeb) return;
     await PraticOSCacheManager.instance.emptyCache();
   }
 
   /// Remove uma imagem específica do cache
   static Future<void> removeFromCache(String url) async {
+    if (kIsWeb) return;
     await PraticOSCacheManager.instance.removeFile(url);
   }
 }

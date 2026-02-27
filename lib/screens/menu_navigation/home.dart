@@ -1,4 +1,5 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Divider, LinearProgressIndicator, AlwaysStoppedAnimation;
 // Keeping Material for specific color references if needed, but UI tree will be Cupertino.
@@ -150,7 +151,9 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final config = context.watch<SegmentConfigProvider>();
-    FirebaseCrashlytics.instance.log("Abrindo home (Cupertino)");
+    if (!kIsWeb) {
+      FirebaseCrashlytics.instance.log("Abrindo home (Cupertino)");
+    }
     // Ensuring default text style is available
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,

@@ -1,6 +1,7 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 /// Centralized analytics service for Firebase Analytics.
 ///
@@ -17,12 +18,14 @@ class AnalyticsService {
   /// Fire-and-forget wrapper. Never throws, never blocks UI.
   void _safe(Future<void> Function() fn) {
     fn().catchError((e, stack) {
-      FirebaseCrashlytics.instance.recordError(
-        e,
-        stack,
-        reason: 'AnalyticsService',
-        fatal: false,
-      );
+      if (!kIsWeb) {
+        FirebaseCrashlytics.instance.recordError(
+          e,
+          stack,
+          reason: 'AnalyticsService',
+          fatal: false,
+        );
+      }
     });
   }
 
