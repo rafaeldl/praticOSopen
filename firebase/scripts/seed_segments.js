@@ -586,7 +586,7 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Fabricante', 'en-US': 'Manufacturer', 'es-ES': 'Fabricante' }
       },
       {
-        key: 'device.serialNumber',
+        key: 'device.serial',
         type: 'label',
         labels: { 'pt-BR': 'IMEI', 'en-US': 'IMEI', 'es-ES': 'IMEI' }
       },
@@ -987,7 +987,7 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems', 'es-ES': 'Sistemas' }
       },
       {
-        key: 'device.serialNumber',
+        key: 'device.serial',
         type: 'label',
         labels: { 'pt-BR': 'Identificador', 'en-US': 'Identifier', 'es-ES': 'Identificador' }
       },
@@ -1060,7 +1060,7 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems', 'es-ES': 'Sistemas' }
       },
       {
-        key: 'device.serialNumber',
+        key: 'device.serial',
         type: 'label',
         labels: { 'pt-BR': 'Nº do Inversor', 'en-US': 'Inverter Serial', 'es-ES': 'Nº del Inversor' }
       },
@@ -1130,7 +1130,7 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Impressoras', 'en-US': 'Printers', 'es-ES': 'Impresoras' }
       },
       {
-        key: 'device.serialNumber',
+        key: 'device.serial',
         type: 'label',
         labels: { 'pt-BR': 'Número de Série', 'en-US': 'Serial Number', 'es-ES': 'Número de Serie' }
       },
@@ -1231,12 +1231,12 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Bloco/Torre', 'en-US': 'Block/Tower', 'es-ES': 'Bloque/Torre' }
       },
       {
-        key: 'device.serialNumber',
+        key: 'device.serial',
         type: 'label',
         labels: { 'pt-BR': 'Nº da Unidade', 'en-US': 'Unit Number', 'es-ES': 'Nº de Unidad' }
       },
       {
-        key: 'device.serialNumber.mask',
+        key: 'device.serial.mask',
         type: 'config',
         value: 'none',
       },
