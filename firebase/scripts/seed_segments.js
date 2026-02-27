@@ -431,6 +431,17 @@ const SEGMENTS = [
         sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
         order: 4,
       },
+
+      // Campos customizados da OS
+      {
+        key: 'service_order.observation',
+        type: 'textarea',
+        labels: { 'pt-BR': 'Observação', 'en-US': 'Observation', 'es-ES': 'Observación' },
+        placeholder: 'Ex: Cliente relata barulho no motor',
+        section: 'Detalhes',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 1,
+      },
     ],
   },
 
@@ -521,11 +532,11 @@ const SEGMENTS = [
         type: 'select',
         labels: { 'pt-BR': 'Voltagem', 'en-US': 'Voltage', 'es-ES': 'Voltaje' },
         required: true,
-        options: ['110V', '220V', 'Bifásico'],
+        options: ['110V', '220V', 'two_phase'],
         optionsI18n: [
           { value: '110V', labels: { 'pt-BR': '110V', 'en-US': '110V', 'es-ES': '110V' } },
           { value: '220V', labels: { 'pt-BR': '220V', 'en-US': '220V', 'es-ES': '220V' } },
-          { value: 'Bifásico', labels: { 'pt-BR': 'Bifásico', 'en-US': 'Two-phase', 'es-ES': 'Bifásico' } },
+          { value: 'two_phase', labels: { 'pt-BR': 'Bifásico', 'en-US': 'Two-phase', 'es-ES': 'Bifásico' } },
         ],
         section: 'Especificações',
         sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
@@ -586,15 +597,9 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Fabricante', 'en-US': 'Manufacturer', 'es-ES': 'Fabricante' }
       },
       {
-        key: 'device.serialNumber',
-        type: 'label',
-        labels: { 'pt-BR': 'IMEI', 'en-US': 'IMEI', 'es-ES': 'IMEI' }
-      },
-      // Configuração de máscara para IMEI
-      {
         key: 'device.serial',
         type: 'text',
-        labels: { 'pt-BR': 'IMEI/Número de Série', 'en-US': 'IMEI/Serial Number', 'es-ES': 'IMEI/Número de Serie' },
+        labels: { 'pt-BR': 'IMEI', 'en-US': 'IMEI', 'es-ES': 'IMEI' },
         masks: ['999999999999999'], // IMEI padrão (15 dígitos)
         placeholder: '123456789012345',
         keyboardType: 'number',
@@ -622,18 +627,6 @@ const SEGMENTS = [
       },
 
       // Campos customizados
-      {
-        key: 'device.imei',
-        type: 'text',
-        labels: { 'pt-BR': 'IMEI', 'en-US': 'IMEI', 'es-ES': 'IMEI' },
-        required: true,
-        maxLength: 15,
-        pattern: '^[0-9]{15}$',
-        placeholder: '123456789012345',
-        section: 'Identificação',
-        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
-        order: 1,
-      },
       {
         key: 'device.storage',
         type: 'select',
@@ -783,11 +776,11 @@ const SEGMENTS = [
         type: 'select',
         labels: { 'pt-BR': 'Voltagem', 'en-US': 'Voltage', 'es-ES': 'Voltaje' },
         required: true,
-        options: ['110V', '220V', 'Bivolt'],
+        options: ['110V', '220V', 'dual_voltage'],
         optionsI18n: [
           { value: '110V', labels: { 'pt-BR': '110V', 'en-US': '110V', 'es-ES': '110V' } },
           { value: '220V', labels: { 'pt-BR': '220V', 'en-US': '220V', 'es-ES': '220V' } },
-          { value: 'Bivolt', labels: { 'pt-BR': 'Bivolt', 'en-US': 'Dual Voltage', 'es-ES': 'Doble Voltaje' } },
+          { value: 'dual_voltage', labels: { 'pt-BR': 'Bivolt', 'en-US': 'Dual Voltage', 'es-ES': 'Doble Voltaje' } },
         ],
         section: 'Especificações',
         sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
@@ -843,12 +836,12 @@ const SEGMENTS = [
         key: 'device.voltage',
         type: 'select',
         labels: { 'pt-BR': 'Tensão do Local', 'en-US': 'Site Voltage', 'es-ES': 'Voltaje del Lugar' },
-        options: ['110V', '220V', 'Bivolt', 'Trifásico'],
+        options: ['110V', '220V', 'dual_voltage', 'three_phase'],
         optionsI18n: [
           { value: '110V', labels: { 'pt-BR': '110V', 'en-US': '110V', 'es-ES': '110V' } },
           { value: '220V', labels: { 'pt-BR': '220V', 'en-US': '220V', 'es-ES': '220V' } },
-          { value: 'Bivolt', labels: { 'pt-BR': 'Bivolt', 'en-US': 'Dual Voltage', 'es-ES': 'Doble Voltaje' } },
-          { value: 'Trifásico', labels: { 'pt-BR': 'Trifásico', 'en-US': 'Three-phase', 'es-ES': 'Trifásico' } },
+          { value: 'dual_voltage', labels: { 'pt-BR': 'Bivolt', 'en-US': 'Dual Voltage', 'es-ES': 'Doble Voltaje' } },
+          { value: 'three_phase', labels: { 'pt-BR': 'Trifásico', 'en-US': 'Three-phase', 'es-ES': 'Trifásico' } },
         ],
         section: 'Especificações',
         sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
@@ -910,11 +903,11 @@ const SEGMENTS = [
         key: 'device.waterType',
         type: 'select',
         labels: { 'pt-BR': 'Tipo de Água', 'en-US': 'Water Type', 'es-ES': 'Tipo de Agua' },
-        options: ['Fria', 'Quente', 'Ambas'],
+        options: ['cold', 'hot', 'both'],
         optionsI18n: [
-          { value: 'Fria', labels: { 'pt-BR': 'Fria', 'en-US': 'Cold', 'es-ES': 'Fría' } },
-          { value: 'Quente', labels: { 'pt-BR': 'Quente', 'en-US': 'Hot', 'es-ES': 'Caliente' } },
-          { value: 'Ambas', labels: { 'pt-BR': 'Ambas', 'en-US': 'Both', 'es-ES': 'Ambas' } },
+          { value: 'cold', labels: { 'pt-BR': 'Fria', 'en-US': 'Cold', 'es-ES': 'Fría' } },
+          { value: 'hot', labels: { 'pt-BR': 'Quente', 'en-US': 'Hot', 'es-ES': 'Caliente' } },
+          { value: 'both', labels: { 'pt-BR': 'Ambas', 'en-US': 'Both', 'es-ES': 'Ambas' } },
         ],
         section: 'Especificações',
         sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
@@ -924,12 +917,12 @@ const SEGMENTS = [
         key: 'device.pressure',
         type: 'select',
         labels: { 'pt-BR': 'Pressão', 'en-US': 'Pressure', 'es-ES': 'Presión' },
-        options: ['Baixa', 'Normal', 'Alta', 'Não avaliada'],
+        options: ['low', 'normal', 'high', 'not_assessed'],
         optionsI18n: [
-          { value: 'Baixa', labels: { 'pt-BR': 'Baixa', 'en-US': 'Low', 'es-ES': 'Baja' } },
-          { value: 'Normal', labels: { 'pt-BR': 'Normal', 'en-US': 'Normal', 'es-ES': 'Normal' } },
-          { value: 'Alta', labels: { 'pt-BR': 'Alta', 'en-US': 'High', 'es-ES': 'Alta' } },
-          { value: 'Não avaliada', labels: { 'pt-BR': 'Não avaliada', 'en-US': 'Not assessed', 'es-ES': 'No evaluada' } },
+          { value: 'low', labels: { 'pt-BR': 'Baixa', 'en-US': 'Low', 'es-ES': 'Baja' } },
+          { value: 'normal', labels: { 'pt-BR': 'Normal', 'en-US': 'Normal', 'es-ES': 'Normal' } },
+          { value: 'high', labels: { 'pt-BR': 'Alta', 'en-US': 'High', 'es-ES': 'Alta' } },
+          { value: 'not_assessed', labels: { 'pt-BR': 'Não avaliada', 'en-US': 'Not assessed', 'es-ES': 'No evaluada' } },
         ],
         section: 'Especificações',
         sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
@@ -987,7 +980,7 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems', 'es-ES': 'Sistemas' }
       },
       {
-        key: 'device.serialNumber',
+        key: 'device.serial',
         type: 'label',
         labels: { 'pt-BR': 'Identificador', 'en-US': 'Identifier', 'es-ES': 'Identificador' }
       },
@@ -1007,13 +1000,13 @@ const SEGMENTS = [
         key: 'device.systemType',
         type: 'select',
         labels: { 'pt-BR': 'Tipo de Sistema', 'en-US': 'System Type', 'es-ES': 'Tipo de Sistema' },
-        options: ['CFTV', 'Alarme', 'Cerca elétrica', 'Controle de acesso', 'Interfonia'],
+        options: ['cctv', 'alarm', 'electric_fence', 'access_control', 'intercom'],
         optionsI18n: [
-          { value: 'CFTV', labels: { 'pt-BR': 'CFTV', 'en-US': 'CCTV', 'es-ES': 'CCTV' } },
-          { value: 'Alarme', labels: { 'pt-BR': 'Alarme', 'en-US': 'Alarm', 'es-ES': 'Alarma' } },
-          { value: 'Cerca elétrica', labels: { 'pt-BR': 'Cerca elétrica', 'en-US': 'Electric Fence', 'es-ES': 'Cerca eléctrica' } },
-          { value: 'Controle de acesso', labels: { 'pt-BR': 'Controle de acesso', 'en-US': 'Access Control', 'es-ES': 'Control de acceso' } },
-          { value: 'Interfonia', labels: { 'pt-BR': 'Interfonia', 'en-US': 'Intercom', 'es-ES': 'Intercomunicador' } },
+          { value: 'cctv', labels: { 'pt-BR': 'CFTV', 'en-US': 'CCTV', 'es-ES': 'CCTV' } },
+          { value: 'alarm', labels: { 'pt-BR': 'Alarme', 'en-US': 'Alarm', 'es-ES': 'Alarma' } },
+          { value: 'electric_fence', labels: { 'pt-BR': 'Cerca elétrica', 'en-US': 'Electric Fence', 'es-ES': 'Cerca eléctrica' } },
+          { value: 'access_control', labels: { 'pt-BR': 'Controle de acesso', 'en-US': 'Access Control', 'es-ES': 'Control de acceso' } },
+          { value: 'intercom', labels: { 'pt-BR': 'Interfonia', 'en-US': 'Intercom', 'es-ES': 'Intercomunicador' } },
         ],
         section: 'Especificações',
         sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
@@ -1060,7 +1053,7 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Sistemas', 'en-US': 'Systems', 'es-ES': 'Sistemas' }
       },
       {
-        key: 'device.serialNumber',
+        key: 'device.serial',
         type: 'label',
         labels: { 'pt-BR': 'Nº do Inversor', 'en-US': 'Inverter Serial', 'es-ES': 'Nº del Inversor' }
       },
@@ -1130,7 +1123,7 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Impressoras', 'en-US': 'Printers', 'es-ES': 'Impresoras' }
       },
       {
-        key: 'device.serialNumber',
+        key: 'device.serial',
         type: 'label',
         labels: { 'pt-BR': 'Número de Série', 'en-US': 'Serial Number', 'es-ES': 'Número de Serie' }
       },
@@ -1145,13 +1138,13 @@ const SEGMENTS = [
         key: 'device.technology',
         type: 'select',
         labels: { 'pt-BR': 'Tecnologia', 'en-US': 'Technology', 'es-ES': 'Tecnología' },
-        options: ['Laser', 'Jato de tinta', 'Térmica', 'Matricial', 'Outra'],
+        options: ['laser', 'inkjet', 'thermal', 'dot_matrix', 'other'],
         optionsI18n: [
-          { value: 'Laser', labels: { 'pt-BR': 'Laser', 'en-US': 'Laser', 'es-ES': 'Láser' } },
-          { value: 'Jato de tinta', labels: { 'pt-BR': 'Jato de tinta', 'en-US': 'Inkjet', 'es-ES': 'Inyección de tinta' } },
-          { value: 'Térmica', labels: { 'pt-BR': 'Térmica', 'en-US': 'Thermal', 'es-ES': 'Térmica' } },
-          { value: 'Matricial', labels: { 'pt-BR': 'Matricial', 'en-US': 'Dot Matrix', 'es-ES': 'Matricial' } },
-          { value: 'Outra', labels: { 'pt-BR': 'Outra', 'en-US': 'Other', 'es-ES': 'Otra' } },
+          { value: 'laser', labels: { 'pt-BR': 'Laser', 'en-US': 'Laser', 'es-ES': 'Láser' } },
+          { value: 'inkjet', labels: { 'pt-BR': 'Jato de tinta', 'en-US': 'Inkjet', 'es-ES': 'Inyección de tinta' } },
+          { value: 'thermal', labels: { 'pt-BR': 'Térmica', 'en-US': 'Thermal', 'es-ES': 'Térmica' } },
+          { value: 'dot_matrix', labels: { 'pt-BR': 'Matricial', 'en-US': 'Dot Matrix', 'es-ES': 'Matricial' } },
+          { value: 'other', labels: { 'pt-BR': 'Outra', 'en-US': 'Other', 'es-ES': 'Otra' } },
         ],
         section: 'Especificações',
         sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
@@ -1161,10 +1154,10 @@ const SEGMENTS = [
         key: 'device.isColor',
         type: 'select',
         labels: { 'pt-BR': 'Colorida?', 'en-US': 'Color?', 'es-ES': '¿Color?' },
-        options: ['Sim', 'Não'],
+        options: ['yes', 'no'],
         optionsI18n: [
-          { value: 'Sim', labels: { 'pt-BR': 'Sim', 'en-US': 'Yes', 'es-ES': 'Sí' } },
-          { value: 'Não', labels: { 'pt-BR': 'Não', 'en-US': 'No', 'es-ES': 'No' } },
+          { value: 'yes', labels: { 'pt-BR': 'Sim', 'en-US': 'Yes', 'es-ES': 'Sí' } },
+          { value: 'no', labels: { 'pt-BR': 'Não', 'en-US': 'No', 'es-ES': 'No' } },
         ],
         section: 'Especificações',
         sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
@@ -1231,12 +1224,12 @@ const SEGMENTS = [
         labels: { 'pt-BR': 'Bloco/Torre', 'en-US': 'Block/Tower', 'es-ES': 'Bloque/Torre' }
       },
       {
-        key: 'device.serialNumber',
+        key: 'device.serial',
         type: 'label',
         labels: { 'pt-BR': 'Nº da Unidade', 'en-US': 'Unit Number', 'es-ES': 'Nº de Unidad' }
       },
       {
-        key: 'device.serialNumber.mask',
+        key: 'device.serial.mask',
         type: 'config',
         value: 'none',
       },
@@ -1261,13 +1254,13 @@ const SEGMENTS = [
         key: 'device.unitType',
         type: 'select',
         labels: { 'pt-BR': 'Tipo de Unidade', 'en-US': 'Unit Type', 'es-ES': 'Tipo de Unidad' },
-        options: ['Apartamento', 'Garagem', 'Hobby Box', 'Sala Comercial', 'Área Comum'],
+        options: ['apartment', 'garage', 'storage_unit', 'commercial_office', 'common_area'],
         optionsI18n: [
-          { value: 'Apartamento', labels: { 'pt-BR': 'Apartamento', 'en-US': 'Apartment', 'es-ES': 'Departamento' } },
-          { value: 'Garagem', labels: { 'pt-BR': 'Garagem', 'en-US': 'Garage', 'es-ES': 'Cochera' } },
-          { value: 'Hobby Box', labels: { 'pt-BR': 'Hobby Box', 'en-US': 'Storage Unit', 'es-ES': 'Depósito' } },
-          { value: 'Sala Comercial', labels: { 'pt-BR': 'Sala Comercial', 'en-US': 'Commercial Office', 'es-ES': 'Oficina Comercial' } },
-          { value: 'Área Comum', labels: { 'pt-BR': 'Área Comum', 'en-US': 'Common Area', 'es-ES': 'Área Común' } },
+          { value: 'apartment', labels: { 'pt-BR': 'Apartamento', 'en-US': 'Apartment', 'es-ES': 'Departamento' } },
+          { value: 'garage', labels: { 'pt-BR': 'Garagem', 'en-US': 'Garage', 'es-ES': 'Cochera' } },
+          { value: 'storage_unit', labels: { 'pt-BR': 'Hobby Box', 'en-US': 'Storage Unit', 'es-ES': 'Depósito' } },
+          { value: 'commercial_office', labels: { 'pt-BR': 'Sala Comercial', 'en-US': 'Commercial Office', 'es-ES': 'Oficina Comercial' } },
+          { value: 'common_area', labels: { 'pt-BR': 'Área Comum', 'en-US': 'Common Area', 'es-ES': 'Área Común' } },
         ],
         section: 'Identificação',
         sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
@@ -1277,15 +1270,15 @@ const SEGMENTS = [
         key: 'device.affectedSystem',
         type: 'select',
         labels: { 'pt-BR': 'Sistema Afetado', 'en-US': 'Affected System', 'es-ES': 'Sistema Afectado' },
-        options: ['Hidráulico', 'Elétrico', 'Estrutural', 'Impermeabilização', 'Acabamento', 'Esquadrias', 'Pintura'],
+        options: ['plumbing', 'electrical', 'structural', 'waterproofing', 'finishing', 'frames_windows', 'painting'],
         optionsI18n: [
-          { value: 'Hidráulico', labels: { 'pt-BR': 'Hidráulico', 'en-US': 'Plumbing', 'es-ES': 'Hidráulico' } },
-          { value: 'Elétrico', labels: { 'pt-BR': 'Elétrico', 'en-US': 'Electrical', 'es-ES': 'Eléctrico' } },
-          { value: 'Estrutural', labels: { 'pt-BR': 'Estrutural', 'en-US': 'Structural', 'es-ES': 'Estructural' } },
-          { value: 'Impermeabilização', labels: { 'pt-BR': 'Impermeabilização', 'en-US': 'Waterproofing', 'es-ES': 'Impermeabilización' } },
-          { value: 'Acabamento', labels: { 'pt-BR': 'Acabamento', 'en-US': 'Finishing', 'es-ES': 'Acabado' } },
-          { value: 'Esquadrias', labels: { 'pt-BR': 'Esquadrias', 'en-US': 'Frames & Windows', 'es-ES': 'Carpintería' } },
-          { value: 'Pintura', labels: { 'pt-BR': 'Pintura', 'en-US': 'Painting', 'es-ES': 'Pintura' } },
+          { value: 'plumbing', labels: { 'pt-BR': 'Hidráulico', 'en-US': 'Plumbing', 'es-ES': 'Hidráulico' } },
+          { value: 'electrical', labels: { 'pt-BR': 'Elétrico', 'en-US': 'Electrical', 'es-ES': 'Eléctrico' } },
+          { value: 'structural', labels: { 'pt-BR': 'Estrutural', 'en-US': 'Structural', 'es-ES': 'Estructural' } },
+          { value: 'waterproofing', labels: { 'pt-BR': 'Impermeabilização', 'en-US': 'Waterproofing', 'es-ES': 'Impermeabilización' } },
+          { value: 'finishing', labels: { 'pt-BR': 'Acabamento', 'en-US': 'Finishing', 'es-ES': 'Acabado' } },
+          { value: 'frames_windows', labels: { 'pt-BR': 'Esquadrias', 'en-US': 'Frames & Windows', 'es-ES': 'Carpintería' } },
+          { value: 'painting', labels: { 'pt-BR': 'Pintura', 'en-US': 'Painting', 'es-ES': 'Pintura' } },
         ],
         section: 'Especificações',
         sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },

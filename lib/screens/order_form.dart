@@ -36,6 +36,7 @@ import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
 import 'package:praticos/services/location_service.dart';
+import 'package:praticos/widgets/dynamic_field_builder.dart';
 
 class OrderForm extends StatefulWidget {
   @override
@@ -141,8 +142,10 @@ class _OrderFormState extends State<OrderForm> {
                     delegate: SliverChildListDelegate([
                       _buildPhotosSection(context, config),
                       _buildClientDeviceSection(context, config),
-                      _buildSummarySection(context, config),
                       _buildDevicesSection(context, config),
+                      _buildSummarySection(context, config),
+                      // Dynamic Custom Field Sections (from segment config)
+                      ..._buildCustomFieldSections(config),
                       // Items sections — conditional on device grouping
                       if (_store.devices.length >= 2) ...[
                         _buildGroupedItemsByDevice(context, config, services, products, forms),
@@ -354,6 +357,70 @@ class _OrderFormState extends State<OrderForm> {
         );
       },
     );
+  }
+
+  /// Keys of hardcoded fields already rendered in the order form.
+  /// The segment may configure these fields (label, mask, validation)
+  /// but they must not appear as duplicate dynamic fields.
+  static const _builtInFieldKeys = {
+    'service_order.status',
+    'service_order.scheduledDate',
+    'service_order.dueDate',
+    'service_order.total',
+    'service_order.payment',
+    'service_order.address',
+  };
+
+  List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
+    final grouped = config.fieldsGroupedBySectionLocalized(
+      'service_order',
+      exclude: _builtInFieldKeys,
+    );
+    if (grouped.isEmpty) return [];
+
+    final locale = config.locale;
+    final sections = <Widget>[];
+
+    for (final entry in grouped.entries) {
+      final sectionName = entry.key;
+      final fields = entry.value;
+
+      sections.add(
+        CupertinoListSection.insetGrouped(
+          header: Text(
+            sectionName.toUpperCase(),
+            style: TextStyle(
+              fontSize: 13,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+          ),
+          children: fields.map((field) {
+            return DynamicFieldBuilder(
+              field: field,
+              value: _store.order?.customData?[field.key],
+              locale: locale,
+              onChanged: (newValue) {
+                setState(() {
+                  _store.order?.customData ??= {};
+                  if (newValue == null) {
+                    _store.order!.customData!.remove(field.key);
+                  } else {
+                    _store.order!.customData![field.key] = newValue;
+                  }
+                  // Clean up empty customData
+                  if (_store.order!.customData!.isEmpty) {
+                    _store.order!.customData = null;
+                  }
+                });
+                _store.createItem();
+              },
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    return sections;
   }
 
   Widget _buildClientDeviceSection(BuildContext context, SegmentConfigProvider config) {

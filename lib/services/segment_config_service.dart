@@ -203,6 +203,8 @@ class SegmentConfigService {
         return _l10n!.phone;
 
       // Campos de device
+      case 'device.category':
+        return _l10n!.deviceCategory;
       case 'device.brand':
         return _l10n!.brand;
       case 'device.model':
@@ -487,6 +489,38 @@ class SegmentConfigService {
     for (final field in fields) {
       final section = field.section ?? 'Geral';
       grouped.putIfAbsent(section, () => []).add(field);
+    }
+
+    return grouped;
+  }
+
+  /// Obtém campos de formulário agrupados por seção localizada
+  ///
+  /// Filtra campos 'config' e 'label', agrupa por seção traduzida,
+  /// e ordena por [order] dentro de cada seção.
+  ///
+  /// [exclude] permite excluir keys de campos já renderizados pelo form
+  /// (campos hardcoded como device.serial, device.brand, etc).
+  /// O campo continua acessível via getField()/getMasks()/label() para
+  /// configurar o campo hardcoded, mas não aparece como campo dinâmico.
+  Map<String, List<CustomField>> fieldsGroupedBySectionLocalized(
+    String namespace, {
+    Set<String>? exclude,
+  }) {
+    final fields = fieldsFor(namespace)
+        .where((f) => f.isField && f.type != 'config')
+        .where((f) => exclude == null || !exclude.contains(f.key))
+        .toList();
+
+    final grouped = <String, List<CustomField>>{};
+    for (final field in fields) {
+      final sectionName = field.getSectionLabel(_locale);
+      grouped.putIfAbsent(sectionName, () => []).add(field);
+    }
+
+    // Sort fields within each section by order
+    for (final section in grouped.values) {
+      section.sort((a, b) => (a.order ?? 999).compareTo(b.order ?? 999));
     }
 
     return grouped;

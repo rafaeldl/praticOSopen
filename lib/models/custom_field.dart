@@ -17,6 +17,10 @@ class CustomField {
 
   // Para select/radio
   final List<String>? options;
+  final List<Map<String, dynamic>>? optionsI18n; // Tradução das opções
+
+  // Organização - i18n
+  final Map<String, String>? sectionI18n; // Tradução do nome da seção
 
   // Configurações de input mask
   final List<String>? masks; // Máscaras universais (não variam por país)
@@ -42,6 +46,8 @@ class CustomField {
     this.prefix,
     this.placeholder,
     this.options,
+    this.optionsI18n,
+    this.sectionI18n,
     this.masks,
     this.masksByCountry,
     this.keyboardType,
@@ -67,6 +73,13 @@ class CustomField {
       placeholder: json['placeholder'],
       options: json['options'] != null
           ? List<String>.from(json['options'])
+          : null,
+      optionsI18n: json['optionsI18n'] != null
+          ? List<Map<String, dynamic>>.from(
+              (json['optionsI18n'] as List).map((e) => Map<String, dynamic>.from(e)))
+          : null,
+      sectionI18n: json['sectionI18n'] != null
+          ? Map<String, String>.from(json['sectionI18n'])
           : null,
       masks: json['masks'] != null
           ? List<String>.from(json['masks'])
@@ -98,6 +111,8 @@ class CustomField {
       if (prefix != null) 'prefix': prefix,
       if (placeholder != null) 'placeholder': placeholder,
       if (options != null) 'options': options,
+      if (optionsI18n != null) 'optionsI18n': optionsI18n,
+      if (sectionI18n != null) 'sectionI18n': sectionI18n,
       if (masks != null) 'masks': masks,
       if (masksByCountry != null) 'masksByCountry': masksByCountry,
       if (keyboardType != null) 'keyboardType': keyboardType,
@@ -143,6 +158,38 @@ class CustomField {
 
     // 3. Fallback final: português brasileiro
     return labels['pt-BR'] ?? key;
+  }
+
+  /// Obtém label traduzida para uma opção de select
+  String getOptionLabel(String value, String locale) {
+    if (optionsI18n == null) return value;
+    try {
+      final entry = optionsI18n!.firstWhere((o) => o['value'] == value);
+      final labels = Map<String, String>.from(entry['labels'] ?? {});
+      return _resolveLocale(labels, locale) ?? value;
+    } catch (e) {
+      return value;
+    }
+  }
+
+  /// Obtém nome da seção traduzido
+  String getSectionLabel(String locale) {
+    if (sectionI18n == null) return section ?? 'Geral';
+    return _resolveLocale(sectionI18n!, locale) ?? section ?? 'Geral';
+  }
+
+  /// Resolve locale com fallback inteligente
+  static String? _resolveLocale(Map<String, String> map, String locale) {
+    if (map.containsKey(locale)) return map[locale];
+    final languageCode = locale.split('-')[0].split('_')[0];
+    final fallback = switch (languageCode) {
+      'pt' => 'pt-BR',
+      'en' => 'en-US',
+      'es' => 'es-ES',
+      _ => 'pt-BR',
+    };
+    if (fallback != locale && map.containsKey(fallback)) return map[fallback];
+    return map['pt-BR'];
   }
 
   /// Verifica se é apenas um label override

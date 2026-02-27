@@ -11,6 +11,7 @@ class Product extends BaseAuditCompany {
   double? value;
   String? photo;
   List<String>? keywords;
+  Map<String, dynamic>? customData;
 
   Product();
   factory Product.fromJson(Map<String, dynamic> json) =>
