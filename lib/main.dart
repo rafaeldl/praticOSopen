@@ -42,9 +42,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PackageInfo info = await PackageInfo.fromPlatform();
   Global.version = "${info.version} (${info.buildNumber})";
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.web,
+    );
+  } else {
+    await Firebase.initializeApp();
+  }
   if (!kIsWeb) {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
     FirebaseCrashlytics.instance.log("iniciando a aplicação");
