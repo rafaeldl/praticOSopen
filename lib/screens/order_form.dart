@@ -142,10 +142,10 @@ class _OrderFormState extends State<OrderForm> {
                     delegate: SliverChildListDelegate([
                       _buildPhotosSection(context, config),
                       _buildClientDeviceSection(context, config),
+                      _buildDevicesSection(context, config),
                       _buildSummarySection(context, config),
                       // Dynamic Custom Field Sections (from segment config)
                       ..._buildCustomFieldSections(config),
-                      _buildDevicesSection(context, config),
                       // Items sections — conditional on device grouping
                       if (_store.devices.length >= 2) ...[
                         _buildGroupedItemsByDevice(context, config, services, products, forms),
