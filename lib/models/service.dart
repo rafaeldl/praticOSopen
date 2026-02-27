@@ -11,6 +11,7 @@ class Service extends BaseAuditCompany {
   double? value;
   String? photo;
   List<String>? keywords;
+  Map<String, dynamic>? customData;
 
   Service();
   factory Service.fromJson(Map<String, dynamic> json) =>

@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/mobx/customer_store.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/services/location_service.dart';
 import 'package:praticos/widgets/dynamic_text_field.dart';
+import 'package:praticos/widgets/dynamic_field_builder.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
 class CustomerFormScreen extends StatefulWidget {
@@ -30,6 +33,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
       } else {
         _customer = Customer();
       }
+      _customer!.customData ??= {};
       _initialized = true;
     }
   }
@@ -40,6 +44,10 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       _formKey.currentState!.save();
+      // Clean up empty customData to avoid storing empty map in Firestore
+      if (_customer!.customData != null && _customer!.customData!.isEmpty) {
+        _customer!.customData = null;
+      }
       await _customerStore.saveCustomer(_customer!);
       setState(() => _isLoading = false);
       if (mounted) {
@@ -50,6 +58,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
@@ -155,10 +164,70 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                   ),
                 ],
               ),
+
+              // Dynamic Custom Field Sections (from segment config)
+              ..._buildCustomFieldSections(config),
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// Keys of hardcoded fields already rendered above.
+  /// The segment may configure these fields (label, mask, validation)
+  /// but they must not appear as duplicate dynamic fields.
+  static const _builtInFieldKeys = {
+    'customer.name',
+    'customer.phone',
+    'customer.email',
+    'customer.address',
+  };
+
+  List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
+    final grouped = config.fieldsGroupedBySectionLocalized(
+      'customer',
+      exclude: _builtInFieldKeys,
+    );
+    if (grouped.isEmpty) return [];
+
+    final locale = config.locale;
+    final sections = <Widget>[];
+
+    for (final entry in grouped.entries) {
+      final sectionName = entry.key;
+      final fields = entry.value;
+
+      sections.add(
+        CupertinoListSection.insetGrouped(
+          header: Text(
+            sectionName.toUpperCase(),
+            style: TextStyle(
+              fontSize: 13,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+          ),
+          children: fields.map((field) {
+            return DynamicFieldBuilder(
+              field: field,
+              value: _customer?.customData?[field.key],
+              locale: locale,
+              onChanged: (newValue) {
+                setState(() {
+                  _customer?.customData ??= {};
+                  if (newValue == null) {
+                    _customer!.customData!.remove(field.key);
+                  } else {
+                    _customer!.customData![field.key] = newValue;
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    return sections;
   }
 }

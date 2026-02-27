@@ -1,9 +1,12 @@
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/mobx/product_store.dart';
 import 'package:praticos/models/product.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/widgets/dynamic_field_builder.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 
 class ProductFormScreen extends StatefulWidget {
   const ProductFormScreen({super.key});
@@ -49,6 +52,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       } else {
         _product = Product();
       }
+      _product!.customData ??= {};
       _valueController.text = _convertToCurrency(_product?.value);
       _initialized = true;
     }
@@ -60,6 +64,10 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       _formKey.currentState!.save();
+      // Clean up empty customData to avoid storing empty map in Firestore
+      if (_product!.customData != null && _product!.customData!.isEmpty) {
+        _product!.customData = null;
+      }
       await _productStore.saveProduct(_product!);
       setState(() => _isLoading = false);
       if (mounted) {
@@ -107,6 +115,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final config = context.watch<SegmentConfigProvider>();
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       navigationBar: CupertinoNavigationBar(
@@ -222,11 +231,67 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
                   ),
                 ],
               ),
+
+              // Dynamic Custom Field Sections (from segment config)
+              ..._buildCustomFieldSections(config),
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// Keys of hardcoded fields already rendered above.
+  static const _builtInFieldKeys = {
+    'product.name',
+    'product.value',
+  };
+
+  List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
+    final grouped = config.fieldsGroupedBySectionLocalized(
+      'product',
+      exclude: _builtInFieldKeys,
+    );
+    if (grouped.isEmpty) return [];
+
+    final locale = config.locale;
+    final sections = <Widget>[];
+
+    for (final entry in grouped.entries) {
+      final sectionName = entry.key;
+      final fields = entry.value;
+
+      sections.add(
+        CupertinoListSection.insetGrouped(
+          header: Text(
+            sectionName.toUpperCase(),
+            style: TextStyle(
+              fontSize: 13,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+          ),
+          children: fields.map((field) {
+            return DynamicFieldBuilder(
+              field: field,
+              value: _product?.customData?[field.key],
+              locale: locale,
+              onChanged: (newValue) {
+                setState(() {
+                  _product?.customData ??= {};
+                  if (newValue == null) {
+                    _product!.customData!.remove(field.key);
+                  } else {
+                    _product!.customData![field.key] = newValue;
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    return sections;
   }
 
   String _convertToCurrency(double? total) {

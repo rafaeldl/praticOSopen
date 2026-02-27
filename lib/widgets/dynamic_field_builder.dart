@@ -6,7 +6,7 @@ import 'package:praticos/extensions/context_extensions.dart';
 
 /// Renderiza o widget Cupertino apropriado para um [CustomField].
 ///
-/// Suporta os tipos: text, number, select, date.
+/// Suporta os tipos: text, textarea, number, select, date.
 /// Segue padrões visuais Cupertino (CupertinoListTile, CupertinoActionSheet, etc).
 class DynamicFieldBuilder extends StatelessWidget {
   final CustomField field;
@@ -27,6 +27,8 @@ class DynamicFieldBuilder extends StatelessWidget {
     switch (field.type) {
       case 'text':
         return _buildTextField(context);
+      case 'textarea':
+        return _buildTextAreaField(context);
       case 'number':
         return _buildNumberField(context);
       case 'select':
@@ -67,6 +69,18 @@ class DynamicFieldBuilder extends StatelessWidget {
         }
         return null;
       },
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // TEXTAREA
+  // ════════════════════════════════════════════════════════════
+
+  Widget _buildTextAreaField(BuildContext context) {
+    return _TextAreaField(
+      initialValue: value as String?,
+      placeholder: field.placeholder ?? field.getLabel(locale),
+      onChanged: (val) => onChanged(val.isEmpty ? null : val),
     );
   }
 
@@ -270,5 +284,62 @@ class DynamicFieldBuilder extends StatelessWidget {
     if (value is DateTime) return value;
     if (value is String) return DateTime.tryParse(value);
     return null;
+  }
+}
+
+/// StatefulWidget that manages its own TextEditingController
+/// to avoid cursor reset on rebuild.
+class _TextAreaField extends StatefulWidget {
+  final String? initialValue;
+  final String? placeholder;
+  final ValueChanged<String> onChanged;
+
+  const _TextAreaField({
+    this.initialValue,
+    this.placeholder,
+    required this.onChanged,
+  });
+
+  @override
+  State<_TextAreaField> createState() => _TextAreaFieldState();
+}
+
+class _TextAreaFieldState extends State<_TextAreaField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialValue);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: CupertinoTextField(
+        controller: _controller,
+        placeholder: widget.placeholder,
+        minLines: 3,
+        maxLines: 6,
+        textCapitalization: TextCapitalization.sentences,
+        style: TextStyle(
+          fontSize: 16,
+          color: CupertinoColors.label.resolveFrom(context),
+        ),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        onChanged: widget.onChanged,
+      ),
+    );
   }
 }

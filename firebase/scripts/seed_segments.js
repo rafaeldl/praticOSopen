@@ -431,6 +431,17 @@ const SEGMENTS = [
         sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
         order: 4,
       },
+
+      // Campos customizados da OS
+      {
+        key: 'service_order.observation',
+        type: 'textarea',
+        labels: { 'pt-BR': 'Observação', 'en-US': 'Observation', 'es-ES': 'Observación' },
+        placeholder: 'Ex: Cliente relata barulho no motor',
+        section: 'Detalhes',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 1,
+      },
     ],
   },
 

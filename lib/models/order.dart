@@ -49,6 +49,9 @@ class Order extends BaseAuditCompany {
   double? latitude;
   double? longitude;
 
+  /// Dynamic custom fields from segment config
+  Map<String, dynamic>? customData;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 
