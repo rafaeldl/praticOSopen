@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -450,9 +451,11 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         useScheduling: useScheduling,
       );
 
-      // Initialize notifications after user is fully authenticated
-      final notificationStore = context.read<NotificationStore>();
-      notificationStore.initialize();
+      // Initialize notifications after user is fully authenticated (mobile only)
+      if (!kIsWeb) {
+        final notificationStore = context.read<NotificationStore>();
+        notificationStore.initialize();
+      }
 
       setState(() {
         _isLoading = false;
