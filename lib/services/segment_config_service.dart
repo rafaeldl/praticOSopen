@@ -203,6 +203,8 @@ class SegmentConfigService {
         return _l10n!.phone;
 
       // Campos de device
+      case 'device.category':
+        return _l10n!.deviceCategory;
       case 'device.brand':
         return _l10n!.brand;
       case 'device.model':
@@ -487,6 +489,29 @@ class SegmentConfigService {
     for (final field in fields) {
       final section = field.section ?? 'Geral';
       grouped.putIfAbsent(section, () => []).add(field);
+    }
+
+    return grouped;
+  }
+
+  /// Obtém campos de formulário agrupados por seção localizada
+  ///
+  /// Filtra campos 'config' e 'label', agrupa por seção traduzida,
+  /// e ordena por [order] dentro de cada seção.
+  Map<String, List<CustomField>> fieldsGroupedBySectionLocalized(String namespace) {
+    final fields = fieldsFor(namespace)
+        .where((f) => f.isField && f.type != 'config')
+        .toList();
+
+    final grouped = <String, List<CustomField>>{};
+    for (final field in fields) {
+      final sectionName = field.getSectionLabel(_locale);
+      grouped.putIfAbsent(sectionName, () => []).add(field);
+    }
+
+    // Sort fields within each section by order
+    for (final section in grouped.values) {
+      section.sort((a, b) => (a.order ?? 999).compareTo(b.order ?? 999));
     }
 
     return grouped;

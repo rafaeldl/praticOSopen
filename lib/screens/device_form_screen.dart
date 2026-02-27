@@ -4,6 +4,7 @@ import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/widgets/dynamic_text_field.dart';
+import 'package:praticos/widgets/dynamic_field_builder.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -33,6 +34,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
       } else {
         _device = Device();
       }
+      _device!.customData ??= {};
       _initialized = true;
     }
   }
@@ -43,6 +45,10 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       _formKey.currentState!.save();
+      // Clean up empty customData to avoid storing empty map in Firestore
+      if (_device!.customData != null && _device!.customData!.isEmpty) {
+        _device!.customData = null;
+      }
       await _deviceStore.saveDevice(_device!);
       setState(() => _isLoading = false);
       if (mounted) {
@@ -138,7 +144,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            CupertinoIcons.car_detailed,
+                            config.deviceIcon,
                             size: 50,
                             color: CupertinoColors.systemGrey.resolveFrom(context),
                           ),
@@ -186,7 +192,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                     title: SizedBox(
                       width: 100,
                       child: Text(
-                        context.l10n.deviceCategory,
+                        config.label(LabelKeys.deviceCategory),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
@@ -204,7 +210,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                       size: 20,
                       color: CupertinoColors.systemGrey.resolveFrom(context),
                     ),
-                    onTap: () => _selectCategory(context),
+                    onTap: () => _selectCategory(context, config),
                   ),
 
                   // Brand/Manufacturer Field
@@ -268,6 +274,9 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                   ),
                 ],
               ),
+
+              // Dynamic Custom Field Sections (from segment config)
+              ..._buildCustomFieldSections(config),
             ],
           ),
         ),
@@ -275,13 +284,57 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     );
   }
 
-  Future<void> _selectCategory(BuildContext context) async {
+  List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
+    final grouped = config.fieldsGroupedBySectionLocalized('device');
+    if (grouped.isEmpty) return [];
+
+    final locale = config.locale;
+    final sections = <Widget>[];
+
+    for (final entry in grouped.entries) {
+      final sectionName = entry.key;
+      final fields = entry.value;
+
+      sections.add(
+        CupertinoListSection.insetGrouped(
+          header: Text(
+            sectionName.toUpperCase(),
+            style: TextStyle(
+              fontSize: 13,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+          ),
+          children: fields.map((field) {
+            return DynamicFieldBuilder(
+              field: field,
+              value: _device?.customData?[field.key],
+              locale: locale,
+              onChanged: (newValue) {
+                setState(() {
+                  _device?.customData ??= {};
+                  if (newValue == null) {
+                    _device!.customData!.remove(field.key);
+                  } else {
+                    _device!.customData![field.key] = newValue;
+                  }
+                });
+              },
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    return sections;
+  }
+
+  Future<void> _selectCategory(BuildContext context, SegmentConfigProvider config) async {
     final value = await Navigator.pushNamed(
       context,
       '/accumulated_value_list',
       arguments: {
         'fieldType': 'deviceCategory',
-        'title': context.l10n.deviceCategory,
+        'title': config.label(LabelKeys.deviceCategory),
         'currentValue': _device?.category,
         'allowClear': true,
       },

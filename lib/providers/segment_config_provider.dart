@@ -182,6 +182,10 @@ class SegmentConfigProvider extends ChangeNotifier {
   Map<String, List<CustomField>> fieldsGroupedBySection(String namespace) =>
       _service.fieldsGroupedBySection(namespace);
 
+  /// Obtém campos de formulário agrupados por seção localizada
+  Map<String, List<CustomField>> fieldsGroupedBySectionLocalized(String namespace) =>
+      _service.fieldsGroupedBySectionLocalized(namespace);
+
   // ════════════════════════════════════════════════════════════
   // FIELD VALIDATION & MASKS
   // ════════════════════════════════════════════════════════════
