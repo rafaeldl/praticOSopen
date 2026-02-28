@@ -198,18 +198,24 @@ const uiStrings: Record<Lang, Record<string, string>> = {
   },
 }
 
-function detectLang(): Lang {
-  if (import.meta.server) return 'pt'
-  const params = new URLSearchParams(window.location.search)
-  const paramLang = params.get('lang')
-  if (paramLang && ['pt', 'en', 'es'].includes(paramLang)) return paramLang as Lang
-  const navLang = (navigator.language || 'pt').split('-')[0]
-  if (['pt', 'en', 'es'].includes(navLang)) return navLang as Lang
-  return 'pt'
-}
-
 export function useOrderI18n() {
-  const lang = ref<Lang>(detectLang())
+  // Always start with 'pt' for SSR/client consistency (avoids hydration mismatch)
+  const lang = ref<Lang>('pt')
+
+  if (import.meta.client) {
+    onMounted(() => {
+      const params = new URLSearchParams(window.location.search)
+      const paramLang = params.get('lang')
+      if (paramLang && ['pt', 'en', 'es'].includes(paramLang)) {
+        lang.value = paramLang as Lang
+        return
+      }
+      const navLang = (navigator.language || 'pt').split('-')[0]
+      if (['pt', 'en', 'es'].includes(navLang)) {
+        lang.value = navLang as Lang
+      }
+    })
+  }
 
   const t = computed(() => uiStrings[lang.value] || uiStrings.pt)
   const status = computed(() => statusLabels[lang.value] || statusLabels.pt)

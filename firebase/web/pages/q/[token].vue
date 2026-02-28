@@ -68,7 +68,7 @@
     <OrderLangSwitcher v-if="orderData" />
 
     <!-- Photo lightbox -->
-    <PhotoLightbox
+    <OrderPhotoLightbox
       v-if="order?.photos?.length"
       :photos="order.photos"
       :initial-index="lightboxIndex"
@@ -77,7 +77,7 @@
     />
 
     <!-- Confirm modals -->
-    <ConfirmModal
+    <OrderConfirmModal
       :is-open="showApproveModal"
       type="approve"
       :title="t.approveTitle"
@@ -86,7 +86,7 @@
       @cancel="showApproveModal = false"
     />
 
-    <ConfirmModal
+    <OrderConfirmModal
       :is-open="showRejectModal"
       type="reject"
       :title="t.rejectTitle"
@@ -98,7 +98,7 @@
     />
 
     <!-- Toast -->
-    <ToastNotification
+    <OrderToastNotification
       :message="toastMessage"
       :type="toastType"
       :visible="toastVisible"

@@ -1,10 +1,12 @@
 export function useTheme() {
-  const theme = ref<'dark' | 'light'>('dark')
+  const theme = ref<'dark' | 'light'>('dark') // SSR-safe default
 
   if (import.meta.client) {
-    const saved = localStorage.getItem('theme')
-    theme.value = (saved as 'dark' | 'light') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
-    document.documentElement.setAttribute('data-theme', theme.value)
+    onMounted(() => {
+      const saved = localStorage.getItem('theme')
+      theme.value = (saved as 'dark' | 'light') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+      document.documentElement.setAttribute('data-theme', theme.value)
+    })
   }
 
   function toggleTheme() {
