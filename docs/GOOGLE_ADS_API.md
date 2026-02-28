@@ -28,8 +28,8 @@ use_proto_plus: True
 
 ### Nivel de Acesso
 
-- **Atual**: Acesso as Analises (somente leitura)
-- **Necessario para criar campanhas**: Acesso Padrao (solicitar upgrade no Centro de API do Google Ads Manager)
+- **Atual**: Acesso Padrao (leitura e escrita)
+- Permite criar, editar, pausar e gerenciar campanhas via API
 
 ## Como usar
 
