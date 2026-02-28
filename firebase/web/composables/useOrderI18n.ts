@@ -1,0 +1,231 @@
+type Lang = 'pt' | 'en' | 'es'
+
+const statusLabels: Record<Lang, Record<string, string>> = {
+  pt: {
+    quote: 'Orçamento',
+    approved: 'Aprovado',
+    progress: 'Em Andamento',
+    done: 'Concluído',
+    canceled: 'Cancelado',
+  },
+  en: {
+    quote: 'Quote',
+    approved: 'Approved',
+    progress: 'In Progress',
+    done: 'Completed',
+    canceled: 'Canceled',
+  },
+  es: {
+    quote: 'Presupuesto',
+    approved: 'Aprobado',
+    progress: 'En Progreso',
+    done: 'Completado',
+    canceled: 'Cancelado',
+  },
+}
+
+const uiStrings: Record<Lang, Record<string, string>> = {
+  pt: {
+    pageTitle: 'Acompanhe sua OS - PraticOS',
+    pageDescription: 'Acompanhe o status da sua ordem de serviço',
+    loading: 'Carregando...',
+    errorTitle: 'Link inválido',
+    errorMessage: 'Este link expirou ou é inválido. Por favor, solicite um novo link.',
+    customer: 'Cliente',
+    device: 'Equipamento',
+    name: 'Nome',
+    phone: 'Telefone',
+    forecast: 'Previsão',
+    serviceDefault: 'Serviço',
+    productDefault: 'Produto',
+    qty: 'Qtd',
+    photo: 'Foto',
+    you: 'Você',
+    services: 'Serviços',
+    products: 'Produtos',
+    photos: 'Fotos',
+    subtotal: 'Subtotal',
+    discount: 'Desconto',
+    paid: 'Pago',
+    total: 'Total a Pagar',
+    approve: 'Aprovar Orçamento',
+    reject: 'Rejeitar',
+    comments: 'Comentários',
+    noComments: 'Nenhum comentário ainda',
+    addComment: 'Adicionar comentário...',
+    send: 'Enviar',
+    approveTitle: 'Aprovar Orçamento?',
+    approveMessage: 'Ao aprovar, você autoriza a execução dos serviços listados.',
+    rejectTitle: 'Rejeitar Orçamento?',
+    rejectMessage: 'Por favor, informe o motivo da rejeição (opcional):',
+    rejectPlaceholder: 'Motivo da rejeição...',
+    confirm: 'Confirmar',
+    cancel: 'Cancelar',
+    approved: 'Orçamento aprovado com sucesso!',
+    rejected: 'Orçamento rejeitado',
+    commentSent: 'Comentário enviado',
+    error: 'Ocorreu um erro. Tente novamente.',
+    alreadyApproved: 'Este orçamento já foi aprovado',
+    alreadyRejected: 'Este orçamento foi rejeitado',
+    poweredBy: 'Powered by',
+    team: 'Equipe',
+    rateService: 'Avalie nosso serviço',
+    rateDescription: 'Como foi sua experiência? Sua avaliação nos ajuda a melhorar.',
+    rateCommentPlaceholder: 'Deixe um comentário sobre o serviço (opcional)',
+    rateSubmit: 'Enviar Avaliação',
+    rateSuccess: 'Obrigado pela sua avaliação!',
+    rateAlreadyRated: 'Este serviço já foi avaliado',
+    yourRating: 'Sua Avaliação',
+    devices: 'Equipamentos',
+    general: 'Geral',
+    comingSoon: 'Em breve',
+    profileComingSoonTitle: 'Perfil em construção',
+    profileComingSoonDesc: 'Em breve você poderá acessar o perfil deste profissional.',
+  },
+  en: {
+    pageTitle: 'Track your Order - PraticOS',
+    pageDescription: 'Track the status of your service order',
+    loading: 'Loading...',
+    errorTitle: 'Invalid link',
+    errorMessage: 'This link has expired or is invalid. Please request a new link.',
+    customer: 'Customer',
+    device: 'Device',
+    name: 'Name',
+    phone: 'Phone',
+    forecast: 'Expected',
+    serviceDefault: 'Service',
+    productDefault: 'Product',
+    qty: 'Qty',
+    photo: 'Photo',
+    you: 'You',
+    services: 'Services',
+    products: 'Products',
+    photos: 'Photos',
+    subtotal: 'Subtotal',
+    discount: 'Discount',
+    paid: 'Paid',
+    total: 'Total Due',
+    approve: 'Approve Quote',
+    reject: 'Reject',
+    comments: 'Comments',
+    noComments: 'No comments yet',
+    addComment: 'Add a comment...',
+    send: 'Send',
+    approveTitle: 'Approve Quote?',
+    approveMessage: 'By approving, you authorize the execution of the listed services.',
+    rejectTitle: 'Reject Quote?',
+    rejectMessage: 'Please provide a reason for rejection (optional):',
+    rejectPlaceholder: 'Reason for rejection...',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
+    approved: 'Quote approved successfully!',
+    rejected: 'Quote rejected',
+    commentSent: 'Comment sent',
+    error: 'An error occurred. Please try again.',
+    alreadyApproved: 'This quote has already been approved',
+    alreadyRejected: 'This quote has been rejected',
+    poweredBy: 'Powered by',
+    team: 'Team',
+    rateService: 'Rate our service',
+    rateDescription: 'How was your experience? Your feedback helps us improve.',
+    rateCommentPlaceholder: 'Leave a comment about the service (optional)',
+    rateSubmit: 'Submit Rating',
+    rateSuccess: 'Thank you for your rating!',
+    rateAlreadyRated: 'This service has already been rated',
+    yourRating: 'Your Rating',
+    devices: 'Devices',
+    general: 'General',
+    comingSoon: 'Coming soon',
+    profileComingSoonTitle: 'Profile under construction',
+    profileComingSoonDesc: 'Soon you will be able to access this professional\'s profile.',
+  },
+  es: {
+    pageTitle: 'Seguí tu OS - PraticOS',
+    pageDescription: 'Seguí el estado de tu orden de servicio',
+    loading: 'Cargando...',
+    errorTitle: 'Enlace inválido',
+    errorMessage: 'Este enlace ha expirado o es inválido. Por favor, solicita un nuevo enlace.',
+    customer: 'Cliente',
+    device: 'Dispositivo',
+    name: 'Nombre',
+    phone: 'Teléfono',
+    forecast: 'Previsión',
+    serviceDefault: 'Servicio',
+    productDefault: 'Producto',
+    qty: 'Cant',
+    photo: 'Foto',
+    you: 'Usted',
+    services: 'Servicios',
+    products: 'Productos',
+    photos: 'Fotos',
+    subtotal: 'Subtotal',
+    discount: 'Descuento',
+    paid: 'Pagado',
+    total: 'Total a Pagar',
+    approve: 'Aprobar Presupuesto',
+    reject: 'Rechazar',
+    comments: 'Comentarios',
+    noComments: 'Sin comentarios todavía',
+    addComment: 'Agregar comentario...',
+    send: 'Enviar',
+    approveTitle: '¿Aprobar Presupuesto?',
+    approveMessage: 'Al aprobar, autorizas la ejecución de los servicios listados.',
+    rejectTitle: '¿Rechazar Presupuesto?',
+    rejectMessage: 'Por favor, indica el motivo del rechazo (opcional):',
+    rejectPlaceholder: 'Motivo del rechazo...',
+    confirm: 'Confirmar',
+    cancel: 'Cancelar',
+    approved: '¡Presupuesto aprobado exitosamente!',
+    rejected: 'Presupuesto rechazado',
+    commentSent: 'Comentario enviado',
+    error: 'Ocurrió un error. Intenta de nuevo.',
+    alreadyApproved: 'Este presupuesto ya ha sido aprobado',
+    alreadyRejected: 'Este presupuesto ha sido rechazado',
+    poweredBy: 'Powered by',
+    team: 'Equipo',
+    rateService: 'Califica nuestro servicio',
+    rateDescription: '¿Cómo fue tu experiencia? Tu opinión nos ayuda a mejorar.',
+    rateCommentPlaceholder: 'Deja un comentario sobre el servicio (opcional)',
+    rateSubmit: 'Enviar Calificación',
+    rateSuccess: '¡Gracias por tu calificación!',
+    rateAlreadyRated: 'Este servicio ya ha sido calificado',
+    yourRating: 'Tu Calificación',
+    devices: 'Dispositivos',
+    general: 'General',
+    comingSoon: 'Próximamente',
+    profileComingSoonTitle: 'Perfil en construcción',
+    profileComingSoonDesc: 'Pronto podrás acceder al perfil de este profesional.',
+  },
+}
+
+function detectLang(): Lang {
+  if (import.meta.server) return 'pt'
+  const params = new URLSearchParams(window.location.search)
+  const paramLang = params.get('lang')
+  if (paramLang && ['pt', 'en', 'es'].includes(paramLang)) return paramLang as Lang
+  const navLang = (navigator.language || 'pt').split('-')[0]
+  if (['pt', 'en', 'es'].includes(navLang)) return navLang as Lang
+  return 'pt'
+}
+
+export function useOrderI18n() {
+  const lang = ref<Lang>(detectLang())
+
+  const t = computed(() => uiStrings[lang.value] || uiStrings.pt)
+  const status = computed(() => statusLabels[lang.value] || statusLabels.pt)
+
+  function setLang(newLang: Lang) {
+    lang.value = newLang
+    if (import.meta.client) {
+      const url = new URL(window.location.href)
+      url.searchParams.set('lang', newLang)
+      window.location.href = url.toString()
+    }
+  }
+
+  function getStatusLabel(statusKey: string): string {
+    return status.value[statusKey] || statusKey
+  }
+
+  return { lang, t, status, setLang, getStatusLabel }
+}

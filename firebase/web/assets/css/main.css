@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   Design Tokens (CSS Custom Properties)
+   Ported from firebase/hosting/src/style.css
+   ============================================ */
+
+:root {
+  /* Brand Colors */
+  --color-primary: #4A9BD9;
+  --color-primary-light: #6BB3E9;
+  --color-primary-dark: #3A7BB9;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #4A9BD9 0%, #FFE600 100%);
+
+  /* Typography */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+
+  /* Transitions */
+  --transition-fast: all 0.15s ease;
+  --transition-normal: all 0.3s ease;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+}
+
+/* Dark Theme (default) */
+[data-theme="dark"] {
+  --bg-primary: #0A0E17;
+  --bg-secondary: #0F1520;
+  --bg-tertiary: #151C2A;
+  --bg-card: #1A2235;
+  --bg-card-hover: #1F2940;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0AEC0;
+  --text-tertiary: #718096;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-color-hover: rgba(255, 255, 255, 0.15);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --bg-primary: #F5F5F7;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F0F0F5;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F5F5F7;
+  --text-primary: #1A1A2E;
+  --text-secondary: #4A5568;
+  --text-tertiary: #718096;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-color-hover: rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+  color-scheme: light;
+}
+
+/* ============================================
+   Status Colors
+   ============================================ */
+
+:root {
+  --status-quote: #4A9BD9;
+  --status-quote-bg: rgba(74, 155, 217, 0.15);
+  --status-approved: #34C759;
+  --status-approved-bg: rgba(52, 199, 89, 0.15);
+  --status-progress: #FF9500;
+  --status-progress-bg: rgba(255, 149, 0, 0.15);
+  --status-done: #248A3D;
+  --status-done-bg: rgba(36, 138, 61, 0.15);
+  --status-canceled: #FF3B30;
+  --status-canceled-bg: rgba(255, 59, 48, 0.15);
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================================
+   Utility layers for Tailwind
+   ============================================ */
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm transition-all duration-200 cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent border border-[var(--border-color)] text-[var(--text-secondary)];
+  }
+
+  .btn-secondary:hover {
+    @apply bg-[var(--bg-tertiary)];
+  }
+}
+
+/* Gradient text utility */
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Safe area support */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+}
