@@ -25,5 +25,13 @@ export default defineNuxtConfig({
   tailwindcss: {
     cssPath: '~/assets/css/main.css',
   },
+  routeRules: {
+    '/pro/**': { swr: 3600 },
+  },
+  nitro: {
+    externals: {
+      inline: ['firebase-admin'],
+    },
+  },
   compatibilityDate: '2025-01-01',
 })
