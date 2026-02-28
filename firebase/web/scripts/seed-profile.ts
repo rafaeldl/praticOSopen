@@ -2,8 +2,10 @@
  * Seed script for public profile test data.
  *
  * Usage:
- *   export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
  *   npx tsx scripts/seed-profile.ts
+ *
+ * Uses Application Default Credentials (gcloud auth application-default login)
+ * or GOOGLE_APPLICATION_CREDENTIALS env var if set.
  *
  * This creates:
  *   - profileSlugs/{slug} → { companyId }
@@ -12,16 +14,14 @@
  *   - companies/{companyId}/orders → sample orders with ratings
  */
 
-import { initializeApp, cert } from 'firebase-admin/app'
+import { initializeApp, cert, applicationDefault } from 'firebase-admin/app'
 import { getFirestore, FieldValue } from 'firebase-admin/firestore'
 
 const serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS
-if (!serviceAccount) {
-  console.error('Set GOOGLE_APPLICATION_CREDENTIALS env var to your service account JSON path')
-  process.exit(1)
-}
-
-const app = initializeApp({ credential: cert(serviceAccount) })
+const app = initializeApp({
+  credential: serviceAccount ? cert(serviceAccount) : applicationDefault(),
+  projectId: 'praticos',
+})
 const db = getFirestore(app)
 
 const SLUG = 'tech-solutions-demo'

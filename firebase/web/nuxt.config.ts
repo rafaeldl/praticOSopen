@@ -30,7 +30,7 @@ export default defineNuxtConfig({
   },
   nitro: {
     externals: {
-      inline: ['firebase-admin'],
+      external: ['firebase-admin'],
     },
   },
   compatibilityDate: '2025-01-01',

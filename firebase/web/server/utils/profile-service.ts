@@ -77,29 +77,34 @@ export async function getProfileBySlug(slug: string): Promise<PublicProfileData 
   if (profileConfig.active === false) return null
 
   // 3. Fetch services + completed orders (for ratings & stats) in parallel
+  // Services: uses existing index (company.id, name). Filter inactive client-side
+  // to avoid needing a composite index on (active, name) for != queries.
+  // Orders: uses existing index (status, createdAt DESC).
   const [servicesSnap, ordersSnap] = await Promise.all([
     db.collection('companies').doc(companyId).collection('services')
-      .where('active', '!=', false)
       .orderBy('name')
-      .limit(50)
+      .limit(100)
       .get(),
     db.collection('companies').doc(companyId).collection('orders')
       .where('status', '==', 'done')
-      .orderBy('updatedAt', 'desc')
+      .orderBy('createdAt', 'desc')
       .limit(200)
       .get(),
   ])
 
-  // Build services list
-  const services = servicesSnap.docs.map(doc => {
-    const d = doc.data()
-    return {
-      id: doc.id,
-      name: d.name || '',
-      value: d.value,
-      photo: d.photo,
-    }
-  })
+  // Build services list (filter out inactive client-side)
+  const services = servicesSnap.docs
+    .filter(doc => doc.data().active !== false)
+    .slice(0, 50)
+    .map(doc => {
+      const d = doc.data()
+      return {
+        id: doc.id,
+        name: d.name || '',
+        value: d.value,
+        photo: d.photo,
+      }
+    })
 
   // Extract reviews and stats from completed orders
   const hiddenReviews = new Set(profileConfig.hiddenReviews || [])
@@ -123,8 +128,8 @@ export async function getProfileBySlug(slug: string): Promise<PublicProfileData 
           ),
           createdAt: order.rating.createdAt?.toDate?.()
             ? order.rating.createdAt.toDate().toISOString()
-            : order.updatedAt?.toDate?.()
-              ? order.updatedAt.toDate().toISOString()
+            : order.createdAt?.toDate?.()
+              ? order.createdAt.toDate().toISOString()
               : new Date().toISOString(),
         })
       }
