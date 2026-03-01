@@ -1,5 +1,5 @@
 <template>
-  <div class="hidden border-b border-[#E4E4E7] bg-white sm:block">
+  <div class="hidden border-b border-[var(--border-color)] bg-[var(--bg-tertiary)] sm:block">
     <div class="mx-auto flex max-w-7xl items-center gap-2 px-5 py-3 lg:px-10">
       <a href="https://praticos.web.app" class="text-xs text-[#71717A] transition-colors hover:text-[#2563EB]">
         {{ t.breadcrumbHome }}
