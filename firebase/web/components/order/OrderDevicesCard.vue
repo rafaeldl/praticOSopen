@@ -15,13 +15,13 @@
           :key="device.id"
           :class="[
             'flex items-center gap-3.5 py-3.5',
-            index < devices.length - 1 ? 'border-b border-[var(--border-color)]' : '',
+            (index as number) < devices.length - 1 ? 'border-b border-[var(--border-color)]' : '',
             index === 0 ? 'pt-0' : '',
-            index === devices.length - 1 ? 'pb-0' : '',
+            (index as number) === devices.length - 1 ? 'pb-0' : '',
           ]"
         >
           <div class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-[rgba(74,155,217,0.12)] text-xs font-semibold text-brand-primary">
-            {{ index + 1 }}
+            {{ (index as number) + 1 }}
           </div>
           <div class="flex min-w-0 flex-col gap-0.5">
             <div class="font-medium text-[var(--text-primary)]">{{ device.name || '-' }}</div>

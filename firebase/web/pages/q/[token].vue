@@ -1,33 +1,34 @@
 <template>
-  <main class="min-h-screen safe-area-bottom" :class="{ 'pt-0': true }">
+  <main class="magic-link min-h-screen bg-[#F5F7FA] safe-area-bottom">
     <!-- Loading -->
     <div v-if="pending" class="flex min-h-[60vh] flex-col items-center justify-center gap-6">
-      <div class="h-12 w-12 animate-spin rounded-full border-[3px] border-[var(--border-color)] border-t-brand-primary" />
-      <p class="text-[var(--text-secondary)]">{{ t.loading }}</p>
+      <div class="h-10 w-10 animate-spin rounded-full border-[2.5px] border-[#E2E8F0] border-t-[#1B5E7B]" />
+      <p class="text-[13px] text-[#5A7184]">{{ t.loading }}</p>
     </div>
 
     <!-- Error -->
     <div v-else-if="error || !orderData" class="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
-      <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-status-canceled-bg">
-        <svg class="h-10 w-10 text-status-canceled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#FEF2F2]">
+        <svg class="h-8 w-8 text-[#EF4444]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
         </svg>
       </div>
-      <h2 class="mb-3 text-2xl font-semibold">{{ t.errorTitle }}</h2>
-      <p class="max-w-[400px] text-[var(--text-secondary)]">{{ t.errorMessage }}</p>
+      <h2 class="mb-2 text-xl font-bold text-[#1A2B3C]">{{ t.errorTitle }}</h2>
+      <p class="max-w-[360px] text-[13px] leading-relaxed text-[#5A7184]">{{ t.errorMessage }}</p>
     </div>
 
     <!-- Order content -->
     <template v-else>
       <OrderHeader :order="order" :company="company" />
 
-      <div class="mx-auto max-w-[600px] px-5">
-        <OrderInfoCard :order="order" :customer="orderData.customer" />
-        <OrderDevicesCard :order="order" />
+      <!-- Mobile layout (single column) -->
+      <div class="lg:hidden px-4 py-5 space-y-4">
+        <OrderProgressCard :status="order.status" />
         <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
-        <OrderServicesCard :order="order" :country="company?.country" />
-        <OrderProductsCard :order="order" :country="company?.country" />
-        <OrderTotalSection :order="order" :country="company?.country" />
+        <OrderSummaryCard :order="order" :country="company?.country" />
+        <OrderVehiclesCard :order="order" />
+        <OrderChecklistCard :forms="order.forms" />
+        <OrderActivityCard :comments="comments" />
 
         <!-- Action buttons for quotes -->
         <OrderActionButtons
@@ -49,7 +50,7 @@
           v-if="permissions.includes('comment') || permissions.includes('view')"
           :comments="comments"
           :can-comment="permissions.includes('comment')"
-          :customer-name="orderData.customer?.name"
+          :customer-name="(orderData as any)?.customer?.name"
           :token="token"
         />
 
@@ -59,9 +60,50 @@
           :order="order"
           :token="token"
         />
-
-        <OrderFooter />
       </div>
+
+      <!-- Desktop layout (2 columns) -->
+      <div class="hidden lg:flex mx-auto max-w-[1280px] px-16 py-8 gap-8">
+        <!-- Main column -->
+        <div class="flex-1 space-y-6">
+          <OrderProgressCard :status="order.status" />
+          <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
+          <OrderSummaryCard :order="order" :country="company?.country" />
+          <OrderChecklistCard :forms="order.forms" />
+
+          <!-- Action buttons for quotes -->
+          <OrderActionButtons
+            v-if="order.status === 'quote' && permissions.includes('approve')"
+            @approve="showApproveModal = true"
+            @reject="showRejectModal = true"
+          />
+        </div>
+
+        <!-- Sidebar -->
+        <div class="w-[360px] shrink-0 space-y-6">
+          <OrderVehiclesCard :order="order" />
+          <OrderActivityCard :comments="comments" />
+
+          <!-- Comments -->
+          <OrderCommentsSection
+            v-if="permissions.includes('comment') || permissions.includes('view')"
+            :comments="comments"
+            :can-comment="permissions.includes('comment')"
+            :customer-name="(orderData as any)?.customer?.name"
+            :token="token"
+          />
+
+          <!-- Rating -->
+          <OrderRatingSection
+            v-if="order.status === 'done'"
+            :order="order"
+            :token="token"
+            @rated="refreshOrder"
+          />
+        </div>
+      </div>
+
+      <OrderFooter />
     </template>
 
     <!-- Language switcher -->

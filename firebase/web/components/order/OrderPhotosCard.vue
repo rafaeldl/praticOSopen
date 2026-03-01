@@ -1,25 +1,31 @@
 <template>
-  <div v-if="photos?.length" class="order-card animate-fade-in-up rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)] overflow-hidden mb-5">
-    <div class="flex items-center gap-3 border-b border-[var(--border-color)] px-5 py-4">
-      <svg class="h-5 w-5 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <polyline points="21 15 16 10 5 21"/>
+  <div v-if="photos?.length" class="card-stagger card-v2 rounded-2xl bg-white p-5 shadow-[0_2px_10px_rgba(27,94,123,0.03)] lg:p-6">
+    <!-- Header: icon + title + count text -->
+    <div class="mb-3.5 flex items-center gap-2">
+      <svg class="h-4 w-4 text-[#1B5E7B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+        <circle cx="12" cy="13" r="4"/>
       </svg>
-      <h3 class="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">{{ t.photos }}</h3>
+      <h3 class="flex-1 text-sm font-bold text-[#1A2B3C]">{{ t.photos }}</h3>
+      <span class="text-xs text-[#8FA3B8]">{{ photos.length }} {{ photos.length === 1 ? t.photo : t.photos.toLowerCase() }}</span>
     </div>
-    <div class="p-5">
-      <div class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3">
-        <div
-          v-for="(photo, index) in photos"
-          :key="index"
-          class="relative aspect-square cursor-pointer overflow-hidden rounded-xl bg-[var(--bg-tertiary)] transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg"
-          @click="$emit('openLightbox', index)"
+
+    <!-- Photo grid -->
+    <div class="flex gap-2.5 overflow-x-auto pb-1 lg:flex-wrap lg:overflow-visible">
+      <div
+        v-for="(photo, index) in photos"
+        :key="index"
+        class="photo-thumb relative flex-shrink-0 cursor-pointer overflow-hidden rounded-xl bg-[#F0F4F8] transition-all duration-200 hover:scale-[1.03] hover:shadow-md active:scale-[0.98]"
+        @click="$emit('openLightbox', index)"
+      >
+        <img
+          :src="photo.url"
+          :alt="photo.description || t.photo"
+          loading="lazy"
+          class="h-[110px] w-[140px] object-cover lg:h-[180px] lg:w-auto lg:min-w-[180px]"
         >
-          <img :src="photo.url" :alt="photo.description || t.photo" loading="lazy" class="h-full w-full object-cover">
-          <div v-if="photo.description" class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-xs text-white">
-            {{ photo.description }}
-          </div>
+        <div v-if="photo.description" class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2.5 pb-2 pt-6 text-[10px] leading-tight text-white lg:text-[11px]">
+          {{ photo.description }}
         </div>
       </div>
     </div>

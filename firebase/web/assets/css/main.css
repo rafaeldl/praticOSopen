@@ -103,6 +103,78 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+/* Magic link page — DM Sans override */
+.magic-link {
+  font-family: 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Staggered card entrance */
+.magic-link .card-stagger {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: cardReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.magic-link .card-stagger:nth-child(1) { animation-delay: 0.05s; }
+.magic-link .card-stagger:nth-child(2) { animation-delay: 0.12s; }
+.magic-link .card-stagger:nth-child(3) { animation-delay: 0.19s; }
+.magic-link .card-stagger:nth-child(4) { animation-delay: 0.26s; }
+.magic-link .card-stagger:nth-child(5) { animation-delay: 0.33s; }
+.magic-link .card-stagger:nth-child(6) { animation-delay: 0.40s; }
+.magic-link .card-stagger:nth-child(7) { animation-delay: 0.47s; }
+.magic-link .card-stagger:nth-child(8) { animation-delay: 0.54s; }
+
+@keyframes cardReveal {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Progress bar fill animation */
+.magic-link .progress-fill {
+  animation: progressGrow 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+  transform-origin: left;
+  transform: scaleX(0);
+}
+@keyframes progressGrow {
+  to { transform: scaleX(1); }
+}
+
+/* Stepper dot entrance */
+.magic-link .step-circle {
+  opacity: 0;
+  transform: scale(0.5);
+  animation: stepPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.magic-link .step-circle:nth-child(1) { animation-delay: 0.15s; }
+.magic-link .step-circle:nth-child(2) { animation-delay: 0.25s; }
+.magic-link .step-circle:nth-child(3) { animation-delay: 0.35s; }
+.magic-link .step-circle:nth-child(4) { animation-delay: 0.45s; }
+
+@keyframes stepPop {
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Card hover lift */
+.magic-link .card-v2 {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+.magic-link .card-v2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(27, 94, 123, 0.08);
+}
+
+/* Photo hover shine */
+.magic-link .photo-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.magic-link .photo-thumb:hover::after {
+  opacity: 1;
+}
+
 /* Safe area support */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .safe-area-bottom {
