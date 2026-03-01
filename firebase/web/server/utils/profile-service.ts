@@ -18,6 +18,7 @@ export interface PublicProfileData {
     showAddress: boolean
     verified: boolean
     slug: string
+    tags?: string[]
   }
   services: Array<{
     id: string
@@ -35,6 +36,12 @@ export interface PublicProfileData {
   portfolio: Array<{
     url: string
     description?: string
+  }>
+  certifications: Array<{
+    id: string
+    name: string
+    issuer?: string
+    verifiedAt?: string
   }>
   stats: {
     completedOrders: number
@@ -174,10 +181,19 @@ export async function getProfileBySlug(slug: string): Promise<PublicProfileData 
       showAddress,
       verified: profileConfig.verified === true,
       slug,
+      tags: Array.isArray(profileConfig.tags) ? profileConfig.tags : [],
     },
     services,
     reviews: limitedReviews,
     portfolio,
+    certifications: Array.isArray(profileConfig.certifications)
+      ? profileConfig.certifications.map((c: any, i: number) => ({
+          id: c.id || String(i),
+          name: c.name || '',
+          issuer: c.issuer,
+          verifiedAt: c.verifiedAt,
+        }))
+      : [],
     stats: {
       completedOrders: ordersSnap.size,
       avgRating: ratingCount > 0 ? Math.round((totalRating / ratingCount) * 10) / 10 : 0,

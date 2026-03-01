@@ -4,21 +4,18 @@
 
 /* ============================================
    Design Tokens (CSS Custom Properties)
-   Ported from firebase/hosting/src/style.css
+   Light Marketplace Theme
    ============================================ */
 
 :root {
   /* Brand Colors */
-  --color-primary: #4A9BD9;
-  --color-primary-light: #6BB3E9;
-  --color-primary-dark: #3A7BB9;
-
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #4A9BD9 0%, #FFE600 100%);
+  --color-primary: #2563EB;
+  --color-primary-light: #3B82F6;
+  --color-primary-dark: #1D4ED8;
 
   /* Typography */
-  --font-heading: 'Outfit', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-heading: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
 
   /* Transitions */
   --transition-fast: all 0.15s ease;
@@ -32,39 +29,21 @@
   --radius-full: 9999px;
 }
 
-/* Dark Theme (default) */
-[data-theme="dark"] {
-  --bg-primary: #0A0E17;
-  --bg-secondary: #0F1520;
-  --bg-tertiary: #151C2A;
-  --bg-card: #1A2235;
-  --bg-card-hover: #1F2940;
-  --text-primary: #FFFFFF;
-  --text-secondary: #A0AEC0;
-  --text-tertiary: #718096;
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-color-hover: rgba(255, 255, 255, 0.15);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
-  color-scheme: dark;
-}
-
 /* Light Theme */
 [data-theme="light"] {
-  --bg-primary: #F5F5F7;
+  --bg-primary: #F8FAFB;
   --bg-secondary: #FFFFFF;
-  --bg-tertiary: #F0F0F5;
+  --bg-tertiary: #F4F4F5;
   --bg-card: #FFFFFF;
-  --bg-card-hover: #F5F5F7;
-  --text-primary: #1A1A2E;
-  --text-secondary: #4A5568;
-  --text-tertiary: #718096;
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-color-hover: rgba(0, 0, 0, 0.15);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+  --bg-card-hover: #F8FAFB;
+  --text-primary: #18181B;
+  --text-secondary: #71717A;
+  --text-tertiary: #A1A1AA;
+  --border-color: #E4E4E7;
+  --border-color-hover: #D4D4D8;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   color-scheme: light;
 }
 
@@ -73,16 +52,16 @@
    ============================================ */
 
 :root {
-  --status-quote: #4A9BD9;
-  --status-quote-bg: rgba(74, 155, 217, 0.15);
-  --status-approved: #34C759;
-  --status-approved-bg: rgba(52, 199, 89, 0.15);
-  --status-progress: #FF9500;
-  --status-progress-bg: rgba(255, 149, 0, 0.15);
-  --status-done: #248A3D;
-  --status-done-bg: rgba(36, 138, 61, 0.15);
-  --status-canceled: #FF3B30;
-  --status-canceled-bg: rgba(255, 59, 48, 0.15);
+  --status-quote: #2563EB;
+  --status-quote-bg: rgba(37, 99, 235, 0.1);
+  --status-approved: #16A34A;
+  --status-approved-bg: rgba(22, 163, 74, 0.1);
+  --status-progress: #F59E0B;
+  --status-progress-bg: rgba(245, 158, 11, 0.1);
+  --status-done: #16A34A;
+  --status-done-bg: rgba(22, 163, 74, 0.1);
+  --status-canceled: #EF4444;
+  --status-canceled-bg: rgba(239, 68, 68, 0.1);
 }
 
 /* ============================================
@@ -103,7 +82,7 @@ body {
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-semibold text-sm transition-all duration-200 cursor-pointer;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[10px] font-semibold text-sm transition-all duration-200 cursor-pointer;
   }
 
   .btn-secondary {
@@ -115,12 +94,13 @@ body {
   }
 }
 
-/* Gradient text utility */
-.text-gradient {
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+/* Card hover lift */
+.card-hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 /* Safe area support */

@@ -126,9 +126,16 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     showLess: 'Ver menos',
 
     // CTA
+    requestQuote: 'Solicitar Orçamento',
     whatsapp: 'WhatsApp',
     call: 'Ligar',
     schedule: 'Agendar',
+
+    // Services
+    startingAt: 'A partir de',
+
+    // Reviews
+    featuredReview: 'Destaque',
 
     // Error
     notFoundTitle: 'Perfil não encontrado',
@@ -138,7 +145,30 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     // Loading
     loading: 'Carregando perfil...',
 
+    // Navbar
+    navExplore: 'Explorar',
+    navCategories: 'Categorias',
+    navHowItWorks: 'Como funciona',
+    navSignIn: 'Entrar',
+    navSearch: 'Buscar profissional...',
+
+    // Breadcrumb
+    breadcrumbHome: 'Início',
+
+    // Certifications
+    certifications: 'Certificações',
+
+    // CTA extended
+    contactDesc: 'Entre em contato com {name} para receber um orçamento gratuito.',
+    trustVerified: 'Profissional verificado',
+    trustResponse: 'Responde em até 1 hora',
+    trustJobs: '{n}+ serviços realizados',
+    trustRating: '{rating} nota média ({count} avaliações)',
+    scheduleFull: 'Agendar serviço',
+    whatsappFull: 'Falar via WhatsApp',
+
     // Footer
+    footerCopy: '© 2026 PraticOS. Todos os direitos reservados.',
     poweredBy: 'Powered by',
 
     // Relative date
@@ -171,9 +201,14 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     showMore: 'Show more reviews',
     showLess: 'Show less',
 
+    requestQuote: 'Request a Quote',
     whatsapp: 'WhatsApp',
     call: 'Call',
     schedule: 'Schedule',
+
+    startingAt: 'Starting at',
+
+    featuredReview: 'Featured',
 
     notFoundTitle: 'Profile not found',
     notFoundDesc: 'The profile you\'re looking for doesn\'t exist or has been deactivated.',
@@ -181,6 +216,25 @@ const uiStrings: Record<Lang, Record<string, string>> = {
 
     loading: 'Loading profile...',
 
+    navExplore: 'Explore',
+    navCategories: 'Categories',
+    navHowItWorks: 'How it works',
+    navSignIn: 'Sign in',
+    navSearch: 'Search professional...',
+
+    breadcrumbHome: 'Home',
+
+    certifications: 'Certifications',
+
+    contactDesc: 'Get in touch with {name} for a free quote.',
+    trustVerified: 'Verified professional',
+    trustResponse: 'Responds within 1 hour',
+    trustJobs: '{n}+ services completed',
+    trustRating: '{rating} average rating ({count} reviews)',
+    scheduleFull: 'Schedule service',
+    whatsappFull: 'Chat on WhatsApp',
+
+    footerCopy: '© 2026 PraticOS. All rights reserved.',
     poweredBy: 'Powered by',
 
     justNow: 'just now',
@@ -212,9 +266,14 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     showMore: 'Ver más calificaciones',
     showLess: 'Ver menos',
 
+    requestQuote: 'Solicitar Presupuesto',
     whatsapp: 'WhatsApp',
     call: 'Llamar',
     schedule: 'Agendar',
+
+    startingAt: 'Desde',
+
+    featuredReview: 'Destacada',
 
     notFoundTitle: 'Perfil no encontrado',
     notFoundDesc: 'El perfil que buscas no existe o fue desactivado.',
@@ -222,6 +281,25 @@ const uiStrings: Record<Lang, Record<string, string>> = {
 
     loading: 'Cargando perfil...',
 
+    navExplore: 'Explorar',
+    navCategories: 'Categorías',
+    navHowItWorks: 'Cómo funciona',
+    navSignIn: 'Iniciar sesión',
+    navSearch: 'Buscar profesional...',
+
+    breadcrumbHome: 'Inicio',
+
+    certifications: 'Certificaciones',
+
+    contactDesc: 'Contacta con {name} para recibir un presupuesto gratuito.',
+    trustVerified: 'Profesional verificado',
+    trustResponse: 'Responde en hasta 1 hora',
+    trustJobs: '{n}+ servicios realizados',
+    trustRating: '{rating} nota promedio ({count} calificaciones)',
+    scheduleFull: 'Agendar servicio',
+    whatsappFull: 'Hablar por WhatsApp',
+
+    footerCopy: '© 2026 PraticOS. Todos los derechos reservados.',
     poweredBy: 'Powered by',
 
     justNow: 'ahora mismo',

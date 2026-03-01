@@ -1,29 +1,30 @@
 <template>
-  <div v-if="services?.length" class="order-card animate-fade-in-up mb-5 overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]">
-    <div class="flex items-center gap-3 border-b border-[var(--border-color)] px-5 py-4">
-      <svg class="h-5 w-5 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-      </svg>
-      <h3 class="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">{{ t.servicesTitle }}</h3>
-    </div>
-    <div class="divide-y divide-[var(--border-color)]">
+  <div v-if="services?.length" class="rounded-xl border border-[#E4E4E7] bg-white p-7">
+    <h3 class="mb-4 text-lg font-semibold text-[#18181B]">{{ t.servicesTitle }}</h3>
+
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
       <div
         v-for="service in services"
         :key="service.id"
-        class="flex items-center justify-between px-5 py-3.5"
+        class="card-hover-lift overflow-hidden rounded-[10px] border border-[#E4E4E7]"
       >
-        <div class="flex items-center gap-3">
+        <!-- Service photo -->
+        <div v-if="service.photo" class="h-[120px] overflow-hidden bg-[#F4F4F5]">
           <img
-            v-if="service.photo"
             :src="service.photo"
             :alt="service.name"
-            class="h-10 w-10 rounded-lg object-cover"
+            loading="lazy"
+            class="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
           >
-          <span class="text-sm text-[var(--text-primary)]">{{ service.name }}</span>
         </div>
-        <span v-if="showPrices && service.value" class="text-sm font-semibold text-brand-primary">
-          {{ formatCurrency(service.value, country) }}
-        </span>
+
+        <!-- Service info -->
+        <div class="px-3.5 py-3">
+          <span class="block text-sm font-semibold text-[#18181B]">{{ service.name }}</span>
+          <span v-if="showPrices && service.value" class="mt-1 block text-[13px] text-[#2563EB]">
+            {{ t.startingAt }} {{ formatCurrency(service.value, country) }}
+          </span>
+        </div>
       </div>
     </div>
   </div>

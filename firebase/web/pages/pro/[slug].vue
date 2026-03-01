@@ -1,24 +1,24 @@
 <template>
-  <main class="min-h-screen" :class="{ 'pb-24': hasCtaFooter }">
+  <main class="min-h-screen bg-[#F8FAFB]" :class="{ 'pb-28 lg:pb-0': hasCtaFooter }">
     <!-- Loading -->
     <div v-if="pending" class="flex min-h-[60vh] flex-col items-center justify-center gap-6">
-      <div class="h-12 w-12 animate-spin rounded-full border-[3px] border-[var(--border-color)] border-t-brand-primary" />
-      <p class="text-[var(--text-secondary)]">{{ t.loading }}</p>
+      <div class="h-12 w-12 animate-spin rounded-full border-[3px] border-[#E4E4E7] border-t-[#2563EB]" />
+      <p class="text-[#71717A]">{{ t.loading }}</p>
     </div>
 
     <!-- Error / Not found -->
     <div v-else-if="error || !profileData" class="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
-      <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-status-canceled-bg">
-        <svg class="h-10 w-10 text-status-canceled" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50">
+        <svg class="h-10 w-10 text-[#EF4444]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>
       </div>
-      <h2 class="mb-3 text-2xl font-semibold">{{ t.notFoundTitle }}</h2>
-      <p class="mb-8 max-w-[400px] text-[var(--text-secondary)]">{{ t.notFoundDesc }}</p>
+      <h2 class="mb-3 text-2xl font-semibold text-[#18181B]">{{ t.notFoundTitle }}</h2>
+      <p class="mb-8 max-w-[400px] text-[#71717A]">{{ t.notFoundDesc }}</p>
       <a
         href="https://praticos.web.app"
-        class="inline-flex items-center gap-2 rounded-full bg-brand-primary px-6 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
+        class="inline-flex items-center gap-2 rounded-[10px] bg-[#2563EB] px-6 py-3 font-semibold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg"
       >
         {{ t.backHome }}
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -29,36 +29,61 @@
 
     <!-- Profile content -->
     <template v-else>
-      <ProfileHeader :company="company" :segment-label="segmentLabel" />
+      <ProfileNavbar />
+      <ProfileBreadcrumb :company-name="company.name || ''" :segment-label="segmentLabel" />
+      <ProfileHeader
+        :company="company"
+        :segment-label="segmentLabel"
+        :stats="stats"
+        :cert-count="certifications.length"
+      />
 
-      <div class="mx-auto max-w-[600px] px-5">
-        <ProfileStatsBar :stats="stats" />
-        <ProfileAbout v-if="company.bio" :bio="company.bio" />
-        <ProfileServicesList
-          :services="services"
-          :show-prices="company.showPrices"
-          :country="company.country"
-        />
-        <ProfilePortfolioGrid
-          :photos="portfolio"
-          @open-lightbox="openLightbox"
-        />
-        <ProfileReviewsSection :reviews="reviews" />
+      <div class="mx-auto max-w-7xl px-5 py-8 lg:flex lg:gap-8 lg:px-10">
+        <!-- Content column -->
+        <div class="min-w-0 space-y-8 lg:flex-1">
+          <ProfileAbout v-if="company.bio" :bio="company.bio" />
+          <ProfileServicesList
+            :services="services"
+            :show-prices="company.showPrices"
+            :country="company.country"
+          />
+          <ProfilePortfolioGrid
+            :photos="portfolio"
+            @open-lightbox="openLightbox"
+          />
+          <ProfileReviewsSection :reviews="reviews" />
+        </div>
 
-        <!-- Footer -->
-        <div class="py-8 text-center text-sm text-[var(--text-tertiary)]">
-          {{ t.poweredBy }} <a href="https://praticos.web.app" target="_blank" class="text-brand-primary hover:underline">PraticOS</a>
+        <!-- Desktop sidebar -->
+        <div class="hidden lg:flex lg:w-[340px] lg:shrink-0 lg:flex-col lg:gap-5">
+          <div class="sticky top-24">
+            <div class="flex flex-col gap-5">
+              <ProfileSidebarCTA :company="company" :stats="stats" />
+              <ProfileSidebarCerts
+                v-if="certifications.length"
+                :certifications="certifications"
+              />
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- Footer -->
+      <footer class="border-t border-[#E4E4E7]">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-6 lg:px-10">
+          <a href="https://praticos.web.app" class="text-sm font-bold text-[#2563EB]">PraticOS</a>
+          <span class="text-xs text-[#A1A1AA]">{{ t.footerCopy }}</span>
+        </div>
+      </footer>
     </template>
 
     <!-- Language switcher (above CTA footer) -->
     <ProfileLangSwitcher v-if="profileData" />
 
-    <!-- CTA footer -->
+    <!-- CTA footer (mobile only) -->
     <ProfileCTAFooter v-if="profileData" :company="company" />
 
-    <!-- Photo lightbox (reusing existing component) -->
+    <!-- Photo lightbox -->
     <OrderPhotoLightbox
       v-if="portfolio?.length"
       :photos="portfolio"
@@ -84,6 +109,7 @@ const company = computed(() => profile.value?.company || {})
 const services = computed(() => profile.value?.services || [])
 const reviews = computed(() => profile.value?.reviews || [])
 const portfolio = computed(() => profile.value?.portfolio || [])
+const certifications = computed(() => profile.value?.certifications || [])
 const stats = computed(() => profile.value?.stats || { completedOrders: 0, avgRating: 0, reviewCount: 0 })
 
 const segmentLabel = computed(() => getSegmentLabel(company.value?.segment))

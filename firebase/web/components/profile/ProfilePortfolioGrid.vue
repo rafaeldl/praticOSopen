@@ -1,26 +1,42 @@
 <template>
-  <div v-if="photos?.length" class="order-card animate-fade-in-up mb-5 overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]">
-    <div class="flex items-center gap-3 border-b border-[var(--border-color)] px-5 py-4">
-      <svg class="h-5 w-5 text-brand-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <polyline points="21 15 16 10 5 21"/>
-      </svg>
-      <h3 class="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">{{ t.portfolioTitle }}</h3>
-    </div>
-    <div class="p-5">
-      <div class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3">
-        <div
-          v-for="(photo, index) in photos"
-          :key="index"
-          class="relative aspect-square cursor-pointer overflow-hidden rounded-xl bg-[var(--bg-tertiary)] transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg"
-          @click="$emit('openLightbox', index)"
+  <div v-if="photos?.length" class="rounded-xl border border-[#E4E4E7] bg-white p-7">
+    <h3 class="mb-4 text-lg font-semibold text-[#18181B]">{{ t.portfolioTitle }}</h3>
+
+    <!-- Featured (first) photo -->
+    <div
+      class="group relative mb-2 cursor-pointer overflow-hidden rounded-[10px] bg-[#F4F4F5]"
+      @click="$emit('openLightbox', 0)"
+    >
+      <div class="h-[240px]">
+        <img
+          :src="photos[0].url"
+          :alt="photos[0].description || ''"
+          loading="lazy"
+          class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         >
-          <img :src="photo.url" :alt="photo.description || ''" loading="lazy" class="h-full w-full object-cover">
-          <div v-if="photo.description" class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-xs text-white">
-            {{ photo.description }}
-          </div>
+      </div>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div class="absolute inset-x-0 bottom-0 p-4">
+          <p v-if="photos[0].description" class="text-sm text-white">{{ photos[0].description }}</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Remaining photos grid -->
+    <div v-if="photos.length > 1" class="grid grid-cols-3 gap-2 sm:grid-cols-5">
+      <div
+        v-for="(photo, index) in photos.slice(1)"
+        :key="index + 1"
+        class="group relative h-[90px] cursor-pointer overflow-hidden rounded-lg bg-[#F4F4F5]"
+        @click="$emit('openLightbox', index + 1)"
+      >
+        <img
+          :src="photo.url"
+          :alt="photo.description || ''"
+          loading="lazy"
+          class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        >
+        <div class="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/30" />
       </div>
     </div>
   </div>
