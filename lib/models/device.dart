@@ -28,6 +28,8 @@ class DeviceAggr extends BaseAuditCompanyAggr {
   String? serial;
   String? name;
   String? photo;
+  String? category;
+  String? manufacturer;
 
   DeviceAggr();
   factory DeviceAggr.fromJson(Map<String, dynamic> json) =>

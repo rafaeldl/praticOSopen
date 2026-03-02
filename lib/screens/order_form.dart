@@ -14,6 +14,7 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/screens/widgets/order_photos_widget.dart';
@@ -1659,9 +1660,13 @@ class _OrderFormState extends State<OrderForm> {
     });
   }
 
-  void _editDevice(DeviceAggr deviceAggr) {
-    // Convert DeviceAggr to Device for the form screen
-    final device = Device.fromJson(deviceAggr.toJson());
+  void _editDevice(DeviceAggr deviceAggr) async {
+    // Fetch full Device from Firestore to preserve all fields (category, manufacturer, etc.)
+    final fullDevice = _store.companyId != null
+        ? await DeviceRepositoryV2().getSingle(_store.companyId!, deviceAggr.id)
+        : null;
+    final device = fullDevice ?? Device.fromJson(deviceAggr.toJson());
+    if (!mounted) return;
     Navigator.pushNamed(
       context,
       '/device_form',
