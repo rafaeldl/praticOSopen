@@ -3017,4 +3017,75 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get youCanChangeThisLater => 'Pode alterar depois nas configurações';
+
+  @override
+  String get documents => 'Documentos';
+
+  @override
+  String get addDocument => 'Adicionar Documento';
+
+  @override
+  String get receipt => 'Comprovante';
+
+  @override
+  String get invoice => 'Nota Fiscal';
+
+  @override
+  String get contract => 'Contrato';
+
+  @override
+  String get attachReceipt => 'Anexar Comprovante';
+
+  @override
+  String get chooseFile => 'Escolher Arquivo';
+
+  @override
+  String get documentType => 'Tipo de Documento';
+
+  @override
+  String get viewDocument => 'Visualizar Documento';
+
+  @override
+  String get deleteDocument => 'Excluir Documento';
+
+  @override
+  String get confirmDeleteDocument =>
+      'Tem certeza que deseja excluir este documento?';
+
+  @override
+  String get uploadingDocument => 'Enviando documento...';
+
+  @override
+  String get noDocuments => 'Nenhum documento anexado';
+
+  @override
+  String get documentAdded => 'Documento adicionado';
+
+  @override
+  String get documentDeleted => 'Documento excluído';
+
+  @override
+  String get openDocument => 'Abrir';
+
+  @override
+  String get receiptAttached => 'Comprovante anexado';
+
+  @override
+  String get receiptRemoved => 'Comprovante removido';
+
+  @override
+  String get removeReceipt => 'Remover Comprovante';
+
+  @override
+  String get confirmRemoveReceipt =>
+      'Tem certeza que deseja remover este comprovante?';
+
+  @override
+  String get fromFiles => 'Arquivos';
+
+  @override
+  String get selectDocumentType => 'Selecione o tipo de documento';
+
+  @override
+  String get errorUploadingDocument => 'Erro ao enviar documento';
 }

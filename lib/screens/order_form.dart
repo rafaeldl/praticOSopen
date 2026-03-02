@@ -17,7 +17,7 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
-import 'package:praticos/screens/widgets/order_photos_widget.dart';
+import 'package:praticos/screens/widgets/order_media_widget.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/segment_config_service.dart';
@@ -141,7 +141,7 @@ class _OrderFormState extends State<OrderForm> {
 
                   return SliverList(
                     delegate: SliverChildListDelegate([
-                      _buildPhotosSection(context, config),
+                      _buildMediaSection(context, config),
                       _buildClientDeviceSection(context, config),
                       _buildDevicesSection(context, config),
                       _buildSummarySection(context, config),
@@ -262,12 +262,11 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildPhotosSection(BuildContext context, SegmentConfigProvider config) {
+  Widget _buildMediaSection(BuildContext context, SegmentConfigProvider config) {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      child: OrderPhotosWidget(
+      child: OrderMediaWidget(
         store: _store,
-        onAddPhoto: () => _showAddPhotoOptions(config),
       ),
     );
   }

@@ -447,6 +447,24 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$documentsAtom = Atom(
+    name: '_OrderStore.documents',
+    context: context,
+  );
+
+  @override
+  ObservableList<OrderDocument> get documents {
+    _$documentsAtom.reportRead();
+    return super.documents;
+  }
+
+  @override
+  set documents(ObservableList<OrderDocument> value) {
+    _$documentsAtom.reportWrite(value, super.documents, () {
+      super.documents = value;
+    });
+  }
+
   late final _$isUploadingPhotoAtom = Atom(
     name: '_OrderStore.isUploadingPhoto',
     context: context,
@@ -462,6 +480,24 @@ mixin _$OrderStore on _OrderStore, Store {
   set isUploadingPhoto(bool value) {
     _$isUploadingPhotoAtom.reportWrite(value, super.isUploadingPhoto, () {
       super.isUploadingPhoto = value;
+    });
+  }
+
+  late final _$isUploadingDocumentAtom = Atom(
+    name: '_OrderStore.isUploadingDocument',
+    context: context,
+  );
+
+  @override
+  bool get isUploadingDocument {
+    _$isUploadingDocumentAtom.reportRead();
+    return super.isUploadingDocument;
+  }
+
+  @override
+  set isUploadingDocument(bool value) {
+    _$isUploadingDocumentAtom.reportWrite(value, super.isUploadingDocument, () {
+      super.isUploadingDocument = value;
     });
   }
 
@@ -932,6 +968,72 @@ mixin _$OrderStore on _OrderStore, Store {
     return _$deletePhotoAsyncAction.run(() => super.deletePhoto(index));
   }
 
+  late final _$addDocumentAsyncAction = AsyncAction(
+    '_OrderStore.addDocument',
+    context: context,
+  );
+
+  @override
+  Future<bool> addDocument(
+    File file,
+    OrderDocumentType type,
+    String contentType,
+    String fileName, {
+    String? description,
+    int? fileSize,
+  }) {
+    return _$addDocumentAsyncAction.run(
+      () => super.addDocument(
+        file,
+        type,
+        contentType,
+        fileName,
+        description: description,
+        fileSize: fileSize,
+      ),
+    );
+  }
+
+  late final _$deleteDocumentAsyncAction = AsyncAction(
+    '_OrderStore.deleteDocument',
+    context: context,
+  );
+
+  @override
+  Future<bool> deleteDocument(int index) {
+    return _$deleteDocumentAsyncAction.run(() => super.deleteDocument(index));
+  }
+
+  late final _$attachReceiptToTransactionAsyncAction = AsyncAction(
+    '_OrderStore.attachReceiptToTransaction',
+    context: context,
+  );
+
+  @override
+  Future<bool> attachReceiptToTransaction(
+    int index,
+    File file,
+    String contentType,
+    String fileName,
+  ) {
+    return _$attachReceiptToTransactionAsyncAction.run(
+      () =>
+          super.attachReceiptToTransaction(index, file, contentType, fileName),
+    );
+  }
+
+  late final _$removeReceiptFromTransactionAsyncAction = AsyncAction(
+    '_OrderStore.removeReceiptFromTransaction',
+    context: context,
+  );
+
+  @override
+  Future<bool> removeReceiptFromTransaction(int index) {
+    return _$removeReceiptFromTransactionAsyncAction.run(
+      () => super.removeReceiptFromTransaction(index),
+    );
+  }
+
   late final _$loadOrdersForDashboardCustomRangeAsyncAction = AsyncAction(
     '_OrderStore.loadOrdersForDashboardCustomRange',
     context: context,
@@ -1392,7 +1494,9 @@ customerFilter: ${customerFilter},
 services: ${services},
 products: ${products},
 photos: ${photos},
+documents: ${documents},
 isUploadingPhoto: ${isUploadingPhoto},
+isUploadingDocument: ${isUploadingDocument},
 paidAmount: ${paidAmount},
 transactions: ${transactions},
 totalPaidAmount: ${totalPaidAmount},
