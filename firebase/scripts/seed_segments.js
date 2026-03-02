@@ -398,7 +398,6 @@ const SEGMENTS = [
         key: 'device.year',
         type: 'number',
         labels: { 'pt-BR': 'Ano', 'en-US': 'Year', 'es-ES': 'Año' },
-        required: true,
         min: 1900,
         max: 2030,
         section: 'Identificação',
@@ -512,7 +511,6 @@ const SEGMENTS = [
         key: 'device.btus',
         type: 'select',
         labels: { 'pt-BR': 'BTUs', 'en-US': 'BTUs', 'es-ES': 'BTUs' },
-        required: true,
         options: ['7000', '9000', '12000', '18000', '22000', '24000', '30000'],
         optionsI18n: [
           { value: '7000', labels: { 'pt-BR': '7000', 'en-US': '7000', 'es-ES': '7000' } },
@@ -531,7 +529,6 @@ const SEGMENTS = [
         key: 'device.voltage',
         type: 'select',
         labels: { 'pt-BR': 'Voltagem', 'en-US': 'Voltage', 'es-ES': 'Voltaje' },
-        required: true,
         options: ['110V', '220V', 'two_phase'],
         optionsI18n: [
           { value: '110V', labels: { 'pt-BR': '110V', 'en-US': '110V', 'es-ES': '110V' } },
@@ -775,7 +772,6 @@ const SEGMENTS = [
         key: 'device.voltage',
         type: 'select',
         labels: { 'pt-BR': 'Voltagem', 'en-US': 'Voltage', 'es-ES': 'Voltaje' },
-        required: true,
         options: ['110V', '220V', 'dual_voltage'],
         optionsI18n: [
           { value: '110V', labels: { 'pt-BR': '110V', 'en-US': '110V', 'es-ES': '110V' } },
