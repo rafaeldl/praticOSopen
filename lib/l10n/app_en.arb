@@ -149,6 +149,7 @@
   "changePhoto": "Change Photo",
   "removePhoto": "Remove Photo",
   "addPhoto": "Add Photo",
+  "addPhotoOrAttachment": "Photo / Attachment",
   "photos": "Photos",
   "photo": "Photo",
   "camera": "Camera",

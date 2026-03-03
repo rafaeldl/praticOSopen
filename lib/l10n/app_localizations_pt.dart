@@ -404,6 +404,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addPhoto => 'Adicionar Foto';
 
   @override
+  String get addPhotoOrAttachment => 'Foto / Anexo';
+
+  @override
   String get photos => 'Fotos';
 
   @override

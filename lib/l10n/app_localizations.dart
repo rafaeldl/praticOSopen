@@ -874,6 +874,12 @@ abstract class AppLocalizations {
   /// **'Adicionar Foto'**
   String get addPhoto;
 
+  /// No description provided for @addPhotoOrAttachment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto / Anexo'**
+  String get addPhotoOrAttachment;
+
   /// No description provided for @photos.
   ///
   /// In pt, this message translates to:

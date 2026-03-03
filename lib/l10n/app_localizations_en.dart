@@ -402,6 +402,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addPhoto => 'Add Photo';
 
   @override
+  String get addPhotoOrAttachment => 'Photo / Attachment';
+
+  @override
   String get photos => 'Photos';
 
   @override
