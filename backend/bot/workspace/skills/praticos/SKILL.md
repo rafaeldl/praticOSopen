@@ -10,15 +10,8 @@ metadata: {"moltbot": {"always": true}}
 ## CONFIG
 
 Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KEY** (auth key)
-**{NUMERO}** = origin.from da sessao (remetente). Normalizar: se nao comeca com "+", adicionar.
-
-🔴 **IDENTIDADE vs DADOS — NUNCA CONFUNDIR:**
-- {NUMERO} = IDENTIDADE DA SESSAO. SEMPRE origin.from. IMUTAVEL.
-- Telefones em vCards, contatos compartilhados, resultados de busca = DADOS DE CLIENTE. NUNCA usar como {NUMERO}.
-- Se o usuario enviar um contato/vCard, o telefone dentro e do CLIENTE, NAO e origin.from.
-- NUNCA INVENTAR {NUMERO}. Se nao souber origin.from, NAO faca chamadas.
-
-**Numeros BR (+55):** WhatsApp usa +55{DDD}{8dig} (13 chars). Se API retornar 14 chars (+55489XXXXXXXX), remover o "9" apos DDD.
+**{NUMERO}** = origin.from da sessao. Normalizar com "+". Regras de identidade vs dados: ver AGENTS.md.
+**Numeros BR (+55):** WhatsApp usa +55{DDD}{8dig} (13 chars). Se 14 chars, remover "9" apos DDD.
 
 **CRON — REGRAS:**
 1. Anotar {NUMERO} + dados em memory/users/{NUMERO}.md (## Pendentes) ANTES de agendar
@@ -29,47 +22,16 @@ Env vars (ja configuradas): **$PRATICOS_API_URL** (base URL), **$PRATICOS_API_KE
 
 ---
 
-## ENDPOINTS RAPIDO
-
-| Acao | Endpoint |
-|------|----------|
-| Buscar entidades | POST /bot/search/unified |
-| Criar OS completa | POST /bot/orders/full (requer IDs) |
-| CRUD entidades | /bot/entities/{customers\|devices\|services\|products} |
-| Status OS | PATCH /bot/orders/{NUM}/status |
-| Detalhes OS | GET /bot/orders/{NUM}/details |
-| Listar OS | GET /bot/orders/list |
-| Fotos upload | POST /bot/orders/{NUM}/photos/upload (multipart) |
-| Resumo | GET /bot/summary/today \| /pending |
-| Faturamento | GET /bot/analytics/financial |
-| Add servico na OS | POST /bot/orders/{NUM}/services |
-| Add produto na OS | POST /bot/orders/{NUM}/products |
-| Add dispositivo | POST /bot/orders/{NUM}/devices |
-| Remover dispositivo | DELETE /bot/orders/{NUM}/devices/{ID} |
-| Compartilhar | POST /bot/orders/{NUM}/share |
-| Comentar/Anotar | POST /bot/orders/{NUM}/comments |
-| Ver comentarios | GET /bot/orders/{NUM}/comments |
-| Atualizar idioma | PATCH /bot/user/language |
-
+## ENDPOINTS
+Referencia completa: `read(file_path="skills/praticos/references/api-endpoints.md")`
 ⚠️ NAO EXISTEM: /bot/customers, /bot/devices, /bot/services, /bot/products, /bot/orders (sem /full /list /{NUM}), /bot/*/search, /bot/search (sem /unified)
-
-🔴 ANTI-LOOP: NOT_FOUND → releia api-endpoints.md: `read(file_path="skills/praticos/references/api-endpoints.md")`. NUNCA tente variacoes de URL. Max 3 tentativas.
-
-**formatContext:** Endpoints retornam `formatContext: { country, currency, locale }`. Usar para formatar moedas e datas (ver SOUL.md).
+🔴 ANTI-LOOP: NOT_FOUND → releia api-endpoints.md. Max 3 tentativas.
 
 ---
 
 ## COMO CHAMAR A API
-
 **OBRIGATORIO: aspas DUPLAS para expandir variaveis. NUNCA aspas simples em $PRATICOS_API_URL ou $PRATICOS_API_KEY.**
-
-GET:
-exec(command="curl -s -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" \"$PRATICOS_API_URL/bot/orders/list\"")
-
-POST JSON:
-exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\"}' \"$PRATICOS_API_URL/bot/search/unified\"")
-
-Exemplos completos (multipart, etc): `read(file_path="skills/praticos/references/api-endpoints.md")`
+Exemplos completos: `read(file_path="skills/praticos/references/api-endpoints.md")`
 
 ---
 
@@ -100,8 +62,14 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
 4. **Fotos:** multipart `-F "file=@/path"` (NAO base64)
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
-   - 🔴 Valor na OS = serviço ou produto. Se usuario pedir para "colocar/registrar/atualizar valor" na OS → buscar servico no catalogo (POST /bot/search/unified) e adicionar via /services. Se nao encontrar → listar servicos disponiveis e pedir para escolher ou criar novo. NUNCA usar /comments para definir valor da OS.
+   - 🔴 Valor na OS = serviço ou produto. Se usuario pedir para "colocar/registrar/atualizar valor" na OS → buscar servico no catalogo (POST /bot/search/unified) e adicionar via /services. Se nao encontrar → criar novo servico (POST /bot/entities/services) e depois adicionar via /services. NUNCA usar /comments para definir valor da OS.
    - Comentario com valor so se usuario pedir EXPLICITAMENTE para anotar/observar (ex: "anota que o valor combinado foi 700").
+   - 🔴 **SERVICOS VIA AUDIO/TEXTO/FOTO — CADA UM DEVE SER ITEM NA OS:**
+     a) Buscar no catalogo (POST /bot/search/unified)
+     b) Se encontrou → adicionar via POST /orders/{NUM}/services
+     c) Se NAO encontrou → criar servico (POST /bot/entities/services) → adicionar via /services
+     d) NUNCA usar /comments como fallback para listar servicos ou valores
+     e) NUNCA duplicar info de servicos ja adicionados como comentario "resumo"
 6. **Exibir OS:** ver CARD DE OS abaixo
 7. 🔴 **Apos criar OS:** SEMPRE exibir card (GET /details → formato CARD DE OS abaixo) + oferecer compartilhar → POST /bot/orders/{NUM}/share
 
@@ -151,6 +119,12 @@ Quando o usuario pedir: anotar, observacao, nota, comentario, lembrete na OS →
 - Listar: GET /bot/orders/{NUM}/comments
 
 Gatilhos: "anota na OS", "observacao", "nota", "adicionar comentario", "registrar que..."
+
+🔴 **NUNCA usar /comments para:**
+- Listar servicos/produtos (usar /services e /products)
+- Registrar valores de servicos (usar /services com `value`)
+- Resumir o que foi adicionado na OS (o card ja mostra)
+- Fallback quando nao encontrar servico no catalogo (criar via /entities/services)
 
 ---
 

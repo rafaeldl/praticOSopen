@@ -1,8 +1,6 @@
 # API Endpoints - Referência Completa
 
-Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" e base "$PRATICOS_API_URL"
-
-**formatContext:** Todos os endpoints bot retornam `formatContext: { country, currency, locale }`. Usar para formatar moedas e datas. Ver SOUL.md > Dados da API.
+Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" e base "$PRATICOS_API_URL". Retornam `formatContext` (ver SOUL.md > Dados da API).
 
 ## Busca Unificada (USAR SEMPRE)
 POST /bot/search/unified
@@ -80,13 +78,4 @@ POST /bot/orders/{NUM}/share `{"permissions":["view","approve","comment"],"expir
 GET /bot/orders/{NUM}/share | DELETE /bot/orders/{NUM}/share/{TOKEN}
 
 ## Checklists
-GET /bot/forms/templates - templates disponiveis
-GET /bot/orders/{NUM}/forms - listar checklists da OS
-GET /bot/orders/{NUM}/forms/{FID} - detalhes
-POST /bot/orders/{NUM}/forms `{"templateId":"ID"}`
-POST /bot/orders/{NUM}/forms/{FID}/items/{IID} `{"value":"resposta"}`
-POST /bot/orders/{NUM}/forms/{FID}/items/{IID}/photos - multipart
-PATCH /bot/orders/{NUM}/forms/{FID}/status `{"status":"completed"}`
-
-Tipos: text(string) | number(num/string) | boolean(true/false/yes/no/sim/não/sí/no — aceitar no idioma do usuario) | select(indice 1-N ou valor) | checklist("1,3,5" ou [1,3,5]) | photo_only(so foto)
-Status: pending → in_progress → completed (completed requer obrigatorios preenchidos)
+Ver detalhes: `read(file_path="skills/praticos/references/checklists.md")`
