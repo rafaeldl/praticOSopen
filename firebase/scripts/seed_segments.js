@@ -1302,6 +1302,267 @@ const SEGMENTS = [
   },
 
   // ═══════════════════════════════════════════════════════════
+  // BICICLETARIA (Oficinas de Bicicleta)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'bicycles',
+    name: 'Bicicletaria',
+    nameI18n: { 'pt-BR': 'Bicicletaria', 'en-US': 'Bike Shop', 'es-ES': 'Bicicletería' },
+    icon: '🚲',
+    active: true,
+    fieldService: false, // Workshop: cliente traz a bicicleta
+    subspecialties: [
+      {
+        id: 'general',
+        icon: '🔧',
+        name: { 'pt-BR': 'Oficina Geral', 'en-US': 'General Workshop', 'es-ES': 'Taller General' },
+        description: { 'pt-BR': 'Manutenção e reparo de bicicletas em geral', 'en-US': 'General bicycle maintenance and repair', 'es-ES': 'Mantenimiento y reparación general de bicicletas' },
+      },
+      {
+        id: 'mtb',
+        icon: '🏔️',
+        name: { 'pt-BR': 'MTB', 'en-US': 'MTB', 'es-ES': 'MTB' },
+        description: { 'pt-BR': 'Mountain bike, trilha e enduro', 'en-US': 'Mountain bike, trail and enduro', 'es-ES': 'Mountain bike, trail y enduro' },
+      },
+      {
+        id: 'road',
+        icon: '🏁',
+        name: { 'pt-BR': 'Speed / Road', 'en-US': 'Road Bike', 'es-ES': 'Ruta / Road' },
+        description: { 'pt-BR': 'Bicicletas de estrada e ciclismo de velocidade', 'en-US': 'Road bikes and speed cycling', 'es-ES': 'Bicicletas de ruta y ciclismo de velocidad' },
+      },
+      {
+        id: 'ebike',
+        icon: '⚡',
+        name: { 'pt-BR': 'E-bike', 'en-US': 'E-bike', 'es-ES': 'E-bike' },
+        description: { 'pt-BR': 'Bicicletas elétricas e assistidas', 'en-US': 'Electric and pedal-assist bikes', 'es-ES': 'Bicicletas eléctricas y asistidas' },
+      },
+    ],
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Bicicleta', 'en-US': 'Bicycle', 'es-ES': 'Bicicleta' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Bicicletas', 'en-US': 'Bicycles', 'es-ES': 'Bicicletas' }
+      },
+      {
+        key: 'device.brand',
+        type: 'label',
+        labels: { 'pt-BR': 'Marca', 'en-US': 'Brand', 'es-ES': 'Marca' }
+      },
+      {
+        key: 'device.model',
+        type: 'label',
+        labels: { 'pt-BR': 'Modelo', 'en-US': 'Model', 'es-ES': 'Modelo' }
+      },
+      {
+        key: 'device.serial',
+        type: 'text',
+        labels: { 'pt-BR': 'Nº de Série', 'en-US': 'Serial Number', 'es-ES': 'Nº de Serie' },
+      },
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Bicicleta', 'en-US': 'Add Bicycle', 'es-ES': 'Agregar Bicicleta' }
+      },
+      {
+        key: 'actions.edit_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Editar Bicicleta', 'en-US': 'Edit Bicycle', 'es-ES': 'Editar Bicicleta' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Conserto', 'en-US': 'Under Repair', 'es-ES': 'En Reparación' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Pronta para Retirada', 'en-US': 'Ready for Pickup', 'es-ES': 'Lista para Retiro' }
+      },
+
+      // Campos customizados (campos reais do form)
+      {
+        key: 'device.bikeType',
+        type: 'select',
+        labels: { 'pt-BR': 'Tipo de Bicicleta', 'en-US': 'Bike Type', 'es-ES': 'Tipo de Bicicleta' },
+        options: ['mtb', 'road', 'gravel', 'urban', 'bmx', 'kids', 'ebike', 'folding', 'fixed'],
+        optionsI18n: [
+          { value: 'mtb', labels: { 'pt-BR': 'MTB', 'en-US': 'MTB', 'es-ES': 'MTB' } },
+          { value: 'road', labels: { 'pt-BR': 'Speed / Road', 'en-US': 'Road', 'es-ES': 'Ruta / Road' } },
+          { value: 'gravel', labels: { 'pt-BR': 'Gravel', 'en-US': 'Gravel', 'es-ES': 'Gravel' } },
+          { value: 'urban', labels: { 'pt-BR': 'Urbana', 'en-US': 'Urban', 'es-ES': 'Urbana' } },
+          { value: 'bmx', labels: { 'pt-BR': 'BMX', 'en-US': 'BMX', 'es-ES': 'BMX' } },
+          { value: 'kids', labels: { 'pt-BR': 'Infantil', 'en-US': 'Kids', 'es-ES': 'Infantil' } },
+          { value: 'ebike', labels: { 'pt-BR': 'E-bike', 'en-US': 'E-bike', 'es-ES': 'E-bike' } },
+          { value: 'folding', labels: { 'pt-BR': 'Dobrável', 'en-US': 'Folding', 'es-ES': 'Plegable' } },
+          { value: 'fixed', labels: { 'pt-BR': 'Fixa / Single Speed', 'en-US': 'Fixed Gear', 'es-ES': 'Piñón Fijo' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 1,
+      },
+      {
+        key: 'device.wheelSize',
+        type: 'select',
+        labels: { 'pt-BR': 'Aro', 'en-US': 'Wheel Size', 'es-ES': 'Rodado' },
+        options: ['12', '16', '20', '24', '26', '27.5', '29', '700c'],
+        optionsI18n: [
+          { value: '12', labels: { 'pt-BR': 'Aro 12"', 'en-US': '12"', 'es-ES': 'Rodado 12"' } },
+          { value: '16', labels: { 'pt-BR': 'Aro 16"', 'en-US': '16"', 'es-ES': 'Rodado 16"' } },
+          { value: '20', labels: { 'pt-BR': 'Aro 20"', 'en-US': '20"', 'es-ES': 'Rodado 20"' } },
+          { value: '24', labels: { 'pt-BR': 'Aro 24"', 'en-US': '24"', 'es-ES': 'Rodado 24"' } },
+          { value: '26', labels: { 'pt-BR': 'Aro 26"', 'en-US': '26"', 'es-ES': 'Rodado 26"' } },
+          { value: '27.5', labels: { 'pt-BR': 'Aro 27.5"', 'en-US': '27.5"', 'es-ES': 'Rodado 27.5"' } },
+          { value: '29', labels: { 'pt-BR': 'Aro 29"', 'en-US': '29"', 'es-ES': 'Rodado 29"' } },
+          { value: '700c', labels: { 'pt-BR': 'Aro 700c', 'en-US': '700c', 'es-ES': 'Rodado 700c' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 2,
+      },
+      {
+        key: 'device.frameSize',
+        type: 'select',
+        labels: { 'pt-BR': 'Tamanho do Quadro', 'en-US': 'Frame Size', 'es-ES': 'Talla del Cuadro' },
+        options: ['xs', 's', 'm', 'l', 'xl'],
+        optionsI18n: [
+          { value: 'xs', labels: { 'pt-BR': 'PP / XS', 'en-US': 'XS', 'es-ES': 'XS' } },
+          { value: 's', labels: { 'pt-BR': 'P / S', 'en-US': 'S', 'es-ES': 'S' } },
+          { value: 'm', labels: { 'pt-BR': 'M', 'en-US': 'M', 'es-ES': 'M' } },
+          { value: 'l', labels: { 'pt-BR': 'G / L', 'en-US': 'L', 'es-ES': 'L' } },
+          { value: 'xl', labels: { 'pt-BR': 'GG / XL', 'en-US': 'XL', 'es-ES': 'XL' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 3,
+      },
+      {
+        key: 'device.frameMaterial',
+        type: 'select',
+        labels: { 'pt-BR': 'Material do Quadro', 'en-US': 'Frame Material', 'es-ES': 'Material del Cuadro' },
+        options: ['aluminum', 'carbon', 'steel', 'chromoly'],
+        optionsI18n: [
+          { value: 'aluminum', labels: { 'pt-BR': 'Alumínio', 'en-US': 'Aluminum', 'es-ES': 'Aluminio' } },
+          { value: 'carbon', labels: { 'pt-BR': 'Carbono', 'en-US': 'Carbon', 'es-ES': 'Carbono' } },
+          { value: 'steel', labels: { 'pt-BR': 'Aço', 'en-US': 'Steel', 'es-ES': 'Acero' } },
+          { value: 'chromoly', labels: { 'pt-BR': 'Cromo-Molibdênio', 'en-US': 'Chromoly', 'es-ES': 'Cromo-Molibdeno' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 4,
+      },
+      {
+        key: 'device.gearCount',
+        type: 'select',
+        labels: { 'pt-BR': 'Marchas', 'en-US': 'Gears', 'es-ES': 'Velocidades' },
+        options: ['single', '7', '8', '9', '10', '11', '12', '18', '21', '24', '27'],
+        optionsI18n: [
+          { value: 'single', labels: { 'pt-BR': 'Single Speed', 'en-US': 'Single Speed', 'es-ES': 'Single Speed' } },
+          { value: '7', labels: { 'pt-BR': '7v', 'en-US': '7 speed', 'es-ES': '7v' } },
+          { value: '8', labels: { 'pt-BR': '8v', 'en-US': '8 speed', 'es-ES': '8v' } },
+          { value: '9', labels: { 'pt-BR': '9v', 'en-US': '9 speed', 'es-ES': '9v' } },
+          { value: '10', labels: { 'pt-BR': '10v', 'en-US': '10 speed', 'es-ES': '10v' } },
+          { value: '11', labels: { 'pt-BR': '11v', 'en-US': '11 speed', 'es-ES': '11v' } },
+          { value: '12', labels: { 'pt-BR': '12v', 'en-US': '12 speed', 'es-ES': '12v' } },
+          { value: '18', labels: { 'pt-BR': '18v', 'en-US': '18 speed', 'es-ES': '18v' } },
+          { value: '21', labels: { 'pt-BR': '21v', 'en-US': '21 speed', 'es-ES': '21v' } },
+          { value: '24', labels: { 'pt-BR': '24v', 'en-US': '24 speed', 'es-ES': '24v' } },
+          { value: '27', labels: { 'pt-BR': '27v', 'en-US': '27 speed', 'es-ES': '27v' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 5,
+      },
+      {
+        key: 'device.brakeType',
+        type: 'select',
+        labels: { 'pt-BR': 'Tipo de Freio', 'en-US': 'Brake Type', 'es-ES': 'Tipo de Freno' },
+        options: ['vbrake', 'disc_mechanical', 'disc_hydraulic', 'cantilever', 'coaster'],
+        optionsI18n: [
+          { value: 'vbrake', labels: { 'pt-BR': 'V-Brake', 'en-US': 'V-Brake', 'es-ES': 'V-Brake' } },
+          { value: 'disc_mechanical', labels: { 'pt-BR': 'Disco Mecânico', 'en-US': 'Mechanical Disc', 'es-ES': 'Disco Mecánico' } },
+          { value: 'disc_hydraulic', labels: { 'pt-BR': 'Disco Hidráulico', 'en-US': 'Hydraulic Disc', 'es-ES': 'Disco Hidráulico' } },
+          { value: 'cantilever', labels: { 'pt-BR': 'Cantilever', 'en-US': 'Cantilever', 'es-ES': 'Cantilever' } },
+          { value: 'coaster', labels: { 'pt-BR': 'Contra-Pedal', 'en-US': 'Coaster Brake', 'es-ES': 'Contrapedal' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 6,
+      },
+      {
+        key: 'device.suspensionType',
+        type: 'select',
+        labels: { 'pt-BR': 'Suspensão', 'en-US': 'Suspension', 'es-ES': 'Suspensión' },
+        options: ['rigid', 'hardtail', 'full_suspension'],
+        optionsI18n: [
+          { value: 'rigid', labels: { 'pt-BR': 'Rígida', 'en-US': 'Rigid', 'es-ES': 'Rígida' } },
+          { value: 'hardtail', labels: { 'pt-BR': 'Hardtail (dianteira)', 'en-US': 'Hardtail (front)', 'es-ES': 'Hardtail (delantera)' } },
+          { value: 'full_suspension', labels: { 'pt-BR': 'Full Suspension', 'en-US': 'Full Suspension', 'es-ES': 'Doble Suspensión' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 7,
+      },
+      {
+        key: 'device.color',
+        type: 'text',
+        labels: { 'pt-BR': 'Cor', 'en-US': 'Color', 'es-ES': 'Color' },
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 8,
+      },
+      {
+        key: 'device.year',
+        type: 'number',
+        labels: { 'pt-BR': 'Ano', 'en-US': 'Year', 'es-ES': 'Año' },
+        min: 1980,
+        max: 2030,
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 9,
+      },
+      {
+        key: 'device.groupset',
+        type: 'text',
+        labels: { 'pt-BR': 'Grupo / Câmbio', 'en-US': 'Groupset', 'es-ES': 'Grupo / Cambio' },
+        placeholder: 'Ex: Shimano Deore, SRAM GX',
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 10,
+      },
+      {
+        key: 'device.isElectric',
+        type: 'select',
+        labels: { 'pt-BR': 'Elétrica?', 'en-US': 'Electric?', 'es-ES': '¿Eléctrica?' },
+        options: ['no', 'yes'],
+        optionsI18n: [
+          { value: 'no', labels: { 'pt-BR': 'Não', 'en-US': 'No', 'es-ES': 'No' } },
+          { value: 'yes', labels: { 'pt-BR': 'Sim', 'en-US': 'Yes', 'es-ES': 'Sí' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 11,
+      },
+
+      // Campos customizados da OS
+      {
+        key: 'service_order.observation',
+        type: 'textarea',
+        labels: { 'pt-BR': 'Observação', 'en-US': 'Observation', 'es-ES': 'Observación' },
+        placeholder: 'Ex: Cliente relata barulho na corrente',
+        section: 'Detalhes',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 1,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // OUTRO (Genérico)
   // ═══════════════════════════════════════════════════════════
   {
