@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show ScaffoldMessenger, SnackBar;
+import 'package:flutter/material.dart' show Divider, ScaffoldMessenger, SnackBar, showModalBottomSheet;
 import 'package:provider/provider.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -9,6 +9,7 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
@@ -80,12 +81,10 @@ class OrderMediaWidget extends StatelessWidget {
   Widget _buildThumbnailRow(BuildContext context, SegmentConfigProvider config) {
     const double thumbSize = 56;
     const double spacing = 8;
-    const double docSpacing = 16;
-
     final photoCount = store.photos.length;
     final docCount = store.documents.length;
-    // 1 add button + photos + docs
-    final totalCount = 1 + photoCount + docCount;
+    final hasDocThumb = docCount > 0;
+    final totalCount = 1 + (hasDocThumb ? 1 : 0) + photoCount;
 
     return SizedBox(
       height: thumbSize,
@@ -93,7 +92,6 @@ class OrderMediaWidget extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: totalCount,
         itemBuilder: (context, index) {
-          // First item is the add button (paperclip — handles both photos and docs)
           if (index == 0) {
             return Padding(
               padding: const EdgeInsets.only(right: spacing),
@@ -101,58 +99,83 @@ class OrderMediaWidget extends StatelessWidget {
             );
           }
 
-          // Photo thumbnails (indices 1..1+photoCount-1)
-          final photoStartIndex = 1;
-          if (index < photoStartIndex + photoCount) {
-            final photoIndex = index - photoStartIndex;
-            final photo = store.photos[photoIndex];
-            final isSelected = photoIndex == 0; // First photo is cover
-
-            // Add extra spacing before first doc if this is the last photo
-            final rightPadding = (photoIndex == photoCount - 1 && docCount > 0)
-                ? docSpacing
-                : spacing;
-
+          if (hasDocThumb && index == 1) {
             return Padding(
-              padding: EdgeInsets.only(right: rightPadding),
-              child: GestureDetector(
-                onTap: () => _showPhotoViewer(context, photoIndex, config),
-                child: Container(
-                  width: thumbSize,
-                  height: thumbSize,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: isSelected
-                        ? Border.all(
-                            color: CupertinoColors.activeBlue,
-                            width: 2,
-                          )
-                        : null,
-                  ),
-                  child: ClipRRect(
-                    borderRadius:
-                        BorderRadius.circular(isSelected ? 6 : 8),
-                    child: CachedImage.cover(
-                      imageUrl: photo.url!,
-                      height: thumbSize,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                  ),
-                ),
-              ),
+              padding: EdgeInsets.only(right: photoCount > 0 ? spacing : 0),
+              child: _buildDocumentCountThumb(context, thumbSize, docCount),
             );
           }
 
-          // Document thumbnails (indices after photos)
-          final docIndex = index - photoStartIndex - photoCount;
-          final doc = store.documents[docIndex];
-          final isLastDoc = docIndex == docCount - 1;
+          final photoIndex = index - 1 - (hasDocThumb ? 1 : 0);
+          final photo = store.photos[photoIndex];
+          final isSelected = photoIndex == 0; // First photo is cover
+          final isLast = photoIndex == photoCount - 1;
 
           return Padding(
-            padding: EdgeInsets.only(right: isLastDoc ? 0 : spacing),
-            child: _buildDocumentThumbnail(context, doc, docIndex, thumbSize),
+            padding: EdgeInsets.only(right: isLast ? 0 : spacing),
+            child: GestureDetector(
+              onTap: () => _showPhotoViewer(context, photoIndex, config),
+              child: Container(
+                width: thumbSize,
+                height: thumbSize,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: isSelected
+                      ? Border.all(
+                          color: CupertinoColors.activeBlue,
+                          width: 2,
+                        )
+                      : null,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(isSelected ? 6 : 8),
+                  child: CachedImage.cover(
+                    imageUrl: photo.url!,
+                    height: thumbSize,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ),
+            ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildDocumentCountThumb(BuildContext context, double size, int count) {
+    return GestureDetector(
+      onTap: () => _showDocumentsSheet(context),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemGrey6.resolveFrom(context),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: CupertinoColors.systemGrey4.resolveFrom(context),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.doc_on_doc_fill,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              size: 20,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -180,105 +203,82 @@ class OrderMediaWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDocumentThumbnail(
-      BuildContext context, OrderDocument doc, int docIndex, double size) {
-    return GestureDetector(
-      onTap: () => _openDocument(context, doc),
-      onLongPress: () => _showDocumentActionSheet(context, docIndex),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: _docThumbnailBackground(context, doc),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: CupertinoColors.systemGrey4.resolveFrom(context),
-            width: 1,
-          ),
-        ),
-        child: doc.isImage && doc.url != null
-            ? _buildDocImageThumbnail(context, doc, size)
-            : _buildDocIconThumbnail(context, doc),
+  // --- Documents bottom sheet ---
+
+  void _showDocumentsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: CupertinoColors.systemGroupedBackground.resolveFrom(context),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (sheetCtx) => Observer(
+        builder: (_) {
+          final docs = store.documents;
+          if (docs.isEmpty) {
+            Navigator.pop(sheetCtx);
+            return const SizedBox.shrink();
+          }
+          return _DocumentsSheet(
+            docs: docs,
+            onOpen: (doc) {
+              Navigator.pop(sheetCtx);
+              _openDocument(context, doc);
+            },
+            onConfirmDelete: (index) async {
+              final confirmed = await _showDeleteConfirmation(context);
+              if (!confirmed) return false;
+              final success = await store.deleteDocument(index);
+              if (context.mounted) {
+                _showFeedback(
+                  context,
+                  success
+                      ? context.l10n.documentDeleted
+                      : context.l10n.errorUploadingDocument,
+                  isError: !success,
+                );
+              }
+              // Close sheet if no more docs
+              if (success && docs.length <= 1 && sheetCtx.mounted) {
+                Navigator.pop(sheetCtx);
+              }
+              return success;
+            },
+            store: store,
+          );
+        },
       ),
     );
   }
 
-  Widget _buildDocImageThumbnail(
-      BuildContext context, OrderDocument doc, double size) {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(7),
-          child: CachedImage.cover(
-            imageUrl: doc.url!,
-            height: size,
-            borderRadius: BorderRadius.circular(7),
+  Future<bool> _showDeleteConfirmation(BuildContext context) async {
+    bool confirmed = false;
+    await showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(context.l10n.deleteDocument),
+        content: Text(context.l10n.confirmDeleteDocument),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.cancel),
+            onPressed: () {
+              confirmed = false;
+              Navigator.pop(ctx);
+            },
           ),
-        ),
-        // Badge to differentiate from regular photos
-        Positioned(
-          bottom: 2,
-          right: 2,
-          child: Container(
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              color: CupertinoColors.black.withValues(alpha: 0.6),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: const Icon(
-              CupertinoIcons.doc_fill,
-              color: CupertinoColors.white,
-              size: 10,
-            ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text(context.l10n.delete),
+            onPressed: () {
+              confirmed = true;
+              Navigator.pop(ctx);
+            },
           ),
-        ),
-      ],
+        ],
+      ),
     );
-  }
-
-  Widget _buildDocIconThumbnail(BuildContext context, OrderDocument doc) {
-    final ext = _fileExtension(doc);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          doc.isPdf ? CupertinoIcons.doc_text_fill : CupertinoIcons.doc_fill,
-          color: doc.isPdf
-              ? CupertinoColors.systemRed
-              : CupertinoColors.systemGrey.resolveFrom(context),
-          size: 22,
-        ),
-        const SizedBox(height: 2),
-        Text(
-          ext.toUpperCase(),
-          style: TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Color _docThumbnailBackground(BuildContext context, OrderDocument doc) {
-    if (doc.isImage && doc.url != null) {
-      return CupertinoColors.systemGrey6.resolveFrom(context);
-    }
-    if (doc.isPdf) {
-      return CupertinoColors.systemRed.withValues(alpha: 0.08);
-    }
-    return CupertinoColors.systemGrey6.resolveFrom(context);
-  }
-
-  String _fileExtension(OrderDocument doc) {
-    if (doc.isPdf) return 'PDF';
-    final name = doc.fileName ?? '';
-    final dotIdx = name.lastIndexOf('.');
-    if (dotIdx >= 0 && dotIdx < name.length - 1) {
-      return name.substring(dotIdx + 1);
-    }
-    return 'DOC';
+    return confirmed;
   }
 
   Widget _buildCoverPhoto(BuildContext context, SegmentConfigProvider config) {
@@ -606,32 +606,6 @@ class OrderMediaWidget extends StatelessWidget {
     );
   }
 
-  void _showDocumentActionSheet(BuildContext context, int docIndex) {
-    final doc = store.documents[docIndex];
-    showCupertinoModalPopup(
-      context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.openDocument),
-            onPressed: () {
-              Navigator.pop(ctx);
-              _openDocument(context, doc);
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDestructiveAction: true,
-          child: Text(context.l10n.delete),
-          onPressed: () {
-            Navigator.pop(ctx);
-            _confirmDeleteDocument(context, docIndex);
-          },
-        ),
-      ),
-    );
-  }
-
   void _openDocument(BuildContext context, OrderDocument doc) {
     if (doc.url == null) return;
 
@@ -647,39 +621,6 @@ class OrderMediaWidget extends StatelessWidget {
     } else {
       launchUrl(Uri.parse(doc.url!), mode: LaunchMode.externalApplication);
     }
-  }
-
-  void _confirmDeleteDocument(BuildContext context, int index) {
-    showCupertinoDialog(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text(context.l10n.deleteDocument),
-        content: Text(context.l10n.confirmDeleteDocument),
-        actions: [
-          CupertinoDialogAction(
-            child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(ctx),
-          ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              Navigator.pop(ctx);
-              final success = await store.deleteDocument(index);
-              if (context.mounted) {
-                _showFeedback(
-                  context,
-                  success
-                      ? context.l10n.documentDeleted
-                      : context.l10n.errorUploadingDocument,
-                  isError: !success,
-                );
-              }
-            },
-            child: Text(context.l10n.delete),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showFeedback(BuildContext context, String message,
@@ -983,6 +924,232 @@ class _DocumentImageViewer extends StatelessWidget {
                   size: 48,
                 );
               },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bottom sheet that lists attached documents with swipe-to-delete
+class _DocumentsSheet extends StatelessWidget {
+  final List<OrderDocument> docs;
+  final void Function(OrderDocument doc) onOpen;
+  final Future<bool> Function(int index) onConfirmDelete;
+  final OrderStore store;
+
+  const _DocumentsSheet({
+    required this.docs,
+    required this.onOpen,
+    required this.onConfirmDelete,
+    required this.store,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.6,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 4),
+            child: Container(
+              width: 36,
+              height: 5,
+              decoration: BoxDecoration(
+                color: CupertinoColors.systemGrey3.resolveFrom(context),
+                borderRadius: BorderRadius.circular(2.5),
+              ),
+            ),
+          ),
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+            child: Row(
+              children: [
+                Text(
+                  context.l10n.documents,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.label.resolveFrom(context),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemGrey5.resolveFrom(context),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${docs.length}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Document list
+          Flexible(
+            child: ListView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                bottom: bottomPadding + 16,
+              ),
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                return _buildRow(context, docs[index], index, isLast: index == docs.length - 1);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRow(BuildContext context, OrderDocument doc, int index, {required bool isLast}) {
+    final iconData = doc.isPdf
+        ? CupertinoIcons.doc_text_fill
+        : doc.isImage
+            ? CupertinoIcons.photo_fill
+            : CupertinoIcons.doc_fill;
+    final iconColor = doc.isPdf
+        ? CupertinoColors.systemRed
+        : doc.isImage
+            ? CupertinoColors.activeBlue
+            : CupertinoColors.systemGrey;
+    final bgColor = iconColor.withValues(alpha: 0.15);
+
+    final subtitleParts = <String>[];
+    if (doc.fileSizeFormatted.isNotEmpty) subtitleParts.add(doc.fileSizeFormatted);
+    if (doc.createdAt != null) {
+      subtitleParts.add(FormatService().formatDayMonth(doc.createdAt!));
+    }
+
+    // Wrap in ClipRRect for first/last items rounded corners
+    final isFirst = index == 0;
+    final borderRadius = BorderRadius.only(
+      topLeft: isFirst ? const Radius.circular(10) : Radius.zero,
+      topRight: isFirst ? const Radius.circular(10) : Radius.zero,
+      bottomLeft: isLast ? const Radius.circular(10) : Radius.zero,
+      bottomRight: isLast ? const Radius.circular(10) : Radius.zero,
+    );
+
+    return ClipRRect(
+      borderRadius: borderRadius,
+      child: Dismissible(
+        key: ValueKey(doc.id ?? index),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          color: CupertinoColors.systemRed,
+          child: const Icon(
+            CupertinoIcons.delete,
+            color: CupertinoColors.white,
+          ),
+        ),
+        confirmDismiss: (_) => onConfirmDelete(index),
+        child: GestureDetector(
+          onTap: () => onOpen(doc),
+          child: Container(
+            color: CupertinoColors.systemBackground.resolveFrom(context),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      // Leading icon
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: bgColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(iconData, color: iconColor, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      // Title + subtitle
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              doc.fileName ?? context.l10n.document,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w500,
+                                color: CupertinoColors.label.resolveFrom(context),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    color: CupertinoColors.systemGrey5.resolveFrom(context),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    doc.typeLabel(context.l10n),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                    ),
+                                  ),
+                                ),
+                                if (subtitleParts.isNotEmpty)
+                                  Text(
+                                    '  ·  ${subtitleParts.join('  ·  ')}',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 16,
+                        color: CupertinoColors.systemGrey3.resolveFrom(context),
+                      ),
+                    ],
+                  ),
+                ),
+                if (!isLast)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 68),
+                    child: Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      color: CupertinoColors.systemGrey5.resolveFrom(context),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
