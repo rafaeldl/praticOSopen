@@ -38,6 +38,8 @@ import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
+import 'package:praticos/services/share_link_service.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
 import 'package:praticos/services/location_service.dart';
 import 'package:praticos/widgets/dynamic_field_builder.dart';
@@ -1599,20 +1601,13 @@ class _OrderFormState extends State<OrderForm> {
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: Text(context.l10n.addPhotoOrAttachment),
-            onPressed: () {
-              Navigator.pop(context);
-              _showAddPhotoOptions(config);
-            },
-          ),
           // Enviar link para cliente
           if (_store.order?.id != null)
             CupertinoActionSheetAction(
               child: Text(context.l10n.shareWithCustomer),
               onPressed: () {
                 Navigator.pop(context);
-                _openShareLinkSheet();
+                ShareLinkSheet.show(context, _store.order!);
               },
             ),
           // Compartilhar PDF para usuários com acesso a valores
@@ -1643,11 +1638,82 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  /// Open the share link sheet
-  void _openShareLinkSheet({String? statusContext}) {
-    final order = _store.order;
-    if (order?.id == null) return;
-    ShareLinkSheet.show(context, order!, statusContext: statusContext);
+  /// Open native share sheet directly with a share link
+  Future<void> _openShareLinkSheet({String? statusContext}) async {
+    final nullableOrder = _store.order;
+    if (nullableOrder?.id == null) return;
+    final order = nullableOrder!;
+
+    final service = ShareLinkService.instance;
+
+    // Show loading overlay
+    final overlay = OverlayEntry(
+      builder: (_) => const ColoredBox(
+        color: Color(0x44000000),
+        child: Center(child: CupertinoActivityIndicator(radius: 16)),
+      ),
+    );
+    Overlay.of(context).insert(overlay);
+
+    try {
+      String? url;
+
+      // 1. Check local cached link
+      final existingLink = order.shareLink;
+      if (existingLink != null &&
+          !existingLink.isExpired &&
+          existingLink.url != null) {
+        url = existingLink.url;
+      }
+
+      // 2. Fetch active tokens from API
+      if (url == null) {
+        try {
+          final tokens = await service.getShareTokens(order.id!);
+          final active = tokens.where((t) => !t.isExpired).toList();
+          if (active.isNotEmpty) {
+            url = 'https://praticos.web.app/q/${active.first.token}';
+          }
+        } catch (_) {
+          // Will generate new link below
+        }
+      }
+
+      // 3. Generate new link if none found
+      if (url == null) {
+        final result = await service.generateShareLink(orderId: order.id!);
+        url = result.url;
+      }
+
+      if (url == null) return;
+
+      // Build share message and open native share sheet
+      final message = service.buildShareMessage(
+        customerName: order.customer?.name ?? '',
+        orderNumber: order.number ?? 0,
+        companyName: Global.companyAggr?.name,
+        locale: context.l10n.localeName,
+        statusContext: statusContext,
+      );
+
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin =
+          box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+      await service.shareViaSheet(
+        url: url,
+        message: message,
+        subject: '${context.l10n.order} #${order.number}',
+        sharePositionOrigin: sharePositionOrigin,
+      );
+    } catch (e) {
+      // Fallback to ShareLinkSheet on error
+      if (mounted) {
+        ShareLinkSheet.show(context, order, statusContext: statusContext);
+      }
+    } finally {
+      overlay.remove();
+    }
   }
 
   void _selectCustomer() {
