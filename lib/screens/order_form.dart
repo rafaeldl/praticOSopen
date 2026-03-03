@@ -1094,7 +1094,7 @@ class _OrderFormState extends State<OrderForm> {
     if (canEditFields) {
       actions.add(_buildActionWithIcon(
         CupertinoIcons.wrench,
-        '${context.l10n.add} ${context.l10n.service}',
+        context.l10n.service,
         () {
           Navigator.pop(context);
           _addService(presetDeviceId: deviceId);
@@ -1102,7 +1102,7 @@ class _OrderFormState extends State<OrderForm> {
       ));
       actions.add(_buildActionWithIcon(
         CupertinoIcons.cube_box,
-        '${context.l10n.add} ${context.l10n.product}',
+        context.l10n.product,
         () {
           Navigator.pop(context);
           _addProduct(presetDeviceId: deviceId);
@@ -1113,7 +1113,7 @@ class _OrderFormState extends State<OrderForm> {
     if (canManageForms) {
       actions.add(_buildActionWithIcon(
         CupertinoIcons.doc_text,
-        '${context.l10n.add} ${context.l10n.form}',
+        context.l10n.form,
         () {
           Navigator.pop(context);
           _addForm(config, presetDeviceId: deviceId);
@@ -1175,17 +1175,17 @@ class _OrderFormState extends State<OrderForm> {
     if (canEditFields) {
       actions.add(_buildActionWithIcon(
         config.deviceIcon,
-        '${context.l10n.add} ${config.device}',
+        config.device,
         () { Navigator.pop(context); _selectDevice(); },
       ));
       actions.add(_buildActionWithIcon(
         CupertinoIcons.wrench,
-        '${context.l10n.add} ${context.l10n.service}',
+        context.l10n.service,
         () { Navigator.pop(context); _addService(); },
       ));
       actions.add(_buildActionWithIcon(
         CupertinoIcons.cube_box,
-        '${context.l10n.add} ${context.l10n.product}',
+        context.l10n.product,
         () { Navigator.pop(context); _addProduct(); },
       ));
     }
@@ -1193,7 +1193,7 @@ class _OrderFormState extends State<OrderForm> {
     if (canManageForms) {
       actions.add(_buildActionWithIcon(
         CupertinoIcons.doc_text,
-        '${context.l10n.add} ${context.l10n.form}',
+        context.l10n.form,
         () { Navigator.pop(context); _addForm(config); },
       ));
     }
