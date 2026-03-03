@@ -1084,27 +1084,39 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  void _openReceipt(PaymentTransaction transaction) {
+  void _openReceipt(PaymentTransaction transaction) async {
     if (transaction.receiptDocumentId == null || _store == null) return;
 
     final doc = _store!.documents.cast<OrderDocument?>().firstWhere(
       (d) => d?.id == transaction.receiptDocumentId,
       orElse: () => null,
     );
-    if (doc?.url == null) return;
+    if (doc == null) return;
 
-    if (doc!.isImage) {
+    // Refresh URL from storagePath to avoid stale tokens
+    String? url = doc.url;
+    if (doc.storagePath != null) {
+      final freshUrl = await PhotoService().getFreshDownloadUrl(doc.storagePath!);
+      if (freshUrl != null) {
+        url = freshUrl;
+        doc.url = freshUrl;
+      }
+    }
+
+    if (url == null || !mounted) return;
+
+    if (doc.isImage) {
       Navigator.of(context).push(
         CupertinoPageRoute(
           builder: (context) => _ReceiptImageViewer(
-            url: doc.url!,
+            url: url!,
             title: doc.fileName ?? context.l10n.receipt,
           ),
         ),
       );
     } else {
       launchUrl(
-          Uri.parse(doc.url!),
+          Uri.parse(url),
           mode: LaunchMode.externalApplication);
     }
   }

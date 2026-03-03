@@ -608,20 +608,33 @@ class OrderMediaWidget extends StatelessWidget {
     );
   }
 
-  void _openDocument(BuildContext context, OrderDocument doc) {
-    if (doc.url == null) return;
+  void _openDocument(BuildContext context, OrderDocument doc) async {
+    if (doc.url == null && doc.storagePath == null) return;
+
+    // Refresh URL from storagePath to avoid stale tokens
+    String? url = doc.url;
+    if (doc.storagePath != null) {
+      final freshUrl = await PhotoService().getFreshDownloadUrl(doc.storagePath!);
+      if (freshUrl != null) {
+        url = freshUrl;
+        doc.url = freshUrl;
+      }
+    }
+
+    if (url == null) return;
+    if (!context.mounted) return;
 
     if (doc.isImage) {
       Navigator.of(context).push(
         CupertinoPageRoute(
           builder: (context) => _DocumentImageViewer(
-            url: doc.url!,
+            url: url!,
             title: doc.fileName ?? context.l10n.documents,
           ),
         ),
       );
     } else {
-      launchUrl(Uri.parse(doc.url!), mode: LaunchMode.externalApplication);
+      launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     }
   }
 

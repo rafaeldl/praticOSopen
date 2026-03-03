@@ -233,6 +233,18 @@ class PhotoService {
     throw Exception('Falha ao obter URL');
   }
 
+  /// Returns a fresh download URL for a given storage path.
+  /// Use this to avoid stale/expired token issues with stored URLs.
+  Future<String?> getFreshDownloadUrl(String storagePath) async {
+    try {
+      final ref = _storage.ref().child(storagePath);
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print('PhotoService: Erro ao obter URL atualizada: $e');
+      return null;
+    }
+  }
+
   // ============================================================
   // FILE PICKING (DOCUMENTS)
   // ============================================================
