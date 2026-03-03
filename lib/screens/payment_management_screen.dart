@@ -5,7 +5,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/models/permission.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -487,8 +490,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           ),
         ),
 
-        // Attach receipt button (only for payments)
-        if (isPayment)
+        // Attach receipt button (only for payments, requires attachPhotos permission)
+        if (isPayment && AuthorizationService.instance.hasPermission(PermissionType.attachPhotos))
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: _receiptFile != null
@@ -704,8 +707,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       ],
                     ),
                   ),
-                  // Receipt indicator
-                  if (transaction.hasReceipt)
+                  // Receipt indicator (requires viewPhotos permission)
+                  if (transaction.hasReceipt &&
+                      AuthorizationService.instance.hasPermission(PermissionType.viewPhotos))
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: GestureDetector(
@@ -909,14 +913,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  void _resetPayment() {
+  void _resetPayment() async {
     if (_store != null) {
-      _store!.order!.payment = 'unpaid';
-      _store!.order!.paidAmount = 0;
-      _store!.paidAmount = 0;
-      _store!.transactions.clear();
-      _store!.order!.transactions?.clear();
-      _store!.updateOrder();
+      await _store!.resetAllPayments();
     }
     _prefillValue();
   }
@@ -1086,24 +1085,26 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   }
 
   void _openReceipt(PaymentTransaction transaction) {
-    if (transaction.receiptUrl == null) return;
+    if (transaction.receiptDocumentId == null || _store == null) return;
 
-    final isImage = transaction.receiptFileName?.toLowerCase().endsWith('.jpg') == true ||
-        transaction.receiptFileName?.toLowerCase().endsWith('.jpeg') == true ||
-        transaction.receiptFileName?.toLowerCase().endsWith('.png') == true;
+    final doc = _store!.documents.cast<OrderDocument?>().firstWhere(
+      (d) => d?.id == transaction.receiptDocumentId,
+      orElse: () => null,
+    );
+    if (doc?.url == null) return;
 
-    if (isImage) {
+    if (doc!.isImage) {
       Navigator.of(context).push(
         CupertinoPageRoute(
           builder: (context) => _ReceiptImageViewer(
-            url: transaction.receiptUrl!,
-            title: transaction.receiptFileName ?? context.l10n.receipt,
+            url: doc.url!,
+            title: doc.fileName ?? context.l10n.receipt,
           ),
         ),
       );
     } else {
       launchUrl(
-          Uri.parse(transaction.receiptUrl!),
+          Uri.parse(doc.url!),
           mode: LaunchMode.externalApplication);
     }
   }

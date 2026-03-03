@@ -32,6 +32,9 @@ class OrderDocument {
   DateTime? createdAt;
   UserAggr? createdBy;
 
+  /// If this document is a receipt linked to a payment transaction
+  String? linkedTransactionId;
+
   OrderDocument();
 
   factory OrderDocument.fromJson(Map<String, dynamic> json) =>

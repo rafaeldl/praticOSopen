@@ -8,6 +8,8 @@ import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
+import 'package:praticos/models/permission.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -1040,6 +1042,9 @@ class _DocumentsSheet extends StatelessWidget {
       subtitleParts.add(FormatService().formatDayMonth(doc.createdAt!));
     }
 
+    final canDelete = AuthorizationService.instance.hasPermission(PermissionType.attachPhotos);
+    final isLinkedReceipt = doc.linkedTransactionId != null;
+
     // Wrap in ClipRRect for first/last items rounded corners
     final isFirst = index == 0;
     final borderRadius = BorderRadius.only(
@@ -1053,7 +1058,7 @@ class _DocumentsSheet extends StatelessWidget {
       borderRadius: borderRadius,
       child: Dismissible(
         key: ValueKey(doc.id ?? index),
-        direction: DismissDirection.endToStart,
+        direction: canDelete ? DismissDirection.endToStart : DismissDirection.none,
         background: Container(
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20),
@@ -1106,7 +1111,9 @@ class _DocumentsSheet extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: CupertinoColors.systemGrey5.resolveFrom(context),
+                                    color: isLinkedReceipt
+                                        ? CupertinoColors.systemGreen.withValues(alpha: 0.15)
+                                        : CupertinoColors.systemGrey5.resolveFrom(context),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -1114,10 +1121,21 @@ class _DocumentsSheet extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,
-                                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                      color: isLinkedReceipt
+                                          ? CupertinoColors.systemGreen
+                                          : CupertinoColors.secondaryLabel.resolveFrom(context),
                                     ),
                                   ),
                                 ),
+                                if (isLinkedReceipt)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: Icon(
+                                      CupertinoIcons.link,
+                                      size: 12,
+                                      color: CupertinoColors.systemGreen,
+                                    ),
+                                  ),
                                 if (subtitleParts.isNotEmpty)
                                   Text(
                                     '  ·  ${subtitleParts.join('  ·  ')}',

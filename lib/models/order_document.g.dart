@@ -21,7 +21,8 @@ OrderDocument _$OrderDocumentFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['createdAt'] as String)
       ..createdBy = json['createdBy'] == null
           ? null
-          : UserAggr.fromJson(json['createdBy'] as Map<String, dynamic>);
+          : UserAggr.fromJson(json['createdBy'] as Map<String, dynamic>)
+      ..linkedTransactionId = json['linkedTransactionId'] as String?;
 
 Map<String, dynamic> _$OrderDocumentToJson(OrderDocument instance) =>
     <String, dynamic>{
@@ -35,6 +36,7 @@ Map<String, dynamic> _$OrderDocumentToJson(OrderDocument instance) =>
       'description': instance.description,
       'createdAt': instance.createdAt?.toIso8601String(),
       'createdBy': instance.createdBy?.toJson(),
+      'linkedTransactionId': instance.linkedTransactionId,
     };
 
 const _$OrderDocumentTypeEnumMap = {
