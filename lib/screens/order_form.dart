@@ -1597,10 +1597,23 @@ class _OrderFormState extends State<OrderForm> {
       canDelete = _authService.canDeleteOrder(_store.order!);
     }
 
+    final canManagePayments =
+        _store.order?.id != null &&
+        !['quote', 'canceled'].contains(_store.status);
+
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: <CupertinoActionSheetAction>[
+          // Pagamentos
+          if (canManagePayments && canViewPrices)
+            CupertinoActionSheetAction(
+              child: Text(context.l10n.payments),
+              onPressed: () {
+                Navigator.pop(context);
+                _openPaymentManagement();
+              },
+            ),
           // Enviar link para cliente
           if (_store.order?.id != null)
             CupertinoActionSheetAction(
