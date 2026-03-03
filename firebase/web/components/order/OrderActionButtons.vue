@@ -1,3 +1,4 @@
+<!-- DEPRECATED: Replaced by OrderQuoteApprovalCard -->
 <template>
   <div class="card-stagger card-v2 flex flex-col gap-3 sm:flex-row rounded-2xl bg-white p-5 shadow-[0_2px_10px_rgba(27,94,123,0.03)] lg:p-6">
     <button

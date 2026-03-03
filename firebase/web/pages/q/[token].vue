@@ -23,19 +23,19 @@
 
       <!-- Mobile layout (single column) -->
       <div class="lg:hidden px-4 py-5 space-y-4">
-        <OrderProgressCard :status="order.status" />
+        <OrderQuoteApprovalCard
+          v-if="order.status === 'quote' && permissions.includes('approve')"
+          :order="order"
+          :country="company?.country"
+          @approve="showApproveModal = true"
+          @reject="showRejectModal = true"
+        />
+        <OrderProgressCard v-else :status="order.status" />
         <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
         <OrderSummaryCard :order="order" :country="company?.country" />
         <OrderVehiclesCard :order="order" />
         <OrderChecklistCard :forms="order.forms" />
         <OrderActivityCard :comments="comments" />
-
-        <!-- Action buttons for quotes -->
-        <OrderActionButtons
-          v-if="order.status === 'quote' && permissions.includes('approve')"
-          @approve="showApproveModal = true"
-          @reject="showRejectModal = true"
-        />
 
         <!-- Rating (before comments if not yet rated) -->
         <OrderRatingSection
@@ -66,17 +66,17 @@
       <div class="hidden lg:flex mx-auto max-w-[1280px] px-16 py-8 gap-8">
         <!-- Main column -->
         <div class="flex-1 space-y-6">
-          <OrderProgressCard :status="order.status" />
-          <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
-          <OrderSummaryCard :order="order" :country="company?.country" />
-          <OrderChecklistCard :forms="order.forms" />
-
-          <!-- Action buttons for quotes -->
-          <OrderActionButtons
+          <OrderQuoteApprovalCard
             v-if="order.status === 'quote' && permissions.includes('approve')"
+            :order="order"
+            :country="company?.country"
             @approve="showApproveModal = true"
             @reject="showRejectModal = true"
           />
+          <OrderProgressCard v-else :status="order.status" />
+          <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
+          <OrderSummaryCard :order="order" :country="company?.country" />
+          <OrderChecklistCard :forms="order.forms" />
         </div>
 
         <!-- Sidebar -->
