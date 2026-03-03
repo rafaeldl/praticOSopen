@@ -3,6 +3,7 @@
     "title": "Segmentos",
     "links": [
       { "href": "segmentos/assistencia-celular.html", "label": "Assistência de Celular" },
+      { "href": "segmentos/bicicletaria.html", "label": "Bicicletaria" },
       { "href": "segmentos/automacao.html", "label": "Automação Residencial" },
       { "href": "segmentos/dedetizacao.html", "label": "Dedetização" },
       { "href": "segmentos/eletrica.html", "label": "Elétrica" },
@@ -35,6 +36,7 @@
       { "href": "segmentos/informatica-en.html", "label": "IT Services" },
       { "href": "segmentos/limpeza-en.html", "label": "Cleaning Company" },
       { "href": "segmentos/automotivo-en.html", "label": "Auto Repair Shop" },
+      { "href": "segmentos/bicicletaria-en.html", "label": "Bike Shop" },
       { "href": "segmentos/refrigeracao-en.html", "label": "HVAC Technician" },
       { "href": "segmentos/seguranca-cftv-en.html", "label": "CCTV & Security" }
     ]
@@ -43,6 +45,7 @@
     "title": "Segmentos",
     "links": [
       { "href": "segmentos/assistencia-celular-es.html", "label": "Asistencia de Celular" },
+      { "href": "segmentos/bicicletaria-es.html", "label": "Bicicletería" },
       { "href": "segmentos/automacao-es.html", "label": "Automatización Residencial" },
       { "href": "segmentos/dedetizacao-es.html", "label": "Control de Plagas" },
       { "href": "segmentos/eletrica-es.html", "label": "Electricista" },
