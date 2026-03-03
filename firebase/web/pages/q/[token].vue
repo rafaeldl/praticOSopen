@@ -31,33 +31,25 @@
           @reject="showRejectModal = true"
         />
         <OrderProgressCard v-else :status="order.status" />
+
+        <!-- Rating (right after progress, per design) -->
+        <OrderRatingSection
+          v-if="order.status === 'done'"
+          :order="order"
+          :token="token"
+          @rated="refreshOrder"
+        />
+
         <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
         <OrderSummaryCard :order="order" :country="company?.country" />
         <OrderVehiclesCard :order="order" />
         <OrderChecklistCard :forms="order.forms" />
         <OrderActivityCard :comments="comments" />
 
-        <!-- Rating (before comments if not yet rated) -->
-        <OrderRatingSection
-          v-if="order.status === 'done' && !order.rating?.score"
-          :order="order"
-          :token="token"
-          @rated="refreshOrder"
-        />
-
         <!-- Comments -->
         <OrderCommentsSection
-          v-if="permissions.includes('comment') || permissions.includes('view')"
-          :comments="comments"
-          :can-comment="permissions.includes('comment')"
-          :customer-name="(orderData as any)?.customer?.name"
-          :token="token"
-        />
-
-        <!-- Rating (after comments if already rated) -->
-        <OrderRatingSection
-          v-if="order.status === 'done' && order.rating?.score"
-          :order="order"
+          v-if="permissions.includes('comment')"
+          :can-comment="true"
           :token="token"
         />
       </div>
@@ -81,6 +73,14 @@
 
         <!-- Sidebar -->
         <div class="w-[360px] shrink-0 space-y-6">
+          <!-- Rating (first in sidebar, per design) -->
+          <OrderRatingSection
+            v-if="order.status === 'done'"
+            :order="order"
+            :token="token"
+            @rated="refreshOrder"
+          />
+
           <OrderVehiclesCard :order="order" />
           <OrderActivityCard :comments="comments" />
 
@@ -91,14 +91,6 @@
             :can-comment="permissions.includes('comment')"
             :customer-name="(orderData as any)?.customer?.name"
             :token="token"
-          />
-
-          <!-- Rating -->
-          <OrderRatingSection
-            v-if="order.status === 'done'"
-            :order="order"
-            :token="token"
-            @rated="refreshOrder"
           />
         </div>
       </div>
