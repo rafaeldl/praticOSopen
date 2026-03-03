@@ -403,6 +403,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addPhoto => 'Agregar Foto';
 
   @override
+  String get addPhotoOrAttachment => 'Foto / Anexo';
+
+  @override
   String get photos => 'Fotos';
 
   @override
@@ -3024,4 +3027,75 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get youCanChangeThisLater =>
       'Puede cambiar esto después en configuraciones';
+
+  @override
+  String get documents => 'Documentos';
+
+  @override
+  String get addDocument => 'Agregar Documento';
+
+  @override
+  String get receipt => 'Comprobante';
+
+  @override
+  String get invoice => 'Factura';
+
+  @override
+  String get contract => 'Contrato';
+
+  @override
+  String get attachReceipt => 'Adjuntar Comprobante';
+
+  @override
+  String get chooseFile => 'Elegir Archivo';
+
+  @override
+  String get documentType => 'Tipo de Documento';
+
+  @override
+  String get viewDocument => 'Ver Documento';
+
+  @override
+  String get deleteDocument => 'Eliminar Documento';
+
+  @override
+  String get confirmDeleteDocument =>
+      '¿Está seguro que desea eliminar este documento?';
+
+  @override
+  String get uploadingDocument => 'Enviando documento...';
+
+  @override
+  String get noDocuments => 'Ningún documento adjunto';
+
+  @override
+  String get documentAdded => 'Documento agregado';
+
+  @override
+  String get documentDeleted => 'Documento eliminado';
+
+  @override
+  String get openDocument => 'Abrir';
+
+  @override
+  String get receiptAttached => 'Comprobante adjuntado';
+
+  @override
+  String get receiptRemoved => 'Comprobante eliminado';
+
+  @override
+  String get removeReceipt => 'Eliminar Comprobante';
+
+  @override
+  String get confirmRemoveReceipt =>
+      '¿Está seguro que desea eliminar este comprobante?';
+
+  @override
+  String get fromFiles => 'Archivos';
+
+  @override
+  String get selectDocumentType => 'Seleccione el tipo de documento';
+
+  @override
+  String get errorUploadingDocument => 'Error al enviar documento';
 }

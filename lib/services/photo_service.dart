@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/global.dart';
 
@@ -181,7 +183,8 @@ class PhotoService {
   }
 
   /// Upload com estratégias de fallback
-  Future<String?> _uploadWithFallback(File file, String storagePath) async {
+  Future<String?> _uploadWithFallback(File file, String storagePath,
+      {String contentType = 'image/jpeg'}) async {
     final ref = _storage.ref().child(storagePath);
     final bytes = await file.readAsBytes();
 
@@ -190,7 +193,7 @@ class PhotoService {
       print('PhotoService: Upload para $storagePath');
       final snapshot = await ref.putData(
         bytes,
-        SettableMetadata(contentType: 'image/jpeg'),
+        SettableMetadata(contentType: contentType),
       );
       return await _getDownloadUrl(snapshot.ref);
     } on FirebaseException catch (e) {
@@ -201,7 +204,7 @@ class PhotoService {
     try {
       final snapshot = await ref.putFile(
         file,
-        SettableMetadata(contentType: 'image/jpeg'),
+        SettableMetadata(contentType: contentType),
       );
       return await _getDownloadUrl(snapshot.ref);
     } on FirebaseException catch (e) {
@@ -228,6 +231,156 @@ class PhotoService {
       }
     }
     throw Exception('Falha ao obter URL');
+  }
+
+  /// Returns a fresh download URL for a given storage path.
+  /// Use this to avoid stale/expired token issues with stored URLs.
+  Future<String?> getFreshDownloadUrl(String storagePath) async {
+    try {
+      final ref = _storage.ref().child(storagePath);
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print('PhotoService: Erro ao obter URL atualizada: $e');
+      return null;
+    }
+  }
+
+  // ============================================================
+  // FILE PICKING (DOCUMENTS)
+  // ============================================================
+
+  /// Picks a document file (PDF, JPG, PNG, DOC, DOCX)
+  Future<PlatformFile?> pickDocument() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'],
+        withData: false,
+        withReadStream: false,
+      );
+      return result?.files.firstOrNull;
+    } catch (e) {
+      print('PhotoService: Erro ao selecionar documento: $e');
+      return null;
+    }
+  }
+
+  /// Generic file upload (skips JPEG conversion for non-images)
+  Future<String?> uploadFile({
+    required File file,
+    required String storagePath,
+    required String contentType,
+  }) async {
+    try {
+      await _validateAuth();
+      _validateTenantPath(storagePath);
+
+      // For images, convert to JPEG; for other files, upload as-is
+      if (contentType.startsWith('image/')) {
+        final jpegFile = await _convertToJpeg(file);
+        return await _uploadWithFallback(jpegFile, storagePath,
+            contentType: 'image/jpeg');
+      }
+
+      return await _uploadWithFallback(file, storagePath,
+          contentType: contentType);
+    } catch (e) {
+      print('PhotoService: Erro no upload do arquivo: $e');
+      return null;
+    }
+  }
+
+  /// Upload a document attached to an order, returns OrderDocument
+  Future<OrderDocument?> uploadOrderDocument({
+    required File file,
+    required String companyId,
+    required String orderId,
+    required String contentType,
+    required String fileName,
+    int? fileSize,
+  }) async {
+    try {
+      await _validateAuth();
+
+      if (Global.companyAggr?.id != companyId) {
+        throw Exception('Sem permissão para upload nesta empresa');
+      }
+
+      final now = DateTime.now();
+      final docId =
+          '${now.millisecondsSinceEpoch}-${now.microsecondsSinceEpoch % 1000000}';
+      final extension = fileName.split('.').last.toLowerCase();
+      final storagePath =
+          'tenants/$companyId/orders/$orderId/documents/$docId.$extension';
+
+      String? downloadUrl;
+      if (contentType.startsWith('image/')) {
+        final jpegFile = await _convertToJpeg(file);
+        downloadUrl = await _uploadWithFallback(jpegFile, storagePath,
+            contentType: 'image/jpeg');
+      } else {
+        downloadUrl = await _uploadWithFallback(file, storagePath,
+            contentType: contentType);
+      }
+
+      if (downloadUrl == null) return null;
+
+      return OrderDocument()
+        ..id = docId
+        ..url = downloadUrl
+        ..storagePath = storagePath
+        ..fileName = fileName
+        ..contentType = contentType.startsWith('image/') ? 'image/jpeg' : contentType
+        ..fileSize = fileSize
+        ..createdAt = now
+        ..createdBy = Global.userAggr;
+    } catch (e) {
+      print('PhotoService: Erro no upload de documento da OS: $e');
+      rethrow;
+    }
+  }
+
+  /// Upload a receipt for a payment transaction
+  Future<Map<String, String>?> uploadReceipt({
+    required File file,
+    required String companyId,
+    required String orderId,
+    required String transactionId,
+    required String contentType,
+    required String fileName,
+  }) async {
+    try {
+      await _validateAuth();
+
+      if (Global.companyAggr?.id != companyId) {
+        throw Exception('Sem permissão para upload nesta empresa');
+      }
+
+      final extension = fileName.split('.').last.toLowerCase();
+      final storagePath =
+          'tenants/$companyId/orders/$orderId/payments/$transactionId/receipt.$extension';
+
+      String? downloadUrl;
+      if (contentType.startsWith('image/')) {
+        final jpegFile = await _convertToJpeg(file);
+        downloadUrl = await _uploadWithFallback(jpegFile, storagePath,
+            contentType: 'image/jpeg');
+      } else {
+        downloadUrl = await _uploadWithFallback(file, storagePath,
+            contentType: contentType);
+      }
+
+      if (downloadUrl == null) return null;
+
+      return {
+        'url': downloadUrl,
+        'path': storagePath,
+        'fileName': fileName,
+      };
+    } catch (e) {
+      print('PhotoService: Erro no upload de comprovante: $e');
+      rethrow;
+    }
   }
 
   // ============================================================

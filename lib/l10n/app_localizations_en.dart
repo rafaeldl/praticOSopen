@@ -402,6 +402,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addPhoto => 'Add Photo';
 
   @override
+  String get addPhotoOrAttachment => 'Photo / Attachment';
+
+  @override
   String get photos => 'Photos';
 
   @override
@@ -3006,4 +3009,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get youCanChangeThisLater => 'You can change this later in settings';
+
+  @override
+  String get documents => 'Documents';
+
+  @override
+  String get addDocument => 'Add Document';
+
+  @override
+  String get receipt => 'Receipt';
+
+  @override
+  String get invoice => 'Invoice';
+
+  @override
+  String get contract => 'Contract';
+
+  @override
+  String get attachReceipt => 'Attach Receipt';
+
+  @override
+  String get chooseFile => 'Choose File';
+
+  @override
+  String get documentType => 'Document Type';
+
+  @override
+  String get viewDocument => 'View Document';
+
+  @override
+  String get deleteDocument => 'Delete Document';
+
+  @override
+  String get confirmDeleteDocument =>
+      'Are you sure you want to delete this document?';
+
+  @override
+  String get uploadingDocument => 'Uploading document...';
+
+  @override
+  String get noDocuments => 'No documents attached';
+
+  @override
+  String get documentAdded => 'Document added';
+
+  @override
+  String get documentDeleted => 'Document deleted';
+
+  @override
+  String get openDocument => 'Open';
+
+  @override
+  String get receiptAttached => 'Receipt attached';
+
+  @override
+  String get receiptRemoved => 'Receipt removed';
+
+  @override
+  String get removeReceipt => 'Remove Receipt';
+
+  @override
+  String get confirmRemoveReceipt =>
+      'Are you sure you want to remove this receipt?';
+
+  @override
+  String get fromFiles => 'Files';
+
+  @override
+  String get selectDocumentType => 'Select document type';
+
+  @override
+  String get errorUploadingDocument => 'Error uploading document';
 }

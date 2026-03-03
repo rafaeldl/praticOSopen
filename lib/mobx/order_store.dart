@@ -5,6 +5,7 @@ import 'package:praticos/services/format_service.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/payment_transaction.dart';
@@ -130,7 +131,13 @@ abstract class _OrderStore with Store {
   ObservableList<OrderPhoto> photos = ObservableList();
 
   @observable
+  ObservableList<OrderDocument> documents = ObservableList();
+
+  @observable
   bool isUploadingPhoto = false;
+
+  @observable
+  bool isUploadingDocument = false;
 
   @observable
   double? paidAmount;
@@ -273,6 +280,8 @@ abstract class _OrderStore with Store {
       transactions = ObservableList<PaymentTransaction>();
       order!.photos = [];
       photos = ObservableList<OrderPhoto>();
+      order!.documents = [];
+      documents = ObservableList<OrderDocument>();
       order!.devices = [];
       devices = ObservableList<DeviceAggr>();
       order!.createdAt = DateTime.now();
@@ -330,6 +339,7 @@ abstract class _OrderStore with Store {
     services = order.services?.asObservable() ?? ObservableList<OrderService>();
     products = order.products?.asObservable() ?? ObservableList<OrderProduct>();
     photos = order.photos?.asObservable() ?? ObservableList<OrderPhoto>();
+    documents = order.documents?.asObservable() ?? ObservableList<OrderDocument>();
     transactions = order.transactions?.asObservable() ?? ObservableList<PaymentTransaction>();
     paidAmount = order.paidAmount ?? 0.0;
     dueDate = order.dueDate != null
@@ -846,6 +856,195 @@ abstract class _OrderStore with Store {
     createItem();
   }
 
+  // ============================================================
+  // DOCUMENT MANAGEMENT
+  // ============================================================
+
+  /// Adds a document to the order
+  @action
+  Future<bool> addDocument(
+    File file,
+    OrderDocumentType type,
+    String contentType,
+    String fileName, {
+    String? description,
+    int? fileSize,
+  }) async {
+    if (order == null || companyId == null) return false;
+
+    // Ensure order is saved first
+    if (order!.id == null) {
+      await repository.createItem(companyId!, order);
+    }
+
+    if (order!.id == null || order!.company?.id == null) return false;
+
+    isUploadingDocument = true;
+
+    try {
+      final OrderDocument? doc = await photoService.uploadOrderDocument(
+        file: file,
+        companyId: order!.company!.id!,
+        orderId: order!.id!,
+        contentType: contentType,
+        fileName: fileName,
+        fileSize: fileSize,
+      );
+
+      isUploadingDocument = false;
+
+      if (doc != null) {
+        doc.type = type;
+        doc.description = description;
+
+        order!.documents ??= [];
+        order!.documents!.add(doc);
+        documents.add(doc);
+        createItem();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      isUploadingDocument = false;
+      print('Erro no upload do documento: $e');
+      return false;
+    }
+  }
+
+  /// Deletes a document by index
+  @action
+  Future<bool> deleteDocument(int index) async {
+    if (order == null ||
+        order!.documents == null ||
+        index >= order!.documents!.length) {
+      return false;
+    }
+
+    final doc = order!.documents![index];
+
+    if (doc.storagePath != null) {
+      final deleted = await photoService.deletePhoto(doc.storagePath!);
+      if (!deleted) return false;
+    }
+
+    // If this document is a receipt linked to a transaction, clear the reference
+    if (doc.linkedTransactionId != null) {
+      final txn = order!.transactions?.firstWhere(
+        (t) => t.id == doc.linkedTransactionId,
+        orElse: () => PaymentTransaction(type: PaymentTransactionType.payment, amount: 0),
+      );
+      if (txn != null && txn.amount > 0) {
+        txn.receiptDocumentId = null;
+        final txnIndex = transactions.indexWhere((t) => t.id == doc.linkedTransactionId);
+        if (txnIndex >= 0) {
+          transactions[txnIndex] = txn;
+        }
+      }
+    }
+
+    order!.documents!.removeAt(index);
+    documents.removeAt(index);
+    createItem();
+    return true;
+  }
+
+  // ============================================================
+  // RECEIPT MANAGEMENT (PAYMENT TRANSACTIONS)
+  // ============================================================
+
+  /// Attaches a receipt to a payment transaction as an OrderDocument
+  @action
+  Future<bool> attachReceiptToTransaction(int index, File file,
+      String contentType, String fileName) async {
+    if (order == null ||
+        companyId == null ||
+        order!.id == null ||
+        order!.transactions == null ||
+        index >= order!.transactions!.length) {
+      return false;
+    }
+
+    // Ensure order is saved first
+    if (order!.id == null) {
+      await repository.createItem(companyId!, order);
+    }
+    if (order!.id == null || order!.company?.id == null) return false;
+
+    final transaction = order!.transactions![index];
+
+    isUploadingDocument = true;
+
+    try {
+      final doc = await photoService.uploadOrderDocument(
+        file: file,
+        companyId: order!.company!.id!,
+        orderId: order!.id!,
+        contentType: contentType,
+        fileName: fileName,
+      );
+
+      isUploadingDocument = false;
+
+      if (doc != null) {
+        doc.type = OrderDocumentType.receipt;
+        doc.linkedTransactionId = transaction.id;
+
+        // Add to order documents
+        order!.documents ??= [];
+        order!.documents!.add(doc);
+        documents.add(doc);
+
+        // Link receipt to transaction
+        transaction.receiptDocumentId = doc.id;
+
+        // Update observable list to trigger UI refresh
+        transactions[index] = transaction;
+        order!.transactions![index] = transaction;
+        createItem();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      isUploadingDocument = false;
+      print('Erro no upload do comprovante: $e');
+      return false;
+    }
+  }
+
+  /// Removes a receipt from a payment transaction
+  @action
+  Future<bool> removeReceiptFromTransaction(int index) async {
+    if (order == null ||
+        order!.transactions == null ||
+        index >= order!.transactions!.length) {
+      return false;
+    }
+
+    final transaction = order!.transactions![index];
+    final docId = transaction.receiptDocumentId;
+    if (docId == null) return false;
+
+    // Find and remove the linked OrderDocument
+    final docIndex = order!.documents?.indexWhere((d) => d.id == docId) ?? -1;
+    if (docIndex >= 0) {
+      final doc = order!.documents![docIndex];
+      if (doc.storagePath != null) {
+        await photoService.deletePhoto(doc.storagePath!);
+      }
+      order!.documents!.removeAt(docIndex);
+      documents.removeAt(docIndex);
+    }
+
+    // Clear reference on transaction
+    transaction.receiptDocumentId = null;
+
+    // Update observable list to trigger UI refresh
+    transactions[index] = transaction;
+    order!.transactions![index] = transaction;
+    createItem();
+    return true;
+  }
+
   @action
   setDiscount(double value) {
     order!.discount = value;
@@ -859,11 +1058,13 @@ abstract class _OrderStore with Store {
   void addPayment(double amount, {String? description}) {
     if (order == null || amount <= 0) return;
 
+    final txnId = DateTime.now().millisecondsSinceEpoch.toString();
     final transaction = PaymentTransaction.payment(
       amount: amount,
       description: description,
       createdBy: Global.userAggr,
     );
+    transaction.id = txnId;
 
     // Inicializa listas se necessário
     order!.transactions ??= [];
@@ -952,7 +1153,7 @@ abstract class _OrderStore with Store {
 
   /// Remove uma transação pelo índice
   @action
-  void removeTransaction(int index) {
+  Future<void> removeTransaction(int index) async {
     if (order == null ||
         order!.transactions == null ||
         index >= order!.transactions!.length) {
@@ -960,6 +1161,21 @@ abstract class _OrderStore with Store {
     }
 
     final transaction = order!.transactions![index];
+
+    // Delete associated receipt document if exists
+    if (transaction.receiptDocumentId != null) {
+      final docIndex = order!.documents?.indexWhere(
+        (d) => d.id == transaction.receiptDocumentId,
+      ) ?? -1;
+      if (docIndex >= 0) {
+        final doc = order!.documents![docIndex];
+        if (doc.storagePath != null) {
+          await photoService.deletePhoto(doc.storagePath!);
+        }
+        order!.documents!.removeAt(docIndex);
+        documents.removeAt(docIndex);
+      }
+    }
 
     // Remove da lista
     order!.transactions!.removeAt(index);
@@ -976,6 +1192,48 @@ abstract class _OrderStore with Store {
       discount = order!.discount;
       updateTotal();
     }
+
+    _updatePaymentStatus();
+    createItem();
+  }
+
+  /// Resets all payments: removes all transactions and their receipt documents
+  @action
+  Future<void> resetAllPayments() async {
+    if (order == null) return;
+
+    // Delete receipt documents from storage and order.documents
+    final txns = order!.transactions ?? [];
+    for (final txn in txns) {
+      if (txn.receiptDocumentId != null) {
+        final docIndex = order!.documents?.indexWhere(
+          (d) => d.id == txn.receiptDocumentId,
+        ) ?? -1;
+        if (docIndex >= 0) {
+          final doc = order!.documents![docIndex];
+          if (doc.storagePath != null) {
+            await photoService.deletePhoto(doc.storagePath!);
+          }
+          order!.documents!.removeAt(docIndex);
+        }
+      }
+    }
+
+    // Sync observable documents list
+    documents.clear();
+    documents.addAll(order!.documents ?? []);
+
+    // Clear transactions
+    order!.transactions?.clear();
+    transactions.clear();
+
+    // Reset payment values
+    order!.payment = 'unpaid';
+    order!.paidAmount = 0;
+    order!.discount = 0;
+    paidAmount = 0;
+    discount = 0;
+    updateTotal();
 
     _updatePaymentStatus();
     createItem();

@@ -18,6 +18,7 @@ PaymentTransaction _$PaymentTransactionFromJson(Map<String, dynamic> json) =>
       createdBy: json['createdBy'] == null
           ? null
           : UserAggr.fromJson(json['createdBy'] as Map<String, dynamic>),
+      receiptDocumentId: json['receiptDocumentId'] as String?,
     );
 
 Map<String, dynamic> _$PaymentTransactionToJson(PaymentTransaction instance) =>
@@ -28,6 +29,7 @@ Map<String, dynamic> _$PaymentTransactionToJson(PaymentTransaction instance) =>
       'description': instance.description,
       'createdAt': instance.createdAt.toIso8601String(),
       'createdBy': instance.createdBy?.toJson(),
+      'receiptDocumentId': instance.receiptDocumentId,
     };
 
 const _$PaymentTransactionTypeEnumMap = {

@@ -2,6 +2,7 @@ import 'package:praticos/models/base_audit_company.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/payment_transaction.dart';
 import 'package:praticos/models/product.dart';
@@ -51,6 +52,9 @@ class Order extends BaseAuditCompany {
 
   /// Dynamic custom fields from segment config
   Map<String, dynamic>? customData;
+
+  /// Attached documents (receipts, invoices, contracts, etc.)
+  List<OrderDocument>? documents;
 
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;

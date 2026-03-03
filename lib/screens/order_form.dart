@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider;
 // Keeping Material for some specific helpers or if absolutely needed, but main UI is Cupertino.
@@ -17,7 +18,9 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
-import 'package:praticos/screens/widgets/order_photos_widget.dart';
+import 'package:praticos/models/order_document.dart';
+import 'package:praticos/screens/widgets/order_media_widget.dart';
+import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/segment_config_service.dart';
@@ -35,6 +38,8 @@ import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
+import 'package:praticos/services/share_link_service.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
 import 'package:praticos/services/location_service.dart';
 import 'package:praticos/widgets/dynamic_field_builder.dart';
@@ -141,7 +146,7 @@ class _OrderFormState extends State<OrderForm> {
 
                   return SliverList(
                     delegate: SliverChildListDelegate([
-                      _buildPhotosSection(context, config),
+                      _buildMediaSection(context, config),
                       _buildClientDeviceSection(context, config),
                       _buildDevicesSection(context, config),
                       _buildSummarySection(context, config),
@@ -262,12 +267,11 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildPhotosSection(BuildContext context, SegmentConfigProvider config) {
+  Widget _buildMediaSection(BuildContext context, SegmentConfigProvider config) {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      child: OrderPhotosWidget(
+      child: OrderMediaWidget(
         store: _store,
-        onAddPhoto: () => _showAddPhotoOptions(config),
       ),
     );
   }
@@ -1092,7 +1096,7 @@ class _OrderFormState extends State<OrderForm> {
     if (canEditFields) {
       actions.add(_buildActionWithIcon(
         CupertinoIcons.wrench,
-        '${context.l10n.add} ${context.l10n.service}',
+        context.l10n.service,
         () {
           Navigator.pop(context);
           _addService(presetDeviceId: deviceId);
@@ -1100,7 +1104,7 @@ class _OrderFormState extends State<OrderForm> {
       ));
       actions.add(_buildActionWithIcon(
         CupertinoIcons.cube_box,
-        '${context.l10n.add} ${context.l10n.product}',
+        context.l10n.product,
         () {
           Navigator.pop(context);
           _addProduct(presetDeviceId: deviceId);
@@ -1111,7 +1115,7 @@ class _OrderFormState extends State<OrderForm> {
     if (canManageForms) {
       actions.add(_buildActionWithIcon(
         CupertinoIcons.doc_text,
-        '${context.l10n.add} ${context.l10n.form}',
+        context.l10n.form,
         () {
           Navigator.pop(context);
           _addForm(config, presetDeviceId: deviceId);
@@ -1120,8 +1124,8 @@ class _OrderFormState extends State<OrderForm> {
     }
 
     actions.add(_buildActionWithIcon(
-      CupertinoIcons.camera,
-      context.l10n.addPhoto,
+      CupertinoIcons.paperclip,
+      context.l10n.addPhotoOrAttachment,
       () {
         Navigator.pop(context);
         _showAddPhotoOptions(config);
@@ -1173,17 +1177,17 @@ class _OrderFormState extends State<OrderForm> {
     if (canEditFields) {
       actions.add(_buildActionWithIcon(
         config.deviceIcon,
-        '${context.l10n.add} ${config.device}',
+        config.device,
         () { Navigator.pop(context); _selectDevice(); },
       ));
       actions.add(_buildActionWithIcon(
         CupertinoIcons.wrench,
-        '${context.l10n.add} ${context.l10n.service}',
+        context.l10n.service,
         () { Navigator.pop(context); _addService(); },
       ));
       actions.add(_buildActionWithIcon(
         CupertinoIcons.cube_box,
-        '${context.l10n.add} ${context.l10n.product}',
+        context.l10n.product,
         () { Navigator.pop(context); _addProduct(); },
       ));
     }
@@ -1191,14 +1195,14 @@ class _OrderFormState extends State<OrderForm> {
     if (canManageForms) {
       actions.add(_buildActionWithIcon(
         CupertinoIcons.doc_text,
-        '${context.l10n.add} ${context.l10n.form}',
+        context.l10n.form,
         () { Navigator.pop(context); _addForm(config); },
       ));
     }
 
     actions.add(_buildActionWithIcon(
-      CupertinoIcons.camera,
-      context.l10n.addPhoto,
+      CupertinoIcons.paperclip,
+      context.l10n.addPhotoOrAttachment,
       () { Navigator.pop(context); _showAddPhotoOptions(config); },
     ));
 
@@ -1593,24 +1597,30 @@ class _OrderFormState extends State<OrderForm> {
       canDelete = _authService.canDeleteOrder(_store.order!);
     }
 
+    final canManagePayments =
+        _store.order?.id != null &&
+        !['quote', 'canceled'].contains(_store.status);
+
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: Text(config.label(LabelKeys.addPhoto)),
-            onPressed: () {
-              Navigator.pop(context);
-              _showAddPhotoOptions(config);
-            },
-          ),
+          // Pagamentos
+          if (canManagePayments && canViewPrices)
+            CupertinoActionSheetAction(
+              child: Text(context.l10n.payments),
+              onPressed: () {
+                Navigator.pop(context);
+                _openPaymentManagement();
+              },
+            ),
           // Enviar link para cliente
           if (_store.order?.id != null)
             CupertinoActionSheetAction(
               child: Text(context.l10n.shareWithCustomer),
               onPressed: () {
                 Navigator.pop(context);
-                _openShareLinkSheet();
+                ShareLinkSheet.show(context, _store.order!);
               },
             ),
           // Compartilhar PDF para usuários com acesso a valores
@@ -1641,11 +1651,82 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  /// Open the share link sheet
-  void _openShareLinkSheet({String? statusContext}) {
-    final order = _store.order;
-    if (order?.id == null) return;
-    ShareLinkSheet.show(context, order!, statusContext: statusContext);
+  /// Open native share sheet directly with a share link
+  Future<void> _openShareLinkSheet({String? statusContext}) async {
+    final nullableOrder = _store.order;
+    if (nullableOrder?.id == null) return;
+    final order = nullableOrder!;
+
+    final service = ShareLinkService.instance;
+
+    // Show loading overlay
+    final overlay = OverlayEntry(
+      builder: (_) => const ColoredBox(
+        color: Color(0x44000000),
+        child: Center(child: CupertinoActivityIndicator(radius: 16)),
+      ),
+    );
+    Overlay.of(context).insert(overlay);
+
+    try {
+      String? url;
+
+      // 1. Check local cached link
+      final existingLink = order.shareLink;
+      if (existingLink != null &&
+          !existingLink.isExpired &&
+          existingLink.url != null) {
+        url = existingLink.url;
+      }
+
+      // 2. Fetch active tokens from API
+      if (url == null) {
+        try {
+          final tokens = await service.getShareTokens(order.id!);
+          final active = tokens.where((t) => !t.isExpired).toList();
+          if (active.isNotEmpty) {
+            url = 'https://praticos.web.app/q/${active.first.token}';
+          }
+        } catch (_) {
+          // Will generate new link below
+        }
+      }
+
+      // 3. Generate new link if none found
+      if (url == null) {
+        final result = await service.generateShareLink(orderId: order.id!);
+        url = result.url;
+      }
+
+      if (url == null) return;
+
+      // Build share message and open native share sheet
+      final message = service.buildShareMessage(
+        customerName: order.customer?.name ?? '',
+        orderNumber: order.number ?? 0,
+        companyName: Global.companyAggr?.name,
+        locale: context.l10n.localeName,
+        statusContext: statusContext,
+      );
+
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin =
+          box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+      await service.shareViaSheet(
+        url: url,
+        message: message,
+        subject: '${context.l10n.order} #${order.number}',
+        sharePositionOrigin: sharePositionOrigin,
+      );
+    } catch (e) {
+      // Fallback to ShareLinkSheet on error
+      if (mounted) {
+        ShareLinkSheet.show(context, order, statusContext: statusContext);
+      }
+    } finally {
+      overlay.remove();
+    }
   }
 
   void _selectCustomer() {
@@ -2267,48 +2348,67 @@ class _OrderFormState extends State<OrderForm> {
     showCupertinoModalPopup(
       context: context,
       builder: (actionSheetContext) => CupertinoActionSheet(
-        title: Text(context.l10n.addPhoto),
+        title: Text(context.l10n.addPhotoOrAttachment),
         actions: [
            CupertinoActionSheetAction(
-            child: Text(context.l10n.takePhoto),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.camera, size: 20),
+                const SizedBox(width: 8),
+                Text(context.l10n.takePhoto),
+              ],
+            ),
             onPressed: () async {
               Navigator.pop(actionSheetContext);
               final success = await _store.addPhotoFromCamera();
               if (!success && mounted) {
-                showCupertinoDialog(
-                  context: widgetContext,
-                  builder: (dialogContext) => CupertinoAlertDialog(
-                    title: Text(widgetContext.l10n.errorOccurred),
-                    content: Text(widgetContext.l10n.errorOccurred),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text(widgetContext.l10n.ok),
-                        onPressed: () => Navigator.pop(dialogContext),
-                      ),
-                    ],
-                  ),
-                );
+                _showMediaError(widgetContext);
               }
             },
           ),
            CupertinoActionSheetAction(
-            child: Text(context.l10n.chooseFromGallery),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.photo, size: 20),
+                const SizedBox(width: 8),
+                Text(context.l10n.chooseFromGallery),
+              ],
+            ),
             onPressed: () async {
               Navigator.pop(actionSheetContext);
               final success = await _store.addPhotoFromGallery();
               if (!success && mounted) {
-                showCupertinoDialog(
-                  context: widgetContext,
-                  builder: (dialogContext) => CupertinoAlertDialog(
-                    title: Text(widgetContext.l10n.errorOccurred),
-                    content: Text(widgetContext.l10n.errorOccurred),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text(widgetContext.l10n.ok),
-                        onPressed: () => Navigator.pop(dialogContext),
-                      ),
-                    ],
-                  ),
+                _showMediaError(widgetContext);
+              }
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.doc, size: 20),
+                const SizedBox(width: 8),
+                Text(context.l10n.fromFiles),
+              ],
+            ),
+            onPressed: () async {
+              Navigator.pop(actionSheetContext);
+              final photoService = PhotoService();
+              final platformFile = await photoService.pickDocument();
+              if (platformFile != null &&
+                  platformFile.path != null &&
+                  widgetContext.mounted) {
+                final file = File(platformFile.path!);
+                final ext = platformFile.extension?.toLowerCase() ?? '';
+                final contentType = _getContentTypeForExtension(ext);
+                _selectDocumentType(
+                  widgetContext,
+                  file,
+                  contentType,
+                  platformFile.name,
+                  fileSize: platformFile.size,
                 );
               }
             },
@@ -2320,6 +2420,116 @@ class _OrderFormState extends State<OrderForm> {
         ),
       ),
     );
+  }
+
+  void _showMediaError(BuildContext ctx) {
+    showCupertinoDialog(
+      context: ctx,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(ctx.l10n.errorOccurred),
+        content: Text(ctx.l10n.errorOccurred),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(ctx.l10n.ok),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _selectDocumentType(
+    BuildContext ctx,
+    File file,
+    String contentType,
+    String fileName, {
+    int? fileSize,
+  }) {
+    showCupertinoModalPopup(
+      context: ctx,
+      builder: (sheetCtx) => CupertinoActionSheet(
+        title: Text(ctx.l10n.selectDocumentType),
+        actions: [
+          for (final entry in {
+            OrderDocumentType.receipt: ctx.l10n.receipt,
+            OrderDocumentType.invoice: ctx.l10n.invoice,
+            OrderDocumentType.contract: ctx.l10n.contract,
+            OrderDocumentType.warranty: ctx.l10n.warranty,
+            OrderDocumentType.other: ctx.l10n.other,
+          }.entries)
+            CupertinoActionSheetAction(
+              child: Text(entry.value),
+              onPressed: () async {
+                Navigator.pop(sheetCtx);
+                final success = await _store.addDocument(
+                  file, entry.key, contentType, fileName,
+                  fileSize: fileSize,
+                );
+                if (ctx.mounted) {
+                  _showMediaFeedback(ctx, success);
+                }
+              },
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(ctx.l10n.cancel),
+          onPressed: () => Navigator.pop(sheetCtx),
+        ),
+      ),
+    );
+  }
+
+  void _showMediaFeedback(BuildContext ctx, bool success) {
+    showCupertinoDialog(
+      context: ctx,
+      builder: (dialogCtx) => CupertinoAlertDialog(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              success
+                  ? CupertinoIcons.checkmark_circle_fill
+                  : CupertinoIcons.xmark_circle_fill,
+              color: success
+                  ? CupertinoColors.systemGreen
+                  : CupertinoColors.systemRed,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(success
+                  ? ctx.l10n.documentAdded
+                  : ctx.l10n.errorUploadingDocument),
+            ),
+          ],
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: Text(ctx.l10n.ok),
+            onPressed: () => Navigator.pop(dialogCtx),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getContentTypeForExtension(String extension) {
+    switch (extension) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      default:
+        return 'application/octet-stream';
+    }
   }
 
   Color _getStatusColorCupertino(String? status) {

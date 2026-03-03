@@ -874,6 +874,12 @@ abstract class AppLocalizations {
   /// **'Adicionar Foto'**
   String get addPhoto;
 
+  /// No description provided for @addPhotoOrAttachment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Foto / Anexo'**
+  String get addPhotoOrAttachment;
+
   /// No description provided for @photos.
   ///
   /// In pt, this message translates to:
@@ -5721,6 +5727,144 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Pode alterar depois nas configurações'**
   String get youCanChangeThisLater;
+
+  /// No description provided for @documents.
+  ///
+  /// In pt, this message translates to:
+  /// **'Documentos'**
+  String get documents;
+
+  /// No description provided for @addDocument.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar Documento'**
+  String get addDocument;
+
+  /// No description provided for @receipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comprovante'**
+  String get receipt;
+
+  /// No description provided for @invoice.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nota Fiscal'**
+  String get invoice;
+
+  /// No description provided for @contract.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contrato'**
+  String get contract;
+
+  /// No description provided for @attachReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anexar Comprovante'**
+  String get attachReceipt;
+
+  /// No description provided for @chooseFile.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher Arquivo'**
+  String get chooseFile;
+
+  /// No description provided for @documentType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo de Documento'**
+  String get documentType;
+
+  /// No description provided for @viewDocument.
+  ///
+  /// In pt, this message translates to:
+  /// **'Visualizar Documento'**
+  String get viewDocument;
+
+  /// No description provided for @deleteDocument.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir Documento'**
+  String get deleteDocument;
+
+  /// No description provided for @confirmDeleteDocument.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja excluir este documento?'**
+  String get confirmDeleteDocument;
+
+  /// No description provided for @uploadingDocument.
+  ///
+  /// In pt, this message translates to:
+  /// **'Enviando documento...'**
+  String get uploadingDocument;
+
+  /// No description provided for @noDocuments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhum documento anexado'**
+  String get noDocuments;
+
+  /// No description provided for @documentAdded.
+  ///
+  /// In pt, this message translates to:
+  /// **'Documento adicionado'**
+  String get documentAdded;
+
+  /// No description provided for @documentDeleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Documento excluído'**
+  String get documentDeleted;
+
+  /// No description provided for @openDocument.
+  ///
+  /// In pt, this message translates to:
+  /// **'Abrir'**
+  String get openDocument;
+
+  /// No description provided for @receiptAttached.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comprovante anexado'**
+  String get receiptAttached;
+
+  /// No description provided for @receiptRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Comprovante removido'**
+  String get receiptRemoved;
+
+  /// No description provided for @removeReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Remover Comprovante'**
+  String get removeReceipt;
+
+  /// No description provided for @confirmRemoveReceipt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja remover este comprovante?'**
+  String get confirmRemoveReceipt;
+
+  /// No description provided for @fromFiles.
+  ///
+  /// In pt, this message translates to:
+  /// **'Arquivos'**
+  String get fromFiles;
+
+  /// No description provided for @selectDocumentType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione o tipo de documento'**
+  String get selectDocumentType;
+
+  /// No description provided for @errorUploadingDocument.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao enviar documento'**
+  String get errorUploadingDocument;
 }
 
 class _AppLocalizationsDelegate

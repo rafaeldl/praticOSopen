@@ -15,6 +15,16 @@ service firebase.storage {
              request.resource.size < 10 * 1024 * 1024; // 10MB max
     }
 
+    // Função para validar documentos (imagens, PDFs, DOC/DOCX)
+    function isValidDocument() {
+      return (request.resource.contentType == null ||
+              request.resource.contentType.matches('image/.*') ||
+              request.resource.contentType == 'application/pdf' ||
+              request.resource.contentType == 'application/msword' ||
+              request.resource.contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') &&
+             request.resource.size < 10 * 1024 * 1024; // 10MB max
+    }
+
     // NOTA: Validação completa de tenant requer Custom Claims ou subcoleção
     // Por enquanto, a validação de tenant é feita client-side no PhotoService
     // TODO: Implementar Custom Claims com companyId no Firebase Auth token
@@ -41,6 +51,26 @@ service firebase.storage {
     }
 
     match /tenants/{companyId}/orders/{orderId}/photos {
+      allow list: if isAuthenticated();
+    }
+
+    // Regras para comprovantes de pagamento de transações
+    match /tenants/{companyId}/orders/{orderId}/payments/{txnId}/{fileId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidDocument();
+      allow update: if isAuthenticated() && isValidDocument();
+      allow delete: if isAuthenticated();
+    }
+
+    // Regras para documentos anexados à OS
+    match /tenants/{companyId}/orders/{orderId}/documents/{docId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidDocument();
+      allow update: if isAuthenticated() && isValidDocument();
+      allow delete: if isAuthenticated();
+    }
+
+    match /tenants/{companyId}/orders/{orderId}/documents {
       allow list: if isAuthenticated();
     }
 
