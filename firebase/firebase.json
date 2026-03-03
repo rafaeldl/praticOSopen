@@ -40,6 +40,13 @@
       {
         "source": "/q/**",
         "destination": "/order/index.html"
+      },
+      {
+        "source": "/pro/**",
+        "run": {
+          "serviceId": "praticos-web",
+          "region": "southamerica-east1"
+        }
       }
     ]
   },

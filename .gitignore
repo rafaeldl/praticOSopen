@@ -12,7 +12,6 @@
 .vscode/
 connect.lock
 coverage/
-lib/generated_plugin_registrant.dart
 
 # Backup folder
 android_old/
