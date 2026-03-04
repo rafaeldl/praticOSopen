@@ -139,8 +139,7 @@ const isTermsLong = computed(() => {
 
 const formattedTotal = computed(() => {
   const total = props.order?.total || 0
-  const paidAmount = props.order?.paidAmount || 0
-  return formatCurrency(total - paidAmount, props.country)
+  return formatCurrency(total, props.country)
 })
 
 function handleApproveClick() {
