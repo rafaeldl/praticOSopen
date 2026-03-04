@@ -7,10 +7,8 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: praticos
   SERVICE_NAME: praticos-web
   REGION: southamerica-east1
-  IMAGE: gcr.io/praticos/praticos-web
 
 jobs:
   deploy:
@@ -28,24 +26,12 @@ jobs:
         with:
           project_id: praticos
 
-      - name: Configure Docker for GCR
-        run: gcloud auth configure-docker --quiet
-
-      - name: Build Docker image
+      - name: Deploy to Cloud Run (source build)
         working-directory: firebase/web
-        run: docker build -t ${{ env.IMAGE }}:${{ github.sha }} -t ${{ env.IMAGE }}:latest .
-
-      - name: Push Docker image
-        run: |
-          docker push ${{ env.IMAGE }}:${{ github.sha }}
-          docker push ${{ env.IMAGE }}:latest
-
-      - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.SERVICE_NAME }} \
-            --image ${{ env.IMAGE }}:${{ github.sha }} \
+            --source . \
             --region ${{ env.REGION }} \
-            --platform managed \
             --allow-unauthenticated \
             --port 3000 \
             --memory 512Mi \
