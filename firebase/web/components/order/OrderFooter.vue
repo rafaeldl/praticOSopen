@@ -11,10 +11,22 @@
       <a href="https://praticos.web.app" target="_blank" class="text-xs font-bold text-[#1B5E7B] transition-colors hover:text-[#0D3B4F]">PraticOS</a>
     </div>
     <!-- Secure link text -->
-    <p class="mt-2 text-center text-[10px] text-[#A0AEC0]">{{ t.secureLink }}</p>
+    <p class="mt-2 text-center text-[10px] text-[#A0AEC0]">
+      {{ t.secureLink }}
+      <template v-if="termsOfService"> · {{ t.termsTitle }}</template>
+    </p>
+    <!-- Full terms text (shown when not in quote status) -->
+    <p v-if="termsOfService && !isQuote" class="mx-auto mt-3 max-w-[600px] text-center text-[9px] leading-[1.5] text-[#C4CDD8]">
+      {{ t.termsTitle }}: {{ termsOfService }}
+    </p>
   </footer>
 </template>
 
 <script setup lang="ts">
+defineProps<{
+  termsOfService?: string | null
+  isQuote?: boolean
+}>()
+
 const { t } = useOrderI18n()
 </script>

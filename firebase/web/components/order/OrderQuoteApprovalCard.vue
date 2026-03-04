@@ -45,35 +45,40 @@
       </div>
 
       <!-- Terms of Service -->
-      <div v-if="termsOfService" class="rounded-[10px] border border-[#E2E8F0] bg-[#FAFBFC] p-3.5 lg:p-4">
-        <div class="mb-2 flex items-center gap-2">
-          <svg class="h-4 w-4 text-[#5A7184]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
-          </svg>
-          <span class="text-[13px] font-semibold text-[#1A2B3C] lg:text-[14px]">{{ t.termsTitle }}</span>
+      <template v-if="termsOfService">
+        <!-- Checkbox row -->
+        <div class="flex items-start gap-2.5">
+          <label class="flex cursor-pointer items-start gap-2.5">
+            <input
+              type="checkbox"
+              v-model="termsAccepted"
+              class="mt-0.5 h-5 w-5 shrink-0 cursor-pointer rounded border-[#CBD5E1] accent-[#1B5E7B]"
+              @change="showTermsError = false"
+            />
+            <span class="text-[12px] leading-[1.4] text-[#5A7184] lg:text-[13px]">{{ t.termsAcceptCheckbox }}</span>
+          </label>
         </div>
-        <div class="relative">
+        <p v-if="showTermsError" class="ml-[30px] text-[11px] text-[#DC2626] lg:text-[12px]">{{ t.termsRequiredError }}</p>
+
+        <!-- Terms box -->
+        <div class="rounded-[10px] border border-[#E2E8F0] bg-[#F8FAFB] p-3.5 lg:p-4">
+          <div class="mb-2.5 flex items-center gap-2">
+            <svg class="h-3.5 w-3.5 text-[#5A7184]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 16v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8c0-1.1.9-2 2-2h3"/><path d="M8 2h13a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/><line x1="10" y1="6" x2="18" y2="6"/><line x1="10" y1="9.5" x2="18" y2="9.5"/><line x1="10" y1="13" x2="15" y2="13"/>
+            </svg>
+            <span class="text-[12px] font-bold text-[#1A2B3C] lg:text-[13px]">{{ t.termsTitle }}</span>
+          </div>
           <p
-            class="whitespace-pre-line text-[12px] leading-relaxed text-[#5A7184] lg:text-[13px]"
-            :class="{ 'line-clamp-2': !termsExpanded }"
+            class="whitespace-pre-line text-[11px] leading-[1.6] text-[#5A7184] lg:text-[12px]"
+            :class="{ 'line-clamp-3': !termsExpanded }"
           >{{ termsOfService }}</p>
           <button
             v-if="isTermsLong"
-            class="mt-1 text-[12px] font-medium text-[#2563EB] hover:underline lg:text-[13px]"
+            class="mt-1.5 text-[11px] font-medium text-[#2563EB] hover:underline lg:text-[12px]"
             @click="termsExpanded = !termsExpanded"
           >{{ termsExpanded ? t.termsReadLess : t.termsReadMore }}</button>
         </div>
-        <label class="mt-3 flex cursor-pointer items-start gap-2.5">
-          <input
-            type="checkbox"
-            v-model="termsAccepted"
-            class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-[#CBD5E1] text-[#16A34A] accent-[#16A34A]"
-            @change="showTermsError = false"
-          />
-          <span class="text-[12px] leading-snug text-[#3B4A5C] lg:text-[13px]">{{ t.termsAcceptCheckbox }}</span>
-        </label>
-        <p v-if="showTermsError" class="mt-1.5 ml-6.5 text-[11px] text-[#DC2626] lg:text-[12px]">{{ t.termsRequiredError }}</p>
-      </div>
+      </template>
 
       <!-- Divider (mobile only, before buttons) -->
       <div class="h-px bg-[#EDF2F7] lg:hidden" />

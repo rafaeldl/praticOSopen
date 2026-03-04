@@ -63,6 +63,7 @@
             v-if="order.status === 'quote' && permissions.includes('approve')"
             :order="order"
             :country="company?.country"
+            :terms-of-service="company?.termsOfService ?? null"
             @approve="showApproveModal = true"
             @reject="showRejectModal = true"
           />
@@ -96,7 +97,10 @@
         </div>
       </div>
 
-      <OrderFooter />
+      <OrderFooter
+        :terms-of-service="company?.termsOfService ?? null"
+        :is-quote="order?.status === 'quote'"
+      />
     </template>
 
     <!-- Language switcher -->
