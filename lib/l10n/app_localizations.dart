@@ -5889,6 +5889,12 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Estes termos serão exibidos ao cliente antes de aprovar o orçamento.'**
   String get termsOfServiceDescription;
+
+  /// No description provided for @useDefaultTerms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usar texto padrão do segmento'**
+  String get useDefaultTerms;
 }
 
 class _AppLocalizationsDelegate

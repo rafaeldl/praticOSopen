@@ -48,6 +48,9 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Default fieldService value from the segment document
   bool get segmentFieldServiceDefault => _service.segmentFieldServiceDefault;
 
+  /// Default terms of service text for the current segment and locale
+  String? get defaultTermsOfService => _service.defaultTermsOfService;
+
   /// Sets resolved company config values and notifies listeners
   void setCompanyConfig({required bool fieldService, required bool useScheduling}) {
     _service.setCompanyConfig(fieldService: fieldService, useScheduling: useScheduling);

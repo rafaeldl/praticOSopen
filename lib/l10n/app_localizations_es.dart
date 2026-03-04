@@ -3112,4 +3112,7 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get termsOfServiceDescription =>
       'Estos términos se mostrarán al cliente antes de aprobar el presupuesto.';
+
+  @override
+  String get useDefaultTerms => 'Usar texto predeterminado del segmento';
 }
