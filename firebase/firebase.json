@@ -39,7 +39,10 @@
     "rewrites": [
       {
         "source": "/q/**",
-        "destination": "/order/index.html"
+        "run": {
+          "serviceId": "praticos-web",
+          "region": "southamerica-east1"
+        }
       },
       {
         "source": "/pro/**",
