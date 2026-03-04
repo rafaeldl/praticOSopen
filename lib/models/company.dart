@@ -19,6 +19,7 @@ class Company extends BaseAudit {
   List<String>? subspecialties; // IDs das subcategorias: ['mechanical', 'carwash']
   bool? fieldService; // Atendimento no local do cliente
   bool? useScheduling; // Usar data agendada nas OS
+  String? termsOfService;
   UserAggr? owner;
   List<UserRoleAggr>? users;
 

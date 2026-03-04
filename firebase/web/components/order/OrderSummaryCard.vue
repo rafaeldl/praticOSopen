@@ -3,7 +3,7 @@
     <!-- Total header -->
     <div class="flex items-center justify-between">
       <span class="text-sm font-semibold text-[#5A7184]">Total</span>
-      <span class="text-2xl font-bold text-[#1B5E7B] tabular-nums">{{ formatCurrency(remaining, country) }}</span>
+      <span class="text-2xl font-bold text-[#1B5E7B] tabular-nums">{{ formatCurrency(total, country) }}</span>
     </div>
 
     <!-- Subtotal / discount / paid breakdown -->
@@ -19,6 +19,11 @@
       <div v-if="paidAmount > 0" class="flex items-center justify-between text-[13px] text-[#5A7184]">
         <span>{{ t.paid }}</span>
         <span class="font-medium tabular-nums">-{{ formatCurrency(paidAmount, country) }}</span>
+      </div>
+      <div class="h-px bg-[#E2E8F0]" />
+      <div class="flex items-center justify-between text-[13px]">
+        <span class="font-semibold text-[#1A2B3C]">{{ t.total }}</span>
+        <span class="font-bold text-[#1B5E7B] tabular-nums">{{ formatCurrency(remaining, country) }}</span>
       </div>
     </div>
 

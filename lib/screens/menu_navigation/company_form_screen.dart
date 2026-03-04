@@ -724,6 +724,52 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                   ),
                 ],
               ),
+
+              // Legal / Terms of Service
+              CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.legalSection),
+                footer: Text(
+                  context.l10n.termsOfServiceDescription,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+                children: [
+                  CupertinoFormRow(
+                    prefix: null,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          context.l10n.termsOfService,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: CupertinoColors.label.resolveFrom(context),
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        CupertinoTextField(
+                          controller: TextEditingController(text: _company?.termsOfService),
+                          placeholder: context.l10n.termsOfServicePlaceholder,
+                          textCapitalization: TextCapitalization.sentences,
+                          maxLines: 6,
+                          minLines: 3,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          onChanged: (val) => _company?.termsOfService = val.trim().isEmpty ? null : val.trim(),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

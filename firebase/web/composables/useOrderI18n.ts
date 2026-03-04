@@ -116,6 +116,11 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     ratingGood: 'Bom',
     ratingFair: 'Regular',
     ratingPoor: 'Ruim',
+    termsTitle: 'Termos e Condições',
+    termsReadMore: 'Ler mais',
+    termsReadLess: 'Ler menos',
+    termsAcceptCheckbox: 'Li e aceito os Termos e Condições',
+    termsRequiredError: 'Você deve aceitar os termos para aprovar o orçamento',
   },
   en: {
     pageTitle: 'Track your Order - PraticOS',
@@ -208,6 +213,11 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     ratingGood: 'Good',
     ratingFair: 'Fair',
     ratingPoor: 'Poor',
+    termsTitle: 'Terms and Conditions',
+    termsReadMore: 'Read more',
+    termsReadLess: 'Read less',
+    termsAcceptCheckbox: 'I have read and accept the Terms and Conditions',
+    termsRequiredError: 'You must accept the terms to approve the quote',
   },
   es: {
     pageTitle: 'Seguí tu OS - PraticOS',
@@ -300,6 +310,11 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     ratingGood: 'Bueno',
     ratingFair: 'Regular',
     ratingPoor: 'Malo',
+    termsTitle: 'Términos y Condiciones',
+    termsReadMore: 'Leer más',
+    termsReadLess: 'Leer menos',
+    termsAcceptCheckbox: 'He leído y acepto los Términos y Condiciones',
+    termsRequiredError: 'Debes aceptar los términos para aprobar el presupuesto',
   },
 }
 

@@ -110,6 +110,7 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
           email: company.email,
           address: company.address,
           country: company.country,
+          termsOfService: company.termsOfService || null,
         } : null,
         comments: comments.map((c) => ({
           // IDs removed for LGPD compliance
@@ -164,14 +165,20 @@ router.post(
         return;
       }
 
+      // Check if company has terms of service
+      const companyDoc = await db.collection('companies').doc(companyId).get();
+      const company = companyDoc.exists ? companyDoc.data() as Company : null;
+      const hasTerms = !!(company?.termsOfService);
+      const now = new Date().toISOString();
+
       // Update order status to approved
       await getTenantCollection(companyId, 'orders').doc(orderId).update({
         status: 'approved',
-        updatedAt: new Date().toISOString(),
+        updatedAt: now,
       });
 
-      // Mark token as approved
-      await shareTokenService.markTokenApproved(token);
+      // Mark token as approved (with terms acceptance timestamp if applicable)
+      await shareTokenService.markTokenApproved(token, hasTerms ? now : undefined);
 
       // Add approval comment
       await commentService.addComment(

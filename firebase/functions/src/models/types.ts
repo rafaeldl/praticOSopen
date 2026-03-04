@@ -346,6 +346,7 @@ export interface Company {
   subspecialties?: string[];
   owner: UserAggr;
   users?: UserRoleAggr[];
+  termsOfService?: string;
   createdAt: DateValue;
   createdBy: UserAggr;
   updatedAt?: DateValue;
@@ -456,6 +457,7 @@ export interface ShareToken {
   approvedAt?: string;
   rejectedAt?: string;
   rejectionReason?: string;
+  termsAcceptedAt?: string;
 }
 
 export interface ShareTokenAuth {

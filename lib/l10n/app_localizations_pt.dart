@@ -3091,4 +3091,18 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get errorUploadingDocument => 'Erro ao enviar documento';
+
+  @override
+  String get legalSection => 'Jurídico';
+
+  @override
+  String get termsOfService => 'Termos e Condições';
+
+  @override
+  String get termsOfServicePlaceholder =>
+      'Ex: Equipamentos não retirados em 90 dias poderão ser descartados...';
+
+  @override
+  String get termsOfServiceDescription =>
+      'Estes termos serão exibidos ao cliente antes de aprovar o orçamento.';
 }

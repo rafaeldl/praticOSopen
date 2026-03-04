@@ -3098,4 +3098,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorUploadingDocument => 'Error al enviar documento';
+
+  @override
+  String get legalSection => 'Legal';
+
+  @override
+  String get termsOfService => 'Términos y Condiciones';
+
+  @override
+  String get termsOfServicePlaceholder =>
+      'Ej: Equipos no retirados en 90 días podrán ser descartados...';
+
+  @override
+  String get termsOfServiceDescription =>
+      'Estos términos se mostrarán al cliente antes de aprobar el presupuesto.';
 }

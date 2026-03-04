@@ -1316,5 +1316,10 @@
   "confirmRemoveReceipt": "Are you sure you want to remove this receipt?",
   "fromFiles": "Files",
   "selectDocumentType": "Select document type",
-  "errorUploadingDocument": "Error uploading document"
+  "errorUploadingDocument": "Error uploading document",
+
+  "legalSection": "Legal",
+  "termsOfService": "Terms and Conditions",
+  "termsOfServicePlaceholder": "E.g.: Devices not picked up within 90 days may be discarded...",
+  "termsOfServiceDescription": "These terms will be shown to the customer before approving the quote."
 }

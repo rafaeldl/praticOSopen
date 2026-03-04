@@ -5865,6 +5865,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Erro ao enviar documento'**
   String get errorUploadingDocument;
+
+  /// No description provided for @legalSection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Jurídico'**
+  String get legalSection;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termos e Condições'**
+  String get termsOfService;
+
+  /// No description provided for @termsOfServicePlaceholder.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Equipamentos não retirados em 90 dias poderão ser descartados...'**
+  String get termsOfServicePlaceholder;
+
+  /// No description provided for @termsOfServiceDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estes termos serão exibidos ao cliente antes de aprovar o orçamento.'**
+  String get termsOfServiceDescription;
 }
 
 class _AppLocalizationsDelegate
