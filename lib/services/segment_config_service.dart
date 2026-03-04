@@ -28,6 +28,9 @@ class SegmentConfigService {
   // Segment-level default for fieldService
   bool _segmentFieldService = true;
 
+  // Segment-level default terms of service (i18n)
+  String? _defaultTermsOfService;
+
   // Resolved company config (set once at startup, read directly in runtime)
   bool _fieldService = true;
   bool _useScheduling = true;
@@ -139,6 +142,10 @@ class SegmentConfigService {
 
       // Read segment-level fieldService default
       _segmentFieldService = data['fieldService'] as bool? ?? true;
+
+      // Read segment-level default terms of service (i18n)
+      final termsI18n = data['defaultTermsOfService'] as Map<String, dynamic>?;
+      _defaultTermsOfService = termsI18n?[_locale] ?? termsI18n?['pt-BR'];
 
       final customFieldsJson = data['customFields'] as List? ?? [];
 
@@ -541,12 +548,16 @@ class SegmentConfigService {
   /// Default fieldService value from the segment document
   bool get segmentFieldServiceDefault => _segmentFieldService;
 
+  /// Default terms of service text for the current segment and locale
+  String? get defaultTermsOfService => _defaultTermsOfService;
+
   /// Limpa todo o cache
   void clear() {
     _segmentId = null;
     _labelCache.clear();
     _customFields.clear();
     _segmentFieldService = true;
+    _defaultTermsOfService = null;
     _fieldService = true;
     _useScheduling = true;
   }

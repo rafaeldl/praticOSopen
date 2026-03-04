@@ -22,6 +22,7 @@ class CompanyFormScreen extends StatefulWidget {
 class _CompanyFormScreenState extends State<CompanyFormScreen> {
   final CompanyStore _companyStore = CompanyStore();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _termsController = TextEditingController();
 
   bool _isLoading = true;
   Company? _company;
@@ -132,10 +133,17 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     _loadData();
   }
 
+  @override
+  void dispose() {
+    _termsController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     if (Global.companyAggr?.id != null) {
       _company = await _companyStore.retrieveCompany(Global.companyAggr!.id);
+      _termsController.text = _company?.termsOfService ?? '';
 
       if (mounted) {
         final provider = context.read<SegmentConfigProvider>();
@@ -753,7 +761,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                         ),
                         const SizedBox(height: 8),
                         CupertinoTextField(
-                          controller: TextEditingController(text: _company?.termsOfService),
+                          controller: _termsController,
                           placeholder: context.l10n.termsOfServicePlaceholder,
                           textCapitalization: TextCapitalization.sentences,
                           maxLines: 6,
@@ -764,6 +772,23 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                           ),
                           onChanged: (val) => _company?.termsOfService = val.trim().isEmpty ? null : val.trim(),
                         ),
+                        if (_termsController.text.isEmpty && config.defaultTermsOfService != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                setState(() {
+                                  _termsController.text = config.defaultTermsOfService!;
+                                  _company?.termsOfService = config.defaultTermsOfService;
+                                });
+                              },
+                              child: Text(
+                                context.l10n.useDefaultTerms,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ),
                         const SizedBox(height: 8),
                       ],
                     ),

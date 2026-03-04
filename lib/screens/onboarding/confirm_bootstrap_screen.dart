@@ -49,6 +49,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
   String _statusMessage = '';
   bool _useScheduling = true;
   bool _fieldService = true;
+  String? _defaultTermsOfService;
 
   @override
   void initState() {
@@ -62,8 +63,15 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
         .doc(widget.segmentId)
         .get();
     if (doc.exists && mounted) {
+      final data = doc.data();
+      final defaultTermsI18n = data?['defaultTermsOfService'] as Map<String, dynamic>?;
       setState(() {
-        _fieldService = doc.data()?['fieldService'] as bool? ?? true;
+        _fieldService = data?['fieldService'] as bool? ?? true;
+        if (defaultTermsI18n != null) {
+          _defaultTermsOfService = defaultTermsI18n[_currentLocale]
+              ?? defaultTermsI18n['pt-BR'] as String?
+              ?? '';
+        }
       });
     }
   }
@@ -201,6 +209,7 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
           ..logo = logoUrl
           ..fieldService = _fieldService
           ..useScheduling = _useScheduling
+          ..termsOfService = _defaultTermsOfService
           ..owner = userAggr
           ..createdAt = DateTime.now()
           ..createdBy = userAggr

@@ -3094,4 +3094,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get termsOfServiceDescription =>
       'These terms will be shown to the customer before approving the quote.';
+
+  @override
+  String get useDefaultTerms => 'Use default terms for this segment';
 }

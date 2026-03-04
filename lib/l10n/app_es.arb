@@ -1321,5 +1321,6 @@
   "legalSection": "Legal",
   "termsOfService": "Términos y Condiciones",
   "termsOfServicePlaceholder": "Ej: Equipos no retirados en 90 días podrán ser descartados...",
-  "termsOfServiceDescription": "Estos términos se mostrarán al cliente antes de aprobar el presupuesto."
+  "termsOfServiceDescription": "Estos términos se mostrarán al cliente antes de aprobar el presupuesto.",
+  "useDefaultTerms": "Usar texto predeterminado del segmento"
 }

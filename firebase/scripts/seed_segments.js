@@ -1,4 +1,5 @@
 const { initializeFirebase, admin } = require('./firebase-init');
+const { DEFAULT_TERMS } = require('./terms_data');
 
 // Inicializar Firebase (aceita caminho do service account como argumento)
 try {
@@ -1588,6 +1589,11 @@ async function seedSegments() {
     for (const segment of SEGMENTS) {
       const { id, ...data } = segment;
       const segmentRef = db.collection('segments').doc(id);
+
+      // Merge defaultTermsOfService from terms_data.js (skip 'global')
+      if (id !== 'global' && DEFAULT_TERMS[id]) {
+        data.defaultTermsOfService = DEFAULT_TERMS[id];
+      }
 
       // Verifica se já existe
       const doc = await segmentRef.get();

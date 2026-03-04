@@ -1321,5 +1321,6 @@
   "legalSection": "Legal",
   "termsOfService": "Terms and Conditions",
   "termsOfServicePlaceholder": "E.g.: Devices not picked up within 90 days may be discarded...",
-  "termsOfServiceDescription": "These terms will be shown to the customer before approving the quote."
+  "termsOfServiceDescription": "These terms will be shown to the customer before approving the quote.",
+  "useDefaultTerms": "Use default terms for this segment"
 }

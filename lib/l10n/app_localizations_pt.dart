@@ -3105,4 +3105,7 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get termsOfServiceDescription =>
       'Estes termos serão exibidos ao cliente antes de aprovar o orçamento.';
+
+  @override
+  String get useDefaultTerms => 'Usar texto padrão do segmento';
 }
