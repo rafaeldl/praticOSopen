@@ -1316,5 +1316,10 @@
   "confirmRemoveReceipt": "¿Está seguro que desea eliminar este comprobante?",
   "fromFiles": "Archivos",
   "selectDocumentType": "Seleccione el tipo de documento",
-  "errorUploadingDocument": "Error al enviar documento"
+  "errorUploadingDocument": "Error al enviar documento",
+
+  "legalSection": "Legal",
+  "termsOfService": "Términos y Condiciones",
+  "termsOfServicePlaceholder": "Ej: Equipos no retirados en 90 días podrán ser descartados...",
+  "termsOfServiceDescription": "Estos términos se mostrarán al cliente antes de aprobar el presupuesto."
 }

@@ -724,6 +724,29 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                   ),
                 ],
               ),
+
+              // Legal / Terms of Service
+              CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.legalSection),
+                footer: Text(
+                  context.l10n.termsOfServiceDescription,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+                children: [
+                  CupertinoTextFormFieldRow(
+                    prefix: Text(context.l10n.termsOfService),
+                    initialValue: _company?.termsOfService,
+                    placeholder: context.l10n.termsOfServicePlaceholder,
+                    textCapitalization: TextCapitalization.sentences,
+                    maxLines: 5,
+                    minLines: 2,
+                    onSaved: (val) => _company?.termsOfService = val?.trim().isEmpty == true ? null : val?.trim(),
+                  ),
+                ],
+              ),
             ],
           ),
         ),

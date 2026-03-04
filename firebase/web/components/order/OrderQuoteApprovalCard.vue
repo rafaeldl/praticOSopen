@@ -44,6 +44,37 @@
         </p>
       </div>
 
+      <!-- Terms of Service -->
+      <div v-if="termsOfService" class="rounded-[10px] border border-[#E2E8F0] bg-[#FAFBFC] p-3.5 lg:p-4">
+        <div class="mb-2 flex items-center gap-2">
+          <svg class="h-4 w-4 text-[#5A7184]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+          </svg>
+          <span class="text-[13px] font-semibold text-[#1A2B3C] lg:text-[14px]">{{ t.termsTitle }}</span>
+        </div>
+        <div class="relative">
+          <p
+            class="whitespace-pre-line text-[12px] leading-relaxed text-[#5A7184] lg:text-[13px]"
+            :class="{ 'line-clamp-2': !termsExpanded }"
+          >{{ termsOfService }}</p>
+          <button
+            v-if="isTermsLong"
+            class="mt-1 text-[12px] font-medium text-[#2563EB] hover:underline lg:text-[13px]"
+            @click="termsExpanded = !termsExpanded"
+          >{{ termsExpanded ? t.termsReadLess : t.termsReadMore }}</button>
+        </div>
+        <label class="mt-3 flex cursor-pointer items-start gap-2.5">
+          <input
+            type="checkbox"
+            v-model="termsAccepted"
+            class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-[#CBD5E1] text-[#16A34A] accent-[#16A34A]"
+            @change="showTermsError = false"
+          />
+          <span class="text-[12px] leading-snug text-[#3B4A5C] lg:text-[13px]">{{ t.termsAcceptCheckbox }}</span>
+        </label>
+        <p v-if="showTermsError" class="mt-1.5 ml-6.5 text-[11px] text-[#DC2626] lg:text-[12px]">{{ t.termsRequiredError }}</p>
+      </div>
+
       <!-- Divider (mobile only, before buttons) -->
       <div class="h-px bg-[#EDF2F7] lg:hidden" />
 
@@ -52,7 +83,7 @@
         <!-- Approve (first on mobile, second on desktop) -->
         <button
           class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#16A34A] px-5 py-3 text-[14px] font-bold text-white shadow-[0_4px_20px_rgba(22,163,74,0.25)] transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgba(22,163,74,0.35)] lg:order-2 lg:flex-none lg:px-8 lg:py-3.5"
-          @click="$emit('approve')"
+          @click="handleApproveClick"
         >
           <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
@@ -82,18 +113,36 @@ import { formatCurrency } from '~/utils/format'
 const props = defineProps<{
   order: any
   country?: string
+  termsOfService?: string | null
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   approve: []
   reject: []
 }>()
 
 const { t } = useOrderI18n()
 
+const termsExpanded = ref(false)
+const termsAccepted = ref(false)
+const showTermsError = ref(false)
+
+const isTermsLong = computed(() => {
+  if (!props.termsOfService) return false
+  return props.termsOfService.length > 120 || props.termsOfService.split('\n').length > 2
+})
+
 const formattedTotal = computed(() => {
   const total = props.order?.total || 0
   const paidAmount = props.order?.paidAmount || 0
   return formatCurrency(total - paidAmount, props.country)
 })
+
+function handleApproveClick() {
+  if (props.termsOfService && !termsAccepted.value) {
+    showTermsError.value = true
+    return
+  }
+  emit('approve')
+}
 </script>

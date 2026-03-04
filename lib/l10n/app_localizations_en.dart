@@ -3080,4 +3080,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorUploadingDocument => 'Error uploading document';
+
+  @override
+  String get legalSection => 'Legal';
+
+  @override
+  String get termsOfService => 'Terms and Conditions';
+
+  @override
+  String get termsOfServicePlaceholder =>
+      'E.g.: Devices not picked up within 90 days may be discarded...';
+
+  @override
+  String get termsOfServiceDescription =>
+      'These terms will be shown to the customer before approving the quote.';
 }
