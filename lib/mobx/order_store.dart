@@ -388,6 +388,7 @@ abstract class _OrderStore with Store {
     devices = order!.devices!.asObservable();
     order!.device = aggr;
     device = aggr;
+    order!.syncDeviceIds();
     createItem();
   }
 
@@ -403,6 +404,7 @@ abstract class _OrderStore with Store {
     // Sync backward compat
     order!.device = order!.devices!.first;
     device = order!.device;
+    order!.syncDeviceIds();
 
     createItem();
   }
@@ -416,6 +418,7 @@ abstract class _OrderStore with Store {
     order!.device =
         order!.devices?.isNotEmpty == true ? order!.devices!.first : null;
     device = order!.device;
+    order!.syncDeviceIds();
 
     // Orphan cleanup: items linked to removed device become global
     for (final s in order!.services ?? <OrderService>[]) {
@@ -440,6 +443,7 @@ abstract class _OrderStore with Store {
     order!.device =
         order!.devices?.isNotEmpty == true ? order!.devices!.first : null;
     device = order!.device;
+    order!.syncDeviceIds();
 
     // Remove items linked to this device
     order!.services?.removeWhere((s) => s.deviceId == deviceId);

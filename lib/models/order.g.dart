@@ -73,6 +73,9 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
   ..customData = json['customData'] as Map<String, dynamic>?
   ..documents = (json['documents'] as List<dynamic>?)
       ?.map((e) => OrderDocument.fromJson(e as Map<String, dynamic>))
+      .toList()
+  ..deviceIds = (json['deviceIds'] as List<dynamic>?)
+      ?.map((e) => e as String)
       .toList();
 
 Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
@@ -107,6 +110,7 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'longitude': instance.longitude,
   'customData': instance.customData,
   'documents': instance.documents?.map((e) => e.toJson()).toList(),
+  'deviceIds': instance.deviceIds,
 };
 
 OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()

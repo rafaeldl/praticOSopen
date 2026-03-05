@@ -270,6 +270,15 @@ class _SettingsState extends State<Settings> {
                         onTap: () => Navigator.pushNamed(context, '/form_template_list'),
                       ),
 
+                    // Recorrência - visível quando useRecurrence ativo
+                    if (config.useRecurrence && canManageCompany)
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.repeat,
+                        color: CupertinoColors.systemOrange,
+                        title: context.l10n.recurrenceRules,
+                        onTap: () => Navigator.pushNamed(context, '/recurrence_list'),
+                      ),
+
                     // Avaliações - Admin/Manager podem visualizar
                     if (canManageCompany)
                       _buildSettingsTile(

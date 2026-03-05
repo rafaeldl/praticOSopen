@@ -229,4 +229,16 @@ class TenantOrderRepository extends TenantRepository<Order?> {
 
     return streamQueryList(companyId, orderBy: orderBy, args: filterList);
   }
+
+  /// Stream de orders que contêm um device específico
+  Stream<List<Order?>> streamOrdersByDevice(
+    String companyId,
+    String deviceId,
+  ) {
+    return streamQueryList(
+      companyId,
+      orderBy: [OrderBy('createdAt', descending: true)],
+      args: [QueryArgs('deviceIds', deviceId, oper: 'arrayContains')],
+    );
+  }
 }

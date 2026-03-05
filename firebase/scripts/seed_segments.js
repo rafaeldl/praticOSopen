@@ -297,6 +297,39 @@ const SEGMENTS = [
         type: 'label',
         labels: { 'pt-BR': 'Observações', 'en-US': 'Notes', 'es-ES': 'Notas' }
       },
+      // ─── Device Management global fields (visible when useDeviceManagement=true) ───
+      {
+        key: 'device.location',
+        type: 'text',
+        labels: { 'pt-BR': 'Localização', 'en-US': 'Location', 'es-ES': 'Ubicación' },
+        section: 'Details',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 1,
+      },
+      {
+        key: 'device.acquisitionDate',
+        type: 'date',
+        labels: { 'pt-BR': 'Data de Aquisição', 'en-US': 'Acquisition Date', 'es-ES': 'Fecha de Adquisición' },
+        section: 'Details',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 2,
+      },
+      {
+        key: 'device.warrantyExpiration',
+        type: 'date',
+        labels: { 'pt-BR': 'Vencimento da Garantia', 'en-US': 'Warranty Expiration', 'es-ES': 'Vencimiento de Garantía' },
+        section: 'Details',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 3,
+      },
+      {
+        key: 'device.deviceNotes',
+        type: 'textarea',
+        labels: { 'pt-BR': 'Observações', 'en-US': 'Notes', 'es-ES': 'Notas' },
+        section: 'Details',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 4,
+      },
     ],
   },
 

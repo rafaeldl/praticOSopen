@@ -56,6 +56,9 @@ class Order extends BaseAuditCompany {
   /// Attached documents (receipts, invoices, contracts, etc.)
   List<OrderDocument>? documents;
 
+  /// Denormalized device IDs for Firestore arrayContains queries
+  List<String>? deviceIds;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 
@@ -120,7 +123,18 @@ class Order extends BaseAuditCompany {
     if (order.devices != null && order.devices!.isNotEmpty) {
       order.device = order.devices!.first;
     }
+    // Sync deviceIds from devices list
+    order.syncDeviceIds();
     return order;
+  }
+
+  /// Syncs deviceIds from devices list (for Firestore arrayContains queries)
+  void syncDeviceIds() {
+    final ids = effectiveDevices
+        .where((d) => d.id != null)
+        .map((d) => d.id!)
+        .toList();
+    deviceIds = ids.isEmpty ? null : ids;
   }
   @override
   Map<String, dynamic> toJson() => _$OrderToJson(this);

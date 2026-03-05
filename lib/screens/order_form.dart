@@ -402,16 +402,17 @@ class _OrderFormState extends State<OrderForm> {
           children: fields.map((field) {
             return DynamicFieldBuilder(
               field: field,
-              value: _store.order?.customData?[field.key],
+              value: _store.order?.customData?[field.fieldName] ?? _store.order?.customData?[field.key],
               locale: locale,
               onChanged: (newValue) {
                 setState(() {
                   _store.order?.customData ??= {};
                   if (newValue == null) {
-                    _store.order!.customData!.remove(field.key);
+                    _store.order!.customData!.remove(field.fieldName);
                   } else {
-                    _store.order!.customData![field.key] = newValue;
+                    _store.order!.customData![field.fieldName] = newValue;
                   }
+                  _store.order!.customData!.remove(field.key); // migrate old key
                   // Clean up empty customData
                   if (_store.order!.customData!.isEmpty) {
                     _store.order!.customData = null;

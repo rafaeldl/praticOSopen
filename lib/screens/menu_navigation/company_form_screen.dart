@@ -213,6 +213,8 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
           provider.setCompanyConfig(
             fieldService: _company!.fieldService ?? true,
             useScheduling: _company!.useScheduling ?? true,
+            useDeviceManagement: _company!.useDeviceManagement ?? false,
+            useRecurrence: _company!.useRecurrence ?? false,
           );
         }
       }
@@ -728,6 +730,34 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     child: CupertinoSwitch(
                       value: _company?.useScheduling ?? true,
                       onChanged: (val) => setState(() => _company?.useScheduling = val),
+                    ),
+                  ),
+                  CupertinoFormRow(
+                    prefix: Text(context.l10n.deviceManagement),
+                    helper: Text(
+                      context.l10n.deviceManagementDescription,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                    child: CupertinoSwitch(
+                      value: _company?.useDeviceManagement ?? false,
+                      onChanged: (val) => setState(() => _company?.useDeviceManagement = val),
+                    ),
+                  ),
+                  CupertinoFormRow(
+                    prefix: Text(context.l10n.recurrence),
+                    helper: Text(
+                      context.l10n.recurrenceDescription,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                    child: CupertinoSwitch(
+                      value: _company?.useRecurrence ?? false,
+                      onChanged: (val) => setState(() => _company?.useRecurrence = val),
                     ),
                   ),
                 ],
