@@ -242,6 +242,19 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   }
 
   // ═══════════════════════════════════════════════════════════════════
+  // Child orders (generated from contract templates)
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Stream of orders generated from a contract template.
+  /// No orderBy to avoid composite index requirement — sorted client-side.
+  Stream<List<Order?>> streamChildOrders(String companyId, String parentOrderId) {
+    return streamQueryList(
+      companyId,
+      args: [QueryArgs('contract.parentOrderId', parentOrderId)],
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
   // Contract queries
   // ═══════════════════════════════════════════════════════════════════
 

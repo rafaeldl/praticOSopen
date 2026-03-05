@@ -59,6 +59,13 @@ class _HomeState extends State<Home> {
       {'status': config.getStatus('canceled'), 'field': 'canceled', 'icon': CupertinoIcons.xmark_circle},
     ];
 
+    // Adicionar filtro de contratos se habilitado
+    if (config.useContracts) {
+      baseFilters.add(
+        {'status': l10n.contracts, 'field': 'contract', 'icon': CupertinoIcons.repeat},
+      );
+    }
+
     // Apenas adicionar filtros financeiros se usuário tem permissão
     if (canViewPrices) {
       baseFilters.addAll([
@@ -526,6 +533,8 @@ class _HomeState extends State<Home> {
         return CupertinoColors.systemOrange;
       case 'paid':
         return CupertinoColors.systemGreen;
+      case 'contract':
+        return CupertinoColors.systemIndigo;
       default:
         return CupertinoColors.activeBlue;
     }
@@ -1030,6 +1039,7 @@ abstract class _FilterLabels {
   String get delivery;
   String get toReceive;
   String get paid;
+  String get contracts;
 }
 
 class _PtLabels implements _FilterLabels {
@@ -1037,6 +1047,7 @@ class _PtLabels implements _FilterLabels {
   @override String get delivery => 'Entrega';
   @override String get toReceive => 'A receber';
   @override String get paid => 'Pago';
+  @override String get contracts => 'Contratos';
 }
 
 class _EnLabels implements _FilterLabels {
@@ -1044,6 +1055,7 @@ class _EnLabels implements _FilterLabels {
   @override String get delivery => 'Delivery';
   @override String get toReceive => 'Receivable';
   @override String get paid => 'Paid';
+  @override String get contracts => 'Contracts';
 }
 
 class _EsLabels implements _FilterLabels {
@@ -1051,4 +1063,5 @@ class _EsLabels implements _FilterLabels {
   @override String get delivery => 'Entrega';
   @override String get toReceive => 'Por cobrar';
   @override String get paid => 'Pagado';
+  @override String get contracts => 'Contratos';
 }

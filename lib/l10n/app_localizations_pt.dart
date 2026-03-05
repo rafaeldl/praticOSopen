@@ -3064,6 +3064,14 @@ class AppLocalizationsPt extends AppLocalizations {
   String get contractNextDue => 'Próxima geração';
 
   @override
+  String get generatedOrders => 'OS geradas';
+
+  @override
+  String generatedOrdersCount(int count) {
+    return 'OS geradas ($count)';
+  }
+
+  @override
   String get frequencyDaily => 'Diário';
 
   @override

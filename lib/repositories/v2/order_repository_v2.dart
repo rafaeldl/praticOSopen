@@ -127,6 +127,8 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
       } else if (status == 'due_date') {
         query = query.where('status', whereIn: ['approved', 'progress']);
         query = query.orderBy('dueDate');
+      } else if (status == 'contract') {
+        query = query.where('isContract', isEqualTo: true);
       } else if (status != 'Todos') {
         query = query.where('status', isEqualTo: status);
       }
@@ -136,8 +138,8 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
       query = query.where('customer.id', isEqualTo: customerId);
     }
 
-    // Ordenação padrão (se não for due_date)
-    if (status != 'due_date') {
+    // Ordenação padrão (se não for due_date nem contract)
+    if (status != 'due_date' && status != 'contract') {
       query = query.orderBy('createdAt', descending: true);
     }
 

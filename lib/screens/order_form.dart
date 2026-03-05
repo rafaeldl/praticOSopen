@@ -167,6 +167,8 @@ class _OrderFormState extends State<OrderForm> {
                       ],
                       // Always show consolidated add button
                       _buildConsolidatedAddSection(context, config),
+                      if (config.useContracts)
+                        _buildChildOrdersSection(context, config),
                       _buildCommentsSection(context),
                       const SizedBox(height: 40),
                     ]),
@@ -1001,6 +1003,112 @@ class _OrderFormState extends State<OrderForm> {
     }
   }
 
+  /// Child orders section - shows orders generated from this contract template
+  Widget _buildChildOrdersSection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(
+      builder: (_) {
+        if (!_store.hasContract) return const SizedBox.shrink();
+
+        final children = _store.childOrders?.value?.whereType<Order>().toList() ?? [];
+        if (children.isEmpty) return const SizedBox.shrink();
+        // Sort client-side (descending by createdAt) to avoid composite index
+        children.sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+
+        final formatService = FormatService();
+
+        return _buildGroupedSection(
+          header: context.l10n.generatedOrdersCount(children.length).toUpperCase(),
+          children: children.asMap().entries.map((entry) {
+            final index = entry.key;
+            final child = entry.value;
+            final isLast = index == children.length - 1;
+            final customerName = child.customer?.name ?? '';
+            final dateStr = child.createdAt != null
+                ? formatService.formatDate(child.createdAt!)
+                : '';
+            final subtitle = [customerName, dateStr].where((s) => s.isNotEmpty).join('  ·  ');
+
+            return GestureDetector(
+              onTap: () {
+                Navigator.of(context, rootNavigator: true)
+                    .pushNamed('/order', arguments: {'order': child});
+              },
+              child: Container(
+                color: CupertinoColors.systemBackground.resolveFrom(context),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _getChildOrderStatusColor(child.status),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            child.number != null ? '#${child.number}' : '',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.label.resolveFrom(context),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              subtitle,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 16,
+                            color: CupertinoColors.systemGrey3.resolveFrom(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (!isLast)
+                      Divider(
+                        height: 1,
+                        indent: 34,
+                        color: CupertinoColors.systemGrey5.resolveFrom(context),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Color _getChildOrderStatusColor(String? status) {
+    switch (status) {
+      case 'approved':
+        return CupertinoColors.systemBlue;
+      case 'done':
+        return CupertinoColors.systemGreen;
+      case 'canceled':
+        return CupertinoColors.systemRed;
+      case 'progress':
+        return CupertinoColors.systemPurple;
+      default:
+        return CupertinoColors.systemGrey;
+    }
+  }
+
   /// Comments section - shows customer and team comments on the order
   Widget _buildCommentsSection(BuildContext context) {
     return Observer(
@@ -1460,6 +1568,7 @@ class _OrderFormState extends State<OrderForm> {
                     const SizedBox(width: 12),
                   ],
                   Expanded(
+                    flex: 2,
                     child: Text(
                       title,
                       style: TextStyle(

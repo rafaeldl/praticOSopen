@@ -5806,6 +5806,18 @@ abstract class AppLocalizations {
   /// **'Próxima geração'**
   String get contractNextDue;
 
+  /// No description provided for @generatedOrders.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS geradas'**
+  String get generatedOrders;
+
+  /// No description provided for @generatedOrdersCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS geradas ({count})'**
+  String generatedOrdersCount(int count);
+
   /// No description provided for @frequencyDaily.
   ///
   /// In pt, this message translates to:

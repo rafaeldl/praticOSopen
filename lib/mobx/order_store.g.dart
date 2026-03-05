@@ -519,6 +519,24 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$childOrdersAtom = Atom(
+    name: '_OrderStore.childOrders',
+    context: context,
+  );
+
+  @override
+  ObservableStream<List<Order?>>? get childOrders {
+    _$childOrdersAtom.reportRead();
+    return super.childOrders;
+  }
+
+  @override
+  set childOrders(ObservableStream<List<Order?>>? value) {
+    _$childOrdersAtom.reportWrite(value, super.childOrders, () {
+      super.childOrders = value;
+    });
+  }
+
   late final _$paidAmountAtom = Atom(
     name: '_OrderStore.paidAmount',
     context: context,
@@ -1152,6 +1170,18 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void loadChildOrders() {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.loadChildOrders',
+    );
+    try {
+      return super.loadChildOrders();
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic setCustomer(Customer? c) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setCustomer',
@@ -1610,6 +1640,7 @@ documents: ${documents},
 isUploadingPhoto: ${isUploadingPhoto},
 isUploadingDocument: ${isUploadingDocument},
 hasContract: ${hasContract},
+childOrders: ${childOrders},
 paidAmount: ${paidAmount},
 transactions: ${transactions},
 totalPaidAmount: ${totalPaidAmount},

@@ -144,6 +144,9 @@ abstract class _OrderStore with Store {
   bool hasContract = false;
 
   @observable
+  ObservableStream<List<Order?>>? childOrders;
+
+  @observable
   double? paidAmount;
 
   @observable
@@ -359,6 +362,17 @@ abstract class _OrderStore with Store {
     hasContract = order.contract != null;
     updateTotal();
     updatePayment();
+    loadChildOrders();
+  }
+
+  @action
+  void loadChildOrders() {
+    if (companyId == null || order?.id == null || !hasContract) {
+      childOrders = null;
+      return;
+    }
+    final tenantRepo = TenantOrderRepository();
+    childOrders = tenantRepo.streamChildOrders(companyId!, order!.id!).asObservable();
   }
 
   @action
