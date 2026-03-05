@@ -3041,6 +3041,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get contractActive => 'Contrato recurrente';
 
   @override
+  String get activateContract => 'Activar contrato recurrente';
+
+  @override
+  String get deactivateContract => 'Desactivar contrato recurrente';
+
+  @override
+  String get deactivateContractConfirm =>
+      'La generación automática de OS será detenida.';
+
+  @override
+  String get recurringContract => 'Contrato recurrente';
+
+  @override
+  String get automaticGeneration => 'Generación automática';
+
+  @override
   String get contractAutoGenerate => 'Generar OS automáticamente';
 
   @override

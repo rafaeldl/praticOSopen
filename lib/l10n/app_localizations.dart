@@ -5752,6 +5752,36 @@ abstract class AppLocalizations {
   /// **'Contrato recorrente'**
   String get contractActive;
 
+  /// No description provided for @activateContract.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ativar contrato recorrente'**
+  String get activateContract;
+
+  /// No description provided for @deactivateContract.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desativar contrato recorrente'**
+  String get deactivateContract;
+
+  /// No description provided for @deactivateContractConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'A geração automática de OS será interrompida.'**
+  String get deactivateContractConfirm;
+
+  /// No description provided for @recurringContract.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contrato recorrente'**
+  String get recurringContract;
+
+  /// No description provided for @automaticGeneration.
+  ///
+  /// In pt, this message translates to:
+  /// **'Geração automática'**
+  String get automaticGeneration;
+
   /// No description provided for @contractAutoGenerate.
   ///
   /// In pt, this message translates to:

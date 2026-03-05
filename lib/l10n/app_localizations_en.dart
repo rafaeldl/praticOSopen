@@ -3024,6 +3024,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contractActive => 'Recurring contract';
 
   @override
+  String get activateContract => 'Activate recurring contract';
+
+  @override
+  String get deactivateContract => 'Deactivate recurring contract';
+
+  @override
+  String get deactivateContractConfirm =>
+      'Automatic order generation will be stopped.';
+
+  @override
+  String get recurringContract => 'Recurring contract';
+
+  @override
+  String get automaticGeneration => 'Automatic generation';
+
+  @override
   String get contractAutoGenerate => 'Auto-generate work orders';
 
   @override

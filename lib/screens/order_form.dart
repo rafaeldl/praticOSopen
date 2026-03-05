@@ -371,69 +371,47 @@ class _OrderFormState extends State<OrderForm> {
       builder: (_) {
         final contract = _store.order?.contract;
         final isActive = _store.hasContract;
-        final formatService = FormatService();
 
-        String subtitle = '';
-        if (isActive && contract != null) {
-          final freqLabel = _contractFrequencyLabel(context, contract.frequency);
-          final nextDate = contract.nextDueDate != null
-              ? formatService.formatDate(contract.nextDueDate!)
-              : '';
-          subtitle = '$freqLabel${nextDate.isNotEmpty ? ' · ${context.l10n.contractNextDue}: $nextDate' : ''}';
-        }
+        // Only show section when contract is active
+        if (!isActive || contract == null) return const SizedBox.shrink();
+
+        final formatService = FormatService();
+        final freqLabel = _contractFrequencyLabel(context, contract.frequency);
+        final nextDate = contract.nextDueDate != null
+            ? formatService.formatDate(contract.nextDueDate!)
+            : '';
+        final autoGen = contract.autoGenerate == true
+            ? context.l10n.yes
+            : context.l10n.no;
 
         return _buildGroupedSection(
-          header: context.l10n.contracts.toUpperCase(),
+          header: context.l10n.recurringContract.toUpperCase(),
           children: [
-            // Toggle row
-            GestureDetector(
-              onTap: () => _store.toggleContract(!isActive),
-              child: Container(
-                color: Colors.transparent,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      child: Row(
-                        children: [
-                          Icon(CupertinoIcons.repeat,
-                            color: CupertinoTheme.of(context).primaryColor, size: 22),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              context.l10n.contractActive,
-                              style: TextStyle(
-                                fontSize: 17,
-                                color: CupertinoColors.label.resolveFrom(context),
-                              ),
-                            ),
-                          ),
-                          CupertinoSwitch(
-                            value: isActive,
-                            onChanged: (val) => _store.toggleContract(val),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (isActive)
-                      Divider(
-                        height: 1,
-                        indent: 50,
-                        color: CupertinoColors.systemGrey5.resolveFrom(context),
-                      ),
-                  ],
-                ),
-              ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.repeat,
+              title: context.l10n.frequency,
+              value: freqLabel,
+              onTap: () => _showContractModal(context),
+              showChevron: true,
             ),
-            if (isActive)
-              _buildListTile(
-                context: context,
-                icon: CupertinoIcons.gear,
-                title: subtitle.isNotEmpty ? subtitle : context.l10n.configure,
-                onTap: () => _showContractModal(context),
-                showChevron: true,
-                isLast: true,
-              ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.calendar,
+              title: context.l10n.contractNextDue,
+              value: nextDate,
+              onTap: () => _showContractModal(context),
+              showChevron: true,
+            ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.bolt,
+              title: context.l10n.automaticGeneration,
+              value: autoGen,
+              onTap: () => _showContractModal(context),
+              showChevron: true,
+              isLast: true,
+            ),
           ],
         );
       },
@@ -469,6 +447,30 @@ class _OrderFormState extends State<OrderForm> {
         onEndDateChanged: (d) => _store.setContractEndDate(d),
         onAutoGenerateChanged: (v) => _store.setContractAutoGenerate(v),
         onReminderDaysChanged: (d) => _store.setContractReminderDays(d),
+      ),
+    );
+  }
+
+  void _confirmDeactivateContract() {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(context.l10n.deactivateContract),
+        content: Text(context.l10n.deactivateContractConfirm),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text(context.l10n.deactivateContract),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _store.toggleContract(false);
+            },
+          ),
+        ],
       ),
     );
   }
@@ -1740,6 +1742,23 @@ class _OrderFormState extends State<OrderForm> {
               onPressed: () {
                 Navigator.pop(context);
                 _onShare(context, _store.order, config);
+              },
+            ),
+          // Contrato recorrente
+          if (config.useContracts && _store.order?.id != null)
+            CupertinoActionSheetAction(
+              isDestructiveAction: _store.hasContract,
+              child: Text(_store.hasContract
+                  ? context.l10n.deactivateContract
+                  : context.l10n.activateContract),
+              onPressed: () {
+                Navigator.pop(context);
+                if (_store.hasContract) {
+                  _confirmDeactivateContract();
+                } else {
+                  _store.toggleContract(true);
+                  _showContractModal(context);
+                }
               },
             ),
           // Excluir OS (se permitido)
