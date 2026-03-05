@@ -3115,4 +3115,37 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get useDefaultTerms => 'Usar texto predeterminado del segmento';
+
+  @override
+  String get pdfTermsAndConditions => 'Terminos y Condiciones';
+
+  @override
+  String get pdfCompanySignature => 'Responsable';
+
+  @override
+  String get pdfClientSignature => 'Cliente';
+
+  @override
+  String get pdfTechnician => 'Tecnico';
+
+  @override
+  String get pdfCreatedDate => 'Creada';
+
+  @override
+  String get pdfCompletedDate => 'Completada';
+
+  @override
+  String get pdfIssuedDate => 'Emitida';
+
+  @override
+  String get pdfServicesSubtotal => 'Subtotal Servicios';
+
+  @override
+  String get pdfPartsSubtotal => 'Subtotal Repuestos';
+
+  @override
+  String get pdfPaid => 'Pagado';
+
+  @override
+  String get pdfUnitValue => 'Valor Unit.';
 }

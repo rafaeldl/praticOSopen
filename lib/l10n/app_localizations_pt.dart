@@ -3108,4 +3108,37 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get useDefaultTerms => 'Usar texto padrão do segmento';
+
+  @override
+  String get pdfTermsAndConditions => 'Termos e Condicoes';
+
+  @override
+  String get pdfCompanySignature => 'Responsavel';
+
+  @override
+  String get pdfClientSignature => 'Cliente';
+
+  @override
+  String get pdfTechnician => 'Tecnico';
+
+  @override
+  String get pdfCreatedDate => 'Criada';
+
+  @override
+  String get pdfCompletedDate => 'Concluida';
+
+  @override
+  String get pdfIssuedDate => 'Emitida';
+
+  @override
+  String get pdfServicesSubtotal => 'Subtotal Servicos';
+
+  @override
+  String get pdfPartsSubtotal => 'Subtotal Pecas';
+
+  @override
+  String get pdfPaid => 'Pago';
+
+  @override
+  String get pdfUnitValue => 'Valor Unit.';
 }

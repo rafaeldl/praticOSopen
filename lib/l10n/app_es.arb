@@ -1322,5 +1322,16 @@
   "termsOfService": "Términos y Condiciones",
   "termsOfServicePlaceholder": "Ej: Equipos no retirados en 90 días podrán ser descartados...",
   "termsOfServiceDescription": "Estos términos se mostrarán al cliente antes de aprobar el presupuesto.",
-  "useDefaultTerms": "Usar texto predeterminado del segmento"
+  "useDefaultTerms": "Usar texto predeterminado del segmento",
+  "pdfTermsAndConditions": "Terminos y Condiciones",
+  "pdfCompanySignature": "Responsable",
+  "pdfClientSignature": "Cliente",
+  "pdfTechnician": "Tecnico",
+  "pdfCreatedDate": "Creada",
+  "pdfCompletedDate": "Completada",
+  "pdfIssuedDate": "Emitida",
+  "pdfServicesSubtotal": "Subtotal Servicios",
+  "pdfPartsSubtotal": "Subtotal Repuestos",
+  "pdfPaid": "Pagado",
+  "pdfUnitValue": "Valor Unit."
 }

@@ -57,6 +57,19 @@ class PdfLocalizations {
   final String partsAndProducts;
   final String serviceLocation;
 
+  // Compact layout strings
+  final String termsAndConditions;
+  final String companySignature;
+  final String clientSignature;
+  final String technician;
+  final String createdDate;
+  final String completedDate;
+  final String issuedDate;
+  final String servicesSubtotal;
+  final String partsSubtotal;
+  final String paid;
+  final String unitValue;
+
   // Form-related strings
   final String statusCompleted;
   final String statusInProgress;
@@ -94,6 +107,17 @@ class PdfLocalizations {
     required this.photoRecord,
     required this.partsAndProducts,
     required this.serviceLocation,
+    required this.termsAndConditions,
+    required this.companySignature,
+    required this.clientSignature,
+    required this.technician,
+    required this.createdDate,
+    required this.completedDate,
+    required this.issuedDate,
+    required this.servicesSubtotal,
+    required this.partsSubtotal,
+    required this.paid,
+    required this.unitValue,
     required this.statusCompleted,
     required this.statusInProgress,
     required this.statusPending,
@@ -133,6 +157,17 @@ class PdfLocalizations {
       photoRecord: _latinCharactersOnly(l10n.photoRecord),
       partsAndProducts: _latinCharactersOnly(l10n.partsAndProducts),
       serviceLocation: _latinCharactersOnly(l10n.serviceLocation),
+      termsAndConditions: _latinCharactersOnly(l10n.pdfTermsAndConditions),
+      companySignature: _latinCharactersOnly(l10n.pdfCompanySignature),
+      clientSignature: _latinCharactersOnly(l10n.pdfClientSignature),
+      technician: _latinCharactersOnly(l10n.pdfTechnician),
+      createdDate: _latinCharactersOnly(l10n.pdfCreatedDate),
+      completedDate: _latinCharactersOnly(l10n.pdfCompletedDate),
+      issuedDate: _latinCharactersOnly(l10n.pdfIssuedDate),
+      servicesSubtotal: _latinCharactersOnly(l10n.pdfServicesSubtotal),
+      partsSubtotal: _latinCharactersOnly(l10n.pdfPartsSubtotal),
+      paid: _latinCharactersOnly(l10n.pdfPaid),
+      unitValue: _latinCharactersOnly(l10n.pdfUnitValue),
       statusCompleted: _latinCharactersOnly(l10n.statusCompleted),
       statusInProgress: _latinCharactersOnly(l10n.statusInProgress),
       statusPending: _latinCharactersOnly(l10n.statusPending),

@@ -5895,6 +5895,72 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Usar texto padrão do segmento'**
   String get useDefaultTerms;
+
+  /// No description provided for @pdfTermsAndConditions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Termos e Condicoes'**
+  String get pdfTermsAndConditions;
+
+  /// No description provided for @pdfCompanySignature.
+  ///
+  /// In pt, this message translates to:
+  /// **'Responsavel'**
+  String get pdfCompanySignature;
+
+  /// No description provided for @pdfClientSignature.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cliente'**
+  String get pdfClientSignature;
+
+  /// No description provided for @pdfTechnician.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tecnico'**
+  String get pdfTechnician;
+
+  /// No description provided for @pdfCreatedDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criada'**
+  String get pdfCreatedDate;
+
+  /// No description provided for @pdfCompletedDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Concluida'**
+  String get pdfCompletedDate;
+
+  /// No description provided for @pdfIssuedDate.
+  ///
+  /// In pt, this message translates to:
+  /// **'Emitida'**
+  String get pdfIssuedDate;
+
+  /// No description provided for @pdfServicesSubtotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Subtotal Servicos'**
+  String get pdfServicesSubtotal;
+
+  /// No description provided for @pdfPartsSubtotal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Subtotal Pecas'**
+  String get pdfPartsSubtotal;
+
+  /// No description provided for @pdfPaid.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pago'**
+  String get pdfPaid;
+
+  /// No description provided for @pdfUnitValue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor Unit.'**
+  String get pdfUnitValue;
 }
 
 class _AppLocalizationsDelegate

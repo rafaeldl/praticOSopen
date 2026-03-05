@@ -106,12 +106,7 @@ class PdfService {
             return mainOsBuilder.buildHeader(data.company, data.order);
           },
           footer: (pw.Context context) {
-            return mainOsBuilder.buildFooter(
-              context,
-              images.praticosLogo,
-              images.appStoreBadge,
-              images.playStoreBadge,
-            );
+            return mainOsBuilder.buildFooter(context);
           },
           build: (pw.Context context) {
             return mainOsBuilder.buildContent(

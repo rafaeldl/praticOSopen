@@ -9,11 +9,23 @@ class PdfStyles {
   // CORES PRINCIPAIS
   // ============================================
 
-  /// Azul principal - usado em headers e badges
-  static const PdfColor primaryColor = PdfColor.fromInt(0xFF2196F3);
+  /// Teal principal - usado em headers e badges
+  static const PdfColor primaryColor = PdfColor.fromInt(0xFF1B5E7B);
 
-  /// Azul escuro - usado em titulos de secao
-  static const PdfColor primaryDark = PdfColor.fromInt(0xFF1565C0);
+  /// Teal escuro - usado em titulos de secao e gradients
+  static const PdfColor primaryDark = PdfColor.fromInt(0xFF0D3B4F);
+
+  /// Inicio do gradient do header
+  static const PdfColor headerGradientStart = PdfColor.fromInt(0xFF0D3B4F);
+
+  /// Fim do gradient do header
+  static const PdfColor headerGradientEnd = PdfColor.fromInt(0xFF1B5E7B);
+
+  /// Fundo da barra de status
+  static const PdfColor statusBarBg = PdfColor.fromInt(0xFFF0F7FA);
+
+  /// Cor de icone de secao
+  static const PdfColor sectionIconColor = PdfColor.fromInt(0xFF1B5E7B);
 
   /// Verde - status pago/concluido
   static const PdfColor successColor = PdfColor.fromInt(0xFF4CAF50);
@@ -31,30 +43,33 @@ class PdfStyles {
   // CORES DE TEXTO
   // ============================================
 
-  /// Texto principal - cinza escuro
-  static const PdfColor textPrimary = PdfColor.fromInt(0xFF212121);
+  /// Texto principal - azul escuro
+  static const PdfColor textPrimary = PdfColor.fromInt(0xFF1A2B3C);
 
-  /// Texto secundario - cinza medio
-  static const PdfColor textSecondary = PdfColor.fromInt(0xFF757575);
+  /// Texto secundario - cinza azulado
+  static const PdfColor textSecondary = PdfColor.fromInt(0xFF5A7184);
 
-  /// Texto desabilitado - cinza claro
-  static const PdfColor textMuted = PdfColor.fromInt(0xFF9E9E9E);
+  /// Texto desabilitado - cinza azulado claro
+  static const PdfColor textMuted = PdfColor.fromInt(0xFF8FA3B8);
 
   // ============================================
   // CORES DE FUNDO E BORDA
   // ============================================
 
-  /// Fundo claro - usado em cards
-  static const PdfColor backgroundLight = PdfColor.fromInt(0xFFF5F5F5);
+  /// Fundo claro - usado em cards e tabelas
+  static const PdfColor backgroundLight = PdfColor.fromInt(0xFFF8FAFB);
 
-  /// Fundo mais claro - usado em tabelas
-  static const PdfColor backgroundLighter = PdfColor.fromInt(0xFFF8F9FA);
+  /// Fundo mais claro - usado em tabelas header
+  static const PdfColor backgroundLighter = PdfColor.fromInt(0xFFF0F7FA);
 
   /// Cor de borda padrao
-  static const PdfColor borderColor = PdfColor.fromInt(0xFFE0E0E0);
+  static const PdfColor borderColor = PdfColor.fromInt(0xFFE2E8F0);
 
-  /// Cor de divisor
-  static const PdfColor dividerColor = PdfColor.fromInt(0xFFBDBDBD);
+  /// Cor de divisor interno de tabela
+  static const PdfColor dividerColor = PdfColor.fromInt(0xFFEDF2F7);
+
+  /// Cor de texto do footer
+  static const PdfColor footerTextColor = PdfColor.fromInt(0xFFA0AEC0);
 
   // ============================================
   // CONFIGURACOES DE PAGINA
@@ -63,8 +78,14 @@ class PdfStyles {
   /// Formato A4
   static const pageFormat = PdfPageFormat.a4;
 
-  /// Margens padrao da pagina (40px)
-  static const pageMargin = pw.EdgeInsets.all(40);
+  /// Margens padrao da pagina (zero - controladas internamente)
+  static const pageMargin = pw.EdgeInsets.zero;
+
+  /// Padding horizontal do body
+  static const double bodyHorizontalPadding = 32.0;
+
+  /// Padding vertical do body
+  static const double bodyVerticalPadding = 16.0;
 
   // ============================================
   // TAMANHOS DE FONTE

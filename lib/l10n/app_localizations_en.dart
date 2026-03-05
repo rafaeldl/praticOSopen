@@ -3097,4 +3097,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get useDefaultTerms => 'Use default terms for this segment';
+
+  @override
+  String get pdfTermsAndConditions => 'Terms and Conditions';
+
+  @override
+  String get pdfCompanySignature => 'Responsible';
+
+  @override
+  String get pdfClientSignature => 'Client';
+
+  @override
+  String get pdfTechnician => 'Technician';
+
+  @override
+  String get pdfCreatedDate => 'Created';
+
+  @override
+  String get pdfCompletedDate => 'Completed';
+
+  @override
+  String get pdfIssuedDate => 'Issued';
+
+  @override
+  String get pdfServicesSubtotal => 'Services Subtotal';
+
+  @override
+  String get pdfPartsSubtotal => 'Parts Subtotal';
+
+  @override
+  String get pdfPaid => 'Paid';
+
+  @override
+  String get pdfUnitValue => 'Unit Price';
 }
