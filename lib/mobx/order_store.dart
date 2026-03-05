@@ -13,6 +13,7 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
+import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
@@ -138,6 +139,9 @@ abstract class _OrderStore with Store {
 
   @observable
   bool isUploadingDocument = false;
+
+  @observable
+  bool hasContract = false;
 
   @observable
   double? paidAmount;
@@ -352,6 +356,7 @@ abstract class _OrderStore with Store {
     address = order.address;
     latitude = order.latitude;
     longitude = order.longitude;
+    hasContract = order.contract != null;
     updateTotal();
     updatePayment();
   }
@@ -488,6 +493,172 @@ abstract class _OrderStore with Store {
     order!.scheduledDate = null;
     scheduledDate = null;
     createItem();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Contract methods
+  // ═══════════════════════════════════════════════════════════════════
+
+  @action
+  void toggleContract(bool value) {
+    if (order == null) return;
+    hasContract = value;
+    if (value) {
+      order!.contract ??= OrderContract()
+        ..frequency = 'monthly'
+        ..interval = 1
+        ..autoGenerate = true
+        ..active = true
+        ..reminderDaysBefore = 3
+        ..startDate = DateTime.now()
+        ..nextDueDate = DateTime(
+          DateTime.now().year,
+          DateTime.now().month + 1,
+          DateTime.now().day,
+        )
+        ..generatedCount = 0;
+      order!.isContract = true;
+    } else {
+      order!.contract = null;
+      order!.isContract = null;
+    }
+    createItem();
+  }
+
+  @action
+  void setContractFrequency(String frequency) {
+    if (order?.contract == null) return;
+    order!.contract!.frequency = frequency;
+    // Recompute nextDueDate based on new frequency
+    order!.contract!.nextDueDate = order!.contract!.computeNextDueDate()
+        ?? order!.contract!.startDate;
+    createItem();
+  }
+
+  @action
+  void setContractInterval(int interval) {
+    if (order?.contract == null) return;
+    order!.contract!.interval = interval;
+    order!.contract!.nextDueDate = order!.contract!.computeNextDueDate()
+        ?? order!.contract!.startDate;
+    createItem();
+  }
+
+  @action
+  void setContractStartDate(DateTime date) {
+    if (order?.contract == null) return;
+    order!.contract!.startDate = date;
+    order!.contract!.nextDueDate = order!.contract!.computeNextDueDate() ?? date;
+    createItem();
+  }
+
+  @action
+  void setContractEndDate(DateTime? date) {
+    if (order?.contract == null) return;
+    order!.contract!.endDate = date;
+    createItem();
+  }
+
+  @action
+  void setContractAutoGenerate(bool value) {
+    if (order?.contract == null) return;
+    order!.contract!.autoGenerate = value;
+    createItem();
+  }
+
+  @action
+  void setContractReminderDays(int days) {
+    if (order?.contract == null) return;
+    order!.contract!.reminderDaysBefore = days;
+    createItem();
+  }
+
+  /// Generate an Order from a contract template
+  Future<Order?> generateOrderFromContract(Order template) async {
+    if (companyId == null || template.id == null) return null;
+
+    final newOrder = Order()
+      ..company = Global.companyAggr
+      ..status = 'quote'
+      ..payment = 'unpaid'
+      ..createdAt = DateTime.now()
+      ..createdBy = template.createdBy
+      ..updatedAt = DateTime.now()
+      ..updatedBy = template.createdBy
+      ..customer = template.customer
+      ..devices = template.devices != null ? List.from(template.devices!) : null
+      ..device = template.device
+      ..services = template.services?.map((s) => OrderService()
+        ..service = s.service
+        ..description = s.description
+        ..value = s.value
+      ).toList()
+      ..products = template.products?.map((p) => OrderProduct()
+        ..product = p.product
+        ..description = p.description
+        ..value = p.value
+        ..quantity = p.quantity
+        ..total = p.total
+      ).toList()
+      ..assignedTo = template.assignedTo
+      ..contract = (OrderContract()..parentOrderId = template.id);
+
+    newOrder.syncDeviceIds();
+
+    // Calculate total from services + products
+    double total = 0;
+    for (final s in newOrder.services ?? <OrderService>[]) {
+      total += s.value ?? 0;
+    }
+    for (final p in newOrder.products ?? <OrderProduct>[]) {
+      total += p.total ?? (p.value ?? 0) * (p.quantity ?? 1);
+    }
+    newOrder.total = total;
+
+    final tenantRepo = TenantOrderRepository();
+    await tenantRepo.createItem(companyId!, newOrder);
+
+    // Update template contract tracking
+    template.contract!.lastGeneratedDate = DateTime.now();
+    template.contract!.generatedCount =
+        (template.contract!.generatedCount ?? 0) + 1;
+    template.contract!.nextDueDate =
+        template.contract!.computeNextDueDate();
+
+    // Deactivate if expired
+    if (template.contract!.isExpired) {
+      template.contract!.active = false;
+    }
+
+    await tenantRepo.updateItem(companyId!, template);
+
+    return newOrder;
+  }
+
+  /// Check and auto-generate orders for all due contracts (called on app startup)
+  Future<int> checkAndGenerateDueOrders() async {
+    if (companyId == null) return 0;
+
+    try {
+      final tenantRepo = TenantOrderRepository();
+      final orders = await tenantRepo.streamContractOrders(companyId!).first;
+
+      final dueOrders = orders
+          .whereType<Order>()
+          .where((o) =>
+              o.contract?.isDue == true &&
+              o.contract?.autoGenerate == true)
+          .toList();
+
+      int generated = 0;
+      for (final template in dueOrders) {
+        await generateOrderFromContract(template);
+        generated++;
+      }
+      return generated;
+    } catch (e) {
+      return 0;
+    }
   }
 
   /// Schedule a local reminder for the current order

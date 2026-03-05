@@ -76,7 +76,11 @@ Order _$OrderFromJson(Map<String, dynamic> json) => Order()
       .toList()
   ..deviceIds = (json['deviceIds'] as List<dynamic>?)
       ?.map((e) => e as String)
-      .toList();
+      .toList()
+  ..contract = json['contract'] == null
+      ? null
+      : OrderContract.fromJson(json['contract'] as Map<String, dynamic>)
+  ..isContract = json['isContract'] as bool?;
 
 Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'id': instance.id,
@@ -111,6 +115,8 @@ Map<String, dynamic> _$OrderToJson(Order instance) => <String, dynamic>{
   'customData': instance.customData,
   'documents': instance.documents?.map((e) => e.toJson()).toList(),
   'deviceIds': instance.deviceIds,
+  'contract': instance.contract?.toJson(),
+  'isContract': instance.isContract,
 };
 
 OrderAggr _$OrderAggrFromJson(Map<String, dynamic> json) => OrderAggr()
@@ -187,6 +193,43 @@ Map<String, dynamic> _$OrderShareLinkToJson(OrderShareLink instance) =>
       'token': instance.token,
       'expiresAt': instance.expiresAt?.toIso8601String(),
       'permissions': instance.permissions,
+    };
+
+OrderContract _$OrderContractFromJson(Map<String, dynamic> json) =>
+    OrderContract()
+      ..frequency = json['frequency'] as String?
+      ..interval = (json['interval'] as num?)?.toInt()
+      ..startDate = json['startDate'] == null
+          ? null
+          : DateTime.parse(json['startDate'] as String)
+      ..endDate = json['endDate'] == null
+          ? null
+          : DateTime.parse(json['endDate'] as String)
+      ..nextDueDate = json['nextDueDate'] == null
+          ? null
+          : DateTime.parse(json['nextDueDate'] as String)
+      ..lastGeneratedDate = json['lastGeneratedDate'] == null
+          ? null
+          : DateTime.parse(json['lastGeneratedDate'] as String)
+      ..generatedCount = (json['generatedCount'] as num?)?.toInt()
+      ..autoGenerate = json['autoGenerate'] as bool?
+      ..active = json['active'] as bool?
+      ..reminderDaysBefore = (json['reminderDaysBefore'] as num?)?.toInt()
+      ..parentOrderId = json['parentOrderId'] as String?;
+
+Map<String, dynamic> _$OrderContractToJson(OrderContract instance) =>
+    <String, dynamic>{
+      'frequency': instance.frequency,
+      'interval': instance.interval,
+      'startDate': instance.startDate?.toIso8601String(),
+      'endDate': instance.endDate?.toIso8601String(),
+      'nextDueDate': instance.nextDueDate?.toIso8601String(),
+      'lastGeneratedDate': instance.lastGeneratedDate?.toIso8601String(),
+      'generatedCount': instance.generatedCount,
+      'autoGenerate': instance.autoGenerate,
+      'active': instance.active,
+      'reminderDaysBefore': instance.reminderDaysBefore,
+      'parentOrderId': instance.parentOrderId,
     };
 
 OrderRating _$OrderRatingFromJson(Map<String, dynamic> json) => OrderRating()

@@ -240,4 +240,30 @@ class TenantOrderRepository extends TenantRepository<Order?> {
       args: [QueryArgs('deviceIds', deviceId, oper: 'arrayContains')],
     );
   }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Contract queries
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// All orders with active contract (for list and auto-generation)
+  Stream<List<Order?>> streamContractOrders(String companyId) {
+    return streamQueryList(
+      companyId,
+      args: [QueryArgs('isContract', true)],
+    );
+  }
+
+  /// Orders with contract linked to a specific device
+  Stream<List<Order?>> streamContractsByDevice(
+    String companyId,
+    String deviceId,
+  ) {
+    return streamQueryList(
+      companyId,
+      args: [
+        QueryArgs('isContract', true),
+        QueryArgs('deviceIds', deviceId, oper: 'arrayContains'),
+      ],
+    );
+  }
 }

@@ -35,7 +35,7 @@ class SegmentConfigService {
   bool _fieldService = true;
   bool _useScheduling = true;
   bool _useDeviceManagement = false;
-  bool _useRecurrence = false;
+  bool _useContracts = false;
 
   // Mapeamento de chaves técnicas de status para label keys
   static const Map<String, String> _statusKeyMapping = {
@@ -540,12 +540,12 @@ class SegmentConfigService {
     required bool fieldService,
     required bool useScheduling,
     required bool useDeviceManagement,
-    required bool useRecurrence,
+    required bool useContracts,
   }) {
     _fieldService = fieldService;
     _useScheduling = useScheduling;
     _useDeviceManagement = useDeviceManagement;
-    _useRecurrence = useRecurrence;
+    _useContracts = useContracts;
   }
 
   /// Whether the company does field service (attends at customer location)
@@ -560,8 +560,8 @@ class SegmentConfigService {
   /// Whether the company uses device management (status, history, etc.)
   bool get useDeviceManagement => _useDeviceManagement;
 
-  /// Whether the company uses recurrence rules for orders
-  bool get useRecurrence => _useRecurrence;
+  /// Whether the company uses recurring maintenance contracts
+  bool get useContracts => _useContracts;
 
   /// Default terms of service text for the current segment and locale
   String? get defaultTermsOfService => _defaultTermsOfService;
@@ -576,7 +576,7 @@ class SegmentConfigService {
     _fieldService = true;
     _useScheduling = true;
     _useDeviceManagement = false;
-    _useRecurrence = false;
+    _useContracts = false;
   }
 
   /// Getters de estado

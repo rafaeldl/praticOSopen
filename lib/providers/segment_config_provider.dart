@@ -51,8 +51,8 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Whether the company uses device management (status, history, etc.)
   bool get useDeviceManagement => _service.useDeviceManagement;
 
-  /// Whether the company uses recurrence rules for orders
-  bool get useRecurrence => _service.useRecurrence;
+  /// Whether the company uses recurring maintenance contracts
+  bool get useContracts => _service.useContracts;
 
   /// Default terms of service text for the current segment and locale
   String? get defaultTermsOfService => _service.defaultTermsOfService;
@@ -62,13 +62,13 @@ class SegmentConfigProvider extends ChangeNotifier {
     required bool fieldService,
     required bool useScheduling,
     required bool useDeviceManagement,
-    required bool useRecurrence,
+    required bool useContracts,
   }) {
     _service.setCompanyConfig(
       fieldService: fieldService,
       useScheduling: useScheduling,
       useDeviceManagement: useDeviceManagement,
-      useRecurrence: useRecurrence,
+      useContracts: useContracts,
     );
     notifyListeners();
   }

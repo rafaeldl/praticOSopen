@@ -22,6 +22,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
   Device? _device;
   final TenantOrderRepository _orderRepo = TenantOrderRepository();
   Stream<List<Order?>>? _orderStream;
+  Stream<List<Order?>>? _contractStream;
 
   @override
   void didChangeDependencies() {
@@ -31,6 +32,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
       _device = args?['device'] as Device?;
       if (_device?.id != null && Global.companyAggr?.id != null) {
         _orderStream = _orderRepo.streamOrdersByDevice(
+          Global.companyAggr!.id!,
+          _device!.id!,
+        );
+        _contractStream = _orderRepo.streamContractsByDevice(
           Global.companyAggr!.id!,
           _device!.id!,
         );
@@ -223,6 +228,10 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
 
             // Order history list
             _buildOrderHistory(config, formatService),
+
+            // Contracts section
+            if (config.useContracts)
+              _buildContractsSection(config, formatService),
 
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
@@ -444,5 +453,132 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildContractsSection(SegmentConfigProvider config, FormatService formatService) {
+    if (_contractStream == null) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    return StreamBuilder<List<Order?>>(
+      stream: _contractStream,
+      builder: (context, snapshot) {
+        final contracts = snapshot.data
+            ?.whereType<Order>()
+            .where((o) => o.contract?.active == true)
+            .toList() ?? [];
+
+        if (contracts.isEmpty) {
+          return const SliverToBoxAdapter(child: SizedBox.shrink());
+        }
+
+        return SliverMainAxisGroup(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+                child: Text(
+                  context.l10n.contracts.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+              ),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final order = contracts[index];
+                  final contract = order.contract!;
+                  final freq = _contractFrequencyLabel(contract.frequency);
+                  final nextDue = contract.nextDueDate != null
+                      ? formatService.formatDate(contract.nextDueDate!)
+                      : '';
+
+                  return Container(
+                    color: CupertinoColors.systemBackground.resolveFrom(context),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/order', arguments: {'order': order});
+                      },
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  CupertinoIcons.repeat,
+                                  size: 18,
+                                  color: CupertinoColors.systemOrange.resolveFrom(context),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '#${order.number ?? ''} - $freq',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                          color: CupertinoColors.label.resolveFrom(context),
+                                        ),
+                                      ),
+                                      if (nextDue.isNotEmpty) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${context.l10n.contractNextDue}: $nextDue',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: CupertinoColors.tertiaryLabel.resolveFrom(context),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  CupertinoIcons.chevron_right,
+                                  size: 16,
+                                  color: CupertinoColors.systemGrey3.resolveFrom(context),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (index < contracts.length - 1)
+                            Divider(
+                              height: 1,
+                              indent: 46,
+                              color: CupertinoColors.systemGrey5.resolveFrom(context),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                childCount: contracts.length,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _contractFrequencyLabel(String? frequency) {
+    switch (frequency) {
+      case 'daily':
+        return context.l10n.frequencyDaily;
+      case 'weekly':
+        return context.l10n.frequencyWeekly;
+      case 'monthly':
+        return context.l10n.frequencyMonthly;
+      case 'yearly':
+        return context.l10n.frequencyYearly;
+      default:
+        return frequency ?? '';
+    }
   }
 }

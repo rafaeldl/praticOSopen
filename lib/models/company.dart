@@ -21,7 +21,7 @@ class Company extends BaseAudit {
   bool? useScheduling; // Usar data agendada nas OS
   String? termsOfService;
   bool? useDeviceManagement; // Gestão avançada de dispositivos/ativos
-  bool? useRecurrence; // Ordens de serviço recorrentes
+  bool? useContracts; // Recurring maintenance contracts
   UserAggr? owner;
   List<UserRoleAggr>? users;
 

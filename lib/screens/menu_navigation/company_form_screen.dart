@@ -214,7 +214,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
             fieldService: _company!.fieldService ?? true,
             useScheduling: _company!.useScheduling ?? true,
             useDeviceManagement: _company!.useDeviceManagement ?? false,
-            useRecurrence: _company!.useRecurrence ?? false,
+            useContracts: _company!.useContracts ?? false,
           );
         }
       }
@@ -747,17 +747,17 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     ),
                   ),
                   CupertinoFormRow(
-                    prefix: Text(context.l10n.recurrence),
+                    prefix: Text(context.l10n.contracts),
                     helper: Text(
-                      context.l10n.recurrenceDescription,
+                      context.l10n.contractsDescription,
                       style: TextStyle(
                         fontSize: 12,
                         color: CupertinoColors.secondaryLabel.resolveFrom(context),
                       ),
                     ),
                     child: CupertinoSwitch(
-                      value: _company?.useRecurrence ?? false,
-                      onChanged: (val) => setState(() => _company?.useRecurrence = val),
+                      value: _company?.useContracts ?? false,
+                      onChanged: (val) => setState(() => _company?.useContracts = val),
                     ),
                   ),
                 ],

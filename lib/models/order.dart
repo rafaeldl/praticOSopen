@@ -59,6 +59,12 @@ class Order extends BaseAuditCompany {
   /// Denormalized device IDs for Firestore arrayContains queries
   List<String>? deviceIds;
 
+  /// Contract sub-document (null = normal order, filled = recurring contract)
+  OrderContract? contract;
+
+  /// Denormalized for Firestore queries (Firestore can't query nested nulls)
+  bool? isContract;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 
@@ -236,6 +242,61 @@ class OrderShareLink {
   factory OrderShareLink.fromJson(Map<String, dynamic> json) =>
       _$OrderShareLinkFromJson(json);
   Map<String, dynamic> toJson() => _$OrderShareLinkToJson(this);
+}
+
+/// Contract sub-document for recurring orders
+@JsonSerializable()
+class OrderContract {
+  String? frequency; // 'daily', 'weekly', 'monthly', 'yearly'
+  int? interval; // 1 = every period, 3 = every 3 periods
+  DateTime? startDate;
+  DateTime? endDate; // null = indefinite
+  DateTime? nextDueDate;
+  DateTime? lastGeneratedDate;
+  int? generatedCount;
+  bool? autoGenerate; // true = creates OS, false = reminder only
+  bool? active;
+  int? reminderDaysBefore;
+  String? parentOrderId; // For generated orders: ID of the template order
+
+  OrderContract();
+
+  factory OrderContract.fromJson(Map<String, dynamic> json) =>
+      _$OrderContractFromJson(json);
+  Map<String, dynamic> toJson() => _$OrderContractToJson(this);
+
+  /// Computes the next due date based on frequency and interval
+  DateTime? computeNextDueDate() {
+    final base = lastGeneratedDate ?? startDate;
+    if (base == null) return null;
+    final step = interval ?? 1;
+
+    switch (frequency) {
+      case 'daily':
+        return base.add(Duration(days: step));
+      case 'weekly':
+        return base.add(Duration(days: 7 * step));
+      case 'monthly':
+        return DateTime(base.year, base.month + step, base.day);
+      case 'yearly':
+        return DateTime(base.year + step, base.month, base.day);
+      default:
+        return null;
+    }
+  }
+
+  /// Whether the contract is due (nextDueDate <= now and active)
+  bool get isDue {
+    if (active != true || nextDueDate == null) return false;
+    return nextDueDate!.isBefore(DateTime.now()) ||
+        nextDueDate!.isAtSameMomentAs(DateTime.now());
+  }
+
+  /// Whether the contract has expired (endDate passed)
+  bool get isExpired {
+    if (endDate == null) return false;
+    return endDate!.isBefore(DateTime.now());
+  }
 }
 
 /// Customer rating for completed orders
