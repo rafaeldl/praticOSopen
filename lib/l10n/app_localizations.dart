@@ -5865,6 +5865,108 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Erro ao enviar documento'**
   String get errorUploadingDocument;
+
+  /// No description provided for @engagementReminders.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembretes'**
+  String get engagementReminders;
+
+  /// No description provided for @dailyReminderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete diário'**
+  String get dailyReminderTitle;
+
+  /// No description provided for @dailyReminderDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receba um lembrete todo dia às 9h'**
+  String get dailyReminderDescription;
+
+  /// No description provided for @inactivityReminderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete de inatividade'**
+  String get inactivityReminderTitle;
+
+  /// No description provided for @inactivityReminderDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receba lembretes quando não usar o app'**
+  String get inactivityReminderDescription;
+
+  /// No description provided for @pendingOsReminderTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lembrete de OS pendentes'**
+  String get pendingOsReminderTitle;
+
+  /// No description provided for @pendingOsReminderDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Receba lembretes sobre OS paradas'**
+  String get pendingOsReminderDescription;
+
+  /// No description provided for @dailyNotificationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Bom dia!'**
+  String get dailyNotificationTitle;
+
+  /// No description provided for @dailyNotificationBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registre as OS do dia no PraticOS'**
+  String get dailyNotificationBody;
+
+  /// No description provided for @inactivity3dTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sentimos sua falta!'**
+  String get inactivity3dTitle;
+
+  /// No description provided for @inactivity3dBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você não abre o PraticOS há 3 dias. Que tal registrar suas OS?'**
+  String get inactivity3dBody;
+
+  /// No description provided for @inactivity5dTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Suas OS estão esperando!'**
+  String get inactivity5dTitle;
+
+  /// No description provided for @inactivity5dBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Já faz 5 dias! Não perca o controle das suas ordens de serviço.'**
+  String get inactivity5dBody;
+
+  /// No description provided for @inactivity7dTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não deixe o PraticOS parado!'**
+  String get inactivity7dTitle;
+
+  /// No description provided for @inactivity7dBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Faz 1 semana que você não abre o app. Volte e organize suas OS!'**
+  String get inactivity7dBody;
+
+  /// No description provided for @pendingOsNotificationTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS pendentes precisam de atenção'**
+  String get pendingOsNotificationTitle;
+
+  /// No description provided for @pendingOsNotificationBody.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você tem {count} OS paradas há mais de 7 dias.'**
+  String pendingOsNotificationBody(int count);
 }
 
 class _AppLocalizationsDelegate

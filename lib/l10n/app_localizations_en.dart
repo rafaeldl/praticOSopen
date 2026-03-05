@@ -3080,4 +3080,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorUploadingDocument => 'Error uploading document';
+
+  @override
+  String get engagementReminders => 'Reminders';
+
+  @override
+  String get dailyReminderTitle => 'Daily reminder';
+
+  @override
+  String get dailyReminderDescription => 'Get a reminder every day at 9 AM';
+
+  @override
+  String get inactivityReminderTitle => 'Inactivity reminder';
+
+  @override
+  String get inactivityReminderDescription =>
+      'Get reminders when you haven\'t used the app';
+
+  @override
+  String get pendingOsReminderTitle => 'Pending orders reminder';
+
+  @override
+  String get pendingOsReminderDescription =>
+      'Get reminders about stalled orders';
+
+  @override
+  String get dailyNotificationTitle => 'Good morning!';
+
+  @override
+  String get dailyNotificationBody => 'Log today\'s work orders on PraticOS';
+
+  @override
+  String get inactivity3dTitle => 'We miss you!';
+
+  @override
+  String get inactivity3dBody =>
+      'You haven\'t opened PraticOS in 3 days. How about logging your orders?';
+
+  @override
+  String get inactivity5dTitle => 'Your orders are waiting!';
+
+  @override
+  String get inactivity5dBody =>
+      'It\'s been 5 days! Don\'t lose track of your work orders.';
+
+  @override
+  String get inactivity7dTitle => 'Don\'t let PraticOS sit idle!';
+
+  @override
+  String get inactivity7dBody =>
+      'It\'s been 1 week since you opened the app. Come back and organize your orders!';
+
+  @override
+  String get pendingOsNotificationTitle => 'Pending orders need attention';
+
+  @override
+  String pendingOsNotificationBody(int count) {
+    return 'You have $count orders stalled for over 7 days.';
+  }
 }

@@ -2,12 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart'; // Import for reaction
 import 'package:provider/provider.dart';
 import 'package:praticos/mobx/bottom_navigation_bar_store.dart';
+import 'package:praticos/mobx/engagement_reminder_store.dart';
 import 'package:praticos/screens/menu_navigation/home_customer_list.dart';
 import 'package:praticos/screens/menu_navigation/settings.dart';
 import 'package:praticos/screens/dashboard/financial_dashboard_simple.dart';
 import 'package:praticos/screens/agenda/agenda_screen.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/services/engagement_scheduler.dart';
 
 import 'home.dart';
 
@@ -18,9 +20,11 @@ class NavigationController extends StatefulWidget {
   _NavigationControllerState createState() => _NavigationControllerState();
 }
 
-class _NavigationControllerState extends State<NavigationController> {
+class _NavigationControllerState extends State<NavigationController>
+    with WidgetsBindingObserver {
   final CupertinoTabController _tabController = CupertinoTabController();
   ReactionDisposer? _disposer;
+  EngagementScheduler? _engagementScheduler;
 
   /// Build page options - Financial tab is always included
   /// Permission check is handled inside FinancialDashboardSimple
@@ -80,10 +84,16 @@ class _NavigationControllerState extends State<NavigationController> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final navigationStore = Provider.of<BottomNavigationBarStore>(context);
-    
+
     // Dispose previous reaction if dependencies change
     _disposer?.call();
 
@@ -96,10 +106,38 @@ class _NavigationControllerState extends State<NavigationController> {
         }
       },
     );
+
+    // Set up engagement scheduler with l10n strings
+    final l10n = context.l10n;
+    final store = Provider.of<EngagementReminderStore>(context, listen: false);
+    _engagementScheduler = EngagementScheduler(
+      store: store,
+      strings: EngagementStrings(
+        dailyTitle: l10n.dailyNotificationTitle,
+        dailyBody: l10n.dailyNotificationBody,
+        inactivity3dTitle: l10n.inactivity3dTitle,
+        inactivity3dBody: l10n.inactivity3dBody,
+        inactivity5dTitle: l10n.inactivity5dTitle,
+        inactivity5dBody: l10n.inactivity5dBody,
+        inactivity7dTitle: l10n.inactivity7dTitle,
+        inactivity7dBody: l10n.inactivity7dBody,
+        pendingOsTitle: l10n.pendingOsNotificationTitle,
+        pendingOsBody: (count) => l10n.pendingOsNotificationBody(count),
+      ),
+    );
+    _engagementScheduler!.onAppResumed();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _engagementScheduler?.onAppResumed();
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _disposer?.call();
     _tabController.dispose();
     super.dispose();

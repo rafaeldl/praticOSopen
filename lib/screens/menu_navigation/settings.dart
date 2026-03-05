@@ -8,7 +8,9 @@ import 'package:praticos/mobx/locale_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/mobx/reminder_store.dart';
+import 'package:praticos/mobx/engagement_reminder_store.dart';
 import 'package:praticos/mobx/whatsapp_link_store.dart';
+import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -49,6 +51,7 @@ class _SettingsState extends State<Settings> {
     AuthorizationService.setUserStore(_userStore);
     final themeStore = Provider.of<ThemeStore>(context);
     final reminderStore = Provider.of<ReminderStore>(context);
+    final engagementStore = Provider.of<EngagementReminderStore>(context);
     final config = context.watch<SegmentConfigProvider>();
 
     return CupertinoPageScaffold(
@@ -357,6 +360,82 @@ class _SettingsState extends State<Settings> {
                       );
                     }
                     return const SizedBox.shrink();
+                  }),
+                ],
+              ),
+
+              // Engagement Reminders Section
+              CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.engagementReminders.toUpperCase()),
+                children: [
+                  Observer(builder: (_) {
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemOrange,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.clock_fill, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.dailyReminderTitle),
+                      subtitle: Text(context.l10n.dailyReminderDescription),
+                      trailing: CupertinoSwitch(
+                        value: engagementStore.dailyEnabled,
+                        onChanged: (value) {
+                          engagementStore.setDailyEnabled(value);
+                          if (!value) {
+                            NotificationService.instance.cancelDailyReminder();
+                          }
+                        },
+                      ),
+                    );
+                  }),
+                  Observer(builder: (_) {
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemPurple,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.arrow_counterclockwise, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.inactivityReminderTitle),
+                      subtitle: Text(context.l10n.inactivityReminderDescription),
+                      trailing: CupertinoSwitch(
+                        value: engagementStore.inactivityEnabled,
+                        onChanged: (value) {
+                          engagementStore.setInactivityEnabled(value);
+                          if (!value) {
+                            NotificationService.instance.cancelInactivityReminders();
+                          }
+                        },
+                      ),
+                    );
+                  }),
+                  Observer(builder: (_) {
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemRed,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.exclamationmark_circle_fill, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.pendingOsReminderTitle),
+                      subtitle: Text(context.l10n.pendingOsReminderDescription),
+                      trailing: CupertinoSwitch(
+                        value: engagementStore.pendingOsEnabled,
+                        onChanged: (value) {
+                          engagementStore.setPendingOsEnabled(value);
+                          if (!value) {
+                            NotificationService.instance.cancelPendingOsReminders();
+                          }
+                        },
+                      ),
+                    );
                   }),
                 ],
               ),

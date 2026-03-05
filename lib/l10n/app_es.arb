@@ -1316,5 +1316,28 @@
   "confirmRemoveReceipt": "¿Está seguro que desea eliminar este comprobante?",
   "fromFiles": "Archivos",
   "selectDocumentType": "Seleccione el tipo de documento",
-  "errorUploadingDocument": "Error al enviar documento"
+  "errorUploadingDocument": "Error al enviar documento",
+
+  "engagementReminders": "Recordatorios",
+  "dailyReminderTitle": "Recordatorio diario",
+  "dailyReminderDescription": "Reciba un recordatorio todos los días a las 9 AM",
+  "inactivityReminderTitle": "Recordatorio de inactividad",
+  "inactivityReminderDescription": "Reciba recordatorios cuando no use la app",
+  "pendingOsReminderTitle": "Recordatorio de OS pendientes",
+  "pendingOsReminderDescription": "Reciba recordatorios sobre OS detenidas",
+  "dailyNotificationTitle": "¡Buenos días!",
+  "dailyNotificationBody": "Registre las OS del día en PraticOS",
+  "inactivity3dTitle": "¡Te extrañamos!",
+  "inactivity3dBody": "No abres PraticOS hace 3 días. ¿Qué tal registrar tus OS?",
+  "inactivity5dTitle": "¡Tus OS te esperan!",
+  "inactivity5dBody": "¡Ya pasaron 5 días! No pierdas el control de tus órdenes de servicio.",
+  "inactivity7dTitle": "¡No dejes PraticOS parado!",
+  "inactivity7dBody": "Hace 1 semana que no abres la app. ¡Vuelve y organiza tus OS!",
+  "pendingOsNotificationTitle": "OS pendientes necesitan atención",
+  "pendingOsNotificationBody": "Tienes {count} OS detenidas hace más de 7 días.",
+  "@pendingOsNotificationBody": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

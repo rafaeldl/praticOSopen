@@ -1316,5 +1316,28 @@
   "confirmRemoveReceipt": "Are you sure you want to remove this receipt?",
   "fromFiles": "Files",
   "selectDocumentType": "Select document type",
-  "errorUploadingDocument": "Error uploading document"
+  "errorUploadingDocument": "Error uploading document",
+
+  "engagementReminders": "Reminders",
+  "dailyReminderTitle": "Daily reminder",
+  "dailyReminderDescription": "Get a reminder every day at 9 AM",
+  "inactivityReminderTitle": "Inactivity reminder",
+  "inactivityReminderDescription": "Get reminders when you haven't used the app",
+  "pendingOsReminderTitle": "Pending orders reminder",
+  "pendingOsReminderDescription": "Get reminders about stalled orders",
+  "dailyNotificationTitle": "Good morning!",
+  "dailyNotificationBody": "Log today's work orders on PraticOS",
+  "inactivity3dTitle": "We miss you!",
+  "inactivity3dBody": "You haven't opened PraticOS in 3 days. How about logging your orders?",
+  "inactivity5dTitle": "Your orders are waiting!",
+  "inactivity5dBody": "It's been 5 days! Don't lose track of your work orders.",
+  "inactivity7dTitle": "Don't let PraticOS sit idle!",
+  "inactivity7dBody": "It's been 1 week since you opened the app. Come back and organize your orders!",
+  "pendingOsNotificationTitle": "Pending orders need attention",
+  "pendingOsNotificationBody": "You have {count} orders stalled for over 7 days.",
+  "@pendingOsNotificationBody": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  }
 }

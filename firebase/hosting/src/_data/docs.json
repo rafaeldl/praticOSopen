@@ -56,6 +56,14 @@
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>"
         },
         {
+          "title": "Lembretes",
+          "description": "Receba notificações automáticas antes dos seus agendamentos. Funciona offline e sem depender de servidores.",
+          "href": "lembretes.html",
+          "linkText": "Ver documentação ->",
+          "badge": "Novo",
+          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>"
+        },
+        {
           "title": "Clientes e Dispositivos",
           "description": "Gerencie sua base de clientes e equipamentos/dispositivos vinculados.",
           "linkText": "Em breve",
@@ -157,6 +165,14 @@
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>"
         },
         {
+          "title": "Reminders",
+          "description": "Receive automatic notifications before your appointments. Works offline and without servers.",
+          "href": "lembretes-en.html",
+          "linkText": "View documentation ->",
+          "badge": "New",
+          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>"
+        },
+        {
           "title": "Customers and Devices",
           "description": "Manage your customer base and linked equipment/devices.",
           "linkText": "Coming soon",
@@ -256,6 +272,14 @@
           "linkText": "Ver documentación ->",
           "badge": "Nuevo",
           "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>"
+        },
+        {
+          "title": "Recordatorios",
+          "description": "Reciba notificaciones automáticas antes de sus citas. Funciona sin conexión y sin depender de servidores.",
+          "href": "lembretes-es.html",
+          "linkText": "Ver documentación ->",
+          "badge": "Nuevo",
+          "icon": "<svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"></path><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"></path></svg>"
         },
         {
           "title": "Clientes y Dispositivos",
