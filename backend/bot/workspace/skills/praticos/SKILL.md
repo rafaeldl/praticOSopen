@@ -60,7 +60,11 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 1. **IDs OBRIGATORIOS** — API NAO aceita nomes. Usar POST /bot/search/unified.
 2. **Criar OS:** busca → IDs → criar. Apos criar → OS ativa. Adicionar item: se ha OS ativa, usar /services ou /products. So criar nova se pedido explicitamente.
 3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
-4. **Fotos:** multipart `-F "file=@/path"` (NAO base64)
+4. **Fotos:** upload via /photos/upload (multipart).
+   exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -F \"file=@/path/to/photo.jpg\" \"$PRATICOS_API_URL/bot/orders/{NUM}/photos/upload\"")
+   - Multiplas fotos: uma chamada por foto
+   - Listar: GET /bot/orders/{NUM}/photos
+   - Deletar: DELETE /bot/orders/{NUM}/photos/{ID}
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
    - 🔴 Valor na OS = serviço ou produto. Se usuario pedir para "colocar/registrar/atualizar valor" na OS → buscar servico no catalogo (POST /bot/search/unified) e adicionar via /services. Se nao encontrar → criar novo servico (POST /bot/entities/services) e depois adicionar via /services. NUNCA usar /comments para definir valor da OS.
    - Comentario com valor so se usuario pedir EXPLICITAMENTE para anotar/observar (ex: "anota que o valor combinado foi 700").

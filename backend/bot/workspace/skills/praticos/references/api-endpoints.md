@@ -48,6 +48,7 @@ GET /bot/orders/{NUM}/details retorna `devices[]` (lista completa) e `deviceCoun
 
 ## OS - Fotos
 POST /bot/orders/{NUM}/photos/upload - multipart com -F "file=@/path"
+exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -F \"file=@/path/to/photo.jpg\" \"$PRATICOS_API_URL/bot/orders/{NUM}/photos/upload\"")
 GET /bot/orders/{NUM}/photos - listar (retorna downloadUrl)
 GET /bot/orders/{NUM}/photos/{ID} - download binario
 DELETE /bot/orders/{NUM}/photos/{ID}
