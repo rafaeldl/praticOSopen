@@ -377,6 +377,34 @@ class _OrderFormState extends State<OrderForm> {
         // Only show section when contract is active
         if (!isActive || contract == null) return const SizedBox.shrink();
 
+        // Child order — show link to parent contract
+        if (contract.parentOrderId != null) {
+          final parentLabel = contract.parentOrderNumber != null
+              ? '${context.l10n.orderShort} #${contract.parentOrderNumber}'
+              : '';
+          return _buildGroupedSection(
+            header: context.l10n.contract.toUpperCase(),
+            children: [
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.link,
+                title: context.l10n.recurringContract,
+                value: parentLabel,
+                onTap: () {
+                  final parentOrder = Order()..id = contract.parentOrderId;
+                  Navigator.of(context, rootNavigator: true).pushNamed(
+                    '/order',
+                    arguments: {'order': parentOrder},
+                  );
+                },
+                showChevron: true,
+                isLast: true,
+              ),
+            ],
+          );
+        }
+
+        // Template order — show contract details (frequency, next due, auto-gen)
         final formatService = FormatService();
         final freqLabel = _contractFrequencyLabel(context, contract.frequency);
         final nextDate = contract.nextDueDate != null
@@ -1022,11 +1050,9 @@ class _OrderFormState extends State<OrderForm> {
             final index = entry.key;
             final child = entry.value;
             final isLast = index == children.length - 1;
-            final customerName = child.customer?.name ?? '';
             final dateStr = child.createdAt != null
                 ? formatService.formatDate(child.createdAt!)
                 : '';
-            final subtitle = [customerName, dateStr].where((s) => s.isNotEmpty).join('  ·  ');
 
             return GestureDetector(
               onTap: () {
@@ -1038,7 +1064,7 @@ class _OrderFormState extends State<OrderForm> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       child: Row(
                         children: [
                           Container(
@@ -1049,27 +1075,26 @@ class _OrderFormState extends State<OrderForm> {
                               shape: BoxShape.circle,
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          Text(
-                            child.number != null ? '#${child.number}' : '',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: CupertinoColors.label.resolveFrom(context),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              subtitle,
+                              child.number != null ? '#${child.number}' : '',
                               style: TextStyle(
-                                fontSize: 15,
-                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                color: CupertinoColors.label.resolveFrom(context),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (dateStr.isNotEmpty)
+                            Text(
+                              dateStr,
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                              ),
+                            ),
+                          const SizedBox(width: 6),
                           Icon(
                             CupertinoIcons.chevron_right,
                             size: 16,
@@ -1081,7 +1106,7 @@ class _OrderFormState extends State<OrderForm> {
                     if (!isLast)
                       Divider(
                         height: 1,
-                        indent: 34,
+                        indent: 36,
                         color: CupertinoColors.systemGrey5.resolveFrom(context),
                       ),
                   ],
@@ -1096,6 +1121,8 @@ class _OrderFormState extends State<OrderForm> {
 
   Color _getChildOrderStatusColor(String? status) {
     switch (status) {
+      case 'quote':
+        return CupertinoColors.systemOrange;
       case 'approved':
         return CupertinoColors.systemBlue;
       case 'done':
@@ -1584,21 +1611,15 @@ class _OrderFormState extends State<OrderForm> {
                   ),
                   if (hasValue || placeholder.isNotEmpty) ...[
                     const SizedBox(width: 8),
-                    Flexible(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          hasValue ? value : placeholder,
-                          style: TextStyle(
-                            fontSize: 17,
-                            color: enabled
-                                ? (hasValue
-                                    ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
-                                    : CupertinoColors.placeholderText.resolveFrom(context))
-                                : CupertinoColors.tertiaryLabel.resolveFrom(context),
-                          ),
-                          textAlign: TextAlign.end,
-                        ),
+                    Text(
+                      hasValue ? value : placeholder,
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: enabled
+                            ? (hasValue
+                                ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
+                                : CupertinoColors.placeholderText.resolveFrom(context))
+                            : CupertinoColors.tertiaryLabel.resolveFrom(context),
                       ),
                     ),
                   ],

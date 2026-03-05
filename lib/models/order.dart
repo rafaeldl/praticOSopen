@@ -258,6 +258,7 @@ class OrderContract {
   bool? active;
   int? reminderDaysBefore;
   String? parentOrderId; // For generated orders: ID of the template order
+  int? parentOrderNumber; // For generated orders: number of the template order
 
   OrderContract();
 

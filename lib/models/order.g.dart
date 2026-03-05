@@ -215,7 +215,8 @@ OrderContract _$OrderContractFromJson(Map<String, dynamic> json) =>
       ..autoGenerate = json['autoGenerate'] as bool?
       ..active = json['active'] as bool?
       ..reminderDaysBefore = (json['reminderDaysBefore'] as num?)?.toInt()
-      ..parentOrderId = json['parentOrderId'] as String?;
+      ..parentOrderId = json['parentOrderId'] as String?
+      ..parentOrderNumber = (json['parentOrderNumber'] as num?)?.toInt();
 
 Map<String, dynamic> _$OrderContractToJson(OrderContract instance) =>
     <String, dynamic>{
@@ -230,6 +231,7 @@ Map<String, dynamic> _$OrderContractToJson(OrderContract instance) =>
       'active': instance.active,
       'reminderDaysBefore': instance.reminderDaysBefore,
       'parentOrderId': instance.parentOrderId,
+      'parentOrderNumber': instance.parentOrderNumber,
     };
 
 OrderRating _$OrderRatingFromJson(Map<String, dynamic> json) => OrderRating()

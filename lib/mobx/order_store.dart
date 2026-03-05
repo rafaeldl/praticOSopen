@@ -615,7 +615,9 @@ abstract class _OrderStore with Store {
         ..total = p.total
       ).toList()
       ..assignedTo = template.assignedTo
-      ..contract = (OrderContract()..parentOrderId = template.id);
+      ..contract = (OrderContract()
+        ..parentOrderId = template.id
+        ..parentOrderNumber = template.number);
 
     newOrder.syncDeviceIds();
 
@@ -651,11 +653,19 @@ abstract class _OrderStore with Store {
 
   /// Check and auto-generate orders for all due contracts (called on app startup)
   Future<int> checkAndGenerateDueOrders() async {
-    if (companyId == null) return 0;
+    if (companyId == null) {
+      print('[Contracts] companyId is null, skipping');
+      return 0;
+    }
 
     try {
       final tenantRepo = TenantOrderRepository();
       final orders = await tenantRepo.streamContractOrders(companyId!).first;
+      print('[Contracts] Found ${orders.length} contract orders');
+
+      for (final o in orders.whereType<Order>()) {
+        print('[Contracts] Order #${o.number}: isDue=${o.contract?.isDue}, autoGenerate=${o.contract?.autoGenerate}, nextDueDate=${o.contract?.nextDueDate}, active=${o.contract?.active}');
+      }
 
       final dueOrders = orders
           .whereType<Order>()
@@ -664,13 +674,18 @@ abstract class _OrderStore with Store {
               o.contract?.autoGenerate == true)
           .toList();
 
+      print('[Contracts] ${dueOrders.length} due orders to generate');
+
       int generated = 0;
       for (final template in dueOrders) {
         await generateOrderFromContract(template);
         generated++;
       }
+      print('[Contracts] Generated $generated orders');
       return generated;
-    } catch (e) {
+    } catch (e, stack) {
+      print('[Contracts] Error: $e');
+      print('[Contracts] Stack: $stack');
       return 0;
     }
   }
