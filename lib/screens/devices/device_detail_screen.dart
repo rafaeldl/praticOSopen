@@ -6,6 +6,7 @@ import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/widgets/cached_image.dart';
+import 'package:praticos/models/custom_field.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -201,11 +202,7 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
                   if (_device!.serial != null)
                     _buildInfoRow(config.label('device.serial'), _device!.serial!),
                   if (_device!.customData != null)
-                    ..._device!.customData!.entries.map((entry) {
-                      final value = entry.value?.toString() ?? '';
-                      if (value.isEmpty) return const SizedBox.shrink();
-                      return _buildInfoRow(entry.key, value);
-                    }),
+                    ..._buildCustomDataRows(config),
                 ],
               ),
             ),
@@ -259,6 +256,37 @@ class _DeviceDetailScreenState extends State<DeviceDetailScreen> {
         color: CupertinoColors.systemGrey.resolveFrom(context),
       ),
     );
+  }
+
+  List<Widget> _buildCustomDataRows(SegmentConfigProvider config) {
+    final locale = context.l10n.localeName;
+    final fields = config.fieldsFor('device');
+
+    // Build lookup: both full key (device.year) and short key (year) → label
+    final labelMap = <String, String>{};
+    for (final f in fields) {
+      final label = f.getLabel(locale);
+      labelMap[f.key] = label;
+      labelMap[f.fieldName] = label;
+    }
+
+    return _device!.customData!.entries
+        .where((e) => e.value != null && e.value.toString().isNotEmpty)
+        .map((entry) {
+      final label = labelMap[entry.key] ?? entry.key;
+      final value = entry.value.toString();
+
+      // Resolve select option labels
+      final field = fields.cast<CustomField?>().firstWhere(
+        (f) => f!.key == entry.key || f.fieldName == entry.key,
+        orElse: () => null,
+      );
+      final displayValue = (field != null && field.type == 'select')
+          ? field.getOptionLabel(value, locale)
+          : value;
+
+      return _buildInfoRow(label, displayValue);
+    }).toList();
   }
 
   Widget _buildInfoRow(String label, String value) {
