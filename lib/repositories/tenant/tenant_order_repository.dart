@@ -237,7 +237,6 @@ class TenantOrderRepository extends TenantRepository<Order?> {
   ) {
     return streamQueryList(
       companyId,
-      orderBy: [OrderBy('createdAt', descending: true)],
       args: [QueryArgs('deviceIds', deviceId, oper: 'arrayContains')],
     );
   }

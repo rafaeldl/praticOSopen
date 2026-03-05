@@ -1263,6 +1263,7 @@ abstract class _OrderStore with Store {
 
   createItem() {
     if (order == null || companyId == null) return;
+    order!.syncDeviceIds();
 
     if (order!.id == null) {
       // Para nova OS, verifica duplicação pelo número
