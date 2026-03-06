@@ -13,6 +13,7 @@ class Device extends BaseAuditCompany {
   String? category;
   String? description;
   String? photo;
+  String? status; // 'active', 'maintenance', 'inactive', 'decommissioned'
   List<String>? keywords;
   Map<String, dynamic>? customData;
 
@@ -30,6 +31,7 @@ class DeviceAggr extends BaseAuditCompanyAggr {
   String? photo;
   String? category;
   String? manufacturer;
+  String? status;
 
   DeviceAggr();
   factory DeviceAggr.fromJson(Map<String, dynamic> json) =>

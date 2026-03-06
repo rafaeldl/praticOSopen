@@ -273,16 +273,17 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
           children: fields.map((field) {
             return DynamicFieldBuilder(
               field: field,
-              value: _product?.customData?[field.key],
+              value: _product?.customData?[field.fieldName] ?? _product?.customData?[field.key],
               locale: locale,
               onChanged: (newValue) {
                 setState(() {
                   _product?.customData ??= {};
                   if (newValue == null) {
-                    _product!.customData!.remove(field.key);
+                    _product!.customData!.remove(field.fieldName);
                   } else {
-                    _product!.customData![field.key] = newValue;
+                    _product!.customData![field.fieldName] = newValue;
                   }
+                  _product!.customData!.remove(field.key); // migrate old key
                 });
               },
             );

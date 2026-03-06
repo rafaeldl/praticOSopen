@@ -150,6 +150,8 @@ class _OrderFormState extends State<OrderForm> {
                       _buildClientDeviceSection(context, config),
                       _buildDevicesSection(context, config),
                       _buildSummarySection(context, config),
+                      if (config.useContracts)
+                        _buildContractSection(context, config),
                       // Dynamic Custom Field Sections (from segment config)
                       ..._buildCustomFieldSections(config),
                       // Items sections — conditional on device grouping
@@ -165,6 +167,8 @@ class _OrderFormState extends State<OrderForm> {
                       ],
                       // Always show consolidated add button
                       _buildConsolidatedAddSection(context, config),
+                      if (config.useContracts)
+                        _buildChildOrdersSection(context, config),
                       _buildCommentsSection(context),
                       const SizedBox(height: 40),
                     ]),
@@ -364,6 +368,143 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
+  Widget _buildContractSection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(
+      builder: (_) {
+        final contract = _store.order?.contract;
+        final isActive = _store.hasContract;
+
+        // Only show section when contract is active
+        if (!isActive || contract == null) return const SizedBox.shrink();
+
+        // Child order — show link to parent contract
+        if (contract.parentOrderId != null) {
+          final parentLabel = contract.parentOrderNumber != null
+              ? '${context.l10n.orderShort} #${contract.parentOrderNumber}'
+              : '';
+          return _buildGroupedSection(
+            header: context.l10n.contract.toUpperCase(),
+            children: [
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.link,
+                title: context.l10n.recurringContract,
+                value: parentLabel,
+                onTap: () {
+                  final parentOrder = Order()..id = contract.parentOrderId;
+                  Navigator.of(context, rootNavigator: true).pushNamed(
+                    '/order',
+                    arguments: {'order': parentOrder},
+                  );
+                },
+                showChevron: true,
+                isLast: true,
+              ),
+            ],
+          );
+        }
+
+        // Template order — show contract details (frequency, next due, auto-gen)
+        final formatService = FormatService();
+        final freqLabel = _contractFrequencyLabel(context, contract.frequency);
+        final nextDate = contract.nextDueDate != null
+            ? formatService.formatDate(contract.nextDueDate!)
+            : '';
+        final autoGen = contract.autoGenerate == true
+            ? context.l10n.yes
+            : context.l10n.no;
+
+        return _buildGroupedSection(
+          header: context.l10n.recurringContract.toUpperCase(),
+          children: [
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.repeat,
+              title: context.l10n.frequency,
+              value: freqLabel,
+              onTap: () => _showContractModal(context),
+              showChevron: true,
+            ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.calendar,
+              title: context.l10n.contractNextDue,
+              value: nextDate,
+              onTap: () => _showContractModal(context),
+              showChevron: true,
+            ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.bolt,
+              title: context.l10n.automaticGeneration,
+              value: autoGen,
+              onTap: () => _showContractModal(context),
+              showChevron: true,
+              isLast: true,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _contractFrequencyLabel(BuildContext context, String? frequency) {
+    switch (frequency) {
+      case 'daily':
+        return context.l10n.frequencyDaily;
+      case 'weekly':
+        return context.l10n.frequencyWeekly;
+      case 'monthly':
+        return context.l10n.frequencyMonthly;
+      case 'yearly':
+        return context.l10n.frequencyYearly;
+      default:
+        return frequency ?? '';
+    }
+  }
+
+  void _showContractModal(BuildContext context) {
+    final contract = _store.order?.contract;
+    if (contract == null) return;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => _ContractConfigSheet(
+        contract: contract,
+        onFrequencyChanged: (f) => _store.setContractFrequency(f),
+        onIntervalChanged: (i) => _store.setContractInterval(i),
+        onStartDateChanged: (d) => _store.setContractStartDate(d),
+        onEndDateChanged: (d) => _store.setContractEndDate(d),
+        onAutoGenerateChanged: (v) => _store.setContractAutoGenerate(v),
+        onReminderDaysChanged: (d) => _store.setContractReminderDays(d),
+      ),
+    );
+  }
+
+  void _confirmDeactivateContract() {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(context.l10n.deactivateContract),
+        content: Text(context.l10n.deactivateContractConfirm),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text(context.l10n.deactivateContract),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _store.toggleContract(false);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Keys of hardcoded fields already rendered in the order form.
   /// The segment may configure these fields (label, mask, validation)
   /// but they must not appear as duplicate dynamic fields.
@@ -402,16 +543,17 @@ class _OrderFormState extends State<OrderForm> {
           children: fields.map((field) {
             return DynamicFieldBuilder(
               field: field,
-              value: _store.order?.customData?[field.key],
+              value: _store.order?.customData?[field.fieldName] ?? _store.order?.customData?[field.key],
               locale: locale,
               onChanged: (newValue) {
                 setState(() {
                   _store.order?.customData ??= {};
                   if (newValue == null) {
-                    _store.order!.customData!.remove(field.key);
+                    _store.order!.customData!.remove(field.fieldName);
                   } else {
-                    _store.order!.customData![field.key] = newValue;
+                    _store.order!.customData![field.fieldName] = newValue;
                   }
+                  _store.order!.customData!.remove(field.key); // migrate old key
                   // Clean up empty customData
                   if (_store.order!.customData!.isEmpty) {
                     _store.order!.customData = null;
@@ -889,6 +1031,111 @@ class _OrderFormState extends State<OrderForm> {
     }
   }
 
+  /// Child orders section - shows orders generated from this contract template
+  Widget _buildChildOrdersSection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(
+      builder: (_) {
+        if (!_store.hasContract) return const SizedBox.shrink();
+
+        final children = _store.childOrders?.value?.whereType<Order>().toList() ?? [];
+        if (children.isEmpty) return const SizedBox.shrink();
+        // Sort client-side (descending by createdAt) to avoid composite index
+        children.sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+
+        final formatService = FormatService();
+
+        return _buildGroupedSection(
+          header: context.l10n.generatedOrdersCount(children.length).toUpperCase(),
+          children: children.asMap().entries.map((entry) {
+            final index = entry.key;
+            final child = entry.value;
+            final isLast = index == children.length - 1;
+            final dateStr = child.createdAt != null
+                ? formatService.formatDate(child.createdAt!)
+                : '';
+
+            return GestureDetector(
+              onTap: () {
+                Navigator.of(context, rootNavigator: true)
+                    .pushNamed('/order', arguments: {'order': child});
+              },
+              child: Container(
+                color: CupertinoColors.systemBackground.resolveFrom(context),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _getChildOrderStatusColor(child.status),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              child.number != null ? '#${child.number}' : '',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                color: CupertinoColors.label.resolveFrom(context),
+                              ),
+                            ),
+                          ),
+                          if (dateStr.isNotEmpty)
+                            Text(
+                              dateStr,
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                              ),
+                            ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 16,
+                            color: CupertinoColors.systemGrey3.resolveFrom(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (!isLast)
+                      Divider(
+                        height: 1,
+                        indent: 36,
+                        color: CupertinoColors.systemGrey5.resolveFrom(context),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Color _getChildOrderStatusColor(String? status) {
+    switch (status) {
+      case 'quote':
+        return CupertinoColors.systemOrange;
+      case 'approved':
+        return CupertinoColors.systemBlue;
+      case 'done':
+        return CupertinoColors.systemGreen;
+      case 'canceled':
+        return CupertinoColors.systemRed;
+      case 'progress':
+        return CupertinoColors.systemPurple;
+      default:
+        return CupertinoColors.systemGrey;
+    }
+  }
+
   /// Comments section - shows customer and team comments on the order
   Widget _buildCommentsSection(BuildContext context) {
     return Observer(
@@ -1348,6 +1595,7 @@ class _OrderFormState extends State<OrderForm> {
                     const SizedBox(width: 12),
                   ],
                   Expanded(
+                    flex: 2,
                     child: Text(
                       title,
                       style: TextStyle(
@@ -1363,21 +1611,15 @@ class _OrderFormState extends State<OrderForm> {
                   ),
                   if (hasValue || placeholder.isNotEmpty) ...[
                     const SizedBox(width: 8),
-                    Flexible(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          hasValue ? value : placeholder,
-                          style: TextStyle(
-                            fontSize: 17,
-                            color: enabled
-                                ? (hasValue
-                                    ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
-                                    : CupertinoColors.placeholderText.resolveFrom(context))
-                                : CupertinoColors.tertiaryLabel.resolveFrom(context),
-                          ),
-                          textAlign: TextAlign.end,
-                        ),
+                    Text(
+                      hasValue ? value : placeholder,
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: enabled
+                            ? (hasValue
+                                ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
+                                : CupertinoColors.placeholderText.resolveFrom(context))
+                            : CupertinoColors.tertiaryLabel.resolveFrom(context),
                       ),
                     ),
                   ],
@@ -1630,6 +1872,23 @@ class _OrderFormState extends State<OrderForm> {
               onPressed: () {
                 Navigator.pop(context);
                 _onShare(context, _store.order, config);
+              },
+            ),
+          // Contrato recorrente
+          if (config.useContracts && _store.order?.id != null)
+            CupertinoActionSheetAction(
+              isDestructiveAction: _store.hasContract,
+              child: Text(_store.hasContract
+                  ? context.l10n.deactivateContract
+                  : context.l10n.activateContract),
+              onPressed: () {
+                Navigator.pop(context);
+                if (_store.hasContract) {
+                  _confirmDeactivateContract();
+                } else {
+                  _store.toggleContract(true);
+                  _showContractModal(context);
+                }
               },
             ),
           // Excluir OS (se permitido)
@@ -2649,5 +2908,384 @@ class _OrderFormState extends State<OrderForm> {
         );
       }
     }
+  }
+}
+
+/// Bottom sheet for configuring contract parameters
+class _ContractConfigSheet extends StatefulWidget {
+  final OrderContract contract;
+  final ValueChanged<String> onFrequencyChanged;
+  final ValueChanged<int> onIntervalChanged;
+  final ValueChanged<DateTime> onStartDateChanged;
+  final ValueChanged<DateTime?> onEndDateChanged;
+  final ValueChanged<bool> onAutoGenerateChanged;
+  final ValueChanged<int> onReminderDaysChanged;
+
+  const _ContractConfigSheet({
+    required this.contract,
+    required this.onFrequencyChanged,
+    required this.onIntervalChanged,
+    required this.onStartDateChanged,
+    required this.onEndDateChanged,
+    required this.onAutoGenerateChanged,
+    required this.onReminderDaysChanged,
+  });
+
+  @override
+  State<_ContractConfigSheet> createState() => _ContractConfigSheetState();
+}
+
+class _ContractConfigSheetState extends State<_ContractConfigSheet> {
+  late String _frequency;
+  late int _interval;
+  late DateTime _startDate;
+  DateTime? _endDate;
+  late bool _autoGenerate;
+  late int _reminderDays;
+
+  @override
+  void initState() {
+    super.initState();
+    _frequency = widget.contract.frequency ?? 'monthly';
+    _interval = widget.contract.interval ?? 1;
+    _startDate = widget.contract.startDate ?? DateTime.now();
+    _endDate = widget.contract.endDate;
+    _autoGenerate = widget.contract.autoGenerate ?? true;
+    _reminderDays = widget.contract.reminderDaysBefore ?? 3;
+  }
+
+  String _frequencyLabel(String frequency) {
+    switch (frequency) {
+      case 'daily':
+        return context.l10n.frequencyDaily;
+      case 'weekly':
+        return context.l10n.frequencyWeekly;
+      case 'monthly':
+        return context.l10n.frequencyMonthly;
+      case 'yearly':
+        return context.l10n.frequencyYearly;
+      default:
+        return frequency;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+      height: MediaQuery.of(context).size.height * 0.55,
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  context.l10n.configure,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.label.resolveFrom(context),
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          // Content
+          Expanded(
+            child: ListView(
+              children: [
+                CupertinoListSection.insetGrouped(
+                  children: [
+                    // Frequency
+                    CupertinoListTile(
+                      title: Text(context.l10n.frequency),
+                      additionalInfo: Text(_frequencyLabel(_frequency)),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showFrequencyPicker(),
+                    ),
+                    // Interval
+                    CupertinoListTile(
+                      title: Text(context.l10n.interval),
+                      additionalInfo: Text('$_interval'),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showIntervalPicker(),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  children: [
+                    // Start date
+                    CupertinoListTile(
+                      title: Text(context.l10n.startDate),
+                      additionalInfo: Text(
+                        FormatService().formatDate(_startDate),
+                      ),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showStartDatePicker(),
+                    ),
+                    // End date
+                    CupertinoListTile(
+                      title: Text(context.l10n.endDate),
+                      additionalInfo: Text(
+                        _endDate != null
+                            ? FormatService().formatDate(_endDate!)
+                            : context.l10n.indefinite,
+                      ),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showEndDatePicker(),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  children: [
+                    // Auto-generate toggle
+                    CupertinoListTile(
+                      title: Text(context.l10n.contractAutoGenerate),
+                      trailing: CupertinoSwitch(
+                        value: _autoGenerate,
+                        onChanged: (val) {
+                          setState(() => _autoGenerate = val);
+                          widget.onAutoGenerateChanged(val);
+                        },
+                      ),
+                    ),
+                    // Reminder days
+                    CupertinoListTile(
+                      title: Text(context.l10n.contractReminderDays),
+                      additionalInfo: Text('$_reminderDays'),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showReminderDaysPicker(),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  child: Text(
+                    context.l10n.contractAutoGenerateDescription,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+    );
+  }
+
+  void _showFrequencyPicker() {
+    final options = ['daily', 'weekly', 'monthly', 'yearly'];
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: options.map((f) => CupertinoActionSheetAction(
+          onPressed: () {
+            setState(() => _frequency = f);
+            widget.onFrequencyChanged(f);
+            Navigator.pop(ctx);
+          },
+          child: Text(_frequencyLabel(f)),
+        )).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
+  void _showIntervalPicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 250,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            Expanded(
+              child: CupertinoPicker(
+                itemExtent: 32,
+                scrollController: FixedExtentScrollController(
+                  initialItem: _interval - 1,
+                ),
+                onSelectedItemChanged: (index) {
+                  setState(() => _interval = index + 1);
+                  widget.onIntervalChanged(index + 1);
+                },
+                children: List.generate(
+                  12,
+                  (i) => Center(child: Text('${i + 1}')),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showStartDatePicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 300,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: _startDate,
+                onDateTimeChanged: (date) {
+                  setState(() => _startDate = date);
+                  widget.onStartDateChanged(date);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEndDatePicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              setState(() => _endDate = null);
+              widget.onEndDateChanged(null);
+              Navigator.pop(ctx);
+            },
+            child: Text(context.l10n.indefinite),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showEndDatePickerDate();
+            },
+            child: Text(context.l10n.selectDate),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
+  void _showEndDatePickerDate() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 300,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: _endDate ?? DateTime.now().add(const Duration(days: 365)),
+                minimumDate: _startDate,
+                onDateTimeChanged: (date) {
+                  setState(() => _endDate = date);
+                  widget.onEndDateChanged(date);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showReminderDaysPicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 250,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            Expanded(
+              child: CupertinoPicker(
+                itemExtent: 32,
+                scrollController: FixedExtentScrollController(
+                  initialItem: _reminderDays,
+                ),
+                onSelectedItemChanged: (index) {
+                  setState(() => _reminderDays = index);
+                  widget.onReminderDaysChanged(index);
+                },
+                children: List.generate(
+                  31,
+                  (i) => Center(child: Text('$i')),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

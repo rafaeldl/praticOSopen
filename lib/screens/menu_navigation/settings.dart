@@ -270,6 +270,15 @@ class _SettingsState extends State<Settings> {
                         onTap: () => Navigator.pushNamed(context, '/form_template_list'),
                       ),
 
+                    // Contracts - visible when useContracts is active
+                    if (config.useContracts && canManageCompany)
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.repeat,
+                        color: CupertinoColors.systemOrange,
+                        title: context.l10n.contracts,
+                        onTap: () => Navigator.pushNamed(context, '/contract_list'),
+                      ),
+
                     // Avaliações - Admin/Manager podem visualizar
                     if (canManageCompany)
                       _buildSettingsTile(

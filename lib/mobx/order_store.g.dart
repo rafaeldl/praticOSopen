@@ -501,6 +501,42 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$hasContractAtom = Atom(
+    name: '_OrderStore.hasContract',
+    context: context,
+  );
+
+  @override
+  bool get hasContract {
+    _$hasContractAtom.reportRead();
+    return super.hasContract;
+  }
+
+  @override
+  set hasContract(bool value) {
+    _$hasContractAtom.reportWrite(value, super.hasContract, () {
+      super.hasContract = value;
+    });
+  }
+
+  late final _$childOrdersAtom = Atom(
+    name: '_OrderStore.childOrders',
+    context: context,
+  );
+
+  @override
+  ObservableStream<List<Order?>>? get childOrders {
+    _$childOrdersAtom.reportRead();
+    return super.childOrders;
+  }
+
+  @override
+  set childOrders(ObservableStream<List<Order?>>? value) {
+    _$childOrdersAtom.reportWrite(value, super.childOrders, () {
+      super.childOrders = value;
+    });
+  }
+
   late final _$paidAmountAtom = Atom(
     name: '_OrderStore.paidAmount',
     context: context,
@@ -1134,6 +1170,18 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
+  void loadChildOrders() {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.loadChildOrders',
+    );
+    try {
+      return super.loadChildOrders();
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   dynamic setCustomer(Customer? c) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setCustomer',
@@ -1224,6 +1272,90 @@ mixin _$OrderStore on _OrderStore, Store {
     );
     try {
       return super.clearScheduledDate();
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void toggleContract(bool value) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.toggleContract',
+    );
+    try {
+      return super.toggleContract(value);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractFrequency(String frequency) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractFrequency',
+    );
+    try {
+      return super.setContractFrequency(frequency);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractInterval(int interval) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractInterval',
+    );
+    try {
+      return super.setContractInterval(interval);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractStartDate(DateTime date) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractStartDate',
+    );
+    try {
+      return super.setContractStartDate(date);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractEndDate(DateTime? date) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractEndDate',
+    );
+    try {
+      return super.setContractEndDate(date);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractAutoGenerate(bool value) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractAutoGenerate',
+    );
+    try {
+      return super.setContractAutoGenerate(value);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractReminderDays(int days) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractReminderDays',
+    );
+    try {
+      return super.setContractReminderDays(days);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }
@@ -1507,6 +1639,8 @@ photos: ${photos},
 documents: ${documents},
 isUploadingPhoto: ${isUploadingPhoto},
 isUploadingDocument: ${isUploadingDocument},
+hasContract: ${hasContract},
+childOrders: ${childOrders},
 paidAmount: ${paidAmount},
 transactions: ${transactions},
 totalPaidAmount: ${totalPaidAmount},

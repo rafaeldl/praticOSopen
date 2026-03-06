@@ -57,6 +57,73 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     }
   }
 
+  Color _statusColor(String? status) {
+    switch (status) {
+      case 'active':
+        return CupertinoColors.systemGreen;
+      case 'maintenance':
+        return CupertinoColors.systemOrange;
+      case 'inactive':
+        return CupertinoColors.systemGrey;
+      case 'decommissioned':
+        return CupertinoColors.systemRed;
+      default:
+        return CupertinoColors.systemGreen;
+    }
+  }
+
+  String _statusLabel(BuildContext context, String? status) {
+    switch (status) {
+      case 'active':
+        return context.l10n.deviceStatusActive;
+      case 'maintenance':
+        return context.l10n.deviceStatusMaintenance;
+      case 'inactive':
+        return context.l10n.deviceStatusInactive;
+      case 'decommissioned':
+        return context.l10n.deviceStatusDecommissioned;
+      default:
+        return context.l10n.deviceStatusActive;
+    }
+  }
+
+  void _pickStatus(BuildContext context) {
+    final statuses = ['active', 'maintenance', 'inactive', 'decommissioned'];
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext ctx) => CupertinoActionSheet(
+        title: Text(context.l10n.status),
+        actions: statuses.map((status) {
+          return CupertinoActionSheetAction(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: _statusColor(status),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(_statusLabel(context, status)),
+              ],
+            ),
+            onPressed: () {
+              setState(() => _device?.status = status);
+              Navigator.pop(ctx);
+            },
+          );
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
   Future<void> _pickImage() async {
     final config = context.read<SegmentConfigProvider>();
     showCupertinoModalPopup(
@@ -275,6 +342,38 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                 ],
               ),
 
+              // Status Section (only when device management is enabled)
+              if (config.useDeviceManagement)
+                CupertinoListSection.insetGrouped(
+                  header: Text(context.l10n.status.toUpperCase()),
+                  children: [
+                    CupertinoListTile(
+                      title: Text(context.l10n.status),
+                      additionalInfo: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _statusColor(_device?.status),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(_statusLabel(context, _device?.status)),
+                        ],
+                      ),
+                      trailing: Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 20,
+                        color: CupertinoColors.systemGrey.resolveFrom(context),
+                      ),
+                      onTap: () => _pickStatus(context),
+                    ),
+                  ],
+                ),
+
               // Dynamic Custom Field Sections (from segment config)
               ..._buildCustomFieldSections(config),
             ],
@@ -320,16 +419,17 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
           children: fields.map((field) {
             return DynamicFieldBuilder(
               field: field,
-              value: _device?.customData?[field.key],
+              value: _device?.customData?[field.fieldName] ?? _device?.customData?[field.key],
               locale: locale,
               onChanged: (newValue) {
                 setState(() {
                   _device?.customData ??= {};
                   if (newValue == null) {
-                    _device!.customData!.remove(field.key);
+                    _device!.customData!.remove(field.fieldName);
                   } else {
-                    _device!.customData![field.key] = newValue;
+                    _device!.customData![field.fieldName] = newValue;
                   }
+                  _device!.customData!.remove(field.key); // migrate old key
                 });
               },
             );
