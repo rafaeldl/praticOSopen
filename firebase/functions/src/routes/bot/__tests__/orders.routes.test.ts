@@ -4,6 +4,7 @@ import { buildApp } from './helpers';
 // ---- Mocks ----------------------------------------------------------------
 
 jest.mock('../../../services/order.service');
+jest.mock('../../../services/share-token.service');
 jest.mock('../../../middleware/auth.middleware', () => ({
   requireLinked: (_req: any, _res: any, next: any) => next(),
 }));
@@ -13,7 +14,9 @@ jest.mock('../../../middleware/company.middleware', () => ({
 }));
 
 import * as orderService from '../../../services/order.service';
+import * as shareTokenService from '../../../services/share-token.service';
 const mockOrderService = orderService as jest.Mocked<typeof orderService>;
+const mockShareTokenService = shareTokenService as jest.Mocked<typeof shareTokenService>;
 
 // ---- Import router after mocks --------------------------------------------
 import router from '../orders.routes';
@@ -118,9 +121,10 @@ describe('Bot Orders Routes', () => {
   // ----- PATCH /:number/status ----------------------------------------------
 
   describe('PATCH /:number/status', () => {
-    it('returns raw data with previousStatus, newStatus, formatContext', async () => {
+    it('returns full order detail with previousStatus, newStatus, formatContext', async () => {
       mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
       mockOrderService.updateOrder.mockResolvedValue(true as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
 
       const app = buildApp(router);
       const res = await request(app)
@@ -130,6 +134,7 @@ describe('Bot Orders Routes', () => {
       expect(res.status).toBe(200);
       expect(res.body.data.previousStatus).toBe('approved');
       expect(res.body.data.newStatus).toBe('progress');
+      expect(res.body.data.order).toBeDefined();
       expect(res.body.data.formatContext).toBeDefined();
     });
 

@@ -5,12 +5,13 @@ Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number
 ## Busca Unificada (USAR SEMPRE)
 POST /bot/search/unified
 Parametros JSON (string OU array de strings): customer, customerPhone, device, deviceSerial, service, product
-Exemplo com arrays: {"service":["tela","bateria"],"product":["película"]}
+🔴 SEMPRE usar arrays para buscar multiplos termos de uma vez. NUNCA fazer chamadas separadas.
+Exemplo com arrays: {"customer":"Joao","service":["tela","bateria"],"product":["película"]}
 Resposta: {exact, suggestions, available}
 - `results` = matches exatos/fortes. Usar diretamente.
 - `available` = matches parciais/fuzzy. Usar com `description` customizada quando similar ao pedido do usuario.
   🔴 Se `available` tem match similar → usar o ID dele + description customizada. NAO criar novo servico.
-exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\",\"service\":\"tela\"}' \"$PRATICOS_API_URL/bot/search/unified\"")
+exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\",\"service\":[\"tela\",\"bateria\"]}' \"$PRATICOS_API_URL/bot/search/unified\"")
 
 ## Resumo
 GET /bot/summary/today - resumo do dia
@@ -24,17 +25,20 @@ exec(command="curl -s -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number
 
 ## OS - Status
 PATCH /bot/orders/{NUM}/status `{"status":"approved|progress|done|canceled"}` (→ se "done": sugerir notificar cliente via link)
+Resposta: retorna `order` atualizado (mesmo formato de /details) + `formatContext` + `previousStatus` + `newStatus`.
 exec(command="curl -s -X PATCH -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"status\":\"approved\"}' \"$PRATICOS_API_URL/bot/orders/42/status\"")
 
 ## OS - Criar
 POST /bot/orders/full
 Body: {customerId, deviceId?, deviceIds?:["id1","id2"], services:[{serviceId,value?,description?,deviceId?}], products:[{productId,quantity?,value?,description?,deviceId?}], dueDate?, scheduledDate?}
 `deviceIds` para multi-device. Se passado, ignora `deviceId`. Cada service/product pode ter `deviceId` para vincular ao dispositivo.
+Resposta: retorna `order` completo (mesmo formato de /details) + `formatContext` + `shareUrl` auto-criado. NAO precisa chamar GET /details apos criar.
 exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customerId\":\"abc\",\"services\":[{\"serviceId\":\"srv1\",\"value\":350}]}' \"$PRATICOS_API_URL/bot/orders/full\"")
 
 ## OS - Atualizar
 PATCH /bot/orders/{NUM} `{"status":"approved","dueDate":"2026-02-20T18:00:00.000Z","scheduledDate":"2026-02-20T09:00:00.000Z","assignedTo":"userId"}`
 Todos os campos opcionais. Passar `null` para limpar um campo (ex: `{"scheduledDate":null}`).
+Resposta: retorna `order` atualizado (mesmo formato de /details) + `formatContext`.
 exec(command="curl -s -X PATCH -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"scheduledDate\":\"2026-02-20T09:00:00.000Z\"}' \"$PRATICOS_API_URL/bot/orders/42\"")
 
 ## OS - Itens
@@ -43,6 +47,7 @@ POST /bot/orders/{NUM}/products `{"productId":"ID","quantity":N,"value":N,"descr
 `deviceId` opcional — vincula item a um dispositivo especifico da OS.
 `description` opcional — texto livre que complementa o nome do servico/produto do catalogo. Usar para especificar detalhes (ex: "Para-lama Esquerdo", "Oleo 5W30", "Split 12k - Sala").
 DELETE /bot/orders/{NUM}/services/{I} | DELETE /bot/orders/{NUM}/products/{I}
+Resposta de TODOS os endpoints de itens: retorna `order` atualizado (mesmo formato de /details) + `formatContext`.
 PATCH /bot/orders/{NUM}/customer | PATCH /bot/orders/{NUM}/device
 
 ## OS - Dispositivos

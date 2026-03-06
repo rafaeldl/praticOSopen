@@ -76,7 +76,8 @@ Dois níveis: **memory/MEMORY.md** (global) e **memory/users/{NUMERO}.md** (por 
 
 **{NUMERO}:** regras em AGENTS.md. Normalizar com "+".
 
-**Início de sessão:** ler `memory/users/{NUMERO}.md`. Se existir, usar. Se NAO, chamar /bot/link/context e criar.
+**Início de sessão:** ler `memory/users/{NUMERO}.md` UMA VEZ. Guardar no contexto. Se NAO existir, chamar /bot/link/context e criar.
+🔴 NAO reler o arquivo de memoria durante a mesma sessao. Manter em contexto.
 
 **Formato:**
 ```
@@ -103,8 +104,9 @@ Dois níveis: **memory/MEMORY.md** (global) e **memory/users/{NUMERO}.md** (por 
 
 ## Cache de Entidades
 
-Cache em `## Frequentes`. **OBRIGATORIO atualizar ANTES de TTS/resposta final.**
-1. Envio dados → 2. read memoria → 3. atualizo Frequentes (novas no topo) → 4. write → 5. resposta
+Cache em `## Frequentes`. Atualizar quando: (a) nova entidade aparece, (b) OS criada/concluida, (c) cliente cadastrado.
+🔴 NAO fazer read+write de memoria a cada interacao. Acumular mudancas e escrever 1x apos a ULTIMA acao do usuario (antes do TTS/resposta final).
+Se nenhuma entidade nova surgiu → NAO escrever. Responder direto.
 
 Formato: Clientes `- Nome (id: x, phone: +55...)` | Devices `- Nome (id: x, serial: Y)` | Servicos/Produtos `- Nome (id: x, valor: N)` | OSs `- #N - Cliente - Device - status (id: x)`
 Cache EXATO e UNICO → usar direto. Ambiguo → chamar API. Max 10/categoria, MRU no topo.

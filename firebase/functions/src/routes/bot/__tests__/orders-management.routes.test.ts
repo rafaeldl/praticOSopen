@@ -78,10 +78,11 @@ describe('Bot Orders Management Routes', () => {
   // ----- POST /full ---------------------------------------------------------
 
   describe('POST /full', () => {
-    it('returns raw data with formatContext, without message', async () => {
+    it('returns full order detail with formatContext, without message', async () => {
       mockCustomerService.getCustomer.mockResolvedValue(fakeCustomer as any);
       mockOrderService.createOrder.mockResolvedValue({ id: 'ord2', number: 2, status: 'quote' } as any);
       mockOrderService.getOrderByNumber.mockResolvedValue({ ...fakeOrder, number: 2 } as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
 
       const app = buildApp(router);
       const res = await request(app)
@@ -89,8 +90,8 @@ describe('Bot Orders Management Routes', () => {
         .send({ customerId: 'c1' });
 
       expect(res.status).toBe(201);
-      expect(res.body.data.orderNumber).toBe(2);
-      expect(res.body.data.services).toBeDefined();
+      expect(res.body.data.order.number).toBe(2);
+      expect(res.body.data.order.services).toBeDefined();
       expect(res.body.data.formatContext).toBeDefined();
       expect(res.body.data.message).toBeUndefined();
     });
@@ -99,10 +100,11 @@ describe('Bot Orders Management Routes', () => {
   // ----- POST /:number/services ---------------------------------------------
 
   describe('POST /:number/services', () => {
-    it('returns serviceName, value, formatContext, without message', async () => {
+    it('returns full order detail with formatContext, without message', async () => {
       mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
       mockCatalogService.getService.mockResolvedValue(fakeService as any);
       mockOrderService.addServiceToOrderByNumber.mockResolvedValue({ success: true, newTotal: 130 } as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
 
       const app = buildApp(router);
       const res = await request(app)
@@ -110,8 +112,8 @@ describe('Bot Orders Management Routes', () => {
         .send({ serviceId: 's1' });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.serviceName).toBe('Screen Fix');
-      expect(res.body.data.value).toBe(50);
+      expect(res.body.data.order).toBeDefined();
+      expect(res.body.data.order.services).toBeDefined();
       expect(res.body.data.formatContext).toBeDefined();
       expect(res.body.data.message).toBeUndefined();
     });
@@ -120,10 +122,11 @@ describe('Bot Orders Management Routes', () => {
   // ----- POST /:number/products ---------------------------------------------
 
   describe('POST /:number/products', () => {
-    it('returns productName, quantity, formatContext, without message', async () => {
+    it('returns full order detail with formatContext, without message', async () => {
       mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
       mockCatalogService.getProduct.mockResolvedValue(fakeProduct as any);
       mockOrderService.addProductToOrderByNumber.mockResolvedValue({ success: true, newTotal: 110 } as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
 
       const app = buildApp(router);
       const res = await request(app)
@@ -131,8 +134,8 @@ describe('Bot Orders Management Routes', () => {
         .send({ productId: 'p1', quantity: 2 });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.productName).toBe('Screen');
-      expect(res.body.data.quantity).toBe(2);
+      expect(res.body.data.order).toBeDefined();
+      expect(res.body.data.order.products).toBeDefined();
       expect(res.body.data.formatContext).toBeDefined();
       expect(res.body.data.message).toBeUndefined();
     });
@@ -141,18 +144,20 @@ describe('Bot Orders Management Routes', () => {
   // ----- DELETE /:number/services/:index ------------------------------------
 
   describe('DELETE /:number/services/:index', () => {
-    it('returns removedServiceName and formatContext, without message', async () => {
+    it('returns full order detail with formatContext, without message', async () => {
       mockOrderService.removeServiceFromOrder.mockResolvedValue({
         success: true,
         removedService: { service: { name: 'Screen Fix' }, value: 50 },
         newTotal: 30,
       } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
 
       const app = buildApp(router);
       const res = await request(app).delete('/1/services/0');
 
       expect(res.status).toBe(200);
-      expect(res.body.data.removedServiceName).toBe('Screen Fix');
+      expect(res.body.data.order).toBeDefined();
       expect(res.body.data.formatContext).toBeDefined();
       expect(res.body.data.message).toBeUndefined();
     });
@@ -161,18 +166,20 @@ describe('Bot Orders Management Routes', () => {
   // ----- DELETE /:number/products/:index ------------------------------------
 
   describe('DELETE /:number/products/:index', () => {
-    it('returns removedProductName and formatContext, without message', async () => {
+    it('returns full order detail with formatContext, without message', async () => {
       mockOrderService.removeProductFromOrder.mockResolvedValue({
         success: true,
         removedProduct: { product: { name: 'Screen' }, value: 30 },
         newTotal: 50,
       } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
 
       const app = buildApp(router);
       const res = await request(app).delete('/1/products/0');
 
       expect(res.status).toBe(200);
-      expect(res.body.data.removedProductName).toBe('Screen');
+      expect(res.body.data.order).toBeDefined();
       expect(res.body.data.formatContext).toBeDefined();
       expect(res.body.data.message).toBeUndefined();
     });

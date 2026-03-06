@@ -22,8 +22,8 @@ import * as orderService from '../../services/order.service';
 import * as customerService from '../../services/customer.service';
 import * as deviceService from '../../services/device.service';
 import * as catalogService from '../../services/catalog.service';
-import * as shareTokenService from '../../services/share-token.service';
 import { db } from '../../services/firestore.service';
+import { buildOrderDetail } from '../../utils/bot-response.utils';
 import {
   validateInput,
   createFullOrderSchema,
@@ -250,20 +250,8 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
 
       console.log(`[BOT] Updated order #${existingOrder.number} (id: ${data.id}) via /full upsert`);
 
-      res.status(200).json({
-        success: true,
-        data: {
-          orderId: data.id,
-          orderNumber: existingOrder.number,
-          status: updatedOrder?.status || existingOrder.status,
-          total: updatedOrder?.total || existingOrder.total || 0,
-          customer: updatedOrder?.customer || null,
-          device: updatedOrder?.device || null,
-          services: updatedOrder?.services || [],
-          products: updatedOrder?.products || [],
-          updated: true,
-        },
-      });
+      const upsertDetail = await buildOrderDetail(updatedOrder || existingOrder, companyId, req.auth?.companyCountry, createdBy);
+      res.status(200).json({ success: true, data: { ...upsertDetail, updated: true } });
     } else {
       // Create new order
       const orderResult = await orderService.createOrder(
@@ -284,22 +272,9 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
         company
       );
 
-      const order = await orderService.getOrderByNumber(companyId, orderResult.number);
-
-      res.status(201).json({
-        success: true,
-        data: {
-          orderId: orderResult.id,
-          orderNumber: orderResult.number,
-          status: orderResult.status,
-          total: order?.total || 0,
-          customer: order?.customer || null,
-          device: order?.device || null,
-          devices: order?.devices || devicesAggr,
-          services: order?.services || [],
-          products: order?.products || [],
-        },
-      });
+      const freshOrder = await orderService.getOrderByNumber(companyId, orderResult.number);
+      const createDetail = await buildOrderDetail(freshOrder || orderResult, companyId, req.auth?.companyCountry, createdBy);
+      res.status(201).json({ success: true, data: createDetail });
     }
   } catch (error) {
     console.error('Create full order error:', error);
@@ -398,15 +373,9 @@ router.post('/:number/services', requireLinked, async (req: AuthenticatedRequest
       return;
     }
 
-    res.json({
-      success: true,
-      data: {
-        serviceName: service.name || '',
-        value: serviceValue,
-        newTotal: result.newTotal,
-
-      },
-    });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, createdBy);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Add service to order error:', error);
     res.status(500).json({
@@ -505,16 +474,9 @@ router.post('/:number/products', requireLinked, async (req: AuthenticatedRequest
       return;
     }
 
-    res.json({
-      success: true,
-      data: {
-        productName: product.name || '',
-        value: productValue,
-        quantity: data.quantity || 1,
-        newTotal: result.newTotal,
-
-      },
-    });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, createdBy);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Add product to order error:', error);
     res.status(500).json({
@@ -577,14 +539,9 @@ router.delete('/:number/services/:index', requireLinked, async (req: Authenticat
       return;
     }
 
-    res.json({
-      success: true,
-      data: {
-        removedServiceName: result.removedService?.service?.name || result.removedService?.description || '',
-        newTotal: result.newTotal,
-
-      },
-    });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, createdBy);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Remove service from order error:', error);
     res.status(500).json({
@@ -647,14 +604,9 @@ router.delete('/:number/products/:index', requireLinked, async (req: Authenticat
       return;
     }
 
-    res.json({
-      success: true,
-      data: {
-        removedProductName: result.removedProduct?.product?.name || result.removedProduct?.description || '',
-        newTotal: result.newTotal,
-
-      },
-    });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, createdBy);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Remove product from order error:', error);
     res.status(500).json({
@@ -746,21 +698,9 @@ router.patch('/:number', requireLinked, async (req: AuthenticatedRequest, res: R
       return;
     }
 
-    // Build response with updated fields
-    const updatedFields: Record<string, unknown> = {};
-    if (data.status !== undefined) updatedFields.status = data.status;
-    if (data.dueDate !== undefined) updatedFields.dueDate = data.dueDate;
-    if (data.scheduledDate !== undefined) updatedFields.scheduledDate = data.scheduledDate;
-    if (data.assignedTo !== undefined) updatedFields.assignedTo = data.assignedTo;
-
-    res.json({
-      success: true,
-      data: {
-        orderNumber,
-        updated: updatedFields,
-
-      },
-    });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, updatedBy);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Update order error:', error);
     res.status(500).json({
@@ -1056,57 +996,8 @@ router.get('/:number/details', async (req: AuthenticatedRequest, res: Response) 
       return;
     }
 
-    // Optimize payload: replace photos array with photosCount + mainPhotoUrl
-    // AI formats the card via os-card.md template (sends photo as cover image)
-    const photosCount = order.photos?.length || 0;
-    const mainPhotoUrl = photosCount > 0
-      ? `/bot/orders/${orderNumber}/photos/${order.photos![0].id}`
-      : null;
-
-    // Fetch active share token from tokens collection
-    const tokens = await shareTokenService.getTokensForOrder(order.id, companyId);
-    const activeToken = tokens.find(t => new Date(t.expiresAt) > new Date());
-    const baseUrl = process.env.SHARE_BASE_URL || 'https://praticos.web.app';
-    const shareUrl = activeToken ? `${baseUrl}/q/${activeToken.token}` : null;
-
-    // Allowlist: only fields the bot card needs (saves ~45% tokens)
-    const orderData = {
-      number: order.number,
-      status: order.status,
-      customer: order.customer ? { name: order.customer.name, phone: order.customer.phone } : null,
-      device: order.device ? { name: order.device.name, serial: order.device.serial } : null,
-      devices: order.devices?.map(d => ({ name: d.name, serial: d.serial })) || (order.device ? [{ name: order.device.name, serial: order.device.serial }] : []),
-      deviceCount: order.devices?.length || (order.device ? 1 : 0),
-      services: order.services?.map(s => ({
-        name: s.service?.name || s.description,
-        value: s.value,
-        deviceId: s.deviceId || null,
-      })),
-      products: order.products?.map(p => ({
-        name: p.product?.name || p.description,
-        quantity: p.quantity,
-        value: p.value,
-        deviceId: p.deviceId || null,
-      })),
-      total: order.total,
-      discount: order.discount,
-      paidAmount: order.paidAmount,
-      dueDate: order.dueDate,
-      scheduledDate: order.scheduledDate,
-      createdAt: order.createdAt,
-      rating: order.rating,
-      photosCount,
-      mainPhotoUrl,
-      shareUrl,
-    };
-
-    res.json({
-      success: true,
-      data: {
-        order: orderData,
-
-      },
-    });
+    const detail = await buildOrderDetail(order, companyId, req.auth?.companyCountry);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Get order details error:', error);
     res.status(500).json({

@@ -63,8 +63,13 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
    - Se errou cliente/device numa OS ja criada → usar PATCH /:number/customer ou PATCH /:number/device. NAO criar nova OS.
    - Se faltou servico → usar POST /:number/services na OS existente. NAO criar nova OS.
 
-1. **IDs OBRIGATORIOS** — API NAO aceita nomes. Usar POST /bot/search/unified.
-2. **Criar OS:** busca → IDs → criar. Apos criar → OS ativa. Adicionar item: se ha OS ativa, usar /services ou /products. So criar nova se pedido explicitamente.
+1. **IDs OBRIGATORIOS** — API NAO aceita nomes. Usar POST /bot/search/unified com ARRAYS para buscar tudo de uma vez:
+   {"customer":"João","service":["tela","bateria"],"product":["película"]}
+   🔴 NUNCA fazer multiplos /search/unified sequenciais. UMA chamada com todos os termos.
+2. **Criar OS:** busca (1 call com arrays) → IDs → POST /bot/orders/full (retorna order completa com card data + shareUrl + formatContext).
+   🔴 NAO chamar GET /details apos criar. Usar dados do response do POST /full para montar o card.
+   🔴 NAO chamar POST /share. A API ja cria o link automaticamente e retorna shareUrl em TODOS os endpoints de mutacao.
+   Apos criar → OS ativa. Adicionar item: se ha OS ativa, usar /services ou /products. So criar nova se pedido explicitamente.
 3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
 4. **Fotos:** upload via /photos/upload (multipart).
    exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -F \"file=@/path/to/photo.jpg\" \"$PRATICOS_API_URL/bot/orders/{NUM}/photos/upload\"")
@@ -72,6 +77,8 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
    - Listar: GET /bot/orders/{NUM}/photos
    - Deletar: DELETE /bot/orders/{NUM}/photos/{ID}
 5. **Valores:** busca retorna `value`. Omitir = catalogo. Brinde = `"value":0`
+   - Atualizar valor de servico existente: DELETE /bot/orders/{NUM}/services/{INDEX} → POST /bot/orders/{NUM}/services com novo valor. 2 calls MAX.
+   - 🔴 NUNCA tentar PATCH em /services. Sempre delete+re-add (2 calls).
    - 🔴 Valor na OS = serviço ou produto. Se usuario pedir para "colocar/registrar/atualizar valor" na OS → buscar servico no catalogo (POST /bot/search/unified) e adicionar via /services. Se nao encontrar → criar novo servico (POST /bot/entities/services) e depois adicionar via /services. NUNCA usar /comments para definir valor da OS.
    - Comentario com valor so se usuario pedir EXPLICITAMENTE para anotar/observar (ex: "anota que o valor combinado foi 700").
    - 🔴 **SERVICOS VIA AUDIO/TEXTO/FOTO — CADA UM DEVE SER ITEM NA OS:**
@@ -86,8 +93,11 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
      - "Pintura de Para-lama Esquerdo" → usar "Pintura de Para-lama" + description "Para-lama Esquerdo"
      - "Troca de oleo 5W30" → usar "Troca de oleo" + description "Oleo 5W30"
      - "Instalacao split 12k sala" → usar "Instalacao de ar condicionado" + description "Split 12k - Sala"
-6. **Exibir OS:** ver CARD DE OS abaixo
-7. 🔴 **Apos criar OS:** SEMPRE exibir card (GET /details → formato CARD DE OS abaixo) + oferecer compartilhar → POST /bot/orders/{NUM}/share
+   - 🔴 Info de etiquetas/dados tecnicos extraidos de fotos: NAO usar /comments. Anotar apenas no memory do usuario se necessario.
+6. **Exibir OS:** Usar dados JA no contexto (do POST/PATCH anterior) para montar card.
+   So chamar GET /details se NAO tem os dados no contexto (ex: usuario pede "mostra a OS 42" sem contexto).
+7. 🔴 **Apos criar/modificar OS:** montar card com dados do response da ultima chamada. NAO re-fetch /details.
+   shareUrl ja vem automaticamente em todos os responses. NAO chamar POST /share.
 
 ---
 
@@ -118,12 +128,12 @@ Apos criar OS, ela vira a **OS ativa**. Salvar no memory:
 `## Sessao` → `- **OS ativa:** #NUM (id: X)`
 
 Regras:
-1. POST /bot/orders/full com sucesso → anotar como OS ativa no memory → exibir card (GET /bot/orders/{NUM}/details → formato CARD DE OS)
+1. POST /bot/orders/full com sucesso → anotar como OS ativa no memory → exibir card usando dados do response (NAO re-fetch /details)
 2. "adicionar/incluir/colocar servico/produto" → verificar OS ativa
    - Existe → POST /bot/orders/{NUM}/services ou /products. Confirmar: "Adicionei X na OS #{NUM}"
    - Nao existe → perguntar em qual OS ou criar nova
 3. "nova OS", "abrir outra", "criar OS" → SEMPRE criar nova
-4. Apos adicionar item → mostrar card atualizado (GET /details)
+4. Apos adicionar item → mostrar card atualizado. Usar dados do response do POST /services ou /products (NAO re-fetch /details)
 5. 🔴 Se a OS ativa tem dados errados (cliente, device) → corrigir via PATCH. NUNCA criar nova OS para corrigir erro.
 
 ---
@@ -154,4 +164,4 @@ Para preencher checklists: `read(file_path="skills/praticos/references/checklist
 ## CARD DE OS
 
 🔴 Para exibir qualquer OS: `read(file_path="skills/praticos/references/os-card.md")`
-Regra critica: usar /details (NAO /list). Foto via mainPhotoUrl → baixar e enviar como imagem.
+Regra critica: usar dados do contexto se disponivel, senao /details (NAO /list). Foto via mainPhotoUrl → baixar e enviar como imagem.
