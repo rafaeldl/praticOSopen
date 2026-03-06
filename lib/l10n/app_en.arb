@@ -1333,5 +1333,11 @@
   "pdfServicesSubtotal": "Services Subtotal",
   "pdfPartsSubtotal": "Parts Subtotal",
   "pdfPaid": "Paid",
-  "pdfUnitValue": "Unit Price"
+  "pdfUnitValue": "Unit Price",
+  "pdfServiceType": "Service",
+  "pdfProductType": "Part",
+  "pdfItemType": "Type",
+  "pdfTrackOnline": "Track online",
+  "pdfTrackOnlineDescription": "Scan the QR Code to track this service order",
+  "pdfEquipment": "Equipment"
 }

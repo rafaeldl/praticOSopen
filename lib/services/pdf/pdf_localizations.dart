@@ -70,6 +70,14 @@ class PdfLocalizations {
   final String paid;
   final String unitValue;
 
+  // Multi-device / equipment block strings
+  final String serviceType;
+  final String productType;
+  final String itemType;
+  final String trackOnline;
+  final String trackOnlineDescription;
+  final String equipment;
+
   // Form-related strings
   final String statusCompleted;
   final String statusInProgress;
@@ -118,6 +126,12 @@ class PdfLocalizations {
     required this.partsSubtotal,
     required this.paid,
     required this.unitValue,
+    required this.serviceType,
+    required this.productType,
+    required this.itemType,
+    required this.trackOnline,
+    required this.trackOnlineDescription,
+    required this.equipment,
     required this.statusCompleted,
     required this.statusInProgress,
     required this.statusPending,
@@ -168,6 +182,12 @@ class PdfLocalizations {
       partsSubtotal: _latinCharactersOnly(l10n.pdfPartsSubtotal),
       paid: _latinCharactersOnly(l10n.pdfPaid),
       unitValue: _latinCharactersOnly(l10n.pdfUnitValue),
+      serviceType: _latinCharactersOnly(l10n.pdfServiceType),
+      productType: _latinCharactersOnly(l10n.pdfProductType),
+      itemType: _latinCharactersOnly(l10n.pdfItemType),
+      trackOnline: _latinCharactersOnly(l10n.pdfTrackOnline),
+      trackOnlineDescription: _latinCharactersOnly(l10n.pdfTrackOnlineDescription),
+      equipment: _latinCharactersOnly(l10n.pdfEquipment),
       statusCompleted: _latinCharactersOnly(l10n.statusCompleted),
       statusInProgress: _latinCharactersOnly(l10n.statusInProgress),
       statusPending: _latinCharactersOnly(l10n.statusPending),

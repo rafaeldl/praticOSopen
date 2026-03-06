@@ -1333,5 +1333,11 @@
   "pdfServicesSubtotal": "Subtotal Servicios",
   "pdfPartsSubtotal": "Subtotal Repuestos",
   "pdfPaid": "Pagado",
-  "pdfUnitValue": "Valor Unit."
+  "pdfUnitValue": "Valor Unit.",
+  "pdfServiceType": "Servicio",
+  "pdfProductType": "Repuesto",
+  "pdfItemType": "Tipo",
+  "pdfTrackOnline": "Seguimiento online",
+  "pdfTrackOnlineDescription": "Escanee el codigo QR para rastrear esta orden de servicio",
+  "pdfEquipment": "Equipo"
 }

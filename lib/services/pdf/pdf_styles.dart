@@ -72,6 +72,22 @@ class PdfStyles {
   static const PdfColor footerTextColor = PdfColor.fromInt(0xFFA0AEC0);
 
   // ============================================
+  // CORES DE EQUIPMENT BLOCK
+  // ============================================
+
+  /// Fundo do card de equipamento
+  static const PdfColor equipmentCardBg = PdfColor.fromInt(0xFFFAFCFD);
+
+  /// Borda do card de equipamento (teal 15% opacidade)
+  static const PdfColor equipmentCardBorder = PdfColor.fromInt(0x251B5E7B);
+
+  /// Cor do badge/label de servico na tabela
+  static const PdfColor serviceTypeColor = PdfColor.fromInt(0xFF1B5E7B);
+
+  /// Cor do badge/label de peca na tabela
+  static const PdfColor productTypeColor = PdfColor.fromInt(0xFFE67E22);
+
+  // ============================================
   // CONFIGURACOES DE PAGINA
   // ============================================
 

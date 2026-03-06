@@ -3148,4 +3148,23 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get pdfUnitValue => 'Valor Unit.';
+
+  @override
+  String get pdfServiceType => 'Servicio';
+
+  @override
+  String get pdfProductType => 'Repuesto';
+
+  @override
+  String get pdfItemType => 'Tipo';
+
+  @override
+  String get pdfTrackOnline => 'Seguimiento online';
+
+  @override
+  String get pdfTrackOnlineDescription =>
+      'Escanee el codigo QR para rastrear esta orden de servicio';
+
+  @override
+  String get pdfEquipment => 'Equipo';
 }

@@ -1378,5 +1378,11 @@
   "pdfServicesSubtotal": "Subtotal Servicos",
   "pdfPartsSubtotal": "Subtotal Pecas",
   "pdfPaid": "Pago",
-  "pdfUnitValue": "Valor Unit."
+  "pdfUnitValue": "Valor Unit.",
+  "pdfServiceType": "Servico",
+  "pdfProductType": "Peca",
+  "pdfItemType": "Tipo",
+  "pdfTrackOnline": "Acompanhe online",
+  "pdfTrackOnlineDescription": "Escaneie o QR Code para acompanhar esta ordem de servico",
+  "pdfEquipment": "Equipamento"
 }

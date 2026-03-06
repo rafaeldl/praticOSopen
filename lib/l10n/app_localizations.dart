@@ -5961,6 +5961,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Valor Unit.'**
   String get pdfUnitValue;
+
+  /// No description provided for @pdfServiceType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Servico'**
+  String get pdfServiceType;
+
+  /// No description provided for @pdfProductType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Peca'**
+  String get pdfProductType;
+
+  /// No description provided for @pdfItemType.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tipo'**
+  String get pdfItemType;
+
+  /// No description provided for @pdfTrackOnline.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acompanhe online'**
+  String get pdfTrackOnline;
+
+  /// No description provided for @pdfTrackOnlineDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escaneie o QR Code para acompanhar esta ordem de servico'**
+  String get pdfTrackOnlineDescription;
+
+  /// No description provided for @pdfEquipment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Equipamento'**
+  String get pdfEquipment;
 }
 
 class _AppLocalizationsDelegate
