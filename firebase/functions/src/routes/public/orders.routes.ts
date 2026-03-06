@@ -17,6 +17,32 @@ import { maskName, maskPhone, maskSerial } from '../../utils/mask.utils';
 const router: Router = Router();
 
 /**
+ * Fetch segment custom labels for the magic link page.
+ * Returns a map like: { 'device._entity': { 'pt-BR': 'Veículo', ... }, ... }
+ */
+async function getSegmentLabels(segmentId?: string): Promise<Record<string, Record<string, string>> | null> {
+  if (!segmentId) return null;
+  try {
+    const segmentDoc = await db.collection('segments').doc(segmentId).get();
+    if (!segmentDoc.exists) return null;
+    const data = segmentDoc.data();
+    const customFields = data?.customFields as Array<{ key: string; type: string; labels: Record<string, string> }> | undefined;
+    if (!customFields?.length) return null;
+
+    const labels: Record<string, Record<string, string>> = {};
+    for (const field of customFields) {
+      if (field.type === 'label' && field.labels) {
+        labels[field.key] = field.labels;
+      }
+    }
+    return Object.keys(labels).length > 0 ? labels : null;
+  } catch (error) {
+    console.error('Failed to fetch segment labels:', error);
+    return null;
+  }
+}
+
+/**
  * GET /public/orders/:token
  * View order details via share token
  */
@@ -110,8 +136,10 @@ router.get('/:token', shareTokenAuth, async (req: AuthenticatedRequest, res: Res
           email: company.email,
           address: company.address,
           country: company.country,
+          segment: company.segment || null,
           termsOfService: company.termsOfService || null,
         } : null,
+        segmentLabels: await getSegmentLabels(company?.segment),
         comments: comments.map((c) => ({
           // IDs removed for LGPD compliance
           text: c.text,

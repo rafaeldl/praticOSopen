@@ -149,7 +149,7 @@
 const route = useRoute()
 const token = route.params.token as string
 
-const { t } = useOrderI18n()
+const { t, setSegmentLabels } = useOrderI18n()
 const { approveQuote, rejectQuote } = useOrderApi()
 
 // SSR data fetch via server proxy
@@ -160,6 +160,10 @@ const order = computed(() => (orderData.value as any)?.data?.order)
 const company = computed(() => (orderData.value as any)?.data?.company)
 const comments = computed(() => (orderData.value as any)?.data?.comments || [])
 const permissions = computed(() => (orderData.value as any)?.data?.permissions || [])
+
+// Apply segment custom labels (e.g. "Veículos" for automotive, "Aparelhos" for electronics)
+const segmentLabels = computed(() => (orderData.value as any)?.data?.segmentLabels || null)
+watch(segmentLabels, (labels) => setSegmentLabels(labels), { immediate: true })
 
 // SEO meta - noindex for share links
 useHead({
