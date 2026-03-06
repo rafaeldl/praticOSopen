@@ -318,6 +318,22 @@ const uiStrings: Record<Lang, Record<string, string>> = {
   },
 }
 
+// Map short lang codes to locale codes used in segment customFields
+const langToLocale: Record<Lang, string> = {
+  pt: 'pt-BR',
+  en: 'en-US',
+  es: 'es-ES',
+}
+
+// Segment label keys mapped to i18n keys they override
+const segmentKeyMap: Record<string, keyof typeof uiStrings.pt> = {
+  'device._entity': 'device',
+  'device._entity_plural': 'devices',
+}
+
+// Shared reactive state for segment labels (set once, used by all composable instances)
+const _segmentLabels = ref<Record<string, Record<string, string>> | null>(null)
+
 export function useOrderI18n() {
   // Always start with 'pt' for SSR/client consistency (avoids hydration mismatch)
   const lang = ref<Lang>('pt')
@@ -337,7 +353,25 @@ export function useOrderI18n() {
     })
   }
 
-  const t = computed(() => uiStrings[lang.value] || uiStrings.pt)
+  const t = computed(() => {
+    const base = { ...(uiStrings[lang.value] || uiStrings.pt) }
+    const labels = _segmentLabels.value
+    if (labels) {
+      const locale = langToLocale[lang.value]
+      for (const [segKey, uiKey] of Object.entries(segmentKeyMap)) {
+        const label = labels[segKey]?.[locale]
+        if (label) {
+          (base as any)[uiKey] = label
+        }
+      }
+      // Also override 'vehicles' with device plural label when available
+      const devicePlural = labels['device._entity_plural']?.[locale]
+      if (devicePlural) {
+        base.vehicles = devicePlural
+      }
+    }
+    return base
+  })
   const status = computed(() => statusLabels[lang.value] || statusLabels.pt)
 
   function setLang(newLang: Lang) {
@@ -349,9 +383,13 @@ export function useOrderI18n() {
     }
   }
 
+  function setSegmentLabels(labels: Record<string, Record<string, string>> | null) {
+    _segmentLabels.value = labels
+  }
+
   function getStatusLabel(statusKey: string): string {
     return status.value[statusKey] || statusKey
   }
 
-  return { lang, t, status, setLang, getStatusLabel }
+  return { lang, t, status, setLang, setSegmentLabels, getStatusLabel }
 }
