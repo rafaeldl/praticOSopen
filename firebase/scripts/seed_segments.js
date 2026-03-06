@@ -1597,6 +1597,174 @@ const SEGMENTS = [
   },
 
   // ═══════════════════════════════════════════════════════════
+  // MANUTENÇÃO DE ATIVOS (Equipamentos industriais, geradores, frotas, etc.)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'asset_maintenance',
+    name: 'Manutenção de Ativos',
+    nameI18n: { 'pt-BR': 'Manutenção de Ativos', 'en-US': 'Asset Maintenance', 'es-ES': 'Mantenimiento de Activos' },
+    icon: '🏭',
+    active: true,
+    fieldService: true,
+    subspecialties: [
+      {
+        id: 'industrial_equipment',
+        icon: '⚙️',
+        name: { 'pt-BR': 'Equipamentos Industriais', 'en-US': 'Industrial Equipment', 'es-ES': 'Equipos Industriales' },
+        description: { 'pt-BR': 'Máquinas, tornos, compressores, esteiras', 'en-US': 'Machines, lathes, compressors, conveyors', 'es-ES': 'Máquinas, tornos, compresores, cintas' },
+      },
+      {
+        id: 'generators',
+        icon: '🔌',
+        name: { 'pt-BR': 'Geradores', 'en-US': 'Generators', 'es-ES': 'Generadores' },
+        description: { 'pt-BR': 'Geradores de energia, nobreaks, grupos geradores', 'en-US': 'Power generators, UPS, generator sets', 'es-ES': 'Generadores de energía, UPS, grupos electrógenos' },
+      },
+      {
+        id: 'hvac_commercial',
+        icon: '❄️',
+        name: { 'pt-BR': 'HVAC Comercial', 'en-US': 'Commercial HVAC', 'es-ES': 'HVAC Comercial' },
+        description: { 'pt-BR': 'Climatização comercial e industrial', 'en-US': 'Commercial and industrial climate control', 'es-ES': 'Climatización comercial e industrial' },
+      },
+      {
+        id: 'fleet_vehicles',
+        icon: '🚛',
+        name: { 'pt-BR': 'Veículos e Frotas', 'en-US': 'Fleet Vehicles', 'es-ES': 'Vehículos y Flotas' },
+        description: { 'pt-BR': 'Frotas de veículos, caminhões, máquinas pesadas', 'en-US': 'Vehicle fleets, trucks, heavy machinery', 'es-ES': 'Flotas de vehículos, camiones, maquinaria pesada' },
+      },
+      {
+        id: 'medical_equipment',
+        icon: '🏥',
+        name: { 'pt-BR': 'Equipamentos Médicos', 'en-US': 'Medical Equipment', 'es-ES': 'Equipos Médicos' },
+        description: { 'pt-BR': 'Equipamentos hospitalares e laboratoriais', 'en-US': 'Hospital and laboratory equipment', 'es-ES': 'Equipos hospitalarios y de laboratorio' },
+      },
+      {
+        id: 'commercial_kitchen',
+        icon: '🍳',
+        name: { 'pt-BR': 'Cozinhas Industriais', 'en-US': 'Commercial Kitchen', 'es-ES': 'Cocinas Industriales' },
+        description: { 'pt-BR': 'Fogões, fornos, câmaras frias, equipamentos de cozinha', 'en-US': 'Stoves, ovens, cold rooms, kitchen equipment', 'es-ES': 'Cocinas, hornos, cámaras frías, equipos de cocina' },
+      },
+    ],
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Ativo', 'en-US': 'Asset', 'es-ES': 'Activo' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Ativos', 'en-US': 'Assets', 'es-ES': 'Activos' }
+      },
+      {
+        key: 'device.brand',
+        type: 'label',
+        labels: { 'pt-BR': 'Fabricante', 'en-US': 'Manufacturer', 'es-ES': 'Fabricante' }
+      },
+      {
+        key: 'device.serial',
+        type: 'label',
+        labels: { 'pt-BR': 'Número de Série', 'en-US': 'Serial Number', 'es-ES': 'Número de Serie' }
+      },
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Ativo', 'en-US': 'Add Asset', 'es-ES': 'Agregar Activo' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Manutenção', 'en-US': 'Under Maintenance', 'es-ES': 'En Mantenimiento' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Operacional', 'en-US': 'Operational', 'es-ES': 'Operativo' }
+      },
+
+      // Campos customizados do domínio
+      {
+        key: 'device.assetTag',
+        type: 'text',
+        labels: { 'pt-BR': 'Tag do Ativo', 'en-US': 'Asset Tag', 'es-ES': 'Etiqueta del Activo' },
+        placeholder: 'Ex: GER-001, MAQ-042',
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 1,
+      },
+      {
+        key: 'device.manufacturer',
+        type: 'text',
+        labels: { 'pt-BR': 'Fabricante', 'en-US': 'Manufacturer', 'es-ES': 'Fabricante' },
+        placeholder: 'Ex: Cummins, WEG, Caterpillar',
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 2,
+      },
+      {
+        key: 'device.assetLocation',
+        type: 'text',
+        labels: { 'pt-BR': 'Localização do Ativo', 'en-US': 'Asset Location', 'es-ES': 'Ubicación del Activo' },
+        placeholder: 'Ex: Galpão 3, Sala de máquinas, Andar 2',
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 3,
+      },
+      {
+        key: 'device.assetCategory',
+        type: 'select',
+        labels: { 'pt-BR': 'Categoria', 'en-US': 'Category', 'es-ES': 'Categoría' },
+        options: ['mechanical', 'electrical', 'hydraulic', 'pneumatic', 'thermal', 'electronic'],
+        optionsI18n: [
+          { value: 'mechanical', labels: { 'pt-BR': 'Mecânico', 'en-US': 'Mechanical', 'es-ES': 'Mecánico' } },
+          { value: 'electrical', labels: { 'pt-BR': 'Elétrico', 'en-US': 'Electrical', 'es-ES': 'Eléctrico' } },
+          { value: 'hydraulic', labels: { 'pt-BR': 'Hidráulico', 'en-US': 'Hydraulic', 'es-ES': 'Hidráulico' } },
+          { value: 'pneumatic', labels: { 'pt-BR': 'Pneumático', 'en-US': 'Pneumatic', 'es-ES': 'Neumático' } },
+          { value: 'thermal', labels: { 'pt-BR': 'Térmico', 'en-US': 'Thermal', 'es-ES': 'Térmico' } },
+          { value: 'electronic', labels: { 'pt-BR': 'Eletrônico', 'en-US': 'Electronic', 'es-ES': 'Electrónico' } },
+        ],
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 4,
+      },
+      {
+        key: 'device.installationDate',
+        type: 'date',
+        labels: { 'pt-BR': 'Data de Instalação', 'en-US': 'Installation Date', 'es-ES': 'Fecha de Instalación' },
+        section: 'Manutenção',
+        sectionI18n: { 'pt-BR': 'Manutenção', 'en-US': 'Maintenance', 'es-ES': 'Mantenimiento' },
+        order: 5,
+      },
+      {
+        key: 'device.warrantyExpiration',
+        type: 'date',
+        labels: { 'pt-BR': 'Vencimento da Garantia', 'en-US': 'Warranty Expiration', 'es-ES': 'Vencimiento de Garantía' },
+        section: 'Manutenção',
+        sectionI18n: { 'pt-BR': 'Manutenção', 'en-US': 'Maintenance', 'es-ES': 'Mantenimiento' },
+        order: 6,
+      },
+      {
+        key: 'device.lastMaintenanceDate',
+        type: 'date',
+        labels: { 'pt-BR': 'Última Manutenção', 'en-US': 'Last Maintenance', 'es-ES': 'Último Mantenimiento' },
+        section: 'Manutenção',
+        sectionI18n: { 'pt-BR': 'Manutenção', 'en-US': 'Maintenance', 'es-ES': 'Mantenimiento' },
+        order: 7,
+      },
+      {
+        key: 'device.operatingHours',
+        type: 'number',
+        labels: { 'pt-BR': 'Horas de Operação', 'en-US': 'Operating Hours', 'es-ES': 'Horas de Operación' },
+        min: 0,
+        max: 999999,
+        section: 'Manutenção',
+        sectionI18n: { 'pt-BR': 'Manutenção', 'en-US': 'Maintenance', 'es-ES': 'Mantenimiento' },
+        order: 8,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // OUTRO (Genérico)
   // ═══════════════════════════════════════════════════════════
   {
