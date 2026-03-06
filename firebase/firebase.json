@@ -38,6 +38,13 @@
     ],
     "rewrites": [
       {
+        "source": "/_nuxt/**",
+        "run": {
+          "serviceId": "praticos-web",
+          "region": "southamerica-east1"
+        }
+      },
+      {
         "source": "/q/**",
         "run": {
           "serviceId": "praticos-web",
