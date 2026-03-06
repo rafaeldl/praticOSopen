@@ -7,6 +7,9 @@ POST /bot/search/unified
 Parametros JSON (string OU array de strings): customer, customerPhone, device, deviceSerial, service, product
 Exemplo com arrays: {"service":["tela","bateria"],"product":["película"]}
 Resposta: {exact, suggestions, available}
+- `results` = matches exatos/fortes. Usar diretamente.
+- `available` = matches parciais/fuzzy. Usar com `description` customizada quando similar ao pedido do usuario.
+  🔴 Se `available` tem match similar → usar o ID dele + description customizada. NAO criar novo servico.
 exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\",\"service\":\"tela\"}' \"$PRATICOS_API_URL/bot/search/unified\"")
 
 ## Resumo
@@ -38,6 +41,7 @@ exec(command="curl -s -X PATCH -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsA
 POST /bot/orders/{NUM}/services `{"serviceId":"ID","value":N,"description":"txt","deviceId":"ID"}`
 POST /bot/orders/{NUM}/products `{"productId":"ID","quantity":N,"value":N,"description":"txt","deviceId":"ID"}`
 `deviceId` opcional — vincula item a um dispositivo especifico da OS.
+`description` opcional — texto livre que complementa o nome do servico/produto do catalogo. Usar para especificar detalhes (ex: "Para-lama Esquerdo", "Oleo 5W30", "Split 12k - Sala").
 DELETE /bot/orders/{NUM}/services/{I} | DELETE /bot/orders/{NUM}/products/{I}
 PATCH /bot/orders/{NUM}/customer | PATCH /bot/orders/{NUM}/device
 
