@@ -58,6 +58,11 @@ Boas-vindas: UMA frase curta com [userName]. Se houver OS pendentes (GET /bot/su
 
 ### REGRAS GLOBAIS
 🔴 **RESPONSE = CARD DATA:** TODOS os endpoints de mutacao retornam `{ order, formatContext, shareUrl }`. Usar dados do response para montar card. NAO re-fetch GET /details. NAO chamar POST /share (shareUrl é auto-criado).
+🔴 **FOTO DE CAPA OBRIGATORIA:** Se `mainPhotoUrl` existir no response → BAIXAR foto e enviar como IMAGEM com card na legenda (`message(filePath=..., message=card)`). NUNCA enviar card como texto puro quando ha foto.
+```
+exec: curl -s -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" "$PRATICOS_API_URL{mainPhotoUrl}" --output /tmp/os-{NUM}.jpg
+message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
+```
 
 🔴 **ANTI-DUPLICACAO:** NUNCA criar POST /bot/orders/full sem TODOS os dados resolvidos (customer correto, device, servicos).
    - Primeiro: resolver TODOS os IDs (search/unified) e confirmar com usuario se ambiguo
@@ -157,5 +162,5 @@ Para preencher checklists: `read(file_path="skills/praticos/references/checklist
 
 ## CARD DE OS
 
-🔴 Para exibir qualquer OS: `read(file_path="skills/praticos/references/os-card.md")`
-Regra critica: usar dados do contexto se disponivel, senao /details (NAO /list). Foto via mainPhotoUrl → baixar e enviar como imagem.
+🔴 Para formato completo do card: `read(file_path="skills/praticos/references/os-card.md")`
+Regra critica: usar dados do contexto se disponivel, senao /details (NAO /list). Ver REGRAS GLOBAIS para foto de capa obrigatoria.
