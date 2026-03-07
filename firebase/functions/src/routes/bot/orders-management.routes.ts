@@ -778,13 +778,9 @@ router.patch('/:number/device', requireLinked, async (req: AuthenticatedRequest,
       return;
     }
 
-    res.json({
-      success: true,
-      data: {
-        device: deviceAggr,
-
-      },
-    });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, createdBy);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Update order device error:', error);
     res.status(500).json({
@@ -862,13 +858,9 @@ router.patch('/:number/customer', requireLinked, async (req: AuthenticatedReques
       return;
     }
 
-    res.json({
-      success: true,
-      data: {
-        customer: customerAggr,
-
-      },
-    });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, createdBy);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Update order customer error:', error);
     res.status(500).json({
@@ -919,7 +911,9 @@ router.post('/:number/devices', requireLinked, async (req: AuthenticatedRequest,
       return;
     }
 
-    res.json({ success: true, data: { devices: result.devices, deviceCount: result.devices.length } });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, createdBy);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Add device to order error:', error);
     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Erro ao adicionar dispositivo' } });
@@ -954,7 +948,9 @@ router.delete('/:number/devices/:deviceId', requireLinked, async (req: Authentic
       return;
     }
 
-    res.json({ success: true, data: { devices: result.devices, deviceCount: result.devices.length } });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, createdBy);
+    res.json({ success: true, data: detail });
   } catch (error) {
     console.error('Remove device from order error:', error);
     res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Erro ao remover dispositivo' } });

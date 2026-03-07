@@ -185,6 +185,91 @@ describe('Bot Orders Management Routes', () => {
     });
   });
 
+  // ----- PATCH /:number/device -----------------------------------------------
+
+  describe('PATCH /:number/device', () => {
+    it('returns full order detail with formatContext', async () => {
+      const fakeDevice = { id: 'd2', name: 'Galaxy S21', serial: 'SN123' };
+      mockDeviceService.getDevice.mockResolvedValue(fakeDevice as any);
+      mockOrderService.updateOrderDevice.mockResolvedValue({ success: true } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .patch('/1/device')
+        .send({ deviceId: 'd2' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.order).toBeDefined();
+      expect(res.body.data.order.number).toBe(1);
+      expect(res.body.data.formatContext).toBeDefined();
+      expect(res.body.data.message).toBeUndefined();
+    });
+  });
+
+  // ----- PATCH /:number/customer ---------------------------------------------
+
+  describe('PATCH /:number/customer', () => {
+    it('returns full order detail with formatContext', async () => {
+      mockCustomerService.getCustomer.mockResolvedValue(fakeCustomer as any);
+      mockOrderService.updateOrderCustomer.mockResolvedValue({ success: true } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .patch('/1/customer')
+        .send({ customerId: 'c1' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.order).toBeDefined();
+      expect(res.body.data.order.number).toBe(1);
+      expect(res.body.data.formatContext).toBeDefined();
+      expect(res.body.data.message).toBeUndefined();
+    });
+  });
+
+  // ----- POST /:number/devices -----------------------------------------------
+
+  describe('POST /:number/devices', () => {
+    it('returns full order detail with formatContext', async () => {
+      const fakeDevice = { id: 'd2', name: 'Galaxy S21', serial: 'SN123' };
+      mockDeviceService.getDevice.mockResolvedValue(fakeDevice as any);
+      mockOrderService.addDeviceToOrder.mockResolvedValue({ success: true, devices: [{ id: 'd1' }, { id: 'd2' }] } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .post('/1/devices')
+        .send({ deviceId: 'd2' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.order).toBeDefined();
+      expect(res.body.data.formatContext).toBeDefined();
+      expect(res.body.data.message).toBeUndefined();
+    });
+  });
+
+  // ----- DELETE /:number/devices/:deviceId -----------------------------------
+
+  describe('DELETE /:number/devices/:deviceId', () => {
+    it('returns full order detail with formatContext', async () => {
+      mockOrderService.removeDeviceFromOrder.mockResolvedValue({ success: true, devices: [{ id: 'd1' }] } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app).delete('/1/devices/d2');
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.order).toBeDefined();
+      expect(res.body.data.formatContext).toBeDefined();
+      expect(res.body.data.message).toBeUndefined();
+    });
+  });
+
   // ----- GET /:number/details -----------------------------------------------
 
   describe('GET /:number/details', () => {

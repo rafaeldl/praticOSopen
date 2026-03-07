@@ -7,10 +7,11 @@ POST /bot/search/unified
 Parametros JSON (string OU array de strings): customer, customerPhone, device, deviceSerial, service, product
 🔴 SEMPRE usar arrays para buscar multiplos termos de uma vez. NUNCA fazer chamadas separadas.
 Exemplo com arrays: {"customer":"Joao","service":["tela","bateria"],"product":["película"]}
-Resposta: {exact, suggestions, available}
-- `results` = matches exatos/fortes. Usar diretamente.
-- `available` = matches parciais/fuzzy. Usar com `description` customizada quando similar ao pedido do usuario.
-  🔴 Se `available` tem match similar → usar o ID dele + description customizada. NAO criar novo servico.
+Resposta por entidade:
+- customer/device: `{ exact, suggestions, available }` — `exact` = match exato (1 resultado ou null), `suggestions` = matches por nome
+- service/product: `{ results, available }` — `results` = matches encontrados no catalogo
+- `available` (todas): lista de itens cadastrados como fallback (retornado quando sem matches)
+🔴 Se `available` tem match similar ao pedido → usar o ID dele + `description` customizada. NAO criar novo.
 exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\",\"service\":[\"tela\",\"bateria\"]}' \"$PRATICOS_API_URL/bot/search/unified\"")
 
 ## Resumo
@@ -45,14 +46,15 @@ exec(command="curl -s -X PATCH -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsA
 POST /bot/orders/{NUM}/services `{"serviceId":"ID","value":N,"description":"txt","deviceId":"ID"}`
 POST /bot/orders/{NUM}/products `{"productId":"ID","quantity":N,"value":N,"description":"txt","deviceId":"ID"}`
 `deviceId` opcional — vincula item a um dispositivo especifico da OS.
-`description` opcional — texto livre que complementa o nome do servico/produto do catalogo. Usar para especificar detalhes (ex: "Para-lama Esquerdo", "Oleo 5W30", "Split 12k - Sala").
+`description` opcional — texto livre para especificar detalhes. Ver exemplos em SKILL.md regra 5.
 DELETE /bot/orders/{NUM}/services/{I} | DELETE /bot/orders/{NUM}/products/{I}
-Resposta de TODOS os endpoints de itens: retorna `order` atualizado (mesmo formato de /details) + `formatContext`.
-PATCH /bot/orders/{NUM}/customer | PATCH /bot/orders/{NUM}/device
+PATCH /bot/orders/{NUM}/customer `{"customerId":"ID"}` — corrigir cliente da OS
+PATCH /bot/orders/{NUM}/device `{"deviceId":"ID"}` — corrigir dispositivo da OS
+🔴 **TODOS os endpoints de mutacao** (POST /full, POST/DELETE /services, POST/DELETE /products, PATCH /status, PATCH /:number, PATCH /customer, PATCH /device, POST/DELETE /devices) retornam `{ order, formatContext }` no mesmo formato de /details. Usar dados do response para montar card. NAO re-fetch /details.
 
 ## OS - Dispositivos
-POST /bot/orders/{NUM}/devices `{"deviceId":"ID"}` — adicionar dispositivo à OS
-DELETE /bot/orders/{NUM}/devices/{DEVICE_ID} — remover dispositivo da OS
+POST /bot/orders/{NUM}/devices `{"deviceId":"ID"}` — adicionar dispositivo à OS (retorna order detail)
+DELETE /bot/orders/{NUM}/devices/{DEVICE_ID} — remover dispositivo da OS (retorna order detail)
 GET /bot/orders/{NUM}/details retorna `devices[]` (lista completa) e `deviceCount` (quantidade)
 
 ## OS - Fotos
@@ -84,8 +86,8 @@ POST /bot/invite/create `{"collaboratorName":"Nome","role":"technician|admin|sup
 GET /bot/invite/list | DELETE /bot/invite/{CODE}
 
 ## Magic Link
-POST /bot/orders/{NUM}/share `{"permissions":["view","approve","comment"],"expiresInDays":7}`
-GET /bot/orders/{NUM}/share | DELETE /bot/orders/{NUM}/share/{TOKEN}
+🔴 **NAO chamar POST /share.** shareUrl é auto-criado em TODOS os endpoints de mutacao.
+GET /bot/orders/{NUM}/share | DELETE /bot/orders/{NUM}/share/{TOKEN} (consulta/remocao apenas)
 
 ## Checklists
 Ver detalhes: `read(file_path="skills/praticos/references/checklists.md")`
