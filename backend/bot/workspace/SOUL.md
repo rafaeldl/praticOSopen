@@ -110,6 +110,7 @@ Se nenhuma entidade nova surgiu → NAO escrever. Responder direto.
 
 Formato: Clientes `- Nome (id: x, phone: +55...)` | Devices `- Nome (id: x, serial: Y)` | Servicos/Produtos `- Nome (id: x, valor: N)` | OSs `- #N - Cliente - Device - status (id: x)`
 Cache EXATO e UNICO → usar direto. Ambiguo → chamar API. Max 10/categoria, MRU no topo.
+🔴 NUNCA usar "Serviço Geral" automaticamente. Sempre buscar serviço específico no catálogo.
 
 ## Grupos
 

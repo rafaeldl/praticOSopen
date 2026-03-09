@@ -98,7 +98,7 @@ export async function searchServices(
   const keyword = normalizeSearchTerm(query);
   if (!keyword) return [];
 
-  // 1. Primary search: by keywords (new records with keywords field)
+  // 1. Primary search: by keywords (full phrase match)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
@@ -111,7 +111,39 @@ export async function searchServices(
     })) as Service[];
   }
 
-  // 2. Fallback: search by name in memory (old records without keywords)
+  // 2. Individual word search when phrase has multiple words
+  const words = keyword.split(' ').filter((w) => w.length > 1);
+  if (words.length > 1) {
+    const wordResults = await Promise.all(
+      words.map((word) =>
+        collection.where('keywords', 'array-contains', word).limit(limit).get()
+      )
+    );
+
+    const scoreMap = new Map<string, { doc: Service; score: number }>();
+    for (const snap of wordResults) {
+      for (const doc of snap.docs) {
+        const existing = scoreMap.get(doc.id);
+        if (existing) {
+          existing.score++;
+        } else {
+          scoreMap.set(doc.id, {
+            doc: { ...doc.data(), id: doc.id } as Service,
+            score: 1,
+          });
+        }
+      }
+    }
+
+    if (scoreMap.size > 0) {
+      return [...scoreMap.values()]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map((entry) => entry.doc);
+    }
+  }
+
+  // 3. Fallback: search by name in memory (old records without keywords)
   const allSnapshot = await collection
     .orderBy('name')
     .limit(100)
@@ -273,7 +305,7 @@ export async function searchProducts(
   const keyword = normalizeSearchTerm(query);
   if (!keyword) return [];
 
-  // 1. Primary search: by keywords (new records with keywords field)
+  // 1. Primary search: by keywords (full phrase match)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
@@ -286,7 +318,39 @@ export async function searchProducts(
     })) as Product[];
   }
 
-  // 2. Fallback: search by name in memory (old records without keywords)
+  // 2. Individual word search when phrase has multiple words
+  const words = keyword.split(' ').filter((w) => w.length > 1);
+  if (words.length > 1) {
+    const wordResults = await Promise.all(
+      words.map((word) =>
+        collection.where('keywords', 'array-contains', word).limit(limit).get()
+      )
+    );
+
+    const scoreMap = new Map<string, { doc: Product; score: number }>();
+    for (const snap of wordResults) {
+      for (const doc of snap.docs) {
+        const existing = scoreMap.get(doc.id);
+        if (existing) {
+          existing.score++;
+        } else {
+          scoreMap.set(doc.id, {
+            doc: { ...doc.data(), id: doc.id } as Product,
+            score: 1,
+          });
+        }
+      }
+    }
+
+    if (scoreMap.size > 0) {
+      return [...scoreMap.values()]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map((entry) => entry.doc);
+    }
+  }
+
+  // 3. Fallback: search by name in memory (old records without keywords)
   const allSnapshot = await collection
     .orderBy('name')
     .limit(100)

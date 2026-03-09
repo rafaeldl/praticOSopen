@@ -89,8 +89,9 @@ message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
      b) Se encontrou match exato em `results` → usar diretamente via POST /orders/{NUM}/services
      c) Se NAO encontrou exato mas `available` tem servico SIMILAR → usar o servico do `available` e passar `description` com o detalhe especifico
      d) Se NAO encontrou nada similar em `results` NEM `available` → criar servico (POST /bot/entities/services) → adicionar via /services
-     e) NUNCA usar /comments como fallback para listar servicos ou valores
-     f) NUNCA duplicar info de servicos ja adicionados como comentario "resumo"
+     e) 🔴 NUNCA usar "Serviço Geral" como fallback. Sempre buscar o serviço mais específico.
+     f) NUNCA usar /comments como fallback para listar servicos ou valores
+     g) NUNCA duplicar info de servicos ja adicionados como comentario "resumo"
    - 🔴 NUNCA criar servico novo no catalogo se existe um similar. Usar `description` para especificar.
      Exemplos de match por similaridade:
      - "Pintura de Para-lama Esquerdo" → usar "Pintura de Para-lama" + description "Para-lama Esquerdo"
