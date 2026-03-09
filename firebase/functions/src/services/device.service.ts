@@ -125,7 +125,7 @@ export async function searchDevices(
     })) as Device[];
   }
 
-  // 1. Primary search: by keywords (new records with keywords field)
+  // 1. Primary search: by keywords (full phrase match)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
@@ -138,22 +138,78 @@ export async function searchDevices(
     })) as Device[];
   }
 
-  // 2. Fallback: search by name, serial or manufacturer in memory (old records without keywords)
+  // 2. Individual word search when phrase has multiple words
+  const words = keyword.split(' ').filter((w) => w.length > 1);
+  if (words.length > 1) {
+    const wordResults = await Promise.all(
+      words.map((word) =>
+        collection.where('keywords', 'array-contains', word).limit(limit).get()
+      )
+    );
+
+    const scoreMap = new Map<string, { doc: Device; score: number }>();
+    for (const snap of wordResults) {
+      for (const doc of snap.docs) {
+        const existing = scoreMap.get(doc.id);
+        if (existing) {
+          existing.score++;
+        } else {
+          scoreMap.set(doc.id, {
+            doc: { ...doc.data(), id: doc.id } as Device,
+            score: 1,
+          });
+        }
+      }
+    }
+
+    if (scoreMap.size > 0) {
+      return [...scoreMap.values()]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map((entry) => entry.doc);
+    }
+  }
+
+  // 3. Fallback: search by name, serial or manufacturer in memory (old records without keywords)
   const allSnapshot = await collection
     .orderBy('name')
     .limit(100)
     .get();
 
+  const allDocs = allSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Device));
   const queryNormalized = removeAccents(query.toLowerCase());
-  return allSnapshot.docs
-    .map((doc) => ({ ...doc.data(), id: doc.id } as Device))
-    .filter((d) => {
-      const nameMatch = removeAccents(d.name?.toLowerCase() || '').includes(queryNormalized);
-      const serialMatch = removeAccents(d.serial?.toLowerCase() || '').includes(queryNormalized);
-      const manufacturerMatch = removeAccents(d.manufacturer?.toLowerCase() || '').includes(queryNormalized);
-      return nameMatch || serialMatch || manufacturerMatch;
-    })
-    .slice(0, limit);
+
+  const matchField = (d: Device) => {
+    const name = removeAccents(d.name?.toLowerCase() || '');
+    const serial = removeAccents(d.serial?.toLowerCase() || '');
+    const manufacturer = removeAccents(d.manufacturer?.toLowerCase() || '');
+    return { name, serial, manufacturer };
+  };
+
+  // Try full phrase match first
+  const phraseMatches = allDocs.filter((d) => {
+    const f = matchField(d);
+    return f.name.includes(queryNormalized) || f.serial.includes(queryNormalized) || f.manufacturer.includes(queryNormalized);
+  });
+  if (phraseMatches.length > 0) return phraseMatches.slice(0, limit);
+
+  // Try individual word match (score by matches)
+  const queryWords = queryNormalized.split(/\s+/).filter((w) => w.length > 1);
+  if (queryWords.length > 1) {
+    const scored = allDocs
+      .map((d) => {
+        const f = matchField(d);
+        const combined = `${f.name} ${f.serial} ${f.manufacturer}`;
+        const score = queryWords.filter((w) => combined.includes(w)).length;
+        return { doc: d, score };
+      })
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    if (scored.length > 0) return scored.slice(0, limit).map((e) => e.doc);
+  }
+
+  return [];
 }
 
 // ============================================================================
