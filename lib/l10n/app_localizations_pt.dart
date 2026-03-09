@@ -3212,4 +3212,62 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get useDefaultTerms => 'Usar texto padrão do segmento';
+
+  @override
+  String get pdfTermsAndConditions => 'Termos e Condicoes';
+
+  @override
+  String get pdfCompanySignature => 'Responsavel';
+
+  @override
+  String get pdfClientSignature => 'Cliente';
+
+  @override
+  String get pdfTechnician => 'Tecnico';
+
+  @override
+  String get pdfCreatedDate => 'Criada';
+
+  @override
+  String get pdfCompletedDate => 'Concluida';
+
+  @override
+  String get pdfIssuedDate => 'Emitida';
+
+  @override
+  String get pdfServicesSubtotal => 'Subtotal Servicos';
+
+  @override
+  String get pdfPartsSubtotal => 'Subtotal Pecas';
+
+  @override
+  String get pdfPaid => 'Pago';
+
+  @override
+  String get pdfUnitValue => 'Valor Unit.';
+
+  @override
+  String get pdfServiceType => 'Servico';
+
+  @override
+  String get pdfProductType => 'Peca';
+
+  @override
+  String get pdfItemType => 'Tipo';
+
+  @override
+  String get pdfSummary => 'Resumo';
+
+  @override
+  String get pdfGeneral => 'Geral';
+
+  @override
+  String get pdfTrackOnline => 'Acompanhe online';
+
+  @override
+  String get pdfTrackOnlineDescription =>
+      'Escaneie o QR Code para acompanhar esta ordem de servico';
+
+  @override
+  String get pdfEquipment => 'Equipamento';
 }
