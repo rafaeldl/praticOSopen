@@ -472,7 +472,6 @@ class PdfMainOsBuilder {
     required bool showBadge,
   }) {
     final hasItems = services.isNotEmpty || products.isNotEmpty;
-    if (!hasItems) return pw.SizedBox();
 
     final subtotal = services.fold(0.0, (sum, s) => sum + (s.value ?? 0)) +
         products.fold(0.0, (sum, p) => sum + (p.total ?? 0));
@@ -550,73 +549,74 @@ class PdfMainOsBuilder {
             ),
           ),
 
-          // Unified table (services + products)
-          pw.Table(
-            border: pw.TableBorder(
-              horizontalInside: pw.BorderSide(color: PdfStyles.dividerColor, width: 0.5),
+          // Unified table (services + products) - only if has items
+          if (hasItems)
+            pw.Table(
+              border: pw.TableBorder(
+                horizontalInside: pw.BorderSide(color: PdfStyles.dividerColor, width: 0.5),
+              ),
+              columnWidths: {
+                0: const pw.FixedColumnWidth(45),
+                1: const pw.FlexColumnWidth(),
+                2: const pw.FixedColumnWidth(28),
+                3: const pw.FixedColumnWidth(70),
+                4: const pw.FixedColumnWidth(70),
+              },
+              children: [
+                // Header row
+                pw.TableRow(
+                  decoration: const pw.BoxDecoration(color: PdfStyles.backgroundLighter),
+                  children: [
+                    _buildCompactTableHeader(localizations.itemType),
+                    _buildCompactTableHeader(localizations.descriptionColumn),
+                    _buildCompactTableHeader(localizations.quantityShort, align: pw.TextAlign.center),
+                    _buildCompactTableHeader(localizations.unitValue, align: pw.TextAlign.right),
+                    _buildCompactTableHeader(localizations.total, align: pw.TextAlign.right),
+                  ],
+                ),
+                // Service rows
+                ...services.map((s) {
+                  final description = s.description != null && s.description!.isNotEmpty
+                      ? '${s.service?.name ?? ''} - ${s.description}'
+                      : s.service?.name ?? '';
+                  return pw.TableRow(
+                    children: [
+                      _buildTypeBadge(localizations.serviceType, PdfStyles.serviceTypeColor),
+                      _buildCompactTableCell(description),
+                      _buildCompactTableCell('1', align: pw.TextAlign.center, color: PdfStyles.textSecondary),
+                      _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
+                      _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, isBold: true),
+                    ],
+                  );
+                }),
+                // Product rows
+                ...products.map((p) {
+                  final description = p.description != null && p.description!.isNotEmpty
+                      ? '${p.product?.name ?? ''} - ${p.description}'
+                      : p.product?.name ?? '';
+                  return pw.TableRow(
+                    children: [
+                      _buildTypeBadge(localizations.productType, PdfStyles.productTypeColor),
+                      _buildCompactTableCell(description),
+                      _buildCompactTableCell(p.quantity?.toString() ?? '1', align: pw.TextAlign.center, color: PdfStyles.textSecondary),
+                      _buildCompactTableCell(_formatCurrency(p.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
+                      _buildCompactTableCell(_formatCurrency(p.total), align: pw.TextAlign.right, isBold: true),
+                    ],
+                  );
+                }),
+                // Subtotal row
+                pw.TableRow(
+                  decoration: const pw.BoxDecoration(color: PdfStyles.backgroundLight),
+                  children: [
+                    pw.SizedBox(),
+                    _buildCompactTableCell(localizations.subtotal, isBold: true, color: PdfStyles.sectionIconColor),
+                    pw.SizedBox(),
+                    pw.SizedBox(),
+                    _buildCompactTableCell(_formatCurrency(subtotal), align: pw.TextAlign.right, isBold: true, color: PdfStyles.sectionIconColor),
+                  ],
+                ),
+              ],
             ),
-            columnWidths: {
-              0: const pw.FixedColumnWidth(45),
-              1: const pw.FlexColumnWidth(),
-              2: const pw.FixedColumnWidth(28),
-              3: const pw.FixedColumnWidth(70),
-              4: const pw.FixedColumnWidth(70),
-            },
-            children: [
-              // Header row
-              pw.TableRow(
-                decoration: const pw.BoxDecoration(color: PdfStyles.backgroundLighter),
-                children: [
-                  _buildCompactTableHeader(localizations.itemType),
-                  _buildCompactTableHeader(localizations.descriptionColumn),
-                  _buildCompactTableHeader(localizations.quantityShort, align: pw.TextAlign.center),
-                  _buildCompactTableHeader(localizations.unitValue, align: pw.TextAlign.right),
-                  _buildCompactTableHeader(localizations.total, align: pw.TextAlign.right),
-                ],
-              ),
-              // Service rows
-              ...services.map((s) {
-                final description = s.description != null && s.description!.isNotEmpty
-                    ? '${s.service?.name ?? ''} - ${s.description}'
-                    : s.service?.name ?? '';
-                return pw.TableRow(
-                  children: [
-                    _buildTypeBadge(localizations.serviceType, PdfStyles.serviceTypeColor),
-                    _buildCompactTableCell(description),
-                    _buildCompactTableCell('1', align: pw.TextAlign.center, color: PdfStyles.textSecondary),
-                    _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
-                    _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, isBold: true),
-                  ],
-                );
-              }),
-              // Product rows
-              ...products.map((p) {
-                final description = p.description != null && p.description!.isNotEmpty
-                    ? '${p.product?.name ?? ''} - ${p.description}'
-                    : p.product?.name ?? '';
-                return pw.TableRow(
-                  children: [
-                    _buildTypeBadge(localizations.productType, PdfStyles.productTypeColor),
-                    _buildCompactTableCell(description),
-                    _buildCompactTableCell(p.quantity?.toString() ?? '1', align: pw.TextAlign.center, color: PdfStyles.textSecondary),
-                    _buildCompactTableCell(_formatCurrency(p.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
-                    _buildCompactTableCell(_formatCurrency(p.total), align: pw.TextAlign.right, isBold: true),
-                  ],
-                );
-              }),
-              // Subtotal row
-              pw.TableRow(
-                decoration: const pw.BoxDecoration(color: PdfStyles.backgroundLight),
-                children: [
-                  pw.SizedBox(),
-                  _buildCompactTableCell(localizations.subtotal, isBold: true, color: PdfStyles.sectionIconColor),
-                  pw.SizedBox(),
-                  pw.SizedBox(),
-                  _buildCompactTableCell(_formatCurrency(subtotal), align: pw.TextAlign.right, isBold: true, color: PdfStyles.sectionIconColor),
-                ],
-              ),
-            ],
-          ),
         ],
       ),
     );
@@ -676,8 +676,6 @@ class PdfMainOsBuilder {
           (order.products ?? []).where((p) => p.deviceId == null || p.deviceId!.isEmpty),
         );
       }
-
-      if (deviceServices.isEmpty && deviceProducts.isEmpty) continue;
 
       if (blocks.isNotEmpty) {
         blocks.add(pw.SizedBox(height: 10));
