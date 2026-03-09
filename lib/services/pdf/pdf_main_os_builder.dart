@@ -307,7 +307,13 @@ class PdfMainOsBuilder {
         pw.SizedBox(width: 12),
 
         // Financial summary (fixed width)
-        _buildFinancialCard(order),
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeader(localizations.subtotal),
+            _buildFinancialCard(order),
+          ],
+        ),
       ],
     );
   }
@@ -926,38 +932,37 @@ class PdfMainOsBuilder {
             // Client + Financial Summary (side by side)
             buildClientAndFinancial(customer, order),
 
-            // Service Location
+            // Service Location (same pattern as client card)
             if (order.address != null && order.address!.isNotEmpty) ...[
-              pw.SizedBox(height: 8),
-              pw.Container(
-                width: double.infinity,
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: pw.BoxDecoration(
-                  borderRadius: pw.BorderRadius.circular(4),
-                  border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
-                ),
-                child: pw.Row(
-                  children: [
-                    pw.Text(
-                      '${localizations.serviceLocation}: ',
-                      style: pw.TextStyle(
-                        font: boldFont,
-                        fontSize: 8,
-                        color: PdfStyles.sectionIconColor,
-                      ),
-                    ),
-                    pw.Expanded(
-                      child: pw.Text(
-                        order.address!,
-                        style: pw.TextStyle(
-                          font: baseFont,
-                          fontSize: 8,
-                          color: PdfStyles.textSecondary,
+              pw.SizedBox(height: 10),
+              pw.Row(
+                children: [
+                  pw.Expanded(
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(localizations.serviceLocation),
+                        pw.Container(
+                          width: double.infinity,
+                          padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          decoration: pw.BoxDecoration(
+                            borderRadius: pw.BorderRadius.circular(4),
+                            border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
+                          ),
+                          child: pw.Text(
+                            order.address!,
+                            style: pw.TextStyle(
+                              font: baseFont,
+                              fontSize: 9,
+                              color: PdfStyles.textPrimary,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  pw.Expanded(child: pw.SizedBox()),
+                ],
               ),
             ],
 
