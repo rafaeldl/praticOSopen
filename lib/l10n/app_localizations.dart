@@ -5980,6 +5980,18 @@ abstract class AppLocalizations {
   /// **'Tipo'**
   String get pdfItemType;
 
+  /// No description provided for @pdfSummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo'**
+  String get pdfSummary;
+
+  /// No description provided for @pdfGeneral.
+  ///
+  /// In pt, this message translates to:
+  /// **'Geral'**
+  String get pdfGeneral;
+
   /// No description provided for @pdfTrackOnline.
   ///
   /// In pt, this message translates to:

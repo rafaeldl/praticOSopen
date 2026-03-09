@@ -1337,6 +1337,8 @@
   "pdfServiceType": "Service",
   "pdfProductType": "Part",
   "pdfItemType": "Type",
+  "pdfSummary": "Summary",
+  "pdfGeneral": "General",
   "pdfTrackOnline": "Track online",
   "pdfTrackOnlineDescription": "Scan the QR Code to track this service order",
   "pdfEquipment": "Equipment"

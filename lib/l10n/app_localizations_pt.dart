@@ -3152,6 +3152,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get pdfItemType => 'Tipo';
 
   @override
+  String get pdfSummary => 'Resumo';
+
+  @override
+  String get pdfGeneral => 'Geral';
+
+  @override
   String get pdfTrackOnline => 'Acompanhe online';
 
   @override

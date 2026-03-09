@@ -56,6 +56,8 @@ class PdfLocalizations {
   final String photoRecord;
   final String partsAndProducts;
   final String serviceLocation;
+  final String summary;
+  final String general;
 
   // Compact layout strings
   final String termsAndConditions;
@@ -115,6 +117,8 @@ class PdfLocalizations {
     required this.photoRecord,
     required this.partsAndProducts,
     required this.serviceLocation,
+    required this.summary,
+    required this.general,
     required this.termsAndConditions,
     required this.companySignature,
     required this.clientSignature,
@@ -171,6 +175,8 @@ class PdfLocalizations {
       photoRecord: _latinCharactersOnly(l10n.photoRecord),
       partsAndProducts: _latinCharactersOnly(l10n.partsAndProducts),
       serviceLocation: _latinCharactersOnly(l10n.serviceLocation),
+      summary: _latinCharactersOnly(l10n.pdfSummary),
+      general: _latinCharactersOnly(l10n.pdfGeneral),
       termsAndConditions: _latinCharactersOnly(l10n.pdfTermsAndConditions),
       companySignature: _latinCharactersOnly(l10n.pdfCompanySignature),
       clientSignature: _latinCharactersOnly(l10n.pdfClientSignature),

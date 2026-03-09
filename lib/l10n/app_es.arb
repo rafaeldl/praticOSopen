@@ -1337,6 +1337,8 @@
   "pdfServiceType": "Servicio",
   "pdfProductType": "Repuesto",
   "pdfItemType": "Tipo",
+  "pdfSummary": "Resumen",
+  "pdfGeneral": "General",
   "pdfTrackOnline": "Seguimiento online",
   "pdfTrackOnlineDescription": "Escanee el codigo QR para rastrear esta orden de servicio",
   "pdfEquipment": "Equipo"

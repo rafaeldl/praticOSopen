@@ -1382,6 +1382,8 @@
   "pdfServiceType": "Servico",
   "pdfProductType": "Peca",
   "pdfItemType": "Tipo",
+  "pdfSummary": "Resumo",
+  "pdfGeneral": "Geral",
   "pdfTrackOnline": "Acompanhe online",
   "pdfTrackOnlineDescription": "Escaneie o QR Code para acompanhar esta ordem de servico",
   "pdfEquipment": "Equipamento"

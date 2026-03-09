@@ -258,60 +258,89 @@ class PdfMainOsBuilder {
       customerParts.add(customer.email!);
     }
 
-    return pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
+    // Use Table so both cells share the same row height
+    return pw.Column(
       children: [
-        // Client card (expanded)
-        pw.Expanded(
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              _buildSectionHeader(config.customer),
-              pw.Container(
-                width: double.infinity,
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                decoration: pw.BoxDecoration(
-                  borderRadius: pw.BorderRadius.circular(4),
-                  border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
-                ),
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    pw.Text(
-                      customer?.name ?? localizations.notInformed,
-                      style: pw.TextStyle(
-                        font: boldFont,
-                        fontSize: 10,
-                        color: PdfStyles.textPrimary,
-                      ),
-                    ),
-                    if (customerParts.isNotEmpty) ...[
-                      pw.SizedBox(height: 3),
-                      pw.Text(
-                        customerParts.join(' · '),
-                        style: pw.TextStyle(
-                          font: baseFont,
-                          fontSize: 8,
-                          color: PdfStyles.textSecondary,
-                        ),
-                        maxLines: 2,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        pw.SizedBox(width: 12),
-
-        // Financial summary (fixed width)
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
+        // Headers side by side
+        pw.Row(
           children: [
-            _buildSectionHeader(localizations.subtotal),
-            _buildFinancialCard(order),
+            pw.Expanded(child: _buildSectionHeader(config.customer)),
+            pw.SizedBox(width: 12),
+            pw.SizedBox(width: 260, child: _buildSectionHeader(localizations.summary)),
+          ],
+        ),
+        // Cards with equal height via Table row
+        pw.Table(
+          columnWidths: {
+            0: const pw.FlexColumnWidth(),
+            1: const pw.FixedColumnWidth(12),
+            2: const pw.FixedColumnWidth(260),
+          },
+          children: [
+            pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.full,
+              children: [
+                // Client card
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: pw.BoxDecoration(
+                    borderRadius: pw.BorderRadius.circular(4),
+                    border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        customer?.name ?? localizations.notInformed,
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 10,
+                          color: PdfStyles.textPrimary,
+                        ),
+                      ),
+                      if (customerParts.isNotEmpty) ...[
+                        pw.SizedBox(height: 3),
+                        pw.Text(
+                          customerParts.join(' · '),
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 8,
+                            color: PdfStyles.textSecondary,
+                          ),
+                          maxLines: 2,
+                        ),
+                      ],
+                      // Service Location inside client card
+                      if (order.address != null && order.address!.isNotEmpty) ...[
+                        pw.SizedBox(height: 6),
+                        pw.Text(
+                          localizations.serviceLocation.toUpperCase(),
+                          style: pw.TextStyle(
+                            font: boldFont,
+                            fontSize: 7,
+                            color: PdfStyles.textMuted,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        pw.SizedBox(height: 2),
+                        pw.Text(
+                          order.address!,
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 8.5,
+                            color: PdfStyles.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                // Spacer column
+                pw.SizedBox(),
+                // Financial summary
+                _buildFinancialCard(order),
+              ],
+            ),
           ],
         ),
       ],
@@ -358,7 +387,6 @@ class PdfMainOsBuilder {
     final isPaid = order.payment == 'paid';
 
     return pw.Container(
-      width: 260,
       decoration: pw.BoxDecoration(
         borderRadius: pw.BorderRadius.circular(4),
         border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
@@ -491,21 +519,20 @@ class PdfMainOsBuilder {
       metaParts.add(device.manufacturer!);
     }
 
-    return pw.ClipRRect(
-      horizontalRadius: 6,
-      verticalRadius: 6,
-      child: pw.Container(
-        width: double.infinity,
-        decoration: pw.BoxDecoration(
-          color: PdfStyles.equipmentCardBg,
-          borderRadius: pw.BorderRadius.circular(6),
-          border: pw.Border.all(color: PdfStyles.equipmentCardBorder, width: 0.5),
-        ),
-        child: pw.Column(
+    return pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           // Equipment header
           pw.Container(
+            width: double.infinity,
+            decoration: pw.BoxDecoration(
+              color: PdfStyles.equipmentCardBg,
+              borderRadius: const pw.BorderRadius.only(
+                topLeft: pw.Radius.circular(6),
+                topRight: pw.Radius.circular(6),
+              ),
+              border: pw.Border.all(color: PdfStyles.equipmentCardBorder, width: 0.5),
+            ),
             padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             child: pw.Row(
               children: [
@@ -554,6 +581,15 @@ class PdfMainOsBuilder {
                     ],
                   ),
                 ),
+                if (hasItems)
+                  pw.Text(
+                    _formatCurrency(subtotal),
+                    style: pw.TextStyle(
+                      font: boldFont,
+                      fontSize: 10,
+                      color: PdfStyles.sectionIconColor,
+                    ),
+                  ),
               ],
             ),
           ),
@@ -562,6 +598,9 @@ class PdfMainOsBuilder {
           if (hasItems)
             pw.Table(
               border: pw.TableBorder(
+                left: pw.BorderSide(color: PdfStyles.equipmentCardBorder, width: 0.5),
+                right: pw.BorderSide(color: PdfStyles.equipmentCardBorder, width: 0.5),
+                bottom: pw.BorderSide(color: PdfStyles.equipmentCardBorder, width: 0.5),
                 horizontalInside: pw.BorderSide(color: PdfStyles.dividerColor, width: 0.5),
               ),
               columnWidths: {
@@ -613,22 +652,9 @@ class PdfMainOsBuilder {
                     ],
                   );
                 }),
-                // Subtotal row
-                pw.TableRow(
-                  decoration: const pw.BoxDecoration(color: PdfStyles.backgroundLight),
-                  children: [
-                    pw.SizedBox(),
-                    _buildCompactTableCell(localizations.subtotal, isBold: true, color: PdfStyles.sectionIconColor),
-                    pw.SizedBox(),
-                    pw.SizedBox(),
-                    _buildCompactTableCell(_formatCurrency(subtotal), align: pw.TextAlign.right, isBold: true, color: PdfStyles.sectionIconColor),
-                  ],
-                ),
               ],
             ),
         ],
-      ),
-    ),
     );
   }
 
@@ -666,6 +692,14 @@ class PdfMainOsBuilder {
     // Multi device: group items by deviceId
     final blocks = <pw.Widget>[];
 
+    // Collect general items (no deviceId)
+    final generalServices = (order.services ?? [])
+        .where((s) => s.deviceId == null || s.deviceId!.isEmpty)
+        .toList();
+    final generalProducts = (order.products ?? [])
+        .where((p) => p.deviceId == null || p.deviceId!.isEmpty)
+        .toList();
+
     for (var i = 0; i < devices.length; i++) {
       final device = devices[i];
       final deviceId = device.id;
@@ -676,16 +710,6 @@ class PdfMainOsBuilder {
       final deviceProducts = (order.products ?? [])
           .where((p) => p.deviceId == deviceId)
           .toList();
-
-      // For the first device, also include items without deviceId
-      if (i == 0) {
-        deviceServices.addAll(
-          (order.services ?? []).where((s) => s.deviceId == null || s.deviceId!.isEmpty),
-        );
-        deviceProducts.addAll(
-          (order.products ?? []).where((p) => p.deviceId == null || p.deviceId!.isEmpty),
-        );
-      }
 
       if (blocks.isNotEmpty) {
         blocks.add(pw.SizedBox(height: 10));
@@ -698,6 +722,22 @@ class PdfMainOsBuilder {
           services: deviceServices,
           products: deviceProducts,
           showBadge: true,
+        ),
+      );
+    }
+
+    // Add general items block (items without deviceId)
+    if (generalServices.isNotEmpty || generalProducts.isNotEmpty) {
+      if (blocks.isNotEmpty) {
+        blocks.add(pw.SizedBox(height: 10));
+      }
+      blocks.add(
+        buildEquipmentBlock(
+          deviceIndex: devices.length,
+          device: DeviceAggr()..name = localizations.general,
+          services: generalServices,
+          products: generalProducts,
+          showBadge: false,
         ),
       );
     }
@@ -931,40 +971,6 @@ class PdfMainOsBuilder {
           children: [
             // Client + Financial Summary (side by side)
             buildClientAndFinancial(customer, order),
-
-            // Service Location (same pattern as client card)
-            if (order.address != null && order.address!.isNotEmpty) ...[
-              pw.SizedBox(height: 10),
-              pw.Row(
-                children: [
-                  pw.Expanded(
-                    child: pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionHeader(localizations.serviceLocation),
-                        pw.Container(
-                          width: double.infinity,
-                          padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                          decoration: pw.BoxDecoration(
-                            borderRadius: pw.BorderRadius.circular(4),
-                            border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
-                          ),
-                          child: pw.Text(
-                            order.address!,
-                            style: pw.TextStyle(
-                              font: baseFont,
-                              fontSize: 9,
-                              color: PdfStyles.textPrimary,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  pw.Expanded(child: pw.SizedBox()),
-                ],
-              ),
-            ],
 
             pw.SizedBox(height: 14),
 
