@@ -485,14 +485,17 @@ class PdfMainOsBuilder {
       metaParts.add(device.manufacturer!);
     }
 
-    return pw.Container(
-      width: double.infinity,
-      decoration: pw.BoxDecoration(
-        color: PdfStyles.equipmentCardBg,
-        borderRadius: pw.BorderRadius.circular(6),
-        border: pw.Border.all(color: PdfStyles.equipmentCardBorder, width: 0.5),
-      ),
-      child: pw.Column(
+    return pw.ClipRRect(
+      horizontalRadius: 6,
+      verticalRadius: 6,
+      child: pw.Container(
+        width: double.infinity,
+        decoration: pw.BoxDecoration(
+          color: PdfStyles.equipmentCardBg,
+          borderRadius: pw.BorderRadius.circular(6),
+          border: pw.Border.all(color: PdfStyles.equipmentCardBorder, width: 0.5),
+        ),
+        child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           // Equipment header
@@ -619,6 +622,7 @@ class PdfMainOsBuilder {
             ),
         ],
       ),
+    ),
     );
   }
 
