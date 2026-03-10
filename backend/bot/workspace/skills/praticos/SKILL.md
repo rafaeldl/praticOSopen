@@ -98,6 +98,7 @@ message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
      - "Troca de oleo 5W30" → usar "Troca de oleo" + description "Oleo 5W30"
      - "Instalacao split 12k sala" → usar "Instalacao de ar condicionado" + description "Split 12k - Sala"
    - 🔴 Info de etiquetas/dados tecnicos extraidos de fotos: NAO usar /comments. Anotar apenas no memory do usuario se necessario.
+6. 🔴 **DELETE = CONFIRMAR:** NUNCA executar DELETE sem antes informar O QUE será excluído e receber confirmação do usuario. Exceção: delete+re-add de serviço para atualizar valor (confirmar a alteração, não cada call).
 
 ---
 
