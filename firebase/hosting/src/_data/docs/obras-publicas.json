@@ -1,0 +1,860 @@
+{
+  "pt": {
+    "sections": [
+      {
+        "id": "visao-geral",
+        "title": "Visão Geral",
+        "intro": "O PraticOS para Obras Públicas permite que prefeituras e municípios gerenciem contratos de licitação, acompanhem a execução de obras e controlem medições financeiras — tudo em conformidade com a legislação vigente.",
+        "infoCard": {
+          "title": "Conformidade com a Lei 14.133/2021",
+          "content": "O sistema foi projetado para atender às exigências da Nova Lei de Licitações (Lei 14.133/2021), com rastreabilidade completa de contratos, medições e pagamentos."
+        },
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line></svg>",
+            "color": "blue",
+            "title": "Gestão de Contratos",
+            "description": "Cadastre e acompanhe contratos de licitação com status detalhado de cada fase"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"10\"></line><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"4\"></line><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"16\"></line></svg>",
+            "color": "green",
+            "title": "Medições de Obra",
+            "description": "Registre medições físicas e financeiras com formulários padronizados"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
+            "color": "orange",
+            "title": "Vistorias e Fiscalização",
+            "description": "Realize vistorias de campo com checklists, fotos e relatórios automáticos"
+          }
+        ]
+      },
+      {
+        "id": "conceitos",
+        "title": "Mapeamento de Conceitos",
+        "intro": "O PraticOS adapta sua terminologia para o contexto de obras públicas. Veja como os conceitos municipais são mapeados no sistema:",
+        "table": {
+          "headers": ["Conceito Municipal", "No PraticOS", "Descrição"],
+          "rows": [
+            { "label": "Obra / Empreendimento", "cells": [{"text": "Dispositivo"}, {"text": "Cada obra é cadastrada como um dispositivo com localização e detalhes"}] },
+            { "label": "Contrato de Licitação", "cells": [{"text": "Ordem de Serviço"}, {"text": "Cada contrato é gerenciado como uma OS com status e histórico"}] },
+            { "label": "Empresa Contratada", "cells": [{"text": "Cliente"}, {"text": "Empresas vencedoras de licitação são cadastradas como clientes"}] },
+            { "label": "Medição de Obra", "cells": [{"text": "Procedimento"}, {"text": "Medições são registradas via formulários dinâmicos (procedimentos)"}] },
+            { "label": "Fiscal de Obra", "cells": [{"text": "Supervisor"}, {"text": "Fiscais acompanham a execução com perfil de supervisor"}] },
+            { "label": "Secretário / Gestor", "cells": [{"text": "Administrador"}, {"text": "Gestores têm acesso completo ao sistema como administradores"}] }
+          ]
+        }
+      },
+      {
+        "id": "configuracao",
+        "title": "Configuração Inicial",
+        "intro": "Configure o PraticOS para sua prefeitura em poucos passos.",
+        "subsections": [
+          {
+            "title": "1. Criar a Empresa",
+            "steps": [
+              "Baixe o app PraticOS na App Store ou Google Play",
+              "Crie uma conta com o e-mail institucional da prefeitura",
+              "No cadastro da empresa, preencha os dados do município (CNPJ, endereço)"
+            ]
+          },
+          {
+            "title": "2. Selecionar o Segmento",
+            "steps": [
+              "Acesse <strong>Configurações → Empresa</strong>",
+              "Em <strong>Segmento</strong>, selecione <strong>Obras Públicas / Prefeituras</strong>",
+              "O sistema adaptará automaticamente os labels e formulários para o contexto municipal"
+            ]
+          },
+          {
+            "title": "3. Cadastrar Empresas Contratadas",
+            "steps": [
+              "Acesse o módulo de <strong>Clientes</strong>",
+              "Cadastre cada empresa contratada com CNPJ, razão social e responsável",
+              "Essas empresas serão vinculadas aos contratos (Ordens de Serviço)"
+            ]
+          },
+          {
+            "title": "4. Configurar Equipe",
+            "steps": [
+              "Acesse <strong>Configurações → Colaboradores</strong>",
+              "Adicione fiscais de obra com o perfil <strong>Supervisor</strong>",
+              "Adicione secretários e gestores com o perfil <strong>Administrador</strong>",
+              "Adicione empresas contratadas com o perfil <strong>Técnico</strong> (acesso limitado)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "contratos",
+        "title": "Gestão de Contratos",
+        "intro": "Cada contrato de licitação é gerenciado como uma Ordem de Serviço no PraticOS, com status que refletem as fases do processo licitatório.",
+        "statusCards": [
+          {
+            "color": "blue",
+            "title": "Em Licitação",
+            "description": "Processo licitatório em andamento. Contrato ainda não assinado."
+          },
+          {
+            "color": "orange",
+            "title": "Contratado",
+            "description": "Contrato assinado, aguardando início da execução da obra."
+          },
+          {
+            "color": "blue",
+            "title": "Em Execução",
+            "description": "Obra em andamento com medições e vistorias sendo realizadas."
+          },
+          {
+            "color": "green",
+            "title": "Concluído",
+            "description": "Obra finalizada, com todas as medições e pagamentos realizados."
+          },
+          {
+            "color": "red",
+            "title": "Rescindido",
+            "description": "Contrato rescindido por descumprimento ou conveniência administrativa."
+          }
+        ],
+        "subsections": [
+          {
+            "title": "Como Criar um Contrato",
+            "steps": [
+              "Acesse o módulo de <strong>Ordens de Serviço</strong>",
+              "Toque em <strong>+</strong> para criar nova OS",
+              "Selecione a <strong>empresa contratada</strong> (cliente)",
+              "Cadastre a <strong>obra</strong> como dispositivo (nome, endereço, tipo de obra)",
+              "Preencha os dados do contrato: número, valor, prazo de execução",
+              "O contrato ficará com status <strong>Em Licitação</strong> até ser aprovado"
+            ]
+          },
+          {
+            "title": "Campos Customizados",
+            "intro": "O segmento Obras Públicas adapta automaticamente os campos do sistema:",
+            "validationList": [
+              { "label": "Dispositivo", "text": "Renomeado para \"Obra\" — cadastre nome da obra, endereço e tipo" },
+              { "label": "Número do Contrato", "text": "Campo dedicado para o número do processo licitatório" },
+              { "label": "Valor Contratado", "text": "Valor total do contrato para controle de medições" },
+              { "label": "Prazo de Execução", "text": "Data de início e término previstas para a obra" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "medicoes",
+        "title": "Medições e Vistorias",
+        "intro": "O sistema disponibiliza formulários específicos para o acompanhamento de obras públicas, permitindo medições padronizadas e vistorias de campo.",
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"10\"></line><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"4\"></line><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"16\"></line></svg>",
+            "color": "blue",
+            "title": "Medição de Obra",
+            "description": "Registro percentual de execução física com campos para quantidade e valor medido"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
+            "color": "green",
+            "title": "Vistoria de Campo",
+            "description": "Checklist de inspeção in loco com registro fotográfico e observações"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "color": "orange",
+            "title": "Liberação de Recursos",
+            "description": "Controle de repasses e liberação de verbas vinculadas ao contrato"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
+            "color": "purple",
+            "title": "Cronograma Físico-Financeiro",
+            "description": "Acompanhamento do progresso planejado vs. realizado da obra"
+          }
+        ],
+        "subsections": [
+          {
+            "title": "Como Preencher uma Medição",
+            "steps": [
+              "Abra o contrato (Ordem de Serviço) desejado",
+              "Acesse a aba <strong>Procedimentos</strong>",
+              "Selecione o template <strong>Medição de Obra</strong>",
+              "Preencha os campos: etapa, percentual executado, valor medido",
+              "Adicione fotos do progresso da obra",
+              "Salve — a medição ficará registrada no histórico do contrato"
+            ]
+          },
+          {
+            "title": "Como Registrar uma Vistoria",
+            "steps": [
+              "Abra o contrato da obra a ser vistoriada",
+              "Acesse a aba <strong>Procedimentos</strong>",
+              "Selecione o template <strong>Vistoria de Campo</strong>",
+              "Preencha o checklist de itens a verificar",
+              "Registre fotos e observações para cada item",
+              "O relatório será gerado automaticamente com data e responsável"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "financeiro",
+        "title": "Controle Financeiro",
+        "intro": "O módulo financeiro do PraticOS é adaptado para o contexto de obras públicas, com labels e funcionalidades específicas para gestão de contratos municipais.",
+        "infoCard": {
+          "title": "Labels Adaptados",
+          "content": "No segmento Obras Públicas, os labels financeiros são personalizados: \"Pagamento\" vira \"Medição\", \"Preço\" vira \"Valor Contratado\", \"Desconto\" vira \"Glosa\", entre outros."
+        },
+        "subsections": [
+          {
+            "title": "Como Registrar uma Medição Financeira",
+            "steps": [
+              "Abra o contrato (OS) desejado",
+              "Acesse a seção <strong>Resumo</strong> e clique em <strong>Total</strong>",
+              "Registre o valor da medição aprovada",
+              "O sistema atualiza automaticamente o saldo do contrato e a barra de progresso"
+            ]
+          },
+          {
+            "title": "Dashboard de Obras",
+            "intro": "O dashboard financeiro mostra uma visão consolidada de todos os contratos:",
+            "validationList": [
+              { "label": "Valor Total Contratado", "text": "Soma de todos os contratos ativos no período" },
+              { "label": "Valor Medido", "text": "Total de medições aprovadas e pagas" },
+              { "label": "Saldo a Executar", "text": "Diferença entre valor contratado e valor medido" },
+              { "label": "Progresso Geral", "text": "Percentual médio de execução das obras" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "permissoes",
+        "title": "Perfis e Permissões",
+        "intro": "O sistema de perfis do PraticOS é mapeado para as funções típicas de uma prefeitura na gestão de obras:",
+        "table": {
+          "headers": ["Função Municipal", "Perfil PraticOS", "Acesso"],
+          "rows": [
+            { "label": "Secretário de Obras", "cells": [{"text": "Administrador"}, {"text": "Acesso total: contratos, financeiro, equipe"}] },
+            { "label": "Diretor de Engenharia", "cells": [{"text": "Gerente"}, {"text": "Contratos, medições e dashboard financeiro"}] },
+            { "label": "Fiscal de Obra", "cells": [{"text": "Supervisor"}, {"text": "Vistorias, medições físicas, sem acesso financeiro"}] },
+            { "label": "Empresa Contratada", "cells": [{"text": "Técnico"}, {"text": "Apenas OS atribuídas, sem dados financeiros"}] },
+            { "label": "Consultor Externo", "cells": [{"text": "Consultor"}, {"text": "Visualiza dados de OS que criou"}] }
+          ]
+        },
+        "warningCard": {
+          "title": "Empresas Contratadas com Acesso Limitado",
+          "content": "Empresas contratadas cadastradas como Técnicos só visualizam as Ordens de Serviço atribuídas a elas, sem acesso a dados financeiros ou de outros contratos."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Perguntas Frequentes",
+        "faq": [
+          {
+            "question": "Preciso ter um sistema de licitação digital para usar o PraticOS?",
+            "answer": "Não. O PraticOS é complementar ao sistema de licitação. Ele gerencia a execução dos contratos após a fase licitatória, não o processo de licitação em si."
+          },
+          {
+            "question": "Posso usar o PraticOS para contratos antigos, já em execução?",
+            "answer": "Sim. Basta cadastrar o contrato como uma OS, informar o valor contratado e o percentual já executado. O sistema passa a acompanhar a partir daquele ponto."
+          },
+          {
+            "question": "Como controlar múltiplas obras simultaneamente?",
+            "answer": "Cada obra é uma Ordem de Serviço independente. Use o dashboard para ter a visão consolidada de todas as obras, com filtros por status, empresa e período."
+          },
+          {
+            "question": "O fiscal de obra consegue ver valores financeiros?",
+            "answer": "Não. Fiscais (perfil Supervisor) têm acesso a medições físicas e vistorias, mas não visualizam valores financeiros. Apenas Administradores e Gerentes acessam dados financeiros."
+          },
+          {
+            "question": "A empresa contratada pode acessar o sistema?",
+            "answer": "Sim, com acesso limitado. A empresa é cadastrada com perfil Técnico e só visualiza as OS atribuídas a ela, sem acesso a dados financeiros ou de outros contratos."
+          },
+          {
+            "question": "É possível gerar relatórios de medição?",
+            "answer": "Sim. As medições registradas via procedimentos geram relatórios automáticos com data, responsável e fotos. O PDF da OS inclui todo o histórico de medições."
+          },
+          {
+            "question": "O sistema atende à Lei 14.133/2021?",
+            "answer": "O PraticOS auxilia na gestão e rastreabilidade dos contratos conforme exigido pela lei, registrando medições, pagamentos e vistorias com histórico completo. No entanto, não substitui sistemas específicos de licitação."
+          },
+          {
+            "question": "Posso compartilhar o progresso da obra com cidadãos?",
+            "answer": "Sim. Use o recurso de Compartilhar OS para gerar um link público com o progresso da obra, medições e fotos. Ideal para transparência pública."
+          }
+        ]
+      }
+    ]
+  },
+  "en": {
+    "sections": [
+      {
+        "id": "overview",
+        "title": "Overview",
+        "intro": "PraticOS for Public Works allows municipalities to manage procurement contracts, track construction execution, and control financial measurements — all in compliance with current legislation.",
+        "infoCard": {
+          "title": "Compliance with Brazilian Procurement Law (14.133/2021)",
+          "content": "The system was designed to meet the requirements of the New Procurement Law (Law 14.133/2021), with complete traceability of contracts, measurements, and payments."
+        },
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line></svg>",
+            "color": "blue",
+            "title": "Contract Management",
+            "description": "Register and track procurement contracts with detailed status for each phase"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"10\"></line><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"4\"></line><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"16\"></line></svg>",
+            "color": "green",
+            "title": "Construction Measurements",
+            "description": "Record physical and financial measurements with standardized forms"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
+            "color": "orange",
+            "title": "Inspections & Oversight",
+            "description": "Conduct field inspections with checklists, photos, and automatic reports"
+          }
+        ]
+      },
+      {
+        "id": "concepts",
+        "title": "Concept Mapping",
+        "intro": "PraticOS adapts its terminology for the public works context. See how municipal concepts map to the system:",
+        "table": {
+          "headers": ["Municipal Concept", "In PraticOS", "Description"],
+          "rows": [
+            { "label": "Construction / Project", "cells": [{"text": "Device"}, {"text": "Each construction project is registered as a device with location and details"}] },
+            { "label": "Procurement Contract", "cells": [{"text": "Service Order"}, {"text": "Each contract is managed as an SO with status and history"}] },
+            { "label": "Contracted Company", "cells": [{"text": "Customer"}, {"text": "Winning bidders are registered as customers"}] },
+            { "label": "Construction Measurement", "cells": [{"text": "Procedure"}, {"text": "Measurements are recorded via dynamic forms (procedures)"}] },
+            { "label": "Construction Inspector", "cells": [{"text": "Supervisor"}, {"text": "Inspectors monitor execution with supervisor profile"}] },
+            { "label": "Secretary / Manager", "cells": [{"text": "Administrator"}, {"text": "Managers have full system access as administrators"}] }
+          ]
+        }
+      },
+      {
+        "id": "setup",
+        "title": "Initial Setup",
+        "intro": "Set up PraticOS for your municipality in a few steps.",
+        "subsections": [
+          {
+            "title": "1. Create the Company",
+            "steps": [
+              "Download the PraticOS app from the App Store or Google Play",
+              "Create an account with the municipality's institutional email",
+              "In the company registration, fill in the municipality data (tax ID, address)"
+            ]
+          },
+          {
+            "title": "2. Select the Segment",
+            "steps": [
+              "Go to <strong>Settings → Company</strong>",
+              "Under <strong>Segment</strong>, select <strong>Public Works / Municipalities</strong>",
+              "The system will automatically adapt labels and forms for the municipal context"
+            ]
+          },
+          {
+            "title": "3. Register Contracted Companies",
+            "steps": [
+              "Go to the <strong>Customers</strong> module",
+              "Register each contracted company with tax ID, company name, and contact person",
+              "These companies will be linked to contracts (Service Orders)"
+            ]
+          },
+          {
+            "title": "4. Configure Team",
+            "steps": [
+              "Go to <strong>Settings → Collaborators</strong>",
+              "Add construction inspectors with the <strong>Supervisor</strong> profile",
+              "Add secretaries and managers with the <strong>Administrator</strong> profile",
+              "Add contracted companies with the <strong>Technician</strong> profile (limited access)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "contracts",
+        "title": "Contract Management",
+        "intro": "Each procurement contract is managed as a Service Order in PraticOS, with statuses that reflect the phases of the procurement process.",
+        "statusCards": [
+          {
+            "color": "blue",
+            "title": "In Procurement",
+            "description": "Procurement process underway. Contract not yet signed."
+          },
+          {
+            "color": "orange",
+            "title": "Contracted",
+            "description": "Contract signed, awaiting start of construction execution."
+          },
+          {
+            "color": "blue",
+            "title": "In Execution",
+            "description": "Construction underway with measurements and inspections being performed."
+          },
+          {
+            "color": "green",
+            "title": "Completed",
+            "description": "Construction finished, with all measurements and payments made."
+          },
+          {
+            "color": "red",
+            "title": "Terminated",
+            "description": "Contract terminated due to non-compliance or administrative convenience."
+          }
+        ],
+        "subsections": [
+          {
+            "title": "How to Create a Contract",
+            "steps": [
+              "Go to the <strong>Service Orders</strong> module",
+              "Tap <strong>+</strong> to create a new SO",
+              "Select the <strong>contracted company</strong> (customer)",
+              "Register the <strong>construction project</strong> as a device (name, address, type)",
+              "Fill in contract data: number, value, execution deadline",
+              "The contract will have <strong>In Procurement</strong> status until approved"
+            ]
+          },
+          {
+            "title": "Custom Fields",
+            "intro": "The Public Works segment automatically adapts system fields:",
+            "validationList": [
+              { "label": "Device", "text": "Renamed to \"Construction\" — register project name, address, and type" },
+              { "label": "Contract Number", "text": "Dedicated field for the procurement process number" },
+              { "label": "Contract Value", "text": "Total contract value for measurement control" },
+              { "label": "Execution Deadline", "text": "Expected start and end dates for the construction" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "measurements",
+        "title": "Measurements & Inspections",
+        "intro": "The system provides specific forms for public works monitoring, enabling standardized measurements and field inspections.",
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"10\"></line><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"4\"></line><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"16\"></line></svg>",
+            "color": "blue",
+            "title": "Construction Measurement",
+            "description": "Percentage record of physical execution with fields for quantity and measured value"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
+            "color": "green",
+            "title": "Field Inspection",
+            "description": "On-site inspection checklist with photo documentation and observations"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "color": "orange",
+            "title": "Resource Release",
+            "description": "Control of transfers and fund releases linked to the contract"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
+            "color": "purple",
+            "title": "Physical-Financial Schedule",
+            "description": "Tracking planned vs. actual construction progress"
+          }
+        ],
+        "subsections": [
+          {
+            "title": "How to Fill a Measurement",
+            "steps": [
+              "Open the desired contract (Service Order)",
+              "Go to the <strong>Procedures</strong> tab",
+              "Select the <strong>Construction Measurement</strong> template",
+              "Fill in the fields: stage, percentage executed, measured value",
+              "Add photos of construction progress",
+              "Save — the measurement will be recorded in the contract history"
+            ]
+          },
+          {
+            "title": "How to Record an Inspection",
+            "steps": [
+              "Open the contract for the construction to be inspected",
+              "Go to the <strong>Procedures</strong> tab",
+              "Select the <strong>Field Inspection</strong> template",
+              "Fill in the checklist of items to verify",
+              "Record photos and observations for each item",
+              "The report will be automatically generated with date and responsible person"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "financial",
+        "title": "Financial Control",
+        "intro": "The PraticOS financial module is adapted for the public works context, with specific labels and features for municipal contract management.",
+        "infoCard": {
+          "title": "Adapted Labels",
+          "content": "In the Public Works segment, financial labels are customized: \"Payment\" becomes \"Measurement\", \"Price\" becomes \"Contract Value\", \"Discount\" becomes \"Deduction\", among others."
+        },
+        "subsections": [
+          {
+            "title": "How to Record a Financial Measurement",
+            "steps": [
+              "Open the desired contract (SO)",
+              "Go to the <strong>Summary</strong> section and click on <strong>Total</strong>",
+              "Record the approved measurement value",
+              "The system automatically updates the contract balance and progress bar"
+            ]
+          },
+          {
+            "title": "Works Dashboard",
+            "intro": "The financial dashboard shows a consolidated view of all contracts:",
+            "validationList": [
+              { "label": "Total Contract Value", "text": "Sum of all active contracts in the period" },
+              { "label": "Measured Value", "text": "Total of approved and paid measurements" },
+              { "label": "Remaining Balance", "text": "Difference between contract value and measured value" },
+              { "label": "Overall Progress", "text": "Average execution percentage of construction projects" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "permissions",
+        "title": "Profiles & Permissions",
+        "intro": "The PraticOS profile system maps to the typical roles in a municipality for public works management:",
+        "table": {
+          "headers": ["Municipal Role", "PraticOS Profile", "Access"],
+          "rows": [
+            { "label": "Works Secretary", "cells": [{"text": "Administrator"}, {"text": "Full access: contracts, financial, team"}] },
+            { "label": "Engineering Director", "cells": [{"text": "Manager"}, {"text": "Contracts, measurements, and financial dashboard"}] },
+            { "label": "Construction Inspector", "cells": [{"text": "Supervisor"}, {"text": "Inspections, physical measurements, no financial access"}] },
+            { "label": "Contracted Company", "cells": [{"text": "Technician"}, {"text": "Only assigned SOs, no financial data"}] },
+            { "label": "External Consultant", "cells": [{"text": "Consultant"}, {"text": "Views data for SOs they created"}] }
+          ]
+        },
+        "warningCard": {
+          "title": "Contracted Companies with Limited Access",
+          "content": "Contracted companies registered as Technicians can only view Service Orders assigned to them, without access to financial data or other contracts."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Frequently Asked Questions",
+        "faq": [
+          {
+            "question": "Do I need a digital procurement system to use PraticOS?",
+            "answer": "No. PraticOS complements the procurement system. It manages contract execution after the procurement phase, not the procurement process itself."
+          },
+          {
+            "question": "Can I use PraticOS for existing contracts already in execution?",
+            "answer": "Yes. Simply register the contract as an SO, enter the contract value and the percentage already executed. The system will track from that point forward."
+          },
+          {
+            "question": "How to manage multiple construction projects simultaneously?",
+            "answer": "Each project is an independent Service Order. Use the dashboard for a consolidated view of all projects, with filters by status, company, and period."
+          },
+          {
+            "question": "Can the construction inspector see financial values?",
+            "answer": "No. Inspectors (Supervisor profile) have access to physical measurements and inspections but cannot view financial values. Only Administrators and Managers access financial data."
+          },
+          {
+            "question": "Can the contracted company access the system?",
+            "answer": "Yes, with limited access. The company is registered with a Technician profile and can only view SOs assigned to it, without access to financial data or other contracts."
+          },
+          {
+            "question": "Is it possible to generate measurement reports?",
+            "answer": "Yes. Measurements recorded via procedures generate automatic reports with date, responsible person, and photos. The SO PDF includes the complete measurement history."
+          },
+          {
+            "question": "Does the system comply with Law 14.133/2021?",
+            "answer": "PraticOS helps with contract management and traceability as required by law, recording measurements, payments, and inspections with complete history. However, it does not replace specific procurement systems."
+          },
+          {
+            "question": "Can I share construction progress with citizens?",
+            "answer": "Yes. Use the Share SO feature to generate a public link with construction progress, measurements, and photos. Ideal for public transparency."
+          }
+        ]
+      }
+    ]
+  },
+  "es": {
+    "sections": [
+      {
+        "id": "vision-general",
+        "title": "Visión General",
+        "intro": "PraticOS para Obras Públicas permite que municipios y ayuntamientos gestionen contratos de licitación, acompañen la ejecución de obras y controlen mediciones financieras — todo en conformidad con la legislación vigente.",
+        "infoCard": {
+          "title": "Conformidad con la Ley de Licitaciones",
+          "content": "El sistema fue diseñado para atender las exigencias de la legislación de contratación pública, con trazabilidad completa de contratos, mediciones y pagos."
+        },
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line></svg>",
+            "color": "blue",
+            "title": "Gestión de Contratos",
+            "description": "Registre y acompañe contratos de licitación con estado detallado de cada fase"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"10\"></line><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"4\"></line><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"16\"></line></svg>",
+            "color": "green",
+            "title": "Mediciones de Obra",
+            "description": "Registre mediciones físicas y financieras con formularios estandarizados"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
+            "color": "orange",
+            "title": "Inspecciones y Fiscalización",
+            "description": "Realice inspecciones de campo con checklists, fotos e informes automáticos"
+          }
+        ]
+      },
+      {
+        "id": "conceptos",
+        "title": "Mapeo de Conceptos",
+        "intro": "PraticOS adapta su terminología para el contexto de obras públicas. Vea cómo los conceptos municipales se mapean en el sistema:",
+        "table": {
+          "headers": ["Concepto Municipal", "En PraticOS", "Descripción"],
+          "rows": [
+            { "label": "Obra / Emprendimiento", "cells": [{"text": "Dispositivo"}, {"text": "Cada obra se registra como un dispositivo con ubicación y detalles"}] },
+            { "label": "Contrato de Licitación", "cells": [{"text": "Orden de Servicio"}, {"text": "Cada contrato se gestiona como una OS con estado e historial"}] },
+            { "label": "Empresa Contratada", "cells": [{"text": "Cliente"}, {"text": "Las empresas ganadoras de licitación se registran como clientes"}] },
+            { "label": "Medición de Obra", "cells": [{"text": "Procedimiento"}, {"text": "Las mediciones se registran mediante formularios dinámicos (procedimientos)"}] },
+            { "label": "Fiscal de Obra", "cells": [{"text": "Supervisor"}, {"text": "Los fiscales acompañan la ejecución con perfil de supervisor"}] },
+            { "label": "Secretario / Gestor", "cells": [{"text": "Administrador"}, {"text": "Los gestores tienen acceso completo al sistema como administradores"}] }
+          ]
+        }
+      },
+      {
+        "id": "configuracion",
+        "title": "Configuración Inicial",
+        "intro": "Configure PraticOS para su municipio en pocos pasos.",
+        "subsections": [
+          {
+            "title": "1. Crear la Empresa",
+            "steps": [
+              "Descargue la app PraticOS en la App Store o Google Play",
+              "Cree una cuenta con el correo institucional del municipio",
+              "En el registro de la empresa, complete los datos del municipio (NIF, dirección)"
+            ]
+          },
+          {
+            "title": "2. Seleccionar el Segmento",
+            "steps": [
+              "Acceda a <strong>Configuraciones → Empresa</strong>",
+              "En <strong>Segmento</strong>, seleccione <strong>Obras Públicas / Municipios</strong>",
+              "El sistema adaptará automáticamente los labels y formularios para el contexto municipal"
+            ]
+          },
+          {
+            "title": "3. Registrar Empresas Contratadas",
+            "steps": [
+              "Acceda al módulo de <strong>Clientes</strong>",
+              "Registre cada empresa contratada con NIF, razón social y responsable",
+              "Estas empresas se vincularán a los contratos (Órdenes de Servicio)"
+            ]
+          },
+          {
+            "title": "4. Configurar Equipo",
+            "steps": [
+              "Acceda a <strong>Configuraciones → Colaboradores</strong>",
+              "Agregue fiscales de obra con el perfil <strong>Supervisor</strong>",
+              "Agregue secretarios y gestores con el perfil <strong>Administrador</strong>",
+              "Agregue empresas contratadas con el perfil <strong>Técnico</strong> (acceso limitado)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "contratos",
+        "title": "Gestión de Contratos",
+        "intro": "Cada contrato de licitación se gestiona como una Orden de Servicio en PraticOS, con estados que reflejan las fases del proceso licitatorio.",
+        "statusCards": [
+          {
+            "color": "blue",
+            "title": "En Licitación",
+            "description": "Proceso licitatorio en curso. Contrato aún no firmado."
+          },
+          {
+            "color": "orange",
+            "title": "Contratado",
+            "description": "Contrato firmado, esperando inicio de la ejecución de la obra."
+          },
+          {
+            "color": "blue",
+            "title": "En Ejecución",
+            "description": "Obra en curso con mediciones e inspecciones siendo realizadas."
+          },
+          {
+            "color": "green",
+            "title": "Concluido",
+            "description": "Obra finalizada, con todas las mediciones y pagos realizados."
+          },
+          {
+            "color": "red",
+            "title": "Rescindido",
+            "description": "Contrato rescindido por incumplimiento o conveniencia administrativa."
+          }
+        ],
+        "subsections": [
+          {
+            "title": "Cómo Crear un Contrato",
+            "steps": [
+              "Acceda al módulo de <strong>Órdenes de Servicio</strong>",
+              "Toque en <strong>+</strong> para crear nueva OS",
+              "Seleccione la <strong>empresa contratada</strong> (cliente)",
+              "Registre la <strong>obra</strong> como dispositivo (nombre, dirección, tipo de obra)",
+              "Complete los datos del contrato: número, valor, plazo de ejecución",
+              "El contrato quedará con estado <strong>En Licitación</strong> hasta ser aprobado"
+            ]
+          },
+          {
+            "title": "Campos Personalizados",
+            "intro": "El segmento Obras Públicas adapta automáticamente los campos del sistema:",
+            "validationList": [
+              { "label": "Dispositivo", "text": "Renombrado a \"Obra\" — registre nombre de la obra, dirección y tipo" },
+              { "label": "Número del Contrato", "text": "Campo dedicado para el número del proceso licitatorio" },
+              { "label": "Valor Contratado", "text": "Valor total del contrato para control de mediciones" },
+              { "label": "Plazo de Ejecución", "text": "Fechas de inicio y término previstas para la obra" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mediciones",
+        "title": "Mediciones e Inspecciones",
+        "intro": "El sistema ofrece formularios específicos para el seguimiento de obras públicas, permitiendo mediciones estandarizadas e inspecciones de campo.",
+        "features": [
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"20\" x2=\"12\" y2=\"10\"></line><line x1=\"18\" y1=\"20\" x2=\"18\" y2=\"4\"></line><line x1=\"6\" y1=\"20\" x2=\"6\" y2=\"16\"></line></svg>",
+            "color": "blue",
+            "title": "Medición de Obra",
+            "description": "Registro porcentual de ejecución física con campos para cantidad y valor medido"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M9 11l3 3L22 4\"></path><path d=\"M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11\"></path></svg>",
+            "color": "green",
+            "title": "Inspección de Campo",
+            "description": "Checklist de inspección in situ con registro fotográfico y observaciones"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
+            "color": "orange",
+            "title": "Liberación de Recursos",
+            "description": "Control de transferencias y liberación de fondos vinculados al contrato"
+          },
+          {
+            "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><polyline points=\"12 6 12 12 16 14\"></polyline></svg>",
+            "color": "purple",
+            "title": "Cronograma Físico-Financiero",
+            "description": "Seguimiento del progreso planificado vs. realizado de la obra"
+          }
+        ],
+        "subsections": [
+          {
+            "title": "Cómo Completar una Medición",
+            "steps": [
+              "Abra el contrato (Orden de Servicio) deseado",
+              "Acceda a la pestaña <strong>Procedimientos</strong>",
+              "Seleccione la plantilla <strong>Medición de Obra</strong>",
+              "Complete los campos: etapa, porcentaje ejecutado, valor medido",
+              "Agregue fotos del progreso de la obra",
+              "Guarde — la medición quedará registrada en el historial del contrato"
+            ]
+          },
+          {
+            "title": "Cómo Registrar una Inspección",
+            "steps": [
+              "Abra el contrato de la obra a inspeccionar",
+              "Acceda a la pestaña <strong>Procedimientos</strong>",
+              "Seleccione la plantilla <strong>Inspección de Campo</strong>",
+              "Complete el checklist de ítems a verificar",
+              "Registre fotos y observaciones para cada ítem",
+              "El informe se generará automáticamente con fecha y responsable"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "financiero",
+        "title": "Control Financiero",
+        "intro": "El módulo financiero de PraticOS está adaptado para el contexto de obras públicas, con labels y funcionalidades específicas para gestión de contratos municipales.",
+        "infoCard": {
+          "title": "Labels Adaptados",
+          "content": "En el segmento Obras Públicas, los labels financieros están personalizados: \"Pago\" se convierte en \"Medición\", \"Precio\" en \"Valor Contratado\", \"Descuento\" en \"Glosa\", entre otros."
+        },
+        "subsections": [
+          {
+            "title": "Cómo Registrar una Medición Financiera",
+            "steps": [
+              "Abra el contrato (OS) deseado",
+              "Acceda a la sección <strong>Resumen</strong> y haga clic en <strong>Total</strong>",
+              "Registre el valor de la medición aprobada",
+              "El sistema actualiza automáticamente el saldo del contrato y la barra de progreso"
+            ]
+          },
+          {
+            "title": "Dashboard de Obras",
+            "intro": "El dashboard financiero muestra una visión consolidada de todos los contratos:",
+            "validationList": [
+              { "label": "Valor Total Contratado", "text": "Suma de todos los contratos activos en el período" },
+              { "label": "Valor Medido", "text": "Total de mediciones aprobadas y pagadas" },
+              { "label": "Saldo a Ejecutar", "text": "Diferencia entre valor contratado y valor medido" },
+              { "label": "Progreso General", "text": "Porcentaje promedio de ejecución de las obras" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "permisos",
+        "title": "Perfiles y Permisos",
+        "intro": "El sistema de perfiles de PraticOS se mapea a las funciones típicas de un municipio en la gestión de obras:",
+        "table": {
+          "headers": ["Función Municipal", "Perfil PraticOS", "Acceso"],
+          "rows": [
+            { "label": "Secretario de Obras", "cells": [{"text": "Administrador"}, {"text": "Acceso total: contratos, financiero, equipo"}] },
+            { "label": "Director de Ingeniería", "cells": [{"text": "Gerente"}, {"text": "Contratos, mediciones y dashboard financiero"}] },
+            { "label": "Fiscal de Obra", "cells": [{"text": "Supervisor"}, {"text": "Inspecciones, mediciones físicas, sin acceso financiero"}] },
+            { "label": "Empresa Contratada", "cells": [{"text": "Técnico"}, {"text": "Solo OS asignadas, sin datos financieros"}] },
+            { "label": "Consultor Externo", "cells": [{"text": "Consultor"}, {"text": "Visualiza datos de OS que creó"}] }
+          ]
+        },
+        "warningCard": {
+          "title": "Empresas Contratadas con Acceso Limitado",
+          "content": "Las empresas contratadas registradas como Técnicos solo visualizan las Órdenes de Servicio asignadas a ellas, sin acceso a datos financieros o de otros contratos."
+        }
+      },
+      {
+        "id": "faq",
+        "title": "Preguntas Frecuentes",
+        "faq": [
+          {
+            "question": "¿Necesito un sistema de licitación digital para usar PraticOS?",
+            "answer": "No. PraticOS es complementario al sistema de licitación. Gestiona la ejecución de los contratos después de la fase licitatoria, no el proceso de licitación en sí."
+          },
+          {
+            "question": "¿Puedo usar PraticOS para contratos antiguos ya en ejecución?",
+            "answer": "Sí. Basta registrar el contrato como una OS, informar el valor contratado y el porcentaje ya ejecutado. El sistema acompaña a partir de ese punto."
+          },
+          {
+            "question": "¿Cómo controlar múltiples obras simultáneamente?",
+            "answer": "Cada obra es una Orden de Servicio independiente. Use el dashboard para tener la visión consolidada de todas las obras, con filtros por estado, empresa y período."
+          },
+          {
+            "question": "¿El fiscal de obra puede ver valores financieros?",
+            "answer": "No. Los fiscales (perfil Supervisor) tienen acceso a mediciones físicas e inspecciones, pero no visualizan valores financieros. Solo Administradores y Gerentes acceden a datos financieros."
+          },
+          {
+            "question": "¿La empresa contratada puede acceder al sistema?",
+            "answer": "Sí, con acceso limitado. La empresa se registra con perfil Técnico y solo visualiza las OS asignadas a ella, sin acceso a datos financieros o de otros contratos."
+          },
+          {
+            "question": "¿Es posible generar informes de medición?",
+            "answer": "Sí. Las mediciones registradas mediante procedimientos generan informes automáticos con fecha, responsable y fotos. El PDF de la OS incluye todo el historial de mediciones."
+          },
+          {
+            "question": "¿El sistema cumple con la legislación de contratación pública?",
+            "answer": "PraticOS ayuda en la gestión y trazabilidad de los contratos conforme lo exigido por la ley, registrando mediciones, pagos e inspecciones con historial completo. Sin embargo, no sustituye sistemas específicos de licitación."
+          },
+          {
+            "question": "¿Puedo compartir el progreso de la obra con ciudadanos?",
+            "answer": "Sí. Use la función Compartir OS para generar un enlace público con el progreso de la obra, mediciones y fotos. Ideal para transparencia pública."
+          }
+        ]
+      }
+    ]
+  }
+}

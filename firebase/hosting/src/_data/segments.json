@@ -16,6 +16,7 @@
       { "href": "segmentos/manutencao-ativos.html", "label": "Manutenção de Ativos" },
       { "href": "segmentos/manutencao-predial.html", "label": "Manutenção Predial" },
       { "href": "segmentos/moveis.html", "label": "Móveis" },
+      { "href": "segmentos/obras-publicas.html", "label": "Obras Públicas / Prefeituras" },
       { "href": "segmentos/automotivo.html", "label": "Oficina Mecânica" },
       { "href": "segmentos/refrigeracao.html", "label": "Refrigeração" },
       { "href": "segmentos/seguranca-cftv.html", "label": "Segurança CFTV" }
@@ -37,6 +38,7 @@
       { "href": "segmentos/moveis-en.html", "label": "Furniture Assembly" },
       { "href": "segmentos/informatica-en.html", "label": "IT Services" },
       { "href": "segmentos/limpeza-en.html", "label": "Cleaning Company" },
+      { "href": "segmentos/obras-publicas-en.html", "label": "Public Works / Municipalities" },
       { "href": "segmentos/automotivo-en.html", "label": "Auto Repair Shop" },
       { "href": "segmentos/bicicletaria-en.html", "label": "Bike Shop" },
       { "href": "segmentos/refrigeracao-en.html", "label": "HVAC Technician" },
@@ -60,6 +62,7 @@
       { "href": "segmentos/manutencao-ativos-es.html", "label": "Mantenimiento de Activos" },
       { "href": "segmentos/manutencao-predial-es.html", "label": "Mantenimiento de Edificios" },
       { "href": "segmentos/moveis-es.html", "label": "Muebles" },
+      { "href": "segmentos/obras-publicas-es.html", "label": "Obras Públicas / Municipios" },
       { "href": "segmentos/automotivo-es.html", "label": "Taller Mecánico" },
       { "href": "segmentos/refrigeracao-es.html", "label": "Refrigeración" },
       { "href": "segmentos/seguranca-cftv-es.html", "label": "CFTV y Seguridad" }

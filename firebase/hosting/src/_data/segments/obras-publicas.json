@@ -1,0 +1,381 @@
+{
+  "slug": "obras-publicas",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Obras Públicas e Prefeituras | PraticOS",
+    "description": "Gerencie contratos, medições e fiscalização de obras públicas com transparência! Sistema de OS para prefeituras, secretarias e empreiteiras com fotos geolocalizadas, controle financeiro e link de acompanhamento para o cidadão. Organize em 5 minutos.",
+    "keywords": "sistema obras públicas, software gestão obras prefeitura, app fiscalização obras, sistema medição obras, programa controle obras públicas, gestão contratos obras municipais",
+    "ogTitle": "Sistema para Obras Públicas e Prefeituras | PraticOS",
+    "ogDescription": "Gerencie contratos e medições de obras públicas com transparência! Sistema com fotos geolocalizadas, controle financeiro e link de acompanhamento. Organize em 5 minutos.",
+    "hero": {
+      "badge": "🏛️ Obras Públicas",
+      "title": "Gestão transparente de contratos e",
+      "titleHighlight": "obras públicas",
+      "subtitle": "Chega de medições em papel e contratos em planilha. Controle cada etapa da obra com fotos geolocalizadas, medições digitais e link de acompanhamento para o cidadão. Para prefeituras, secretarias de obras e empreiteiras.",
+      "ctaPrimary": "Testar Grátis",
+      "ctaWhatsapp": "Começar pelo WhatsApp",
+      "stats": {
+        "users": { "value": "200+", "label": "Técnicos ativos" },
+        "orders": { "value": "5k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliação" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Você enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem gerencia obras públicas e contratos municipais",
+      "items": [
+        { "icon": "📊", "title": "Contratos gerenciados em planilha", "text": "Contratos de obra em planilhas soltas, sem vínculo com medições ou cronograma. Informação fragmentada e difícil de auditar." },
+        { "icon": "🔍", "title": "Sem rastreabilidade de execução", "text": "Não sabe em que etapa a obra está, quem executou e quando. Fiscal visita a obra e não tem registro comparativo." },
+        { "icon": "📝", "title": "Medições em papel ou PDF estático", "text": "Medições feitas em formulários de papel ou planilhas que não se conectam ao contrato. Retrabalho e risco de erro." },
+        { "icon": "🏛️", "title": "Sem transparência pública", "text": "Cidadão não tem como acompanhar o andamento da obra. Vereador cobra, imprensa questiona, e não há dados acessíveis." },
+        { "icon": "📱", "title": "Fiscal sem ferramenta em campo", "text": "Fiscal vai à obra com prancheta e câmera separada. Fotos se perdem, anotações ficam no caderno e nunca viram relatório." },
+        { "icon": "💰", "title": "Repasses financeiros sem controle", "text": "Pagamentos de medições sem vínculo com o avanço real da obra. Dificuldade de comprovar execução para tribunal de contas." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluções",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para gestão de obras públicas",
+      "items": [
+        { "icon": "📋", "title": "Contratos como Ordens de Serviço", "text": "Cada contrato de obra vira uma OS com etapas, medições e cronograma vinculados.", "highlight": "Tudo rastreável e auditável." },
+        { "icon": "📐", "title": "Medições digitais por etapa", "text": "Registre o percentual executado de cada etapa diretamente no celular. Vinculado ao contrato e ao cronograma." },
+        { "icon": "📸", "title": "Fotos geolocalizadas em campo", "text": "Fiscal registra fotos com data, hora e localização GPS. Prova irrefutável do avanço da obra.", "highlight": "Documentação para tribunal de contas." },
+        { "icon": "🔗", "title": "Link de acompanhamento público", "text": "Compartilhe o andamento da obra com cidadãos, vereadores e imprensa. Transparência total sem dar acesso ao sistema." },
+        { "icon": "💰", "title": "Dashboard financeiro por contrato", "text": "Acompanhe valores empenhados, medidos e pagos por contrato. Visão clara do saldo e execução financeira." },
+        { "icon": "👥", "title": "Perfis por função", "text": "Fiscal, engenheiro, secretário e empreiteira — cada um vê e faz apenas o que compete à sua função." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulário",
+      "title": "Checklist de",
+      "titleHighlight": "medição de obra",
+      "text": "Checklist digital para fiscais registrarem o avanço da obra em campo. Preencha no celular com fotos geolocalizadas e percentual executado por etapa.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Medição de Obra",
+      "items": [
+        { "icon": "🏗️", "text": "Identificação da obra e contrato" },
+        { "icon": "📐", "text": "Etapa em medição" },
+        { "icon": "📊", "text": "Percentual executado (%)" },
+        { "icon": "📸", "text": "Fotos geolocalizadas do avanço" },
+        { "icon": "👷", "text": "Responsável técnico pela etapa" },
+        { "icon": "✍️", "text": "Assinatura do fiscal" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar obras públicas",
+      "subtitle": "Ferramentas poderosas e intuitivas para prefeituras, secretarias e empreiteiras",
+      "items": [
+        { "icon": "document", "title": "OS Digital por Contrato", "text": "Crie ordens de serviço vinculadas a contratos com etapas, medições e cronograma. Tudo organizado e auditável." },
+        { "icon": "image", "title": "Fotos Geolocalizadas", "text": "Fotografe o avanço da obra com data, hora e localização GPS. Prova irrefutável para prestação de contas.", "color": "yellow" },
+        { "icon": "pdf", "title": "Relatórios em PDF", "text": "Gere relatórios de medição e avanço por obra ou por contrato. Pronto para enviar ao tribunal de contas.", "color": "orange" },
+        { "icon": "money", "title": "Controle Financeiro", "text": "Acompanhe valores empenhados, medidos e pagos. Dashboard financeiro por contrato com visão consolidada.", "color": "green" },
+        { "icon": "users", "title": "Multi-Contrato", "text": "Gerencie múltiplos contratos e obras simultaneamente. Visão consolidada por secretaria ou por empreiteira.", "color": "purple" },
+        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cidadão, vereador e imprensa acompanham o andamento da obra pelo celular. Transparência pública total.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes a fiscalização era feita com prancheta e as medições ficavam em planilhas soltas. Com o PraticOS, cada obra tem seu histórico completo e o prefeito acompanha tudo pelo dashboard. A prestação de contas ficou muito mais fácil.",
+      "name": "Carlos Mendes",
+      "role": "Secretário de Obras de município de médio porte",
+      "metric": "Redução de 60% no tempo de prestação de contas"
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas dúvidas antes de começar",
+      "items": [
+        { "question": "Precisa de processo licitatório para contratar?", "answer": "O PraticOS é um serviço de assinatura SaaS com valores compatíveis com dispensa de licitação na maioria dos municípios. Consulte sua assessoria jurídica para confirmar o enquadramento." },
+        { "question": "Funciona offline em campo?", "answer": "Sim! O fiscal pode registrar fotos e preencher medições mesmo sem internet. Quando o celular se reconectar, tudo é sincronizado automaticamente." },
+        { "question": "A empresa contratada consegue acessar?", "answer": "Sim! Você pode criar perfis com permissões específicas para a empreiteira. Ela vê apenas as obras e informações que você autorizar." },
+        { "question": "Gera relatórios para tribunal de contas?", "answer": "Sim! O PraticOS gera relatórios em PDF com fotos geolocalizadas, medições e histórico completo. Documentação pronta para prestação de contas." },
+        { "question": "É seguro para dados públicos?", "answer": "Sim! O PraticOS usa infraestrutura Google Cloud (Firebase) com criptografia de dados em trânsito e em repouso. Cada prefeitura tem ambiente isolado (multi-tenant)." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar suas obras",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe está pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Public Works & Municipal Management System | PraticOS",
+    "description": "Manage contracts, measurements and public works inspections with transparency! Work order system for municipalities, public works departments and contractors with geolocated photos, financial control and citizen tracking link. Get organized in 5 minutes.",
+    "keywords": "public works management software, municipal construction system, public works inspection app, construction measurement system, government project management, public works tracking",
+    "ogTitle": "Public Works & Municipal Management System | PraticOS",
+    "ogDescription": "Manage contracts and measurements of public works with transparency! System with geolocated photos, financial control and tracking link. Get organized in 5 minutes.",
+    "hero": {
+      "badge": "🏛️ Public Works",
+      "title": "Transparent management of contracts and",
+      "titleHighlight": "public works",
+      "subtitle": "Stop doing measurements on paper and managing contracts in spreadsheets. Control every stage of the project with geolocated photos, digital measurements and a tracking link for citizens. For municipalities, public works departments and contractors.",
+      "ctaPrimary": "Try Free",
+      "ctaWhatsapp": "Start on WhatsApp",
+      "stats": {
+        "users": { "value": "200+", "label": "Active technicians" },
+        "orders": { "value": "5k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for public works and municipal contract management",
+      "items": [
+        { "icon": "📊", "title": "Contracts managed in spreadsheets", "text": "Construction contracts in loose spreadsheets, with no link to measurements or schedules. Fragmented information that's hard to audit." },
+        { "icon": "🔍", "title": "No execution traceability", "text": "Don't know what stage the project is at, who executed it and when. Inspector visits the site with no comparative records." },
+        { "icon": "📝", "title": "Measurements on paper or static PDF", "text": "Measurements done on paper forms or spreadsheets that don't connect to the contract. Rework and risk of errors." },
+        { "icon": "🏛️", "title": "No public transparency", "text": "Citizens can't track the progress of the project. Council members demand answers, press questions, and there's no accessible data." },
+        { "icon": "📱", "title": "Inspector without field tools", "text": "Inspector goes to the site with clipboard and separate camera. Photos get lost, notes stay in a notebook and never become a report." },
+        { "icon": "💰", "title": "Financial transfers without control", "text": "Measurement payments with no link to actual project progress. Difficulty proving execution to audit courts." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for public works management",
+      "items": [
+        { "icon": "📋", "title": "Contracts as Work Orders", "text": "Each construction contract becomes a WO with linked stages, measurements and schedule.", "highlight": "Everything traceable and auditable." },
+        { "icon": "📐", "title": "Digital measurements by stage", "text": "Record the percentage completed for each stage directly on your phone. Linked to the contract and schedule." },
+        { "icon": "📸", "title": "Geolocated field photos", "text": "Inspector captures photos with date, time and GPS location. Irrefutable proof of project progress.", "highlight": "Documentation for audit courts." },
+        { "icon": "🔗", "title": "Public tracking link", "text": "Share project progress with citizens, council members and press. Total transparency without granting system access." },
+        { "icon": "💰", "title": "Financial dashboard per contract", "text": "Track committed, measured and paid values per contract. Clear view of balance and financial execution." },
+        { "icon": "👥", "title": "Role-based profiles", "text": "Inspector, engineer, secretary and contractor — each sees and does only what their role allows." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Construction",
+      "titleHighlight": "measurement checklist",
+      "text": "Digital checklist for inspectors to record project progress in the field. Fill on your phone with geolocated photos and percentage completed per stage.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Construction Measurement",
+      "items": [
+        { "icon": "🏗️", "text": "Project and contract identification" },
+        { "icon": "📐", "text": "Stage being measured" },
+        { "icon": "📊", "text": "Percentage completed (%)" },
+        { "icon": "📸", "text": "Geolocated progress photos" },
+        { "icon": "👷", "text": "Technical lead for the stage" },
+        { "icon": "✍️", "text": "Inspector signature" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage public works",
+      "subtitle": "Powerful and intuitive tools for municipalities, departments and contractors",
+      "items": [
+        { "icon": "document", "title": "Digital WO per Contract", "text": "Create work orders linked to contracts with stages, measurements and schedule. All organized and auditable." },
+        { "icon": "image", "title": "Geolocated Photos", "text": "Photograph project progress with date, time and GPS location. Irrefutable proof for accountability.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Reports", "text": "Generate measurement and progress reports by project or contract. Ready to submit to audit courts.", "color": "orange" },
+        { "icon": "money", "title": "Financial Control", "text": "Track committed, measured and paid values. Financial dashboard per contract with consolidated view.", "color": "green" },
+        { "icon": "users", "title": "Multi-Contract", "text": "Manage multiple contracts and projects simultaneously. Consolidated view by department or contractor.", "color": "purple" },
+        { "icon": "link", "title": "Tracking Link", "text": "Citizens, council members and press track project progress on their phone. Total public transparency.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Before, inspections were done with clipboards and measurements stayed in loose spreadsheets. With PraticOS, each project has its complete history and the mayor tracks everything through the dashboard. Accountability became much easier.",
+      "name": "Carlos Mendes",
+      "role": "Public Works Secretary of a mid-size municipality",
+      "metric": "60% reduction in accountability reporting time"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Does it require a bidding process to hire?", "answer": "PraticOS is a SaaS subscription service with pricing compatible with bidding exemptions in most municipalities. Check with your legal advisor to confirm eligibility." },
+        { "question": "Does it work offline in the field?", "answer": "Yes! The inspector can capture photos and fill measurements even without internet. When the phone reconnects, everything syncs automatically." },
+        { "question": "Can the contracted company access it?", "answer": "Yes! You can create profiles with specific permissions for the contractor. They only see the projects and information you authorize." },
+        { "question": "Does it generate reports for audit courts?", "answer": "Yes! PraticOS generates PDF reports with geolocated photos, measurements and complete history. Documentation ready for accountability." },
+        { "question": "Is it secure for public data?", "answer": "Yes! PraticOS uses Google Cloud infrastructure (Firebase) with encryption in transit and at rest. Each municipality has an isolated environment (multi-tenant)." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "organize your projects",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Obras Públicas y Municipios | PraticOS",
+    "description": "¡Gestiona contratos, mediciones y fiscalización de obras públicas con transparencia! Sistema de OS para municipios, secretarías y contratistas con fotos geolocalizadas, control financiero y link de seguimiento para el ciudadano. Organiza en 5 minutos.",
+    "keywords": "sistema obras públicas, software gestión obras municipio, app fiscalización obras, sistema medición obras, programa control obras públicas, gestión contratos obras municipales",
+    "ogTitle": "Sistema para Obras Públicas y Municipios | PraticOS",
+    "ogDescription": "¡Gestiona contratos y mediciones de obras públicas con transparencia! Sistema con fotos geolocalizadas, control financiero y link de seguimiento. Organiza en 5 minutos.",
+    "hero": {
+      "badge": "🏛️ Obras Públicas",
+      "title": "Gestión transparente de contratos y",
+      "titleHighlight": "obras públicas",
+      "subtitle": "Basta de mediciones en papel y contratos en planillas. Controla cada etapa de la obra con fotos geolocalizadas, mediciones digitales y link de seguimiento para el ciudadano. Para municipios, secretarías de obras y contratistas.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaWhatsapp": "Empezar por WhatsApp",
+      "stats": {
+        "users": { "value": "200+", "label": "Técnicos activos" },
+        "orders": { "value": "5k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificación" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien gestiona obras públicas y contratos municipales",
+      "items": [
+        { "icon": "📊", "title": "Contratos gestionados en planillas", "text": "Contratos de obra en planillas sueltas, sin vínculo con mediciones o cronograma. Información fragmentada y difícil de auditar." },
+        { "icon": "🔍", "title": "Sin rastreabilidad de ejecución", "text": "No sabe en qué etapa está la obra, quién ejecutó y cuándo. Fiscal visita la obra y no tiene registro comparativo." },
+        { "icon": "📝", "title": "Mediciones en papel o PDF estático", "text": "Mediciones hechas en formularios de papel o planillas que no se conectan al contrato. Retrabajo y riesgo de error." },
+        { "icon": "🏛️", "title": "Sin transparencia pública", "text": "Ciudadano no puede acompañar el avance de la obra. Concejal reclama, prensa cuestiona, y no hay datos accesibles." },
+        { "icon": "📱", "title": "Fiscal sin herramienta en campo", "text": "Fiscal va a la obra con portapapeles y cámara separada. Fotos se pierden, anotaciones quedan en el cuaderno y nunca se vuelven informe." },
+        { "icon": "💰", "title": "Transferencias financieras sin control", "text": "Pagos de mediciones sin vínculo con el avance real de la obra. Dificultad de comprobar ejecución para tribunal de cuentas." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Cómo",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para gestión de obras públicas",
+      "items": [
+        { "icon": "📋", "title": "Contratos como Órdenes de Servicio", "text": "Cada contrato de obra se convierte en una OS con etapas, mediciones y cronograma vinculados.", "highlight": "Todo rastreable y auditable." },
+        { "icon": "📐", "title": "Mediciones digitales por etapa", "text": "Registra el porcentaje ejecutado de cada etapa directamente en el celular. Vinculado al contrato y al cronograma." },
+        { "icon": "📸", "title": "Fotos geolocalizadas en campo", "text": "Fiscal registra fotos con fecha, hora y ubicación GPS. Prueba irrefutable del avance de la obra.", "highlight": "Documentación para tribunal de cuentas." },
+        { "icon": "🔗", "title": "Link de seguimiento público", "text": "Comparte el avance de la obra con ciudadanos, concejales y prensa. Transparencia total sin dar acceso al sistema." },
+        { "icon": "💰", "title": "Dashboard financiero por contrato", "text": "Acompaña valores comprometidos, medidos y pagados por contrato. Visión clara del saldo y ejecución financiera." },
+        { "icon": "👥", "title": "Perfiles por función", "text": "Fiscal, ingeniero, secretario y contratista — cada uno ve y hace solo lo que corresponde a su función." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "medición de obra",
+      "text": "Checklist digital para fiscales registren el avance de la obra en campo. Llena en el celular con fotos geolocalizadas y porcentaje ejecutado por etapa.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Medición de Obra",
+      "items": [
+        { "icon": "🏗️", "text": "Identificación de la obra y contrato" },
+        { "icon": "📐", "text": "Etapa en medición" },
+        { "icon": "📊", "text": "Porcentaje ejecutado (%)" },
+        { "icon": "📸", "text": "Fotos geolocalizadas del avance" },
+        { "icon": "👷", "text": "Responsable técnico de la etapa" },
+        { "icon": "✍️", "text": "Firma del fiscal" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar obras públicas",
+      "subtitle": "Herramientas potentes e intuitivas para municipios, secretarías y contratistas",
+      "items": [
+        { "icon": "document", "title": "OS Digital por Contrato", "text": "Crea órdenes de servicio vinculadas a contratos con etapas, mediciones y cronograma. Todo organizado y auditable." },
+        { "icon": "image", "title": "Fotos Geolocalizadas", "text": "Fotografía el avance de la obra con fecha, hora y ubicación GPS. Prueba irrefutable para rendición de cuentas.", "color": "yellow" },
+        { "icon": "pdf", "title": "Informes en PDF", "text": "Genera informes de medición y avance por obra o por contrato. Listo para enviar al tribunal de cuentas.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Acompaña valores comprometidos, medidos y pagados. Dashboard financiero por contrato con visión consolidada.", "color": "green" },
+        { "icon": "users", "title": "Multi-Contrato", "text": "Gestiona múltiples contratos y obras simultáneamente. Visión consolidada por secretaría o por contratista.", "color": "purple" },
+        { "icon": "link", "title": "Link de Seguimiento", "text": "Ciudadano, concejal y prensa siguen el avance de la obra por el celular. Transparencia pública total.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes la fiscalización se hacía con portapapeles y las mediciones quedaban en planillas sueltas. Con PraticOS, cada obra tiene su historial completo y el alcalde acompaña todo por el dashboard. La rendición de cuentas se volvió mucho más fácil.",
+      "name": "Carlos Mendes",
+      "role": "Secretario de Obras de municipio de tamaño medio",
+      "metric": "Reducción de 60% en tiempo de rendición de cuentas"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesita proceso licitatorio para contratar?", "answer": "PraticOS es un servicio de suscripción SaaS con valores compatibles con dispensa de licitación en la mayoría de los municipios. Consulta con tu asesoría jurídica para confirmar el encuadramiento." },
+        { "question": "¿Funciona sin internet en campo?", "answer": "¡Sí! El fiscal puede registrar fotos y llenar mediciones incluso sin internet. Cuando el celular se reconecte, todo se sincroniza automáticamente." },
+        { "question": "¿La empresa contratada puede acceder?", "answer": "¡Sí! Puedes crear perfiles con permisos específicos para el contratista. Solo ve las obras e información que tú autorices." },
+        { "question": "¿Genera informes para tribunal de cuentas?", "answer": "¡Sí! PraticOS genera informes en PDF con fotos geolocalizadas, mediciones e historial completo. Documentación lista para rendición de cuentas." },
+        { "question": "¿Es seguro para datos públicos?", "answer": "¡Sí! PraticOS usa infraestructura Google Cloud (Firebase) con encriptación de datos en tránsito y en reposo. Cada municipio tiene ambiente aislado (multi-tenant)." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "organizar tus obras",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo está listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}
