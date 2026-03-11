@@ -640,6 +640,59 @@ const DEFAULT_TERMS = {
   },
 
   // ═══════════════════════════════════════════════════════════
+  // OBRAS PÚBLICAS / PREFEITURAS
+  // ═══════════════════════════════════════════════════════════
+  public_works: {
+    'pt-BR': `Ao aprovar esta ordem de serviço, o órgão contratante declara estar ciente e de acordo com as seguintes condições:
+
+1. ACESSO À OBRA: O contratante deve garantir acesso ao canteiro de obras na data e horário agendados. Impedimentos de acesso que resultem em mobilização sem execução poderão ser cobrados como visita técnica.
+
+2. MEDIÇÕES: As medições serão realizadas digitalmente com registro fotográfico geolocalizado, constituindo documento oficial para fins de fiscalização e prestação de contas. Divergências devem ser apontadas em até 5 dias úteis após o envio do relatório.
+
+3. GARANTIA: Os serviços executados têm garantia de 1 (um) ano sobre a mão de obra, conforme legislação vigente. Materiais fornecidos seguem a garantia do fabricante. A garantia não cobre danos decorrentes de vandalismo, intempéries extraordinárias, uso indevido ou falta de manutenção preventiva.
+
+4. ADITIVOS CONTRATUAIS: Quaisquer alterações de escopo, quantitativos ou especificações técnicas devem ser comunicadas e formalizadas por escrito antes da execução. Nenhum serviço adicional será realizado sem autorização expressa do fiscal de contrato.
+
+5. PAGAMENTO: O pagamento está vinculado às medições aprovadas pelo fiscal de contrato, conforme cronograma físico-financeiro estabelecido. Atrasos no pagamento poderão resultar em suspensão dos serviços, sem prejuízo de atualização monetária.
+
+6. DOCUMENTAÇÃO E PRESTAÇÃO DE CONTAS: Todos os serviços serão documentados com relatórios fotográficos geolocalizados, diários de obra e planilhas de medição, em formato compatível com as exigências do Tribunal de Contas e órgãos de controle.
+
+7. RESPONSABILIDADE TÉCNICA: O contratado é responsável pela emissão de ART/RRT junto ao CREA/CAU competente. A responsabilidade técnica pela execução dos serviços é integralmente do contratado, incluindo segurança do trabalho e conformidade com normas técnicas vigentes.`,
+
+    'en-US': `By approving this work order, the contracting authority acknowledges and agrees to the following terms and conditions:
+
+1. SITE ACCESS: The contracting party must ensure access to the construction site on the scheduled date and time. Access impediments resulting in mobilization without execution may be charged as a technical visit.
+
+2. MEASUREMENTS: Measurements will be performed digitally with geolocated photographic records, constituting an official document for inspection and accountability purposes. Discrepancies must be reported within 5 business days of the report submission.
+
+3. WARRANTY: Services performed carry a 1 (one) year warranty on workmanship, in accordance with applicable legislation. Supplied materials follow the manufacturer's warranty. Warranty does not cover damage from vandalism, extraordinary weather events, misuse, or lack of preventive maintenance.
+
+4. CONTRACT AMENDMENTS: Any changes in scope, quantities, or technical specifications must be communicated and formalized in writing before execution. No additional services will be performed without express authorization from the contract inspector.
+
+5. PAYMENT: Payment is linked to measurements approved by the contract inspector, according to the established physical-financial schedule. Payment delays may result in service suspension, without prejudice to monetary adjustment.
+
+6. DOCUMENTATION AND ACCOUNTABILITY: All services will be documented with geolocated photographic reports, construction logs, and measurement spreadsheets, in a format compatible with the requirements of audit courts and oversight bodies.
+
+7. TECHNICAL RESPONSIBILITY: The contractor is responsible for issuing the ART/RRT with the competent CREA/CAU. Technical responsibility for service execution lies entirely with the contractor, including workplace safety and compliance with applicable technical standards.`,
+
+    'es-ES': `Al aprobar esta orden de servicio, el organismo contratante declara estar al tanto y de acuerdo con las siguientes condiciones:
+
+1. ACCESO A LA OBRA: El contratante debe garantizar el acceso al sitio de obras en la fecha y horario programados. Los impedimentos de acceso que resulten en movilización sin ejecución podrán cobrarse como visita técnica.
+
+2. MEDICIONES: Las mediciones se realizarán digitalmente con registro fotográfico geolocalizado, constituyendo documento oficial para fines de fiscalización y rendición de cuentas. Las discrepancias deben señalarse dentro de los 5 días hábiles posteriores al envío del informe.
+
+3. GARANTÍA: Los servicios ejecutados tienen garantía de 1 (un) año sobre la mano de obra, conforme a la legislación vigente. Los materiales suministrados siguen la garantía del fabricante. La garantía no cubre daños por vandalismo, fenómenos climáticos extraordinarios, uso indebido o falta de mantenimiento preventivo.
+
+4. ADENDAS CONTRACTUALES: Cualquier alteración de alcance, cantidades o especificaciones técnicas debe ser comunicada y formalizada por escrito antes de la ejecución. No se realizará ningún servicio adicional sin autorización expresa del inspector de contrato.
+
+5. PAGO: El pago está vinculado a las mediciones aprobadas por el inspector de contrato, conforme al cronograma físico-financiero establecido. Los retrasos en el pago podrán resultar en la suspensión de los servicios, sin perjuicio de la actualización monetaria.
+
+6. DOCUMENTACIÓN Y RENDICIÓN DE CUENTAS: Todos los servicios serán documentados con informes fotográficos geolocalizados, bitácoras de obra y planillas de medición, en formato compatible con las exigencias del Tribunal de Cuentas y órganos de control.
+
+7. RESPONSABILIDAD TÉCNICA: El contratado es responsable de la emisión de la habilitación técnica correspondiente ante el organismo competente. La responsabilidad técnica por la ejecución de los servicios recae íntegramente en el contratado, incluyendo seguridad laboral y conformidad con las normas técnicas vigentes.`,
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // OUTRO (Genérico)
   // ═══════════════════════════════════════════════════════════
   other: {
