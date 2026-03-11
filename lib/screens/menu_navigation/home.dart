@@ -1,6 +1,6 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Material, MaterialType, Divider;
+import 'package:flutter/material.dart' show Material, MaterialType, Divider, LinearProgressIndicator, AlwaysStoppedAnimation;
 // Keeping Material for specific color references if needed, but UI tree will be Cupertino.
 
 import 'package:flutter/services.dart';
@@ -874,6 +874,12 @@ class _HomeState extends State<Home> {
                             ],
                           ],
                         ),
+
+                        // Execution percentage progress bar (for segments with executionPercentage)
+                        if (_getExecutionPercentage(order) != null) ...[
+                          const SizedBox(height: 6),
+                          _buildExecutionProgressBar(order),
+                        ],
                       ],
                     ),
                   ),
@@ -997,6 +1003,54 @@ class _HomeState extends State<Home> {
         fontWeight: FontWeight.w700,
         color: CupertinoColors.white,
       ),
+    );
+  }
+
+  /// Reads executionPercentage from order.customData (if present)
+  double? _getExecutionPercentage(Order order) {
+    final value = order.customData?['executionPercentage'];
+    if (value == null) return null;
+    if (value is num) return value.toDouble().clamp(0, 100);
+    if (value is String) {
+      final parsed = double.tryParse(value);
+      return parsed?.clamp(0, 100);
+    }
+    return null;
+  }
+
+  Widget _buildExecutionProgressBar(Order order) {
+    final percentage = _getExecutionPercentage(order) ?? 0;
+    final fraction = percentage / 100;
+
+    return Row(
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: SizedBox(
+              height: 4,
+              child: LinearProgressIndicator(
+                value: fraction,
+                backgroundColor: CupertinoColors.systemGrey5.resolveFrom(context),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  percentage >= 100
+                      ? CupertinoColors.systemGreen
+                      : CupertinoColors.activeBlue,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '${percentage.toInt()}%',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          ),
+        ),
+      ],
     );
   }
 

@@ -1765,6 +1765,279 @@ const SEGMENTS = [
   },
 
   // ═══════════════════════════════════════════════════════════
+  // OBRAS PÚBLICAS / PREFEITURAS (Public Works / Municipalities)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'public_works',
+    name: 'Obras Públicas / Prefeituras',
+    nameI18n: {
+      'pt-BR': 'Obras Públicas / Prefeituras',
+      'en-US': 'Public Works / Municipalities',
+      'es-ES': 'Obras Públicas / Municipios'
+    },
+    icon: '🏛️',
+    active: true,
+    fieldService: true,
+    useDeviceManagement: true,
+    useContracts: true,
+    useScheduling: true,
+    subspecialties: [
+      {
+        id: 'infrastructure',
+        icon: '🏗️',
+        name: { 'pt-BR': 'Obras de Infraestrutura', 'en-US': 'Infrastructure Works', 'es-ES': 'Obras de Infraestructura' },
+        description: { 'pt-BR': 'Estradas, pontes, saneamento, drenagem', 'en-US': 'Roads, bridges, sanitation, drainage', 'es-ES': 'Carreteras, puentes, saneamiento, drenaje' },
+      },
+      {
+        id: 'maintenance_services',
+        icon: '🔧',
+        name: { 'pt-BR': 'Serviços de Manutenção', 'en-US': 'Maintenance Services', 'es-ES': 'Servicios de Mantenimiento' },
+        description: { 'pt-BR': 'Manutenção de prédios públicos, praças, iluminação', 'en-US': 'Public buildings, parks, lighting maintenance', 'es-ES': 'Mantenimiento de edificios públicos, plazas, iluminación' },
+      },
+      {
+        id: 'material_supply',
+        icon: '📦',
+        name: { 'pt-BR': 'Fornecimento de Materiais', 'en-US': 'Material Supply', 'es-ES': 'Suministro de Materiales' },
+        description: { 'pt-BR': 'Compra e entrega de materiais de construção e insumos', 'en-US': 'Purchase and delivery of construction materials and supplies', 'es-ES': 'Compra y entrega de materiales de construcción e insumos' },
+      },
+      {
+        id: 'it_services',
+        icon: '💻',
+        name: { 'pt-BR': 'Serviços de TI', 'en-US': 'IT Services', 'es-ES': 'Servicios de TI' },
+        description: { 'pt-BR': 'Infraestrutura de TI, sistemas, redes', 'en-US': 'IT infrastructure, systems, networks', 'es-ES': 'Infraestructura de TI, sistemas, redes' },
+      },
+      {
+        id: 'cleaning_conservation',
+        icon: '🧹',
+        name: { 'pt-BR': 'Limpeza e Conservação', 'en-US': 'Cleaning & Conservation', 'es-ES': 'Limpieza y Conservación' },
+        description: { 'pt-BR': 'Limpeza urbana, conservação de áreas públicas', 'en-US': 'Urban cleaning, public area conservation', 'es-ES': 'Limpieza urbana, conservación de áreas públicas' },
+      },
+      {
+        id: 'consulting',
+        icon: '📋',
+        name: { 'pt-BR': 'Consultoria e Projetos', 'en-US': 'Consulting & Projects', 'es-ES': 'Consultoría y Proyectos' },
+        description: { 'pt-BR': 'Projetos de engenharia, laudos, consultorias técnicas', 'en-US': 'Engineering projects, reports, technical consulting', 'es-ES': 'Proyectos de ingeniería, informes, consultoría técnica' },
+      },
+    ],
+    customFields: [
+      // ── Entity Labels ──
+      {
+        key: 'customer._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Empresa Contratada', 'en-US': 'Contractor', 'es-ES': 'Empresa Contratada' }
+      },
+      {
+        key: 'customer._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Empresas Contratadas', 'en-US': 'Contractors', 'es-ES': 'Empresas Contratadas' }
+      },
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Obra', 'en-US': 'Project', 'es-ES': 'Obra' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Obras', 'en-US': 'Projects', 'es-ES': 'Obras' }
+      },
+      {
+        key: 'service_order._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Contrato', 'en-US': 'Contract', 'es-ES': 'Contrato' }
+      },
+      {
+        key: 'service_order._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Contratos', 'en-US': 'Contracts', 'es-ES': 'Contratos' }
+      },
+
+      // ── Device Field Labels ──
+      {
+        key: 'device.serial',
+        type: 'label',
+        labels: { 'pt-BR': 'Nº do Contrato', 'en-US': 'Contract Number', 'es-ES': 'Nº del Contrato' }
+      },
+      {
+        key: 'device.brand',
+        type: 'label',
+        labels: { 'pt-BR': 'Secretaria Responsável', 'en-US': 'Responsible Department', 'es-ES': 'Secretaría Responsable' }
+      },
+      {
+        key: 'device.model',
+        type: 'label',
+        labels: { 'pt-BR': 'Localização da Obra', 'en-US': 'Project Location', 'es-ES': 'Ubicación de la Obra' }
+      },
+      {
+        key: 'device.description',
+        type: 'label',
+        labels: { 'pt-BR': 'Objeto do Contrato', 'en-US': 'Contract Object', 'es-ES': 'Objeto del Contrato' }
+      },
+
+      // ── Status Labels ──
+      {
+        key: 'status.quote',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Licitação', 'en-US': 'Bidding', 'es-ES': 'En Licitación' }
+      },
+      {
+        key: 'status.approved',
+        type: 'label',
+        labels: { 'pt-BR': 'Contratado', 'en-US': 'Contracted', 'es-ES': 'Contratado' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Execução', 'en-US': 'In Execution', 'es-ES': 'En Ejecución' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Concluído / Recebido', 'en-US': 'Completed / Received', 'es-ES': 'Concluido / Recibido' }
+      },
+      {
+        key: 'status.cancelled',
+        type: 'label',
+        labels: { 'pt-BR': 'Rescindido', 'en-US': 'Terminated', 'es-ES': 'Rescindido' }
+      },
+
+      // ── Action Labels ──
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Nova Obra', 'en-US': 'New Project', 'es-ES': 'Nueva Obra' }
+      },
+      {
+        key: 'actions.edit_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Editar Obra', 'en-US': 'Edit Project', 'es-ES': 'Editar Obra' }
+      },
+      {
+        key: 'actions.create_service_order',
+        type: 'label',
+        labels: { 'pt-BR': 'Novo Contrato', 'en-US': 'New Contract', 'es-ES': 'Nuevo Contrato' }
+      },
+      {
+        key: 'actions.create_customer',
+        type: 'label',
+        labels: { 'pt-BR': 'Nova Empresa Contratada', 'en-US': 'New Contractor', 'es-ES': 'Nueva Empresa Contratada' }
+      },
+
+      // ── Financial Labels ──
+      {
+        key: 'financial.total',
+        type: 'label',
+        labels: { 'pt-BR': 'Valor Contratado', 'en-US': 'Contract Value', 'es-ES': 'Valor Contratado' }
+      },
+      {
+        key: 'financial.total_paid',
+        type: 'label',
+        labels: { 'pt-BR': 'Total Liberado', 'en-US': 'Total Released', 'es-ES': 'Total Liberado' }
+      },
+      {
+        key: 'financial.remaining',
+        type: 'label',
+        labels: { 'pt-BR': 'A Liberar', 'en-US': 'Pending Release', 'es-ES': 'Por Liberar' }
+      },
+      {
+        key: 'financial.payment',
+        type: 'label',
+        labels: { 'pt-BR': 'Medição', 'en-US': 'Measurement', 'es-ES': 'Medición' }
+      },
+
+      // ── Custom Fields: Dados do Contrato ──
+      {
+        key: 'service_order.bidModality',
+        type: 'select',
+        labels: { 'pt-BR': 'Modalidade de Licitação', 'en-US': 'Bid Modality', 'es-ES': 'Modalidad de Licitación' },
+        options: ['electronic_auction', 'competition', 'invitation', 'waiver', 'unenforceability', 'competitive_dialogue'],
+        optionsI18n: [
+          { value: 'electronic_auction', labels: { 'pt-BR': 'Pregão Eletrônico', 'en-US': 'Electronic Auction', 'es-ES': 'Subasta Electrónica' } },
+          { value: 'competition', labels: { 'pt-BR': 'Concorrência', 'en-US': 'Competition', 'es-ES': 'Concurrencia' } },
+          { value: 'invitation', labels: { 'pt-BR': 'Convite', 'en-US': 'Invitation', 'es-ES': 'Invitación' } },
+          { value: 'waiver', labels: { 'pt-BR': 'Dispensa', 'en-US': 'Waiver', 'es-ES': 'Dispensa' } },
+          { value: 'unenforceability', labels: { 'pt-BR': 'Inexigibilidade', 'en-US': 'Unenforceability', 'es-ES': 'Inexigibilidad' } },
+          { value: 'competitive_dialogue', labels: { 'pt-BR': 'Diálogo Competitivo', 'en-US': 'Competitive Dialogue', 'es-ES': 'Diálogo Competitivo' } },
+        ],
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 1,
+      },
+      {
+        key: 'service_order.bidNumber',
+        type: 'text',
+        labels: { 'pt-BR': 'Nº da Licitação', 'en-US': 'Bid Number', 'es-ES': 'Nº de Licitación' },
+        placeholder: 'Ex: PE 001/2026',
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 2,
+      },
+      {
+        key: 'service_order.contractNumber',
+        type: 'text',
+        labels: { 'pt-BR': 'Nº do Contrato', 'en-US': 'Contract Number', 'es-ES': 'Nº del Contrato' },
+        placeholder: 'Ex: CT 045/2026',
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 3,
+      },
+      {
+        key: 'service_order.contractualDeadline',
+        type: 'date',
+        labels: { 'pt-BR': 'Prazo Contratual', 'en-US': 'Contractual Deadline', 'es-ES': 'Plazo Contractual' },
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 4,
+      },
+      {
+        key: 'service_order.legalBasis',
+        type: 'select',
+        labels: { 'pt-BR': 'Base Legal', 'en-US': 'Legal Basis', 'es-ES': 'Base Legal' },
+        options: ['law_14133', 'law_8666', 'other'],
+        optionsI18n: [
+          { value: 'law_14133', labels: { 'pt-BR': 'Lei 14.133/2021', 'en-US': 'Law 14,133/2021', 'es-ES': 'Ley 14.133/2021' } },
+          { value: 'law_8666', labels: { 'pt-BR': 'Lei 8.666/1993', 'en-US': 'Law 8,666/1993', 'es-ES': 'Ley 8.666/1993' } },
+          { value: 'other', labels: { 'pt-BR': 'Outra', 'en-US': 'Other', 'es-ES': 'Otra' } },
+        ],
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 5,
+      },
+
+      // ── Custom Fields: Execução ──
+      {
+        key: 'service_order.executionPercentage',
+        type: 'number',
+        labels: { 'pt-BR': '% de Execução', 'en-US': 'Execution %', 'es-ES': '% de Ejecución' },
+        min: 0,
+        max: 100,
+        suffix: '%',
+        section: 'Execução',
+        sectionI18n: { 'pt-BR': 'Execução', 'en-US': 'Execution', 'es-ES': 'Ejecución' },
+        order: 6,
+      },
+      {
+        key: 'service_order.contractFiscal',
+        type: 'text',
+        labels: { 'pt-BR': 'Fiscal do Contrato', 'en-US': 'Contract Inspector', 'es-ES': 'Fiscal del Contrato' },
+        placeholder: 'Nome do fiscal designado',
+        section: 'Execução',
+        sectionI18n: { 'pt-BR': 'Execução', 'en-US': 'Execution', 'es-ES': 'Ejecución' },
+        order: 7,
+      },
+      {
+        key: 'service_order.currentMilestone',
+        type: 'text',
+        labels: { 'pt-BR': 'Etapa Atual', 'en-US': 'Current Milestone', 'es-ES': 'Etapa Actual' },
+        placeholder: 'Ex: Fundação, Alvenaria, Acabamento',
+        section: 'Execução',
+        sectionI18n: { 'pt-BR': 'Execução', 'en-US': 'Execution', 'es-ES': 'Ejecución' },
+        order: 8,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // OUTRO (Genérico)
   // ═══════════════════════════════════════════════════════════
   {
