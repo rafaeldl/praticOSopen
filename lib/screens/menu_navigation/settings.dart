@@ -156,57 +156,6 @@ class _SettingsState extends State<Settings> {
                 return const SizedBox.shrink();
               }),
 
-              // Connected Channels Section (WhatsApp)
-              CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.connectedChannels.toUpperCase()),
-                children: [
-                  Observer(
-                    builder: (_) {
-                      final isLinked = _whatsappStore.isLinked;
-                      final isLoading = _whatsappStore.isLoading;
-
-                      return CupertinoListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: isLinked
-                                ? CupertinoColors.systemGreen
-                                : CupertinoColors.systemGrey,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.chat_bubble_2_fill,
-                            color: CupertinoColors.white,
-                            size: 20,
-                          ),
-                        ),
-                        title: const Text('WhatsApp'),
-                        subtitle: Text(
-                          isLoading
-                              ? context.l10n.loading
-                              : isLinked
-                                  ? _whatsappStore.linkedNumber ?? context.l10n.linked
-                                  : context.l10n.notLinked,
-                        ),
-                        trailing: isLoading
-                            ? const CupertinoActivityIndicator()
-                            : isLinked
-                                ? Icon(
-                                    CupertinoIcons.checkmark_circle_fill,
-                                    color: CupertinoColors.systemGreen.resolveFrom(context),
-                                  )
-                                : const CupertinoListTileChevron(),
-                        onTap: isLoading
-                            ? null
-                            : isLinked
-                                ? () => _showUnlinkWhatsAppDialog(context)
-                                : () => _showLinkWhatsAppSheet(context),
-                      );
-                    },
-                  ),
-                ],
-              ),
-
               // Admin/Management Section - RBAC based
               Observer(builder: (ctx) {
                 final canManageCompany = _authService.hasPermission(PermissionType.manageCompany);
@@ -329,22 +278,6 @@ class _SettingsState extends State<Settings> {
                     trailing: const CupertinoListTileChevron(),
                     onTap: () => _showThemeSelectionDialog(context, themeStore, config),
                   ),
-                  Observer(builder: (_) {
-                    return CupertinoListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.systemYellow,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(CupertinoIcons.bell_fill, color: CupertinoColors.white, size: 20),
-                      ),
-                      title: Text(context.l10n.scheduleReminder),
-                      additionalInfo: Text(_getReminderText(context, reminderStore.reminderMinutes)),
-                      trailing: const CupertinoListTileChevron(),
-                      onTap: () => _showReminderSelectionDialog(context, reminderStore),
-                    );
-                  }),
                   // Reabrir Onboarding - para reconfigurar empresa e capturar screenshots
                   Observer(builder: (_) {
                     if (_authService.hasPermission(PermissionType.manageCompany)) {
@@ -373,10 +306,26 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
 
-              // Engagement Reminders Section
+              // Reminders Section
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.engagementReminders.toUpperCase()),
                 children: [
+                  Observer(builder: (_) {
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemYellow,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.bell_fill, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.scheduleReminder),
+                      additionalInfo: Text(_getReminderText(context, reminderStore.reminderMinutes)),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showReminderSelectionDialog(context, reminderStore),
+                    );
+                  }),
                   Observer(builder: (_) {
                     return CupertinoListTile(
                       leading: Container(
@@ -453,6 +402,51 @@ class _SettingsState extends State<Settings> {
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.account.toUpperCase()),
                 children: [
+                  // WhatsApp link
+                  Observer(
+                    builder: (_) {
+                      final isLinked = _whatsappStore.isLinked;
+                      final isLoading = _whatsappStore.isLoading;
+
+                      return CupertinoListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: isLinked
+                                ? CupertinoColors.systemGreen
+                                : CupertinoColors.systemGrey,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            CupertinoIcons.chat_bubble_2_fill,
+                            color: CupertinoColors.white,
+                            size: 20,
+                          ),
+                        ),
+                        title: const Text('WhatsApp'),
+                        subtitle: Text(
+                          isLoading
+                              ? context.l10n.loading
+                              : isLinked
+                                  ? _whatsappStore.linkedNumber ?? context.l10n.linked
+                                  : context.l10n.notLinked,
+                        ),
+                        trailing: isLoading
+                            ? const CupertinoActivityIndicator()
+                            : isLinked
+                                ? Icon(
+                                    CupertinoIcons.checkmark_circle_fill,
+                                    color: CupertinoColors.systemGreen.resolveFrom(context),
+                                  )
+                                : const CupertinoListTileChevron(),
+                        onTap: isLoading
+                            ? null
+                            : isLinked
+                                ? () => _showUnlinkWhatsAppDialog(context)
+                                : () => _showLinkWhatsAppSheet(context),
+                      );
+                    },
+                  ),
                   // Accept Invite - join another company
                   CupertinoListTile(
                     leading: Container(
