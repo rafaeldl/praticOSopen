@@ -1405,6 +1405,29 @@
   "selectDocumentType": "Selecione o tipo de documento",
   "errorUploadingDocument": "Erro ao enviar documento",
 
+  "engagementReminders": "Lembretes",
+  "dailyReminderTitle": "Lembrete diário",
+  "dailyReminderDescription": "Receba um lembrete todo dia às 9h",
+  "inactivityReminderTitle": "Lembrete de inatividade",
+  "inactivityReminderDescription": "Receba lembretes quando não usar o app",
+  "pendingOsReminderTitle": "Lembrete de OS pendentes",
+  "pendingOsReminderDescription": "Receba lembretes sobre OS paradas",
+  "dailyNotificationTitle": "Bom dia!",
+  "dailyNotificationBody": "Registre as OS do dia no PraticOS",
+  "inactivity3dTitle": "Sentimos sua falta!",
+  "inactivity3dBody": "Você não abre o PraticOS há 3 dias. Que tal registrar suas OS?",
+  "inactivity5dTitle": "Suas OS estão esperando!",
+  "inactivity5dBody": "Já faz 5 dias! Não perca o controle das suas ordens de serviço.",
+  "inactivity7dTitle": "Não deixe o PraticOS parado!",
+  "inactivity7dBody": "Faz 1 semana que você não abre o app. Volte e organize suas OS!",
+  "pendingOsNotificationTitle": "OS pendentes precisam de atenção",
+  "pendingOsNotificationBody": "Você tem {count} OS paradas há mais de 7 dias.",
+  "@pendingOsNotificationBody": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
   "legalSection": "Jurídico",
   "termsOfService": "Termos e Condições",
   "termsOfServicePlaceholder": "Ex: Equipamentos não retirados em 90 dias poderão ser descartados...",

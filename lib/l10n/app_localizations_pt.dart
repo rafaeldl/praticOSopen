@@ -3197,6 +3197,64 @@ class AppLocalizationsPt extends AppLocalizations {
   String get errorUploadingDocument => 'Erro ao enviar documento';
 
   @override
+  String get engagementReminders => 'Lembretes';
+
+  @override
+  String get dailyReminderTitle => 'Lembrete diário';
+
+  @override
+  String get dailyReminderDescription => 'Receba um lembrete todo dia às 9h';
+
+  @override
+  String get inactivityReminderTitle => 'Lembrete de inatividade';
+
+  @override
+  String get inactivityReminderDescription =>
+      'Receba lembretes quando não usar o app';
+
+  @override
+  String get pendingOsReminderTitle => 'Lembrete de OS pendentes';
+
+  @override
+  String get pendingOsReminderDescription =>
+      'Receba lembretes sobre OS paradas';
+
+  @override
+  String get dailyNotificationTitle => 'Bom dia!';
+
+  @override
+  String get dailyNotificationBody => 'Registre as OS do dia no PraticOS';
+
+  @override
+  String get inactivity3dTitle => 'Sentimos sua falta!';
+
+  @override
+  String get inactivity3dBody =>
+      'Você não abre o PraticOS há 3 dias. Que tal registrar suas OS?';
+
+  @override
+  String get inactivity5dTitle => 'Suas OS estão esperando!';
+
+  @override
+  String get inactivity5dBody =>
+      'Já faz 5 dias! Não perca o controle das suas ordens de serviço.';
+
+  @override
+  String get inactivity7dTitle => 'Não deixe o PraticOS parado!';
+
+  @override
+  String get inactivity7dBody =>
+      'Faz 1 semana que você não abre o app. Volte e organize suas OS!';
+
+  @override
+  String get pendingOsNotificationTitle => 'OS pendentes precisam de atenção';
+
+  @override
+  String pendingOsNotificationBody(int count) {
+    return 'Você tem $count OS paradas há mais de 7 dias.';
+  }
+
+  @override
   String get legalSection => 'Jurídico';
 
   @override
