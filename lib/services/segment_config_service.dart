@@ -28,9 +28,14 @@ class SegmentConfigService {
   // Segment-level default for fieldService
   bool _segmentFieldService = true;
 
+  // Segment-level default terms of service (i18n)
+  String? _defaultTermsOfService;
+
   // Resolved company config (set once at startup, read directly in runtime)
   bool _fieldService = true;
   bool _useScheduling = true;
+  bool _useDeviceManagement = false;
+  bool _useContracts = false;
 
   // Mapeamento de chaves técnicas de status para label keys
   static const Map<String, String> _statusKeyMapping = {
@@ -139,6 +144,10 @@ class SegmentConfigService {
 
       // Read segment-level fieldService default
       _segmentFieldService = data['fieldService'] as bool? ?? true;
+
+      // Read segment-level default terms of service (i18n)
+      final termsI18n = data['defaultTermsOfService'] as Map<String, dynamic>?;
+      _defaultTermsOfService = termsI18n?[_locale] ?? termsI18n?['pt-BR'];
 
       final customFieldsJson = data['customFields'] as List? ?? [];
 
@@ -527,9 +536,16 @@ class SegmentConfigService {
   }
 
   /// Sets resolved company config values (called once at startup)
-  void setCompanyConfig({required bool fieldService, required bool useScheduling}) {
+  void setCompanyConfig({
+    required bool fieldService,
+    required bool useScheduling,
+    required bool useDeviceManagement,
+    required bool useContracts,
+  }) {
     _fieldService = fieldService;
     _useScheduling = useScheduling;
+    _useDeviceManagement = useDeviceManagement;
+    _useContracts = useContracts;
   }
 
   /// Whether the company does field service (attends at customer location)
@@ -541,14 +557,26 @@ class SegmentConfigService {
   /// Default fieldService value from the segment document
   bool get segmentFieldServiceDefault => _segmentFieldService;
 
+  /// Whether the company uses device management (status, history, etc.)
+  bool get useDeviceManagement => _useDeviceManagement;
+
+  /// Whether the company uses recurring maintenance contracts
+  bool get useContracts => _useContracts;
+
+  /// Default terms of service text for the current segment and locale
+  String? get defaultTermsOfService => _defaultTermsOfService;
+
   /// Limpa todo o cache
   void clear() {
     _segmentId = null;
     _labelCache.clear();
     _customFields.clear();
     _segmentFieldService = true;
+    _defaultTermsOfService = null;
     _fieldService = true;
     _useScheduling = true;
+    _useDeviceManagement = false;
+    _useContracts = false;
   }
 
   /// Getters de estado

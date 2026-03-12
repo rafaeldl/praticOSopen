@@ -1,4 +1,5 @@
 const { initializeFirebase, admin } = require('./firebase-init');
+const { DEFAULT_TERMS } = require('./terms_data');
 
 // Inicializar Firebase (aceita caminho do service account como argumento)
 try {
@@ -295,6 +296,39 @@ const SEGMENTS = [
         key: 'common.notes',
         type: 'label',
         labels: { 'pt-BR': 'Observações', 'en-US': 'Notes', 'es-ES': 'Notas' }
+      },
+      // ─── Device Management global fields (visible when useDeviceManagement=true) ───
+      {
+        key: 'device.location',
+        type: 'text',
+        labels: { 'pt-BR': 'Localização', 'en-US': 'Location', 'es-ES': 'Ubicación' },
+        section: 'Details',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 1,
+      },
+      {
+        key: 'device.acquisitionDate',
+        type: 'date',
+        labels: { 'pt-BR': 'Data de Aquisição', 'en-US': 'Acquisition Date', 'es-ES': 'Fecha de Adquisición' },
+        section: 'Details',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 2,
+      },
+      {
+        key: 'device.warrantyExpiration',
+        type: 'date',
+        labels: { 'pt-BR': 'Vencimento da Garantia', 'en-US': 'Warranty Expiration', 'es-ES': 'Vencimiento de Garantía' },
+        section: 'Details',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 3,
+      },
+      {
+        key: 'device.deviceNotes',
+        type: 'textarea',
+        labels: { 'pt-BR': 'Observações', 'en-US': 'Notes', 'es-ES': 'Notas' },
+        section: 'Details',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 4,
       },
     ],
   },
@@ -1302,6 +1336,708 @@ const SEGMENTS = [
   },
 
   // ═══════════════════════════════════════════════════════════
+  // BICICLETARIA (Oficinas de Bicicleta)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'bicycles',
+    name: 'Bicicletaria',
+    nameI18n: { 'pt-BR': 'Bicicletaria', 'en-US': 'Bike Shop', 'es-ES': 'Bicicletería' },
+    icon: '🚲',
+    active: true,
+    fieldService: false, // Workshop: cliente traz a bicicleta
+    subspecialties: [
+      {
+        id: 'general',
+        icon: '🔧',
+        name: { 'pt-BR': 'Oficina Geral', 'en-US': 'General Workshop', 'es-ES': 'Taller General' },
+        description: { 'pt-BR': 'Manutenção e reparo de bicicletas em geral', 'en-US': 'General bicycle maintenance and repair', 'es-ES': 'Mantenimiento y reparación general de bicicletas' },
+      },
+      {
+        id: 'mtb',
+        icon: '🏔️',
+        name: { 'pt-BR': 'MTB', 'en-US': 'MTB', 'es-ES': 'MTB' },
+        description: { 'pt-BR': 'Mountain bike, trilha e enduro', 'en-US': 'Mountain bike, trail and enduro', 'es-ES': 'Mountain bike, trail y enduro' },
+      },
+      {
+        id: 'road',
+        icon: '🏁',
+        name: { 'pt-BR': 'Speed / Road', 'en-US': 'Road Bike', 'es-ES': 'Ruta / Road' },
+        description: { 'pt-BR': 'Bicicletas de estrada e ciclismo de velocidade', 'en-US': 'Road bikes and speed cycling', 'es-ES': 'Bicicletas de ruta y ciclismo de velocidad' },
+      },
+      {
+        id: 'ebike',
+        icon: '⚡',
+        name: { 'pt-BR': 'E-bike', 'en-US': 'E-bike', 'es-ES': 'E-bike' },
+        description: { 'pt-BR': 'Bicicletas elétricas e assistidas', 'en-US': 'Electric and pedal-assist bikes', 'es-ES': 'Bicicletas eléctricas y asistidas' },
+      },
+    ],
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Bicicleta', 'en-US': 'Bicycle', 'es-ES': 'Bicicleta' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Bicicletas', 'en-US': 'Bicycles', 'es-ES': 'Bicicletas' }
+      },
+      {
+        key: 'device.brand',
+        type: 'label',
+        labels: { 'pt-BR': 'Marca', 'en-US': 'Brand', 'es-ES': 'Marca' }
+      },
+      {
+        key: 'device.model',
+        type: 'label',
+        labels: { 'pt-BR': 'Modelo', 'en-US': 'Model', 'es-ES': 'Modelo' }
+      },
+      {
+        key: 'device.serial',
+        type: 'text',
+        labels: { 'pt-BR': 'Nº de Série', 'en-US': 'Serial Number', 'es-ES': 'Nº de Serie' },
+      },
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Bicicleta', 'en-US': 'Add Bicycle', 'es-ES': 'Agregar Bicicleta' }
+      },
+      {
+        key: 'actions.edit_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Editar Bicicleta', 'en-US': 'Edit Bicycle', 'es-ES': 'Editar Bicicleta' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Conserto', 'en-US': 'Under Repair', 'es-ES': 'En Reparación' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Pronta para Retirada', 'en-US': 'Ready for Pickup', 'es-ES': 'Lista para Retiro' }
+      },
+
+      // Campos customizados (campos reais do form)
+      {
+        key: 'device.bikeType',
+        type: 'select',
+        labels: { 'pt-BR': 'Tipo de Bicicleta', 'en-US': 'Bike Type', 'es-ES': 'Tipo de Bicicleta' },
+        options: ['mtb', 'road', 'gravel', 'urban', 'bmx', 'kids', 'ebike', 'folding', 'fixed'],
+        optionsI18n: [
+          { value: 'mtb', labels: { 'pt-BR': 'MTB', 'en-US': 'MTB', 'es-ES': 'MTB' } },
+          { value: 'road', labels: { 'pt-BR': 'Speed / Road', 'en-US': 'Road', 'es-ES': 'Ruta / Road' } },
+          { value: 'gravel', labels: { 'pt-BR': 'Gravel', 'en-US': 'Gravel', 'es-ES': 'Gravel' } },
+          { value: 'urban', labels: { 'pt-BR': 'Urbana', 'en-US': 'Urban', 'es-ES': 'Urbana' } },
+          { value: 'bmx', labels: { 'pt-BR': 'BMX', 'en-US': 'BMX', 'es-ES': 'BMX' } },
+          { value: 'kids', labels: { 'pt-BR': 'Infantil', 'en-US': 'Kids', 'es-ES': 'Infantil' } },
+          { value: 'ebike', labels: { 'pt-BR': 'E-bike', 'en-US': 'E-bike', 'es-ES': 'E-bike' } },
+          { value: 'folding', labels: { 'pt-BR': 'Dobrável', 'en-US': 'Folding', 'es-ES': 'Plegable' } },
+          { value: 'fixed', labels: { 'pt-BR': 'Fixa / Single Speed', 'en-US': 'Fixed Gear', 'es-ES': 'Piñón Fijo' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 1,
+      },
+      {
+        key: 'device.wheelSize',
+        type: 'select',
+        labels: { 'pt-BR': 'Aro', 'en-US': 'Wheel Size', 'es-ES': 'Rodado' },
+        options: ['12', '16', '20', '24', '26', '27.5', '29', '700c'],
+        optionsI18n: [
+          { value: '12', labels: { 'pt-BR': 'Aro 12"', 'en-US': '12"', 'es-ES': 'Rodado 12"' } },
+          { value: '16', labels: { 'pt-BR': 'Aro 16"', 'en-US': '16"', 'es-ES': 'Rodado 16"' } },
+          { value: '20', labels: { 'pt-BR': 'Aro 20"', 'en-US': '20"', 'es-ES': 'Rodado 20"' } },
+          { value: '24', labels: { 'pt-BR': 'Aro 24"', 'en-US': '24"', 'es-ES': 'Rodado 24"' } },
+          { value: '26', labels: { 'pt-BR': 'Aro 26"', 'en-US': '26"', 'es-ES': 'Rodado 26"' } },
+          { value: '27.5', labels: { 'pt-BR': 'Aro 27.5"', 'en-US': '27.5"', 'es-ES': 'Rodado 27.5"' } },
+          { value: '29', labels: { 'pt-BR': 'Aro 29"', 'en-US': '29"', 'es-ES': 'Rodado 29"' } },
+          { value: '700c', labels: { 'pt-BR': 'Aro 700c', 'en-US': '700c', 'es-ES': 'Rodado 700c' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 2,
+      },
+      {
+        key: 'device.frameSize',
+        type: 'select',
+        labels: { 'pt-BR': 'Tamanho do Quadro', 'en-US': 'Frame Size', 'es-ES': 'Talla del Cuadro' },
+        options: ['xs', 's', 'm', 'l', 'xl'],
+        optionsI18n: [
+          { value: 'xs', labels: { 'pt-BR': 'PP / XS', 'en-US': 'XS', 'es-ES': 'XS' } },
+          { value: 's', labels: { 'pt-BR': 'P / S', 'en-US': 'S', 'es-ES': 'S' } },
+          { value: 'm', labels: { 'pt-BR': 'M', 'en-US': 'M', 'es-ES': 'M' } },
+          { value: 'l', labels: { 'pt-BR': 'G / L', 'en-US': 'L', 'es-ES': 'L' } },
+          { value: 'xl', labels: { 'pt-BR': 'GG / XL', 'en-US': 'XL', 'es-ES': 'XL' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 3,
+      },
+      {
+        key: 'device.frameMaterial',
+        type: 'select',
+        labels: { 'pt-BR': 'Material do Quadro', 'en-US': 'Frame Material', 'es-ES': 'Material del Cuadro' },
+        options: ['aluminum', 'carbon', 'steel', 'chromoly'],
+        optionsI18n: [
+          { value: 'aluminum', labels: { 'pt-BR': 'Alumínio', 'en-US': 'Aluminum', 'es-ES': 'Aluminio' } },
+          { value: 'carbon', labels: { 'pt-BR': 'Carbono', 'en-US': 'Carbon', 'es-ES': 'Carbono' } },
+          { value: 'steel', labels: { 'pt-BR': 'Aço', 'en-US': 'Steel', 'es-ES': 'Acero' } },
+          { value: 'chromoly', labels: { 'pt-BR': 'Cromo-Molibdênio', 'en-US': 'Chromoly', 'es-ES': 'Cromo-Molibdeno' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 4,
+      },
+      {
+        key: 'device.gearCount',
+        type: 'select',
+        labels: { 'pt-BR': 'Marchas', 'en-US': 'Gears', 'es-ES': 'Velocidades' },
+        options: ['single', '7', '8', '9', '10', '11', '12', '18', '21', '24', '27'],
+        optionsI18n: [
+          { value: 'single', labels: { 'pt-BR': 'Single Speed', 'en-US': 'Single Speed', 'es-ES': 'Single Speed' } },
+          { value: '7', labels: { 'pt-BR': '7v', 'en-US': '7 speed', 'es-ES': '7v' } },
+          { value: '8', labels: { 'pt-BR': '8v', 'en-US': '8 speed', 'es-ES': '8v' } },
+          { value: '9', labels: { 'pt-BR': '9v', 'en-US': '9 speed', 'es-ES': '9v' } },
+          { value: '10', labels: { 'pt-BR': '10v', 'en-US': '10 speed', 'es-ES': '10v' } },
+          { value: '11', labels: { 'pt-BR': '11v', 'en-US': '11 speed', 'es-ES': '11v' } },
+          { value: '12', labels: { 'pt-BR': '12v', 'en-US': '12 speed', 'es-ES': '12v' } },
+          { value: '18', labels: { 'pt-BR': '18v', 'en-US': '18 speed', 'es-ES': '18v' } },
+          { value: '21', labels: { 'pt-BR': '21v', 'en-US': '21 speed', 'es-ES': '21v' } },
+          { value: '24', labels: { 'pt-BR': '24v', 'en-US': '24 speed', 'es-ES': '24v' } },
+          { value: '27', labels: { 'pt-BR': '27v', 'en-US': '27 speed', 'es-ES': '27v' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 5,
+      },
+      {
+        key: 'device.brakeType',
+        type: 'select',
+        labels: { 'pt-BR': 'Tipo de Freio', 'en-US': 'Brake Type', 'es-ES': 'Tipo de Freno' },
+        options: ['vbrake', 'disc_mechanical', 'disc_hydraulic', 'cantilever', 'coaster'],
+        optionsI18n: [
+          { value: 'vbrake', labels: { 'pt-BR': 'V-Brake', 'en-US': 'V-Brake', 'es-ES': 'V-Brake' } },
+          { value: 'disc_mechanical', labels: { 'pt-BR': 'Disco Mecânico', 'en-US': 'Mechanical Disc', 'es-ES': 'Disco Mecánico' } },
+          { value: 'disc_hydraulic', labels: { 'pt-BR': 'Disco Hidráulico', 'en-US': 'Hydraulic Disc', 'es-ES': 'Disco Hidráulico' } },
+          { value: 'cantilever', labels: { 'pt-BR': 'Cantilever', 'en-US': 'Cantilever', 'es-ES': 'Cantilever' } },
+          { value: 'coaster', labels: { 'pt-BR': 'Contra-Pedal', 'en-US': 'Coaster Brake', 'es-ES': 'Contrapedal' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 6,
+      },
+      {
+        key: 'device.suspensionType',
+        type: 'select',
+        labels: { 'pt-BR': 'Suspensão', 'en-US': 'Suspension', 'es-ES': 'Suspensión' },
+        options: ['rigid', 'hardtail', 'full_suspension'],
+        optionsI18n: [
+          { value: 'rigid', labels: { 'pt-BR': 'Rígida', 'en-US': 'Rigid', 'es-ES': 'Rígida' } },
+          { value: 'hardtail', labels: { 'pt-BR': 'Hardtail (dianteira)', 'en-US': 'Hardtail (front)', 'es-ES': 'Hardtail (delantera)' } },
+          { value: 'full_suspension', labels: { 'pt-BR': 'Full Suspension', 'en-US': 'Full Suspension', 'es-ES': 'Doble Suspensión' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 7,
+      },
+      {
+        key: 'device.color',
+        type: 'text',
+        labels: { 'pt-BR': 'Cor', 'en-US': 'Color', 'es-ES': 'Color' },
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 8,
+      },
+      {
+        key: 'device.year',
+        type: 'number',
+        labels: { 'pt-BR': 'Ano', 'en-US': 'Year', 'es-ES': 'Año' },
+        min: 1980,
+        max: 2030,
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 9,
+      },
+      {
+        key: 'device.groupset',
+        type: 'text',
+        labels: { 'pt-BR': 'Grupo / Câmbio', 'en-US': 'Groupset', 'es-ES': 'Grupo / Cambio' },
+        placeholder: 'Ex: Shimano Deore, SRAM GX',
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 10,
+      },
+      {
+        key: 'device.isElectric',
+        type: 'select',
+        labels: { 'pt-BR': 'Elétrica?', 'en-US': 'Electric?', 'es-ES': '¿Eléctrica?' },
+        options: ['no', 'yes'],
+        optionsI18n: [
+          { value: 'no', labels: { 'pt-BR': 'Não', 'en-US': 'No', 'es-ES': 'No' } },
+          { value: 'yes', labels: { 'pt-BR': 'Sim', 'en-US': 'Yes', 'es-ES': 'Sí' } },
+        ],
+        section: 'Especificações',
+        sectionI18n: { 'pt-BR': 'Especificações', 'en-US': 'Specifications', 'es-ES': 'Especificaciones' },
+        order: 11,
+      },
+
+      // Campos customizados da OS
+      {
+        key: 'service_order.observation',
+        type: 'textarea',
+        labels: { 'pt-BR': 'Observação', 'en-US': 'Observation', 'es-ES': 'Observación' },
+        placeholder: 'Ex: Cliente relata barulho na corrente',
+        section: 'Detalhes',
+        sectionI18n: { 'pt-BR': 'Detalhes', 'en-US': 'Details', 'es-ES': 'Detalles' },
+        order: 1,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // MANUTENÇÃO DE ATIVOS (Equipamentos industriais, geradores, frotas, etc.)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'asset_maintenance',
+    name: 'Manutenção de Ativos',
+    nameI18n: { 'pt-BR': 'Manutenção de Ativos', 'en-US': 'Asset Maintenance', 'es-ES': 'Mantenimiento de Activos' },
+    icon: '🏭',
+    active: true,
+    fieldService: true,
+    subspecialties: [
+      {
+        id: 'industrial_equipment',
+        icon: '⚙️',
+        name: { 'pt-BR': 'Equipamentos Industriais', 'en-US': 'Industrial Equipment', 'es-ES': 'Equipos Industriales' },
+        description: { 'pt-BR': 'Máquinas, tornos, compressores, esteiras', 'en-US': 'Machines, lathes, compressors, conveyors', 'es-ES': 'Máquinas, tornos, compresores, cintas' },
+      },
+      {
+        id: 'generators',
+        icon: '🔌',
+        name: { 'pt-BR': 'Geradores', 'en-US': 'Generators', 'es-ES': 'Generadores' },
+        description: { 'pt-BR': 'Geradores de energia, nobreaks, grupos geradores', 'en-US': 'Power generators, UPS, generator sets', 'es-ES': 'Generadores de energía, UPS, grupos electrógenos' },
+      },
+      {
+        id: 'hvac_commercial',
+        icon: '❄️',
+        name: { 'pt-BR': 'HVAC Comercial', 'en-US': 'Commercial HVAC', 'es-ES': 'HVAC Comercial' },
+        description: { 'pt-BR': 'Climatização comercial e industrial', 'en-US': 'Commercial and industrial climate control', 'es-ES': 'Climatización comercial e industrial' },
+      },
+      {
+        id: 'fleet_vehicles',
+        icon: '🚛',
+        name: { 'pt-BR': 'Veículos e Frotas', 'en-US': 'Fleet Vehicles', 'es-ES': 'Vehículos y Flotas' },
+        description: { 'pt-BR': 'Frotas de veículos, caminhões, máquinas pesadas', 'en-US': 'Vehicle fleets, trucks, heavy machinery', 'es-ES': 'Flotas de vehículos, camiones, maquinaria pesada' },
+      },
+      {
+        id: 'medical_equipment',
+        icon: '🏥',
+        name: { 'pt-BR': 'Equipamentos Médicos', 'en-US': 'Medical Equipment', 'es-ES': 'Equipos Médicos' },
+        description: { 'pt-BR': 'Equipamentos hospitalares e laboratoriais', 'en-US': 'Hospital and laboratory equipment', 'es-ES': 'Equipos hospitalarios y de laboratorio' },
+      },
+      {
+        id: 'commercial_kitchen',
+        icon: '🍳',
+        name: { 'pt-BR': 'Cozinhas Industriais', 'en-US': 'Commercial Kitchen', 'es-ES': 'Cocinas Industriales' },
+        description: { 'pt-BR': 'Fogões, fornos, câmaras frias, equipamentos de cozinha', 'en-US': 'Stoves, ovens, cold rooms, kitchen equipment', 'es-ES': 'Cocinas, hornos, cámaras frías, equipos de cocina' },
+      },
+    ],
+    customFields: [
+      // Labels customizados
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Ativo', 'en-US': 'Asset', 'es-ES': 'Activo' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Ativos', 'en-US': 'Assets', 'es-ES': 'Activos' }
+      },
+      {
+        key: 'device.brand',
+        type: 'label',
+        labels: { 'pt-BR': 'Fabricante', 'en-US': 'Manufacturer', 'es-ES': 'Fabricante' }
+      },
+      {
+        key: 'device.serial',
+        type: 'label',
+        labels: { 'pt-BR': 'Número de Série', 'en-US': 'Serial Number', 'es-ES': 'Número de Serie' }
+      },
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Adicionar Ativo', 'en-US': 'Add Asset', 'es-ES': 'Agregar Activo' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Manutenção', 'en-US': 'Under Maintenance', 'es-ES': 'En Mantenimiento' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Operacional', 'en-US': 'Operational', 'es-ES': 'Operativo' }
+      },
+
+      // Campos customizados do domínio
+      {
+        key: 'device.assetTag',
+        type: 'text',
+        labels: { 'pt-BR': 'Tag do Ativo', 'en-US': 'Asset Tag', 'es-ES': 'Etiqueta del Activo' },
+        placeholder: 'Ex: GER-001, MAQ-042',
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 1,
+      },
+      {
+        key: 'device.manufacturer',
+        type: 'text',
+        labels: { 'pt-BR': 'Fabricante', 'en-US': 'Manufacturer', 'es-ES': 'Fabricante' },
+        placeholder: 'Ex: Cummins, WEG, Caterpillar',
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 2,
+      },
+      {
+        key: 'device.assetLocation',
+        type: 'text',
+        labels: { 'pt-BR': 'Localização do Ativo', 'en-US': 'Asset Location', 'es-ES': 'Ubicación del Activo' },
+        placeholder: 'Ex: Galpão 3, Sala de máquinas, Andar 2',
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 3,
+      },
+      {
+        key: 'device.assetCategory',
+        type: 'select',
+        labels: { 'pt-BR': 'Categoria', 'en-US': 'Category', 'es-ES': 'Categoría' },
+        options: ['mechanical', 'electrical', 'hydraulic', 'pneumatic', 'thermal', 'electronic'],
+        optionsI18n: [
+          { value: 'mechanical', labels: { 'pt-BR': 'Mecânico', 'en-US': 'Mechanical', 'es-ES': 'Mecánico' } },
+          { value: 'electrical', labels: { 'pt-BR': 'Elétrico', 'en-US': 'Electrical', 'es-ES': 'Eléctrico' } },
+          { value: 'hydraulic', labels: { 'pt-BR': 'Hidráulico', 'en-US': 'Hydraulic', 'es-ES': 'Hidráulico' } },
+          { value: 'pneumatic', labels: { 'pt-BR': 'Pneumático', 'en-US': 'Pneumatic', 'es-ES': 'Neumático' } },
+          { value: 'thermal', labels: { 'pt-BR': 'Térmico', 'en-US': 'Thermal', 'es-ES': 'Térmico' } },
+          { value: 'electronic', labels: { 'pt-BR': 'Eletrônico', 'en-US': 'Electronic', 'es-ES': 'Electrónico' } },
+        ],
+        section: 'Identificação',
+        sectionI18n: { 'pt-BR': 'Identificação', 'en-US': 'Identification', 'es-ES': 'Identificación' },
+        order: 4,
+      },
+      {
+        key: 'device.installationDate',
+        type: 'date',
+        labels: { 'pt-BR': 'Data de Instalação', 'en-US': 'Installation Date', 'es-ES': 'Fecha de Instalación' },
+        section: 'Manutenção',
+        sectionI18n: { 'pt-BR': 'Manutenção', 'en-US': 'Maintenance', 'es-ES': 'Mantenimiento' },
+        order: 5,
+      },
+      {
+        key: 'device.warrantyExpiration',
+        type: 'date',
+        labels: { 'pt-BR': 'Vencimento da Garantia', 'en-US': 'Warranty Expiration', 'es-ES': 'Vencimiento de Garantía' },
+        section: 'Manutenção',
+        sectionI18n: { 'pt-BR': 'Manutenção', 'en-US': 'Maintenance', 'es-ES': 'Mantenimiento' },
+        order: 6,
+      },
+      {
+        key: 'device.lastMaintenanceDate',
+        type: 'date',
+        labels: { 'pt-BR': 'Última Manutenção', 'en-US': 'Last Maintenance', 'es-ES': 'Último Mantenimiento' },
+        section: 'Manutenção',
+        sectionI18n: { 'pt-BR': 'Manutenção', 'en-US': 'Maintenance', 'es-ES': 'Mantenimiento' },
+        order: 7,
+      },
+      {
+        key: 'device.operatingHours',
+        type: 'number',
+        labels: { 'pt-BR': 'Horas de Operação', 'en-US': 'Operating Hours', 'es-ES': 'Horas de Operación' },
+        min: 0,
+        max: 999999,
+        section: 'Manutenção',
+        sectionI18n: { 'pt-BR': 'Manutenção', 'en-US': 'Maintenance', 'es-ES': 'Mantenimiento' },
+        order: 8,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // OBRAS PÚBLICAS / PREFEITURAS (Public Works / Municipalities)
+  // ═══════════════════════════════════════════════════════════
+  {
+    id: 'public_works',
+    name: 'Obras Públicas / Prefeituras',
+    nameI18n: {
+      'pt-BR': 'Obras Públicas / Prefeituras',
+      'en-US': 'Public Works / Municipalities',
+      'es-ES': 'Obras Públicas / Municipios'
+    },
+    icon: '🏛️',
+    active: true,
+    fieldService: true,
+    useDeviceManagement: true,
+    useContracts: true,
+    useScheduling: true,
+    subspecialties: [
+      {
+        id: 'infrastructure',
+        icon: '🏗️',
+        name: { 'pt-BR': 'Obras de Infraestrutura', 'en-US': 'Infrastructure Works', 'es-ES': 'Obras de Infraestructura' },
+        description: { 'pt-BR': 'Estradas, pontes, saneamento, drenagem', 'en-US': 'Roads, bridges, sanitation, drainage', 'es-ES': 'Carreteras, puentes, saneamiento, drenaje' },
+      },
+      {
+        id: 'maintenance_services',
+        icon: '🔧',
+        name: { 'pt-BR': 'Serviços de Manutenção', 'en-US': 'Maintenance Services', 'es-ES': 'Servicios de Mantenimiento' },
+        description: { 'pt-BR': 'Manutenção de prédios públicos, praças, iluminação', 'en-US': 'Public buildings, parks, lighting maintenance', 'es-ES': 'Mantenimiento de edificios públicos, plazas, iluminación' },
+      },
+      {
+        id: 'material_supply',
+        icon: '📦',
+        name: { 'pt-BR': 'Fornecimento de Materiais', 'en-US': 'Material Supply', 'es-ES': 'Suministro de Materiales' },
+        description: { 'pt-BR': 'Compra e entrega de materiais de construção e insumos', 'en-US': 'Purchase and delivery of construction materials and supplies', 'es-ES': 'Compra y entrega de materiales de construcción e insumos' },
+      },
+      {
+        id: 'it_services',
+        icon: '💻',
+        name: { 'pt-BR': 'Serviços de TI', 'en-US': 'IT Services', 'es-ES': 'Servicios de TI' },
+        description: { 'pt-BR': 'Infraestrutura de TI, sistemas, redes', 'en-US': 'IT infrastructure, systems, networks', 'es-ES': 'Infraestructura de TI, sistemas, redes' },
+      },
+      {
+        id: 'cleaning_conservation',
+        icon: '🧹',
+        name: { 'pt-BR': 'Limpeza e Conservação', 'en-US': 'Cleaning & Conservation', 'es-ES': 'Limpieza y Conservación' },
+        description: { 'pt-BR': 'Limpeza urbana, conservação de áreas públicas', 'en-US': 'Urban cleaning, public area conservation', 'es-ES': 'Limpieza urbana, conservación de áreas públicas' },
+      },
+      {
+        id: 'consulting',
+        icon: '📋',
+        name: { 'pt-BR': 'Consultoria e Projetos', 'en-US': 'Consulting & Projects', 'es-ES': 'Consultoría y Proyectos' },
+        description: { 'pt-BR': 'Projetos de engenharia, laudos, consultorias técnicas', 'en-US': 'Engineering projects, reports, technical consulting', 'es-ES': 'Proyectos de ingeniería, informes, consultoría técnica' },
+      },
+    ],
+    customFields: [
+      // ── Entity Labels ──
+      {
+        key: 'customer._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Empresa Contratada', 'en-US': 'Contractor', 'es-ES': 'Empresa Contratada' }
+      },
+      {
+        key: 'customer._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Empresas Contratadas', 'en-US': 'Contractors', 'es-ES': 'Empresas Contratadas' }
+      },
+      {
+        key: 'device._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Obra', 'en-US': 'Project', 'es-ES': 'Obra' }
+      },
+      {
+        key: 'device._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Obras', 'en-US': 'Projects', 'es-ES': 'Obras' }
+      },
+      {
+        key: 'service_order._entity',
+        type: 'label',
+        labels: { 'pt-BR': 'Contrato', 'en-US': 'Contract', 'es-ES': 'Contrato' }
+      },
+      {
+        key: 'service_order._entity_plural',
+        type: 'label',
+        labels: { 'pt-BR': 'Contratos', 'en-US': 'Contracts', 'es-ES': 'Contratos' }
+      },
+
+      // ── Device Field Labels ──
+      {
+        key: 'device.serial',
+        type: 'label',
+        labels: { 'pt-BR': 'Nº do Contrato', 'en-US': 'Contract Number', 'es-ES': 'Nº del Contrato' }
+      },
+      {
+        key: 'device.brand',
+        type: 'label',
+        labels: { 'pt-BR': 'Secretaria Responsável', 'en-US': 'Responsible Department', 'es-ES': 'Secretaría Responsable' }
+      },
+      {
+        key: 'device.model',
+        type: 'label',
+        labels: { 'pt-BR': 'Localização da Obra', 'en-US': 'Project Location', 'es-ES': 'Ubicación de la Obra' }
+      },
+      {
+        key: 'device.description',
+        type: 'label',
+        labels: { 'pt-BR': 'Objeto do Contrato', 'en-US': 'Contract Object', 'es-ES': 'Objeto del Contrato' }
+      },
+
+      // ── Status Labels ──
+      {
+        key: 'status.quote',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Licitação', 'en-US': 'Bidding', 'es-ES': 'En Licitación' }
+      },
+      {
+        key: 'status.approved',
+        type: 'label',
+        labels: { 'pt-BR': 'Contratado', 'en-US': 'Contracted', 'es-ES': 'Contratado' }
+      },
+      {
+        key: 'status.in_progress',
+        type: 'label',
+        labels: { 'pt-BR': 'Em Execução', 'en-US': 'In Execution', 'es-ES': 'En Ejecución' }
+      },
+      {
+        key: 'status.completed',
+        type: 'label',
+        labels: { 'pt-BR': 'Concluído / Recebido', 'en-US': 'Completed / Received', 'es-ES': 'Concluido / Recibido' }
+      },
+      {
+        key: 'status.cancelled',
+        type: 'label',
+        labels: { 'pt-BR': 'Rescindido', 'en-US': 'Terminated', 'es-ES': 'Rescindido' }
+      },
+
+      // ── Action Labels ──
+      {
+        key: 'actions.create_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Nova Obra', 'en-US': 'New Project', 'es-ES': 'Nueva Obra' }
+      },
+      {
+        key: 'actions.edit_device',
+        type: 'label',
+        labels: { 'pt-BR': 'Editar Obra', 'en-US': 'Edit Project', 'es-ES': 'Editar Obra' }
+      },
+      {
+        key: 'actions.create_service_order',
+        type: 'label',
+        labels: { 'pt-BR': 'Novo Contrato', 'en-US': 'New Contract', 'es-ES': 'Nuevo Contrato' }
+      },
+      {
+        key: 'actions.create_customer',
+        type: 'label',
+        labels: { 'pt-BR': 'Nova Empresa Contratada', 'en-US': 'New Contractor', 'es-ES': 'Nueva Empresa Contratada' }
+      },
+
+      // ── Financial Labels ──
+      {
+        key: 'financial.total',
+        type: 'label',
+        labels: { 'pt-BR': 'Valor Contratado', 'en-US': 'Contract Value', 'es-ES': 'Valor Contratado' }
+      },
+      {
+        key: 'financial.total_paid',
+        type: 'label',
+        labels: { 'pt-BR': 'Total Liberado', 'en-US': 'Total Released', 'es-ES': 'Total Liberado' }
+      },
+      {
+        key: 'financial.remaining',
+        type: 'label',
+        labels: { 'pt-BR': 'A Liberar', 'en-US': 'Pending Release', 'es-ES': 'Por Liberar' }
+      },
+      {
+        key: 'financial.payment',
+        type: 'label',
+        labels: { 'pt-BR': 'Medição', 'en-US': 'Measurement', 'es-ES': 'Medición' }
+      },
+
+      // ── Custom Fields: Dados do Contrato ──
+      {
+        key: 'service_order.bidModality',
+        type: 'select',
+        labels: { 'pt-BR': 'Modalidade de Licitação', 'en-US': 'Bid Modality', 'es-ES': 'Modalidad de Licitación' },
+        options: ['electronic_auction', 'competition', 'invitation', 'waiver', 'unenforceability', 'competitive_dialogue'],
+        optionsI18n: [
+          { value: 'electronic_auction', labels: { 'pt-BR': 'Pregão Eletrônico', 'en-US': 'Electronic Auction', 'es-ES': 'Subasta Electrónica' } },
+          { value: 'competition', labels: { 'pt-BR': 'Concorrência', 'en-US': 'Competition', 'es-ES': 'Concurrencia' } },
+          { value: 'invitation', labels: { 'pt-BR': 'Convite', 'en-US': 'Invitation', 'es-ES': 'Invitación' } },
+          { value: 'waiver', labels: { 'pt-BR': 'Dispensa', 'en-US': 'Waiver', 'es-ES': 'Dispensa' } },
+          { value: 'unenforceability', labels: { 'pt-BR': 'Inexigibilidade', 'en-US': 'Unenforceability', 'es-ES': 'Inexigibilidad' } },
+          { value: 'competitive_dialogue', labels: { 'pt-BR': 'Diálogo Competitivo', 'en-US': 'Competitive Dialogue', 'es-ES': 'Diálogo Competitivo' } },
+        ],
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 1,
+      },
+      {
+        key: 'service_order.bidNumber',
+        type: 'text',
+        labels: { 'pt-BR': 'Nº da Licitação', 'en-US': 'Bid Number', 'es-ES': 'Nº de Licitación' },
+        placeholder: 'Ex: PE 001/2026',
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 2,
+      },
+      {
+        key: 'service_order.contractNumber',
+        type: 'text',
+        labels: { 'pt-BR': 'Nº do Contrato', 'en-US': 'Contract Number', 'es-ES': 'Nº del Contrato' },
+        placeholder: 'Ex: CT 045/2026',
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 3,
+      },
+      {
+        key: 'service_order.contractualDeadline',
+        type: 'date',
+        labels: { 'pt-BR': 'Prazo Contratual', 'en-US': 'Contractual Deadline', 'es-ES': 'Plazo Contractual' },
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 4,
+      },
+      {
+        key: 'service_order.legalBasis',
+        type: 'select',
+        labels: { 'pt-BR': 'Base Legal', 'en-US': 'Legal Basis', 'es-ES': 'Base Legal' },
+        options: ['law_14133', 'law_8666', 'other'],
+        optionsI18n: [
+          { value: 'law_14133', labels: { 'pt-BR': 'Lei 14.133/2021', 'en-US': 'Law 14,133/2021', 'es-ES': 'Ley 14.133/2021' } },
+          { value: 'law_8666', labels: { 'pt-BR': 'Lei 8.666/1993', 'en-US': 'Law 8,666/1993', 'es-ES': 'Ley 8.666/1993' } },
+          { value: 'other', labels: { 'pt-BR': 'Outra', 'en-US': 'Other', 'es-ES': 'Otra' } },
+        ],
+        section: 'Dados do Contrato',
+        sectionI18n: { 'pt-BR': 'Dados do Contrato', 'en-US': 'Contract Data', 'es-ES': 'Datos del Contrato' },
+        order: 5,
+      },
+
+      // ── Custom Fields: Execução ──
+      {
+        key: 'service_order.executionPercentage',
+        type: 'number',
+        labels: { 'pt-BR': '% de Execução', 'en-US': 'Execution %', 'es-ES': '% de Ejecución' },
+        min: 0,
+        max: 100,
+        suffix: '%',
+        section: 'Execução',
+        sectionI18n: { 'pt-BR': 'Execução', 'en-US': 'Execution', 'es-ES': 'Ejecución' },
+        order: 6,
+      },
+      {
+        key: 'service_order.contractFiscal',
+        type: 'text',
+        labels: { 'pt-BR': 'Fiscal do Contrato', 'en-US': 'Contract Inspector', 'es-ES': 'Fiscal del Contrato' },
+        placeholder: 'Nome do fiscal designado',
+        section: 'Execução',
+        sectionI18n: { 'pt-BR': 'Execução', 'en-US': 'Execution', 'es-ES': 'Ejecución' },
+        order: 7,
+      },
+      {
+        key: 'service_order.currentMilestone',
+        type: 'text',
+        labels: { 'pt-BR': 'Etapa Atual', 'en-US': 'Current Milestone', 'es-ES': 'Etapa Actual' },
+        placeholder: 'Ex: Fundação, Alvenaria, Acabamento',
+        section: 'Execução',
+        sectionI18n: { 'pt-BR': 'Execução', 'en-US': 'Execution', 'es-ES': 'Ejecución' },
+        order: 8,
+      },
+    ],
+  },
+
+  // ═══════════════════════════════════════════════════════════
   // OUTRO (Genérico)
   // ═══════════════════════════════════════════════════════════
   {
@@ -1327,6 +2063,11 @@ async function seedSegments() {
     for (const segment of SEGMENTS) {
       const { id, ...data } = segment;
       const segmentRef = db.collection('segments').doc(id);
+
+      // Merge defaultTermsOfService from terms_data.js (skip 'global')
+      if (id !== 'global' && DEFAULT_TERMS[id]) {
+        data.defaultTermsOfService = DEFAULT_TERMS[id];
+      }
 
       // Verifica se já existe
       const doc = await segmentRef.get();

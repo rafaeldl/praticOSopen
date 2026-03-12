@@ -273,16 +273,17 @@ class _ServiceFormScreenState extends State<ServiceFormScreen> {
           children: fields.map((field) {
             return DynamicFieldBuilder(
               field: field,
-              value: _service?.customData?[field.key],
+              value: _service?.customData?[field.fieldName] ?? _service?.customData?[field.key],
               locale: locale,
               onChanged: (newValue) {
                 setState(() {
                   _service?.customData ??= {};
                   if (newValue == null) {
-                    _service!.customData!.remove(field.key);
+                    _service!.customData!.remove(field.fieldName);
                   } else {
-                    _service!.customData![field.key] = newValue;
+                    _service!.customData![field.fieldName] = newValue;
                   }
+                  _service!.customData!.remove(field.key); // migrate old key
                 });
               },
             );

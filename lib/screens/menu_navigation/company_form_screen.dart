@@ -22,6 +22,7 @@ class CompanyFormScreen extends StatefulWidget {
 class _CompanyFormScreenState extends State<CompanyFormScreen> {
   final CompanyStore _companyStore = CompanyStore();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _termsController = TextEditingController();
 
   bool _isLoading = true;
   Company? _company;
@@ -132,10 +133,17 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
     _loadData();
   }
 
+  @override
+  void dispose() {
+    _termsController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     if (Global.companyAggr?.id != null) {
       _company = await _companyStore.retrieveCompany(Global.companyAggr!.id);
+      _termsController.text = _company?.termsOfService ?? '';
 
       if (mounted) {
         final provider = context.read<SegmentConfigProvider>();
@@ -205,6 +213,8 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
           provider.setCompanyConfig(
             fieldService: _company!.fieldService ?? true,
             useScheduling: _company!.useScheduling ?? true,
+            useDeviceManagement: _company!.useDeviceManagement ?? false,
+            useContracts: _company!.useContracts ?? false,
           );
         }
       }
@@ -720,6 +730,97 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     child: CupertinoSwitch(
                       value: _company?.useScheduling ?? true,
                       onChanged: (val) => setState(() => _company?.useScheduling = val),
+                    ),
+                  ),
+                  CupertinoFormRow(
+                    prefix: Text(context.l10n.deviceManagement),
+                    helper: Text(
+                      context.l10n.deviceManagementDescription,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                    child: CupertinoSwitch(
+                      value: _company?.useDeviceManagement ?? false,
+                      onChanged: (val) => setState(() => _company?.useDeviceManagement = val),
+                    ),
+                  ),
+                  CupertinoFormRow(
+                    prefix: Text(context.l10n.contracts),
+                    helper: Text(
+                      context.l10n.contractsDescription,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                      ),
+                    ),
+                    child: CupertinoSwitch(
+                      value: _company?.useContracts ?? false,
+                      onChanged: (val) => setState(() => _company?.useContracts = val),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Legal / Terms of Service
+              CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.legalSection),
+                footer: Text(
+                  context.l10n.termsOfServiceDescription,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                  ),
+                ),
+                children: [
+                  CupertinoFormRow(
+                    prefix: null,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          context.l10n.termsOfService,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: CupertinoColors.label.resolveFrom(context),
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        CupertinoTextField(
+                          controller: _termsController,
+                          placeholder: context.l10n.termsOfServicePlaceholder,
+                          textCapitalization: TextCapitalization.sentences,
+                          maxLines: 6,
+                          minLines: 3,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          onChanged: (val) => _company?.termsOfService = val.trim().isEmpty ? null : val.trim(),
+                        ),
+                        if (_termsController.text.isEmpty && config.defaultTermsOfService != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              onPressed: () {
+                                setState(() {
+                                  _termsController.text = config.defaultTermsOfService!;
+                                  _company?.termsOfService = config.defaultTermsOfService;
+                                });
+                              },
+                              child: Text(
+                                context.l10n.useDefaultTerms,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
                   ),
                 ],

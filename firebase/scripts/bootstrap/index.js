@@ -14,5 +14,6 @@ module.exports = {
   plumbing: require('./plumbing'),
   solar: require('./solar'),
   printers: require('./printers'),
+  bicycles: require('./bicycles'),
   other: require('./other'),
 };

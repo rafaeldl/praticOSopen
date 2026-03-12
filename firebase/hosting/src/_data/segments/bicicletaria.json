@@ -1,0 +1,378 @@
+{
+  "slug": "bicicletaria",
+  "pt": {
+    "lang": "pt-BR",
+    "langCode": "pt",
+    "title": "Sistema para Bicicletaria | PraticOS",
+    "description": "Chega de perder controle da oficina! Sistema de OS para bicicletaria com histórico da bicicleta, checklist de entrada e controle financeiro. Organize sua bike shop em 5 minutos.",
+    "keywords": "sistema para bicicletaria, programa para oficina de bicicleta, software bicicletaria, ordem de serviço bike shop, app para bicicletaria, gestão de oficina de bicicleta",
+    "ogTitle": "Sistema para Bicicletaria | PraticOS",
+    "ogDescription": "Chega de perder controle! Sistema de OS com histórico da bicicleta, checklist de entrada e controle financeiro. Organize sua bike shop em 5 minutos.",
+    "hero": {
+      "badge": "🚲 Bicicletarias",
+      "title": "Chega de perder controle:",
+      "titleHighlight": "organize sua bike shop em 5 minutos",
+      "subtitle": "Acabe com o caderninho e saiba exatamente quanto você lucrou. Histórico completo da bicicleta, checklist de entrada com fotos e cliente acompanhando pelo celular.",
+      "ctaPrimary": "Testar Grátis",
+      "ctaWhatsapp": "Começar pelo WhatsApp",
+      "stats": {
+        "users": { "value": "500+", "label": "Mecânicos ativos" },
+        "orders": { "value": "10k+", "label": "OS criadas" },
+        "rating": { "value": "4.8", "label": "Avaliação" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "Você enfrenta",
+      "titleHighlight": "esses problemas?",
+      "subtitle": "Dores comuns de quem trabalha com bicicletaria",
+      "items": [
+        { "icon": "📞", "title": "Cliente liga toda hora", "text": "Ligações constantes perguntando se a bike ficou pronta. Interrompe seu trabalho e perde produtividade." },
+        { "icon": "🚲", "title": "Sem histórico da bicicleta", "text": "Cliente volta com a mesma bike e você não lembra o que já trocou. Perde tempo refazendo diagnóstico." },
+        { "icon": "💸", "title": "Não sabe quanto lucrou", "text": "Trabalha o mês inteiro mas no final não sobra nada. Sem controle de custos e margem real por serviço." },
+        { "icon": "📝", "title": "Bikes acumulando sem status", "text": "Oficina lotada de bicicletas e você não sabe qual está pronta, qual falta peça e qual o cliente ainda não buscou." },
+        { "icon": "🧮", "title": "Dificuldade de precificação", "text": "Não sabe se está cobrando certo. Esquece de anotar peças usadas e descobre que perdeu dinheiro no serviço." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluções",
+      "title": "Como o",
+      "titleHighlight": "PraticOS resolve",
+      "subtitle": "Funcionalidades pensadas para o dia a dia da bicicletaria",
+      "items": [
+        { "icon": "🔗", "title": "Link mágico para o cliente", "text": "Cliente recebe um link e acompanha o status da bike em tempo real.", "highlight": "Reduz ligações em até 70%." },
+        { "icon": "📋", "title": "Histórico por bicicleta", "text": "Busque pelo Nº de série ou nome e veja todo o histórico da bike. Serviços anteriores, peças trocadas, observações." },
+        { "icon": "📸", "title": "Checklist de entrada com fotos", "text": "Documente o estado da bicicleta na entrada. Proteja-se de reclamações indevidas." },
+        { "icon": "🧮", "title": "Cálculo automático do total", "text": "Adiciona peças e mão de obra, o sistema calcula tudo automaticamente. Sem erro de conta." },
+        { "icon": "💰", "title": "Dashboard financeiro completo", "text": "Saiba exatamente quanto lucrou no mês.", "highlight": "Controle total de custos e margem." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulário",
+      "title": "Checklist de",
+      "titleHighlight": "entrada da bicicleta",
+      "text": "Documente o estado da bicicleta na entrada e evite problemas de garantia. O cliente assina digitalmente.",
+      "cta": "Testar Grátis — Sem Cartão",
+      "previewTitle": "📋 Checklist de Recebimento",
+      "items": [
+        { "icon": "📸", "text": "Fotos da bicicleta (antes do serviço)" },
+        { "icon": "🔢", "text": "Nº de série e modelo" },
+        { "icon": "🖼️", "text": "Estado: Quadro, Rodas, Pintura" },
+        { "icon": "⚙️", "text": "Freios e Transmissão" },
+        { "icon": "🔧", "text": "Problemas relatados pelo cliente" },
+        { "icon": "✍️", "text": "Assinatura digital do cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funcionalidades",
+      "title": "Tudo que você precisa para",
+      "titleHighlight": "gerenciar sua bicicletaria",
+      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crie ordens de serviço completas com fotos, histórico da bike e valores. Tudo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografe o estado da bicicleta na entrada. Proteja-se de reclamações indevidas.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profissional", "text": "Gere orçamentos e recibos em PDF. Profissionalismo que impressiona o cliente.", "color": "orange" },
+        { "icon": "money", "title": "Controle Financeiro", "text": "Veja quanto faturou, quanto recebeu e quanto tem a receber. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestão de Clientes", "text": "Histórico completo de cada cliente e bicicleta. Todos os serviços anteriores.", "color": "purple" },
+        { "icon": "link", "title": "Link de Acompanhamento", "text": "Cliente acompanha o status do serviço pelo celular. Sem precisar ligar.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes eu anotava tudo no caderno e perdia o controle das bikes na oficina. Agora sei exatamente o status de cada bicicleta e os clientes adoram acompanhar pelo link.",
+      "name": "Carlos Pedreira",
+      "role": "Dono de bicicletaria há 8 anos",
+      "metric": "Aumento de 40% na organização"
+    },
+    "faq": {
+      "tag": "Dúvidas",
+      "title": "Perguntas",
+      "titleHighlight": "frequentes",
+      "subtitle": "Tire suas dúvidas antes de começar",
+      "items": [
+        { "question": "Preciso pagar para usar?", "answer": "Não! O plano gratuito é real e não tem limite de tempo. Você pode usar para sempre com até 30 fotos/mês. Nossos preços são transparentes e você não precisa falar com vendedor." },
+        { "question": "Funciona para qualquer tipo de bicicletaria?", "answer": "Sim! PraticOS funciona para oficinas gerais, especializadas em MTB, speed, e-bikes e muito mais. O sistema se adapta ao seu negócio com campos customizados por tipo de bike." },
+        { "question": "Consigo ver o histórico da bicicleta?", "answer": "Sim! Busque pelo nome ou Nº de série e veja todo o histórico da bike: serviços anteriores, peças trocadas, observações. Nunca mais perca tempo refazendo diagnóstico." },
+        { "question": "Meus funcionários vão conseguir usar?", "answer": "Com certeza! O PraticOS foi feito para ser tão simples quanto usar WhatsApp. Se você sabe usar o celular, sabe usar o PraticOS." },
+        { "question": "Posso registrar diferentes tipos de bicicleta?", "answer": "Sim! Você pode registrar tipo (MTB, Speed, Gravel, Urbana, BMX, E-bike...), tamanho do aro, quadro, material, marchas, freio e suspensão. Cada bike fica com ficha completa." },
+        { "question": "E se eu precisar de ajuda?", "answer": "Temos suporte por email e documentação completa. Respondemos em até 24 horas úteis. Nosso time conhece o dia a dia da bicicletaria." }
+      ]
+    },
+    "download": {
+      "title": "Baixe agora e comece a",
+      "titleHighlight": "organizar sua bicicletaria",
+      "text": "Disponível para iOS e Android. Comece gratuitamente!",
+      "appStore": { "label": "Disponível na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contato",
+      "title": "Precisa de",
+      "titleHighlight": "ajuda?",
+      "subtitle": "Nossa equipe está pronta para te atender",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
+        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
+      },
+      "form": {
+        "name": "Nome",
+        "namePlaceholder": "Seu nome",
+        "email": "E-mail",
+        "emailPlaceholder": "seu@email.com",
+        "message": "Mensagem",
+        "messagePlaceholder": "Como podemos ajudar?",
+        "submit": "Enviar Mensagem"
+      }
+    }
+  },
+  "en": {
+    "lang": "en",
+    "langCode": "en",
+    "title": "Bike Shop Management System | PraticOS",
+    "description": "Stop losing control of your shop! Work order system for bike shops with bicycle history, intake checklist and financial control. Get organized in 5 minutes.",
+    "keywords": "bike shop software, bicycle repair shop management, work order system bike shop, bike repair app, bicycle workshop software",
+    "ogTitle": "Bike Shop Management System | PraticOS",
+    "ogDescription": "Stop losing control! WO system with bicycle history, intake checklist and financial control. Get organized in 5 minutes.",
+    "hero": {
+      "badge": "🚲 Bike Shops",
+      "title": "Stop losing control:",
+      "titleHighlight": "organize your bike shop in 5 minutes",
+      "subtitle": "Ditch the notebook and know exactly how much you made. Complete bicycle history, intake checklist with photos and customer tracking on their phone.",
+      "ctaPrimary": "Try Free",
+      "ctaWhatsapp": "Start on WhatsApp",
+      "stats": {
+        "users": { "value": "500+", "label": "Active mechanics" },
+        "orders": { "value": "10k+", "label": "WOs created" },
+        "rating": { "value": "4.8", "label": "Rating" }
+      }
+    },
+    "problems": {
+      "tag": "Problems",
+      "title": "Do you face",
+      "titleHighlight": "these problems?",
+      "subtitle": "Common pain points for bike shop owners",
+      "items": [
+        { "icon": "📞", "title": "Customer calls all day", "text": "Constant calls asking if the bike is ready. Interrupts your work and kills productivity." },
+        { "icon": "🚲", "title": "No bicycle history", "text": "Customer returns with the same bike and you don't remember what you already replaced. Waste time redoing diagnosis." },
+        { "icon": "💸", "title": "Don't know your profit", "text": "Work all month but nothing's left at the end. No control over costs and real margin per job." },
+        { "icon": "📝", "title": "Bikes piling up with no status", "text": "Shop full of bikes and you don't know which is ready, which needs parts, and which the customer hasn't picked up." },
+        { "icon": "🧮", "title": "Pricing difficulties", "text": "Don't know if you're charging right. Forget to write down parts used and discover you lost money on the job." }
+      ]
+    },
+    "solutions": {
+      "tag": "Solutions",
+      "title": "How",
+      "titleHighlight": "PraticOS solves it",
+      "subtitle": "Features designed for daily bike shop operations",
+      "items": [
+        { "icon": "🔗", "title": "Magic link for the customer", "text": "Customer receives a link and tracks the bike status in real time.", "highlight": "Reduces calls by up to 70%." },
+        { "icon": "📋", "title": "History per bicycle", "text": "Search by serial number or name and see the complete bike history. Previous services, parts replaced, notes." },
+        { "icon": "📸", "title": "Intake checklist with photos", "text": "Document the bicycle condition at intake. Protect yourself from undue complaints." },
+        { "icon": "🧮", "title": "Automatic total calculation", "text": "Add parts and labor, the system calculates everything automatically. No math errors." },
+        { "icon": "💰", "title": "Complete financial dashboard", "text": "Know exactly how much you made this month.", "highlight": "Full control over costs and margins." }
+      ]
+    },
+    "checklist": {
+      "tag": "Form",
+      "title": "Bicycle",
+      "titleHighlight": "intake checklist",
+      "text": "Document the bicycle condition at intake and avoid warranty issues. Customer signs digitally.",
+      "cta": "Try Free — No Credit Card",
+      "previewTitle": "📋 Intake Checklist",
+      "items": [
+        { "icon": "📸", "text": "Bicycle photos (before service)" },
+        { "icon": "🔢", "text": "Serial number and model" },
+        { "icon": "🖼️", "text": "Condition: Frame, Wheels, Paint" },
+        { "icon": "⚙️", "text": "Brakes and Drivetrain" },
+        { "icon": "🔧", "text": "Problems reported by customer" },
+        { "icon": "✍️", "text": "Customer digital signature" }
+      ]
+    },
+    "features": {
+      "tag": "Features",
+      "title": "Everything you need to",
+      "titleHighlight": "manage your bike shop",
+      "subtitle": "Powerful and intuitive tools to boost your productivity",
+      "items": [
+        { "icon": "document", "title": "Digital WO", "text": "Create complete work orders with photos, bike history and values. All organized." },
+        { "icon": "image", "title": "Unlimited Photos", "text": "Photograph the bicycle condition at intake. Protect yourself from undue complaints.", "color": "yellow" },
+        { "icon": "pdf", "title": "Professional PDF", "text": "Generate quotes and receipts in PDF. Professionalism that impresses customers.", "color": "orange" },
+        { "icon": "money", "title": "Financial Control", "text": "See how much you billed, received and have to receive. Complete dashboard.", "color": "green" },
+        { "icon": "users", "title": "Customer Management", "text": "Complete history of each customer and bicycle. All previous services.", "color": "purple" },
+        { "icon": "link", "title": "Tracking Link", "text": "Customer tracks service status on their phone. No need to call.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Before I wrote everything in a notebook and lost control of bikes in the shop. Now I know exactly the status of each bicycle and customers love tracking via the link.",
+      "name": "Carlos Pedreira",
+      "role": "Bike shop owner for 8 years",
+      "metric": "40% increase in organization"
+    },
+    "faq": {
+      "tag": "FAQ",
+      "title": "Frequently asked",
+      "titleHighlight": "questions",
+      "subtitle": "Get your questions answered before you start",
+      "items": [
+        { "question": "Do I need to pay to use it?", "answer": "No! The free plan is real and has no time limit. You can use it forever with up to 30 photos/month. Our pricing is transparent and you don't need to talk to a salesperson." },
+        { "question": "Does it work for any type of bike shop?", "answer": "Yes! PraticOS works for general workshops, MTB specialists, road bike shops, e-bike services and more. The system adapts to your business with custom fields per bike type." },
+        { "question": "Can I see the bicycle's history?", "answer": "Yes! Search by name or serial number and see the complete bike history: previous services, parts replaced, notes. Never waste time redoing diagnosis again." },
+        { "question": "Will my employees be able to use it?", "answer": "Absolutely! PraticOS was made to be as simple as using WhatsApp. If you know how to use a phone, you know how to use PraticOS." },
+        { "question": "Can I register different bike types?", "answer": "Yes! You can register type (MTB, Road, Gravel, Urban, BMX, E-bike...), wheel size, frame size, material, gears, brake type and suspension. Each bike gets a complete profile." },
+        { "question": "What if I need help?", "answer": "We have email support and complete documentation. We respond within 24 business hours. Our team knows the daily routine of bike shops." }
+      ]
+    },
+    "download": {
+      "title": "Download now and",
+      "titleHighlight": "organize your bike shop",
+      "text": "Available for iOS and Android. Start free!",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contact",
+      "title": "Need",
+      "titleHighlight": "help?",
+      "subtitle": "Our team is ready to assist you",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
+        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
+      },
+      "form": {
+        "name": "Name",
+        "namePlaceholder": "Your name",
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "message": "Message",
+        "messagePlaceholder": "How can we help?",
+        "submit": "Send Message"
+      }
+    }
+  },
+  "es": {
+    "lang": "es",
+    "langCode": "es",
+    "title": "Sistema para Bicicletería | PraticOS",
+    "description": "¡Basta de perder el control del taller! Sistema de OS para bicicletería con historial de la bicicleta, checklist de entrada y control financiero. Organiza tu bike shop en 5 minutos.",
+    "keywords": "sistema para bicicletería, programa para taller de bicicletas, software bicicletería, orden de servicio bike shop, app para bicicletería, gestión de taller de bicicletas",
+    "ogTitle": "Sistema para Bicicletería | PraticOS",
+    "ogDescription": "¡Basta de perder el control! Sistema de OS con historial de la bicicleta, checklist de entrada y control financiero. Organiza tu bike shop en 5 minutos.",
+    "hero": {
+      "badge": "🚲 Bicicleterías",
+      "title": "Basta de perder el control:",
+      "titleHighlight": "organiza tu bike shop en 5 minutos",
+      "subtitle": "Acaba con el cuaderno y sabe exactamente cuánto ganaste. Historial completo de la bicicleta, checklist de entrada con fotos y cliente siguiendo por el celular.",
+      "ctaPrimary": "Probar Gratis",
+      "ctaWhatsapp": "Empezar por WhatsApp",
+      "stats": {
+        "users": { "value": "500+", "label": "Mecánicos activos" },
+        "orders": { "value": "10k+", "label": "OS creadas" },
+        "rating": { "value": "4.8", "label": "Calificación" }
+      }
+    },
+    "problems": {
+      "tag": "Problemas",
+      "title": "¿Enfrentas",
+      "titleHighlight": "estos problemas?",
+      "subtitle": "Dolores comunes de quien trabaja con bicicletería",
+      "items": [
+        { "icon": "📞", "title": "Cliente llama todo el día", "text": "Llamadas constantes preguntando si la bici está lista. Interrumpe tu trabajo y pierdes productividad." },
+        { "icon": "🚲", "title": "Sin historial de la bicicleta", "text": "Cliente vuelve con la misma bici y no recuerdas qué ya cambiaste. Pierdes tiempo rehaciendo diagnóstico." },
+        { "icon": "💸", "title": "No sabe cuánto ganó", "text": "Trabajas todo el mes pero al final no sobra nada. Sin control de costos y margen real por servicio." },
+        { "icon": "📝", "title": "Bicis acumulándose sin estado", "text": "Taller lleno de bicicletas y no sabes cuál está lista, cuál le falta pieza y cuál el cliente aún no recogió." },
+        { "icon": "🧮", "title": "Dificultad para cotizar", "text": "No sabes si estás cobrando bien. Olvidas anotar piezas usadas y descubres que perdiste dinero en el servicio." }
+      ]
+    },
+    "solutions": {
+      "tag": "Soluciones",
+      "title": "Cómo",
+      "titleHighlight": "PraticOS lo resuelve",
+      "subtitle": "Funcionalidades pensadas para el día a día de la bicicletería",
+      "items": [
+        { "icon": "🔗", "title": "Link mágico para el cliente", "text": "Cliente recibe un link y sigue el estado de la bici en tiempo real.", "highlight": "Reduce llamadas hasta 70%." },
+        { "icon": "📋", "title": "Historial por bicicleta", "text": "Busca por Nº de serie o nombre y ve todo el historial de la bici. Servicios anteriores, piezas cambiadas, observaciones." },
+        { "icon": "📸", "title": "Checklist de entrada con fotos", "text": "Documenta el estado de la bicicleta en la entrada. Protégete de reclamaciones indebidas." },
+        { "icon": "🧮", "title": "Cálculo automático del total", "text": "Agrega piezas y mano de obra, el sistema calcula todo automáticamente. Sin error de cuenta." },
+        { "icon": "💰", "title": "Dashboard financiero completo", "text": "Sabe exactamente cuánto ganaste en el mes.", "highlight": "Control total de costos y margen." }
+      ]
+    },
+    "checklist": {
+      "tag": "Formulario",
+      "title": "Checklist de",
+      "titleHighlight": "entrada de la bicicleta",
+      "text": "Documenta el estado de la bicicleta en la entrada y evita problemas de garantía. El cliente firma digitalmente.",
+      "cta": "Probar Gratis — Sin Tarjeta",
+      "previewTitle": "📋 Checklist de Recepción",
+      "items": [
+        { "icon": "📸", "text": "Fotos de la bicicleta (antes del servicio)" },
+        { "icon": "🔢", "text": "Nº de serie y modelo" },
+        { "icon": "🖼️", "text": "Estado: Cuadro, Ruedas, Pintura" },
+        { "icon": "⚙️", "text": "Frenos y Transmisión" },
+        { "icon": "🔧", "text": "Problemas reportados por el cliente" },
+        { "icon": "✍️", "text": "Firma digital del cliente" }
+      ]
+    },
+    "features": {
+      "tag": "Funciones",
+      "title": "Todo lo que necesitas para",
+      "titleHighlight": "gestionar tu bicicletería",
+      "subtitle": "Herramientas potentes e intuitivas para aumentar tu productividad",
+      "items": [
+        { "icon": "document", "title": "OS Digital", "text": "Crea órdenes de servicio completas con fotos, historial de la bici y valores. Todo organizado." },
+        { "icon": "image", "title": "Fotos Ilimitadas", "text": "Fotografía el estado de la bicicleta en la entrada. Protégete de reclamaciones indebidas.", "color": "yellow" },
+        { "icon": "pdf", "title": "PDF Profesional", "text": "Genera presupuestos y recibos en PDF. Profesionalismo que impresiona al cliente.", "color": "orange" },
+        { "icon": "money", "title": "Control Financiero", "text": "Mira cuánto facturaste, cuánto recibiste y cuánto tienes por recibir. Dashboard completo.", "color": "green" },
+        { "icon": "users", "title": "Gestión de Clientes", "text": "Historial completo de cada cliente y bicicleta. Todos los servicios anteriores.", "color": "purple" },
+        { "icon": "link", "title": "Link de Seguimiento", "text": "Cliente sigue el estado del servicio por el celular. Sin necesidad de llamar.", "color": "cyan" }
+      ]
+    },
+    "testimonial": {
+      "quote": "Antes anotaba todo en el cuaderno y perdía el control de las bicis en el taller. Ahora sé exactamente el estado de cada bicicleta y los clientes adoran seguir por el link.",
+      "name": "Carlos Pedreira",
+      "role": "Dueño de bicicletería hace 8 años",
+      "metric": "Aumento de 40% en organización"
+    },
+    "faq": {
+      "tag": "Dudas",
+      "title": "Preguntas",
+      "titleHighlight": "frecuentes",
+      "subtitle": "Resuelve tus dudas antes de empezar",
+      "items": [
+        { "question": "¿Necesito pagar para usar?", "answer": "¡No! El plan gratuito es real y no tiene límite de tiempo. Puedes usarlo para siempre con hasta 30 fotos/mes. Nuestros precios son transparentes y no necesitas hablar con vendedor." },
+        { "question": "¿Funciona para cualquier tipo de bicicletería?", "answer": "¡Sí! PraticOS funciona para talleres generales, especialistas en MTB, ruta, e-bikes y más. El sistema se adapta a tu negocio con campos personalizados por tipo de bici." },
+        { "question": "¿Puedo ver el historial de la bicicleta?", "answer": "¡Sí! Busca por nombre o Nº de serie y ve todo el historial de la bici: servicios anteriores, piezas cambiadas, observaciones. Nunca más pierdas tiempo rehaciendo diagnóstico." },
+        { "question": "¿Mis empleados van a poder usarlo?", "answer": "¡Por supuesto! PraticOS fue hecho para ser tan simple como usar WhatsApp. Si sabes usar el celular, sabes usar PraticOS." },
+        { "question": "¿Puedo registrar diferentes tipos de bicicleta?", "answer": "¡Sí! Puedes registrar tipo (MTB, Ruta, Gravel, Urbana, BMX, E-bike...), rodado, talla del cuadro, material, velocidades, tipo de freno y suspensión. Cada bici queda con ficha completa." },
+        { "question": "¿Y si necesito ayuda?", "answer": "Tenemos soporte por email y documentación completa. Respondemos en hasta 24 horas hábiles. Nuestro equipo conoce el día a día de la bicicletería." }
+      ]
+    },
+    "download": {
+      "title": "Descarga ahora y empieza a",
+      "titleHighlight": "organizar tu bicicletería",
+      "text": "Disponible para iOS y Android. ¡Empieza gratis!",
+      "appStore": { "label": "Descarga en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" }
+    },
+    "contact": {
+      "tag": "Contacto",
+      "title": "¿Necesitas",
+      "titleHighlight": "ayuda?",
+      "subtitle": "Nuestro equipo está listo para atenderte",
+      "cards": {
+        "email": { "title": "Email" },
+        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
+        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
+      },
+      "form": {
+        "name": "Nombre",
+        "namePlaceholder": "Tu nombre",
+        "email": "Email",
+        "emailPlaceholder": "tu@email.com",
+        "message": "Mensaje",
+        "messagePlaceholder": "¿Cómo podemos ayudar?",
+        "submit": "Enviar Mensaje"
+      }
+    }
+  }
+}

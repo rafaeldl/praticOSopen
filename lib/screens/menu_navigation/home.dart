@@ -1,6 +1,6 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show Material, MaterialType, Divider;
+import 'package:flutter/material.dart' show Material, MaterialType, Divider, LinearProgressIndicator, AlwaysStoppedAnimation;
 // Keeping Material for specific color references if needed, but UI tree will be Cupertino.
 
 import 'package:flutter/services.dart';
@@ -58,6 +58,13 @@ class _HomeState extends State<Home> {
       {'status': config.getStatus('done'), 'field': 'done', 'icon': CupertinoIcons.check_mark_circled},
       {'status': config.getStatus('canceled'), 'field': 'canceled', 'icon': CupertinoIcons.xmark_circle},
     ];
+
+    // Adicionar filtro de contratos se habilitado
+    if (config.useContracts) {
+      baseFilters.add(
+        {'status': l10n.contracts, 'field': 'contract', 'icon': CupertinoIcons.repeat},
+      );
+    }
 
     // Apenas adicionar filtros financeiros se usuário tem permissão
     if (canViewPrices) {
@@ -526,6 +533,8 @@ class _HomeState extends State<Home> {
         return CupertinoColors.systemOrange;
       case 'paid':
         return CupertinoColors.systemGreen;
+      case 'contract':
+        return CupertinoColors.systemIndigo;
       default:
         return CupertinoColors.activeBlue;
     }
@@ -865,6 +874,12 @@ class _HomeState extends State<Home> {
                             ],
                           ],
                         ),
+
+                        // Execution percentage progress bar (for segments with executionPercentage)
+                        if (_getExecutionPercentage(order) != null) ...[
+                          const SizedBox(height: 6),
+                          _buildExecutionProgressBar(order),
+                        ],
                       ],
                     ),
                   ),
@@ -991,6 +1006,54 @@ class _HomeState extends State<Home> {
     );
   }
 
+  /// Reads executionPercentage from order.customData (if present)
+  double? _getExecutionPercentage(Order order) {
+    final value = order.customData?['executionPercentage'];
+    if (value == null) return null;
+    if (value is num) return value.toDouble().clamp(0, 100);
+    if (value is String) {
+      final parsed = double.tryParse(value);
+      return parsed?.clamp(0, 100);
+    }
+    return null;
+  }
+
+  Widget _buildExecutionProgressBar(Order order) {
+    final percentage = _getExecutionPercentage(order) ?? 0;
+    final fraction = percentage / 100;
+
+    return Row(
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: SizedBox(
+              height: 4,
+              child: LinearProgressIndicator(
+                value: fraction,
+                backgroundColor: CupertinoColors.systemGrey5.resolveFrom(context),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  percentage >= 100
+                      ? CupertinoColors.systemGreen
+                      : CupertinoColors.activeBlue,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '${percentage.toInt()}%',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          ),
+        ),
+      ],
+    );
+  }
+
   Color _getCupertinoStatusColor(String? status) {
     switch (status) {
       case 'approved':
@@ -1030,6 +1093,7 @@ abstract class _FilterLabels {
   String get delivery;
   String get toReceive;
   String get paid;
+  String get contracts;
 }
 
 class _PtLabels implements _FilterLabels {
@@ -1037,6 +1101,7 @@ class _PtLabels implements _FilterLabels {
   @override String get delivery => 'Entrega';
   @override String get toReceive => 'A receber';
   @override String get paid => 'Pago';
+  @override String get contracts => 'Contratos';
 }
 
 class _EnLabels implements _FilterLabels {
@@ -1044,6 +1109,7 @@ class _EnLabels implements _FilterLabels {
   @override String get delivery => 'Delivery';
   @override String get toReceive => 'Receivable';
   @override String get paid => 'Paid';
+  @override String get contracts => 'Contracts';
 }
 
 class _EsLabels implements _FilterLabels {
@@ -1051,4 +1117,5 @@ class _EsLabels implements _FilterLabels {
   @override String get delivery => 'Entrega';
   @override String get toReceive => 'Por cobrar';
   @override String get paid => 'Pagado';
+  @override String get contracts => 'Contratos';
 }

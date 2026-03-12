@@ -11,7 +11,9 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Unified payment management screen that combines:
@@ -361,15 +363,19 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                                 .resolveFrom(context),
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        context.l10n.payment,
-                        style: TextStyle(
-                          color: _selectedType == 0
-                              ? CupertinoColors.label.resolveFrom(context)
-                              : CupertinoColors.secondaryLabel
-                                  .resolveFrom(context),
-                        ),
-                      ),
+                      Builder(builder: (ctx) {
+                        final segConfig = ctx.read<SegmentConfigProvider>();
+                        final paymentLabel = segConfig.label('financial.payment');
+                        return Text(
+                          paymentLabel.isNotEmpty ? paymentLabel : context.l10n.payment,
+                          style: TextStyle(
+                            color: _selectedType == 0
+                                ? CupertinoColors.label.resolveFrom(context)
+                                : CupertinoColors.secondaryLabel
+                                    .resolveFrom(context),
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),

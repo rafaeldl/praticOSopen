@@ -1,0 +1,40 @@
+name: Deploy Nuxt SSR to Cloud Run
+
+on:
+  push:
+    branches: [master]
+    paths: ['firebase/web/**']
+  workflow_dispatch:
+
+env:
+  SERVICE_NAME: praticos-web
+  REGION: southamerica-east1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_PRATICOS }}'
+
+      - name: Setup gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: praticos
+
+      - name: Deploy to Cloud Run (source build)
+        working-directory: firebase/web
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --source . \
+            --region ${{ env.REGION }} \
+            --allow-unauthenticated \
+            --port 3000 \
+            --memory 512Mi \
+            --min-instances 0 \
+            --max-instances 3 \
+            --quiet

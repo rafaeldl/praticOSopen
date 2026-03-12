@@ -56,7 +56,7 @@ class OsPdfOptions {
     this.includeForms = true,
     this.includeOsPhotos = true,
     this.includeFormPhotos = true,
-    this.maxOsPhotos = 6,
+    this.maxOsPhotos = 3,
     this.maxPhotosPerItem = 8,
   });
 }
@@ -106,19 +106,13 @@ class PdfService {
             return mainOsBuilder.buildHeader(data.company, data.order);
           },
           footer: (pw.Context context) {
-            return mainOsBuilder.buildFooter(
-              context,
-              images.praticosLogo,
-              images.appStoreBadge,
-              images.playStoreBadge,
-            );
+            return mainOsBuilder.buildFooter(context);
           },
           build: (pw.Context context) {
             return mainOsBuilder.buildContent(
               order: data.order,
               customer: data.customer,
               company: data.company,
-              osPhotos: images.osPhotos,
             );
           },
         ),
@@ -188,17 +182,6 @@ class PdfService {
     final appStoreBadge = await _imageLoader.loadAppStoreBadge();
     final playStoreBadge = await _imageLoader.loadPlayStoreBadge();
 
-    // Fotos da OS
-    List<pw.MemoryImage> osPhotos = [];
-    if (options.includeOsPhotos && data.order.photos != null) {
-      final photoUrls = data.order.photos!
-          .take(options.maxOsPhotos)
-          .where((p) => p.url != null && p.url!.isNotEmpty)
-          .map((p) => p.url!)
-          .toList();
-      osPhotos = await _imageLoader.loadPhotos(photoUrls, limit: options.maxOsPhotos);
-    }
-
     // Fotos dos itens dos formularios
     // Map<formId, Map<itemId, List<Image>>>
     final Map<String, Map<String, List<pw.MemoryImage>>> formItemPhotos = {};
@@ -230,7 +213,6 @@ class PdfService {
       praticosLogo: praticosLogo,
       appStoreBadge: appStoreBadge,
       playStoreBadge: playStoreBadge,
-      osPhotos: osPhotos,
       formItemPhotos: formItemPhotos,
     );
   }
@@ -247,7 +229,6 @@ class _PdfImages {
   final pw.MemoryImage? praticosLogo;
   final pw.MemoryImage? appStoreBadge;
   final pw.MemoryImage? playStoreBadge;
-  final List<pw.MemoryImage> osPhotos;
   final Map<String, Map<String, List<pw.MemoryImage>>> formItemPhotos;
 
   _PdfImages({
@@ -255,7 +236,6 @@ class _PdfImages {
     this.praticosLogo,
     this.appStoreBadge,
     this.playStoreBadge,
-    required this.osPhotos,
     required this.formItemPhotos,
   });
 }

@@ -56,6 +56,29 @@ class PdfLocalizations {
   final String photoRecord;
   final String partsAndProducts;
   final String serviceLocation;
+  final String summary;
+  final String general;
+
+  // Compact layout strings
+  final String termsAndConditions;
+  final String companySignature;
+  final String clientSignature;
+  final String technician;
+  final String createdDate;
+  final String completedDate;
+  final String issuedDate;
+  final String servicesSubtotal;
+  final String partsSubtotal;
+  final String paid;
+  final String unitValue;
+
+  // Multi-device / equipment block strings
+  final String serviceType;
+  final String productType;
+  final String itemType;
+  final String trackOnline;
+  final String trackOnlineDescription;
+  final String equipment;
 
   // Form-related strings
   final String statusCompleted;
@@ -94,6 +117,25 @@ class PdfLocalizations {
     required this.photoRecord,
     required this.partsAndProducts,
     required this.serviceLocation,
+    required this.summary,
+    required this.general,
+    required this.termsAndConditions,
+    required this.companySignature,
+    required this.clientSignature,
+    required this.technician,
+    required this.createdDate,
+    required this.completedDate,
+    required this.issuedDate,
+    required this.servicesSubtotal,
+    required this.partsSubtotal,
+    required this.paid,
+    required this.unitValue,
+    required this.serviceType,
+    required this.productType,
+    required this.itemType,
+    required this.trackOnline,
+    required this.trackOnlineDescription,
+    required this.equipment,
     required this.statusCompleted,
     required this.statusInProgress,
     required this.statusPending,
@@ -133,6 +175,25 @@ class PdfLocalizations {
       photoRecord: _latinCharactersOnly(l10n.photoRecord),
       partsAndProducts: _latinCharactersOnly(l10n.partsAndProducts),
       serviceLocation: _latinCharactersOnly(l10n.serviceLocation),
+      summary: _latinCharactersOnly(l10n.pdfSummary),
+      general: _latinCharactersOnly(l10n.pdfGeneral),
+      termsAndConditions: _latinCharactersOnly(l10n.pdfTermsAndConditions),
+      companySignature: _latinCharactersOnly(l10n.pdfCompanySignature),
+      clientSignature: _latinCharactersOnly(l10n.pdfClientSignature),
+      technician: _latinCharactersOnly(l10n.pdfTechnician),
+      createdDate: _latinCharactersOnly(l10n.pdfCreatedDate),
+      completedDate: _latinCharactersOnly(l10n.pdfCompletedDate),
+      issuedDate: _latinCharactersOnly(l10n.pdfIssuedDate),
+      servicesSubtotal: _latinCharactersOnly(l10n.pdfServicesSubtotal),
+      partsSubtotal: _latinCharactersOnly(l10n.pdfPartsSubtotal),
+      paid: _latinCharactersOnly(l10n.pdfPaid),
+      unitValue: _latinCharactersOnly(l10n.pdfUnitValue),
+      serviceType: _latinCharactersOnly(l10n.pdfServiceType),
+      productType: _latinCharactersOnly(l10n.pdfProductType),
+      itemType: _latinCharactersOnly(l10n.pdfItemType),
+      trackOnline: _latinCharactersOnly(l10n.pdfTrackOnline),
+      trackOnlineDescription: _latinCharactersOnly(l10n.pdfTrackOnlineDescription),
+      equipment: _latinCharactersOnly(l10n.pdfEquipment),
       statusCompleted: _latinCharactersOnly(l10n.statusCompleted),
       statusInProgress: _latinCharactersOnly(l10n.statusInProgress),
       statusPending: _latinCharactersOnly(l10n.statusPending),

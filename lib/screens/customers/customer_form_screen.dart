@@ -210,16 +210,17 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
           children: fields.map((field) {
             return DynamicFieldBuilder(
               field: field,
-              value: _customer?.customData?[field.key],
+              value: _customer?.customData?[field.fieldName] ?? _customer?.customData?[field.key],
               locale: locale,
               onChanged: (newValue) {
                 setState(() {
                   _customer?.customData ??= {};
                   if (newValue == null) {
-                    _customer!.customData!.remove(field.key);
+                    _customer!.customData!.remove(field.fieldName);
                   } else {
-                    _customer!.customData![field.key] = newValue;
+                    _customer!.customData![field.fieldName] = newValue;
                   }
+                  _customer!.customData!.remove(field.key); // migrate old key
                 });
               },
             );

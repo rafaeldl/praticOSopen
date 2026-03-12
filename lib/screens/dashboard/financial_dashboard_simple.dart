@@ -9,6 +9,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/widgets/permission_widgets.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -539,35 +540,40 @@ class _FinancialDashboardSimpleState extends State<FinancialDashboardSimple> {
                   const SizedBox(height: 16),
 
                   // Legend Row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildHealthLegendItem(
-                          label: context.l10n.received,
-                          value: _convertToCurrency(orderStore.totalPaidAmount),
-                          count: paidOrders,
-                          color: greenColor,
-                          isSelected: orderStore.paymentFilter == 'paid',
-                          onTap: () => _togglePaymentFilter(orderStore, 'paid'),
+                  Builder(builder: (context) {
+                    final segConfig = context.read<SegmentConfigProvider>();
+                    final paidLabel = segConfig.label('financial.total_paid');
+                    final remainingLabel = segConfig.label('financial.remaining');
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: _buildHealthLegendItem(
+                            label: paidLabel.isNotEmpty ? paidLabel : context.l10n.received,
+                            value: _convertToCurrency(orderStore.totalPaidAmount),
+                            count: paidOrders,
+                            color: greenColor,
+                            isSelected: orderStore.paymentFilter == 'paid',
+                            onTap: () => _togglePaymentFilter(orderStore, 'paid'),
+                          ),
                         ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 40,
-                        color: tertiaryColor,
-                      ),
-                      Expanded(
-                        child: _buildHealthLegendItem(
-                          label: context.l10n.toReceive,
-                          value: _convertToCurrency(orderStore.totalUnpaidAmount),
-                          count: unpaidOrders,
-                          color: orangeColor,
-                          isSelected: orderStore.paymentFilter == 'unpaid',
-                          onTap: () => _togglePaymentFilter(orderStore, 'unpaid'),
+                        Container(
+                          width: 1,
+                          height: 40,
+                          color: tertiaryColor,
                         ),
-                      ),
-                    ],
-                  ),
+                        Expanded(
+                          child: _buildHealthLegendItem(
+                            label: remainingLabel.isNotEmpty ? remainingLabel : context.l10n.toReceive,
+                            value: _convertToCurrency(orderStore.totalUnpaidAmount),
+                            count: unpaidOrders,
+                            color: orangeColor,
+                            isSelected: orderStore.paymentFilter == 'unpaid',
+                            onTap: () => _togglePaymentFilter(orderStore, 'unpaid'),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
                 ],
               ),
             ),

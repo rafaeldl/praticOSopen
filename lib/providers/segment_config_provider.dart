@@ -48,9 +48,28 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Default fieldService value from the segment document
   bool get segmentFieldServiceDefault => _service.segmentFieldServiceDefault;
 
+  /// Whether the company uses device management (status, history, etc.)
+  bool get useDeviceManagement => _service.useDeviceManagement;
+
+  /// Whether the company uses recurring maintenance contracts
+  bool get useContracts => _service.useContracts;
+
+  /// Default terms of service text for the current segment and locale
+  String? get defaultTermsOfService => _service.defaultTermsOfService;
+
   /// Sets resolved company config values and notifies listeners
-  void setCompanyConfig({required bool fieldService, required bool useScheduling}) {
-    _service.setCompanyConfig(fieldService: fieldService, useScheduling: useScheduling);
+  void setCompanyConfig({
+    required bool fieldService,
+    required bool useScheduling,
+    required bool useDeviceManagement,
+    required bool useContracts,
+  }) {
+    _service.setCompanyConfig(
+      fieldService: fieldService,
+      useScheduling: useScheduling,
+      useDeviceManagement: useDeviceManagement,
+      useContracts: useContracts,
+    );
     notifyListeners();
   }
 
@@ -86,6 +105,8 @@ class SegmentConfigProvider extends ChangeNotifier {
         return CupertinoIcons.sun_max;
       case 'printers':
         return CupertinoIcons.printer;
+      case 'public_works':
+        return CupertinoIcons.hammer;
       default:
         return CupertinoIcons.tag; // Genérico
     }
