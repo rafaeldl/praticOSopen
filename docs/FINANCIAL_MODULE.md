@@ -22,7 +22,8 @@
 18. [Documentacao: Checklist](#documentacao-checklist)
 19. [Fases de Implementacao](#fases-de-implementacao)
 20. [Retrocompatibilidade](#retrocompatibilidade)
-21. [Changelog](#changelog)
+21. [Revisao UX Mobile-First](#revisao-ux-mobile-first)
+22. [Changelog](#changelog)
 
 ---
 
@@ -3086,9 +3087,330 @@ Se `PaymentMethod` ja existe no modelo de OS, reutilizar o mesmo enum (mover par
 
 ---
 
+## Revisao UX Mobile-First
+
+> **Principio:** Funcionalidade completa nos dados, simplicidade radical na interface mobile. O mesmo backend que atende o dono da oficina no celular vai atender o contador no desktop depois. Nenhuma feature foi removida nesta revisao -- todas as recomendacoes sao sobre esconder, automatizar ou defaultar na interface mobile.
+
+### 1. Contagem de Toques por Acao
+
+| Acao | Toques | Digitacao | Veredicto | Notas |
+|------|--------|-----------|-----------|-------|
+| Registrar despesa rapida | 4 | 2 campos (desc + valor) | OK | FAB > Despesa > preencher > Salvar |
+| Registrar despesa com categoria | 5 | 2 campos | OK | Idem + 1 toque na categoria (grid inline) |
+| Pagar conta via swipe | 2 | 0 | EXCELENTE | Swipe-right > Confirmar (pre-fill resolve tudo) |
+| Pagar conta via detalhe | 3 | 0 | BOM | Tap entry > Pagar > Confirmar |
+| Pagar parcela (card expandido) | 2 | 0 | EXCELENTE | Pagar (no card) > Confirmar |
+| Estornar pagamento | 3 | 1 campo (motivo) | OK | Swipe-left > motivo > Confirmar |
+| Transferencia entre contas | 5+ | 1 campo (valor) | ALERTA | Nav bar banco > lista > swipe > valor > Transferir |
+| Parcelar despesa | 6+ | 2 campos + stepper | ACEITAVEL | Acao rara, complexidade justificada |
+| Ver "quanto fiz hoje" | 2+ | 0 | ALERTA | Precisa abrir tab + interpretar KPIs mensais |
+
+**Recomendacoes:**
+
+- **Transferencia**: Adicionar atalho "Transferir" no long-press de uma conta no header do extrato (se houver mais de 1 conta). Reduz de 5 para 3 toques.
+- **"Quanto fiz hoje"**: Adicionar resumo do dia no header do extrato (abaixo do saldo total): `Hoje: +R$800 -R$450 = +R$350`. Zero toques extras -- ja esta visivel ao abrir.
+- **Pagar com half-sheet simplificado**: O half-sheet atual mostra 4 campos editaveis (valor, conta, forma, data) mesmo quando o pre-fill resolve tudo. Sugerir modo "one-tap": exibir apenas um botao `Confirmar R$ 2.500 na Conta Corrente via Pix` com link `Editar detalhes` abaixo para quem precisa mudar algo. Reduz de 2 para 1 toque no caso comum (95% das vezes).
+
+---
+
+### 2. Classificacao de Campos: Progressive Disclosure
+
+> Legenda: **Sempre visivel** = usuario precisa em >70% dos casos. **Colapsado** = util em <30% dos casos, esconder em "+ Detalhes". **Automatico** = calculado/herdado, nunca aparece no form mobile (disponivel via API/web futura).
+
+#### Formulario de Entry (Despesa/Recebimento)
+
+| Campo | Mobile v1 | Justificativa |
+|-------|-----------|---------------|
+| `description` | **Sempre visivel** | Obrigatorio em 100% dos casos |
+| `amount` | **Sempre visivel** | Obrigatorio, fonte grande (24pt+) |
+| `dueDate` | **Sempre visivel** (default: hoje) | >70% dos casos, default resolve maioria |
+| `category` | **Sempre visivel** (grid inline) | Rapido com 1 toque, ajuda relatorios |
+| `account` | **Sempre visivel** (default pre-selecionado) | Obrigatorio, pre-fill resolve |
+| `competenceDate` | **Automatico** (= dueDate) | Usuario mobile nao sabe o que e. Nunca mostrar. Disponivel via API/web |
+| `tags` | **Automatico** (nao aparece) | <5% dos usuarios usam tags no mobile. Disponivel via API/web |
+| `supplier` / `customer` | **Colapsado** (em "+ Detalhes") | <30% dos casos quando nao vinculado a OS |
+| `notes` | **Colapsado** | Esporadico |
+| `attachments` | **Colapsado** | Esporadico |
+| `recurrence` (avancada) | **Colapsado** | Toggle "Repetir todo mes?" visivel, config avancada (semanal, bimestral) escondida |
+
+> **Nota:** O doc ja implementa a maioria dessas decisoes corretamente na secao "Tela 2: Formulario de Lancamento". As unicas mudancas recomendadas sao: (1) `competenceDate` marcado explicitamente como "nunca visivel no mobile", (2) `tags` removido do grupo colapsado e marcado como "API/web only no mobile v1".
+
+#### Half-Sheet de Pagamento
+
+| Campo | Mobile v1 | Justificativa |
+|-------|-----------|---------------|
+| `amount` | **Sempre visivel** (pre-fill com remainingBalance) | Obrigatorio |
+| `account` | **Sempre visivel** (pre-fill ultima conta usada) | Obrigatorio |
+| `paymentMethod` | **Sempre visivel** (pre-fill ultima forma usada) | Obrigatorio |
+| `paymentDate` | **Automatico** (default: hoje, editavel via "Editar detalhes") | 95% dos pagamentos sao "agora" |
+| `discount` | **Colapsado** | <5% dos pagamentos |
+| `attachments` | **Colapsado** | Opcional |
+| `notes` | **Colapsado** | Opcional |
+
+> **Recomendacao**: Modo "one-tap" como estado padrao do half-sheet. Mostrar resumo + botao de confirmar. Campos editaveis acessiveis via "Editar detalhes". A `paymentDate` default "hoje" so aparece se o usuario expandir.
+
+---
+
+### 3. Terminologia: Expandir Mapeamento Tecnico -> Usuario
+
+A tabela de terminologia na secao "Telas e Fluxos UX" cobre os conceitos principais. Expandir com os termos abaixo que aparecem no modelo mas **nao devem vazar para a UI mobile**:
+
+| Termo tecnico (codigo) | Aparece no mobile? | Termo na UI (se aparecer) | Acao |
+|-------------------------|-------------------|---------------------------|------|
+| `direction` (payable/receivable) | Nunca como campo | Titulo do form: "Nova Despesa" / "Novo Recebimento" | OK (ja implementado) |
+| `status` (pending/paid/cancelled) | Como badge visual | "Pendente", "Pago", "Cancelado" | **Adicionar a tabela** |
+| `competenceDate` | **Nunca** | -- | Automatico (= dueDate) |
+| `reconciliacao` / `reconcile` | Sim (botao na tela de contas) | **"Verificar saldo"** ou **"Corrigir saldo"** | **Renomear na UI** |
+| `transferDirection` (out/in) | **Nunca** | Icones de seta resolvem visualmente | Interno |
+| `syncSource` | **Nunca** | -- | Interno |
+| `installmentGroupId` | **Nunca** | Usuario ve "Parcela 3/6" | Interno |
+| `paidAmount` / `remainingBalance` | Sim (no detalhe da entry) | **"Pago: R$ X de R$ Y"** / **"Falta: R$ X"** | **Adicionar a tabela** |
+| `DRE` | **Nunca no mobile** | **"Relatorio mensal"** ou **"Resumo do mes"** | Renomear na UI mobile |
+| `regime de competencia` | **Nunca** | -- | Conceito interno, nao expor |
+| `WriteBatch` / `Transaction` | **Nunca** | -- | Dev only |
+| `overdue` | Sim (badge + dot) | "Vencida" (ja mapeado) | OK |
+| `reversed` | Sim (no extrato) | "Estornado" (ja mapeado) | OK |
+
+> **Regra de ouro para terminologia mobile:** Se o dono da oficina nao usaria a palavra numa conversa com um amigo, ela nao aparece na tela. "Gastei R$450 em pecas" = sim. "Registrei um payable entry com regime de competencia" = nunca.
+
+---
+
+### 4. Teste do "Mao Suja": Registrar R$450 em Pecas
+
+**Cenario:** O Seu Carlos acabou de pagar R$450 em pecas no fornecedor. Esta com graxa nas maos. Precisa registrar antes de esquecer.
+
+#### Fluxo atual (conforme doc)
+
+```
+1. Abrir app (Face ID / 1 toque)
+2. Tab Financeiro (1 toque -- 0 se ja estiver na tab)
+3. FAB [+] (1 toque -- bottom-right, thumb zone OK)
+4. "Nova Despesa" (1 toque)
+5. Digitar descricao "Pecas" (DIGITACAO -- problema com maos sujas)
+6. Digitar valor "450" (DIGITACAO -- problema com maos sujas)
+7. Toque em "Material" no grid de categorias (1 toque -- BOM, alvo grande)
+8. Salvar (1 toque -- top-right)
+
+Total: 6 toques + 2 campos de digitacao
+Tempo estimado: 15-20 segundos
+```
+
+#### Problemas identificados
+
+1. **Digitacao com maos sujas/molhadas** e o maior gargalo. Teclado padrao do iOS tem teclas de ~30pt, insuficiente para polegares grossos com graxa.
+2. **Campo de descricao** exige pensar o que escrever. Com pressa, o usuario vai pular ou escrever "asd".
+3. **Botao Salvar no top-right** esta fora da thumb zone. Com uma mao so (a outra segurando uma peca), e dificil alcancar.
+
+#### Recomendacoes para o fluxo "mao suja"
+
+**R1 - Templates de despesa recorrente (impacto alto, esforco medio):**
+Ao abrir "Nova Despesa", mostrar 3-4 chips com as descricoes mais usadas (baseado em historico): `[Pecas] [Oleo] [Material eletrico] [+ Outra]`. Um toque preenche descricao + categoria automaticamente. Reduz digitacao a zero no caso recorrente.
+
+**R2 - Numpad com teclas grandes (impacto alto, esforco baixo):**
+O campo de valor deve abrir numpad customizado com teclas de **48pt+** (HIG recomenda 44pt minimo). Incluir botoes de valor rapido: `[+50] [+100] [+500]` para valores redondos comuns.
+
+**R3 - Botao Salvar duplicado na bottom (impacto medio, esforco baixo):**
+Alem do "Salvar" no nav bar (top-right), adicionar botao full-width fixo na bottom do form: `[Registrar Despesa]`. Segue padrao do half-sheet de pagamento e fica na thumb zone.
+
+**R4 - Sugestao de descricao + valor (impacto medio, esforco medio):**
+Se o usuario ja registrou "Pecas R$450" antes, ao digitar "Pe..." sugerir autocomplete com o ultimo valor. Usa o mesmo `AccumulatedValue` do sistema de categorias.
+
+**R5 - Entrada por voz (impacto alto, esforco alto -- Fase futura):**
+Botao de microfone no campo de descricao usando `SFSpeechRecognizer` nativo do iOS. "Quatrocentos e cinquenta reais em pecas" -> preenche valor + descricao. Excelente para maos ocupadas, mas complexidade de implementacao alta. Sugerir como Fase 3+.
+
+#### Fluxo otimizado (com templates)
+
+```
+1. Abrir app (Face ID)
+2. Tab Financeiro (1 toque)
+3. FAB [+] > "Nova Despesa" (2 toques)
+4. Toque no chip "Pecas" (1 toque -- preenche desc + categoria)
+5. Digitar "450" no numpad grande (3 toques no numpad)
+6. Botao "Registrar" na bottom (1 toque -- thumb zone)
+
+Total: 7 toques, 0 digitacao de texto
+Tempo estimado: 8-10 segundos
+```
+
+---
+
+### 5. Consistencia com o App Atual
+
+| Padrao UX do PraticOS | Usado no modulo financeiro? | Status |
+|------------------------|-----------------------------|--------|
+| `CupertinoPageScaffold` + `CupertinoSliverNavigationBar` | Sim (extrato, contas, form) | CONSISTENTE |
+| `CupertinoListSection.insetGrouped` para formularios | Sim (form de entry e conta) | CONSISTENTE |
+| `CupertinoAlertDialog` para confirmacoes | Sim (saldo negativo, excluir) | CONSISTENTE |
+| `CupertinoActionSheet` para menus/opcoes | Sim (FAB, filtros) | CONSISTENTE |
+| Swipe actions (right = acao primaria, left = destrutiva) | Sim (pagar = right, estornar = left) | CONSISTENTE |
+| Half-sheets (`showCupertinoModalPopup`) | Sim (pagamento, transferencia) | CONSISTENTE |
+| Status dots coloridos (8-10px) | Sim (parcelas pagas/vencidas) | CONSISTENTE |
+| Dark mode com `.resolveFrom(context)` | Sim (codigo de exemplo usa) | CONSISTENTE |
+
+**Elementos novos introduzidos:**
+
+| Elemento | Precedente no app? | Risco de estranhamento | Acao |
+|----------|--------------------|-----------------------|------|
+| Grid de categorias (4 colunas) | Nao ha grid similar | Baixo (padrao de mercado) | OK -- familiar de apps de banco |
+| Eye toggle para ocultar valores | Nao ha toggle similar | Baixo (Nubank/Inter) | OK -- usuarios de banco ja conhecem |
+| Card expansivel de parcelas | Nao ha card expansivel | Medio | Garantir que animacao de expand/collapse seja suave e que o tap target seja generoso (todo o card, nao so um icone) |
+| Badge numerico na tab | Verificar se ja existe | Baixo | OK -- padrao iOS nativo |
+| Resumo inline "Entradas/Saidas" | Dashboard atual usa cards | Baixo | Transicao natural de cards para texto compacto |
+
+> **Veredicto:** A spec esta muito bem alinhada com os padroes existentes. Os poucos elementos novos sao padroes de mercado que nao devem causar friccao.
+
+---
+
+### 6. Cenarios do Dia-a-Dia: Analise de Cobertura
+
+#### Cenarios cobertos (sem friccao)
+
+| Cenario | Como o doc resolve |
+|---------|--------------------|
+| Registrar despesa rapida | FAB > Despesa > form 2 niveis |
+| Pagar conta com 2 toques | Swipe-right > half-sheet pre-preenchido |
+| Conferir se cliente pagou OS | Extrato com link `OS #142` clicavel |
+| Ver parcelas pendentes | Card expansivel com progresso visual |
+| Despesa sem categoria | Categoria e opcional no schema |
+| Estornar pagamento errado | Swipe-left + motivo obrigatorio |
+
+#### Cenarios com friccao (precisam de ajuste UX)
+
+**C1 - Split payment (metade dinheiro, metade Pix)**
+
+O modelo suporta (pagamento parcial existe), mas o fluxo UX nao esta explicito. O usuario precisa:
+1. Abrir half-sheet > pagar R$225 em dinheiro > Confirmar
+2. Voltar para a entry (que agora mostra "Pago: R$225 de R$450") > pagar novamente > R$225 via Pix > Confirmar
+
+**Recomendacao:** Adicionar ao half-sheet de pagamento, apos confirmar um pagamento parcial, um prompt: `"Faltam R$225. Registrar outro pagamento agora?"` com botoes `[Sim, agora]` `[Depois]`. Reduz de "saber que precisa voltar e pagar de novo" para "o sistema me pergunta". Tambem adicionar na secao do half-sheet o wireframe deste fluxo.
+
+**C2 - Dono paga do proprio bolso (conta pessoal vs empresa)**
+
+Seu Carlos paga uma peca com o cartao pessoal porque esqueceu o da empresa. Hoje nao ha como registrar isso de forma clara.
+
+**Recomendacao (modelo -- sem mudanca):** O usuario pode criar uma conta do tipo `cash` chamada "Meu Bolso" ou "Pessoal". Ao registrar a despesa nessa conta, fica claro que saiu do bolso dele. Depois pode transferir da conta da empresa para "reembolsar" via transferencia. Documentar este fluxo como exemplo na secao de onboarding ou FAQ, sem adicionar campos ao modelo.
+
+**C3 - "Quanto fiz hoje" sem navegacao**
+
+O header do extrato mostra saldo total + entradas/saidas do **mes**. O dono da oficina quer saber "quanto fiz hoje" ao final do expediente sem pensar.
+
+**Recomendacao:** Adicionar ao `BalanceHeader` uma segunda linha compacta com o resumo do dia atual:
+
+```
+Saldo Total              [eye]
+R$ 15.420,00
+
+Hoje: +R$1.150  -R$450  = +R$700
+```
+
+Sempre visivel, zero toques. Dados ja estao no stream de payments (filtrar por `paymentDate == hoje`). Impacto baixo na implementacao (filtro adicional no store).
+
+**C4 - Tecnico no campo registra gasto de material**
+
+O tecnico comprou um fusivel de R$15 no caminho para o cliente. RBAC atual so permite admin/gerente no modulo financeiro. O tecnico nao pode registrar.
+
+**Recomendacao:** Adicionar permission granular `registerFieldExpense` que permite ao tecnico:
+- Criar entries `payable` de valor limitado (ex: ate R$500, configuravel)
+- **Nao** ver saldo total, extrato geral, contas bancarias ou relatorios
+- A despesa aparece para o admin aprovar/revisar
+
+Isso pode ser implementado como variacao do form de entry, acessivel via atalho na tela de OS ("Registrar gasto") em vez da tab Financeiro. Adicionar a tabela de RBAC:
+
+| Perfil | registerFieldExpense |
+|--------|---------------------|
+| Admin | sim |
+| Gerente | sim |
+| Supervisor | configuravel |
+| Tecnico | configuravel |
+
+> **Nota para modelo:** Nao requer novos campos. A entry criada pelo tecnico e uma `payable` normal com `createdBy` do tecnico. O admin ve no extrato e pode editar/categorizar depois.
+
+**C5 - Fornecedor recorrente (repetir ultimo lancamento)**
+
+Seu Carlos paga o mesmo fornecedor de pecas toda semana, valores similares. Recorrencia formal (mensal) nao se aplica porque o valor varia.
+
+**Recomendacao:** Adicionar na lista de "Despesas recentes" (ou nos chips de template sugeridos no R1) a opcao de "Repetir" um lancamento anterior. Tap em "Repetir" pre-preenche descricao, categoria, fornecedor e conta -- o usuario so ajusta o valor. Mesmo conceito de "repetir pedido" em apps de delivery.
+
+---
+
+### 7. Camadas de Complexidade: Mobile v1 vs API/Web Futura
+
+> **Principio:** Toda funcionalidade existe no modelo de dados e na API. A interface mobile v1 expoe apenas o que o dono da oficina precisa no dia-a-dia. A web futura (para contadores, gestores de rede, franquias) expoe o restante.
+
+| Funcionalidade | Mobile v1 | API/Web Futura | Justificativa |
+|----------------|-----------|----------------|---------------|
+| Registrar despesa/recebimento | Sim (form 2 niveis) | Sim (form completo) | Core do dia-a-dia |
+| Pagar entry | Sim (half-sheet 1-2 toques) | Sim | Core |
+| Extrato cronologico | Sim (scroll infinito por mes) | Sim + filtros multi-criterio | Core mobile, filtros avancados no desktop |
+| Contas bancarias CRUD | Sim (lista + form simples) | Sim + reconciliacao detalhada | Core |
+| Transferencias | Sim (half-sheet) | Sim | Core |
+| Parcelas (visualizar + pagar) | Sim (card expansivel) | Sim + edicao em lote | Core mobile, edicao em lote no desktop |
+| Estornos | Sim (swipe + motivo) | Sim + relatorio de estornos | Core |
+| Categorias | Sim (grid simples ou AccumulatedValue) | Sim + hierarquia, merge, regras | Simplificado no mobile |
+| Comprovantes | Sim (camera/galeria) | Sim + upload PDF multiplo, OCR | Simplificado no mobile |
+| **DRE (regime competencia)** | **NAO** -- exibir como "Resumo do mes" simplificado (receitas vs despesas por categoria) | Sim (DRE completo com competenceDate editavel) | Termo "DRE" nunca aparece no mobile |
+| **Fluxo de caixa projetado** | **SIMPLIFICADO** -- "Proximos 30 dias: a receber X, a pagar Y" (1 card) | Sim (3-12 meses, grafico de linha) | Mobile so precisa do curto prazo |
+| **Reconciliacao manual** | **NAO** -- alerta automatico se saldo divergir + botao "Corrigir saldo" | Sim (tela dedicada com historico) | Reconciliacao detalhada e tarefa de escritorio |
+| **Filtros avancados do extrato** | **NAO** -- apenas filtro por tipo (Tudo/Entradas/Saidas/Transferencias) | Sim (categoria, conta, periodo custom, fornecedor, tags) | Tela pequena, filtro simples basta |
+| **Relatorios cross-periodo** | **NAO** | Sim (comparativo mes-a-mes, tendencias) | Analise e tarefa de escritorio |
+| **Regime de competencia** | **AUTOMATICO** (competenceDate = dueDate, invisivel) | Sim (campo editavel) | Usuario mobile nao sabe o que e |
+| **Tags** | **NAO** (campo existe no modelo, invisivel no mobile) | Sim (filtro e organizacao) | Ninguem tagga despesa no celular com maos sujas |
+| **Exportacao CSV/PDF** | **NAO** | Sim (relatorios exportaveis) | Tarefa de escritorio/contabilidade |
+| **Snapshots mensais** | **NAO** (geracao automatica em background) | Sim (botao "Fechar mes", historico) | Conceito contabil, nao expor no mobile |
+| **Notas detalhadas** | **Colapsado** (campo existe mas escondido) | Sim (campo proeminente) | Mobile = anotar rapido, desktop = detalhar |
+
+---
+
+### 8. Top 10 Recomendacoes Priorizadas
+
+| # | Recomendacao | Impacto | Esforco | Fase |
+|---|-------------|---------|---------|------|
+| 1 | **Resumo do dia no header** ("Hoje: +R$1.150 -R$450 = +R$700") -- zero toques para "quanto fiz hoje" | Alto | Baixo | 1 |
+| 2 | **Half-sheet one-tap** -- modo padrao mostra `[Confirmar R$X via Pix]` com link "Editar detalhes" para expandir campos | Alto | Baixo | 1 |
+| 3 | **Templates de despesa** -- chips com descricoes mais usadas (Pecas, Oleo, Material) que pre-preenchem desc + categoria em 1 toque | Alto | Medio | 1 |
+| 4 | **Numpad com teclas grandes** (48pt+) e botoes de valor rapido `[+50] [+100] [+500]` no campo de valor | Alto | Baixo | 1 |
+| 5 | **Split payment explicitado** -- apos pagamento parcial, prompt "Faltam R$X. Registrar outro agora?" | Medio | Baixo | 1 |
+| 6 | **Botao Salvar na bottom** do form de entry (full-width, thumb zone) alem do nav bar top-right | Medio | Baixo | 1 |
+| 7 | **`competenceDate` e `tags` marcados como invisivel** no mobile v1 (existem no modelo, nao aparecem no form) | Medio | Zero | 1 |
+| 8 | **Terminologia expandida** -- adicionar "Pendente", "Pago", "Cancelado", "Verificar saldo", "Pago: X de Y", "Falta: X" a tabela | Medio | Zero | 1 |
+| 9 | **Permission `registerFieldExpense`** para tecnico registrar despesa no campo (via tela de OS, nao tab Financeiro) | Medio | Medio | 2-3 |
+| 10 | **Tabela Mobile v1 vs Web Futura** incorporada ao doc para guiar decisoes de UI durante implementacao | Alto | Zero | 1 |
+
+### 9. O que o Doc Ja Faz Bem
+
+Para registro: estes pontos da spec ja estao excelentes e nao precisam de mudanca:
+
+- **Swipe-right para pagar** (2 toques) -- melhor atalho do modulo
+- **Pre-fill inteligente** no half-sheet (valor + conta + forma + data)
+- **Form de 2 niveis** (essencial visivel + detalhes colapsados)
+- **FAB com 2 opcoes** (Despesa/Recebimento) -- simples e direto
+- **Card expansivel de parcelas** com botao "Pagar" na proxima pendente
+- **Badge de vencidas** na tab -- visibilidade sem abrir
+- **Empty state + onboarding 3 passos** -- baixa barreira de entrada
+- **Eye toggle** -- familiar de apps bancarios
+- **Categorias por uso** (AccumulatedValue) -- as mais usadas sobem
+- **Transferencia como half-sheet** em vez de tela dedicada
+
+---
+
 ## Changelog
 
 ### Marco 2026
+
+#### Revisao UX Mobile-First (30/03/2026)
+
+**Revisao completa da spec sob otica de usabilidade para dono de oficina mecanica:**
+
+- Contagem de toques por acao (6 acoes dentro do limite de 4, 2 alertas: transferencia e "quanto fiz hoje")
+- Classificacao de todos os campos do form: sempre visivel / colapsado / automatico (mobile-invisible)
+- `competenceDate` e `tags` marcados como "nunca visivel no mobile v1" (existem no modelo, nao na UI)
+- Terminologia expandida: adicionados "Pendente/Pago/Cancelado", "Verificar saldo", "Pago X de Y", "Falta X"
+- Teste do "mao suja" com fluxo tela-a-tela e 5 recomendacoes (templates, numpad grande, voz, botao bottom)
+- Analise de consistencia com padroes Cupertino existentes (3 elementos novos identificados, todos aceitaveis)
+- 5 cenarios do dia-a-dia analisados: split payment, pagamento do bolso, "quanto fiz hoje", tecnico no campo, fornecedor recorrente
+- Tabela completa Mobile v1 vs API/Web Futura (17 funcionalidades classificadas)
+- Top 10 recomendacoes priorizadas por impacto e esforco
+- **Nenhuma feature removida** -- todas as recomendacoes sao sobre UI (esconder, defaultar, automatizar)
 
 #### Feature flag `useFinancialManagement` (30/03/2026)
 
