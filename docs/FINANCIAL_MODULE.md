@@ -1,5 +1,31 @@
 # Modulo Financeiro Completo - PraticOS
 
+## Indice
+
+1. [Visao Geral](#visao-geral)
+2. [Conceito Central: Entries vs Payments](#conceito-central-entries-vs-payments)
+3. [Arquitetura](#arquitetura)
+4. [Decisoes Tecnicas: Firestore](#decisoes-tecnicas-firestore-nosql)
+5. [Integridade de Dados](#integridade-de-dados)
+6. [Modelos de Dados](#modelos-de-dados)
+7. [Estornos](#estornos-reversals)
+8. [Comprovantes](#comprovantes-attachments)
+9. [Parcelas](#parcelas-installments)
+10. [Transferencias](#transferencias-entre-contas)
+11. [Sincronizacao OS <-> Financeiro](#sincronizacao-bidirecional-os---financeiro)
+12. [Telas e Fluxos UX](#telas-e-fluxos-ux)
+13. [Permissoes (RBAC)](#permissoes-rbac)
+14. [Indicadores Financeiros](#indicadores-financeiros)
+15. [API Cloud Functions](#api-endpoints-cloud-functions)
+16. [Bot WhatsApp](#bot-comandos-financeiros)
+17. [Site: Documentacao Publica](#site-documentacao-publica)
+18. [Documentacao: Checklist](#documentacao-checklist)
+19. [Fases de Implementacao](#fases-de-implementacao)
+20. [Retrocompatibilidade](#retrocompatibilidade)
+21. [Changelog](#changelog)
+
+---
+
 ## Visao Geral
 
 O modulo financeiro expande o sistema atual (pagamentos vinculados a OS) para uma gestao financeira completa com:
@@ -340,7 +366,7 @@ for (final p in activeExpenses) {
 | Transferencia | Nao (valores conhecidos) | `WriteBatch` |
 | Estorno | Nao (dados do payment original disponiveis) | `WriteBatch` |
 | Criar parcelamento | Nao (valores calculados) | `WriteBatch` |
-| Recalcular paidAmount | Sim (query payments ativos) | `Transaction` |
+| Recalcular paidAmount | Sim (query payments ativos) | `Transaction` (obrigatorio -- evita race condition) |
 | Reconciliar saldo | Sim (query todos payments) | Calcular fora, `WriteBatch` para corrigir |
 
 **Regra pratica:**
@@ -375,7 +401,7 @@ Para evitar que reconciliacao e relatorios cross-periodo fiquem lentos com o cre
 - **Relatorios anuais:** Carregar 12 snapshots (em vez de ~2.400 payments)
 - **Comparativo de periodos:** Snapshots tornam a comparacao trivial
 
-**Quando implementar:** Fase 4, ou quando uma conta ultrapassar ~1.000 payments. Nao e necessario no MVP.
+**Quando implementar:** Fase 2 (geracao manual via botao "Fechar mes" na tela de contas). Cloud Function automatica (primeiro dia do mes) pode ser adicionada na Fase 4.
 
 ### Firestore Security Rules
 
@@ -512,12 +538,13 @@ Future<double> calculateRealBalance(String accountId) async {
 
   double balance = account.initialBalance ?? 0;
   for (final p in payments) {
+    if (p.deletedAt != null) continue;  // Ignorar soft-deleted
     if (p.status == FinancialPaymentStatus.reversed) continue;
     if (p.type == FinancialPaymentType.income) balance += p.amount ?? 0;
     if (p.type == FinancialPaymentType.expense) balance -= p.amount ?? 0;
     if (p.type == FinancialPaymentType.transfer) {
-      if (p.accountId == accountId) balance -= p.amount ?? 0;
-      if (p.targetAccountId == accountId) balance += p.amount ?? 0;
+      if (p.transferDirection == 'out') balance -= p.amount ?? 0;
+      if (p.transferDirection == 'in') balance += p.amount ?? 0;
     }
   }
   return balance;
@@ -538,6 +565,48 @@ UserAggr? deletedBy;    // Quem excluiu
 - Payments excluidos nao contam no calculo de saldo/KPIs
 - Admin pode visualizar itens excluidos via filtro especial
 - Exclusao fisica so ocorre em cleanup periodico (90+ dias)
+
+### Comportamento Offline
+
+O Firestore possui cache offline nativo. Comportamento esperado:
+
+- **Criar entry offline:** Salvo localmente, sincronizado quando reconectar. Funciona normalmente.
+- **WriteBatch offline:** O batch e enfileirado localmente e executado no servidor ao reconectar. Atomicidade e mantida.
+- **Conflito de sync:** Se dois dispositivos editam o mesmo documento offline, o ultimo a sincronizar vence (last-write-wins). Para pagamentos, isso e aceitavel pois cada pagamento cria um novo documento.
+- **Saldo offline:** O `currentBalance` pode ficar temporariamente desatualizado. A reconciliacao (manual ou automatica) corrige ao reconectar.
+
+### Conta Bancaria Desativada
+
+Quando uma conta e desativada (`active: false`):
+
+- **Entries pendentes vinculadas:** Permanecem pendentes. O usuario deve reatribuir a outra conta ou pagar antes de desativar.
+- **Validacao no form:** Ao desativar, exibir alerta se houver entries pendentes vinculadas.
+- **Novas entries:** Contas inativas nao aparecem no picker de conta.
+- **Extrato:** Payments historicos da conta inativa continuam visiveis (conta desativada nao apaga historico).
+
+### Validacao de Valores
+
+| Campo | Regra | Onde aplicar |
+|-------|-------|-------------|
+| `amount` | Min: 0.01, Max: 999.999.999,99 | Form + API (Zod) |
+| `description` | Min: 1 char, Max: 500 | Form + API |
+| `dueDate` | Obrigatorio | Form + API |
+| `accountId` | Deve existir e estar ativa | Service layer |
+| `installments.count` | Min: 2, Max: 60 | Form + API |
+| `paymentDate` | Nao pode ser no futuro (exceto agendamento) | Service layer |
+
+### Validacao de Saldo Negativo
+
+Algumas contas nao devem ficar com saldo negativo (nao existe dinheiro negativo no caixa fisico). A validacao e um **alerta com confirmacao**, nao um bloqueio -- o usuario pode forcar a operacao se necessario.
+
+| Tipo de Conta | Permite saldo negativo? | Comportamento |
+|---------------|------------------------|---------------|
+| `cash` | Nao (alerta + confirmacao) | "Caixa ficara com saldo negativo (R$ -200). Continuar?" |
+| `bank` | Sim | Sem alerta (cheque especial e comum) |
+| `creditCard` | Sim | Sem alerta (comportamento normal do cartao) |
+| `digitalWallet` | Nao (alerta + confirmacao) | "Carteira ficara com saldo negativo. Continuar?" |
+
+**Onde aplicar:** No `FinancialPaymentStore`, antes de confirmar o `WriteBatch` de pagamento ou transferencia. Verificar `account.currentBalance - amount < 0` e exibir `CupertinoAlertDialog` se a conta nao permite negativo.
 
 ---
 
@@ -616,13 +685,15 @@ Representa uma conta a pagar ou a receber (planejamento financeiro).
 class FinancialEntry extends BaseAuditCompany {
   // Classificacao
   FinancialEntryDirection? direction;  // payable | receivable
-  FinancialEntryStatus? status;        // pending | paid | overdue | cancelled
+  FinancialEntryStatus? status;        // pending | paid | cancelled (overdue e computado via isOverdue)
 
   // Valores
   String? description;                 // "Aluguel escritorio marco"
   double? amount;                      // Valor total
   double? paidAmount;                  // Quanto ja foi pago (parcial) - recalculado via payments
+  double? discountAmount;              // Desconto concedido (ex: abatimento ao pagar menos que o total)
   DateTime? dueDate;                   // Data de vencimento
+  DateTime? competenceDate;            // Data de competencia (para DRE). Default = dueDate
   DateTime? paidDate;                  // Data do pagamento efetivo
 
   // Categorizacao
@@ -638,7 +709,7 @@ class FinancialEntry extends BaseAuditCompany {
   String? supplier;                    // Para payables (fornecedor, texto livre)
 
   // Vinculo com OS
-  String? orderId;                     // Se gerado automaticamente a partir de OS
+  String? orderId;                     // Receivable: gerado automaticamente da OS. Payable: custo direto da OS (uso futuro)
   int? orderNumber;                    // Numero da OS (denormalizado para display)
 
   // Observacoes e anexos
@@ -653,12 +724,15 @@ class FinancialEntry extends BaseAuditCompany {
   int? installmentNumber;              // Ex: 3 (parcela 3 de 6). Null = nao e parcela
   int? installmentTotal;               // Ex: 6 (total de parcelas). Null = nao e parcela
 
+  // Sync bidirecional com OS
+  String? syncSource;                    // 'financial' | 'order' | null (previne loop de sync)
+
   // Soft delete
   DateTime? deletedAt;
   UserAggr? deletedBy;
 
   // Computed
-  double get remainingBalance => (amount ?? 0) - (paidAmount ?? 0);
+  double get remainingBalance => (amount ?? 0) - (paidAmount ?? 0) - (discountAmount ?? 0);
   bool get isFullyPaid => remainingBalance <= 0;
   bool get isOverdue => status == FinancialEntryStatus.pending
       && dueDate != null
@@ -685,33 +759,51 @@ enum FinancialEntryDirection {
 }
 
 enum FinancialEntryStatus {
-  @JsonValue('pending')   pending,    // Pendente
+  @JsonValue('pending')   pending,    // Pendente (inclui vencidas -- usar getter isOverdue)
   @JsonValue('paid')      paid,       // Pago
-  @JsonValue('overdue')   overdue,    // Vencido
   @JsonValue('cancelled') cancelled,  // Cancelado
 }
+
+// NOTA: "Vencida" NAO e um status armazenado. E um estado computado via getter:
+//   bool get isOverdue => status == pending && dueDate < now
+// Queries de vencidas: where('status', '==', 'pending').where('dueDate', '<', now)
+// Isso evita a necessidade de scheduled job para atualizar status.
 ```
 
 **`paidAmount` - Recalculo via Payments:**
 
-O `paidAmount` e um valor denormalizado para performance, mas a **fonte da verdade** sao os `FinancialPayment` vinculados (via `entryId`). Ao estornar ou excluir um payment, recalcular:
+O `paidAmount` e um valor denormalizado para performance, mas a **fonte da verdade** sao os `FinancialPayment` vinculados (via `entryId`). Ao estornar ou excluir um payment, recalcular usando `Transaction` para evitar race conditions (ex: dois estornos simultaneos em multi-device):
 
 ```dart
 Future<void> recalculatePaidAmount(String entryId) async {
-  final payments = await paymentRepo.queryByEntry(entryId);
-  final activePaidAmount = payments
-      .where((p) => p.status == FinancialPaymentStatus.completed)
-      .fold<double>(0, (sum, p) => sum + (p.amount ?? 0));
+  await FirebaseFirestore.instance.runTransaction((transaction) async {
+    // 1. Ler entry e payments dentro da transaction (garante consistencia)
+    final entryDoc = await transaction.get(entryRef(entryId));
+    final entry = FinancialEntry.fromJson(entryDoc.data()!);
+    final paymentsSnapshot = await transaction.get(
+      paymentsCollection.where('entryId', isEqualTo: entryId),
+    );
 
-  await entryRepo.update(entryId, {
-    'paidAmount': activePaidAmount,
-    'status': activePaidAmount >= entry.amount
-        ? 'paid'
-        : activePaidAmount > 0 ? 'pending' : 'pending',
-    'paidDate': activePaidAmount >= entry.amount ? DateTime.now() : null,
+    // 2. Calcular paidAmount real
+    final payments = paymentsSnapshot.docs.map((d) => FinancialPayment.fromJson(d.data()));
+    final activePaidAmount = payments
+        .where((p) => p.status == FinancialPaymentStatus.completed && p.deletedAt == null)
+        .fold<double>(0, (sum, p) => sum + (p.amount ?? 0));
+
+    final totalWithDiscount = activePaidAmount + (entry.discountAmount ?? 0);
+    final isFullyPaid = totalWithDiscount >= (entry.amount ?? 0);
+
+    // 3. Atualizar entry atomicamente
+    transaction.update(entryRef(entryId), {
+      'paidAmount': activePaidAmount,
+      'status': isFullyPaid ? 'paid' : 'pending',
+      'paidDate': isFullyPaid ? DateTime.now() : null,
+    });
   });
 }
 ```
+
+> **Nota:** A `Transaction` garante que a leitura dos payments e a escrita do `paidAmount` sejam atomicas. Se outro processo modificar os payments durante a transaction, o Firestore faz retry automaticamente.
 
 #### Estrutura no Firestore
 
@@ -723,7 +815,9 @@ Future<void> recalculatePaidAmount(String entryId) async {
   "description": "Aluguel escritorio marco",
   "amount": 2500.00,
   "paidAmount": 0.00,
+  "discountAmount": 0.00,
   "dueDate": "2026-04-10T00:00:00Z",
+  "competenceDate": "2026-04-01T00:00:00Z",
   "paidDate": null,
   "category": "rent",
   "accountId": "abc123",
@@ -763,6 +857,7 @@ class FinancialPayment extends BaseAuditCompany {
 
   // Valores
   double? amount;                      // Valor (sempre positivo)
+  double? discount;                    // Desconto concedido neste pagamento (ex: abatimento)
   DateTime? paymentDate;               // Data da movimentacao
   PaymentMethod? paymentMethod;        // pix, cash, creditCard, etc.
   String? description;                 // Descricao curta
@@ -782,6 +877,7 @@ class FinancialPayment extends BaseAuditCompany {
   String? targetAccountId;             // Conta destino
   FinancialAccountAggr? targetAccount; // Aggr denormalizado
   String? transferGroupId;             // Vincula os 2 payments de uma transferencia
+  String? transferDirection;           // 'out' | 'in' (explicita direcao da transferencia)
 
   // Estorno
   String? reversedPaymentId;           // Se este payment e um estorno, ref ao payment original
@@ -799,6 +895,9 @@ class FinancialPayment extends BaseAuditCompany {
 
   // Categorizacao
   String? category;                    // Categoria da entry (denormalizado)
+
+  // Sync bidirecional com OS
+  String? syncSource;                  // 'financial' | 'order' | null
 
   // Soft delete
   DateTime? deletedAt;
@@ -843,6 +942,7 @@ enum PaymentMethod {
   "type": "expense",
   "status": "completed",
   "amount": 2500.00,
+  "discount": 0.00,
   "paymentDate": "2026-03-27T14:30:00Z",
   "paymentMethod": "pix",
   "description": "Aluguel escritorio marco",
@@ -854,6 +954,7 @@ enum PaymentMethod {
   "targetAccountId": null,
   "targetAccount": null,
   "transferGroupId": null,
+  "transferDirection": null,
   "reversedPaymentId": null,
   "reversedByPaymentId": null,
   "reversedAt": null,
@@ -888,72 +989,187 @@ class FinancialRecurrence {
 }
 ```
 
-**Prevencao de duplicacao:**
+**Prevencao de duplicacao e catch-up:**
 
-Antes de gerar uma nova entry recorrente, verificar:
+A geracao de recorrencia acontece **client-side no app** (nao via Cloud Function). Se o usuario nao abrir o app por semanas, as entries pendentes nao sao geradas ate a proxima abertura. O loop de catch-up abaixo gera todas as entries atrasadas de uma vez:
 
 ```dart
-// Verifica se ja existe entry com este dueDate para esta recorrencia
-final existing = await entryRepo.query([
-  QueryArgs('recurrence.nextDueDate', nextDueDate),
-  QueryArgs('direction', entry.direction),
-  QueryArgs('description', entry.description),
-]);
-if (existing.isNotEmpty) return; // Ja gerada, pular
+// Loop de catch-up: gera todas as entries atrasadas desde a ultima abertura
+Future<void> processRecurrence(FinancialEntry entry) async {
+  var nextDueDate = entry.recurrence!.nextDueDate!;
 
-// Apos gerar, atualizar lastGeneratedDate
-await entryRepo.update(entryId, {
-  'recurrence.lastGeneratedDate': nextDueDate,
-  'recurrence.nextDueDate': calculateNextDueDate(nextDueDate, frequency, interval),
-});
+  while (nextDueDate.isBefore(DateTime.now()) || nextDueDate.isAtSameMomentAs(DateTime.now())) {
+    // Verifica se ja existe entry com este dueDate para esta recorrencia
+    final existing = await entryRepo.query([
+      QueryArgs('recurrence.nextDueDate', nextDueDate),
+      QueryArgs('direction', entry.direction),
+      QueryArgs('description', entry.description),
+    ]);
+
+    if (existing.isEmpty) {
+      // Gerar nova entry com dueDate = nextDueDate
+      await _createRecurringEntry(entry, nextDueDate);
+    }
+
+    // Avancar para proxima data
+    nextDueDate = calculateNextDueDate(nextDueDate, entry.recurrence!.frequency, entry.recurrence!.interval);
+  }
+
+  // Atualizar lastGeneratedDate e nextDueDate na entry original
+  await entryRepo.update(entry.id, {
+    'recurrence.lastGeneratedDate': DateTime.now(),
+    'recurrence.nextDueDate': nextDueDate,
+  });
+}
 ```
+
+> **Limitacao conhecida:** Como a geracao e client-side, entries recorrentes so sao criadas quando o app e aberto. Para o publico-alvo (donos de pequenos negocios que usam o app diariamente), isso e aceitavel. Se necessario no futuro, uma Cloud Function scheduled pode ser adicionada sem alterar a estrutura.
 
 Segue o mesmo padrao do `OrderContract` ja existente no sistema.
 
 ---
 
-### FinancialCategory
+### Categorias Financeiras
 
-Categorias predefinidas separadas por direction + custom via AccumulatedValue.
+Categorias sao **100% dinamicas**, gerenciadas pelo sistema `AccumulatedValue` existente no app. Nao ha categorias hardcoded no codigo -- apenas categorias iniciais sugeridas via bootstrap.
+
+#### Firestore Structure
+
+```
+/companies/{companyId}/accumulatedFields/
+  expenseCategory/
+    values/
+      {valueId}: { "value": "Aluguel", "searchKey": "aluguel", "usageCount": 12 }
+      {valueId}: { "value": "Material", "searchKey": "material", "usageCount": 8 }
+      ...
+  incomeCategory/
+    values/
+      {valueId}: { "value": "Servicos", "searchKey": "servicos", "usageCount": 25 }
+      ...
+```
+
+Usa o mesmo `AccumulatedValueRepository` e `AccumulatedValueListScreen` que ja existem para `deviceCategory`, `deviceBrand`, etc. O usuario pode:
+- Selecionar categorias existentes (ordenadas por uso)
+- Criar novas categorias on-the-fly (digitando no autocomplete)
+- Excluir categorias nao usadas (swipe-left)
+
+#### Bootstrap: Categorias Iniciais
+
+Quando o modulo financeiro e ativado pela primeira vez (ou durante onboarding), o `BootstrapService` cria categorias iniciais sugeridas por direction.
+
+**Adicionar ao bootstrap do segmento** (`segments/{segmentId}/bootstrap/`):
+
+```javascript
+// firebase/functions/seed/financial-bootstrap.js
+const { t } = require('./helpers');
+
+module.exports = {
+  financialCategories: {
+    expense: [
+      { value: t('Aluguel', 'Rent', 'Alquiler'), icon: 'house' },
+      { value: t('Agua, luz, internet', 'Utilities', 'Servicios'), icon: 'bolt' },
+      { value: t('Salarios', 'Salaries', 'Salarios'), icon: 'person_2' },
+      { value: t('Material/Suprimentos', 'Supplies', 'Suministros'), icon: 'cube_box' },
+      { value: t('Manutencao', 'Maintenance', 'Mantenimiento'), icon: 'wrench' },
+      { value: t('Marketing', 'Marketing', 'Marketing'), icon: 'megaphone' },
+      { value: t('Impostos/Taxas', 'Taxes', 'Impuestos'), icon: 'doc_text' },
+      { value: t('Seguros', 'Insurance', 'Seguros'), icon: 'shield' },
+      { value: t('Transporte', 'Transport', 'Transporte'), icon: 'car' },
+      { value: t('Outros', 'Other', 'Otros'), icon: 'ellipsis' },
+    ],
+    income: [
+      { value: t('Servicos', 'Services', 'Servicios'), icon: 'wrench' },
+      { value: t('Venda de produtos', 'Product Sales', 'Venta de productos'), icon: 'cube_box' },
+      { value: t('Contratos', 'Contracts', 'Contratos'), icon: 'doc_on_doc' },
+      { value: t('Outras receitas', 'Other Income', 'Otros ingresos'), icon: 'ellipsis' },
+    ],
+  },
+};
+```
+
+**Execucao no `BootstrapService`:**
 
 ```dart
-class FinancialCategory {
-  // === Categorias de Despesa (direction: payable) ===
-  static const expenseCategories = [
-    'rent',              // Aluguel
-    'utilities',         // Agua, luz, internet
-    'salaries',          // Salarios
-    'supplies',          // Material/Suprimentos
-    'maintenance',       // Manutencao
-    'marketing',         // Marketing/Publicidade
-    'taxes',             // Impostos/Taxas
-    'insurance',         // Seguros
-    'transport',         // Transporte/Combustivel
-    'other',             // Outros
-  ];
+Future<void> bootstrapFinancialCategories(String companyId, String locale) async {
+  final bootstrapData = await getFinancialBootstrapData(locale);
 
-  // === Categorias de Receita (direction: receivable) ===
-  static const incomeCategories = [
-    'serviceRevenue',    // Receita de servicos
-    'productSale',       // Venda de produtos
-    'contractRevenue',   // Receita de contratos
-    'otherIncome',       // Outras receitas
-  ];
+  // Criar categorias de despesa
+  for (final cat in bootstrapData.expenseCategories) {
+    await accumulatedValueRepo.use(
+      companyId,
+      'expenseCategory',  // fieldType
+      cat.value,          // valor localizado
+    );
+  }
 
-  /// Retorna categorias por direction para uso no picker
-  static List<String> byDirection(FinancialEntryDirection direction) {
-    return direction == FinancialEntryDirection.payable
-        ? expenseCategories
-        : incomeCategories;
+  // Criar categorias de receita
+  for (final cat in bootstrapData.incomeCategories) {
+    await accumulatedValueRepo.use(
+      companyId,
+      'incomeCategory',
+      cat.value,
+    );
   }
 }
 ```
 
-**Categorias customizadas** usam o sistema `AccumulatedValue` existente:
-- Path despesas: `/companies/{companyId}/accumulatedFields/expenseCategory/values/`
-- Path receitas: `/companies/{companyId}/accumulatedFields/incomeCategory/values/`
+> **Nota:** O bootstrap cria as categorias com `usageCount: 1`. Conforme o usuario vai usando, as mais frequentes sobem no ranking automaticamente. Se o usuario nunca usar "Seguros", essa categoria fica no fim da lista. Se criar "Combustivel" e usar 20 vezes, ela sobe para o topo.
 
-O picker de categorias mostra as predefinidas (filtradas por direction) + custom, com autocomplete.
+#### UI: Picker de Categoria
+
+O picker usa o `AccumulatedValueListScreen` existente, filtrado por `fieldType`:
+
+```dart
+// No formulario de entry
+Future<void> _selectCategory(BuildContext context) async {
+  final fieldType = entry.direction == FinancialEntryDirection.payable
+      ? 'expenseCategory'
+      : 'incomeCategory';
+
+  final value = await Navigator.pushNamed(
+    context,
+    '/accumulated_value_list',
+    arguments: {
+      'fieldType': fieldType,
+      'title': context.l10n.category,
+      'currentValue': entry.category,
+      'allowClear': true,
+    },
+  );
+  if (value != null) {
+    setState(() => entry.category = value as String);
+  }
+}
+```
+
+**Alternativa visual (grid de icones):**
+
+Para o MVP, o picker pode usar o `AccumulatedValueListScreen` padrao (lista com busca). Na Fase 2+, pode evoluir para um grid de icones (como descrito na secao de UX) que carrega as categorias do AccumulatedValue + icone mapeado:
+
+```dart
+// Mapeamento de icone por categoria (fallback para icone generico)
+static const _categoryIcons = <String, IconData>{
+  'Aluguel': CupertinoIcons.house,
+  'Material/Suprimentos': CupertinoIcons.cube_box,
+  'Salarios': CupertinoIcons.person_2,
+  // ... fallback
+};
+
+IconData getCategoryIcon(String category) {
+  return _categoryIcons[category] ?? CupertinoIcons.tag;
+}
+```
+
+#### Vantagens sobre categorias hardcoded
+
+| Aspecto | Hardcoded | AccumulatedValue |
+|---------|-----------|-----------------|
+| Personalizar | Nao (codigo fixo) | Sim (usuario cria/exclui) |
+| Localizar | Precisa de i18n no enum | Ja localizado no bootstrap |
+| Ranking | Ordem fixa | Ordenado por uso real |
+| Segmento | Mesmo para todos | Bootstrap customizado por segmento |
+| Migrar | Requer deploy | Apenas Firestore |
+| Relatórios | Group by enum fixo | Group by valor texto |
 
 ---
 
@@ -1013,6 +1229,50 @@ Future<void> reversePayment(FinancialPayment original, String reason) async {
   if (original.entryId != null) {
     await recalculatePaidAmount(original.entryId!);
   }
+}
+
+// Estorno de transferencia: reverte ambos os payments do grupo
+Future<void> reverseTransfer(FinancialPayment original, String reason) async {
+  final groupPayments = await paymentRepo.query([
+    QueryArgs('transferGroupId', original.transferGroupId),
+    QueryArgs('status', 'completed'),
+  ]);
+
+  final batch = FirebaseFirestore.instance.batch();
+  final now = DateTime.now();
+
+  for (final payment in groupPayments) {
+    // Criar payment reverso para cada lado
+    final reversalRef = paymentsCollection.doc();
+    batch.set(reversalRef, {
+      ...payment.toJson(),
+      'id': reversalRef.id,
+      'status': 'completed',
+      'reversedPaymentId': payment.id,
+      'reversalReason': reason,
+      'paymentDate': now,
+      'description': 'Estorno: ${payment.description}',
+      'transferDirection': payment.transferDirection == 'out' ? 'in' : 'out',
+      'createdAt': now,
+    });
+
+    // Marcar original como estornado
+    batch.update(paymentRef(payment.id), {
+      'status': 'reversed',
+      'reversedByPaymentId': reversalRef.id,
+      'reversedAt': now,
+    });
+
+    // Reverter saldo da conta
+    final balanceChange = payment.transferDirection == 'out'
+        ? payment.amount   // Devolver ao remetente
+        : -payment.amount; // Retirar do destinatario
+    batch.update(accountRef(payment.accountId), {
+      'currentBalance': FieldValue.increment(balanceChange),
+    });
+  }
+
+  await batch.commit();
 }
 ```
 
@@ -1151,6 +1411,7 @@ Future<void> transfer(String fromId, String toId, double amount) async {
     'accountId': fromId,
     'targetAccountId': toId,
     'transferGroupId': groupId,
+    'transferDirection': 'out',
     // ...
   });
 
@@ -1163,6 +1424,7 @@ Future<void> transfer(String fromId, String toId, double amount) async {
     'accountId': toId,
     'targetAccountId': fromId,
     'transferGroupId': groupId,
+    'transferDirection': 'in',
     // ...
   });
 
@@ -1525,42 +1787,44 @@ Formulario com **2 niveis** -- campos essenciais visiveis, campos opcionais cola
 
 **Tempo estimado para caso comum:** 10-15 segundos (descricao + valor + salvar).
 
-#### Picker de Categoria (grid com icones)
+#### Picker de Categoria
+
+**MVP (Fase 1):** Usa o `AccumulatedValueListScreen` existente -- lista com busca e autocomplete. O usuario pode selecionar categorias do bootstrap ou criar novas digitando.
 
 ```dart
-// Grid 4 colunas com icones -- mais rapido que lista
-Widget _buildCategoryPicker(FinancialEntryDirection direction) {
-  final categories = FinancialCategory.byDirection(direction);
+// Abre o picker de categorias (AccumulatedValue)
+final fieldType = entry.direction == FinancialEntryDirection.payable
+    ? 'expenseCategory'
+    : 'incomeCategory';
 
-  return Wrap(
-    spacing: 12, runSpacing: 12,
-    children: categories.map((cat) => GestureDetector(
-      onTap: () => setState(() => _selectedCategory = cat),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+final value = await Navigator.pushNamed(context, '/accumulated_value_list', arguments: {
+  'fieldType': fieldType,
+  'title': context.l10n.category,
+  'currentValue': entry.category,
+  'allowClear': true,
+});
+```
+
+**Evolucao (Fase 2+):** Grid de icones que carrega categorias do AccumulatedValue + mapeamento de icone. As mais usadas aparecem primeiro (ordenadas por `usageCount`). Botao "+ Nova" no final do grid para criar categoria custom.
+
+```dart
+// Grid carregado dinamicamente do AccumulatedValue
+Widget _buildCategoryGrid(FinancialEntryDirection direction) {
+  final fieldType = direction == FinancialEntryDirection.payable
+      ? 'expenseCategory' : 'incomeCategory';
+
+  return StreamBuilder<List<AccumulatedValue>>(
+    stream: accRepo.streamAll(companyId, fieldType),
+    builder: (context, snapshot) {
+      final categories = snapshot.data ?? [];
+      return Wrap(
+        spacing: 12, runSpacing: 12,
         children: [
-          Container(
-            width: 56, height: 56,
-            decoration: BoxDecoration(
-              color: _selectedCategory == cat
-                  ? CupertinoColors.activeBlue.withOpacity(0.1)
-                  : CupertinoColors.systemGrey5.resolveFrom(context),
-              borderRadius: BorderRadius.circular(12),
-              border: _selectedCategory == cat
-                  ? Border.all(color: CupertinoColors.activeBlue, width: 2) : null,
-            ),
-            child: Icon(_categoryIcon(cat), color: _selectedCategory == cat
-                ? CupertinoColors.activeBlue
-                : CupertinoColors.secondaryLabel.resolveFrom(context)),
-          ),
-          SizedBox(height: 4),
-          Text(_categoryLabel(cat, context), style: TextStyle(
-            fontSize: 11,
-            color: CupertinoColors.secondaryLabel.resolveFrom(context),
-          )),
+          ...categories.map((cat) => _buildCategoryChip(cat)),
+          _buildAddNewChip(),  // "+ Nova categoria"
         ],
-      ),
-    )).toList(),
+      );
+    },
   );
 }
 ```
@@ -1605,6 +1869,12 @@ Quando o usuario marca uma entry pendente como paga. Usa `showCupertinoModalPopu
 **Pagamento parcial:**
 - Usuario edita o valor para pagar menos que o total
 - Sistema atualiza `paidAmount` e mantem entry como `pending`
+
+**Desconto:**
+- Toggle "Conceder desconto" no half-sheet (colapsado por padrao)
+- Ao ativar, campo de valor do desconto aparece
+- O desconto e registrado no payment (`discount`) e na entry (`discountAmount`)
+- Entry e marcada como `paid` se `paidAmount + discountAmount >= amount` (evita saldo residual eterno)
 
 **Entry points (como chegar aqui):**
 1. Toque na entry pendente na lista > detalhe > botao "Pagar" (verde, full-width)
@@ -1806,27 +2076,202 @@ Dois botoes inline para acao imediata, sem precisar usar o FAB.
 
 ---
 
+## Feature Flag: `useFinancialManagement`
+
+O modulo financeiro completo e **opcional** e controlado por um feature flag no modelo Company, seguindo o mesmo padrao de `useContracts`, `useDeviceManagement`, etc.
+
+### Flag no Company Model
+
+```dart
+class Company extends BaseAudit {
+  // ... flags existentes
+  bool? fieldService;
+  bool? useScheduling;
+  bool? useDeviceManagement;
+  bool? useContracts;
+  bool? useFinancialManagement;  // NOVO -- default: false
+}
+```
+
+### Inicializacao
+
+Em `auth_wrapper.dart` (`_SegmentLoader`), resolver o flag com default `false`:
+
+```dart
+final bool useFinancialManagement = companyData?['useFinancialManagement'] as bool? ?? false;
+
+segmentProvider.setCompanyConfig(
+  // ... flags existentes
+  useFinancialManagement: useFinancialManagement,
+);
+```
+
+Em `segment_config_service.dart` e `segment_config_provider.dart`, adicionar:
+
+```dart
+bool _useFinancialManagement = false;
+bool get useFinancialManagement => _useFinancialManagement;
+```
+
+### O que muda com o flag
+
+| Aspecto | `false` (padrao -- modo simples) | `true` (modulo completo) |
+|---------|----------------------------------|--------------------------|
+| **Tab Financeiro** | Dashboard de faturamento OS (como hoje) | Extrato financeiro (nova tela principal) |
+| **Pagamento na OS** | `PaymentTransaction` direto na OS | Mesmo + sync bidirecional com entries |
+| **Contas a pagar** | Nao disponivel | Disponivel |
+| **Contas bancarias** | Nao disponivel | Disponivel |
+| **Parcelas** | Nao disponivel | Disponivel |
+| **Estornos** | Nao disponivel | Disponivel |
+| **Transferencias** | Nao disponivel | Disponivel |
+| **Relatorios** | Dashboard simples OS (como hoje) | DRE, fluxo projetado, despesas por categoria |
+| **FAB na tab** | Nao tem | Nova Despesa / Novo Recebimento |
+| **API /financial/** | Nao disponivel | Disponivel |
+| **Bot financeiro** | Nao disponivel | Disponivel |
+| **Dados Firestore** | Nenhuma colecao financeira | 3 colecoes (accounts, entries, payments) |
+| **Onboarding** | Nao aparece | Fluxo de 3 passos na primeira visita |
+| **Badge vencidas** | Nao aparece | Badge vermelho na tab |
+
+### O que NAO muda
+
+- Permissoes RBAC continuam funcionando (admin/gerente veem financas, tecnico nao)
+- Dashboard de faturamento OS continua acessivel (via botao "Relatorios" no extrato, ou como tela principal se flag desligado)
+- `PaymentTransaction` na OS continua funcionando normalmente
+- Nenhuma migracao de dados necessaria
+- **Zero impacto para quem nao ativa** -- o app continua exatamente como hoje
+
+### Aplicacao no Codigo
+
+**Tab Financeiro (navigation_controller.dart):**
+
+```dart
+// Conteudo da tab muda baseado no flag
+Widget _buildFinancialTab(BuildContext context) {
+  final config = Provider.of<SegmentConfigProvider>(context);
+
+  if (config.useFinancialManagement) {
+    return FinancialStatementScreen();  // Extrato completo
+  } else {
+    return FinancialDashboardSimple();  // Dashboard OS (como hoje)
+  }
+}
+```
+
+**Order Store -- sync condicional:**
+
+```dart
+// Sync com financeiro so acontece se o modulo estiver ativo
+Future<void> _onOrderStatusChanged(Order order) async {
+  // ... logica existente de status
+
+  if (SegmentConfigService().useFinancialManagement) {
+    await _syncFinancialEntry(order);  // Cria/atualiza entry no financeiro
+  }
+}
+```
+
+**Formulario de OS -- indicador de sync:**
+
+```dart
+// Na tela de pagamento da OS, mostrar link para o financeiro se ativo
+if (config.useFinancialManagement && entry != null)
+  CupertinoButton(
+    child: Text(context.l10n.viewInFinancial),
+    onPressed: () => Navigator.pushNamed(context, '/financial/entry', arguments: entry),
+  ),
+```
+
+**API -- guard no endpoint:**
+
+```typescript
+// No financial.routes.ts -- verificar se modulo esta ativo
+router.use(async (req, res, next) => {
+  const company = await getCompanyDoc(req.auth.companyId);
+  if (!company.useFinancialManagement) {
+    return res.status(403).json({
+      success: false,
+      error: { code: 'MODULE_DISABLED', message: 'Financial management module is not enabled' }
+    });
+  }
+  next();
+});
+```
+
+### Ativacao pelo Usuario
+
+O admin ativa o modulo em **Configuracoes da Empresa** (`company_form_screen.dart`):
+
+```dart
+// Secao de Features no formulario da empresa
+CupertinoListSection.insetGrouped(
+  header: Text(context.l10n.features.toUpperCase()),
+  children: [
+    // ... toggles existentes (fieldService, scheduling, etc.)
+    _buildFeatureToggle(
+      title: context.l10n.financialManagement,
+      subtitle: context.l10n.financialManagementDescription,
+      // "Gestao completa de despesas, receitas, contas e relatorios"
+      value: _company!.useFinancialManagement ?? false,
+      onChanged: (value) {
+        setState(() => _company!.useFinancialManagement = value);
+        if (value) {
+          // Primeira ativacao: executar bootstrap de categorias
+          _bootstrapFinancialIfNeeded();
+        }
+      },
+    ),
+  ],
+),
+```
+
+### Bootstrap na Primeira Ativacao
+
+Quando o admin ativa o flag pela primeira vez:
+
+1. **Criar categorias iniciais** via `bootstrapFinancialCategories()` (AccumulatedValue)
+2. **Mostrar onboarding** na proxima vez que abrir a tab Financeiro (criar conta, saldo inicial)
+3. **NAO criar dados retroativos** -- OS existentes nao geram entries automaticamente
+
+Para importar OS antigas: botao opcional "Importar OS anteriores" na tela de configuracoes (gera entries receivable para OS aprovadas sem entry vinculada).
+
+### Firestore
+
+```
+/companies/{companyId}/
+{
+  "useFinancialManagement": false,  // default
+  // ... outros campos
+}
+```
+
+Nenhum indice adicional necessario para o flag (campo simples no documento da empresa).
+
+---
+
 ## Permissoes (RBAC)
+
+> **Nota:** Permissions controlam **quem** pode ver/editar. O feature flag controla **se** o modulo esta disponivel. Ambos devem ser satisfeitos: `useFinancialManagement == true` E usuario tem permission adequada.
 
 ### Novas Permissions
 
-| Permission | Descricao |
-|------------|-----------|
-| `manageFinancialEntries` | CRUD contas a pagar/receber |
-| `manageFinancialAccounts` | CRUD contas bancarias |
-| `viewFinancialStatement` | Visualizar extrato (somente leitura) |
+| Permission | Descricao | Requer flag ativo? |
+|------------|-----------|-------------------|
+| `manageFinancialEntries` | CRUD contas a pagar/receber | Sim |
+| `manageFinancialAccounts` | CRUD contas bancarias | Sim |
+| `viewFinancialStatement` | Visualizar extrato (somente leitura) | Sim |
+| `viewFinancialReports` | Dashboard de faturamento OS (existente) | Nao (funciona sem flag) |
 
 ### Acesso por Perfil
 
-| Perfil | Ver Extrato | Gerenciar Entries | Gerenciar Contas | Dashboard |
-|--------|-------------|-------------------|------------------|-----------|
+| Perfil | Dashboard OS (sem flag) | Extrato (com flag) | Gerenciar Entries | Gerenciar Contas |
+|--------|------------------------|--------------------|--------------------|------------------|
 | Admin | sim | sim | sim | sim |
 | Gerente | sim | sim | sim | sim |
 | Supervisor | nao | nao | nao | nao |
 | Consultor | nao | nao | nao | nao |
 | Tecnico | nao | nao | nao | nao |
 
-As permissoes existentes (`viewPrices`, `viewBilling`, `viewFinancialReports`) continuam controlando o acesso ao dashboard de faturamento da OS.
+As permissoes existentes (`viewPrices`, `viewBilling`, `viewFinancialReports`) continuam controlando o acesso ao dashboard de faturamento da OS independente do flag.
 
 ---
 
@@ -1857,7 +2302,7 @@ As permissoes existentes (`viewPrices`, `viewBilling`, `viewFinancialReports`) c
 | A Pagar (pendente) | Soma de entries payable pending (excluindo parcelas com installmentGroupId para evitar duplicacao) | `financialEntries` |
 | A Receber (pendente) | Soma de entries receivable pending | `financialEntries` |
 | Vencidas | Entries com status pending + dueDate < hoje | `financialEntries` |
-| Despesa por Categoria | Agrupamento de expenses (completed) por category | `financialPayments` |
+| Despesa por Categoria | Agrupamento de expenses (completed) por category (dinamico via AccumulatedValue) | `financialPayments` |
 
 ### Fluxo de Caixa Projetado
 
@@ -1947,7 +2392,9 @@ DESPESAS
   MARGEM                         33,2%
 ```
 
-**Calculo:** Agrupa payments `completed` do periodo por `category`, separados por `type` (income/expense).
+**Calculo:** Agrupa payments `completed` do periodo por `category`, separados por `type` (income/expense). Usa `entry.competenceDate` (default = `dueDate`) para determinar o periodo de competencia. Isso permite regime de competencia: aluguel de marco pago em abril aparece no DRE de marco.
+
+> **Regime de caixa vs competencia:** O extrato sempre mostra por `paymentDate` (regime de caixa -- quando o dinheiro movimentou). O DRE agrupa por `competenceDate` (regime de competencia -- a qual periodo a despesa/receita pertence). Com um campo simples, o sistema suporta ambos.
 
 ### Dashboard Financeiro Aprimorado
 
@@ -1960,6 +2407,509 @@ O dashboard existente (`FinancialDashboardSimple`) sera expandido com:
 5. **Despesas por Categoria** - Grafico pizza com breakdown
 6. **DRE Simplificado** - Receitas vs Despesas por categoria
 7. **Contas Vencidas** - Alerta com lista de entries overdue
+
+---
+
+## API: Endpoints Cloud Functions
+
+O modulo financeiro expoe endpoints REST via Cloud Functions, seguindo os mesmos padroes do sistema atual (`orders.routes.ts`, `analytics.routes.ts`).
+
+### Arquitetura
+
+```
+firebase/functions/src/
+  |-- routes/
+  |     |-- v1/financial.routes.ts      <- Rotas API Key + Bearer
+  |     +-- bot/financial.routes.ts     <- Rotas Bot (Fase 4)
+  |-- services/
+  |     +-- financial.service.ts        <- Logica de negocio
+  |-- models/
+  |     +-- types.ts                    <- Tipos financeiros (adicionar)
+  +-- utils/
+        +-- validation.utils.ts         <- Schemas Zod (adicionar)
+```
+
+**Middleware reutilizado:**
+- `apiKeyAuth` / `bearerAuth` -- autenticacao (existente)
+- `resolveCompanyContext` -- contexto multi-tenant (existente)
+- `apiCoreLimiter` / `appLimiter` -- rate limiting (existente)
+
+**Servicos reutilizados:**
+- `firestore.service.ts` -- `getTenantCollection()`, `paginatedQuery()`, `getDocument()`
+- `analytics.service.ts` -- calculo de periodos, formatacao de datas
+
+**Registro em `index.ts`:**
+
+```typescript
+import financialRoutes from './routes/v1/financial.routes';
+import botFinancialRoutes from './routes/bot/financial.routes';
+
+// API Key (integracoes externas)
+app.use('/v1/financial', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, financialRoutes);
+
+// Bearer (Flutter app)
+app.use('/v1/app/financial', appLimiter, bearerAuth, resolveCompanyContext, financialRoutes);
+
+// Bot (Fase 4)
+app.use('/bot/financial', botLimiter, botAuth, resolveCompanyContext, botFinancialRoutes);
+```
+
+### Rotas v1 -- Contas Bancarias
+
+| Metodo | Rota | Descricao | Fase |
+|--------|------|-----------|------|
+| GET | /v1/financial/accounts | Listar contas ativas | 2 |
+| GET | /v1/financial/accounts/:id | Detalhe da conta com saldo | 2 |
+| POST | /v1/financial/accounts | Criar conta | 2 |
+| PATCH | /v1/financial/accounts/:id | Atualizar conta | 2 |
+
+**GET /v1/financial/accounts**
+
+```typescript
+// Request
+GET /v1/financial/accounts?active=true
+
+// Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "acc456",
+      "name": "Conta Corrente Itau",
+      "type": "bank",
+      "currentBalance": 12500.00,
+      "initialBalance": 5000.00,
+      "currency": "BRL",
+      "color": "#1E88E5",
+      "icon": "bank",
+      "active": true,
+      "isDefault": true
+    }
+  ],
+  "summary": {
+    "totalBalance": 15420.00,
+    "accountCount": 3
+  }
+}
+```
+
+**POST /v1/financial/accounts**
+
+```typescript
+// Zod Schema
+const createAccountSchema = z.object({
+  name: z.string().min(1).max(200),
+  type: z.enum(['bank', 'cash', 'creditCard', 'digitalWallet']),
+  initialBalance: z.number().default(0),
+  currency: z.string().default('BRL'),
+  color: z.string().optional(),
+  icon: z.string().optional(),
+  isDefault: z.boolean().default(false),
+});
+```
+
+### Rotas v1 -- Entries (Contas a Pagar/Receber)
+
+| Metodo | Rota | Descricao | Fase |
+|--------|------|-----------|------|
+| GET | /v1/financial/entries | Listar entries com filtros | 1 |
+| GET | /v1/financial/entries/:id | Detalhe com payments vinculados | 1 |
+| POST | /v1/financial/entries | Criar entry | 1 |
+| PATCH | /v1/financial/entries/:id | Atualizar entry | 1 |
+| DELETE | /v1/financial/entries/:id | Soft-delete | 1 |
+| POST | /v1/financial/entries/:id/pay | Pagar entry (WriteBatch) | 1 |
+
+**GET /v1/financial/entries**
+
+```typescript
+// Request (cursor-based pagination -- mesmo padrao do OrderRepositoryV2)
+GET /v1/financial/entries?direction=payable&status=pending&startDate=2026-03-01&endDate=2026-03-31&limit=20
+
+// Zod Schema
+const listEntriesSchema = z.object({
+  direction: z.enum(['payable', 'receivable']).optional(),
+  status: z.enum(['pending', 'paid', 'cancelled']).optional(),
+  category: z.string().optional(),
+  startDate: z.string().optional(),  // dueDate range
+  endDate: z.string().optional(),
+  accountId: z.string().optional(),
+  installmentGroupId: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(20),
+  cursor: z.string().optional(),  // ID do ultimo documento (cursor-based, nao offset)
+});
+
+// Response
+{
+  "success": true,
+  "data": [
+    {
+      "id": "entry123",
+      "direction": "payable",
+      "status": "pending",
+      "description": "Aluguel escritorio marco",
+      "amount": 2500.00,
+      "paidAmount": 0.00,
+      "dueDate": "2026-04-10T00:00:00Z",
+      "category": "rent",
+      "account": { "id": "acc456", "name": "Conta Corrente", "type": "bank" },
+      "supplier": "Imobiliaria XYZ",
+      "installmentNumber": null,
+      "installmentTotal": null,
+      "createdAt": "2026-03-27T10:00:00Z"
+    }
+  ],
+  "pagination": { "limit": 20, "hasMore": true, "nextCursor": "entry456" }
+}
+```
+
+**POST /v1/financial/entries**
+
+```typescript
+// Request
+POST /v1/financial/entries
+{
+  "direction": "payable",
+  "description": "Aluguel escritorio abril",
+  "amount": 2500.00,
+  "dueDate": "2026-04-10T00:00:00Z",
+  "category": "rent",
+  "accountId": "acc456",
+  "supplier": "Imobiliaria XYZ",
+  "notes": "Ref: contrato 2024",
+  "installments": null
+}
+
+// Zod Schema
+const createEntrySchema = z.object({
+  direction: z.enum(['payable', 'receivable']),
+  description: z.string().min(1).max(500),
+  amount: z.number().min(0.01).max(999999999.99),
+  dueDate: z.string(),  // ISO 8601
+  category: z.string().max(200).optional(),  // Valor livre (AccumulatedValue, nao enum)
+  accountId: z.string().optional(),
+  customerId: z.string().optional(),   // para receivable
+  supplier: z.string().max(500).optional(),  // para payable
+  notes: z.string().max(2000).optional(),
+  tags: z.array(z.string()).max(10).optional(),
+  installments: z.object({
+    count: z.number().min(2).max(60),
+  }).optional(),
+  recurrence: z.object({
+    frequency: z.enum(['daily', 'weekly', 'monthly', 'yearly']),
+    interval: z.number().min(1).max(12).default(1),
+    endDate: z.string().optional(),
+  }).optional(),
+});
+```
+
+**POST /v1/financial/entries/:id/pay**
+
+```typescript
+// Request
+POST /v1/financial/entries/entry123/pay
+{
+  "amount": 2500.00,
+  "accountId": "acc456",
+  "paymentMethod": "pix",
+  "paymentDate": "2026-03-28T14:30:00Z",
+  "description": "Pagamento aluguel",
+  "notes": null
+}
+
+// Zod Schema
+const payEntrySchema = z.object({
+  amount: z.number().min(0.01),
+  accountId: z.string().min(1),
+  paymentMethod: z.enum(['pix', 'cash', 'creditCard', 'debitCard', 'transfer', 'check', 'other']),
+  paymentDate: z.string().optional(),  // default: now
+  description: z.string().max(500).optional(),
+  notes: z.string().max(2000).optional(),
+});
+
+// Response
+{
+  "success": true,
+  "data": {
+    "payment": { "id": "pay789", "type": "expense", "amount": 2500.00, ... },
+    "entry": { "id": "entry123", "status": "paid", "paidAmount": 2500.00, ... },
+    "account": { "id": "acc456", "currentBalance": 10000.00 }
+  }
+}
+
+// Internamente: WriteBatch atomico (entry + payment + account)
+```
+
+### Rotas v1 -- Payments (Extrato)
+
+| Metodo | Rota | Descricao | Fase |
+|--------|------|-----------|------|
+| GET | /v1/financial/payments | Listar payments (extrato) | 1 |
+| GET | /v1/financial/payments/:id | Detalhe do payment | 1 |
+| POST | /v1/financial/payments/:id/reverse | Estornar payment | 3 |
+
+**GET /v1/financial/payments**
+
+```typescript
+// Request
+GET /v1/financial/payments?startDate=2026-03-01&endDate=2026-03-31&type=expense&limit=20
+
+// Zod Schema
+const listPaymentsSchema = z.object({
+  type: z.enum(['income', 'expense', 'transfer']).optional(),
+  status: z.enum(['completed', 'reversed']).optional(),
+  accountId: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  limit: z.coerce.number().min(1).max(100).default(20),
+  cursor: z.string().optional(),  // cursor-based pagination
+});
+
+// Response
+{
+  "success": true,
+  "data": [ /* payments ordered by paymentDate desc */ ],
+  "pagination": { "limit": 20, "hasMore": true, "nextCursor": "pay456" }
+}
+```
+
+### Rotas v1 -- Resumo e Transferencias
+
+| Metodo | Rota | Descricao | Fase |
+|--------|------|-----------|------|
+| GET | /v1/financial/summary | KPIs do periodo | 1 |
+| GET | /v1/financial/overdue | Entries vencidas | 1 |
+| POST | /v1/financial/transfers | Transferencia entre contas | 2 |
+
+**GET /v1/financial/summary**
+
+```typescript
+// Request
+GET /v1/financial/summary?startDate=2026-03-01&endDate=2026-03-31
+
+// Response
+{
+  "success": true,
+  "data": {
+    "period": { "start": "2026-03-01", "end": "2026-03-31", "label": "Marco 2026" },
+    "balance": {
+      "total": 15420.00,
+      "byAccount": [
+        { "id": "acc456", "name": "Conta Corrente", "balance": 12500.00 },
+        { "id": "acc789", "name": "Caixa", "balance": 2920.00 }
+      ]
+    },
+    "income": { "total": 12200.00, "count": 28 },
+    "expense": { "total": 8150.00, "count": 19 },
+    "profit": 4050.00,
+    "margin": 33.2,
+    "pending": {
+      "payable": { "total": 5300.00, "count": 8 },
+      "receivable": { "total": 3200.00, "count": 5 },
+      "overdue": { "total": 1200.00, "count": 2 }
+    }
+  }
+}
+```
+
+**POST /v1/financial/transfers**
+
+```typescript
+// Request
+POST /v1/financial/transfers
+{
+  "fromAccountId": "acc789",
+  "toAccountId": "acc456",
+  "amount": 1000.00,
+  "description": "Deposito caixa para banco",
+  "paymentDate": "2026-03-28T10:00:00Z"
+}
+
+// Internamente: WriteBatch atomico (2 payments + 2 accounts)
+```
+
+### Rotas Bot (Fase 4)
+
+| Metodo | Rota | Descricao |
+|--------|------|-----------|
+| GET | /bot/financial/summary | Resumo financeiro formatado para WhatsApp |
+| GET | /bot/financial/overdue | Lista de contas vencidas |
+
+**GET /bot/financial/summary**
+
+```typescript
+// Request
+GET /bot/financial/summary?startDate=2026-03-28&endDate=2026-03-28
+
+// Response (formatado para contexto do bot)
+{
+  "success": true,
+  "data": {
+    "period": "Hoje, 28/03/2026",
+    "balance": 15420.00,
+    "income": 2150.00,
+    "expense": 450.00,
+    "profit": 1700.00,
+    "overdueCount": 2,
+    "overdueTotal": 1200.00,
+    "formatContext": { "locale": "pt-BR", "currency": "BRL" }
+  }
+}
+```
+
+### Permissoes nos Endpoints
+
+| Rota | Roles permitidos |
+|------|-----------------|
+| GET (leitura) | admin, manager (ou quem tiver `viewFinancialStatement`) |
+| POST/PATCH/DELETE (escrita) | admin, manager (ou quem tiver `manageFinancialEntries`) |
+| Accounts (escrita) | admin, manager (ou quem tiver `manageFinancialAccounts`) |
+
+---
+
+## Bot: Comandos Financeiros
+
+> **Fase de implementacao:** Apenas Fase 4 (apos modulo completo com relatorios e API pronta).
+
+O bot Pratico (WhatsApp) ganha acesso a dados financeiros via endpoints `GET /bot/financial/*`. O bot **nao acessa Firestore direto** -- tudo passa pela API.
+
+### Comandos Naturais
+
+O bot interpreta linguagem natural e mapeia para endpoints:
+
+| Comando do usuario | Endpoint | Resposta |
+|--------------------|----------|----------|
+| "quanto ganhei hoje?" | `GET /bot/financial/summary?startDate=HOJE&endDate=HOJE` | Entradas + Saidas + Lucro do dia |
+| "quanto ganhei este mes?" | `GET /bot/financial/summary?startDate=INICIO_MES&endDate=FIM_MES` | Resumo mensal |
+| "tem conta vencida?" | `GET /bot/financial/overdue` | Lista de entries overdue com valores |
+| "resumo financeiro" | `GET /bot/financial/summary` | Resumo completo: saldo + entradas + saidas + vencidas |
+| "qual meu saldo?" | `GET /bot/financial/summary` | Saldo total + saldo por conta |
+
+### Automacoes CRON
+
+Configurar em `backend/bot/workspace/cron/jobs.json`:
+
+```json
+[
+  {
+    "name": "daily_financial_summary",
+    "schedule": "0 18 * * 1-6",
+    "description": "Resumo financeiro diario as 18h (seg-sab)",
+    "enabled": false,
+    "action": "Envie o resumo financeiro do dia para o dono"
+  },
+  {
+    "name": "overdue_alert",
+    "schedule": "0 9 * * 1-5",
+    "description": "Alerta de contas vencendo hoje/amanha as 9h (seg-sex)",
+    "enabled": false,
+    "action": "Verifique se tem contas vencendo hoje ou amanha e avise o dono"
+  },
+  {
+    "name": "weekly_financial_report",
+    "schedule": "0 10 * * 1",
+    "description": "Resumo financeiro semanal toda segunda as 10h",
+    "enabled": false,
+    "action": "Envie o resumo financeiro da semana passada"
+  }
+]
+```
+
+> **Nota:** Todas as automacoes comecam desabilitadas (`enabled: false`). O usuario ativa via configuracao do bot.
+
+### Integracao com Cobranca
+
+O bot ja tem logica de cobranca amigavel (SOUL.md). Com o modulo financeiro, a cobranca pode ser mais inteligente:
+
+1. Bot consulta `GET /bot/financial/overdue`
+2. Identifica entries receivable vencidas com `customer` vinculado
+3. Sugere ao dono: "Joao tem R$350 pendente da OS #142 (venceu em 25/03). Quer que eu envie uma mensagem?"
+4. Se autorizado, envia mensagem amigavel ao cliente
+
+**Arquivos a modificar (Fase 4):**
+- `backend/bot/workspace/skills/praticos/references/api-endpoints.md` -- adicionar endpoints financeiros
+- `backend/bot/workspace/cron/jobs.json` -- configurar automacoes
+- `firebase/functions/src/routes/bot/financial.routes.ts` -- criar rotas bot
+
+---
+
+## Site: Documentacao Publica
+
+### Estrategia
+
+Criar artigo **separado** `gestao-financeira` no site Eleventy. O artigo `financeiro` existente continua documentando o sistema de pagamento na OS (sistema atual). O novo artigo cobre o modulo financeiro completo.
+
+### Arquivos a Criar
+
+| Arquivo | Descricao |
+|---------|-----------|
+| `firebase/hosting/src/_data/docs/gestao-financeira.json` | Conteudo trilingual (pt/en/es) |
+| `firebase/hosting/src/docs/gestao-financeira.njk` | Template portugues |
+| `firebase/hosting/src/docs/gestao-financeira-en.njk` | Template ingles |
+| `firebase/hosting/src/docs/gestao-financeira-es.njk` | Template espanhol |
+
+### Arquivo a Modificar
+
+- `firebase/hosting/src/_data/docs.json` -- registrar no hub com badge "Novo"
+
+### Secoes do Artigo
+
+| # | Secao | Conteudo | Fase |
+|---|-------|----------|------|
+| 1 | Visao geral | O que o modulo faz, diferenca do sistema de pagamento na OS | 1 |
+| 2 | Extrato financeiro | Como ver o que entrou e saiu, navegacao por mes, filtros | 1 |
+| 3 | Registrar despesas | Passo a passo: criar despesa, pagar, ver no extrato | 1 |
+| 4 | Contas bancarias | Como criar contas, saldo, reconciliacao | 2 |
+| 5 | Transferencias | Como mover dinheiro entre contas | 2 |
+| 6 | Recebimentos | Manual + automatico via OS, link com OS | 3 |
+| 7 | Parcelas | Como parcelar, progresso, pagar parcelas | 3 |
+| 8 | Relatorios | DRE, fluxo projetado, graficos | 4 |
+| 9 | Permissoes | Quem pode ver, quem pode editar (tabela) | 1 |
+| 10 | Perguntas frequentes | FAQ com duvidas comuns | 1+ |
+
+### Padrao a Seguir
+
+Usar o mesmo formato de `firebase/hosting/src/_data/docs/procedimentos.json`:
+- Secoes com `id`, `title`, `intro`
+- Componentes: `features`, `infoCard`, `subsections`, `statusCards`, `table`, `faq`
+- Trilingual: `pt`, `en`, `es` no mesmo JSON
+
+### Registro no Hub
+
+```json
+// Adicionar em firebase/hosting/src/_data/docs.json > categories
+{
+  "title": "Gestao Financeira",
+  "description": "Controle completo de despesas, recebimentos, contas bancarias e relatorios financeiros",
+  "href": "gestao-financeira.html",
+  "linkText": "Ver documentacao ->",
+  "badge": "Novo",
+  "icon": "<svg>...</svg>"
+}
+```
+
+---
+
+## Documentacao: Checklist
+
+### Atualizar Existentes
+
+| Arquivo | Alteracao |
+|---------|----------|
+| `docs/FINANCEIRO.md` | Adicionar nota no topo: "Para o novo modulo financeiro completo (contas a pagar/receber, extrato, parcelas, relatorios), ver `docs/FINANCIAL_MODULE.md`" |
+| `CLAUDE.md` | Adicionar na secao "Documentacao Adicional": `docs/FINANCIAL_MODULE.md - Modulo financeiro completo (contas, extrato, parcelas, relatorios)` |
+
+### Criar Durante Implementacao
+
+| Arquivo | Quando | Conteudo |
+|---------|--------|----------|
+| Endpoints inline no FINANCIAL_MODULE.md | Fase 1+ | Referencia de API (ja documentada acima) |
+| `api-endpoints.md` (bot) | Fase 4 | Endpoints financeiros para o bot |
+
+### Gerar Apos Build
+
+```bash
+cd firebase/hosting && npm run build  # Gerar site apos alterar docs publicos
+```
 
 ---
 
@@ -1994,9 +2944,17 @@ O dashboard existente (`FinancialDashboardSimple`) sera expandido com:
 - `lib/models/permission.dart` - novas permissions
 - `lib/l10n/app_pt.arb`, `app_en.arb`, `app_es.arb` - i18n
 - `lib/routes.dart` - novas rotas
-- `lib/screens/menu_navigation/navigation_controller.dart` - tab Financeiro aponta para extrato
+- `lib/screens/menu_navigation/navigation_controller.dart` - tab Financeiro condicional (flag on = extrato, flag off = dashboard OS)
+- `lib/models/company.dart` - adicionar `useFinancialManagement` bool
+- `lib/services/segment_config_service.dart` - adicionar getter do flag
+- `lib/providers/segment_config_provider.dart` - adicionar flag ao provider
+- `lib/screens/auth_wrapper.dart` - resolver flag com default false
+- `lib/screens/menu_navigation/company_form_screen.dart` - toggle na secao Features
 
 **Requisitos criticos:**
+- Feature flag `useFinancialManagement` no Company model (default: false)
+- Tab Financeiro condicional: dashboard OS (flag off) ou extrato (flag on)
+- Bootstrap de categorias na primeira ativacao do flag
 - Todas as operacoes de pagamento usam `WriteBatch`
 - Soft delete implementado desde o inicio
 - Status do payment (`completed`/`reversed`) presente desde o inicio
@@ -2007,45 +2965,78 @@ O dashboard existente (`FinancialDashboardSimple`) sera expandido com:
 
 **Resultado:** Usuario registra despesas (simples e parceladas), paga com 2 toques, e ve no extrato.
 
+**API Cloud Functions:**
+- `firebase/functions/src/routes/v1/financial.routes.ts` (criar) -- CRUD entries + payments + summary
+- `firebase/functions/src/services/financial.service.ts` (criar) -- logica de negocio
+- `firebase/functions/src/models/types.ts` (modificar) -- tipos FinancialEntry, FinancialPayment
+- `firebase/functions/src/utils/validation.utils.ts` (modificar) -- schemas Zod
+- `firebase/functions/src/index.ts` (modificar) -- registrar rotas v1 e app
+- Endpoints: GET/POST entries, GET payments, POST pay, GET summary, GET overdue
+
+**Documentacao:**
+- `docs/FINANCEIRO.md` -- adicionar nota apontando para FINANCIAL_MODULE.md
+- `CLAUDE.md` -- adicionar referencia ao modulo na secao "Documentacao Adicional"
+- `firebase/hosting/src/_data/docs/gestao-financeira.json` (criar) -- secoes: Visao geral, Extrato, Despesas, Permissoes
+- `firebase/hosting/src/docs/gestao-financeira.njk` (criar) -- pt/en/es templates
+- `firebase/hosting/src/_data/docs.json` (modificar) -- registrar no hub com badge "Novo"
+- `firebase/firestore.indexes.json` (modificar) -- adicionar indices compostos financeiros
+- `lib/services/bootstrap_service.dart` (modificar) -- adicionar `bootstrapFinancialCategories()`
+- Bootstrap seed data (criar) -- categorias iniciais por segmento (expense + income, i18n)
+
 ### Fase 2 - Contas Bancarias + Saldo + Transferencias
 
 **Escopo:** Gestao de contas, transferencias e reconciliacao.
 
-**Arquivos a criar:**
+**Arquivos a criar (App):**
 - `lib/screens/financial/financial_account_list_screen.dart` -- lista com saldo por conta
 - `lib/screens/financial/financial_account_form_screen.dart` -- form criar/editar conta
 - `lib/screens/financial/widgets/transfer_sheet.dart` -- half-sheet de transferencia
 
-**Arquivos a modificar:**
+**Arquivos a modificar (App):**
 - `lib/screens/financial/financial_statement_screen.dart` - header com saldo total, icone de contas na nav bar
 - `lib/mobx/financial_payment_store.dart` - logica de transferencia atomica (WriteBatch)
-- `lib/mobx/financial_account_store.dart` - reconciliacao de saldo
+- `lib/mobx/financial_account_store.dart` - reconciliacao de saldo + snapshots mensais (geracao manual)
 - `lib/screens/financial/financial_entry_form_screen.dart` - account picker pre-selecionado
+- `lib/screens/financial/financial_account_list_screen.dart` - botao "Fechar mes" para gerar snapshot manual
 
-**Resultado:** Controle de saldo, transferencias atomicas via half-sheet, reconciliacao.
+**API Cloud Functions:**
+- `financial.routes.ts` (modificar) -- adicionar CRUD accounts + POST transfers
+- `financial.service.ts` (modificar) -- logica de contas, transferencia atomica, reconciliacao, snapshots mensais
+
+**Documentacao:**
+- `gestao-financeira.json` (atualizar) -- adicionar secoes: Contas bancarias, Transferencias
+
+**Resultado:** Controle de saldo, transferencias atomicas via half-sheet, reconciliacao, snapshots mensais manuais.
 
 ### Fase 3 - Recebiveis + Sync Bidirecional com OS + Estornos
 
 **Escopo:** Contas a receber + integracao com OS + estornos.
 
-**Arquivos a modificar:**
-- `lib/mobx/order_store.dart` - `_syncFinancialEntry()` com `syncSource`
+**Arquivos a modificar (App):**
+- `lib/mobx/order_store.dart` - `_syncFinancialEntry()` com `syncSource` (guard: so executa se `useFinancialManagement == true`)
 - `lib/mobx/financial_entry_store.dart` - `_syncOrderPayment()` com `syncSource`
 - `lib/mobx/financial_payment_store.dart` - `reversePayment()` + `recalculatePaidAmount()`
 - `lib/screens/financial/financial_statement_screen.dart` - filtros via ActionSheet, badge de vencidas, link OS clicavel, visualizacao de estornos
 - `lib/screens/financial/financial_entry_form_screen.dart` - modo receivable (customer picker), comprovantes
 - `lib/screens/financial/widgets/payment_timeline_item.dart` - swipe-right para pagar, estilo estornado
 
+**API Cloud Functions:**
+- `financial.routes.ts` (modificar) -- adicionar POST reverse, integracao sync OS
+- `financial.service.ts` (modificar) -- logica de estorno, sync bidirecional
+
+**Documentacao:**
+- `gestao-financeira.json` (atualizar) -- adicionar secoes: Recebimentos, Parcelas
+
 **Resultado:** Visao completa de recebiveis, pagamento por qualquer tela (OS ou financeiro), estornos com auditoria, OS como link no extrato.
 
-### Fase 4 - Recorrencia + Relatorios Avancados
+### Fase 4 - Recorrencia + Relatorios Avancados + Bot
 
-**Escopo:** Automatizacao, projecoes e insights visuais.
+**Escopo:** Automatizacao, projecoes, insights visuais e integracao com bot WhatsApp.
 
-**Arquivos a criar:**
+**Arquivos a criar (App):**
 - `lib/screens/financial/financial_reports_screen.dart` -- tela de relatorios (DRE, fluxo projetado, graficos)
 
-**Arquivos a modificar:**
+**Arquivos a modificar (App):**
 - `lib/mobx/financial_entry_store.dart` - geracao de recorrencia com `lastGeneratedDate`
 - `lib/screens/financial/financial_entry_form_screen.dart` - toggle "Repetir todo mes?" simplificado
 - `lib/screens/financial/financial_statement_screen.dart` - botao "Relatorios" na nav bar
@@ -2057,7 +3048,20 @@ O dashboard existente (`FinancialDashboardSimple`) sera expandido com:
 - Grafico pizza despesas por categoria
 - Dashboard antigo (`FinancialDashboardSimple`) integrado
 
-**Resultado:** Lancamentos recorrentes com toggle simples, projecao financeira, DRE simplificado, tela de relatorios dedicada.
+**API Cloud Functions:**
+- `firebase/functions/src/routes/bot/financial.routes.ts` (criar) -- rotas bot
+- `financial.service.ts` (modificar) -- resumo formatado para bot, snapshots mensais
+- `index.ts` (modificar) -- registrar rotas bot
+
+**Bot WhatsApp:**
+- `backend/bot/workspace/skills/praticos/references/api-endpoints.md` (modificar) -- adicionar endpoints financeiros
+- `backend/bot/workspace/cron/jobs.json` (modificar) -- configurar automacoes (resumo diario, alerta vencidas, resumo semanal)
+
+**Documentacao:**
+- `gestao-financeira.json` (atualizar) -- adicionar secoes: Relatorios, FAQ
+- Build site: `cd firebase/hosting && npm run build`
+
+**Resultado:** Lancamentos recorrentes com toggle simples, projecao financeira, DRE simplificado, tela de relatorios dedicada, bot com comandos financeiros e automacoes.
 
 ---
 
@@ -2085,6 +3089,63 @@ Se `PaymentMethod` ja existe no modelo de OS, reutilizar o mesmo enum (mover par
 ## Changelog
 
 ### Marco 2026
+
+#### Feature flag `useFinancialManagement` (30/03/2026)
+
+**Modulo financeiro e opcional**, controlado por flag no Company model (padrao: false):
+- Segue mesmo padrao de `useContracts`, `useDeviceManagement` (SegmentConfigProvider)
+- Tab Financeiro condicional: dashboard OS (flag off) ou extrato (flag on)
+- Sync bidirecional OS<->Financeiro so ativa com flag on
+- API retorna 403 MODULE_DISABLED se flag off
+- Bootstrap de categorias executa na primeira ativacao
+- Zero impacto para quem nao ativa -- app continua como hoje
+- Tabela completa de comportamento por flag (on vs off)
+- Exemplos de codigo para navigation, order store, API guard e company form
+
+#### Categorias dinamicas via AccumulatedValue + Bootstrap (30/03/2026)
+
+**Mudanca:** Categorias financeiras deixam de ser hardcoded (`FinancialCategory` com listas fixas) e passam a ser 100% dinamicas via `AccumulatedValue` existente.
+
+- Removida classe `FinancialCategory` com listas estaticas
+- Categorias armazenadas em `accumulatedFields/expenseCategory/` e `incomeCategory/`
+- Bootstrap cria categorias iniciais sugeridas (localizadas por idioma e segmento)
+- Usuario pode criar/excluir categorias livremente via autocomplete
+- Ranking por uso real (`usageCount`) -- mais usadas aparecem primeiro
+- Picker usa `AccumulatedValueListScreen` existente (MVP) com evolucao para grid de icones (Fase 2+)
+- API aceita category como string livre (nao enum)
+- Adicionado `bootstrapFinancialCategories()` ao `BootstrapService`
+
+#### Revisao e otimizacao do plano (30/03/2026)
+
+**Bugs corrigidos:**
+- Removido `overdue` do enum `FinancialEntryStatus` -- vencida e estado computado (`isOverdue` getter), nao status persistido. Evita necessidade de scheduled job.
+- Corrigido ternario redundante em `recalculatePaidAmount` (ambos branches retornavam 'pending')
+- Adicionado filtro `deletedAt != null` em `calculateRealBalance` (ignorava soft-deleted)
+- Adicionado `syncSource` nos modelos `FinancialEntry` e `FinancialPayment` (estava na secao de sync mas ausente dos models)
+- Corrigido API pagination de offset-based para cursor-based (Firestore nao suporta offset eficiente)
+- Corrigido bot commands de `?period=today` para `?startDate/endDate` (consistente com Zod schema)
+
+**Lacunas preenchidas:**
+- Adicionado Zod schema para `POST /v1/financial/entries` (criacao de entry)
+- Adicionado Zod schema para `POST /v1/financial/accounts` (criacao de conta)
+- Adicionada secao "Comportamento Offline" (WriteBatch offline, conflitos, saldo temporario)
+- Adicionada secao "Conta Bancaria Desativada" (o que acontece com entries pendentes)
+- Adicionada tabela "Validacao de Valores" (min/max amount, campos obrigatorios)
+- Adicionado indice/sumario no topo do documento para navegacao
+
+#### Especificacao de API, Bot, Site e Documentacao (30/03/2026)
+
+**Novas secoes adicionadas:**
+- API Cloud Functions: endpoints REST completos (v1, app, bot) com schemas Zod e exemplos JSON
+- Bot WhatsApp: comandos naturais, automacoes CRON, integracao com cobranca (Fase 4)
+- Site Eleventy: artigo separado `gestao-financeira` com 10 secoes (trilingual)
+- Documentacao: checklist de docs a atualizar/criar
+- Fases de Implementacao: expandidas com API, bot, site e docs em cada fase
+
+**Decisoes:**
+- Site: artigo separado (nao atualizar financeiro.json existente)
+- Bot: comandos financeiros apenas na Fase 4 (apos relatorios)
+- API: cresce junto com o app (Fase 1 = entries/payments, Fase 2 = accounts, Fase 3 = sync, Fase 4 = bot)
 
 #### Analise tecnica Firestore e decisoes de infraestrutura (30/03/2026)
 
@@ -2136,6 +3197,29 @@ Novos elementos de UX:
 - Tabela de terminologia (termos tecnicos vs linguagem do usuario)
 - Consideracoes mobile-first (thumb zone, densidade, performance)
 - Plano de transicao do dashboard existente para extrato como tela principal
+
+#### 10 otimizacoes de robustez e completude (30/03/2026)
+
+**Novos campos nos modelos:**
+- `discountAmount` em `FinancialEntry` e `discount` em `FinancialPayment` -- suporte a desconto no pagamento parcial, evita saldo residual eterno
+- `competenceDate` em `FinancialEntry` -- permite DRE por regime de competencia (aluguel de marco pago em abril aparece no DRE de marco)
+- `transferDirection` (`out`/`in`) em `FinancialPayment` -- direcao explicita em transferencias, simplifica queries e reconciliacao
+- `orderId` em entries payable documentado para uso futuro (custo direto da OS)
+
+**Correcoes de robustez:**
+- `recalculatePaidAmount` reescrito usando `Transaction` do Firestore (evita race condition em estornos simultaneos multi-device)
+- Estorno de transferencia com logica completa: reverte ambos os payments do `transferGroupId` atomicamente
+- Recorrencia com loop de catch-up: gera entries atrasadas quando app e reaberto apos periodo offline
+- Documentada limitacao: geracao de recorrencia e client-side, nao ocorre sem abrir o app
+
+**Ajustes de limites e validacao:**
+- Limite de parcelas aumentado de 48 para 60 (5 anos -- cobre financiamento de equipamentos)
+- Validacao de saldo negativo por tipo de conta: `cash`/`digitalWallet` alertam antes de ficar negativo, `bank`/`creditCard` permitem
+- Snapshots mensais antecipados para Fase 2 (geracao manual via botao "Fechar mes")
+
+**UX:**
+- Toggle "Conceder desconto" no half-sheet de pagamento (colapsado por padrao)
+- `remainingBalance` getter atualizado para considerar `discountAmount`
 
 #### Revisao tecnica e otimizacao (28/03/2026)
 
