@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -281,8 +282,10 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
                 CupertinoButton(
                   padding:
@@ -293,7 +296,6 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
                   },
                   child: Text(context.l10n.registerExpense),
                 ),
-                const SizedBox(width: 8),
                 CupertinoButton(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -321,7 +323,9 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
 
     return CupertinoPageScaffold(
       backgroundColor: bgColor,
-      child: Stack(
+      child: Material(
+        type: MaterialType.transparency,
+        child: Stack(
         children: [
           Observer(
             builder: (_) {
@@ -533,6 +537,7 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
             },
           ),
         ],
+        ),
       ),
     );
   }
