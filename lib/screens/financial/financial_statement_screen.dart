@@ -358,6 +358,19 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         GestureDetector(
+                          onTap: () => Navigator.pushNamed(
+                              context, '/financial_reports'),
+                          behavior: HitTestBehavior.opaque,
+                          child: const Padding(
+                            padding: EdgeInsets.all(8),
+                            child: Icon(
+                              CupertinoIcons.chart_bar,
+                              size: 22,
+                              color: CupertinoColors.activeBlue,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
                           onTap: _showFilterSheet,
                           behavior: HitTestBehavior.opaque,
                           child: Padding(

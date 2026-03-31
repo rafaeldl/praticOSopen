@@ -28,6 +28,7 @@ import 'package:praticos/screens/financial/financial_statement_screen.dart';
 import 'package:praticos/screens/financial/financial_entry_form_screen.dart';
 import 'package:praticos/screens/financial/financial_account_list_screen.dart';
 import 'package:praticos/screens/financial/financial_account_form_screen.dart';
+import 'package:praticos/screens/financial/financial_reports_screen.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   // '/onboarding': removed - onboarding now handled by AuthWrapper with authStore
@@ -60,4 +61,5 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/financial_entry_form': (context) => const FinancialEntryFormScreen(),
   '/financial_account_list': (context) => const FinancialAccountListScreen(),
   '/financial_account_form': (context) => const FinancialAccountFormScreen(),
+  '/financial_reports': (context) => const FinancialReportsScreen(),
 };

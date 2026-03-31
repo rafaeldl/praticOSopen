@@ -1568,5 +1568,19 @@
   "cannotReverseReversal": "Não é possível estornar um estorno",
   "confirmReversal": "Confirmar estorno",
   "confirmReversalMessage": "Tem certeza que deseja estornar este pagamento? Esta ação não pode ser desfeita.",
-  "reversed": "Estornado"
+  "reversed": "Estornado",
+  "reports": "Relatórios",
+  "monthlySummary": "Resumo do mês",
+  "projection": "Projeção",
+  "incomeVsExpenses": "Entradas vs Saídas",
+  "expensesByCategory": "Despesas por categoria",
+  "revenue": "Receitas",
+  "expenses": "Despesas",
+  "result": "Resultado",
+  "margin": "Margem",
+  "projectedBalance": "Saldo projetado",
+  "toReceive": "A receber",
+  "toPay": "A pagar",
+  "others": "Outros",
+  "noDataForPeriod": "Sem dados para o período"
 }

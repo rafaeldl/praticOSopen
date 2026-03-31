@@ -234,10 +234,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get partiallyPaid => 'Parcialmente Pago';
 
   @override
-  String get toReceive => 'A Receber';
+  String get toReceive => 'A receber';
 
   @override
-  String get toPay => 'A Pagar';
+  String get toPay => 'A pagar';
 
   @override
   String get received => 'Recebido';
@@ -1215,7 +1215,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get analytics => 'Análises';
 
   @override
-  String get revenue => 'Receita';
+  String get revenue => 'Receitas';
 
   @override
   String get expenses => 'Despesas';
@@ -3574,4 +3574,28 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get confirmReversalMessage =>
       'Tem certeza que deseja estornar este pagamento? Esta ação não pode ser desfeita.';
+
+  @override
+  String get monthlySummary => 'Resumo do mês';
+
+  @override
+  String get projection => 'Projeção';
+
+  @override
+  String get incomeVsExpenses => 'Entradas vs Saídas';
+
+  @override
+  String get expensesByCategory => 'Despesas por categoria';
+
+  @override
+  String get result => 'Resultado';
+
+  @override
+  String get margin => 'Margem';
+
+  @override
+  String get projectedBalance => 'Saldo projetado';
+
+  @override
+  String get noDataForPeriod => 'Sem dados para o período';
 }

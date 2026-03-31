@@ -234,10 +234,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get partiallyPaid => 'Partially Paid';
 
   @override
-  String get toReceive => 'To Receive';
+  String get toReceive => 'To receive';
 
   @override
-  String get toPay => 'Payable';
+  String get toPay => 'To pay';
 
   @override
   String get received => 'Received';
@@ -3563,4 +3563,28 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get confirmReversalMessage =>
       'Are you sure you want to reverse this payment? This action cannot be undone.';
+
+  @override
+  String get monthlySummary => 'Monthly summary';
+
+  @override
+  String get projection => 'Projection';
+
+  @override
+  String get incomeVsExpenses => 'Income vs Expenses';
+
+  @override
+  String get expensesByCategory => 'Expenses by category';
+
+  @override
+  String get result => 'Result';
+
+  @override
+  String get margin => 'Margin';
+
+  @override
+  String get projectedBalance => 'Projected balance';
+
+  @override
+  String get noDataForPeriod => 'No data for period';
 }

@@ -1523,5 +1523,19 @@
   "cannotReverseReversal": "No se puede revertir una reversión",
   "confirmReversal": "Confirmar reversión",
   "confirmReversalMessage": "¿Está seguro que desea revertir este pago? Esta acción no se puede deshacer.",
-  "reversed": "Revertido"
+  "reversed": "Revertido",
+  "reports": "Informes",
+  "monthlySummary": "Resumen del mes",
+  "projection": "Proyección",
+  "incomeVsExpenses": "Ingresos vs Gastos",
+  "expensesByCategory": "Gastos por categoría",
+  "revenue": "Ingresos",
+  "expenses": "Gastos",
+  "result": "Resultado",
+  "margin": "Margen",
+  "projectedBalance": "Saldo proyectado",
+  "toReceive": "Por cobrar",
+  "toPay": "Por pagar",
+  "others": "Otros",
+  "noDataForPeriod": "Sin datos para el período"
 }

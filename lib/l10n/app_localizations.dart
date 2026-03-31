@@ -553,13 +553,13 @@ abstract class AppLocalizations {
   /// No description provided for @toReceive.
   ///
   /// In pt, this message translates to:
-  /// **'A Receber'**
+  /// **'A receber'**
   String get toReceive;
 
   /// No description provided for @toPay.
   ///
   /// In pt, this message translates to:
-  /// **'A Pagar'**
+  /// **'A pagar'**
   String get toPay;
 
   /// No description provided for @received.
@@ -2491,7 +2491,7 @@ abstract class AppLocalizations {
   /// No description provided for @revenue.
   ///
   /// In pt, this message translates to:
-  /// **'Receita'**
+  /// **'Receitas'**
   String get revenue;
 
   /// No description provided for @expenses.
@@ -6765,6 +6765,54 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Tem certeza que deseja estornar este pagamento? Esta ação não pode ser desfeita.'**
   String get confirmReversalMessage;
+
+  /// No description provided for @monthlySummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resumo do mês'**
+  String get monthlySummary;
+
+  /// No description provided for @projection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Projeção'**
+  String get projection;
+
+  /// No description provided for @incomeVsExpenses.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entradas vs Saídas'**
+  String get incomeVsExpenses;
+
+  /// No description provided for @expensesByCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Despesas por categoria'**
+  String get expensesByCategory;
+
+  /// No description provided for @result.
+  ///
+  /// In pt, this message translates to:
+  /// **'Resultado'**
+  String get result;
+
+  /// No description provided for @margin.
+  ///
+  /// In pt, this message translates to:
+  /// **'Margem'**
+  String get margin;
+
+  /// No description provided for @projectedBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo projetado'**
+  String get projectedBalance;
+
+  /// No description provided for @noDataForPeriod.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem dados para o período'**
+  String get noDataForPeriod;
 }
 
 class _AppLocalizationsDelegate

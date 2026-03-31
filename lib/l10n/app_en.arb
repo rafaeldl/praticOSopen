@@ -1523,5 +1523,19 @@
   "cannotReverseReversal": "Cannot reverse a reversal",
   "confirmReversal": "Confirm reversal",
   "confirmReversalMessage": "Are you sure you want to reverse this payment? This action cannot be undone.",
-  "reversed": "Reversed"
+  "reversed": "Reversed",
+  "reports": "Reports",
+  "monthlySummary": "Monthly summary",
+  "projection": "Projection",
+  "incomeVsExpenses": "Income vs Expenses",
+  "expensesByCategory": "Expenses by category",
+  "revenue": "Revenue",
+  "expenses": "Expenses",
+  "result": "Result",
+  "margin": "Margin",
+  "projectedBalance": "Projected balance",
+  "toReceive": "To receive",
+  "toPay": "To pay",
+  "others": "Others",
+  "noDataForPeriod": "No data for period"
 }
