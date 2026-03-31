@@ -1406,5 +1406,70 @@
   "pdfGeneral": "General",
   "pdfTrackOnline": "Track online",
   "pdfTrackOnlineDescription": "Scan the QR Code to track this service order",
-  "pdfEquipment": "Equipment"
+  "pdfEquipment": "Equipment",
+
+  "financialManagement": "Financial management",
+  "financialManagementDescription": "Complete control of expenses, income, bank accounts and reports",
+  "financialStatement": "Financial",
+  "newExpense": "New expense",
+  "newIncome": "New income",
+  "expense": "Expense",
+  "income": "Income",
+  "accounts": "Accounts",
+  "supplier": "Supplier",
+  "payNow": "Pay",
+  "confirmPayment": "Confirm payment",
+  "editDetails": "Edit details",
+  "addDetails": "Add details",
+  "installmentCount": "Number of installments",
+  "repeatMonthly": "Repeat every month?",
+  "customize": "Customize",
+  "todaySummary": "Today",
+  "entries": "Income",
+  "exits": "Expenses",
+  "totalBalance": "Total balance",
+  "hideValues": "Hide values",
+  "showValues": "Show values",
+  "overdue": "Overdue",
+  "cancelled": "Cancelled",
+  "reversal": "Reversal",
+  "reversed": "Reversed",
+  "transfer": "Transfer",
+  "setupFinancial": "Control your finances",
+  "setupFinancialDescription": "Track expenses and income to know exactly how much comes in and goes out of your business.",
+  "howDoYouReceivePayments": "How do you receive payments?",
+  "cashBox": "Cash",
+  "bankAccount": "Bank account",
+  "digitalWallet": "Digital wallet",
+  "howMuchToday": "How much is in this account today?",
+  "registerFirst": "Register your first expense or income.",
+  "noMovements": "No movements in {month}.",
+  "@noMovements": {
+    "placeholders": {
+      "month": {"type": "String"}
+    }
+  },
+  "registerExpense": "Register expense",
+  "registerIncome": "Register income",
+  "verifyBalance": "Verify balance",
+  "correctBalance": "Correct balance",
+  "paidOf": "Paid: {paid} of {total}",
+  "@paidOf": {
+    "placeholders": {
+      "paid": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "invalidAmount": "Invalid amount",
+  "accountRequired": "Select an account",
+  "parcelsOf": "{paid}/{total} paid",
+  "@parcelsOf": {
+    "placeholders": {
+      "paid": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "all": "All",
+  "transfers": "Transfers",
+  "newCategory": "New category"
 }

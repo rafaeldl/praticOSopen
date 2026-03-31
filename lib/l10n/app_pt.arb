@@ -1451,5 +1451,70 @@
   "pdfGeneral": "Geral",
   "pdfTrackOnline": "Acompanhe online",
   "pdfTrackOnlineDescription": "Escaneie o QR Code para acompanhar esta ordem de servico",
-  "pdfEquipment": "Equipamento"
+  "pdfEquipment": "Equipamento",
+
+  "financialManagement": "Gestão financeira",
+  "financialManagementDescription": "Controle completo de despesas, receitas, contas bancárias e relatórios",
+  "financialStatement": "Financeiro",
+  "newExpense": "Nova despesa",
+  "newIncome": "Novo recebimento",
+  "expense": "Despesa",
+  "income": "Recebimento",
+  "accounts": "Contas",
+  "supplier": "Fornecedor",
+  "payNow": "Pagar",
+  "confirmPayment": "Confirmar pagamento",
+  "editDetails": "Editar detalhes",
+  "addDetails": "Adicionar detalhes",
+  "installmentCount": "Número de parcelas",
+  "repeatMonthly": "Repetir todo mês?",
+  "customize": "Personalizar",
+  "todaySummary": "Hoje",
+  "entries": "Entradas",
+  "exits": "Saídas",
+  "totalBalance": "Saldo total",
+  "hideValues": "Ocultar valores",
+  "showValues": "Mostrar valores",
+  "overdue": "Vencida",
+  "cancelled": "Cancelado",
+  "reversal": "Estorno",
+  "reversed": "Estornado",
+  "transfer": "Transferência",
+  "setupFinancial": "Controle suas finanças",
+  "setupFinancialDescription": "Registre despesas e recebimentos para saber exatamente quanto entra e quanto sai do seu negócio.",
+  "howDoYouReceivePayments": "Como você recebe seus pagamentos?",
+  "cashBox": "Dinheiro/Caixa",
+  "bankAccount": "Conta bancária",
+  "digitalWallet": "Carteira digital",
+  "howMuchToday": "Quanto tem nessa conta hoje?",
+  "registerFirst": "Registre sua primeira despesa ou recebimento.",
+  "noMovements": "Nenhuma movimentação em {month}.",
+  "@noMovements": {
+    "placeholders": {
+      "month": {"type": "String"}
+    }
+  },
+  "registerExpense": "Registrar despesa",
+  "registerIncome": "Registrar recebimento",
+  "verifyBalance": "Verificar saldo",
+  "correctBalance": "Corrigir saldo",
+  "paidOf": "Pago: {paid} de {total}",
+  "@paidOf": {
+    "placeholders": {
+      "paid": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "invalidAmount": "Valor inválido",
+  "accountRequired": "Selecione uma conta",
+  "parcelsOf": "{paid}/{total} pagas",
+  "@parcelsOf": {
+    "placeholders": {
+      "paid": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "all": "Tudo",
+  "transfers": "Transferências",
+  "newCategory": "Nova categoria"
 }

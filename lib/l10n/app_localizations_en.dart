@@ -3317,4 +3317,150 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pdfEquipment => 'Equipment';
+
+  @override
+  String get financialManagement => 'Financial management';
+
+  @override
+  String get financialManagementDescription =>
+      'Complete control of expenses, income, bank accounts and reports';
+
+  @override
+  String get financialStatement => 'Financial';
+
+  @override
+  String get newExpense => 'New expense';
+
+  @override
+  String get newIncome => 'New income';
+
+  @override
+  String get expense => 'Expense';
+
+  @override
+  String get income => 'Income';
+
+  @override
+  String get accounts => 'Accounts';
+
+  @override
+  String get supplier => 'Supplier';
+
+  @override
+  String get payNow => 'Pay';
+
+  @override
+  String get confirmPayment => 'Confirm payment';
+
+  @override
+  String get editDetails => 'Edit details';
+
+  @override
+  String get addDetails => 'Add details';
+
+  @override
+  String get installmentCount => 'Number of installments';
+
+  @override
+  String get repeatMonthly => 'Repeat every month?';
+
+  @override
+  String get customize => 'Customize';
+
+  @override
+  String get todaySummary => 'Today';
+
+  @override
+  String get entries => 'Income';
+
+  @override
+  String get exits => 'Expenses';
+
+  @override
+  String get totalBalance => 'Total balance';
+
+  @override
+  String get hideValues => 'Hide values';
+
+  @override
+  String get showValues => 'Show values';
+
+  @override
+  String get overdue => 'Overdue';
+
+  @override
+  String get cancelled => 'Cancelled';
+
+  @override
+  String get reversal => 'Reversal';
+
+  @override
+  String get reversed => 'Reversed';
+
+  @override
+  String get transfer => 'Transfer';
+
+  @override
+  String get setupFinancial => 'Control your finances';
+
+  @override
+  String get setupFinancialDescription =>
+      'Track expenses and income to know exactly how much comes in and goes out of your business.';
+
+  @override
+  String get howDoYouReceivePayments => 'How do you receive payments?';
+
+  @override
+  String get cashBox => 'Cash';
+
+  @override
+  String get bankAccount => 'Bank account';
+
+  @override
+  String get digitalWallet => 'Digital wallet';
+
+  @override
+  String get howMuchToday => 'How much is in this account today?';
+
+  @override
+  String get registerFirst => 'Register your first expense or income.';
+
+  @override
+  String noMovements(String month) {
+    return 'No movements in $month.';
+  }
+
+  @override
+  String get registerExpense => 'Register expense';
+
+  @override
+  String get registerIncome => 'Register income';
+
+  @override
+  String get verifyBalance => 'Verify balance';
+
+  @override
+  String get correctBalance => 'Correct balance';
+
+  @override
+  String paidOf(String paid, String total) {
+    return 'Paid: $paid of $total';
+  }
+
+  @override
+  String get invalidAmount => 'Invalid amount';
+
+  @override
+  String get accountRequired => 'Select an account';
+
+  @override
+  String parcelsOf(String paid, String total) {
+    return '$paid/$total paid';
+  }
+
+  @override
+  String get transfers => 'Transfers';
+
+  @override
+  String get newCategory => 'New category';
 }

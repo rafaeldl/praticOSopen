@@ -2941,7 +2941,7 @@ abstract class AppLocalizations {
   /// No description provided for @all.
   ///
   /// In pt, this message translates to:
-  /// **'Todos'**
+  /// **'Tudo'**
   String get all;
 
   /// No description provided for @none.
@@ -6309,6 +6309,282 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Equipamento'**
   String get pdfEquipment;
+
+  /// No description provided for @financialManagement.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gestão financeira'**
+  String get financialManagement;
+
+  /// No description provided for @financialManagementDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Controle completo de despesas, receitas, contas bancárias e relatórios'**
+  String get financialManagementDescription;
+
+  /// No description provided for @financialStatement.
+  ///
+  /// In pt, this message translates to:
+  /// **'Financeiro'**
+  String get financialStatement;
+
+  /// No description provided for @newExpense.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova despesa'**
+  String get newExpense;
+
+  /// No description provided for @newIncome.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo recebimento'**
+  String get newIncome;
+
+  /// No description provided for @expense.
+  ///
+  /// In pt, this message translates to:
+  /// **'Despesa'**
+  String get expense;
+
+  /// No description provided for @income.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recebimento'**
+  String get income;
+
+  /// No description provided for @accounts.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contas'**
+  String get accounts;
+
+  /// No description provided for @supplier.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fornecedor'**
+  String get supplier;
+
+  /// No description provided for @payNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagar'**
+  String get payNow;
+
+  /// No description provided for @confirmPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar pagamento'**
+  String get confirmPayment;
+
+  /// No description provided for @editDetails.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar detalhes'**
+  String get editDetails;
+
+  /// No description provided for @addDetails.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicionar detalhes'**
+  String get addDetails;
+
+  /// No description provided for @installmentCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Número de parcelas'**
+  String get installmentCount;
+
+  /// No description provided for @repeatMonthly.
+  ///
+  /// In pt, this message translates to:
+  /// **'Repetir todo mês?'**
+  String get repeatMonthly;
+
+  /// No description provided for @customize.
+  ///
+  /// In pt, this message translates to:
+  /// **'Personalizar'**
+  String get customize;
+
+  /// No description provided for @todaySummary.
+  ///
+  /// In pt, this message translates to:
+  /// **'Hoje'**
+  String get todaySummary;
+
+  /// No description provided for @entries.
+  ///
+  /// In pt, this message translates to:
+  /// **'Entradas'**
+  String get entries;
+
+  /// No description provided for @exits.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saídas'**
+  String get exits;
+
+  /// No description provided for @totalBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo total'**
+  String get totalBalance;
+
+  /// No description provided for @hideValues.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ocultar valores'**
+  String get hideValues;
+
+  /// No description provided for @showValues.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mostrar valores'**
+  String get showValues;
+
+  /// No description provided for @overdue.
+  ///
+  /// In pt, this message translates to:
+  /// **'Vencida'**
+  String get overdue;
+
+  /// No description provided for @cancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelado'**
+  String get cancelled;
+
+  /// No description provided for @reversal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estorno'**
+  String get reversal;
+
+  /// No description provided for @reversed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estornado'**
+  String get reversed;
+
+  /// No description provided for @transfer.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transferência'**
+  String get transfer;
+
+  /// No description provided for @setupFinancial.
+  ///
+  /// In pt, this message translates to:
+  /// **'Controle suas finanças'**
+  String get setupFinancial;
+
+  /// No description provided for @setupFinancialDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registre despesas e recebimentos para saber exatamente quanto entra e quanto sai do seu negócio.'**
+  String get setupFinancialDescription;
+
+  /// No description provided for @howDoYouReceivePayments.
+  ///
+  /// In pt, this message translates to:
+  /// **'Como você recebe seus pagamentos?'**
+  String get howDoYouReceivePayments;
+
+  /// No description provided for @cashBox.
+  ///
+  /// In pt, this message translates to:
+  /// **'Dinheiro/Caixa'**
+  String get cashBox;
+
+  /// No description provided for @bankAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conta bancária'**
+  String get bankAccount;
+
+  /// No description provided for @digitalWallet.
+  ///
+  /// In pt, this message translates to:
+  /// **'Carteira digital'**
+  String get digitalWallet;
+
+  /// No description provided for @howMuchToday.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quanto tem nessa conta hoje?'**
+  String get howMuchToday;
+
+  /// No description provided for @registerFirst.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registre sua primeira despesa ou recebimento.'**
+  String get registerFirst;
+
+  /// No description provided for @noMovements.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma movimentação em {month}.'**
+  String noMovements(String month);
+
+  /// No description provided for @registerExpense.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar despesa'**
+  String get registerExpense;
+
+  /// No description provided for @registerIncome.
+  ///
+  /// In pt, this message translates to:
+  /// **'Registrar recebimento'**
+  String get registerIncome;
+
+  /// No description provided for @verifyBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Verificar saldo'**
+  String get verifyBalance;
+
+  /// No description provided for @correctBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Corrigir saldo'**
+  String get correctBalance;
+
+  /// No description provided for @paidOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pago: {paid} de {total}'**
+  String paidOf(String paid, String total);
+
+  /// No description provided for @invalidAmount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Valor inválido'**
+  String get invalidAmount;
+
+  /// No description provided for @accountRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione uma conta'**
+  String get accountRequired;
+
+  /// No description provided for @parcelsOf.
+  ///
+  /// In pt, this message translates to:
+  /// **'{paid}/{total} pagas'**
+  String parcelsOf(String paid, String total);
+
+  /// No description provided for @transfers.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transferências'**
+  String get transfers;
+
+  /// No description provided for @newCategory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova categoria'**
+  String get newCategory;
 }
 
 class _AppLocalizationsDelegate

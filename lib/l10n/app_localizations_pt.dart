@@ -1442,7 +1442,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get deleted => 'Excluído';
 
   @override
-  String get all => 'Todos';
+  String get all => 'Tudo';
 
   @override
   String get none => 'Nenhum';
@@ -3328,4 +3328,150 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get pdfEquipment => 'Equipamento';
+
+  @override
+  String get financialManagement => 'Gestão financeira';
+
+  @override
+  String get financialManagementDescription =>
+      'Controle completo de despesas, receitas, contas bancárias e relatórios';
+
+  @override
+  String get financialStatement => 'Financeiro';
+
+  @override
+  String get newExpense => 'Nova despesa';
+
+  @override
+  String get newIncome => 'Novo recebimento';
+
+  @override
+  String get expense => 'Despesa';
+
+  @override
+  String get income => 'Recebimento';
+
+  @override
+  String get accounts => 'Contas';
+
+  @override
+  String get supplier => 'Fornecedor';
+
+  @override
+  String get payNow => 'Pagar';
+
+  @override
+  String get confirmPayment => 'Confirmar pagamento';
+
+  @override
+  String get editDetails => 'Editar detalhes';
+
+  @override
+  String get addDetails => 'Adicionar detalhes';
+
+  @override
+  String get installmentCount => 'Número de parcelas';
+
+  @override
+  String get repeatMonthly => 'Repetir todo mês?';
+
+  @override
+  String get customize => 'Personalizar';
+
+  @override
+  String get todaySummary => 'Hoje';
+
+  @override
+  String get entries => 'Entradas';
+
+  @override
+  String get exits => 'Saídas';
+
+  @override
+  String get totalBalance => 'Saldo total';
+
+  @override
+  String get hideValues => 'Ocultar valores';
+
+  @override
+  String get showValues => 'Mostrar valores';
+
+  @override
+  String get overdue => 'Vencida';
+
+  @override
+  String get cancelled => 'Cancelado';
+
+  @override
+  String get reversal => 'Estorno';
+
+  @override
+  String get reversed => 'Estornado';
+
+  @override
+  String get transfer => 'Transferência';
+
+  @override
+  String get setupFinancial => 'Controle suas finanças';
+
+  @override
+  String get setupFinancialDescription =>
+      'Registre despesas e recebimentos para saber exatamente quanto entra e quanto sai do seu negócio.';
+
+  @override
+  String get howDoYouReceivePayments => 'Como você recebe seus pagamentos?';
+
+  @override
+  String get cashBox => 'Dinheiro/Caixa';
+
+  @override
+  String get bankAccount => 'Conta bancária';
+
+  @override
+  String get digitalWallet => 'Carteira digital';
+
+  @override
+  String get howMuchToday => 'Quanto tem nessa conta hoje?';
+
+  @override
+  String get registerFirst => 'Registre sua primeira despesa ou recebimento.';
+
+  @override
+  String noMovements(String month) {
+    return 'Nenhuma movimentação em $month.';
+  }
+
+  @override
+  String get registerExpense => 'Registrar despesa';
+
+  @override
+  String get registerIncome => 'Registrar recebimento';
+
+  @override
+  String get verifyBalance => 'Verificar saldo';
+
+  @override
+  String get correctBalance => 'Corrigir saldo';
+
+  @override
+  String paidOf(String paid, String total) {
+    return 'Pago: $paid de $total';
+  }
+
+  @override
+  String get invalidAmount => 'Valor inválido';
+
+  @override
+  String get accountRequired => 'Selecione uma conta';
+
+  @override
+  String parcelsOf(String paid, String total) {
+    return '$paid/$total pagas';
+  }
+
+  @override
+  String get transfers => 'Transferências';
+
+  @override
+  String get newCategory => 'Nova categoria';
 }

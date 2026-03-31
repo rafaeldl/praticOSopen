@@ -11,6 +11,7 @@ import 'package:praticos/repositories/v2/product_repository_v2.dart';
 import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/repositories/v2/customer_repository_v2.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
+import 'package:praticos/repositories/accumulated_value_repository.dart';
 import 'package:praticos/services/forms_service.dart';
 
 /// Resultado da execução do bootstrap
@@ -611,6 +612,42 @@ class BootstrapService {
         return 'done'; // Concluído - finalizado
       default:
         return 'quote';
+    }
+  }
+
+  /// Creates initial financial categories (expense and income) for a company.
+  ///
+  /// Uses AccumulatedValueRepository to seed default categories so the user
+  /// has a useful starting point when first accessing the financial module.
+  Future<void> bootstrapFinancialCategories(String companyId) async {
+    final repo = AccumulatedValueRepository();
+
+    // Expense categories
+    final expenseCategories = [
+      'Aluguel',
+      'Água, luz, internet',
+      'Salários',
+      'Material/Suprimentos',
+      'Manutenção',
+      'Marketing',
+      'Impostos/Taxas',
+      'Seguros',
+      'Transporte',
+      'Outros',
+    ];
+    for (final cat in expenseCategories) {
+      await repo.use(companyId, 'expenseCategory', cat);
+    }
+
+    // Income categories
+    final incomeCategories = [
+      'Serviços',
+      'Venda de produtos',
+      'Contratos',
+      'Outras receitas',
+    ];
+    for (final cat in incomeCategories) {
+      await repo.use(companyId, 'incomeCategory', cat);
     }
   }
 
