@@ -442,6 +442,29 @@ service cloud.firestore {
       }
 
       // ──────────────────────────────────────────────────────────────────────
+      // MÓDULO FINANCEIRO
+      // Acesso restrito a admin e manager (canViewFinancial)
+      // Soft delete apenas (allow delete: if false)
+      // ──────────────────────────────────────────────────────────────────────
+      match /financialAccounts/{accountId} {
+        allow read: if canViewFinancial(companyId);
+        allow create, update: if canViewFinancial(companyId);
+        allow delete: if false; // Soft delete only
+      }
+
+      match /financialEntries/{entryId} {
+        allow read: if canViewFinancial(companyId);
+        allow create, update: if canViewFinancial(companyId);
+        allow delete: if false; // Soft delete only
+      }
+
+      match /financialPayments/{paymentId} {
+        allow read: if canViewFinancial(companyId);
+        allow create, update: if canViewFinancial(companyId);
+        allow delete: if false; // Soft delete only
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
       // NOTIFICAÇÕES IN-APP
       // Usuário pode ler/atualizar apenas suas próprias notificações
       // Criação apenas via Cloud Functions (Admin SDK)

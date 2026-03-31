@@ -3465,7 +3465,7 @@ cd firebase/hosting && npm run build  # Gera site sem erros
 
 ---
 
-#### Sprint Infra-1 - Firestore Indexes + Security Rules + Storage Rules
+#### Sprint Infra-1 - Firestore Indexes + Security Rules + Storage Rules -- CONCLUIDO (31/03/2026)
 
 **Stack:** JSON + Firebase config
 

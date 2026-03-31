@@ -118,6 +118,21 @@ service firebase.storage {
       allow delete: if isAuthenticated();
     }
 
+    // Regras para comprovantes financeiros (entries e payments)
+    match /tenants/{companyId}/financial/entries/{entryId}/attachments/{fileName} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isValidImage() || isValidDocument());
+      allow update: if isAuthenticated() && (isValidImage() || isValidDocument());
+      allow delete: if isAuthenticated();
+    }
+
+    match /tenants/{companyId}/financial/payments/{paymentId}/attachments/{fileName} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (isValidImage() || isValidDocument());
+      allow update: if isAuthenticated() && (isValidImage() || isValidDocument());
+      allow delete: if isAuthenticated();
+    }
+
     // Regras para fotos de perfil de usuários
     match /tenants/{companyId}/users/{userId}/{photoId} {
       allow read: if isAuthenticated();
