@@ -14,6 +14,12 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
+import 'package:praticos/models/financial_entry.dart';
+import 'package:praticos/models/financial_account.dart';
+import 'package:praticos/repositories/v2/financial_entry_repository_v2.dart';
+import 'package:praticos/repositories/v2/financial_account_repository_v2.dart';
+import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
@@ -30,6 +36,14 @@ abstract class _OrderStore with Store {
   final PhotoService photoService = PhotoService();
   final FormsService formsService = FormsService();
   final AuthorizationService _authService = AuthorizationService.instance;
+
+  FinancialEntryRepositoryV2? _financialEntryRepoInstance;
+  FinancialEntryRepositoryV2 get _financialEntryRepo =>
+      _financialEntryRepoInstance ??= FinancialEntryRepositoryV2();
+
+  FinancialAccountRepositoryV2? _financialAccountRepoInstance;
+  FinancialAccountRepositoryV2 get _financialAccountRepo =>
+      _financialAccountRepoInstance ??= FinancialAccountRepositoryV2();
 
   Order? order;
 
@@ -718,6 +732,7 @@ abstract class _OrderStore with Store {
     this.status = status;
     updatePayment();
     createItem();
+    _syncFinancialOnStatusChange(status);  // fire-and-forget
   }
 
   String dateToString(DateTime? date) {
@@ -1287,6 +1302,7 @@ abstract class _OrderStore with Store {
 
     createItem();
     AnalyticsService.instance.logPaymentAdded(amount: amount);
+    _syncFinancialOnPayment(amount);  // fire-and-forget
   }
 
   /// Adiciona um desconto como transação
@@ -1863,6 +1879,134 @@ abstract class _OrderStore with Store {
   void clearCustomerRankingSelection() {
     selectedCustomerInRanking = null;
     loadOrdersForDashboard();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Financial Sync (bidirectional OS <-> Financial)
+  // ═══════════════════════════════════════════════════════════════════
+
+  Future<void> _syncFinancialOnStatusChange(String status) async {
+    if (!SegmentConfigService().useFinancialManagement) return;
+    if (companyId == null || order == null) return;
+    if (order!.syncSource == 'financial') {
+      order!.syncSource = null;
+      createItem();
+      return;
+    }
+
+    if (status == 'approved' && (order!.total ?? 0) > 0) {
+      final existing = await _financialEntryRepo.getQueryList(companyId!,
+          args: [QueryArgs('orderId', order!.id), QueryArgs('deletedAt', null)]);
+      if (existing.isNotEmpty) return;
+
+      final entry = FinancialEntry()
+        ..direction = FinancialEntryDirection.receivable
+        ..status = FinancialEntryStatus.pending
+        ..description = 'OS #${order!.number}'
+        ..amount = order!.total
+        ..dueDate = DateTime.now()
+        ..competenceDate = DateTime.now()
+        ..paidAmount = order!.paidAmount ?? 0
+        ..discountAmount = 0
+        ..orderId = order!.id
+        ..orderNumber = order!.number
+        ..customer = order!.customer
+        ..category = 'Serviços'
+        ..syncSource = 'order'
+        ..company = Global.companyAggr
+        ..createdAt = DateTime.now()
+        ..createdBy = Global.userAggr
+        ..updatedAt = DateTime.now()
+        ..updatedBy = Global.userAggr;
+      await _financialEntryRepo.createItem(companyId!, entry);
+    }
+
+    if (status == 'canceled') {
+      final entries = await _financialEntryRepo.getQueryList(companyId!,
+          args: [QueryArgs('orderId', order!.id), QueryArgs('deletedAt', null)]);
+      for (final e in entries) {
+        if (e != null && e.status != FinancialEntryStatus.cancelled) {
+          e.status = FinancialEntryStatus.cancelled;
+          e.syncSource = 'order';
+          e.updatedAt = DateTime.now();
+          e.updatedBy = Global.userAggr;
+          await _financialEntryRepo.updateItem(companyId!, e);
+        }
+      }
+    }
+  }
+
+  Future<void> _syncFinancialOnPayment(double amount) async {
+    if (!SegmentConfigService().useFinancialManagement) return;
+    if (companyId == null || order == null) return;
+    if (order!.syncSource == 'financial') {
+      order!.syncSource = null;
+      createItem();
+      return;
+    }
+
+    // Find the receivable entry for this OS
+    final entries = await _financialEntryRepo.getQueryList(companyId!,
+        args: [QueryArgs('orderId', order!.id), QueryArgs('deletedAt', null)]);
+    final entry = entries.firstWhere((e) => e != null, orElse: () => null);
+    if (entry == null) return;
+
+    // Find default account
+    final accounts = await _financialAccountRepo.streamActive(companyId!).first;
+    final activeAccounts = accounts.where((a) => a != null).cast<FinancialAccount>().toList();
+    if (activeAccounts.isEmpty) return;
+    final account = activeAccounts.firstWhere(
+      (a) => a.isDefault == true,
+      orElse: () => activeAccounts.first,
+    );
+
+    // Create payment + update entry + update account balance via WriteBatch
+    final db = firestore.FirebaseFirestore.instance;
+    final batch = db.batch();
+    final now = DateTime.now();
+
+    final paymentRef = db.collection('companies').doc(companyId).collection('financialPayments').doc();
+    batch.set(paymentRef, {
+      'id': paymentRef.id,
+      'type': 'income',
+      'status': 'completed',
+      'amount': amount,
+      'paymentDate': firestore.Timestamp.fromDate(now),
+      'description': 'OS #${order!.number}',
+      'entryId': entry.id,
+      'accountId': account.id,
+      'account': account.toAggr().toJson(),
+      'orderId': order!.id,
+      'orderNumber': order!.number,
+      'customer': order!.customer?.toJson(),
+      'category': entry.category,
+      'syncSource': 'order',
+      'company': Global.companyAggr?.toJson(),
+      'createdAt': firestore.Timestamp.fromDate(now),
+      'createdBy': Global.userAggr?.toJson(),
+      'updatedAt': firestore.Timestamp.fromDate(now),
+      'updatedBy': Global.userAggr?.toJson(),
+    });
+
+    // Update entry paidAmount
+    final entryRef = db.collection('companies').doc(companyId).collection('financialEntries').doc(entry.id);
+    final newPaidAmount = (entry.paidAmount ?? 0) + amount;
+    final isFullyPaid = newPaidAmount >= (entry.amount ?? 0);
+    batch.update(entryRef, {
+      'paidAmount': firestore.FieldValue.increment(amount),
+      'status': isFullyPaid ? 'paid' : 'pending',
+      'paidDate': isFullyPaid ? firestore.Timestamp.fromDate(now) : null,
+      'syncSource': 'order',
+      'updatedAt': firestore.Timestamp.fromDate(now),
+      'updatedBy': Global.userAggr?.toJson(),
+    });
+
+    // Update account balance
+    batch.update(db.collection('companies').doc(companyId).collection('financialAccounts').doc(account.id), {
+      'currentBalance': firestore.FieldValue.increment(amount),
+    });
+
+    await batch.commit();
   }
 
   // Métodos para scroll infinito na Home

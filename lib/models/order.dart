@@ -65,6 +65,9 @@ class Order extends BaseAuditCompany {
   /// Denormalized for Firestore queries (Firestore can't query nested nulls)
   bool? isContract;
 
+  /// Bidirectional sync with Financial module (prevents sync loops)
+  String? syncSource;
+
   /// Retorna a URL da primeira foto (capa da OS)
   String? get coverPhotoUrl => photos?.isNotEmpty == true ? photos!.first.url : null;
 

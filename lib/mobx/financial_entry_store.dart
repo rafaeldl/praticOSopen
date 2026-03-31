@@ -1,6 +1,8 @@
 import 'package:praticos/global.dart';
 import 'package:praticos/models/financial_entry.dart';
 import 'package:praticos/repositories/v2/financial_entry_repository_v2.dart';
+import 'package:praticos/services/segment_config_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 part 'financial_entry_store.g.dart';
@@ -97,6 +99,56 @@ abstract class _FinancialEntryStore with Store {
   Future<List<FinancialEntry?>> getInstallmentGroup(String groupId) async {
     if (companyId == null) return [];
     return repository.getByInstallmentGroup(companyId!, groupId);
+  }
+
+  /// Syncs a payment from the financial module back to the linked OS.
+  /// Called after payEntry when the entry has an orderId.
+  Future<void> syncOrderPayment(FinancialEntry entry, double amount) async {
+    if (companyId == null) return;
+    if (!SegmentConfigService().useFinancialManagement) return;
+    if (entry.orderId == null) return;
+    if (entry.syncSource == 'order') {
+      entry.syncSource = null;
+      await repository.updateItem(companyId!, entry);
+      return;
+    }
+
+    // Update the OS with the payment
+    final db = FirebaseFirestore.instance;
+    final orderRef = db.collection('companies').doc(companyId).collection('orders').doc(entry.orderId);
+    final orderDoc = await orderRef.get();
+    if (!orderDoc.exists) return;
+
+    final now = DateTime.now();
+    final txnId = now.millisecondsSinceEpoch.toString();
+
+    // Add PaymentTransaction to the OS
+    final transaction = {
+      'id': txnId,
+      'type': 'payment',
+      'amount': amount,
+      'description': 'Pagamento via financeiro',
+      'createdAt': now.toIso8601String(),
+      'createdBy': Global.userAggr?.toJson(),
+    };
+
+    final orderData = orderDoc.data()!;
+    final transactions = List<Map<String, dynamic>>.from(orderData['transactions'] ?? []);
+    transactions.add(transaction);
+
+    final currentPaid = (orderData['paidAmount'] as num?)?.toDouble() ?? 0;
+    final newPaid = currentPaid + amount;
+    final total = (orderData['total'] as num?)?.toDouble() ?? 0;
+    final isFullyPaid = newPaid >= total;
+
+    await orderRef.update({
+      'transactions': transactions,
+      'paidAmount': newPaid,
+      'payment': isFullyPaid ? 'paid' : 'unpaid',
+      'syncSource': 'financial',
+      'updatedAt': Timestamp.fromDate(now),
+      'updatedBy': Global.userAggr?.toJson(),
+    });
   }
 
   void _applyAuditFields(FinancialEntry entry) {
