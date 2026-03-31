@@ -3319,7 +3319,7 @@ fvm flutter analyze
 
 **Resultado:** Despesas fixas repetem automaticamente, relatorios visuais.
 
-#### Sprint 14 - Recorrencia
+#### Sprint 14 - Recorrencia -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Lancamentos recorrentes com toggle simples + catch-up ao reabrir app.
 
@@ -3346,7 +3346,7 @@ fvm flutter analyze
 
 ---
 
-#### Sprint 15 - Tela de Relatorios
+#### Sprint 15 - Tela de Relatorios -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** DRE simplificado + fluxo de caixa projetado + graficos.
 
@@ -3883,6 +3883,30 @@ Para registro: estes pontos da spec ja estao excelentes e nao precisam de mudanc
 ## Changelog
 
 ### Marco 2026
+
+#### Milestone 4 implementado: Recorrencia + Relatorios (31/03/2026)
+
+**Sprints 14-15 concluidos. +1.506 linhas, zero erros no analyze.**
+
+Sprint 14 (Recorrencia):
+- `processRecurrences()`: engine client-side com catch-up loop ao abrir app
+- `_calculateNextDueDate()`: daily/weekly/monthly/yearly com intervalo configuravel
+- Form: opcoes avancadas de recorrencia colapsaveis (frequencia, intervalo, data fim)
+- Entries geradas sao normais (pending, sem recurrence propria)
+- Auto-desativa recorrencia quando endDate e ultrapassada
+- Chamado fire-and-forget no load da tela de extrato
+
+Sprint 15 (Relatorios):
+- `FinancialReportsScreen` com 4 secoes:
+  - Resumo do mes: receitas/despesas por categoria, totais, resultado, margem
+  - Projecao: proximos 3 meses baseado em entries pendentes + saldo atual
+  - Grafico de barras (fl_chart): entradas vs saidas ultimos 6 meses
+  - Grafico pizza (fl_chart): top 5 categorias de despesa + "Outros"
+- Botao "Relatorios" na nav bar do extrato
+- 15 i18n keys adicionados (pt/en/es)
+
+**TODOS OS 4 MILESTONES DO APP CONCLUIDOS (Sprints 1-15).**
+Restam sprints separados: Infra-1, API-1, API-2, Bot-1, Docs-1.
 
 #### Milestone 3 implementado: Recebiveis + Sync + Estornos (31/03/2026)
 
