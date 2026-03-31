@@ -11,6 +11,7 @@ import 'package:praticos/routes.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/engagement_scheduler.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/screens/financial/financial_statement_screen.dart';
 
 import 'home.dart';
 
@@ -36,7 +37,7 @@ class _NavigationControllerState extends State<NavigationController>
       HomeCustomerList(),
       const AgendaScreen(),
       useFinancialManagement
-          ? const Center(child: Text('Financial Statement'))
+          ? const FinancialStatementScreen()
           : FinancialDashboardSimple(),
       Settings(),
     ];
