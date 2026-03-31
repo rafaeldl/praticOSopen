@@ -20,7 +20,7 @@
 16. [Bot WhatsApp](#bot-comandos-financeiros)
 17. [Site: Documentacao Publica](#site-documentacao-publica)
 18. [Documentacao: Checklist](#documentacao-checklist)
-19. [Fases de Implementacao](#fases-de-implementacao)
+19. [Fases de Implementacao (Sprints)](#fases-de-implementacao)
 20. [Retrocompatibilidade](#retrocompatibilidade)
 21. [Revisao UX Mobile-First](#revisao-ux-mobile-first)
 22. [Changelog](#changelog)
@@ -2916,153 +2916,640 @@ cd firebase/hosting && npm run build  # Gerar site apos alterar docs publicos
 
 ## Fases de Implementacao
 
-### Fase 1 - Foundation + Contas a Pagar + Extrato
+### Visao Geral
 
-**Escopo:** Toda a infraestrutura base + capacidade de registrar e pagar despesas.
+O modulo esta organizado em **4 milestones de produto** (o que o usuario ganha) e **sprints tecnicos** dentro de cada milestone (como a IA implementa). Cada sprint e uma unidade de trabalho independente, otimizada para execucao em uma unica sessao de IA.
 
-**Arquivos a criar:**
-- `lib/models/financial_account.dart`
-- `lib/models/financial_entry.dart`
-- `lib/models/financial_payment.dart`
+**Principios dos sprints:**
+
+- **1 stack por sprint** -- nao misturar Flutter com TypeScript com Nunjucks
+- **Max ~8 arquivos por sprint** -- cabe no contexto sem compressao
+- **1 padrao repetivel** -- todos os arquivos do sprint seguem a mesma estrutura
+- **Ponto de validacao ao final** -- comando concreto que confirma sucesso
+- **Independencia** -- cada sprint pode rodar em sessao separada
+- **Ordem por dependencia tecnica** -- camada de dados antes de UI
+
+**Requisitos criticos (aplicar desde o Sprint 1):**
+
+- Todas as operacoes multi-documento usam `WriteBatch`
+- Soft delete (`deletedAt`/`deletedBy`) implementado desde o inicio
+- Status do payment (`completed`/`reversed`) presente desde o inicio
+- Nomenclatura em ingles no codigo, portugues na UI (`context.l10n`)
+- `FormatService` para toda formatacao de moeda/data
+- Cores dinamicas com `.resolveFrom(context)` para dark mode
+
+```
+Milestone 1: Despesas + Extrato         Sprints 1-8      "Registra despesa, paga, ve no extrato"
+Milestone 2: Contas Bancarias           Sprints 9-10     "Controla saldo, transfere entre contas"
+Milestone 3: Recebiveis + Sync + Estornos  Sprints 11-13 "Recebe da OS, estorna, tudo sincronizado"
+Milestone 4: Recorrencia + Relatorios   Sprints 14-15    "Despesa fixa repete, relatorios visuais"
+Separados: API, Bot, Docs, Infra        Sprints API/Bot/Docs  "Outro stack, roda em paralelo"
+```
+
+---
+
+### Milestone 1 - Despesas + Extrato
+
+**Resultado:** Usuario registra despesas (simples e parceladas), paga com 2 toques, e ve no extrato.
+
+#### Sprint 1 - Models + Enums + Build Runner
+
+**Objetivo:** Criar toda a camada de dados. Zero logica, zero UI.
+
+**Criar:**
+- `lib/models/financial_account.dart` -- `FinancialAccount` + `FinancialAccountAggr` + enum `FinancialAccountType`
+- `lib/models/financial_entry.dart` -- `FinancialEntry` + `FinancialEntryAggr` + enums `FinancialEntryDirection`, `FinancialEntryStatus` + classe `FinancialRecurrence`
+- `lib/models/financial_payment.dart` -- `FinancialPayment` + enums `FinancialPaymentType`, `FinancialPaymentStatus`
+
+**Padrao a copiar:** `lib/models/customer.dart` (BaseAuditCompany + @JsonSerializable + toAggr + toJson/fromJson)
+
+**Decisoes:**
+- Verificar se `PaymentMethod` ja existe em `lib/models/` -- se sim, reutilizar; se nao, criar em `lib/models/payment_method.dart` compartilhado
+- `FinancialRecurrence` e sub-documento embutido (nao precisa de Aggr nem de collection propria)
+- Getters computados (`remainingBalance`, `isFullyPaid`, `isOverdue`, `isInstallment`) no model, nao no store
+
+**Validacao:**
+```bash
+fvm flutter pub run build_runner build --delete-conflicting-outputs  # Gera .g.dart
+fvm flutter analyze  # Zero erros
+```
+
+**Arquivos:** ~3-4 | **Complexidade:** M
+
+---
+
+#### Sprint 2 - Repositories
+
+**Objetivo:** Camada de acesso a dados. Boilerplate puro.
+
+**Criar:**
 - `lib/repositories/tenant/tenant_financial_account_repository.dart`
 - `lib/repositories/tenant/tenant_financial_entry_repository.dart`
 - `lib/repositories/tenant/tenant_financial_payment_repository.dart`
 - `lib/repositories/v2/financial_account_repository_v2.dart`
 - `lib/repositories/v2/financial_entry_repository_v2.dart`
 - `lib/repositories/v2/financial_payment_repository_v2.dart`
-- `lib/mobx/financial_account_store.dart`
-- `lib/mobx/financial_entry_store.dart`
-- `lib/mobx/financial_payment_store.dart`
-- `lib/screens/financial/financial_statement_screen.dart` -- extrato principal
-- `lib/screens/financial/financial_entry_form_screen.dart` -- formulario 2 niveis
-- `lib/screens/financial/widgets/payment_confirmation_sheet.dart` -- half-sheet de pagamento
-- `lib/screens/financial/widgets/payment_timeline_item.dart` -- item compacto do extrato
-- `lib/screens/financial/widgets/balance_header.dart` -- header com eye toggle
-- `lib/screens/financial/widgets/category_picker_grid.dart` -- grid de categorias com icones
-- `lib/screens/financial/widgets/installment_progress_card.dart` -- card expansivel de parcelas
 
-**Arquivos a modificar:**
-- `lib/models/permission.dart` - novas permissions
-- `lib/l10n/app_pt.arb`, `app_en.arb`, `app_es.arb` - i18n
-- `lib/routes.dart` - novas rotas
-- `lib/screens/menu_navigation/navigation_controller.dart` - tab Financeiro condicional (flag on = extrato, flag off = dashboard OS)
-- `lib/models/company.dart` - adicionar `useFinancialManagement` bool
-- `lib/services/segment_config_service.dart` - adicionar getter do flag
-- `lib/providers/segment_config_provider.dart` - adicionar flag ao provider
-- `lib/screens/auth_wrapper.dart` - resolver flag com default false
-- `lib/screens/menu_navigation/company_form_screen.dart` - toggle na secao Features
+**Padrao a copiar:** `lib/repositories/tenant/tenant_customer_repository.dart` + `lib/repositories/v2/customer_repository_v2.dart`
 
-**Requisitos criticos:**
-- Feature flag `useFinancialManagement` no Company model (default: false)
-- Tab Financeiro condicional: dashboard OS (flag off) ou extrato (flag on)
-- Bootstrap de categorias na primeira ativacao do flag
-- Todas as operacoes de pagamento usam `WriteBatch`
-- Soft delete implementado desde o inicio
-- Status do payment (`completed`/`reversed`) presente desde o inicio
-- Eye toggle para ocultar valores (SharedPreferences)
-- Empty state + onboarding de 3 passos na primeira visita
-- Formulario com campos essenciais visiveis + detalhes colapsados
-- Half-sheet de pagamento com pre-fill inteligente
+**Decisoes:**
+- `TenantRepository<FinancialEntry>` herda tudo -- so precisa definir `collectionName` e `fromJson`
+- `RepositoryV2` segue mesmo padrao do `CustomerRepositoryV2` -- queries customizadas como metodos
 
-**Resultado:** Usuario registra despesas (simples e parceladas), paga com 2 toques, e ve no extrato.
+**Validacao:**
+```bash
+fvm flutter analyze  # Zero erros
+```
 
-**API Cloud Functions:**
-- `firebase/functions/src/routes/v1/financial.routes.ts` (criar) -- CRUD entries + payments + summary
-- `firebase/functions/src/services/financial.service.ts` (criar) -- logica de negocio
-- `firebase/functions/src/models/types.ts` (modificar) -- tipos FinancialEntry, FinancialPayment
-- `firebase/functions/src/utils/validation.utils.ts` (modificar) -- schemas Zod
-- `firebase/functions/src/index.ts` (modificar) -- registrar rotas v1 e app
-- Endpoints: GET/POST entries, GET payments, POST pay, GET summary, GET overdue
+**Arquivos:** 6 | **Complexidade:** S (boilerplate)
 
-**Documentacao:**
-- `docs/FINANCEIRO.md` -- adicionar nota apontando para FINANCIAL_MODULE.md
-- `CLAUDE.md` -- adicionar referencia ao modulo na secao "Documentacao Adicional"
-- `firebase/hosting/src/_data/docs/gestao-financeira.json` (criar) -- secoes: Visao geral, Extrato, Despesas, Permissoes
-- `firebase/hosting/src/docs/gestao-financeira.njk` (criar) -- pt/en/es templates
-- `firebase/hosting/src/_data/docs.json` (modificar) -- registrar no hub com badge "Novo"
-- `firebase/firestore.indexes.json` (modificar) -- adicionar indices compostos financeiros
-- `lib/services/bootstrap_service.dart` (modificar) -- adicionar `bootstrapFinancialCategories()`
-- Bootstrap seed data (criar) -- categorias iniciais por segmento (expense + income, i18n)
+---
 
-### Fase 2 - Contas Bancarias + Saldo + Transferencias
+#### Sprint 3 - Stores MobX
 
-**Escopo:** Gestao de contas, transferencias e reconciliacao.
+**Objetivo:** Estado reativo. Apenas actions necessarias para o Milestone 1 (despesas + extrato). NAO implementar transferencia, estorno, sync ou recorrencia.
 
-**Arquivos a criar (App):**
-- `lib/screens/financial/financial_account_list_screen.dart` -- lista com saldo por conta
-- `lib/screens/financial/financial_account_form_screen.dart` -- form criar/editar conta
-- `lib/screens/financial/widgets/transfer_sheet.dart` -- half-sheet de transferencia
+**Criar:**
+- `lib/mobx/financial_account_store.dart` -- `load()`, `totalBalance` (soma de contas ativas), CRUD basico
+- `lib/mobx/financial_entry_store.dart` -- `load()`, stream por direction/status/dueDate, `createEntry()`, `createInstallments()`, filtros
+- `lib/mobx/financial_payment_store.dart` -- stream por paymentDate (extrato), `payEntry()` com WriteBatch atomico (entry + payment + account), KPIs do periodo (totalIncome, totalExpense, profit, margin), KPIs do dia (todayIncome, todayExpense)
 
-**Arquivos a modificar (App):**
-- `lib/screens/financial/financial_statement_screen.dart` - header com saldo total, icone de contas na nav bar
-- `lib/mobx/financial_payment_store.dart` - logica de transferencia atomica (WriteBatch)
-- `lib/mobx/financial_account_store.dart` - reconciliacao de saldo + snapshots mensais (geracao manual)
-- `lib/screens/financial/financial_entry_form_screen.dart` - account picker pre-selecionado
-- `lib/screens/financial/financial_account_list_screen.dart` - botao "Fechar mes" para gerar snapshot manual
+**Padrao a copiar:** `lib/mobx/order_store.dart` (estrutura de streams, actions, observables)
 
-**API Cloud Functions:**
-- `financial.routes.ts` (modificar) -- adicionar CRUD accounts + POST transfers
-- `financial.service.ts` (modificar) -- logica de contas, transferencia atomica, reconciliacao, snapshots mensais
+**Decisoes:**
+- `payEntry()` usa `WriteBatch` -- criar payment + atualizar entry status/paidAmount + atualizar account currentBalance
+- KPIs calculados client-side no store (nao na UI) -- mesmo padrao do `FinancialDashboardSimple`
+- Adicionar KPIs do dia (`todayIncome`, `todayExpense`, `todayProfit`) para o header "Hoje: +X -Y = Z"
+- Stubs para metodos de fases futuras NAO devem ser criados
 
-**Documentacao:**
-- `gestao-financeira.json` (atualizar) -- adicionar secoes: Contas bancarias, Transferencias
+**Validacao:**
+```bash
+fvm flutter pub run build_runner build --delete-conflicting-outputs  # Gera .g.dart do MobX
+fvm flutter analyze  # Zero erros
+```
 
-**Resultado:** Controle de saldo, transferencias atomicas via half-sheet, reconciliacao, snapshots mensais manuais.
+**Arquivos:** 3 | **Complexidade:** L
 
-### Fase 3 - Recebiveis + Sync Bidirecional com OS + Estornos
+---
 
-**Escopo:** Contas a receber + integracao com OS + estornos.
+#### Sprint 4 - Feature Flag + Integracao
 
-**Arquivos a modificar (App):**
-- `lib/mobx/order_store.dart` - `_syncFinancialEntry()` com `syncSource` (guard: so executa se `useFinancialManagement == true`)
-- `lib/mobx/financial_entry_store.dart` - `_syncOrderPayment()` com `syncSource`
-- `lib/mobx/financial_payment_store.dart` - `reversePayment()` + `recalculatePaidAmount()`
-- `lib/screens/financial/financial_statement_screen.dart` - filtros via ActionSheet, badge de vencidas, link OS clicavel, visualizacao de estornos
-- `lib/screens/financial/financial_entry_form_screen.dart` - modo receivable (customer picker), comprovantes
-- `lib/screens/financial/widgets/payment_timeline_item.dart` - swipe-right para pagar, estilo estornado
+**Objetivo:** Ligar o modulo ao app existente. Trabalho cirurgico em arquivos existentes.
 
-**API Cloud Functions:**
-- `financial.routes.ts` (modificar) -- adicionar POST reverse, integracao sync OS
-- `financial.service.ts` (modificar) -- logica de estorno, sync bidirecional
+**Modificar:**
+- `lib/models/company.dart` -- adicionar `bool? useFinancialManagement`
+- `lib/services/segment_config_service.dart` -- adicionar getter `useFinancialManagement`
+- `lib/providers/segment_config_provider.dart` -- adicionar field + setter
+- `lib/screens/auth_wrapper.dart` -- resolver flag com default `false` no `_SegmentLoader`
+- `lib/models/permission.dart` -- adicionar `manageFinancialEntries`, `manageFinancialAccounts`, `viewFinancialStatement`
+- `lib/routes.dart` -- registrar novas rotas financeiras
+- `lib/screens/menu_navigation/navigation_controller.dart` -- tab Financeiro condicional: `if (config.useFinancialManagement) FinancialStatementScreen() else FinancialDashboardSimple()`
+- `lib/screens/menu_navigation/company_form_screen.dart` -- toggle na secao Features
 
-**Documentacao:**
-- `gestao-financeira.json` (atualizar) -- adicionar secoes: Recebimentos, Parcelas
+**Padrao a copiar:** Buscar como `useContracts` ou `useDeviceManagement` sao implementados nesses mesmos arquivos e replicar o padrao exato.
 
-**Resultado:** Visao completa de recebiveis, pagamento por qualquer tela (OS ou financeiro), estornos com auditoria, OS como link no extrato.
+**Decisoes:**
+- O toggle chama `_bootstrapFinancialIfNeeded()` na primeira ativacao (Sprint 5)
+- A tab condicional e o unico ponto de entrada -- nao criar menu lateral separado
+- As telas financeiras ainda nao existem neste sprint -- usar placeholder temporario (`Center(child: Text('Financial'))`) para validar que o flag funciona
 
-### Fase 4 - Recorrencia + Relatorios Avancados + Bot
+**Validacao:**
+```bash
+fvm flutter analyze  # Zero erros
+# Teste manual: ligar/desligar flag em Configuracoes da Empresa, verificar que a tab muda
+```
 
-**Escopo:** Automatizacao, projecoes, insights visuais e integracao com bot WhatsApp.
+**Arquivos:** ~8 modificacoes | **Complexidade:** M (cirurgico, risco de quebrar existente)
 
-**Arquivos a criar (App):**
-- `lib/screens/financial/financial_reports_screen.dart` -- tela de relatorios (DRE, fluxo projetado, graficos)
+---
 
-**Arquivos a modificar (App):**
-- `lib/mobx/financial_entry_store.dart` - geracao de recorrencia com `lastGeneratedDate`
-- `lib/screens/financial/financial_entry_form_screen.dart` - toggle "Repetir todo mes?" simplificado
-- `lib/screens/financial/financial_statement_screen.dart` - botao "Relatorios" na nav bar
+#### Sprint 5 - i18n + Bootstrap de Categorias
 
-**Novos componentes na tela de Relatorios:**
-- Fluxo de Caixa Projetado (proximos 3-6 meses)
-- DRE Simplificado (por periodo)
-- Grafico de fluxo de caixa (entradas vs saidas por mes)
-- Grafico pizza despesas por categoria
-- Dashboard antigo (`FinancialDashboardSimple`) integrado
+**Objetivo:** Todas as strings traduzidas + categorias iniciais criadas na ativacao do modulo.
 
-**API Cloud Functions:**
-- `firebase/functions/src/routes/bot/financial.routes.ts` (criar) -- rotas bot
-- `financial.service.ts` (modificar) -- resumo formatado para bot, snapshots mensais
-- `index.ts` (modificar) -- registrar rotas bot
+**Modificar:**
+- `lib/l10n/app_pt.arb` -- adicionar todas as strings financeiras (titulos, labels, botoes, mensagens, categorias)
+- `lib/l10n/app_en.arb` -- traducoes ingles
+- `lib/l10n/app_es.arb` -- traducoes espanhol
+- `lib/services/bootstrap_service.dart` -- adicionar `bootstrapFinancialCategories()` usando `AccumulatedValueRepository` existente
 
-**Bot WhatsApp:**
-- `backend/bot/workspace/skills/praticos/references/api-endpoints.md` (modificar) -- adicionar endpoints financeiros
-- `backend/bot/workspace/cron/jobs.json` (modificar) -- configurar automacoes (resumo diario, alerta vencidas, resumo semanal)
+**Padrao a copiar:**
+- Strings: buscar como `app_pt.arb` organiza strings de OS/customer e seguir mesma convencao de prefixo (ex: `financial_`, `financialEntry_`, etc.)
+- Bootstrap: buscar como categorias de `deviceCategory`/`deviceBrand` sao criadas no bootstrap existente
 
-**Documentacao:**
-- `gestao-financeira.json` (atualizar) -- adicionar secoes: Relatorios, FAQ
-- Build site: `cd firebase/hosting && npm run build`
+**Decisoes:**
+- Categorias usam `AccumulatedValue` existente -- zero codigo novo para o sistema de categorias
+- Criar `expenseCategory` e `incomeCategory` como `fieldType` no AccumulatedValue
+- Categorias iniciais localizadas: 10 de despesa + 4 de receita (conforme spec)
+- Icones mapeados estaticamente (fallback para `CupertinoIcons.tag`)
 
-**Resultado:** Lancamentos recorrentes com toggle simples, projecao financeira, DRE simplificado, tela de relatorios dedicada, bot com comandos financeiros e automacoes.
+**Validacao:**
+```bash
+fvm flutter gen-l10n  # Gera arquivos de traducao
+fvm flutter analyze  # Zero erros
+# Verificar que context.l10n.financialXxx resolve em todos os 3 idiomas
+```
+
+**Arquivos:** ~4 | **Complexidade:** M (volume de strings, precisa consistencia nos 3 idiomas)
+
+---
+
+#### Sprint 6 - Widgets Reutilizaveis
+
+**Objetivo:** Componentes visuais isolados, sem dependencia de tela. Testavel individualmente.
+
+**Criar:**
+- `lib/screens/financial/widgets/balance_header.dart` -- saldo total + eye toggle (SharedPreferences) + resumo do dia ("Hoje: +X -Y = Z") + navegacao de mes (`< Marco 2026 >`)
+- `lib/screens/financial/widgets/payment_timeline_item.dart` -- item compacto 2 linhas (descricao + valor na L1, forma + conta na L2) + icones SF Symbols por tipo
+- `lib/screens/financial/widgets/payment_confirmation_sheet.dart` -- half-sheet one-tap: botao `Confirmar R$X via Pix na Conta Y` + link "Editar detalhes" para expandir campos
+- `lib/screens/financial/widgets/category_picker_grid.dart` -- grid 4 colunas carregado do AccumulatedValue, ordenado por `usageCount`, botao "+ Nova" no final
+- `lib/screens/financial/widgets/installment_progress_card.dart` -- card expansivel: colapsado (titulo + barra progresso), expandido (lista de parcelas com botao "Pagar" na proxima pendente)
+
+**Padrao a copiar:** Buscar widgets existentes em `lib/screens/` que usam `CupertinoListSection.insetGrouped`, `showCupertinoModalPopup`, etc. Seguir mesma estrutura.
+
+**Decisoes:**
+- Eye toggle salva preferencia em `SharedPreferences` com chave `financial_hide_values`
+- `PaymentConfirmationSheet` no modo one-tap: pre-fill de valor (remainingBalance), conta (ultima usada ou default), forma (ultima usada), data (hoje). Todos os campos pre-preenchidos aparecem como resumo texto, nao como inputs editaveis. Expandir com "Editar detalhes" mostra os inputs.
+- `PaymentTimelineItem` deve suportar estado `reversed` (texto riscado, cor cinza) desde o inicio, mesmo que estorno so venha no Milestone 3
+- Areas de toque minimo 44pt (HIG) em todos os botoes e alvos de toque
+- Numpad com teclas grandes (48pt+) no campo de valor do half-sheet
+
+**Validacao:**
+```bash
+fvm flutter analyze  # Zero erros
+# Widgets compilam isoladamente (sem dependencia de tela)
+```
+
+**Arquivos:** 5 | **Complexidade:** L (criativo, precisa dos wireframes do doc como referencia)
+
+---
+
+#### Sprint 7 - Telas Principais
+
+**Objetivo:** Montar as 2 telas finais conectando stores + widgets. Fluxo funcional end-to-end.
+
+**Criar:**
+- `lib/screens/financial/financial_statement_screen.dart` -- extrato principal: BalanceHeader + timeline de payments agrupados por data + FAB (Nova Despesa / Novo Recebimento via CupertinoActionSheet) + empty state + badges
+- `lib/screens/financial/financial_entry_form_screen.dart` -- formulario 2 niveis: campos essenciais (descricao, valor grande, vencimento, grid categoria, conta default) + secao colapsada "+ Detalhes" (fornecedor, notas, anexos) + toggle "Parcelar em vezes" (stepper inline) + botao Salvar na bottom (thumb zone) + botao Salvar no nav bar
+
+**Conectar:**
+- Statement usa `FinancialPaymentStore` (stream extrato) + `FinancialAccountStore` (saldo total) + `PaymentTimelineItem` + `BalanceHeader`
+- EntryForm usa `FinancialEntryStore` (createEntry/createInstallments) + `CategoryPickerGrid` + `PaymentConfirmationSheet` (ao marcar "ja paguei" ou via swipe na lista)
+- Remover placeholder do Sprint 4 e apontar para telas reais
+
+**Decisoes:**
+- Direction (payable/receivable) definida pelo botao do FAB, nao por campo no form
+- Titulo do form muda: "Nova Despesa" (payable) / "Novo Recebimento" (receivable)
+- `competenceDate` e `tags` nao aparecem no form (automatico/invisivel)
+- Timeline usa stream paginado (Firestore `limit` + `startAfterDocument`)
+- Separadores por data como sticky headers
+
+**Validacao:**
+```bash
+fvm flutter analyze  # Zero erros
+# Teste manual: abrir app > ativar flag > tab Financeiro > criar despesa > pagar > ver no extrato
+```
+
+**Arquivos:** 2 | **Complexidade:** XL (conecta tudo, mais criativo, mais risco)
+
+---
+
+#### Sprint 8 - Onboarding + Polish
+
+**Objetivo:** Primeira experiencia do usuario + refinamentos finais do Milestone 1.
+
+**Modificar:**
+- `lib/screens/financial/financial_statement_screen.dart` -- empty state com onboarding de 3 passos (criar conta > saldo inicial > CTA para primeira despesa), badge de vencidas na tab, swipe actions nos items
+- `lib/screens/financial/financial_entry_form_screen.dart` -- recorrencia simplificada (toggle "Repetir todo mes?" que cria `recurrence.frequency: monthly, interval: 1`), link "Personalizar" para opcoes avancadas colapsadas
+
+**Decisoes:**
+- Onboarding: 3 passos rapidos conforme wireframe do doc. Cards pre-definidos para tipo de conta ("Dinheiro/Caixa", "Conta bancaria", "Pix/Carteira digital"). Criar conta com 1 toque no card.
+- Badge de vencidas: contar entries com `status == pending && dueDate < now`, exibir numero no icone da tab
+- Swipe-right no item do extrato: abre detalhe (neste milestone, apenas visualizacao -- swipe para pagar entry pendente vem no Sprint 11)
+
+**Validacao:**
+```bash
+fvm flutter analyze  # Zero erros
+# Teste manual end-to-end completo:
+# 1. Ativar flag > ver onboarding > criar conta
+# 2. Criar despesa simples > pagar > ver no extrato
+# 3. Criar despesa parcelada > ver card expansivel > pagar parcela
+# 4. Criar despesa com vencimento passado > ver badge de vencida
+# 5. Testar eye toggle > valores ocultados
+# 6. Verificar "Hoje: +X -Y = Z" no header
+```
+
+**Arquivos:** ~2-3 modificacoes | **Complexidade:** M
+
+---
+
+### Milestone 2 - Contas Bancarias
+
+**Resultado:** Controle de saldo por conta, transferencias entre contas.
+
+#### Sprint 9 - Telas de Contas Bancarias (CRUD)
+
+**Objetivo:** Lista de contas com saldo + formulario de criar/editar conta.
+
+**Criar:**
+- `lib/screens/financial/financial_account_list_screen.dart` -- lista com saldo total no topo + cards por conta (icone + nome + saldo) + swipe right (transferir) + swipe left (editar) + botao [+] na nav bar
+- `lib/screens/financial/financial_account_form_screen.dart` -- form simples: nome, tipo (picker com 4 opcoes), saldo inicial, cor, icone, default toggle
+
+**Modificar:**
+- `lib/screens/financial/financial_statement_screen.dart` -- adicionar icone de banco na nav bar trailing que navega para `FinancialAccountListScreen`, saldo total no header usa `FinancialAccountStore.totalBalance`
+
+**Padrao a copiar:** Buscar tela de listagem existente no app (ex: lista de clientes ou colaboradores) para replicar estrutura de CupertinoPageScaffold + SliverList.
+
+**Validacao:**
+```bash
+fvm flutter analyze
+# Teste manual: criar conta > ver na lista > editar > ver saldo no extrato
+```
+
+**Arquivos:** 3 (2 criar + 1 modificar) | **Complexidade:** M
+
+---
+
+#### Sprint 10 - Transferencias + Account Picker
+
+**Objetivo:** Mover dinheiro entre contas + pre-selecionar conta no form de entry.
+
+**Criar:**
+- `lib/screens/financial/widgets/transfer_sheet.dart` -- half-sheet: conta origem (pre-selecionada pelo contexto), picker conta destino, campo valor, botao "Transferir"
+
+**Modificar:**
+- `lib/mobx/financial_payment_store.dart` -- adicionar `transfer()` com WriteBatch atomico (2 payments + 2 accounts)
+- `lib/screens/financial/financial_entry_form_screen.dart` -- account picker pre-selecionado com conta default (`isDefault: true`)
+- `lib/mobx/financial_account_store.dart` -- reconciliacao basica: `calculateRealBalance()` compara currentBalance com soma real dos payments, alerta se divergir, botao "Corrigir saldo" (UI: "Verificar saldo")
+
+**Validacao:**
+```bash
+fvm flutter analyze
+# Teste manual: transferir Caixa > Banco > ver 2 payments no extrato > saldos atualizados
+# Teste: forcar divergencia de saldo > ver alerta > corrigir
+```
+
+**Arquivos:** 4 (1 criar + 3 modificar) | **Complexidade:** L (WriteBatch atomico, reconciliacao)
+
+---
+
+### Milestone 3 - Recebiveis + Sync + Estornos
+
+**Resultado:** Visao completa de recebiveis, pagamento por qualquer tela (OS ou financeiro), estornos com auditoria.
+
+#### Sprint 11 - Modo Recebimento + Filtros
+
+**Objetivo:** Form de entry em modo receivable + filtros no extrato.
+
+**Modificar:**
+- `lib/screens/financial/financial_entry_form_screen.dart` -- modo receivable: titulo "Novo Recebimento", customer picker (reutilizar picker existente de Customer), categoria de `incomeCategory`
+- `lib/screens/financial/financial_statement_screen.dart` -- filtros via `CupertinoActionSheet`: Tudo, Entradas, Saidas, Transferencias. Icone de filtro na nav bar.
+- `lib/screens/financial/widgets/payment_timeline_item.dart` -- swipe-right abre `PaymentConfirmationSheet` direto para entries pendentes, link `OS #142` clicavel (navega para OS)
+
+**Validacao:**
+```bash
+fvm flutter analyze
+# Teste manual: criar recebimento > pagar via swipe > filtrar extrato por tipo
+```
+
+**Arquivos:** 3 modificacoes | **Complexidade:** M
+
+---
+
+#### Sprint 12 - Sync Bidirecional OS <-> Financeiro
+
+> **ALTO RISCO** -- Toca `OrderStore` existente. Testar exaustivamente.
+
+**Objetivo:** OS aprovada gera entry receivable. Pagamento na OS reflete no financeiro e vice-versa.
+
+**Modificar:**
+- `lib/mobx/order_store.dart` -- adicionar `_syncFinancialEntry()` com guard `if (!useFinancialManagement) return` + `syncSource` para prevenir loop. Eventos: OS aprovada (total > 0) cria entry receivable; pagamento na OS cria payment income; OS cancelada cancela entry.
+- `lib/mobx/financial_entry_store.dart` -- adicionar `_syncOrderPayment()` com `syncSource`. Evento: receivable com orderId marcado como pago cria PaymentTransaction na OS.
+
+**Decisoes:**
+- `syncSource` persistido no documento Firestore (nao flag em memoria) -- sobrevive a crash/multi-device
+- Guard condicional no OrderStore: sync so executa se `SegmentConfigService().useFinancialManagement == true`
+- Sync nao retroativo: OS existentes (antes da ativacao) nao geram entries automaticamente
+
+**Validacao:**
+```bash
+fvm flutter analyze
+# Teste manual critico (cada cenario):
+# 1. Aprovar OS > verificar entry receivable criada
+# 2. Pagar OS pela tela da OS > verificar payment no extrato financeiro
+# 3. Pagar entry receivable pelo financeiro > verificar PaymentTransaction na OS
+# 4. Cancelar OS > verificar entry cancelada
+# 5. Verificar que nao ha loop (pagar pela OS nao dispara sync de volta)
+# 6. Testar com flag desligado > nenhum sync acontece
+```
+
+**Arquivos:** 2 modificacoes | **Complexidade:** XL (risco alto, tocar OrderStore)
+
+---
+
+#### Sprint 13 - Estornos
+
+> **ALTO RISCO** -- Atomicidade critica. Testar multi-cenario.
+
+**Objetivo:** Reverter pagamentos com trilha de auditoria completa.
+
+**Modificar:**
+- `lib/mobx/financial_payment_store.dart` -- adicionar `reversePayment()` (WriteBatch: payment original -> reversed, criar payment reverso, reverter saldo conta, recalcular paidAmount entry) + `reverseTransfer()` (reverte ambos payments do transferGroupId)
+- `lib/mobx/financial_entry_store.dart` -- adicionar `recalculatePaidAmount()` via `Transaction` do Firestore (evita race condition multi-device)
+- `lib/screens/financial/widgets/payment_timeline_item.dart` -- swipe-left (vermelho) para estornar com confirmacao (motivo obrigatorio via `CupertinoAlertDialog`), estilo visual de item estornado (riscado, cinza)
+- `lib/screens/financial/financial_statement_screen.dart` -- visualizacao de estornos no extrato (payment original riscado + payment reverso com badge amarelo)
+
+**Validacao:**
+```bash
+fvm flutter analyze
+# Teste manual critico:
+# 1. Estornar pagamento de despesa > saldo da conta restaurado > entry volta para pendente
+# 2. Estornar pagamento de recebimento > saldo reduzido > entry volta para pendente
+# 3. Estornar transferencia > ambas contas revertidas
+# 4. Tentar estornar um estorno > bloqueado (regra: sem estorno de estorno)
+# 5. Estornar payment com orderId > verificar sync reverso na OS
+# 6. Verificar extrato: original riscado + reverso com motivo visivel
+```
+
+**Arquivos:** 4 modificacoes | **Complexidade:** XL (atomicidade, multi-cenario)
+
+---
+
+### Milestone 4 - Recorrencia + Relatorios
+
+**Resultado:** Despesas fixas repetem automaticamente, relatorios visuais.
+
+#### Sprint 14 - Recorrencia
+
+**Objetivo:** Lancamentos recorrentes com toggle simples + catch-up ao reabrir app.
+
+**Modificar:**
+- `lib/mobx/financial_entry_store.dart` -- adicionar `processRecurrence()` com loop de catch-up (gera entries atrasadas desde ultima abertura), prevencao de duplicacao via `lastGeneratedDate`
+- `lib/screens/financial/financial_entry_form_screen.dart` -- toggle "Repetir todo mes?" visivel + link "Personalizar" que expande opcoes avancadas (frequencia, intervalo, data fim) -- colapsado por padrao
+
+**Decisoes:**
+- Geracao client-side (nao Cloud Function) -- conforme spec, aceitavel para publico-alvo que usa app diariamente
+- Toggle "Repetir todo mes?" e o caso 90% -- cria `recurrence: { frequency: monthly, interval: 1, active: true }`
+- Opcoes avancadas (semanal, bimestral, anual) acessiveis via "Personalizar" dentro do toggle
+- `processRecurrence()` chamado no `load()` do store (ao abrir a tab financeira)
+
+**Validacao:**
+```bash
+fvm flutter analyze
+# Teste manual:
+# 1. Criar despesa recorrente mensal > fechar app > mudar data do dispositivo +2 meses > reabrir > 2 entries geradas
+# 2. Verificar que nao duplica se reabrir novamente
+# 3. Pausar recorrencia > verificar que para de gerar
+```
+
+**Arquivos:** 2 modificacoes | **Complexidade:** L (logica de catch-up)
+
+---
+
+#### Sprint 15 - Tela de Relatorios
+
+**Objetivo:** DRE simplificado + fluxo de caixa projetado + graficos.
+
+**Criar:**
+- `lib/screens/financial/financial_reports_screen.dart` -- tela dedicada com: DRE simplificado por periodo (receitas vs despesas por categoria, usando `competenceDate`), fluxo de caixa projetado (proximos 3 meses baseado em entries pendentes), grafico de barras entradas vs saidas por mes, grafico pizza despesas por categoria, integracao com dashboard antigo (`FinancialDashboardSimple`)
+
+**Modificar:**
+- `lib/screens/financial/financial_statement_screen.dart` -- adicionar botao "Relatorios" (icone grafico) na nav bar trailing que navega para `FinancialReportsScreen`
+
+**Decisoes:**
+- Na UI mobile, exibir como "Resumo do mes" e "Projecao" -- nunca usar termo "DRE" ou "regime de competencia"
+- Fluxo projetado simplificado no mobile: apenas "Proximos 30 dias: a receber X, a pagar Y"
+- Graficos podem usar `fl_chart` ou equivalente (verificar dependencia existente no pubspec)
+- Dashboard antigo acessivel dentro da tela de relatorios como secao "Faturamento OS"
+
+**Validacao:**
+```bash
+fvm flutter analyze
+# Teste manual: extrato > botao Relatorios > ver DRE do mes > ver projecao > ver graficos
+```
+
+**Arquivos:** 2 (1 criar + 1 modificar) | **Complexidade:** L (criativo, graficos)
+
+---
+
+### Sprints Separados (outro stack -- rodam em paralelo)
+
+> Estes sprints sao independentes do app Flutter e podem ser executados em sessoes/worktrees separadas. Recomenda-se rodar em paralelo com os milestones do app apos o Sprint 3 (quando os models estao definidos).
+
+#### Sprint API-1 - Cloud Functions: Entries + Payments + Summary
+
+**Stack:** TypeScript (Firebase Cloud Functions)
+
+**Criar:**
+- `firebase/functions/src/routes/v1/financial.routes.ts` -- rotas REST: GET/POST entries, GET payments, POST entries/:id/pay, GET summary, GET overdue
+- `firebase/functions/src/services/financial.service.ts` -- logica de negocio (queries, WriteBatch, validacao)
+
+**Modificar:**
+- `firebase/functions/src/models/types.ts` -- tipos FinancialEntry, FinancialPayment, FinancialAccount
+- `firebase/functions/src/utils/validation.utils.ts` -- schemas Zod (createEntrySchema, payEntrySchema, listEntriesSchema, etc.)
+- `firebase/functions/src/index.ts` -- registrar rotas: `/v1/financial` (apiKey) + `/v1/app/financial` (bearer)
+
+**Padrao a copiar:** `firebase/functions/src/routes/v1/orders.routes.ts` + `analytics.routes.ts`
+
+**Validacao:**
+```bash
+cd firebase/functions && npm run build  # Compila sem erros
+# Testar endpoints via curl ou Postman
+```
+
+**Arquivos:** ~5 | **Complexidade:** L
+
+---
+
+#### Sprint API-2 - Cloud Functions: Accounts + Transfers + Reverse
+
+**Stack:** TypeScript
+
+**Modificar:**
+- `financial.routes.ts` -- adicionar CRUD accounts, POST transfers, POST payments/:id/reverse
+- `financial.service.ts` -- logica de contas, transferencia atomica, estorno, reconciliacao
+
+**Validacao:**
+```bash
+cd firebase/functions && npm run build
+```
+
+**Arquivos:** 2 modificacoes | **Complexidade:** M
+
+---
+
+#### Sprint Bot-1 - Endpoints Bot + CRON (Milestone 4)
+
+**Stack:** TypeScript + Bot workspace
+
+**Criar:**
+- `firebase/functions/src/routes/bot/financial.routes.ts` -- GET summary (formatado para WhatsApp), GET overdue
+
+**Modificar:**
+- `firebase/functions/src/index.ts` -- registrar rotas bot
+- `backend/bot/workspace/skills/praticos/references/api-endpoints.md` -- adicionar endpoints financeiros
+- `backend/bot/workspace/cron/jobs.json` -- configurar automacoes (resumo diario 18h, alerta vencidas 9h, resumo semanal segunda 10h) -- todas `enabled: false` por padrao
+
+**Validacao:**
+```bash
+cd firebase/functions && npm run build
+# Testar via curl: GET /bot/financial/summary
+```
+
+**Arquivos:** ~4 | **Complexidade:** M
+
+---
+
+#### Sprint Docs-1 - Site Eleventy
+
+**Stack:** Nunjucks + JSON
+
+**Criar:**
+- `firebase/hosting/src/_data/docs/gestao-financeira.json` -- conteudo trilingual (pt/en/es), secoes conforme spec
+- `firebase/hosting/src/docs/gestao-financeira.njk` -- template portugues
+- `firebase/hosting/src/docs/gestao-financeira-en.njk` -- template ingles
+- `firebase/hosting/src/docs/gestao-financeira-es.njk` -- template espanhol
+
+**Modificar:**
+- `firebase/hosting/src/_data/docs.json` -- registrar no hub com badge "Novo"
+
+**Padrao a copiar:** `firebase/hosting/src/_data/docs/procedimentos.json` + `firebase/hosting/src/docs/procedimentos.njk`
+
+**Validacao:**
+```bash
+cd firebase/hosting && npm run build  # Gera site sem erros
+# Verificar pagina gerada em public/docs/gestao-financeira.html
+```
+
+**Arquivos:** ~5 | **Complexidade:** M (volume de conteudo trilingual)
+
+---
+
+#### Sprint Infra-1 - Firestore Indexes + Security Rules + Storage Rules
+
+**Stack:** JSON + Firebase config
+
+**Modificar:**
+- `firebase/firestore.indexes.json` -- adicionar ~12 indices compostos (conforme spec, secao "Indices Compostos Necessarios")
+- `firebase/firestore.rules` -- adicionar rules para financialAccounts, financialEntries, financialPayments (conforme spec)
+- `firebase/storage.rules` -- adicionar paths para comprovantes financeiros
+
+**Modificar (app):**
+- `docs/FINANCEIRO.md` -- adicionar nota no topo apontando para FINANCIAL_MODULE.md
+- `CLAUDE.md` -- adicionar referencia na secao "Documentacao Adicional"
+
+**Validacao:**
+```bash
+# Indices e rules sao validados no deploy
+firebase deploy --only firestore:indexes --dry-run
+firebase deploy --only firestore:rules --dry-run
+firebase deploy --only storage --dry-run
+```
+
+**Arquivos:** ~5 | **Complexidade:** S (copiar da spec)
+
+---
+
+### Mapa de Dependencias
+
+```
+Sprint 1 (Models)
+  |
+  v
+Sprint 2 (Repos) ---------> Sprint API-1 (Cloud Functions)
+  |                                |
+  v                                v
+Sprint 3 (Stores) ---------> Sprint API-2
+  |
+  +----------+----------+
+  |          |          |
+  v          v          v
+Sprint 4   Sprint 5   Sprint Infra-1
+(Flag)     (i18n)     (Indexes/Rules)
+  |          |
+  +----+-----+
+       |
+       v
+  Sprint 6 (Widgets) -----> Sprint Docs-1 (Site)
+       |
+       v
+  Sprint 7 (Telas)
+       |
+       v
+  Sprint 8 (Polish)
+       |
+  === MILESTONE 1 COMPLETO === (pausa, testar, corrigir)
+       |
+  Sprint 9 (Contas CRUD)
+       |
+       v
+  Sprint 10 (Transferencias)
+       |
+  === MILESTONE 2 COMPLETO ===
+       |
+  Sprint 11 (Receivables)
+       |
+       v
+  Sprint 12 (Sync OS) --- ALTO RISCO
+       |
+       v
+  Sprint 13 (Estornos) --- ALTO RISCO
+       |
+  === MILESTONE 3 COMPLETO ===
+       |
+  Sprint 14 (Recorrencia)
+       |
+       v
+  Sprint 15 (Relatorios)
+       |                     Sprint Bot-1
+  === MILESTONE 4 COMPLETO ===
+```
+
+**Sprints paralelizaveis** (podem rodar em worktrees separadas):
+- Sprint API-1 em paralelo com Sprints 4-8 (apos Sprint 3)
+- Sprint Infra-1 em paralelo com Sprints 4-8 (apos Sprint 1)
+- Sprint Docs-1 em paralelo com qualquer sprint (sem dependencia tecnica)
+- Sprint Bot-1 apos Sprint API-1
 
 ---
 
@@ -3396,6 +3883,20 @@ Para registro: estes pontos da spec ja estao excelentes e nao precisam de mudanc
 ## Changelog
 
 ### Marco 2026
+
+#### Reestruturacao de fases para sprints de IA (31/03/2026)
+
+**Fases reorganizadas de 4 milestones de produto para 15+ sprints tecnicos otimizados para implementacao por IA:**
+
+- 4 milestones de produto mantidos (Despesas, Contas, Sync/Estornos, Relatorios)
+- Cada milestone quebrado em sprints de 2-8 arquivos (cabe no contexto de 1 sessao)
+- 1 stack por sprint (nao mistura Flutter com TypeScript com Nunjucks)
+- 1 padrao repetivel por sprint (ex: todos os models seguem mesma estrutura)
+- Ponto de validacao concreto ao final de cada sprint (build_runner, analyze, teste manual)
+- Sprints separados para API, Bot, Docs, Infra (rodam em paralelo via worktrees)
+- Mapa de dependencias com sprints paralelizaveis identificados
+- Sprints de alto risco marcados (Sync OS, Estornos) com checklists de teste exaustivos
+- Complexidade relativa por sprint (S/M/L/XL)
 
 #### Revisao UX Mobile-First (30/03/2026)
 
