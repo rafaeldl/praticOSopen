@@ -1471,5 +1471,15 @@
   },
   "all": "All",
   "transfers": "Transfers",
-  "newCategory": "New category"
+  "newCategory": "New category",
+  "newAccount": "New account",
+  "editAccount": "Edit account",
+  "deactivateAccount": "Deactivate account",
+  "deactivateAccountConfirmation": "Are you sure you want to deactivate this account? It will no longer appear in listings.",
+  "defaultAccount": "Default account",
+  "initialBalance": "Initial balance",
+  "accountDeactivated": "Account deactivated",
+  "accountSaved": "Account saved",
+  "noAccountsRegistered": "No accounts registered",
+  "addFirstAccount": "Tap + to add your first account."
 }

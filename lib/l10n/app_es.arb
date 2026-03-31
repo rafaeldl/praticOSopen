@@ -1471,5 +1471,15 @@
   },
   "all": "Todo",
   "transfers": "Transferencias",
-  "newCategory": "Nueva categoría"
+  "newCategory": "Nueva categoría",
+  "newAccount": "Nueva cuenta",
+  "editAccount": "Editar cuenta",
+  "deactivateAccount": "Desactivar cuenta",
+  "deactivateAccountConfirmation": "¿Está seguro de que desea desactivar esta cuenta? Ya no aparecerá en los listados.",
+  "defaultAccount": "Cuenta predeterminada",
+  "initialBalance": "Saldo inicial",
+  "accountDeactivated": "Cuenta desactivada",
+  "accountSaved": "Cuenta guardada",
+  "noAccountsRegistered": "No hay cuentas registradas",
+  "addFirstAccount": "Toque + para agregar su primera cuenta."
 }

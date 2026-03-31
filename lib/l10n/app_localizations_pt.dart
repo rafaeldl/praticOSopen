@@ -3474,4 +3474,35 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get newCategory => 'Nova categoria';
+
+  @override
+  String get newAccount => 'Nova conta';
+
+  @override
+  String get editAccount => 'Editar conta';
+
+  @override
+  String get deactivateAccount => 'Desativar conta';
+
+  @override
+  String get deactivateAccountConfirmation =>
+      'Tem certeza que deseja desativar esta conta? Ela não aparecerá mais nas listagens.';
+
+  @override
+  String get defaultAccount => 'Conta padrão';
+
+  @override
+  String get initialBalance => 'Saldo inicial';
+
+  @override
+  String get accountDeactivated => 'Conta desativada';
+
+  @override
+  String get accountSaved => 'Conta salva';
+
+  @override
+  String get noAccountsRegistered => 'Nenhuma conta cadastrada';
+
+  @override
+  String get addFirstAccount => 'Toque em + para adicionar sua primeira conta.';
 }

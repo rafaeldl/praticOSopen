@@ -26,6 +26,8 @@ import 'package:praticos/screens/devices/device_detail_screen.dart';
 import 'package:praticos/screens/contracts/contract_list_screen.dart';
 import 'package:praticos/screens/financial/financial_statement_screen.dart';
 import 'package:praticos/screens/financial/financial_entry_form_screen.dart';
+import 'package:praticos/screens/financial/financial_account_list_screen.dart';
+import 'package:praticos/screens/financial/financial_account_form_screen.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
   // '/onboarding': removed - onboarding now handled by AuthWrapper with authStore
@@ -56,6 +58,6 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/contract_list': (context) => const ContractListScreen(),
   '/financial_statement': (context) => const FinancialStatementScreen(),
   '/financial_entry_form': (context) => const FinancialEntryFormScreen(),
-  '/financial_account_list': (context) => const Scaffold(body: Center(child: Text('Financial Account List'))),
-  '/financial_account_form': (context) => const Scaffold(body: Center(child: Text('Financial Account Form'))),
+  '/financial_account_list': (context) => const FinancialAccountListScreen(),
+  '/financial_account_form': (context) => const FinancialAccountFormScreen(),
 };

@@ -6585,6 +6585,66 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Nova categoria'**
   String get newCategory;
+
+  /// No description provided for @newAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova conta'**
+  String get newAccount;
+
+  /// No description provided for @editAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar conta'**
+  String get editAccount;
+
+  /// No description provided for @deactivateAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Desativar conta'**
+  String get deactivateAccount;
+
+  /// No description provided for @deactivateAccountConfirmation.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja desativar esta conta? Ela não aparecerá mais nas listagens.'**
+  String get deactivateAccountConfirmation;
+
+  /// No description provided for @defaultAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conta padrão'**
+  String get defaultAccount;
+
+  /// No description provided for @initialBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo inicial'**
+  String get initialBalance;
+
+  /// No description provided for @accountDeactivated.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conta desativada'**
+  String get accountDeactivated;
+
+  /// No description provided for @accountSaved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conta salva'**
+  String get accountSaved;
+
+  /// No description provided for @noAccountsRegistered.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma conta cadastrada'**
+  String get noAccountsRegistered;
+
+  /// No description provided for @addFirstAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Toque em + para adicionar sua primeira conta.'**
+  String get addFirstAccount;
 }
 
 class _AppLocalizationsDelegate
