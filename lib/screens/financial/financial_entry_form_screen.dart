@@ -36,6 +36,7 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
   FinancialAccount? _selectedAccount;
   bool _isInstallment = false;
   int _installmentCount = 2;
+  bool _isRecurring = false;
   bool _showDetails = false;
   bool _isSaving = false;
   String? _companyId;
@@ -186,6 +187,18 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
         ..notes = _notesController.text.trim().isNotEmpty
             ? _notesController.text.trim()
             : null;
+
+      if (_isRecurring && !_isInstallment) {
+        entry.recurrence = FinancialRecurrence()
+          ..frequency = 'monthly'
+          ..interval = 1
+          ..active = true
+          ..nextDueDate = DateTime(
+            _dueDate.year,
+            _dueDate.month + 1,
+            _dueDate.day,
+          );
+      }
 
       if (_isInstallment && _installmentCount > 1) {
         await _entryStore.createInstallments(entry, _installmentCount);
@@ -352,7 +365,10 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                         trailing: CupertinoSwitch(
                           value: _isInstallment,
                           onChanged: (val) {
-                            setState(() => _isInstallment = val);
+                            setState(() {
+                              _isInstallment = val;
+                              if (val) _isRecurring = false;
+                            });
                           },
                         ),
                       ),
@@ -361,6 +377,21 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                             secondaryLabelColor),
                     ],
                   ),
+
+                  // Recurring toggle (only when not in installment mode)
+                  if (!_isInstallment)
+                    CupertinoListSection.insetGrouped(
+                      children: [
+                        CupertinoListTile(
+                          title: Text(context.l10n.repeatMonthly),
+                          trailing: CupertinoSwitch(
+                            value: _isRecurring,
+                            onChanged: (val) =>
+                                setState(() => _isRecurring = val),
+                          ),
+                        ),
+                      ],
+                    ),
 
                   // Expandable details
                   if (!_showDetails)

@@ -6,6 +6,7 @@ import 'package:praticos/mobx/financial_account_store.dart';
 import 'package:praticos/mobx/financial_payment_store.dart';
 import 'package:praticos/models/financial_payment.dart';
 import 'package:praticos/screens/financial/widgets/balance_header.dart';
+import 'package:praticos/screens/financial/widgets/financial_onboarding_sheet.dart';
 import 'package:praticos/screens/financial/widgets/payment_timeline_item.dart';
 import 'package:praticos/services/format_service.dart';
 
@@ -191,6 +192,122 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
     );
   }
 
+  void _showOnboarding() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => FinancialOnboardingSheet(
+        accountStore: _accountStore,
+        onComplete: () {
+          Navigator.pop(ctx);
+          // Reload accounts and payments after onboarding
+          _accountStore.load();
+          _loadCurrentMonth();
+        },
+      ),
+    );
+  }
+
+  Widget _buildFirstVisitEmptyState(BuildContext context) {
+    final secondaryLabelColor =
+        CupertinoColors.secondaryLabel.resolveFrom(context);
+    final labelColor = CupertinoColors.label.resolveFrom(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              CupertinoIcons.briefcase,
+              size: 64,
+              color: secondaryLabelColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.l10n.setupFinancial,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: labelColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: 280,
+              child: Text(
+                context.l10n.setupFinancialDescription,
+                style: TextStyle(
+                  fontSize: 15,
+                  color: secondaryLabelColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            CupertinoButton.filled(
+              onPressed: _showOnboarding,
+              child: Text(context.l10n.getStarted),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoMovementsEmptyState(BuildContext context) {
+    final secondaryLabelColor =
+        CupertinoColors.secondaryLabel.resolveFrom(context);
+    final monthName = DateFormat.yMMMM(
+      Localizations.localeOf(context).toString(),
+    ).format(_currentMonth);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.l10n.noMovements(monthName),
+              style: TextStyle(
+                fontSize: 15,
+                color: secondaryLabelColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CupertinoButton(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/financial_entry_form',
+                        arguments: {'direction': 'payable'});
+                  },
+                  child: Text(context.l10n.registerExpense),
+                ),
+                const SizedBox(width: 8),
+                CupertinoButton(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/financial_entry_form',
+                        arguments: {'direction': 'receivable'});
+                  },
+                  child: Text(context.l10n.registerIncome),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bgColor =
@@ -205,6 +322,26 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
         children: [
           Observer(
             builder: (_) {
+              final accounts = _accountStore.accountList?.value ?? [];
+              final hasAccounts = accounts
+                  .where((a) => a != null && (a.active ?? false))
+                  .isNotEmpty;
+
+              // First visit: no accounts at all
+              if (!hasAccounts) {
+                return CustomScrollView(
+                  slivers: [
+                    CupertinoSliverNavigationBar(
+                      largeTitle: Text(context.l10n.financialStatement),
+                    ),
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _buildFirstVisitEmptyState(context),
+                    ),
+                  ],
+                );
+              }
+
               final payments = _paymentStore.paymentList?.value ?? [];
               final filtered = _filterPayments(payments);
               final grouped = _groupByDate(filtered);
@@ -262,29 +399,14 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
                     ),
                   ),
 
-                  // Payment list grouped by date
+                  // No movements empty state
                   if (dateKeys.isEmpty)
                     SliverFillRemaining(
                       hasScrollBody: false,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(32),
-                          child: Text(
-                            context.l10n.noMovements(
-                              DateFormat.yMMMM(
-                                Localizations.localeOf(context).toString(),
-                              ).format(_currentMonth),
-                            ),
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: secondaryLabelColor,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
+                      child: _buildNoMovementsEmptyState(context),
                     ),
 
+                  // Payment list grouped by date
                   if (dateKeys.isNotEmpty)
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
@@ -339,34 +461,45 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
             },
           ),
 
-          // FAB
-          Positioned(
-            right: 16,
-            bottom: 16,
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: _showFABSheet,
-              child: Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: CupertinoColors.activeBlue,
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: [
-                    BoxShadow(
-                      color: CupertinoColors.activeBlue.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
+          // FAB - only show when accounts exist
+          Observer(
+            builder: (_) {
+              final accounts = _accountStore.accountList?.value ?? [];
+              final hasAccounts = accounts
+                  .where((a) => a != null && (a.active ?? false))
+                  .isNotEmpty;
+
+              if (!hasAccounts) return const SizedBox.shrink();
+
+              return Positioned(
+                right: 16,
+                bottom: 16,
+                child: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _showFABSheet,
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.activeBlue,
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CupertinoColors.activeBlue.withValues(alpha: 0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
+                    child: const Icon(
+                      CupertinoIcons.add,
+                      color: CupertinoColors.white,
+                      size: 28,
+                    ),
+                  ),
                 ),
-                child: const Icon(
-                  CupertinoIcons.add,
-                  color: CupertinoColors.white,
-                  size: 28,
-                ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),
