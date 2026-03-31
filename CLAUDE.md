@@ -815,3 +815,4 @@ Antes de finalizar uma feature, verificar:
 - `docs/BOT_WORKSPACE_CONFIG.md` - Configuração do workspace OpenClaw
 - `docs/GOOGLE_ADS_API.md` - Acesso ao Google Ads via Claude Code
 - `docs/ADS_CAMPAIGNS.md` - Status de campanhas, pendências e progresso
+- `docs/FINANCIAL_MODULE.md` - Módulo financeiro completo (contas, extrato, parcelas, relatórios) - Milestone 1 implementado

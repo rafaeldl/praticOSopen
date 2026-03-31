@@ -2952,7 +2952,7 @@ Separados: API, Bot, Docs, Infra        Sprints API/Bot/Docs  "Outro stack, roda
 
 **Resultado:** Usuario registra despesas (simples e parceladas), paga com 2 toques, e ve no extrato.
 
-#### Sprint 1 - Models + Enums + Build Runner
+#### Sprint 1 - Models + Enums + Build Runner -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Criar toda a camada de dados. Zero logica, zero UI.
 
@@ -2978,7 +2978,7 @@ fvm flutter analyze  # Zero erros
 
 ---
 
-#### Sprint 2 - Repositories
+#### Sprint 2 - Repositories -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Camada de acesso a dados. Boilerplate puro.
 
@@ -3005,7 +3005,7 @@ fvm flutter analyze  # Zero erros
 
 ---
 
-#### Sprint 3 - Stores MobX
+#### Sprint 3 - Stores MobX -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Estado reativo. Apenas actions necessarias para o Milestone 1 (despesas + extrato). NAO implementar transferencia, estorno, sync ou recorrencia.
 
@@ -3032,7 +3032,7 @@ fvm flutter analyze  # Zero erros
 
 ---
 
-#### Sprint 4 - Feature Flag + Integracao
+#### Sprint 4 - Feature Flag + Integracao -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Ligar o modulo ao app existente. Trabalho cirurgico em arquivos existentes.
 
@@ -3063,7 +3063,7 @@ fvm flutter analyze  # Zero erros
 
 ---
 
-#### Sprint 5 - i18n + Bootstrap de Categorias
+#### Sprint 5 - i18n + Bootstrap de Categorias -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Todas as strings traduzidas + categorias iniciais criadas na ativacao do modulo.
 
@@ -3094,7 +3094,7 @@ fvm flutter analyze  # Zero erros
 
 ---
 
-#### Sprint 6 - Widgets Reutilizaveis
+#### Sprint 6 - Widgets Reutilizaveis -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Componentes visuais isolados, sem dependencia de tela. Testavel individualmente.
 
@@ -3124,7 +3124,7 @@ fvm flutter analyze  # Zero erros
 
 ---
 
-#### Sprint 7 - Telas Principais
+#### Sprint 7 - Telas Principais -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Montar as 2 telas finais conectando stores + widgets. Fluxo funcional end-to-end.
 
@@ -3154,7 +3154,7 @@ fvm flutter analyze  # Zero erros
 
 ---
 
-#### Sprint 8 - Onboarding + Polish
+#### Sprint 8 - Onboarding + Polish -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Primeira experiencia do usuario + refinamentos finais do Milestone 1.
 
@@ -3883,6 +3883,45 @@ Para registro: estes pontos da spec ja estao excelentes e nao precisam de mudanc
 ## Changelog
 
 ### Marco 2026
+
+#### Milestone 1 implementado: Despesas + Extrato (31/03/2026)
+
+**Sprints 1-8 concluidos. 44 arquivos, +5.656 linhas, zero erros no analyze, 42 testes passando.**
+
+Arquivos criados:
+- 4 models: `FinancialAccount`, `FinancialEntry`, `FinancialPayment`, `PaymentMethod` (+ 3 `.g.dart`)
+- 6 repositories: 3 TenantRepository + 3 RepositoryV2 (accounts, entries, payments)
+- 3 stores MobX: `FinancialAccountStore`, `FinancialEntryStore`, `FinancialPaymentStore` (+ 3 `.g.dart`)
+- 5 widgets: `BalanceHeader`, `PaymentTimelineItem`, `PaymentConfirmationSheet`, `CategoryPickerGrid`, `InstallmentProgressCard`
+- 2 telas: `FinancialStatementScreen` (extrato), `FinancialEntryFormScreen` (formulario 2 niveis)
+- 1 widget de onboarding: `FinancialOnboardingSheet` (3 passos)
+- 3 arquivos de teste: 42 testes (serialization + business logic)
+
+Arquivos modificados:
+- `Company` model (flag `useFinancialManagement`)
+- `SegmentConfigService` + `SegmentConfigProvider` (getter do flag)
+- `auth_wrapper.dart` (resolucao do flag)
+- `permission.dart` (3 novas permissions: `manageFinancialEntries`, `manageFinancialAccounts`, `viewFinancialStatement`)
+- `routes.dart` (4 novas rotas)
+- `navigation_controller.dart` (tab condicional)
+- `company_form_screen.dart` (toggle do flag)
+- `bootstrap_service.dart` (`bootstrapFinancialCategories()`)
+- 3 `.arb` (47 strings financeiras em pt/en/es)
+
+Funcionalidades entregues:
+- Feature flag `useFinancialManagement` (toggle, zero impacto quando desligado)
+- Onboarding de 3 passos (criar conta, saldo inicial, CTA)
+- Criar despesa simples ou parcelada
+- Pagar via half-sheet one-tap com pre-fill
+- Extrato com timeline agrupada por data + filtros por tipo
+- Eye toggle para ocultar valores
+- Resumo do dia no header ("Hoje: +X -Y = Z")
+- Navegacao por mes
+- Categorias dinamicas via AccumulatedValue (bootstrap com 14 categorias)
+- Toggle "Repetir todo mes" para recorrencia
+- Empty states com CTAs
+- i18n completo (pt/en/es)
+- Dark mode ready (cores com `.resolveFrom(context)`)
 
 #### Reestruturacao de fases para sprints de IA (31/03/2026)
 
