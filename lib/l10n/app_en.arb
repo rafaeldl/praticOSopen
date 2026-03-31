@@ -1506,5 +1506,14 @@
   },
   "balanceCorrected": "Balance corrected",
   "selectDestinationAccount": "Select destination account",
-  "balanceMatches": "Balance matches"
+  "balanceMatches": "Balance matches",
+  "pendingPayables": "Payables",
+  "pendingReceivables": "Receivables",
+  "swipeToPay": "Pay",
+  "osNumberShort": "OS #{number}",
+  "@osNumberShort": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  }
 }

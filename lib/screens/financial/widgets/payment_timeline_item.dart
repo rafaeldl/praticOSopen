@@ -11,11 +11,15 @@ import 'package:praticos/services/format_service.dart';
 class PaymentTimelineItem extends StatelessWidget {
   final FinancialPayment payment;
   final VoidCallback? onTap;
+  final VoidCallback? onSwipeRight;
+  final VoidCallback? onOrderTap;
 
   const PaymentTimelineItem({
     super.key,
     required this.payment,
     this.onTap,
+    this.onSwipeRight,
+    this.onOrderTap,
   });
 
   bool get _isReversed =>
@@ -93,7 +97,7 @@ class PaymentTimelineItem extends StatelessWidget {
         _isReversed ? TextDecoration.lineThrough : TextDecoration.none;
     final textColor = _isReversed ? CupertinoColors.systemGrey : labelColor;
 
-    return GestureDetector(
+    Widget item = GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
@@ -136,17 +140,49 @@ class PaymentTimelineItem extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  // Line 2: method + account
-                  Text(
-                    _buildSecondaryText(context),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: secondaryLabelColor,
-                      decoration: textDecoration,
+                  // Line 2: OS link + method + account
+                  if (_hasOrderLink && onOrderTap != null)
+                    GestureDetector(
+                      onTap: onOrderTap,
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'OS #${payment.orderNumber}',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: CupertinoColors.activeBlue,
+                                fontWeight: FontWeight.w500,
+                                decoration: textDecoration,
+                              ),
+                            ),
+                            TextSpan(
+                              text: _buildSecondaryTextWithoutOS(context).isNotEmpty
+                                  ? ' \u00b7 ${_buildSecondaryTextWithoutOS(context)}'
+                                  : '',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: secondaryLabelColor,
+                                decoration: textDecoration,
+                              ),
+                            ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )
+                  else
+                    Text(
+                      _buildSecondaryText(context),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: secondaryLabelColor,
+                        decoration: textDecoration,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -166,10 +202,43 @@ class PaymentTimelineItem extends StatelessWidget {
         ),
       ),
     );
+
+    if (onSwipeRight != null) {
+      item = Dismissible(
+        key: ValueKey('swipe_${payment.id}'),
+        direction: DismissDirection.startToEnd,
+        confirmDismiss: (_) async {
+          onSwipeRight!();
+          return false;
+        },
+        background: Container(
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: 20),
+          color: CupertinoColors.activeBlue,
+          child: const Row(
+            children: [
+              Icon(CupertinoIcons.money_dollar_circle,
+                  color: CupertinoColors.white, size: 22),
+              SizedBox(width: 8),
+              Text('Pagar',
+                  style: TextStyle(
+                      color: CupertinoColors.white,
+                      fontWeight: FontWeight.w600)),
+            ],
+          ),
+        ),
+        child: item,
+      );
+    }
+
+    return item;
   }
 
   String _buildSecondaryText(BuildContext context) {
     final parts = <String>[];
+    if (payment.orderNumber != null) {
+      parts.add('OS #${payment.orderNumber}');
+    }
     final methodLabel = _paymentMethodLabel(context, payment.paymentMethod);
     if (methodLabel.isNotEmpty) {
       parts.add(methodLabel);
@@ -180,4 +249,16 @@ class PaymentTimelineItem extends StatelessWidget {
     }
     return parts.join(' \u00b7 ');
   }
+
+  String _buildSecondaryTextWithoutOS(BuildContext context) {
+    final parts = <String>[];
+    final methodLabel = _paymentMethodLabel(context, payment.paymentMethod);
+    if (methodLabel.isNotEmpty) parts.add(methodLabel);
+    final accountName = payment.account?.name;
+    if (accountName != null && accountName.isNotEmpty) parts.add(accountName);
+    return parts.join(' \u00b7 ');
+  }
+
+  bool get _hasOrderLink =>
+      payment.orderId != null && payment.orderNumber != null;
 }

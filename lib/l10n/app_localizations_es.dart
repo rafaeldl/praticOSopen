@@ -3546,4 +3546,18 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get balanceMatches => 'Saldo correcto';
+
+  @override
+  String get pendingPayables => 'Cuentas por pagar';
+
+  @override
+  String get pendingReceivables => 'Cuentas por cobrar';
+
+  @override
+  String get swipeToPay => 'Pagar';
+
+  @override
+  String osNumberShort(String number) {
+    return 'OS #$number';
+  }
 }

@@ -445,6 +445,11 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
                               ...dayPayments.map(
                                 (payment) => PaymentTimelineItem(
                                   payment: payment,
+                                  onOrderTap: payment.orderId != null
+                                      ? () => Navigator.pushNamed(
+                                          context, '/order',
+                                          arguments: payment.orderId)
+                                      : null,
                                 ),
                               ),
                             ],

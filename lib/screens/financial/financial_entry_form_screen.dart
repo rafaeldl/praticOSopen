@@ -3,6 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/financial_account_store.dart';
 import 'package:praticos/mobx/financial_entry_store.dart';
+import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/financial_account.dart';
 import 'package:praticos/models/financial_entry.dart';
 import 'package:praticos/screens/financial/widgets/category_picker_grid.dart';
@@ -40,6 +41,7 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
   bool _showDetails = false;
   bool _isSaving = false;
   String? _companyId;
+  Customer? _selectedCustomer;
 
   @override
   void initState() {
@@ -62,6 +64,7 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (args != null && args['direction'] != null) {
       _direction = args['direction'] as String;
+      if (!_isPayable) _showDetails = true;
     }
   }
 
@@ -165,6 +168,18 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
     );
   }
 
+  void _selectCustomer() {
+    Navigator.pushNamed(
+      context,
+      '/customer_list',
+      arguments: {'order': null},
+    ).then((result) {
+      if (result != null && mounted) {
+        setState(() => _selectedCustomer = result as Customer);
+      }
+    });
+  }
+
   Future<void> _save() async {
     final amount = _parseAmount(_amountController.text);
     if (amount <= 0) return;
@@ -181,8 +196,8 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
         ..accountId = _selectedAccount?.id
         ..account = _selectedAccount?.toAggr()
         ..supplier = _isPayable ? _supplierController.text.trim() : null
-        ..customer = !_isPayable && _supplierController.text.trim().isNotEmpty
-            ? null // Customer linking would be a separate feature
+        ..customer = !_isPayable && _selectedCustomer != null
+            ? _selectedCustomer!.toAggr()
             : null
         ..notes = _notesController.text.trim().isNotEmpty
             ? _notesController.text.trim()
@@ -415,19 +430,29 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                   if (_showDetails)
                     CupertinoListSection.insetGrouped(
                       children: [
-                        CupertinoTextFormFieldRow(
-                          controller: _supplierController,
-                          prefix: Text(
-                            _isPayable
-                                ? context.l10n.supplier
-                                : context.l10n.customers,
+                        if (_isPayable)
+                          CupertinoTextFormFieldRow(
+                            controller: _supplierController,
+                            prefix: Text(context.l10n.supplier),
+                            placeholder: context.l10n.supplier,
+                            textCapitalization:
+                                TextCapitalization.sentences,
+                          )
+                        else
+                          GestureDetector(
+                            onTap: _selectCustomer,
+                            behavior: HitTestBehavior.opaque,
+                            child: CupertinoListTile(
+                              title: Text(context.l10n.customer),
+                              additionalInfo: Text(
+                                _selectedCustomer?.name ?? '',
+                                style: TextStyle(
+                                    color: secondaryLabelColor),
+                              ),
+                              trailing:
+                                  const CupertinoListTileChevron(),
+                            ),
                           ),
-                          placeholder: _isPayable
-                              ? context.l10n.supplier
-                              : context.l10n.customers,
-                          textCapitalization:
-                              TextCapitalization.sentences,
-                        ),
                         CupertinoTextFormFieldRow(
                           controller: _notesController,
                           prefix: Text(context.l10n.notes),

@@ -1506,5 +1506,14 @@
   },
   "balanceCorrected": "Saldo corregido",
   "selectDestinationAccount": "Seleccione la cuenta destino",
-  "balanceMatches": "Saldo correcto"
+  "balanceMatches": "Saldo correcto",
+  "pendingPayables": "Cuentas por pagar",
+  "pendingReceivables": "Cuentas por cobrar",
+  "swipeToPay": "Pagar",
+  "osNumberShort": "OS #{number}",
+  "@osNumberShort": {
+    "placeholders": {
+      "number": {"type": "String"}
+    }
+  }
 }

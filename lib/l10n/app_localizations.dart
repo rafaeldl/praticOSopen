@@ -6699,6 +6699,30 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Saldo correto'**
   String get balanceMatches;
+
+  /// No description provided for @pendingPayables.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contas a pagar'**
+  String get pendingPayables;
+
+  /// No description provided for @pendingReceivables.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contas a receber'**
+  String get pendingReceivables;
+
+  /// No description provided for @swipeToPay.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagar'**
+  String get swipeToPay;
+
+  /// No description provided for @osNumberShort.
+  ///
+  /// In pt, this message translates to:
+  /// **'OS #{number}'**
+  String osNumberShort(String number);
 }
 
 class _AppLocalizationsDelegate
