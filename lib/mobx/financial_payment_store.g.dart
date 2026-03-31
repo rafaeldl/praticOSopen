@@ -146,6 +146,32 @@ mixin _$FinancialPaymentStore on _FinancialPaymentStore, Store {
     );
   }
 
+  late final _$transferAsyncAction = AsyncAction(
+    '_FinancialPaymentStore.transfer',
+    context: context,
+  );
+
+  @override
+  Future<void> transfer({
+    required String fromAccountId,
+    required FinancialAccountAggr fromAccount,
+    required String toAccountId,
+    required FinancialAccountAggr toAccount,
+    required double amount,
+    String? description,
+  }) {
+    return _$transferAsyncAction.run(
+      () => super.transfer(
+        fromAccountId: fromAccountId,
+        fromAccount: fromAccount,
+        toAccountId: toAccountId,
+        toAccount: toAccount,
+        amount: amount,
+        description: description,
+      ),
+    );
+  }
+
   late final _$_FinancialPaymentStoreActionController = ActionController(
     name: '_FinancialPaymentStore',
     context: context,

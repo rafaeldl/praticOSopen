@@ -6645,6 +6645,60 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Toque em + para adicionar sua primeira conta.'**
   String get addFirstAccount;
+
+  /// No description provided for @transferFrom.
+  ///
+  /// In pt, this message translates to:
+  /// **'De: {account}'**
+  String transferFrom(String account);
+
+  /// No description provided for @transferTo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Para'**
+  String get transferTo;
+
+  /// No description provided for @transferSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Transferência realizada'**
+  String get transferSuccess;
+
+  /// No description provided for @balanceMismatch.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo divergente'**
+  String get balanceMismatch;
+
+  /// No description provided for @registeredBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo registrado: {value}'**
+  String registeredBalance(String value);
+
+  /// No description provided for @realBalance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo real: {value}'**
+  String realBalance(String value);
+
+  /// No description provided for @balanceCorrected.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo corrigido'**
+  String get balanceCorrected;
+
+  /// No description provided for @selectDestinationAccount.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecione a conta destino'**
+  String get selectDestinationAccount;
+
+  /// No description provided for @balanceMatches.
+  ///
+  /// In pt, this message translates to:
+  /// **'Saldo correto'**
+  String get balanceMatches;
 }
 
 class _AppLocalizationsDelegate

@@ -55,6 +55,30 @@ mixin _$FinancialAccountStore on _FinancialAccountStore, Store {
     return _$updateAccountAsyncAction.run(() => super.updateAccount(account));
   }
 
+  late final _$calculateRealBalanceAsyncAction = AsyncAction(
+    '_FinancialAccountStore.calculateRealBalance',
+    context: context,
+  );
+
+  @override
+  Future<double> calculateRealBalance(String accountId) {
+    return _$calculateRealBalanceAsyncAction.run(
+      () => super.calculateRealBalance(accountId),
+    );
+  }
+
+  late final _$reconcileBalanceAsyncAction = AsyncAction(
+    '_FinancialAccountStore.reconcileBalance',
+    context: context,
+  );
+
+  @override
+  Future<void> reconcileBalance(String accountId, double realBalance) {
+    return _$reconcileBalanceAsyncAction.run(
+      () => super.reconcileBalance(accountId, realBalance),
+    );
+  }
+
   late final _$_FinancialAccountStoreActionController = ActionController(
     name: '_FinancialAccountStore',
     context: context,

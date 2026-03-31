@@ -3494,4 +3494,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addFirstAccount => 'Tap + to add your first account.';
+
+  @override
+  String transferFrom(String account) {
+    return 'From: $account';
+  }
+
+  @override
+  String get transferTo => 'To';
+
+  @override
+  String get transferSuccess => 'Transfer completed';
+
+  @override
+  String get balanceMismatch => 'Balance mismatch';
+
+  @override
+  String registeredBalance(String value) {
+    return 'Registered balance: $value';
+  }
+
+  @override
+  String realBalance(String value) {
+    return 'Real balance: $value';
+  }
+
+  @override
+  String get balanceCorrected => 'Balance corrected';
+
+  @override
+  String get selectDestinationAccount => 'Select destination account';
+
+  @override
+  String get balanceMatches => 'Balance matches';
 }

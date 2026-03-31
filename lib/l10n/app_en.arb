@@ -1481,5 +1481,30 @@
   "accountDeactivated": "Account deactivated",
   "accountSaved": "Account saved",
   "noAccountsRegistered": "No accounts registered",
-  "addFirstAccount": "Tap + to add your first account."
+  "addFirstAccount": "Tap + to add your first account.",
+
+  "transferFrom": "From: {account}",
+  "@transferFrom": {
+    "placeholders": {
+      "account": {"type": "String"}
+    }
+  },
+  "transferTo": "To",
+  "transferSuccess": "Transfer completed",
+  "balanceMismatch": "Balance mismatch",
+  "registeredBalance": "Registered balance: {value}",
+  "@registeredBalance": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "realBalance": "Real balance: {value}",
+  "@realBalance": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "balanceCorrected": "Balance corrected",
+  "selectDestinationAccount": "Select destination account",
+  "balanceMatches": "Balance matches"
 }

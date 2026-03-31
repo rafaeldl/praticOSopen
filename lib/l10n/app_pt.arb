@@ -1526,5 +1526,30 @@
   "accountDeactivated": "Conta desativada",
   "accountSaved": "Conta salva",
   "noAccountsRegistered": "Nenhuma conta cadastrada",
-  "addFirstAccount": "Toque em + para adicionar sua primeira conta."
+  "addFirstAccount": "Toque em + para adicionar sua primeira conta.",
+
+  "transferFrom": "De: {account}",
+  "@transferFrom": {
+    "placeholders": {
+      "account": {"type": "String"}
+    }
+  },
+  "transferTo": "Para",
+  "transferSuccess": "Transferência realizada",
+  "balanceMismatch": "Saldo divergente",
+  "registeredBalance": "Saldo registrado: {value}",
+  "@registeredBalance": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "realBalance": "Saldo real: {value}",
+  "@realBalance": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "balanceCorrected": "Saldo corrigido",
+  "selectDestinationAccount": "Selecione a conta destino",
+  "balanceMatches": "Saldo correto"
 }

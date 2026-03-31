@@ -3505,4 +3505,37 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addFirstAccount => 'Toque em + para adicionar sua primeira conta.';
+
+  @override
+  String transferFrom(String account) {
+    return 'De: $account';
+  }
+
+  @override
+  String get transferTo => 'Para';
+
+  @override
+  String get transferSuccess => 'Transferência realizada';
+
+  @override
+  String get balanceMismatch => 'Saldo divergente';
+
+  @override
+  String registeredBalance(String value) {
+    return 'Saldo registrado: $value';
+  }
+
+  @override
+  String realBalance(String value) {
+    return 'Saldo real: $value';
+  }
+
+  @override
+  String get balanceCorrected => 'Saldo corrigido';
+
+  @override
+  String get selectDestinationAccount => 'Selecione a conta destino';
+
+  @override
+  String get balanceMatches => 'Saldo correto';
 }

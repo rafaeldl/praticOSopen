@@ -185,4 +185,87 @@ abstract class _FinancialPaymentStore with Store {
 
     await batch.commit();
   }
+
+  @action
+  Future<void> transfer({
+    required String fromAccountId,
+    required FinancialAccountAggr fromAccount,
+    required String toAccountId,
+    required FinancialAccountAggr toAccount,
+    required double amount,
+    String? description,
+  }) async {
+    if (companyId == null) return;
+
+    final db = FirebaseFirestore.instance;
+    final batch = db.batch();
+    final now = DateTime.now();
+    final groupId = now.millisecondsSinceEpoch.toString();
+
+    final paymentsCol = db
+        .collection('companies')
+        .doc(companyId)
+        .collection('financialPayments');
+
+    final desc = description ??
+        'Transfer ${fromAccount.name} \u2192 ${toAccount.name}';
+
+    // Payment 1: outgoing from source
+    final p1Ref = paymentsCol.doc();
+    batch.set(p1Ref, {
+      'id': p1Ref.id,
+      'type': 'transfer',
+      'status': 'completed',
+      'amount': amount,
+      'paymentDate': Timestamp.fromDate(now),
+      'description': desc,
+      'accountId': fromAccountId,
+      'account': fromAccount.toJson(),
+      'targetAccountId': toAccountId,
+      'targetAccount': toAccount.toJson(),
+      'transferGroupId': groupId,
+      'transferDirection': 'out',
+      'company': Global.companyAggr?.toJson(),
+      'createdAt': Timestamp.fromDate(now),
+      'createdBy': Global.userAggr?.toJson(),
+      'updatedAt': Timestamp.fromDate(now),
+      'updatedBy': Global.userAggr?.toJson(),
+    });
+
+    // Payment 2: incoming to destination
+    final p2Ref = paymentsCol.doc();
+    batch.set(p2Ref, {
+      'id': p2Ref.id,
+      'type': 'transfer',
+      'status': 'completed',
+      'amount': amount,
+      'paymentDate': Timestamp.fromDate(now),
+      'description': desc,
+      'accountId': toAccountId,
+      'account': toAccount.toJson(),
+      'targetAccountId': fromAccountId,
+      'targetAccount': fromAccount.toJson(),
+      'transferGroupId': groupId,
+      'transferDirection': 'in',
+      'company': Global.companyAggr?.toJson(),
+      'createdAt': Timestamp.fromDate(now),
+      'createdBy': Global.userAggr?.toJson(),
+      'updatedAt': Timestamp.fromDate(now),
+      'updatedBy': Global.userAggr?.toJson(),
+    });
+
+    // Update balances
+    final accountsCol = db
+        .collection('companies')
+        .doc(companyId)
+        .collection('financialAccounts');
+    batch.update(accountsCol.doc(fromAccountId), {
+      'currentBalance': FieldValue.increment(-amount),
+    });
+    batch.update(accountsCol.doc(toAccountId), {
+      'currentBalance': FieldValue.increment(amount),
+    });
+
+    await batch.commit();
+  }
 }

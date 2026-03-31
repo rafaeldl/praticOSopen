@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/financial_account.dart';
+import 'package:praticos/models/financial_payment.dart';
 import 'package:praticos/repositories/v2/financial_account_repository_v2.dart';
+import 'package:praticos/repositories/v2/financial_payment_repository_v2.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,7 +32,7 @@ abstract class _FinancialAccountStore with Store {
     final accounts = accountList?.value ?? [];
     return accounts
         .where((a) => a != null && (a.active ?? false))
-        .fold<double>(0, (sum, a) => sum + (a!.currentBalance ?? 0));
+        .fold<double>(0, (acc, a) => acc + (a!.currentBalance ?? 0));
   }
 
   @action
@@ -58,5 +61,46 @@ abstract class _FinancialAccountStore with Store {
     account.updatedAt = DateTime.now();
     account.updatedBy = Global.userAggr;
     await repository.updateItem(companyId!, account);
+  }
+
+  @action
+  Future<double> calculateRealBalance(String accountId) async {
+    if (companyId == null) return 0;
+
+    final paymentRepo = FinancialPaymentRepositoryV2();
+    final account = await repository.getSingle(companyId!, accountId);
+    final payments =
+        await paymentRepo.streamByAccount(companyId!, accountId).first;
+
+    double balance = account?.initialBalance ?? 0;
+    for (final p in payments) {
+      if (p == null || p.deletedAt != null) continue;
+      if (p.status == FinancialPaymentStatus.reversed) continue;
+      if (p.type == FinancialPaymentType.income) balance += p.amount ?? 0;
+      if (p.type == FinancialPaymentType.expense) balance -= p.amount ?? 0;
+      if (p.type == FinancialPaymentType.transfer) {
+        if (p.transferDirection == 'out') balance -= p.amount ?? 0;
+        if (p.transferDirection == 'in') balance += p.amount ?? 0;
+      }
+    }
+    return balance;
+  }
+
+  @action
+  Future<void> reconcileBalance(
+      String accountId, double realBalance) async {
+    if (companyId == null) return;
+    final db = FirebaseFirestore.instance;
+    await db
+        .collection('companies')
+        .doc(companyId)
+        .collection('financialAccounts')
+        .doc(accountId)
+        .update({
+      'currentBalance': realBalance,
+      'lastReconciledAt': Timestamp.fromDate(DateTime.now()),
+      'updatedAt': Timestamp.fromDate(DateTime.now()),
+      'updatedBy': Global.userAggr?.toJson(),
+    });
   }
 }
