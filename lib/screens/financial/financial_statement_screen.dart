@@ -3,6 +3,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/financial_account_store.dart';
+import 'package:praticos/mobx/financial_entry_store.dart';
 import 'package:praticos/mobx/financial_payment_store.dart';
 import 'package:praticos/models/financial_payment.dart';
 import 'package:praticos/screens/financial/widgets/balance_header.dart';
@@ -23,6 +24,7 @@ class FinancialStatementScreen extends StatefulWidget {
 class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
   final FinancialPaymentStore _paymentStore = FinancialPaymentStore();
   final FinancialAccountStore _accountStore = FinancialAccountStore();
+  final FinancialEntryStore _entryStore = FinancialEntryStore();
 
   DateTime _currentMonth = DateTime.now();
   FinancialPaymentType? _filterType;
@@ -35,6 +37,7 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
       if (mounted) {
         _accountStore.load();
         _loadCurrentMonth();
+        _entryStore.processRecurrences(); // fire-and-forget
       }
     });
   }

@@ -201,6 +201,97 @@ abstract class _FinancialEntryStore with Store {
     });
   }
 
+  /// Processes all active recurrences, generating pending entries for any
+  /// missed due dates (catch-up). Called fire-and-forget when the financial
+  /// statement screen loads.
+  Future<void> processRecurrences() async {
+    if (companyId == null) return;
+
+    // Load pending entries and filter for active recurrences client-side
+    final allEntries = await repository.streamPending(companyId!).first;
+    final recurring = allEntries
+        .where((e) =>
+            e != null &&
+            e.recurrence != null &&
+            (e.recurrence!.active ?? false) &&
+            e.recurrence!.nextDueDate != null &&
+            !e.recurrence!.nextDueDate!.isAfter(DateTime.now()))
+        .cast<FinancialEntry>()
+        .toList();
+
+    for (final entry in recurring) {
+      await _processRecurrence(entry);
+    }
+  }
+
+  Future<void> _processRecurrence(FinancialEntry entry) async {
+    if (companyId == null) return;
+    var nextDueDate = entry.recurrence!.nextDueDate!;
+    final now = DateTime.now();
+    final endDate = entry.recurrence!.endDate;
+
+    while (!nextDueDate.isAfter(now)) {
+      // Check if endDate is reached before generating
+      if (endDate != null && nextDueDate.isAfter(endDate)) {
+        entry.recurrence!.active = false;
+        break;
+      }
+
+      // Generate new entry with dueDate = nextDueDate (normal, no recurrence)
+      final newEntry = FinancialEntry()
+        ..direction = entry.direction
+        ..status = FinancialEntryStatus.pending
+        ..description = entry.description
+        ..amount = entry.amount
+        ..dueDate = nextDueDate
+        ..competenceDate = nextDueDate
+        ..paidAmount = 0
+        ..discountAmount = 0
+        ..category = entry.category
+        ..accountId = entry.accountId
+        ..account = entry.account
+        ..supplier = entry.supplier
+        ..customer = entry.customer;
+      _applyAuditFields(newEntry);
+      await repository.createItem(companyId!, newEntry);
+
+      // Advance to next due date
+      nextDueDate = _calculateNextDueDate(
+        nextDueDate,
+        entry.recurrence!.frequency ?? 'monthly',
+        entry.recurrence!.interval ?? 1,
+      );
+    }
+
+    // Check if the next due date exceeds endDate => deactivate
+    if (endDate != null && nextDueDate.isAfter(endDate)) {
+      entry.recurrence!.active = false;
+    }
+
+    // Update the original entry with new nextDueDate and lastGeneratedDate
+    entry.recurrence!.lastGeneratedDate = DateTime.now();
+    entry.recurrence!.nextDueDate = nextDueDate;
+    entry.updatedAt = DateTime.now();
+    entry.updatedBy = Global.userAggr;
+    await repository.updateItem(companyId!, entry);
+  }
+
+  DateTime _calculateNextDueDate(
+      DateTime current, String frequency, int interval) {
+    switch (frequency) {
+      case 'daily':
+        return current.add(Duration(days: interval));
+      case 'weekly':
+        return current.add(Duration(days: 7 * interval));
+      case 'monthly':
+        return DateTime(current.year, current.month + interval, current.day);
+      case 'yearly':
+        return DateTime(current.year + interval, current.month, current.day);
+      default:
+        return DateTime(current.year, current.month + interval, current.day);
+    }
+  }
+
   void _applyAuditFields(FinancialEntry entry) {
     entry.createdAt = DateTime.now();
     entry.createdBy = Global.userAggr;

@@ -38,6 +38,10 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
   bool _isInstallment = false;
   int _installmentCount = 2;
   bool _isRecurring = false;
+  bool _showRecurrenceOptions = false;
+  String _recurrenceFrequency = 'monthly';
+  int _recurrenceInterval = 1;
+  DateTime? _recurrenceEndDate;
   bool _showDetails = false;
   bool _isSaving = false;
   String? _companyId;
@@ -204,15 +208,16 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
             : null;
 
       if (_isRecurring && !_isInstallment) {
+        final freq = _showRecurrenceOptions ? _recurrenceFrequency : 'monthly';
+        final intv = _showRecurrenceOptions ? _recurrenceInterval : 1;
+        final nextDue = _calculateNextDueDate(_dueDate, freq, intv);
+
         entry.recurrence = FinancialRecurrence()
-          ..frequency = 'monthly'
-          ..interval = 1
+          ..frequency = freq
+          ..interval = intv
           ..active = true
-          ..nextDueDate = DateTime(
-            _dueDate.year,
-            _dueDate.month + 1,
-            _dueDate.day,
-          );
+          ..nextDueDate = nextDue
+          ..endDate = _showRecurrenceOptions ? _recurrenceEndDate : null;
       }
 
       if (_isInstallment && _installmentCount > 1) {
@@ -401,10 +406,65 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                           title: Text(context.l10n.repeatMonthly),
                           trailing: CupertinoSwitch(
                             value: _isRecurring,
-                            onChanged: (val) =>
-                                setState(() => _isRecurring = val),
+                            onChanged: (val) {
+                              setState(() {
+                                _isRecurring = val;
+                                if (!val) _showRecurrenceOptions = false;
+                              });
+                            },
                           ),
                         ),
+                        if (_isRecurring && !_showRecurrenceOptions)
+                          CupertinoButton(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            onPressed: () =>
+                                setState(() => _showRecurrenceOptions = true),
+                            child: Row(
+                              children: [
+                                const Icon(CupertinoIcons.slider_horizontal_3,
+                                    size: 16),
+                                const SizedBox(width: 4),
+                                Text(context.l10n.customize),
+                              ],
+                            ),
+                          ),
+                        if (_isRecurring && _showRecurrenceOptions) ...[
+                          // Frequency picker
+                          GestureDetector(
+                            onTap: _showFrequencyPicker,
+                            behavior: HitTestBehavior.opaque,
+                            child: CupertinoListTile(
+                              title: Text(context.l10n.frequency),
+                              additionalInfo: Text(
+                                _frequencyLabel(context),
+                                style:
+                                    TextStyle(color: secondaryLabelColor),
+                              ),
+                              trailing: const CupertinoListTileChevron(),
+                            ),
+                          ),
+                          // Interval stepper
+                          _buildIntervalStepper(
+                              context, labelColor, secondaryLabelColor),
+                          // End date picker (optional)
+                          GestureDetector(
+                            onTap: _showEndDatePicker,
+                            behavior: HitTestBehavior.opaque,
+                            child: CupertinoListTile(
+                              title: Text(context.l10n.endDate),
+                              additionalInfo: Text(
+                                _recurrenceEndDate != null
+                                    ? FormatService()
+                                        .formatDate(_recurrenceEndDate!)
+                                    : '-',
+                                style:
+                                    TextStyle(color: secondaryLabelColor),
+                              ),
+                              trailing: const CupertinoListTileChevron(),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
 
@@ -483,6 +543,173 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  String _frequencyLabel(BuildContext context) {
+    switch (_recurrenceFrequency) {
+      case 'daily':
+        return context.l10n.frequencyDaily;
+      case 'weekly':
+        return context.l10n.frequencyWeekly;
+      case 'monthly':
+        return context.l10n.frequencyMonthly;
+      case 'yearly':
+        return context.l10n.frequencyYearly;
+      default:
+        return context.l10n.frequencyMonthly;
+    }
+  }
+
+  void _showFrequencyPicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(context.l10n.frequency),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              setState(() => _recurrenceFrequency = 'daily');
+              Navigator.pop(ctx);
+            },
+            child: Text(context.l10n.frequencyDaily),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              setState(() => _recurrenceFrequency = 'weekly');
+              Navigator.pop(ctx);
+            },
+            child: Text(context.l10n.frequencyWeekly),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              setState(() => _recurrenceFrequency = 'monthly');
+              Navigator.pop(ctx);
+            },
+            child: Text(context.l10n.frequencyMonthly),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              setState(() => _recurrenceFrequency = 'yearly');
+              Navigator.pop(ctx);
+            },
+            child: Text(context.l10n.frequencyYearly),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(context.l10n.cancel),
+        ),
+      ),
+    );
+  }
+
+  void _showEndDatePicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 280,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 44,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CupertinoButton(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    onPressed: () {
+                      setState(() => _recurrenceEndDate = null);
+                      Navigator.pop(ctx);
+                    },
+                    child: Text(context.l10n.cancel),
+                  ),
+                  CupertinoButton(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(context.l10n.confirm),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime:
+                    _recurrenceEndDate ?? _dueDate.add(const Duration(days: 365)),
+                minimumDate: _dueDate,
+                onDateTimeChanged: (date) {
+                  setState(() => _recurrenceEndDate = date);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  DateTime _calculateNextDueDate(
+      DateTime current, String frequency, int interval) {
+    switch (frequency) {
+      case 'daily':
+        return current.add(Duration(days: interval));
+      case 'weekly':
+        return current.add(Duration(days: 7 * interval));
+      case 'monthly':
+        return DateTime(current.year, current.month + interval, current.day);
+      case 'yearly':
+        return DateTime(current.year + interval, current.month, current.day);
+      default:
+        return DateTime(current.year, current.month + interval, current.day);
+    }
+  }
+
+  Widget _buildIntervalStepper(
+    BuildContext context,
+    Color labelColor,
+    Color secondaryLabelColor,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Text(
+            context.l10n.interval,
+            style: TextStyle(color: labelColor),
+          ),
+          const Spacer(),
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            minimumSize: const Size.square(32),
+            onPressed: _recurrenceInterval > 1
+                ? () => setState(() => _recurrenceInterval--)
+                : null,
+            child: const Icon(CupertinoIcons.minus_circle, size: 28),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              '$_recurrenceInterval',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: labelColor,
+              ),
+            ),
+          ),
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            minimumSize: const Size.square(32),
+            onPressed: _recurrenceInterval < 12
+                ? () => setState(() => _recurrenceInterval++)
+                : null,
+            child: const Icon(CupertinoIcons.plus_circle, size: 28),
+          ),
+        ],
       ),
     );
   }
