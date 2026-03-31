@@ -120,6 +120,19 @@ enum PermissionType {
 
   /// Configurar templates, regras e parâmetros globais
   manageSettings,
+
+  // ═══════════════════════════════════════════════════════════════════
+  // MÓDULO FINANCEIRO AVANÇADO
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Gerenciar lançamentos financeiros (receitas/despesas)
+  manageFinancialEntries,
+
+  /// Gerenciar contas financeiras (caixa, banco, cartão)
+  manageFinancialAccounts,
+
+  /// Visualizar extrato financeiro consolidado
+  viewFinancialStatement,
 }
 
 /// Mapeamento de permissões por perfil.
@@ -249,6 +262,10 @@ class RolePermissions {
     PermissionType.manageRoles,
     PermissionType.manageCompany,
     PermissionType.manageSettings,
+    // Módulo Financeiro Avançado
+    PermissionType.manageFinancialEntries,
+    PermissionType.manageFinancialAccounts,
+    PermissionType.viewFinancialStatement,
   };
 
   /// 💰 Manager (Financial) - Financial management
@@ -273,6 +290,10 @@ class RolePermissions {
     PermissionType.viewDevices,
     // Fotos
     PermissionType.viewPhotos,
+    // Módulo Financeiro Avançado
+    PermissionType.manageFinancialEntries,
+    PermissionType.manageFinancialAccounts,
+    PermissionType.viewFinancialStatement,
   };
 
   /// 🧑‍🔧 Supervisor - Gestão operacional (SEM acesso financeiro)

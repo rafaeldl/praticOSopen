@@ -36,6 +36,7 @@ class SegmentConfigService {
   bool _useScheduling = true;
   bool _useDeviceManagement = false;
   bool _useContracts = false;
+  bool _useFinancialManagement = false;
 
   // Mapeamento de chaves técnicas de status para label keys
   static const Map<String, String> _statusKeyMapping = {
@@ -541,11 +542,13 @@ class SegmentConfigService {
     required bool useScheduling,
     required bool useDeviceManagement,
     required bool useContracts,
+    required bool useFinancialManagement,
   }) {
     _fieldService = fieldService;
     _useScheduling = useScheduling;
     _useDeviceManagement = useDeviceManagement;
     _useContracts = useContracts;
+    _useFinancialManagement = useFinancialManagement;
   }
 
   /// Whether the company does field service (attends at customer location)
@@ -563,6 +566,9 @@ class SegmentConfigService {
   /// Whether the company uses recurring maintenance contracts
   bool get useContracts => _useContracts;
 
+  /// Whether the company uses advanced financial management
+  bool get useFinancialManagement => _useFinancialManagement;
+
   /// Default terms of service text for the current segment and locale
   String? get defaultTermsOfService => _defaultTermsOfService;
 
@@ -577,6 +583,7 @@ class SegmentConfigService {
     _useScheduling = true;
     _useDeviceManagement = false;
     _useContracts = false;
+    _useFinancialManagement = false;
   }
 
   /// Getters de estado

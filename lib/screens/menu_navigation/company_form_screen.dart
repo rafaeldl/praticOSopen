@@ -215,6 +215,7 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
             useScheduling: _company!.useScheduling ?? true,
             useDeviceManagement: _company!.useDeviceManagement ?? false,
             useContracts: _company!.useContracts ?? false,
+            useFinancialManagement: _company!.useFinancialManagement ?? false,
           );
         }
       }
@@ -758,6 +759,13 @@ class _CompanyFormScreenState extends State<CompanyFormScreen> {
                     child: CupertinoSwitch(
                       value: _company?.useContracts ?? false,
                       onChanged: (val) => setState(() => _company?.useContracts = val),
+                    ),
+                  ),
+                  CupertinoFormRow(
+                    prefix: const Text('Gestão Financeira'),
+                    child: CupertinoSwitch(
+                      value: _company?.useFinancialManagement ?? false,
+                      onChanged: (val) => setState(() => _company?.useFinancialManagement = val),
                     ),
                   ),
                 ],

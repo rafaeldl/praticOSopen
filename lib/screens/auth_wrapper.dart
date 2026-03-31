@@ -432,6 +432,7 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
       final bool useScheduling = companyData?['useScheduling'] as bool? ?? true;
       final bool useDeviceManagement = companyData?['useDeviceManagement'] as bool? ?? false;
       final bool useContracts = companyData?['useContracts'] as bool? ?? false;
+      final bool useFinancialManagement = companyData?['useFinancialManagement'] as bool? ?? false;
 
       // Backfill: persist resolved values on first access
       final needsUpdate = companyData?['fieldService'] == null
@@ -453,6 +454,7 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         useScheduling: useScheduling,
         useDeviceManagement: useDeviceManagement,
         useContracts: useContracts,
+        useFinancialManagement: useFinancialManagement,
       );
 
       // Initialize notifications after user is fully authenticated

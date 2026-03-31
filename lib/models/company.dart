@@ -22,6 +22,7 @@ class Company extends BaseAudit {
   String? termsOfService;
   bool? useDeviceManagement; // Gestão avançada de dispositivos/ativos
   bool? useContracts; // Recurring maintenance contracts
+  bool? useFinancialManagement; // Advanced financial management (accounts, entries, statement)
   UserAggr? owner;
   List<UserRoleAggr>? users;
 

@@ -52,4 +52,8 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/ratings': (context) => const RatingsScreen(),
   '/notifications': (context) => const NotificationListScreen(),
   '/contract_list': (context) => const ContractListScreen(),
+  '/financial_statement': (context) => const Scaffold(body: Center(child: Text('Financial Statement'))),
+  '/financial_entry_form': (context) => const Scaffold(body: Center(child: Text('Financial Entry Form'))),
+  '/financial_account_list': (context) => const Scaffold(body: Center(child: Text('Financial Account List'))),
+  '/financial_account_form': (context) => const Scaffold(body: Center(child: Text('Financial Account Form'))),
 };

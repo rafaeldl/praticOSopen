@@ -10,6 +10,7 @@ import 'package:praticos/screens/agenda/agenda_screen.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/engagement_scheduler.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 
 import 'home.dart';
 
@@ -26,14 +27,17 @@ class _NavigationControllerState extends State<NavigationController>
   ReactionDisposer? _disposer;
   EngagementScheduler? _engagementScheduler;
 
-  /// Build page options - Financial tab is always included
-  /// Permission check is handled inside FinancialDashboardSimple
-  List<Widget> _buildPageOptions() {
+  /// Build page options - Financial tab shows full statement when
+  /// useFinancialManagement is enabled, otherwise simple dashboard
+  List<Widget> _buildPageOptions(BuildContext context) {
+    final useFinancialManagement = Provider.of<SegmentConfigProvider>(context, listen: false).useFinancialManagement;
     return <Widget>[
       Home(),
       HomeCustomerList(),
       const AgendaScreen(),
-      FinancialDashboardSimple(),
+      useFinancialManagement
+          ? const Center(child: Text('Financial Statement'))
+          : FinancialDashboardSimple(),
       Settings(),
     ];
   }
@@ -146,7 +150,7 @@ class _NavigationControllerState extends State<NavigationController>
   @override
   Widget build(BuildContext context) {
     final navigationStore = Provider.of<BottomNavigationBarStore>(context);
-    final pageOptions = _buildPageOptions();
+    final pageOptions = _buildPageOptions(context);
     final tabItems = _buildTabItems(context);
 
     return CupertinoTabScaffold(
