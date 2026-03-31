@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/models/financial_account.dart';
-import 'package:praticos/models/financial_payment.dart';
 import 'package:praticos/repositories/v2/financial_account_repository_v2.dart';
 import 'package:praticos/repositories/v2/financial_payment_repository_v2.dart';
+import 'package:praticos/utils/financial_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -72,18 +72,10 @@ abstract class _FinancialAccountStore with Store {
     final payments =
         await paymentRepo.streamByAccount(companyId!, accountId).first;
 
-    double balance = account?.initialBalance ?? 0;
-    for (final p in payments) {
-      if (p == null || p.deletedAt != null) continue;
-      if (p.status == FinancialPaymentStatus.reversed) continue;
-      if (p.type == FinancialPaymentType.income) balance += p.amount ?? 0;
-      if (p.type == FinancialPaymentType.expense) balance -= p.amount ?? 0;
-      if (p.type == FinancialPaymentType.transfer) {
-        if (p.transferDirection == 'out') balance -= p.amount ?? 0;
-        if (p.transferDirection == 'in') balance += p.amount ?? 0;
-      }
-    }
-    return balance;
+    return FinancialUtils.computeRealBalance(
+      account?.initialBalance ?? 0,
+      payments,
+    );
   }
 
   @action

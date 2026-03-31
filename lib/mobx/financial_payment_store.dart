@@ -5,6 +5,7 @@ import 'package:praticos/models/financial_entry.dart';
 import 'package:praticos/models/financial_payment.dart';
 import 'package:praticos/models/payment_method.dart';
 import 'package:praticos/repositories/v2/financial_payment_repository_v2.dart';
+import 'package:praticos/utils/financial_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -57,38 +58,11 @@ abstract class _FinancialPaymentStore with Store {
   void loadKPIs(DateTime start, DateTime end) {
     if (companyId == null) return;
     repository.streamByDateRange(companyId!, start, end).listen((payments) {
-      final active = payments
-          .where((p) =>
-              p != null &&
-              p.status == FinancialPaymentStatus.completed &&
-              p.deletedAt == null)
-          .cast<FinancialPayment>();
-
-      totalIncome = active
-          .where((p) => p.type == FinancialPaymentType.income)
-          .fold<double>(0, (acc, p) => acc + (p.amount ?? 0));
-
-      totalExpense = active
-          .where((p) => p.type == FinancialPaymentType.expense)
-          .fold<double>(0, (acc, p) => acc + (p.amount ?? 0));
-
-      // Today KPIs
-      final now = DateTime.now();
-      final todayStart = DateTime(now.year, now.month, now.day);
-      final todayEnd = todayStart.add(const Duration(days: 1));
-
-      final todayPayments = active.where((p) =>
-          p.paymentDate != null &&
-          p.paymentDate!.isAfter(todayStart) &&
-          p.paymentDate!.isBefore(todayEnd));
-
-      todayIncome = todayPayments
-          .where((p) => p.type == FinancialPaymentType.income)
-          .fold<double>(0, (acc, p) => acc + (p.amount ?? 0));
-
-      todayExpense = todayPayments
-          .where((p) => p.type == FinancialPaymentType.expense)
-          .fold<double>(0, (acc, p) => acc + (p.amount ?? 0));
+      final kpis = FinancialUtils.computeKPIs(payments);
+      totalIncome = kpis.totalIncome;
+      totalExpense = kpis.totalExpense;
+      todayIncome = kpis.todayIncome;
+      todayExpense = kpis.todayExpense;
     });
   }
 
