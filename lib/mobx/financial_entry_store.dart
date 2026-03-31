@@ -151,6 +151,56 @@ abstract class _FinancialEntryStore with Store {
     });
   }
 
+  /// Recalculates the paidAmount on a FinancialEntry by summing all active
+  /// (completed, non-deleted) payments linked to that entry. Uses a Firestore
+  /// transaction for atomic read+write of the entry document.
+  Future<void> recalculatePaidAmount(String entryId) async {
+    if (companyId == null) return;
+    final db = FirebaseFirestore.instance;
+    final entryRef = db
+        .collection('companies')
+        .doc(companyId)
+        .collection('financialEntries')
+        .doc(entryId);
+
+    // Read payments outside transaction (queries not supported in transactions)
+    final paymentsSnapshot = await db
+        .collection('companies')
+        .doc(companyId)
+        .collection('financialPayments')
+        .where('entryId', isEqualTo: entryId)
+        .get();
+
+    double activePaidAmount = 0;
+    for (final doc in paymentsSnapshot.docs) {
+      final data = doc.data();
+      if (data['status'] == 'completed' && data['deletedAt'] == null) {
+        activePaidAmount += (data['amount'] as num?)?.toDouble() ?? 0;
+      }
+    }
+
+    // Atomic update of entry
+    await db.runTransaction((transaction) async {
+      final entryDoc = await transaction.get(entryRef);
+      if (!entryDoc.exists) return;
+
+      final entryData = entryDoc.data()!;
+      final entryAmount = (entryData['amount'] as num?)?.toDouble() ?? 0;
+      final discountAmount =
+          (entryData['discountAmount'] as num?)?.toDouble() ?? 0;
+      final isFullyPaid = activePaidAmount + discountAmount >= entryAmount;
+
+      transaction.update(entryRef, {
+        'paidAmount': activePaidAmount,
+        'status': isFullyPaid ? 'paid' : 'pending',
+        'paidDate':
+            isFullyPaid ? Timestamp.fromDate(DateTime.now()) : null,
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+        'updatedBy': Global.userAggr?.toJson(),
+      });
+    });
+  }
+
   void _applyAuditFields(FinancialEntry entry) {
     entry.createdAt = DateTime.now();
     entry.createdBy = Global.userAggr;

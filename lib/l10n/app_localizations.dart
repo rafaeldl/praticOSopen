@@ -6723,6 +6723,48 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'OS #{number}'**
   String osNumberShort(String number);
+
+  /// No description provided for @reversePayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estornar'**
+  String get reversePayment;
+
+  /// No description provided for @reversalReasonRequired.
+  ///
+  /// In pt, this message translates to:
+  /// **'Informe o motivo do estorno'**
+  String get reversalReasonRequired;
+
+  /// No description provided for @reversalReasonHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Motivo do estorno'**
+  String get reversalReasonHint;
+
+  /// No description provided for @paymentReversed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamento estornado'**
+  String get paymentReversed;
+
+  /// No description provided for @cannotReverseReversal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não é possível estornar um estorno'**
+  String get cannotReverseReversal;
+
+  /// No description provided for @confirmReversal.
+  ///
+  /// In pt, this message translates to:
+  /// **'Confirmar estorno'**
+  String get confirmReversal;
+
+  /// No description provided for @confirmReversalMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja estornar este pagamento? Esta ação não pode ser desfeita.'**
+  String get confirmReversalMessage;
 }
 
 class _AppLocalizationsDelegate

@@ -450,6 +450,16 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
                                           context, '/order',
                                           arguments: payment.orderId)
                                       : null,
+                                  onReverse: (payment, reason) async {
+                                    if (payment.type ==
+                                        FinancialPaymentType.transfer) {
+                                      await _paymentStore.reverseTransfer(
+                                          payment, reason);
+                                    } else {
+                                      await _paymentStore.reversePayment(
+                                          payment, reason);
+                                    }
+                                  },
                                 ),
                               ),
                             ],

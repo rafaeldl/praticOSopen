@@ -3560,4 +3560,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String osNumberShort(String number) {
     return 'OS #$number';
   }
+
+  @override
+  String get reversePayment => 'Revertir';
+
+  @override
+  String get reversalReasonRequired => 'Ingrese el motivo de la reversión';
+
+  @override
+  String get reversalReasonHint => 'Motivo de la reversión';
+
+  @override
+  String get paymentReversed => 'Pago revertido';
+
+  @override
+  String get cannotReverseReversal => 'No se puede revertir una reversión';
+
+  @override
+  String get confirmReversal => 'Confirmar reversión';
+
+  @override
+  String get confirmReversalMessage =>
+      '¿Está seguro que desea revertir este pago? Esta acción no se puede deshacer.';
 }

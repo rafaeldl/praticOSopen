@@ -5,6 +5,7 @@ import 'package:praticos/models/financial_entry.dart';
 import 'package:praticos/models/financial_payment.dart';
 import 'package:praticos/models/payment_method.dart';
 import 'package:praticos/repositories/v2/financial_payment_repository_v2.dart';
+import 'package:praticos/mobx/financial_entry_store.dart';
 import 'package:praticos/utils/financial_utils.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -239,6 +240,195 @@ abstract class _FinancialPaymentStore with Store {
     batch.update(accountsCol.doc(toAccountId), {
       'currentBalance': FieldValue.increment(amount),
     });
+
+    await batch.commit();
+  }
+
+  /// Reverses a single payment (income or expense) atomically.
+  ///
+  /// Creates a reversal payment document, marks the original as reversed,
+  /// and reverts the account balance. If the original is linked to an entry,
+  /// recalculates the entry's paidAmount.
+  @action
+  Future<void> reversePayment(
+      FinancialPayment original, String reason) async {
+    if (companyId == null) return;
+
+    // Guard: cannot reverse an already-reversed payment
+    if (original.status == FinancialPaymentStatus.reversed) return;
+
+    // Guard: cannot reverse a reversal payment itself
+    if (original.reversedPaymentId != null) return;
+
+    final db = FirebaseFirestore.instance;
+    final batch = db.batch();
+    final now = DateTime.now();
+
+    final paymentsCol = db
+        .collection('companies')
+        .doc(companyId)
+        .collection('financialPayments');
+
+    // 1. Create reversal payment
+    final reversalRef = paymentsCol.doc();
+    batch.set(reversalRef, {
+      'id': reversalRef.id,
+      'type': original.type?.name,
+      'status': 'completed',
+      'amount': original.amount,
+      'paymentDate': Timestamp.fromDate(now),
+      'description': 'Estorno: ${original.description}',
+      'reversedPaymentId': original.id,
+      'reversalReason': reason,
+      'entryId': original.entryId,
+      'accountId': original.accountId,
+      'account': original.account?.toJson(),
+      'orderId': original.orderId,
+      'orderNumber': original.orderNumber,
+      'customer': original.customer?.toJson(),
+      'supplier': original.supplier,
+      'category': original.category,
+      'syncSource': null,
+      'company': Global.companyAggr?.toJson(),
+      'createdAt': Timestamp.fromDate(now),
+      'createdBy': Global.userAggr?.toJson(),
+      'updatedAt': Timestamp.fromDate(now),
+      'updatedBy': Global.userAggr?.toJson(),
+    });
+
+    // 2. Mark original as reversed
+    final originalRef = paymentsCol.doc(original.id);
+    batch.update(originalRef, {
+      'status': 'reversed',
+      'reversedByPaymentId': reversalRef.id,
+      'reversedAt': Timestamp.fromDate(now),
+      'updatedAt': Timestamp.fromDate(now),
+      'updatedBy': Global.userAggr?.toJson(),
+    });
+
+    // 3. Revert account balance
+    if (original.accountId != null) {
+      final accountRef = db
+          .collection('companies')
+          .doc(companyId)
+          .collection('financialAccounts')
+          .doc(original.accountId);
+
+      // Expense reversal gives money back (+), income reversal takes money back (-)
+      final balanceRevert = original.type == FinancialPaymentType.expense
+          ? (original.amount ?? 0)
+          : -(original.amount ?? 0);
+      batch.update(accountRef, {
+        'currentBalance': FieldValue.increment(balanceRevert),
+      });
+    }
+
+    await batch.commit();
+
+    // 4. Recalculate entry paidAmount if linked
+    if (original.entryId != null) {
+      final entryStore = FinancialEntryStore();
+      // Ensure companyId is set (avoid waiting for SharedPreferences)
+      entryStore.companyId = companyId;
+      await entryStore.recalculatePaidAmount(original.entryId!);
+    }
+  }
+
+  /// Reverses a transfer (both legs) atomically.
+  ///
+  /// Fetches both payments by transferGroupId, creates reversal payments
+  /// with flipped directions, marks originals as reversed, and reverts
+  /// both account balances in a single WriteBatch.
+  @action
+  Future<void> reverseTransfer(
+      FinancialPayment original, String reason) async {
+    if (companyId == null) return;
+    if (original.transferGroupId == null) return;
+
+    // Guard: cannot reverse an already-reversed payment
+    if (original.status == FinancialPaymentStatus.reversed) return;
+
+    // Guard: cannot reverse a reversal payment itself
+    if (original.reversedPaymentId != null) return;
+
+    // Get both payments in the transfer group
+    final groupPayments = await repository.getByTransferGroup(
+        companyId!, original.transferGroupId!);
+
+    if (groupPayments.isEmpty) return;
+
+    final db = FirebaseFirestore.instance;
+    final batch = db.batch();
+    final now = DateTime.now();
+    final newGroupId = now.millisecondsSinceEpoch.toString();
+
+    final paymentsCol = db
+        .collection('companies')
+        .doc(companyId)
+        .collection('financialPayments');
+
+    final accountsCol = db
+        .collection('companies')
+        .doc(companyId)
+        .collection('financialAccounts');
+
+    for (final payment in groupPayments) {
+      if (payment == null) continue;
+      if (payment.status == FinancialPaymentStatus.reversed) continue;
+
+      // Flip transfer direction for the reversal
+      final originalDirection = payment.transferDirection;
+      final reversalDirection =
+          originalDirection == 'out' ? 'in' : 'out';
+
+      // 1. Create reversal payment
+      final reversalRef = paymentsCol.doc();
+      batch.set(reversalRef, {
+        'id': reversalRef.id,
+        'type': 'transfer',
+        'status': 'completed',
+        'amount': payment.amount,
+        'paymentDate': Timestamp.fromDate(now),
+        'description': 'Estorno: ${payment.description}',
+        'reversedPaymentId': payment.id,
+        'reversalReason': reason,
+        'accountId': payment.accountId,
+        'account': payment.account?.toJson(),
+        'targetAccountId': payment.targetAccountId,
+        'targetAccount': payment.targetAccount?.toJson(),
+        'transferGroupId': newGroupId,
+        'transferDirection': reversalDirection,
+        'syncSource': null,
+        'company': Global.companyAggr?.toJson(),
+        'createdAt': Timestamp.fromDate(now),
+        'createdBy': Global.userAggr?.toJson(),
+        'updatedAt': Timestamp.fromDate(now),
+        'updatedBy': Global.userAggr?.toJson(),
+      });
+
+      // 2. Mark original as reversed
+      final originalRef = paymentsCol.doc(payment.id);
+      batch.update(originalRef, {
+        'status': 'reversed',
+        'reversedByPaymentId': reversalRef.id,
+        'reversedAt': Timestamp.fromDate(now),
+        'updatedAt': Timestamp.fromDate(now),
+        'updatedBy': Global.userAggr?.toJson(),
+      });
+
+      // 3. Revert account balance
+      if (payment.accountId != null) {
+        final accountRef = accountsCol.doc(payment.accountId);
+        // 'out' direction originally decremented balance, so revert with +
+        // 'in' direction originally incremented balance, so revert with -
+        final balanceRevert = originalDirection == 'out'
+            ? (payment.amount ?? 0)
+            : -(payment.amount ?? 0);
+        batch.update(accountRef, {
+          'currentBalance': FieldValue.increment(balanceRevert),
+        });
+      }
+    }
 
     await batch.commit();
   }

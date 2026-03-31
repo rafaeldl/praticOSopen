@@ -3552,4 +3552,26 @@ class AppLocalizationsPt extends AppLocalizations {
   String osNumberShort(String number) {
     return 'OS #$number';
   }
+
+  @override
+  String get reversePayment => 'Estornar';
+
+  @override
+  String get reversalReasonRequired => 'Informe o motivo do estorno';
+
+  @override
+  String get reversalReasonHint => 'Motivo do estorno';
+
+  @override
+  String get paymentReversed => 'Pagamento estornado';
+
+  @override
+  String get cannotReverseReversal => 'Não é possível estornar um estorno';
+
+  @override
+  String get confirmReversal => 'Confirmar estorno';
+
+  @override
+  String get confirmReversalMessage =>
+      'Tem certeza que deseja estornar este pagamento? Esta ação não pode ser desfeita.';
 }

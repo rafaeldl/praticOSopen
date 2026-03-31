@@ -1515,5 +1515,13 @@
     "placeholders": {
       "number": {"type": "String"}
     }
-  }
+  },
+  "reversePayment": "Reverse",
+  "reversalReasonRequired": "Reversal reason required",
+  "reversalReasonHint": "Reversal reason",
+  "paymentReversed": "Payment reversed",
+  "cannotReverseReversal": "Cannot reverse a reversal",
+  "confirmReversal": "Confirm reversal",
+  "confirmReversalMessage": "Are you sure you want to reverse this payment? This action cannot be undone.",
+  "reversed": "Reversed"
 }

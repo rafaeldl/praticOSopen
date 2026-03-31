@@ -1560,5 +1560,13 @@
     "placeholders": {
       "number": {"type": "String"}
     }
-  }
+  },
+  "reversePayment": "Estornar",
+  "reversalReasonRequired": "Informe o motivo do estorno",
+  "reversalReasonHint": "Motivo do estorno",
+  "paymentReversed": "Pagamento estornado",
+  "cannotReverseReversal": "Não é possível estornar um estorno",
+  "confirmReversal": "Confirmar estorno",
+  "confirmReversalMessage": "Tem certeza que deseja estornar este pagamento? Esta ação não pode ser desfeita.",
+  "reversed": "Estornado"
 }

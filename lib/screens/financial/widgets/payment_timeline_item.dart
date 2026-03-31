@@ -13,6 +13,7 @@ class PaymentTimelineItem extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onSwipeRight;
   final VoidCallback? onOrderTap;
+  final Function(FinancialPayment payment, String reason)? onReverse;
 
   const PaymentTimelineItem({
     super.key,
@@ -20,6 +21,7 @@ class PaymentTimelineItem extends StatelessWidget {
     this.onTap,
     this.onSwipeRight,
     this.onOrderTap,
+    this.onReverse,
   });
 
   bool get _isReversed =>
@@ -183,6 +185,21 @@ class PaymentTimelineItem extends StatelessWidget {
                         decoration: textDecoration,
                       ),
                     ),
+                  // Line 3: reversal reason (if reversed)
+                  if (_isReversed && payment.reversalReason != null && payment.reversalReason!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        payment.reversalReason!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          color: secondaryLabelColor,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -203,6 +220,40 @@ class PaymentTimelineItem extends StatelessWidget {
       ),
     );
 
+    // Swipe-left to reverse (endToStart)
+    if (_canReverse) {
+      item = Dismissible(
+        key: ValueKey('reverse_${payment.id}'),
+        direction: DismissDirection.endToStart,
+        confirmDismiss: (_) async {
+          final reason = await _showReversalDialog(context);
+          if (reason != null && reason.isNotEmpty) {
+            onReverse!(payment, reason);
+          }
+          return false;
+        },
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          color: CupertinoColors.systemRed,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(context.l10n.reversePayment,
+                  style: const TextStyle(
+                      color: CupertinoColors.white,
+                      fontWeight: FontWeight.w600)),
+              const SizedBox(width: 8),
+              const Icon(CupertinoIcons.arrow_uturn_left,
+                  color: CupertinoColors.white, size: 22),
+            ],
+          ),
+        ),
+        child: item,
+      );
+    }
+
+    // Swipe-right to pay (startToEnd)
     if (onSwipeRight != null) {
       item = Dismissible(
         key: ValueKey('swipe_${payment.id}'),
@@ -261,4 +312,55 @@ class PaymentTimelineItem extends StatelessWidget {
 
   bool get _hasOrderLink =>
       payment.orderId != null && payment.orderNumber != null;
+
+  /// Whether this payment can be reversed via swipe.
+  bool get _canReverse =>
+      onReverse != null &&
+      payment.status == FinancialPaymentStatus.completed &&
+      payment.reversedPaymentId == null;
+
+  /// Shows a CupertinoAlertDialog requesting a reversal reason.
+  /// Returns the reason string, or null if cancelled.
+  Future<String?> _showReversalDialog(BuildContext context) async {
+    String reason = '';
+    return showCupertinoDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return CupertinoAlertDialog(
+              title: Text(context.l10n.confirmReversal),
+              content: Column(
+                children: [
+                  const SizedBox(height: 8),
+                  Text(context.l10n.confirmReversalMessage),
+                  const SizedBox(height: 12),
+                  CupertinoTextField(
+                    placeholder: context.l10n.reversalReasonHint,
+                    onChanged: (value) => setState(() => reason = value),
+                    autofocus: true,
+                    maxLines: 2,
+                  ),
+                ],
+              ),
+              actions: [
+                CupertinoDialogAction(
+                  isDefaultAction: true,
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(context.l10n.cancel),
+                ),
+                CupertinoDialogAction(
+                  isDestructiveAction: true,
+                  onPressed: reason.trim().isEmpty
+                      ? null
+                      : () => Navigator.pop(ctx, reason.trim()),
+                  child: Text(context.l10n.reversePayment),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 }

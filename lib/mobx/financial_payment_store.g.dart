@@ -172,6 +172,30 @@ mixin _$FinancialPaymentStore on _FinancialPaymentStore, Store {
     );
   }
 
+  late final _$reversePaymentAsyncAction = AsyncAction(
+    '_FinancialPaymentStore.reversePayment',
+    context: context,
+  );
+
+  @override
+  Future<void> reversePayment(FinancialPayment original, String reason) {
+    return _$reversePaymentAsyncAction.run(
+      () => super.reversePayment(original, reason),
+    );
+  }
+
+  late final _$reverseTransferAsyncAction = AsyncAction(
+    '_FinancialPaymentStore.reverseTransfer',
+    context: context,
+  );
+
+  @override
+  Future<void> reverseTransfer(FinancialPayment original, String reason) {
+    return _$reverseTransferAsyncAction.run(
+      () => super.reverseTransfer(original, reason),
+    );
+  }
+
   late final _$_FinancialPaymentStoreActionController = ActionController(
     name: '_FinancialPaymentStore',
     context: context,

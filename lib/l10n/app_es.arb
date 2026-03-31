@@ -1515,5 +1515,13 @@
     "placeholders": {
       "number": {"type": "String"}
     }
-  }
+  },
+  "reversePayment": "Revertir",
+  "reversalReasonRequired": "Ingrese el motivo de la reversión",
+  "reversalReasonHint": "Motivo de la reversión",
+  "paymentReversed": "Pago revertido",
+  "cannotReverseReversal": "No se puede revertir una reversión",
+  "confirmReversal": "Confirmar reversión",
+  "confirmReversalMessage": "¿Está seguro que desea revertir este pago? Esta acción no se puede deshacer.",
+  "reversed": "Revertido"
 }
