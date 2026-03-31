@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/financial_account_store.dart';
 import 'package:praticos/models/financial_account.dart';
@@ -183,70 +184,73 @@ class _FinancialAccountFormScreenState
                 ),
               ),
       ),
-      child: SafeArea(
-        child: ListView(
-          children: [
-            const SizedBox(height: 16),
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
+          child: ListView(
+            children: [
+              const SizedBox(height: 16),
 
-            // Form fields
-            CupertinoListSection.insetGrouped(
-              children: [
-                // Name
-                CupertinoTextFormFieldRow(
-                  controller: _nameController,
-                  prefix: Text(context.l10n.name),
-                  placeholder: 'Ex: Conta Corrente Itau',
-                  textCapitalization: TextCapitalization.words,
-                  onChanged: (_) => setState(() {}),
-                ),
-
-                // Type selector
-                CupertinoListTile(
-                  title: Text(context.l10n.type),
-                  additionalInfo: Text(_typeLabel(_selectedType)),
-                  trailing: const CupertinoListTileChevron(),
-                  onTap: _showTypeSelector,
-                ),
-
-                // Initial balance (create mode only)
-                if (!_isEditing)
-                  CupertinoTextFormFieldRow(
-                    controller: _initialBalanceController,
-                    prefix: Text(context.l10n.initialBalance),
-                    placeholder: '0,00',
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                  ),
-
-                // Default account toggle
-                CupertinoListTile(
-                  title: Text(context.l10n.defaultAccount),
-                  trailing: CupertinoSwitch(
-                    value: _isDefault,
-                    onChanged: (value) => setState(() => _isDefault = value),
-                  ),
-                ),
-              ],
-            ),
-
-            // Deactivate button (edit mode only)
-            if (_isEditing) ...[
-              const SizedBox(height: 32),
+              // Form fields
               CupertinoListSection.insetGrouped(
                 children: [
+                  // Name
+                  CupertinoTextFormFieldRow(
+                    controller: _nameController,
+                    prefix: Text(context.l10n.name),
+                    placeholder: 'Ex: Conta Corrente Itau',
+                    textCapitalization: TextCapitalization.words,
+                    onChanged: (_) => setState(() {}),
+                  ),
+
+                  // Type selector
                   CupertinoListTile(
-                    title: Text(
-                      context.l10n.deactivateAccount,
-                      style: const TextStyle(
-                        color: CupertinoColors.destructiveRed,
-                      ),
+                    title: Text(context.l10n.type),
+                    additionalInfo: Text(_typeLabel(_selectedType)),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: _showTypeSelector,
+                  ),
+
+                  // Initial balance (create mode only)
+                  if (!_isEditing)
+                    CupertinoTextFormFieldRow(
+                      controller: _initialBalanceController,
+                      prefix: Text(context.l10n.initialBalance),
+                      placeholder: '0,00',
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
-                    onTap: _confirmDeactivate,
+
+                  // Default account toggle
+                  CupertinoListTile(
+                    title: Text(context.l10n.defaultAccount),
+                    trailing: CupertinoSwitch(
+                      value: _isDefault,
+                      onChanged: (value) => setState(() => _isDefault = value),
+                    ),
                   ),
                 ],
               ),
+
+              // Deactivate button (edit mode only)
+              if (_isEditing) ...[
+                const SizedBox(height: 32),
+                CupertinoListSection.insetGrouped(
+                  children: [
+                    CupertinoListTile(
+                      title: Text(
+                        context.l10n.deactivateAccount,
+                        style: const TextStyle(
+                          color: CupertinoColors.destructiveRed,
+                        ),
+                      ),
+                      onTap: _confirmDeactivate,
+                    ),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

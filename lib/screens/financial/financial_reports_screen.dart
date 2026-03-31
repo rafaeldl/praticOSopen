@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -228,46 +229,49 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
 
     return CupertinoPageScaffold(
       backgroundColor: bgColor,
-      child: CustomScrollView(
-        slivers: [
-          CupertinoSliverNavigationBar(
-            largeTitle: Text(context.l10n.reports),
-            previousPageTitle: context.l10n.financialStatement,
-          ),
-          if (_isLoading)
-            const SliverFillRemaining(
-              hasScrollBody: false,
-              child: Center(child: CupertinoActivityIndicator()),
-            )
-          else ...[
-            // 1. Monthly Summary (DRE simplified)
-            SliverToBoxAdapter(
-              child: _buildMonthlySummary(
-                  context, labelColor, secondaryLabel),
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          slivers: [
+            CupertinoSliverNavigationBar(
+              largeTitle: Text(context.l10n.reports),
+              previousPageTitle: context.l10n.financialStatement,
             ),
-
-            // 2. Cash Flow Projection
-            SliverToBoxAdapter(
-              child: Observer(
-                builder: (_) => _buildProjection(
+            if (_isLoading)
+              const SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(child: CupertinoActivityIndicator()),
+              )
+            else ...[
+              // 1. Monthly Summary (DRE simplified)
+              SliverToBoxAdapter(
+                child: _buildMonthlySummary(
                     context, labelColor, secondaryLabel),
               ),
-            ),
 
-            // 3. Bar Chart - Income vs Expenses
-            SliverToBoxAdapter(
-              child: _buildBarChart(context, labelColor, secondaryLabel),
-            ),
+              // 2. Cash Flow Projection
+              SliverToBoxAdapter(
+                child: Observer(
+                  builder: (_) => _buildProjection(
+                      context, labelColor, secondaryLabel),
+                ),
+              ),
 
-            // 4. Pie Chart - Expenses by Category
-            SliverToBoxAdapter(
-              child:
-                  _buildPieChart(context, labelColor, secondaryLabel),
-            ),
+              // 3. Bar Chart - Income vs Expenses
+              SliverToBoxAdapter(
+                child: _buildBarChart(context, labelColor, secondaryLabel),
+              ),
 
-            const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
+              // 4. Pie Chart - Expenses by Category
+              SliverToBoxAdapter(
+                child:
+                    _buildPieChart(context, labelColor, secondaryLabel),
+              ),
+
+              const SliverPadding(padding: EdgeInsets.only(bottom: 32)),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

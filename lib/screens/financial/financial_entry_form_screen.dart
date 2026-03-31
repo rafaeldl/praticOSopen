@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/mobx/financial_account_store.dart';
@@ -265,9 +266,11 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                 ),
               ),
       ),
-      child: SafeArea(
-        child: CustomScrollView(
-          slivers: [
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
             SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -541,7 +544,8 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                 ],
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

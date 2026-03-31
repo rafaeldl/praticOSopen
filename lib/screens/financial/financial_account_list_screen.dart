@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -96,88 +97,91 @@ class _FinancialAccountListScreenState
 
     return CupertinoPageScaffold(
       backgroundColor: bgColor,
-      child: CustomScrollView(
-        slivers: [
-          CupertinoSliverNavigationBar(
-            largeTitle: Text(context.l10n.accounts),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.add),
-              onPressed: () {
-                Navigator.pushNamed(context, '/financial_account_form')
-                    .then((_) {
-                  // Reload on return
-                  _accountStore.load();
-                });
-              },
+      child: Material(
+        type: MaterialType.transparency,
+        child: CustomScrollView(
+          slivers: [
+            CupertinoSliverNavigationBar(
+              largeTitle: Text(context.l10n.accounts),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: const Icon(CupertinoIcons.add),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/financial_account_form')
+                      .then((_) {
+                    // Reload on return
+                    _accountStore.load();
+                  });
+                },
+              ),
             ),
-          ),
 
-          // Total balance header
-          SliverToBoxAdapter(
-            child: Observer(
-              builder: (_) {
-                return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              context.l10n.totalBalance,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: secondaryLabelColor,
+            // Total balance header
+            SliverToBoxAdapter(
+              child: Observer(
+                builder: (_) {
+                  return Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.totalBalance,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: secondaryLabelColor,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _formatValue(_accountStore.totalBalance),
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: labelColor,
+                              const SizedBox(height: 2),
+                              Text(
+                                _formatValue(_accountStore.totalBalance),
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: labelColor,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: _toggleHideValues,
-                        behavior: HitTestBehavior.opaque,
-                        child: SizedBox(
-                          width: 44,
-                          height: 44,
-                          child: Center(
-                            child: Icon(
-                              _hideValues
-                                  ? CupertinoIcons.eye_slash
-                                  : CupertinoIcons.eye,
-                              color: secondaryLabelColor,
-                              size: 22,
+                        GestureDetector(
+                          onTap: _toggleHideValues,
+                          behavior: HitTestBehavior.opaque,
+                          child: SizedBox(
+                            width: 44,
+                            height: 44,
+                            child: Center(
+                              child: Icon(
+                                _hideValues
+                                    ? CupertinoIcons.eye_slash
+                                    : CupertinoIcons.eye,
+                                color: secondaryLabelColor,
+                                size: 22,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
 
-          // Account list
-          Observer(
-            builder: (_) => _buildAccountList(context),
-          ),
+            // Account list
+            Observer(
+              builder: (_) => _buildAccountList(context),
+            ),
 
-          // Bottom padding
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
+            // Bottom padding
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
+        ),
       ),
     );
   }
