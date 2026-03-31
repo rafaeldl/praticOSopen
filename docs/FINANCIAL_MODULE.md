@@ -3237,7 +3237,7 @@ fvm flutter analyze
 
 **Resultado:** Visao completa de recebiveis, pagamento por qualquer tela (OS ou financeiro), estornos com auditoria.
 
-#### Sprint 11 - Modo Recebimento + Filtros
+#### Sprint 11 - Modo Recebimento + Filtros -- CONCLUIDO (31/03/2026)
 
 **Objetivo:** Form de entry em modo receivable + filtros no extrato.
 
@@ -3256,7 +3256,7 @@ fvm flutter analyze
 
 ---
 
-#### Sprint 12 - Sync Bidirecional OS <-> Financeiro
+#### Sprint 12 - Sync Bidirecional OS <-> Financeiro -- CONCLUIDO (31/03/2026)
 
 > **ALTO RISCO** -- Toca `OrderStore` existente. Testar exaustivamente.
 
@@ -3287,7 +3287,7 @@ fvm flutter analyze
 
 ---
 
-#### Sprint 13 - Estornos
+#### Sprint 13 - Estornos -- CONCLUIDO (31/03/2026)
 
 > **ALTO RISCO** -- Atomicidade critica. Testar multi-cenario.
 
@@ -3883,6 +3883,43 @@ Para registro: estes pontos da spec ja estao excelentes e nao precisam de mudanc
 ## Changelog
 
 ### Marco 2026
+
+#### Milestone 3 implementado: Recebiveis + Sync + Estornos (31/03/2026)
+
+**Sprints 11-13 concluidos. +945 linhas, zero erros no analyze.**
+
+Sprint 11 (Modo Recebimento + Filtros):
+- Entry form: customer picker para receivable (reutiliza CustomerListScreen existente)
+- PaymentTimelineItem: link "OS #NNN" clicavel (navega para OS), swipe-right para pagar, swipe-left para estornar
+- Callbacks onSwipeRight, onOrderTap, onReverse adicionados ao widget
+
+Sprint 12 (Sync Bidirecional OS <-> Financeiro -- ALTO RISCO):
+- OrderStore: `_syncFinancialOnStatusChange()` cria entry receivable ao aprovar OS, cancela ao cancelar OS
+- OrderStore: `_syncFinancialOnPayment()` cria payment income + atualiza entry + credita conta via WriteBatch ao pagar OS
+- FinancialEntryStore: `syncOrderPayment()` cria PaymentTransaction na OS ao pagar entry pelo financeiro
+- Prevencao de loop via `syncSource` persistido no Firestore (sobrevive crash/multi-device)
+- Guards condicionais: `useFinancialManagement` + `syncSource` em todo ponto de sync
+- Order model: campo `syncSource` adicionado
+
+Sprint 13 (Estornos -- ALTO RISCO):
+- `reversePayment()`: WriteBatch atomico (payment reverso + original reversed + saldo revertido + recalculo paidAmount)
+- `reverseTransfer()`: reverte ambos legs da transferencia atomicamente, flipa transferDirection
+- `recalculatePaidAmount()`: Transaction do Firestore para recalculo atomico apos estorno
+- Swipe-left com CupertinoAlertDialog para motivo obrigatorio
+- Visual: item estornado riscado + motivo em italico
+- Guards: sem estorno de estorno, sem estorno de payment de estorno
+
+#### Milestone 2 implementado: Contas Bancarias + Transferencias (31/03/2026)
+
+**Sprints 9-10 concluidos. +1.657 linhas, 42 testes de business logic adicionados.**
+
+- FinancialAccountListScreen: lista com saldo total, eye toggle, cards por conta com icones por tipo
+- FinancialAccountFormScreen: criar/editar conta, tipo picker, saldo inicial, default toggle, desativar
+- TransferSheet: half-sheet com origem/destino/valor, WriteBatch atomico (2 payments + 2 contas)
+- Reconciliacao: calculateRealBalance() + isBalanceDivergent() + reconcileBalance()
+- FinancialUtils extraido: computeRealBalance, computeKPIs, isBalanceDivergent (testavel sem Firebase)
+- AmountParser extraido: parse multi-formato (BR/US/simbolos)
+- 42 testes de business logic (balance, KPIs, tolerancia, parsing)
 
 #### Milestone 1 implementado: Despesas + Extrato (31/03/2026)
 
