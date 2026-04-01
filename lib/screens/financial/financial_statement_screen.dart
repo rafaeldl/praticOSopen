@@ -628,13 +628,6 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
                       children: [
                         CupertinoButton(
                           padding: EdgeInsets.zero,
-                          onPressed: () => Navigator.pushNamed(
-                              context, '/financial_reports'),
-                          child: const Icon(CupertinoIcons.chart_bar,
-                              size: 22),
-                        ),
-                        CupertinoButton(
-                          padding: EdgeInsets.zero,
                           onPressed: _showFilterSheet,
                           child: Icon(
                             _isFilterActive
@@ -642,13 +635,6 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
                                 : CupertinoIcons.line_horizontal_3_decrease_circle,
                             size: 22,
                           ),
-                        ),
-                        CupertinoButton(
-                          padding: EdgeInsets.zero,
-                          onPressed: () => Navigator.pushNamed(
-                              context, '/financial_account_list'),
-                          child: const Icon(CupertinoIcons.creditcard,
-                              size: 22),
                         ),
                         CupertinoButton(
                           padding: EdgeInsets.zero,
@@ -683,6 +669,10 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
                               });
                             }
                           : null,
+                      onReportsTap: () => Navigator.pushNamed(
+                          context, '/financial_reports'),
+                      onAccountsTap: () => Navigator.pushNamed(
+                          context, '/financial_account_list'),
                     ),
                   ),
 

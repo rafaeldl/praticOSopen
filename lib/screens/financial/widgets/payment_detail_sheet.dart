@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/financial_payment.dart';
 import 'package:praticos/models/payment_method.dart';
@@ -215,7 +216,9 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
     final textDecoration =
         _isReversed ? TextDecoration.lineThrough : TextDecoration.none;
 
-    return Container(
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
       constraints: const BoxConstraints(minHeight: 200, maxHeight: 520),
       decoration: BoxDecoration(
         color: CupertinoColors.systemBackground.resolveFrom(context),
@@ -486,6 +489,7 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
           ),
         ),
       ),
+    ),
     );
   }
 

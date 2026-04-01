@@ -836,7 +836,7 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                         CupertinoTextFormFieldRow(
                           controller: _notesController,
                           prefix: Text(context.l10n.notes),
-                          placeholder: context.l10n.notes,
+                          placeholder: '...',
                           maxLines: 3,
                           textCapitalization:
                               TextCapitalization.sentences,

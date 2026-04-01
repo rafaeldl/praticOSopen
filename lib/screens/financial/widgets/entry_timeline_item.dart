@@ -69,8 +69,6 @@ class EntryTimelineItem extends StatelessWidget {
     final labelColor = CupertinoColors.label.resolveFrom(context);
     final secondaryLabelColor =
         CupertinoColors.secondaryLabel.resolveFrom(context);
-    final textDecoration =
-        _isCancelled ? TextDecoration.lineThrough : TextDecoration.none;
     final textColor = _isInactive ? CupertinoColors.systemGrey : labelColor;
     final valueColor = _directionColor;
 
@@ -104,17 +102,42 @@ class EntryTimelineItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Line 1: description
-                  Text(
-                    entry.description ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: textColor,
-                      decoration: textDecoration,
-                    ),
+                  // Line 1: description + badge
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          entry.description ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: _isInactive ? FontWeight.w500 : FontWeight.w600,
+                            color: textColor,
+                          ),
+                        ),
+                      ),
+                      if (_isCancelled) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemGrey
+                                .withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            context.l10n.cancelled,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.systemGrey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 2),
                   // Line 2: category · supplier/customer · installment
@@ -128,7 +151,7 @@ class EntryTimelineItem extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 13,
                             color: secondaryLabelColor,
-                            decoration: textDecoration,
+      
                           ),
                         ),
                       ),
@@ -167,7 +190,6 @@ class EntryTimelineItem extends StatelessWidget {
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: valueColor,
-                decoration: textDecoration,
               ),
             ),
           ],

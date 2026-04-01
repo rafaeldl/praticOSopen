@@ -22,6 +22,8 @@ class BalanceHeader extends StatefulWidget {
   final double totalReceivable;
   final int overdueCount;
   final VoidCallback? onOverdueTap;
+  final VoidCallback? onReportsTap;
+  final VoidCallback? onAccountsTap;
 
   const BalanceHeader({
     super.key,
@@ -38,6 +40,8 @@ class BalanceHeader extends StatefulWidget {
     this.totalReceivable = 0,
     this.overdueCount = 0,
     this.onOverdueTap,
+    this.onReportsTap,
+    this.onAccountsTap,
   });
 
   @override
@@ -149,6 +153,66 @@ class _BalanceHeaderState extends State<BalanceHeader> {
 
           // Inline income/expense summary
           _buildInlineSummary(context, secondaryLabelColor),
+
+          // Quick links
+          if (widget.onReportsTap != null || widget.onAccountsTap != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (widget.onReportsTap != null)
+                    GestureDetector(
+                      onTap: widget.onReportsTap,
+                      behavior: HitTestBehavior.opaque,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.chart_bar,
+                            size: 14,
+                            color: CupertinoColors.activeBlue,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            context.l10n.reports,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: CupertinoColors.activeBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (widget.onReportsTap != null &&
+                      widget.onAccountsTap != null)
+                    const SizedBox(width: 20),
+                  if (widget.onAccountsTap != null)
+                    GestureDetector(
+                      onTap: widget.onAccountsTap,
+                      behavior: HitTestBehavior.opaque,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            CupertinoIcons.creditcard,
+                            size: 14,
+                            color: CupertinoColors.activeBlue,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            context.l10n.accounts,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: CupertinoColors.activeBlue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -162,6 +226,8 @@ class _BalanceHeaderState extends State<BalanceHeader> {
     if (widget.todayIncome == 0 && widget.todayExpense == 0) {
       return const SizedBox.shrink();
     }
+
+    final hasBoth = widget.todayIncome > 0 && widget.todayExpense > 0;
 
     return Row(
       children: [
@@ -177,7 +243,7 @@ class _BalanceHeaderState extends State<BalanceHeader> {
               color: CupertinoColors.systemGreen,
             ),
           ),
-        if (widget.todayIncome > 0 && widget.todayExpense > 0)
+        if (hasBoth)
           Text(
             ' ',
             style: TextStyle(fontSize: 13, color: secondaryColor),
@@ -190,20 +256,21 @@ class _BalanceHeaderState extends State<BalanceHeader> {
               color: CupertinoColors.systemRed,
             ),
           ),
-        if (widget.todayIncome > 0 || widget.todayExpense > 0)
+        if (hasBoth) ...[
           Text(
             ' = ',
             style: TextStyle(fontSize: 13, color: secondaryColor),
           ),
-        Text(
-          '${todayNet >= 0 ? '+' : ''}${_formatValue(todayNet)}',
-          style: TextStyle(
-            fontSize: 13,
-            color: todayNet >= 0
-                ? CupertinoColors.systemGreen
-                : CupertinoColors.systemRed,
+          Text(
+            '${todayNet >= 0 ? '+' : ''}${_formatValue(todayNet)}',
+            style: TextStyle(
+              fontSize: 13,
+              color: todayNet >= 0
+                  ? CupertinoColors.systemGreen
+                  : CupertinoColors.systemRed,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

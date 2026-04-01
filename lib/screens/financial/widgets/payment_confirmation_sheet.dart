@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/financial_account.dart';
 import 'package:praticos/models/financial_entry.dart';
@@ -129,7 +130,9 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
     final methodLabel = _paymentMethodLabel(context, _selectedMethod);
     final accountName = _selectedAccount.name ?? '';
 
-    return Container(
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
       constraints: const BoxConstraints(minHeight: 300, maxHeight: 500),
       decoration: BoxDecoration(
         color: bgColor,
@@ -216,7 +219,7 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
                   label: context.l10n.value,
                   child: CupertinoTextField(
                     controller: TextEditingController(
-                      text: _amount.toStringAsFixed(2),
+                      text: FormatService().formatDecimal(_amount),
                     ),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
@@ -389,7 +392,7 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
                     child: CupertinoTextField(
                       controller: TextEditingController(
                         text: _discount > 0
-                            ? _discount.toStringAsFixed(2)
+                            ? FormatService().formatDecimal(_discount)
                             : '',
                       ),
                       keyboardType: const TextInputType.numberWithOptions(
@@ -431,6 +434,7 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
           ),
         ),
       ),
+    ),
     );
   }
 

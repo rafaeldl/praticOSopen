@@ -42,6 +42,7 @@ class PaymentTimelineItem extends StatelessWidget {
   }
 
   IconData get _typeIcon {
+    if (_isReversed) return CupertinoIcons.arrow_uturn_left;
     switch (payment.type) {
       case FinancialPaymentType.income:
         return CupertinoIcons.arrow_down_left;
@@ -95,14 +96,15 @@ class PaymentTimelineItem extends StatelessWidget {
     final secondaryLabelColor =
         CupertinoColors.secondaryLabel.resolveFrom(context);
     final valueColor = _isReversed ? CupertinoColors.systemGrey : _typeColor;
-    final textDecoration =
-        _isReversed ? TextDecoration.lineThrough : TextDecoration.none;
     final textColor = _isReversed ? CupertinoColors.systemGrey : labelColor;
 
     Widget item = GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
+      child: Container(
+        color: _isReversed
+            ? CupertinoColors.systemGrey6.resolveFrom(context)
+            : null,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Row(
           children: [
@@ -129,17 +131,42 @@ class PaymentTimelineItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Line 1: description
-                  Text(
-                    payment.description ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: textColor,
-                      decoration: textDecoration,
-                    ),
+                  // Line 1: description + badge
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          payment.description ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: _isReversed ? FontWeight.w500 : FontWeight.w600,
+                            color: textColor,
+                          ),
+                        ),
+                      ),
+                      if (_isReversed) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemOrange
+                                .withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            context.l10n.reversed,
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: CupertinoColors.systemOrange,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 2),
                   // Line 2: OS link + method + account
@@ -155,7 +182,7 @@ class PaymentTimelineItem extends StatelessWidget {
                                 fontSize: 13,
                                 color: CupertinoColors.activeBlue,
                                 fontWeight: FontWeight.w500,
-                                decoration: textDecoration,
+          
                               ),
                             ),
                             TextSpan(
@@ -165,7 +192,7 @@ class PaymentTimelineItem extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 13,
                                 color: secondaryLabelColor,
-                                decoration: textDecoration,
+          
                               ),
                             ),
                           ],
@@ -182,7 +209,7 @@ class PaymentTimelineItem extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         color: secondaryLabelColor,
-                        decoration: textDecoration,
+  
                       ),
                     ),
                   // Line 3: reversal reason (if reversed)
@@ -212,7 +239,6 @@ class PaymentTimelineItem extends StatelessWidget {
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: valueColor,
-                decoration: textDecoration,
               ),
             ),
           ],
