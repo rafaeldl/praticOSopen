@@ -378,20 +378,17 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.pop(context),
-          child: Text(_isReadOnly ? context.l10n.close : context.l10n.cancel),
+          child: Text(_isEditing ? context.l10n.close : context.l10n.cancel),
         ),
         trailing: _isSaving
             ? const CupertinoActivityIndicator()
-            : _isReadOnly
-                ? null
-                : CupertinoButton(
+            : _isEditing
+                ? CupertinoButton(
                     padding: EdgeInsets.zero,
-                    onPressed: _save,
-                    child: Text(
-                      context.l10n.save,
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
+                    onPressed: _showEntryActionsSheet,
+                    child: const Icon(CupertinoIcons.ellipsis_circle, size: 22),
+                  )
+                : null,
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -401,174 +398,68 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
               : CustomScrollView(
             slivers: [
             SliverToBoxAdapter(
-              child: IgnorePointer(
-                ignoring: _isReadOnly,
-                child: Opacity(
-                  opacity: _isReadOnly ? 0.6 : 1.0,
-                  child: Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Payment history section
-                  if (_linkedPayments.isNotEmpty)
-                    CupertinoListSection.insetGrouped(
-                      header: Text(context.l10n.paymentHistory),
-                      children: [
-                        // Progress bar
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    context.l10n.paidOf(
-                                      FormatService().formatCurrency(
-                                          _existingEntry?.paidAmount ?? 0),
-                                      FormatService().formatCurrency(
-                                          _existingEntry?.amount ?? 0),
-                                    ),
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: CupertinoColors.secondaryLabel
-                                          .resolveFrom(context),
-                                    ),
-                                  ),
-                                  if (_isPaid)
-                                    const Icon(
-                                      CupertinoIcons.checkmark_circle_fill,
-                                      color: CupertinoColors.systemGreen,
-                                      size: 18,
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(4),
-                                child: SizedBox(
-                                  height: 8,
-                                  child: LayoutBuilder(
-                                    builder: (context, constraints) {
-                                      final total =
-                                          _existingEntry?.amount ?? 1;
-                                      final paid =
-                                          _existingEntry?.paidAmount ?? 0;
-                                      final ratio = total > 0
-                                          ? (paid / total).clamp(0.0, 1.0)
-                                          : 0.0;
-                                      return Stack(
-                                        children: [
-                                          Container(
-                                            width: constraints.maxWidth,
-                                            color: CupertinoColors.systemGrey5
-                                                .resolveFrom(context),
-                                          ),
-                                          Container(
-                                            width: constraints.maxWidth *
-                                                ratio,
-                                            color:
-                                                CupertinoColors.systemGreen,
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        // Individual payments
-                        ..._linkedPayments.map(
-                          (p) => CupertinoListTile(
-                            leading: const Icon(
-                              CupertinoIcons.checkmark_circle,
-                              color: CupertinoColors.systemGreen,
-                              size: 20,
-                            ),
-                            title: Text(
-                              FormatService()
-                                  .formatCurrency(p.amount ?? 0),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            subtitle: Text(
-                              '${FormatService().formatDate(p.paymentDate ?? p.createdAt ?? DateTime.now())} \u00b7 ${_paymentMethodLabelForPayment(p.paymentMethod)} \u00b7 ${p.account?.name ?? ''}',
-                            ),
-                          ),
-                        ),
-                        // Reverse button (only for fully paid entries)
-                        if (_isPaid)
-                          CupertinoButton(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
-                            onPressed: _isSaving
-                                ? null
-                                : () => _reverseLinkedPayment(
-                                    _linkedPayments.first),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  CupertinoIcons.arrow_uturn_left,
-                                  color: CupertinoColors.systemRed,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  context.l10n.reverseEntryPayment,
-                                  style: const TextStyle(
-                                    color: CupertinoColors.systemRed,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
+                  // === STATUS BANNER (paid entries) ===
+                  if (_isPaid && _linkedPayments.isNotEmpty)
+                    _buildStatusBanner(context),
 
-                  // Essential fields
-                  CupertinoListSection.insetGrouped(
-                    children: [
-                      // Description
-                      CupertinoTextFormFieldRow(
-                        controller: _descriptionController,
-                        prefix: Text(context.l10n.description),
-                        placeholder: 'Ex: Material eletrico',
-                        textCapitalization: TextCapitalization.sentences,
+                  // === SECTION: VALOR ===
+                  _buildSectionHeader(context, context.l10n.value),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemBackground.resolveFrom(context),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      // Value (readonly when paid)
-                      IgnorePointer(
+                      child: IgnorePointer(
                         ignoring: _isPaid,
                         child: Opacity(
                           opacity: _isPaid ? 0.6 : 1.0,
-                          child: CupertinoTextFormFieldRow(
+                          child: CupertinoTextField(
                             controller: _amountController,
-                            prefix: Text(context.l10n.value),
-                            placeholder: '0,00',
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
-                                    decimal: true),
+                            textAlign: TextAlign.center,
+                            placeholder: 'R\$ 0,00',
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
                             autofocus: !_isEditing,
+                            decoration: null,
                             style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
                               color: labelColor,
                             ),
+                            placeholderStyle: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: CupertinoColors.placeholderText.resolveFrom(context),
+                            ),
                           ),
                         ),
                       ),
-                      // Due date (readonly when paid)
-                      IgnorePointer(
-                        ignoring: _isPaid,
-                        child: Opacity(
-                          opacity: _isPaid ? 0.6 : 1.0,
-                          child: GestureDetector(
-                            onTap: _showDatePicker,
+                    ),
+                  ),
+
+                  // === SECTION: DETALHES ===
+                  _buildSectionHeader(context, context.l10n.details),
+                  IgnorePointer(
+                    ignoring: _isReadOnly,
+                    child: Opacity(
+                      opacity: _isReadOnly ? 0.6 : 1.0,
+                      child: CupertinoListSection.insetGrouped(
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                        children: [
+                          CupertinoTextFormFieldRow(
+                            controller: _descriptionController,
+                            prefix: Text(context.l10n.description),
+                            placeholder: 'Ex: Material eletrico',
+                            textCapitalization: TextCapitalization.sentences,
+                          ),
+                          GestureDetector(
+                            onTap: _isPaid ? null : _showDatePicker,
                             behavior: HitTestBehavior.opaque,
                             child: CupertinoListTile(
                               title: Text(context.l10n.dueDate),
@@ -576,93 +467,94 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                                 FormatService().formatDate(_dueDate),
                                 style: TextStyle(color: secondaryLabelColor),
                               ),
-                              trailing: const CupertinoListTileChevron(),
+                              trailing: _isPaid ? null : const CupertinoListTileChevron(),
                             ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Category section
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 8),
-                    child: Text(
-                      context.l10n.category,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: secondaryLabelColor,
+                          // Category inline row
+                          GestureDetector(
+                            onTap: _isPaid ? null : () {
+                              // Category is handled by the picker grid below
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            child: CupertinoListTile(
+                              title: Text(context.l10n.category),
+                              additionalInfo: _selectedCategory != null
+                                  ? Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                                      decoration: BoxDecoration(
+                                        color: CupertinoColors.activeBlue,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        _selectedCategory!,
+                                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: CupertinoColors.white),
+                                      ),
+                                    )
+                                  : Text('-', style: TextStyle(color: secondaryLabelColor)),
+                            ),
+                          ),
+                          // Account row
+                          Observer(
+                            builder: (_) {
+                              final accounts = _accountStore.accountList?.value ?? [];
+                              final activeAccounts = accounts
+                                  .where((a) => a != null && (a.active ?? false))
+                                  .cast<FinancialAccount>()
+                                  .toList();
+                              _selectDefaultAccount(accounts);
+                              return GestureDetector(
+                                onTap: activeAccounts.isNotEmpty && !_isPaid
+                                    ? () => _showAccountPicker(activeAccounts)
+                                    : null,
+                                behavior: HitTestBehavior.opaque,
+                                child: CupertinoListTile(
+                                  title: Text(context.l10n.accounts),
+                                  additionalInfo: Text(
+                                    _selectedAccount?.name ?? '',
+                                    style: TextStyle(color: secondaryLabelColor),
+                                  ),
+                                  trailing: _isPaid ? null : const CupertinoListTileChevron(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: _companyId != null
-                        ? CategoryPickerGrid(
-                            fieldType: _isPayable
-                                ? 'expenseCategory'
-                                : 'incomeCategory',
-                            selectedCategory: _selectedCategory,
-                            companyId: _companyId!,
-                            onCategorySelected: (category) {
-                              setState(() => _selectedCategory = category);
-                            },
-                          )
-                        : const SizedBox.shrink(),
-                  ),
 
-                  // Account section
-                  Observer(
-                    builder: (_) {
-                      final accounts =
-                          _accountStore.accountList?.value ?? [];
-                      final activeAccounts = accounts
-                          .where((a) =>
-                              a != null && (a.active ?? false))
-                          .cast<FinancialAccount>()
-                          .toList();
+                  // Category picker grid (below the details section)
+                  if (!_isPaid && !_isReadOnly)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                      child: _companyId != null
+                          ? CategoryPickerGrid(
+                              fieldType: _isPayable ? 'expenseCategory' : 'incomeCategory',
+                              selectedCategory: _selectedCategory,
+                              companyId: _companyId!,
+                              onCategorySelected: (category) {
+                                setState(() => _selectedCategory = category);
+                              },
+                            )
+                          : const SizedBox.shrink(),
+                    ),
 
-                      _selectDefaultAccount(accounts);
-
-                      return CupertinoListSection.insetGrouped(
-                        header: Text(context.l10n.accounts),
-                        children: [
-                          GestureDetector(
-                            onTap: activeAccounts.isNotEmpty
-                                ? () => _showAccountPicker(activeAccounts)
-                                : null,
-                            behavior: HitTestBehavior.opaque,
-                            child: CupertinoListTile(
-                              title: Text(context.l10n.accounts),
-                              additionalInfo: Text(
-                                _selectedAccount?.name ?? '',
-                                style:
-                                    TextStyle(color: secondaryLabelColor),
-                              ),
-                              trailing: const CupertinoListTileChevron(),
+                  // === SECTION: OPÇÕES (create mode only) ===
+                  if (!_isEditing) ...[
+                    _buildSectionHeader(context, context.l10n.options),
+                    CupertinoListSection.insetGrouped(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        // Already paid toggle
+                        if (!_isInstallment)
+                          CupertinoListTile(
+                            title: Text(context.l10n.alreadyPaid),
+                            trailing: CupertinoSwitch(
+                              value: _markAsPaid,
+                              onChanged: (val) => setState(() => _markAsPaid = val),
                             ),
                           ),
-                        ],
-                      );
-                    },
-                  ),
-
-                  // "Already paid" toggle (only in create mode, not installments)
-                  if (!_isEditing && !_isInstallment)
-                    CupertinoListSection.insetGrouped(
-                      children: [
-                        CupertinoListTile(
-                          title: Text(context.l10n.alreadyPaid),
-                          trailing: CupertinoSwitch(
-                            value: _markAsPaid,
-                            onChanged: (val) {
-                              setState(() => _markAsPaid = val);
-                            },
-                          ),
-                        ),
-                        if (_markAsPaid) ...[
+                        if (_markAsPaid && !_isInstallment) ...[
                           GestureDetector(
                             onTap: _showPaymentMethodPicker,
                             behavior: HitTestBehavior.opaque,
@@ -670,8 +562,7 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                               title: Text(context.l10n.paymentMethod),
                               additionalInfo: Text(
                                 _paymentMethodLabel(_paymentMethod),
-                                style:
-                                    TextStyle(color: secondaryLabelColor),
+                                style: TextStyle(color: secondaryLabelColor),
                               ),
                               trailing: const CupertinoListTileChevron(),
                             ),
@@ -683,140 +574,105 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                               title: Text(context.l10n.paymentDate),
                               additionalInfo: Text(
                                 FormatService().formatDate(_paymentDate),
-                                style:
-                                    TextStyle(color: secondaryLabelColor),
+                                style: TextStyle(color: secondaryLabelColor),
                               ),
                               trailing: const CupertinoListTileChevron(),
                             ),
                           ),
                         ],
-                      ],
-                    ),
-
-                  // Installment toggle
-                  if (!_isEditing)
-                  CupertinoListSection.insetGrouped(
-                    children: [
-                      CupertinoListTile(
-                        title: Text(context.l10n.installmentCount),
-                        trailing: CupertinoSwitch(
-                          value: _isInstallment,
-                          onChanged: (val) {
-                            setState(() {
-                              _isInstallment = val;
-                              if (val) {
-                                _isRecurring = false;
-                                _markAsPaid = false;
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                      if (_isInstallment)
-                        _buildInstallmentStepper(context, labelColor,
-                            secondaryLabelColor),
-                    ],
-                  ),
-
-                  // Recurring toggle (only when not in installment mode, create only)
-                  if (!_isInstallment && !_isEditing)
-                    CupertinoListSection.insetGrouped(
-                      children: [
+                        // Installment toggle
                         CupertinoListTile(
-                          title: Text(context.l10n.repeatMonthly),
+                          title: Text(context.l10n.installmentCount),
                           trailing: CupertinoSwitch(
-                            value: _isRecurring,
+                            value: _isInstallment,
                             onChanged: (val) {
                               setState(() {
-                                _isRecurring = val;
-                                if (!val) _showRecurrenceOptions = false;
+                                _isInstallment = val;
+                                if (val) { _isRecurring = false; _markAsPaid = false; }
                               });
                             },
                           ),
                         ),
-                        if (_isRecurring && !_showRecurrenceOptions)
-                          CupertinoButton(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            onPressed: () =>
-                                setState(() => _showRecurrenceOptions = true),
-                            child: Row(
-                              children: [
-                                const Icon(CupertinoIcons.slider_horizontal_3,
-                                    size: 16),
-                                const SizedBox(width: 4),
-                                Text(context.l10n.customize),
-                              ],
+                        if (_isInstallment)
+                          _buildInstallmentStepper(context, labelColor, secondaryLabelColor),
+                        // Recurring toggle
+                        if (!_isInstallment) ...[
+                          CupertinoListTile(
+                            title: Text(context.l10n.repeatMonthly),
+                            trailing: CupertinoSwitch(
+                              value: _isRecurring,
+                              onChanged: (val) {
+                                setState(() { _isRecurring = val; if (!val) _showRecurrenceOptions = false; });
+                              },
                             ),
                           ),
-                        if (_isRecurring && _showRecurrenceOptions) ...[
-                          // Frequency picker
-                          GestureDetector(
-                            onTap: _showFrequencyPicker,
-                            behavior: HitTestBehavior.opaque,
-                            child: CupertinoListTile(
-                              title: Text(context.l10n.frequency),
-                              additionalInfo: Text(
-                                _frequencyLabel(context),
-                                style:
-                                    TextStyle(color: secondaryLabelColor),
+                          if (_isRecurring && !_showRecurrenceOptions)
+                            CupertinoButton(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              onPressed: () => setState(() => _showRecurrenceOptions = true),
+                              child: Row(
+                                children: [
+                                  const Icon(CupertinoIcons.slider_horizontal_3, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text(context.l10n.customize),
+                                ],
                               ),
-                              trailing: const CupertinoListTileChevron(),
                             ),
-                          ),
-                          // Interval stepper
-                          _buildIntervalStepper(
-                              context, labelColor, secondaryLabelColor),
-                          // End date picker (optional)
-                          GestureDetector(
-                            onTap: _showEndDatePicker,
-                            behavior: HitTestBehavior.opaque,
-                            child: CupertinoListTile(
-                              title: Text(context.l10n.endDate),
-                              additionalInfo: Text(
-                                _recurrenceEndDate != null
-                                    ? FormatService()
-                                        .formatDate(_recurrenceEndDate!)
-                                    : '-',
-                                style:
-                                    TextStyle(color: secondaryLabelColor),
+                          if (_isRecurring && _showRecurrenceOptions) ...[
+                            GestureDetector(
+                              onTap: _showFrequencyPicker,
+                              behavior: HitTestBehavior.opaque,
+                              child: CupertinoListTile(
+                                title: Text(context.l10n.frequency),
+                                additionalInfo: Text(_frequencyLabel(context), style: TextStyle(color: secondaryLabelColor)),
+                                trailing: const CupertinoListTileChevron(),
                               ),
-                              trailing: const CupertinoListTileChevron(),
                             ),
-                          ),
+                            _buildIntervalStepper(context, labelColor, secondaryLabelColor),
+                            GestureDetector(
+                              onTap: _showEndDatePicker,
+                              behavior: HitTestBehavior.opaque,
+                              child: CupertinoListTile(
+                                title: Text(context.l10n.endDate),
+                                additionalInfo: Text(
+                                  _recurrenceEndDate != null ? FormatService().formatDate(_recurrenceEndDate!) : '-',
+                                  style: TextStyle(color: secondaryLabelColor),
+                                ),
+                                trailing: const CupertinoListTileChevron(),
+                              ),
+                            ),
+                          ],
                         ],
                       ],
                     ),
+                  ],
 
-                  // Expandable details
-                  if (!_showDetails)
+                  // === EXPANDABLE DETAILS ===
+                  if (!_showDetails && !_isReadOnly)
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.fromLTRB(32, 16, 20, 4),
                       child: CupertinoButton(
                         padding: EdgeInsets.zero,
-                        onPressed: () =>
-                            setState(() => _showDetails = true),
+                        onPressed: () => setState(() => _showDetails = true),
                         child: Row(
                           children: [
-                            const Icon(CupertinoIcons.add, size: 16),
+                            const Icon(CupertinoIcons.chevron_down, size: 14),
                             const SizedBox(width: 4),
                             Text(context.l10n.addDetails),
                           ],
                         ),
                       ),
                     ),
-
                   if (_showDetails)
                     CupertinoListSection.insetGrouped(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
                       children: [
                         if (_isPayable)
                           CupertinoTextFormFieldRow(
                             controller: _supplierController,
                             prefix: Text(context.l10n.supplier),
-                            placeholder: context.l10n.supplier,
-                            textCapitalization:
-                                TextCapitalization.sentences,
+                            placeholder: '...',
+                            textCapitalization: TextCapitalization.sentences,
                           )
                         else
                           GestureDetector(
@@ -826,11 +682,9 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                               title: Text(context.l10n.customer),
                               additionalInfo: Text(
                                 _selectedCustomer?.name ?? '',
-                                style: TextStyle(
-                                    color: secondaryLabelColor),
+                                style: TextStyle(color: secondaryLabelColor),
                               ),
-                              trailing:
-                                  const CupertinoListTileChevron(),
+                              trailing: const CupertinoListTileChevron(),
                             ),
                           ),
                         CupertinoTextFormFieldRow(
@@ -838,29 +692,93 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                           prefix: Text(context.l10n.notes),
                           placeholder: '...',
                           maxLines: 3,
-                          textCapitalization:
-                              TextCapitalization.sentences,
+                          textCapitalization: TextCapitalization.sentences,
+                        ),
+                        // Attach document
+                        CupertinoListTile(
+                          leading: const Icon(CupertinoIcons.paperclip, color: CupertinoColors.activeBlue, size: 20),
+                          title: Text(
+                            context.l10n.attachReceipt,
+                            style: const TextStyle(color: CupertinoColors.activeBlue),
+                          ),
                         ),
                       ],
                     ),
 
-                  // Bottom save button
-                  if (!_isReadOnly)
+                  // === PAYMENT HISTORY (edit mode, below fields) ===
+                  if (_isEditing && _linkedPayments.isNotEmpty) ...[
+                    _buildSectionHeader(context, context.l10n.paymentHistory),
+                    CupertinoListSection.insetGrouped(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        // Progress bar
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    context.l10n.paidOf(
+                                      FormatService().formatCurrency(_existingEntry?.paidAmount ?? 0),
+                                      FormatService().formatCurrency(_existingEntry?.amount ?? 0),
+                                    ),
+                                    style: TextStyle(fontSize: 13, color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+                                  ),
+                                  if (_isPaid)
+                                    const Icon(CupertinoIcons.checkmark_circle_fill, color: CupertinoColors.systemGreen, size: 18),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(4),
+                                child: SizedBox(
+                                  height: 8,
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      final total = _existingEntry?.amount ?? 1;
+                                      final paid = _existingEntry?.paidAmount ?? 0;
+                                      final ratio = total > 0 ? (paid / total).clamp(0.0, 1.0) : 0.0;
+                                      return Stack(children: [
+                                        Container(width: constraints.maxWidth, color: CupertinoColors.systemGrey5.resolveFrom(context)),
+                                        Container(width: constraints.maxWidth * ratio, color: CupertinoColors.systemGreen),
+                                      ]);
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        ..._linkedPayments.map(
+                          (p) => CupertinoListTile(
+                            leading: const Icon(CupertinoIcons.checkmark_circle, color: CupertinoColors.systemGreen, size: 20),
+                            title: Text(FormatService().formatCurrency(p.amount ?? 0), style: const TextStyle(fontWeight: FontWeight.w600)),
+                            subtitle: Text('${FormatService().formatDate(p.paymentDate ?? p.createdAt ?? DateTime.now())} \u00b7 ${_paymentMethodLabelForPayment(p.paymentMethod)} \u00b7 ${p.account?.name ?? ''}'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  // === CTA BUTTON ===
+                  if (!_isReadOnly && !_isPaid)
                     Padding(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
                       child: SizedBox(
                         width: double.infinity,
                         child: CupertinoButton.filled(
                           onPressed: _isSaving ? null : _save,
                           child: _isSaving
-                              ? const CupertinoActivityIndicator(
-                                  color: CupertinoColors.white)
+                              ? const CupertinoActivityIndicator(color: CupertinoColors.white)
                               : Text(saveLabel),
                         ),
                       ),
                     ),
 
-                  // Pay button (edit mode, pending entries not fully paid)
+                  // Pay button (edit mode, pending)
                   if (_isEditing && !_isPaid && !_isReadOnly)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -872,58 +790,37 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
-                                CupertinoIcons.money_dollar_circle,
-                                color: CupertinoColors.white,
-                                size: 20,
-                              ),
+                              const Icon(CupertinoIcons.money_dollar_circle, color: CupertinoColors.white, size: 20),
                               const SizedBox(width: 8),
-                              Text(
-                                context.l10n.confirmPayment,
-                                style: const TextStyle(
-                                    color: CupertinoColors.white),
-                              ),
+                              Text(context.l10n.confirmPayment, style: const TextStyle(color: CupertinoColors.white)),
                             ],
                           ),
                         ),
                       ),
                     ),
 
-                  // Delete / Cancel buttons (edit mode, pending only)
-                  if (_isEditing && !_isPaid && !_isReadOnly) ...[
+                  // Reverse link (paid entries)
+                  if (_isPaid && _linkedPayments.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: SizedBox(
-                        width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Center(
                         child: CupertinoButton(
-                          onPressed: _showCancelEntryDialog,
-                          child: Text(
-                            context.l10n.cancelEntry,
-                            style: const TextStyle(
-                                color: CupertinoColors.systemOrange),
+                          padding: EdgeInsets.zero,
+                          onPressed: _isSaving ? null : () => _reverseLinkedPayment(_linkedPayments.first),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(CupertinoIcons.arrow_uturn_left, color: CupertinoColors.systemRed, size: 16),
+                              const SizedBox(width: 6),
+                              Text(context.l10n.reverseEntryPayment, style: const TextStyle(color: CupertinoColors.systemRed, fontWeight: FontWeight.w600)),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: CupertinoButton(
-                          onPressed: _showDeleteEntryDialog,
-                          child: Text(
-                            context.l10n.deleteEntry,
-                            style: const TextStyle(
-                                color: CupertinoColors.systemRed),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+
+                  const SizedBox(height: 32),
                 ],
-              ),
-                ),
               ),
             ),
             ],
@@ -1031,6 +928,134 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
         }).toList(),
         cancelButton: CupertinoActionSheetAction(
           isDestructiveAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(context.l10n.cancel),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 24, 20, 8),
+      child: Text(
+        title.toUpperCase(),
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.2,
+          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusBanner(BuildContext context) {
+    final paidDate = _existingEntry?.paidDate ?? _linkedPayments.first.paymentDate;
+    final dateStr = paidDate != null ? FormatService().formatDate(paidDate) : '-';
+    final methodStr = _linkedPayments.isNotEmpty
+        ? _paymentMethodLabelForPayment(_linkedPayments.first.paymentMethod)
+        : '';
+    final accountStr = _linkedPayments.isNotEmpty
+        ? _linkedPayments.first.account?.name ?? ''
+        : '';
+    final countStr = _linkedPayments.length > 1
+        ? '${_linkedPayments.length} ${context.l10n.payments.toLowerCase()}'
+        : methodStr;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGreen.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: CupertinoColors.systemGreen.withValues(alpha: 0.25),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            CupertinoIcons.checkmark_circle_fill,
+            color: CupertinoColors.systemGreen,
+            size: 22,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.paidOn(dateStr),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1C7A2E),
+                  ),
+                ),
+                Text(
+                  '$countStr · $accountStr',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: CupertinoColors.systemGreen,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEntryActionsSheet() {
+    final actions = <CupertinoActionSheetAction>[];
+
+    if (_isPaid && _linkedPayments.isNotEmpty) {
+      actions.add(
+        CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () {
+            Navigator.pop(context);
+            _reverseLinkedPayment(_linkedPayments.first);
+          },
+          child: Text(context.l10n.reverseEntryPayment),
+        ),
+      );
+    }
+
+    if (!_isPaid && !_isReadOnly) {
+      actions.add(
+        CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+            _showCancelEntryDialog();
+          },
+          child: Text(
+            context.l10n.cancelEntry,
+            style: const TextStyle(color: CupertinoColors.systemOrange),
+          ),
+        ),
+      );
+      actions.add(
+        CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () {
+            Navigator.pop(context);
+            _showDeleteEntryDialog();
+          },
+          child: Text(context.l10n.deleteEntry),
+        ),
+      );
+    }
+
+    if (actions.isEmpty) return;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: actions,
+        cancelButton: CupertinoActionSheetAction(
           onPressed: () => Navigator.pop(ctx),
           child: Text(context.l10n.cancel),
         ),
