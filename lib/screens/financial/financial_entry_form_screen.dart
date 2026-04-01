@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -13,7 +14,10 @@ import 'package:praticos/models/payment_method.dart';
 import 'package:praticos/screens/financial/widgets/category_picker_grid.dart';
 import 'package:praticos/screens/financial/widgets/payment_confirmation_sheet.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/screens/financial/widgets/attachment_viewer.dart';
+import 'package:praticos/services/photo_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Form screen for creating a financial entry (expense or income).
 ///
@@ -57,6 +61,10 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
   bool _markAsPaid = false;
   PaymentMethod _paymentMethod = PaymentMethod.pix;
   DateTime _paymentDate = DateTime.now();
+
+  // Attachments
+  List<String> _attachmentUrls = [];
+  bool _isAttaching = false;
 
   // Edit mode (Fix C)
   FinancialEntry? _existingEntry;
@@ -138,10 +146,8 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
           _selectedCategory = entry.category;
           _supplierController.text = entry.supplier ?? '';
           _notesController.text = entry.notes ?? '';
-          if (entry.supplier != null || entry.customer != null || entry.notes != null) {
-            _showDetails = true;
-          }
-          if (!_isPayable) _showDetails = true;
+          _attachmentUrls = List<String>.from(entry.attachments ?? []);
+          _showDetails = true;
         });
       }
     } finally {
@@ -271,6 +277,65 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
     });
   }
 
+  void _openAttachment(String url) {
+    final isPdf = url.toLowerCase().contains('.pdf') ||
+        url.toLowerCase().contains('%2Epdf');
+    if (isPdf) {
+      launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+    } else {
+      Navigator.of(context).push(
+        CupertinoPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => AttachmentImageViewer(url: url),
+        ),
+      );
+    }
+  }
+
+  String _filenameFromUrl(String url) {
+    try {
+      final withoutQuery = url.split('?').first;
+      final oIndex = withoutQuery.indexOf('/o/');
+      if (oIndex != -1) {
+        final encodedPath = withoutQuery.substring(oIndex + 3);
+        final fullPath = Uri.decodeComponent(encodedPath);
+        return fullPath.split('/').last;
+      }
+      return withoutQuery.split('/').last;
+    } catch (_) {
+      return url.split('/').last.split('?').first;
+    }
+  }
+
+  Future<void> _pickAttachment() async {
+    if (_companyId == null) return;
+
+    final photoService = PhotoService();
+    final file = await photoService.pickDocument();
+    if (file == null || file.path == null) return;
+
+    setState(() => _isAttaching = true);
+    try {
+      final ext = file.extension ?? 'jpg';
+      final contentType = ext == 'pdf' ? 'application/pdf' : 'image/$ext';
+      final entryId = _existingEntry?.id ?? 'new';
+      final storagePath =
+          'tenants/$_companyId/financial/entries/$entryId/attachments/${file.name}';
+
+      final url = await photoService.uploadFile(
+        file: File(file.path!),
+        storagePath: storagePath,
+        contentType: contentType,
+      );
+
+      if (url != null && mounted) {
+        setState(() => _attachmentUrls.add(url));
+      }
+    } finally {
+      if (mounted) setState(() => _isAttaching = false);
+    }
+  }
+
   Future<void> _save() async {
     if (_isReadOnly) return;
     final amount = _parseAmount(_amountController.text);
@@ -294,7 +359,8 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
               : null
           ..notes = _notesController.text.trim().isNotEmpty
               ? _notesController.text.trim()
-              : null;
+              : null
+          ..attachments = _attachmentUrls.isNotEmpty ? _attachmentUrls : null;
         await _entryStore.updateEntry(_existingEntry!);
       } else {
         // Create mode
@@ -312,7 +378,8 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
               : null
           ..notes = _notesController.text.trim().isNotEmpty
               ? _notesController.text.trim()
-              : null;
+              : null
+          ..attachments = _attachmentUrls.isNotEmpty ? _attachmentUrls : null;
 
         if (_isRecurring && !_isInstallment) {
           final freq =
@@ -518,6 +585,27 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                               );
                             },
                           ),
+                          // Supplier/Customer in DETALHES section (edit mode only)
+                          if (_isEditing && _isPayable)
+                            CupertinoTextFormFieldRow(
+                              controller: _supplierController,
+                              prefix: Text(context.l10n.supplier),
+                              placeholder: context.l10n.supplierNameHint,
+                              textCapitalization: TextCapitalization.sentences,
+                            ),
+                          if (_isEditing && !_isPayable)
+                            GestureDetector(
+                              onTap: _selectCustomer,
+                              behavior: HitTestBehavior.opaque,
+                              child: CupertinoListTile(
+                                title: Text(context.l10n.customer),
+                                additionalInfo: Text(
+                                  _selectedCustomer?.name ?? '',
+                                  style: TextStyle(color: secondaryLabelColor),
+                                ),
+                                trailing: const CupertinoListTileChevron(),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -648,7 +736,7 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                   ],
 
                   // === EXPANDABLE DETAILS ===
-                  if (!_showDetails && !_isReadOnly)
+                  if (!_showDetails && !_isReadOnly && !_isEditing)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(32, 16, 20, 4),
                       child: CupertinoButton(
@@ -667,41 +755,106 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
                     CupertinoListSection.insetGrouped(
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       children: [
-                        if (_isPayable)
-                          CupertinoTextFormFieldRow(
-                            controller: _supplierController,
-                            prefix: Text(context.l10n.supplier),
-                            placeholder: '...',
-                            textCapitalization: TextCapitalization.sentences,
-                          )
-                        else
-                          GestureDetector(
-                            onTap: _selectCustomer,
-                            behavior: HitTestBehavior.opaque,
-                            child: CupertinoListTile(
-                              title: Text(context.l10n.customer),
-                              additionalInfo: Text(
-                                _selectedCustomer?.name ?? '',
-                                style: TextStyle(color: secondaryLabelColor),
+                        // Supplier/Customer shown here only in create mode;
+                        // in edit mode they are inside the DETALHES section above.
+                        if (!_isEditing) ...[
+                          if (_isPayable)
+                            CupertinoTextFormFieldRow(
+                              controller: _supplierController,
+                              prefix: Text(context.l10n.supplier),
+                              placeholder: context.l10n.supplierNameHint,
+                              textCapitalization: TextCapitalization.sentences,
+                            )
+                          else
+                            GestureDetector(
+                              onTap: _selectCustomer,
+                              behavior: HitTestBehavior.opaque,
+                              child: CupertinoListTile(
+                                title: Text(context.l10n.customer),
+                                additionalInfo: Text(
+                                  _selectedCustomer?.name ?? '',
+                                  style: TextStyle(color: secondaryLabelColor),
+                                ),
+                                trailing: const CupertinoListTileChevron(),
                               ),
-                              trailing: const CupertinoListTileChevron(),
                             ),
+                        ],
+                        // Notes field — custom layout to avoid multiline prefix misalignment
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                context.l10n.notes,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              CupertinoTextField(
+                                controller: _notesController,
+                                placeholder: context.l10n.addNote,
+                                maxLines: 3,
+                                minLines: 2,
+                                decoration: null,
+                                padding: EdgeInsets.zero,
+                                textCapitalization: TextCapitalization.sentences,
+                              ),
+                            ],
                           ),
-                        CupertinoTextFormFieldRow(
-                          controller: _notesController,
-                          prefix: Text(context.l10n.notes),
-                          placeholder: '...',
-                          maxLines: 3,
-                          textCapitalization: TextCapitalization.sentences,
                         ),
                         // Attach document
-                        CupertinoListTile(
-                          leading: const Icon(CupertinoIcons.paperclip, color: CupertinoColors.activeBlue, size: 20),
-                          title: Text(
-                            context.l10n.attachReceipt,
-                            style: const TextStyle(color: CupertinoColors.activeBlue),
+                        GestureDetector(
+                          onTap: _isAttaching ? null : _pickAttachment,
+                          behavior: HitTestBehavior.opaque,
+                          child: CupertinoListTile(
+                            leading: _isAttaching
+                                ? const CupertinoActivityIndicator()
+                                : const Icon(CupertinoIcons.paperclip, color: CupertinoColors.activeBlue, size: 20),
+                            title: Text(
+                              context.l10n.attachReceipt,
+                              style: const TextStyle(color: CupertinoColors.activeBlue),
+                            ),
                           ),
                         ),
+                        // Attached files list
+                        ..._attachmentUrls.map((url) {
+                          final isPdf = url.toLowerCase().contains('.pdf') ||
+                              url.toLowerCase().contains('%2Epdf');
+                          final filename = _filenameFromUrl(url);
+                          return GestureDetector(
+                            onTap: () => _openAttachment(url),
+                            behavior: HitTestBehavior.opaque,
+                            child: CupertinoListTile(
+                              leading: Icon(
+                                isPdf ? CupertinoIcons.doc_text : CupertinoIcons.photo,
+                                size: 20,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                              ),
+                              title: Text(
+                                filename,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: CupertinoColors.label.resolveFrom(context),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              trailing: CupertinoButton(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                onPressed: () => setState(() => _attachmentUrls.remove(url)),
+                                child: const Icon(
+                                  CupertinoIcons.xmark_circle_fill,
+                                  size: 20,
+                                  color: CupertinoColors.systemGrey3,
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
                       ],
                     ),
 
@@ -843,8 +996,9 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
       context,
       entry: _existingEntry!,
       accounts: accounts,
+      companyId: _companyId,
       onConfirm: (amount, accountId, account, method, date,
-          {double? discount}) async {
+          {double? discount, List<String>? attachments}) async {
         await _paymentStore.payEntry(
           _existingEntry!,
           amount: amount,
@@ -853,6 +1007,7 @@ class _FinancialEntryFormScreenState extends State<FinancialEntryFormScreen> {
           method: method,
           paymentDate: date,
           discount: discount,
+          attachments: attachments,
         );
         // Reload entry to reflect updated payment state
         if (mounted && _existingEntry?.id != null) {

@@ -519,8 +519,9 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
       context,
       entry: entry,
       accounts: accounts,
+      companyId: _paymentStore.companyId,
       onConfirm: (amount, accountId, account, method, date,
-          {double? discount}) async {
+          {double? discount, List<String>? attachments}) async {
         await _paymentStore.payEntry(
           entry,
           amount: amount,
@@ -529,6 +530,7 @@ class _FinancialStatementScreenState extends State<FinancialStatementScreen> {
           method: method,
           paymentDate: date,
           discount: discount,
+          attachments: attachments,
         );
       },
     );

@@ -78,6 +78,7 @@ abstract class _FinancialPaymentStore with Store {
     double? discount,
     String? description,
     String? notes,
+    List<String>? attachments,
   }) async {
     if (companyId == null) return;
 
@@ -116,6 +117,7 @@ abstract class _FinancialPaymentStore with Store {
       'supplier': entry.supplier,
       'category': entry.category,
       'syncSource': null,
+      'attachments': attachments ?? [],
       'company': Global.companyAggr?.toJson(),
       'createdAt': Timestamp.fromDate(now),
       'createdBy': Global.userAggr?.toJson(),

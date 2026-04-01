@@ -3347,6 +3347,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supplier => 'Supplier';
 
   @override
+  String get supplierNameHint => 'Supplier name';
+
+  @override
   String get payNow => 'Pay';
 
   @override

@@ -1417,6 +1417,7 @@
   "income": "Income",
   "accounts": "Accounts",
   "supplier": "Supplier",
+  "supplierNameHint": "Supplier name",
   "payNow": "Pay",
   "confirmPayment": "Confirm payment",
   "editDetails": "Edit details",

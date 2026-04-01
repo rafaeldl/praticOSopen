@@ -6364,6 +6364,12 @@ abstract class AppLocalizations {
   /// **'Fornecedor'**
   String get supplier;
 
+  /// No description provided for @supplierNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome do fornecedor'**
+  String get supplierNameHint;
+
   /// No description provided for @payNow.
   ///
   /// In pt, this message translates to:

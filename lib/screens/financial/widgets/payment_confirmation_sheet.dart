@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:praticos/extensions/context_extensions.dart';
@@ -5,6 +6,7 @@ import 'package:praticos/models/financial_account.dart';
 import 'package:praticos/models/financial_entry.dart';
 import 'package:praticos/models/payment_method.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/photo_service.dart';
 
 /// Half-sheet for confirming payment of an entry.
 ///
@@ -14,6 +16,7 @@ import 'package:praticos/services/format_service.dart';
 class PaymentConfirmationSheet extends StatefulWidget {
   final FinancialEntry entry;
   final List<FinancialAccount> accounts;
+  final String? companyId;
   final Function(
     double amount,
     String accountId,
@@ -21,6 +24,7 @@ class PaymentConfirmationSheet extends StatefulWidget {
     PaymentMethod method,
     DateTime date, {
     double? discount,
+    List<String>? attachments,
   }) onConfirm;
 
   const PaymentConfirmationSheet({
@@ -28,6 +32,7 @@ class PaymentConfirmationSheet extends StatefulWidget {
     required this.entry,
     required this.accounts,
     required this.onConfirm,
+    this.companyId,
   });
 
   /// Show the payment confirmation sheet as a modal popup.
@@ -35,6 +40,7 @@ class PaymentConfirmationSheet extends StatefulWidget {
     BuildContext context, {
     required FinancialEntry entry,
     required List<FinancialAccount> accounts,
+    String? companyId,
     required Function(
       double amount,
       String accountId,
@@ -42,6 +48,7 @@ class PaymentConfirmationSheet extends StatefulWidget {
       PaymentMethod method,
       DateTime date, {
       double? discount,
+      List<String>? attachments,
     }) onConfirm,
   }) {
     return showCupertinoModalPopup(
@@ -49,6 +56,7 @@ class PaymentConfirmationSheet extends StatefulWidget {
       builder: (context) => PaymentConfirmationSheet(
         entry: entry,
         accounts: accounts,
+        companyId: companyId,
         onConfirm: onConfirm,
       ),
     );
@@ -62,6 +70,8 @@ class PaymentConfirmationSheet extends StatefulWidget {
 class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
   bool _showDetails = false;
   bool _showDiscount = false;
+  final List<String> _pendingAttachments = [];
+  bool _isUploading = false;
 
   late double _amount;
   late FinancialAccount _selectedAccount;
@@ -105,6 +115,35 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
     }
   }
 
+  Future<void> _pickAttachment() async {
+    if (widget.companyId == null) return;
+
+    final photoService = PhotoService();
+    final file = await photoService.pickDocument();
+    if (file == null || file.path == null) return;
+
+    setState(() => _isUploading = true);
+    try {
+      final ext = file.extension ?? 'jpg';
+      final contentType = ext == 'pdf' ? 'application/pdf' : 'image/$ext';
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final storagePath =
+          'tenants/${widget.companyId}/financial/payments/pending_$timestamp/attachments/${file.name}';
+
+      final url = await photoService.uploadFile(
+        file: File(file.path!),
+        storagePath: storagePath,
+        contentType: contentType,
+      );
+
+      if (url != null && mounted) {
+        setState(() => _pendingAttachments.add(url));
+      }
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+  }
+
   void _confirm() {
     final accountAggr = _selectedAccount.toAggr();
     widget.onConfirm(
@@ -114,6 +153,7 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
       _selectedMethod,
       _selectedDate,
       discount: _showDiscount && _discount > 0 ? _discount : null,
+      attachments: _pendingAttachments.isNotEmpty ? _pendingAttachments : null,
     );
     Navigator.of(context).pop();
   }
@@ -210,15 +250,41 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                GestureDetector(
-                  onTap: () => setState(() => _showDetails = true),
-                  child: Text(
-                    context.l10n.editDetails,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: CupertinoColors.activeBlue,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () => setState(() => _showDetails = true),
+                      child: Text(
+                        context.l10n.editDetails,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: CupertinoColors.activeBlue,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (widget.companyId != null) ...[
+                      Text('  ·  ', style: TextStyle(fontSize: 15, color: secondaryLabelColor)),
+                      GestureDetector(
+                        onTap: _isUploading ? null : _pickAttachment,
+                        child: Row(
+                          children: [
+                            if (_isUploading)
+                              const CupertinoActivityIndicator()
+                            else
+                              Icon(CupertinoIcons.paperclip, size: 15, color: CupertinoColors.activeBlue),
+                            const SizedBox(width: 4),
+                            Text(
+                              _pendingAttachments.isEmpty
+                                  ? context.l10n.attachReceipt
+                                  : '${_pendingAttachments.length}',
+                              style: const TextStyle(fontSize: 15, color: CupertinoColors.activeBlue),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
 
@@ -308,6 +374,27 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
                               if (parsed != null) setState(() => _discount = parsed);
                             },
                           ),
+                        ),
+                      ),
+                    // Attachment row (only when companyId is available)
+                    if (widget.companyId != null)
+                      GestureDetector(
+                        onTap: _isUploading ? null : _pickAttachment,
+                        behavior: HitTestBehavior.opaque,
+                        child: CupertinoListTile(
+                          leading: _isUploading
+                              ? const CupertinoActivityIndicator()
+                              : const Icon(CupertinoIcons.paperclip, color: CupertinoColors.activeBlue, size: 20),
+                          title: Text(
+                            context.l10n.attachReceipt,
+                            style: const TextStyle(color: CupertinoColors.activeBlue),
+                          ),
+                          additionalInfo: _pendingAttachments.isNotEmpty
+                              ? Text(
+                                  '${_pendingAttachments.length}',
+                                  style: TextStyle(color: secondaryLabelColor),
+                                )
+                              : null,
                         ),
                       ),
                   ],

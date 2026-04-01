@@ -130,6 +130,7 @@ mixin _$FinancialPaymentStore on _FinancialPaymentStore, Store {
     double? discount,
     String? description,
     String? notes,
+    List<String>? attachments,
   }) {
     return _$payEntryAsyncAction.run(
       () => super.payEntry(
@@ -142,6 +143,7 @@ mixin _$FinancialPaymentStore on _FinancialPaymentStore, Store {
         discount: discount,
         description: description,
         notes: notes,
+        attachments: attachments,
       ),
     );
   }

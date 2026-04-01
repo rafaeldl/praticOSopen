@@ -1462,6 +1462,7 @@
   "income": "Recebimento",
   "accounts": "Contas",
   "supplier": "Fornecedor",
+  "supplierNameHint": "Nome do fornecedor",
   "payNow": "Pagar",
   "confirmPayment": "Confirmar pagamento",
   "editDetails": "Editar detalhes",

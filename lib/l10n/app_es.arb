@@ -1417,6 +1417,7 @@
   "income": "Ingreso",
   "accounts": "Cuentas",
   "supplier": "Proveedor",
+  "supplierNameHint": "Nombre del proveedor",
   "payNow": "Pagar",
   "confirmPayment": "Confirmar pago",
   "editDetails": "Editar detalles",

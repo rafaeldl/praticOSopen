@@ -3358,6 +3358,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get supplier => 'Fornecedor';
 
   @override
+  String get supplierNameHint => 'Nome do fornecedor';
+
+  @override
   String get payNow => 'Pagar';
 
   @override

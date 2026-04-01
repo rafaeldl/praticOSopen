@@ -661,6 +661,11 @@ account = AdAccount('act_521666357871300')
 
 Ver `docs/ADS_CAMPAIGNS.md` para status completo de todas as campanhas, pendencias e historico.
 
+## Model Strategy
+
+- Always use `model: "opus"` when spawning Plan agents or any planning/architecture subagent
+- Always use `model: "sonnet"` when spawning execution agents (general-purpose, code writing, qa-validator, code-documenter)
+
 ## Regras Importantes
 
 1. **Inglês no Código**: SEMPRE usar inglês para classes, variáveis, constantes, enums, chaves JSON e valores no banco

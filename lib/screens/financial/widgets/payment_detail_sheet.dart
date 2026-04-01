@@ -6,6 +6,8 @@ import 'package:praticos/models/financial_payment.dart';
 import 'package:praticos/models/payment_method.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/screens/financial/widgets/attachment_viewer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Half-sheet showing payment details with receipt attachment and reversal.
 class PaymentDetailSheet extends StatefulWidget {
@@ -124,6 +126,42 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
     }
   }
 
+  /// Extracts the original filename from a Firebase Storage download URL.
+  ///
+  /// Firebase Storage URLs encode the full path as a single segment after '/o/':
+  /// https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{encoded_path}?alt=media&token=...
+  String _filenameFromUrl(String url) {
+    try {
+      final withoutQuery = url.split('?').first;
+      final oIndex = withoutQuery.indexOf('/o/');
+      if (oIndex != -1) {
+        final encodedPath = withoutQuery.substring(oIndex + 3);
+        final fullPath = Uri.decodeComponent(encodedPath);
+        return fullPath.split('/').last;
+      }
+      return withoutQuery.split('/').last;
+    } catch (_) {
+      return url.split('/').last.split('?').first;
+    }
+  }
+
+  void _openAttachment(BuildContext context, String url) {
+    final isPdf = url.toLowerCase().contains('.pdf') ||
+        url.toLowerCase().contains('%2F') && url.toLowerCase().contains('.pdf');
+    if (isPdf) {
+      // PDFs: open in-app browser (SFSafariViewController on iOS)
+      launchUrl(Uri.parse(url), mode: LaunchMode.inAppBrowserView);
+    } else {
+      // Images: open fullscreen viewer within the app
+      Navigator.of(context).push(
+        CupertinoPageRoute(
+          fullscreenDialog: true,
+          builder: (_) => AttachmentImageViewer(url: url),
+        ),
+      );
+    }
+  }
+
   Future<void> _pickAndUploadReceipt() async {
     if (widget.companyId == null || widget.payment.id == null) return;
 
@@ -146,12 +184,7 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
 
       if (url != null && widget.onAttachmentAdded != null) {
         await widget.onAttachmentAdded!(widget.payment, url);
-        if (mounted) {
-          setState(() {
-            widget.payment.attachments ??= [];
-            widget.payment.attachments!.add(url);
-          });
-        }
+        if (mounted) setState(() {});
       }
     } finally {
       if (mounted) setState(() => _isUploading = false);
@@ -379,34 +412,53 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
                     payment.attachments!.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
+                    child: Column(
                       children: payment.attachments!.map((url) {
-                        final isPdf = url.toLowerCase().contains('.pdf');
+                        final isPdf = url.toLowerCase().contains('.pdf') ||
+                            url.toLowerCase().contains('%2Epdf');
+                        final filename = _filenameFromUrl(url);
                         return GestureDetector(
-                          onTap: () {
-                            // Could open preview
-                          },
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: CupertinoColors.systemGrey5
-                                  .resolveFrom(context),
-                            ),
-                            child: isPdf
-                                ? const Icon(CupertinoIcons.doc_text,
-                                    size: 28)
-                                : ClipRRect(
+                          onTap: () => _openAttachment(context, url),
+                          behavior: HitTestBehavior.opaque,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(url,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            const Icon(
-                                                CupertinoIcons.photo)),
+                                    color: CupertinoColors.systemGrey5
+                                        .resolveFrom(context),
                                   ),
+                                  child: isPdf
+                                      ? const Icon(CupertinoIcons.doc_text,
+                                          size: 22, color: CupertinoColors.activeBlue)
+                                      : ClipRRect(
+                                          borderRadius: BorderRadius.circular(8),
+                                          child: Image.network(url,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) =>
+                                                  const Icon(CupertinoIcons.photo, size: 22)),
+                                        ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    filename,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: CupertinoColors.activeBlue,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const Icon(CupertinoIcons.chevron_right,
+                                    size: 14, color: CupertinoColors.systemGrey3),
+                              ],
+                            ),
                           ),
                         );
                       }).toList(),
@@ -475,3 +527,4 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
     );
   }
 }
+
