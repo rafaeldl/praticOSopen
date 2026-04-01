@@ -11,7 +11,11 @@ import 'package:praticos/mobx/financial_entry_store.dart';
 import 'package:praticos/mobx/financial_payment_store.dart';
 import 'package:praticos/models/financial_entry.dart';
 import 'package:praticos/models/financial_payment.dart';
+import 'package:praticos/global.dart';
+import 'package:praticos/services/financial_export_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/pdf/pdf_financial_report_builder.dart';
+import 'package:printing/printing.dart';
 
 /// Data class for projected month in cash flow projection.
 class _ProjectedMonth {
@@ -216,6 +220,94 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
   }
 
   // ──────────────────────────────────────────────────────────
+  // Export
+  // ──────────────────────────────────────────────────────────
+
+  void _showExportSheet() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(context.l10n.exportOptions),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _exportDrePdf();
+            },
+            child: Text(context.l10n.exportDrePdf),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _exportStatementCsv();
+            },
+            child: Text(context.l10n.exportStatementCsv),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(context.l10n.cancel),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _exportDrePdf() async {
+    final completed = _currentMonthPayments
+        .where((p) => p.status == FinancialPaymentStatus.completed)
+        .toList();
+
+    final incomeByCategory = <String, double>{};
+    final expenseByCategory = <String, double>{};
+    double totalIncome = 0;
+    double totalExpense = 0;
+
+    for (final p in completed) {
+      final cat = p.category ?? '';
+      final amount = p.amount ?? 0;
+      if (p.type == FinancialPaymentType.income) {
+        incomeByCategory[cat] = (incomeByCategory[cat] ?? 0) + amount;
+        totalIncome += amount;
+      } else if (p.type == FinancialPaymentType.expense) {
+        expenseByCategory[cat] = (expenseByCategory[cat] ?? 0) + amount;
+        totalExpense += amount;
+      }
+    }
+
+    final monthLabel = DateFormat.yMMMM(
+      Localizations.localeOf(context).toString(),
+    ).format(_currentMonth);
+
+    final data = DrePdfData(
+      monthLabel: monthLabel,
+      companyName: Global.companyAggr?.name ?? '',
+      incomeByCategory: incomeByCategory,
+      expenseByCategory: expenseByCategory,
+      totalIncome: totalIncome,
+      totalExpense: totalExpense,
+    );
+
+    final exportService = FinancialExportService();
+    final pdfBytes = await exportService.generateDrePdf(data);
+
+    if (!mounted) return;
+
+    await Printing.sharePdf(
+      bytes: pdfBytes,
+      filename: 'DRE_${DateFormat('yyyy_MM').format(_currentMonth)}.pdf',
+    );
+  }
+
+  Future<void> _exportStatementCsv() async {
+    final exportService = FinancialExportService();
+    final csv = exportService.generateStatementCsv(_currentMonthPayments);
+    final filename =
+        'extrato_${DateFormat('yyyy_MM').format(_currentMonth)}.csv';
+    await exportService.shareCsv(csv, filename);
+  }
+
+  // ──────────────────────────────────────────────────────────
   // Build
   // ──────────────────────────────────────────────────────────
 
@@ -236,6 +328,11 @@ class _FinancialReportsScreenState extends State<FinancialReportsScreen> {
             CupertinoSliverNavigationBar(
               largeTitle: Text(context.l10n.reports),
               previousPageTitle: context.l10n.financialStatement,
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: _isLoading ? null : _showExportSheet,
+                child: const Icon(CupertinoIcons.square_arrow_up, size: 22),
+              ),
             ),
             if (_isLoading)
               const SliverFillRemaining(

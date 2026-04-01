@@ -1537,5 +1537,58 @@
   "toReceive": "Por cobrar",
   "toPay": "Por pagar",
   "others": "Otros",
-  "noDataForPeriod": "Sin datos para el período"
+  "noDataForPeriod": "Sin datos para el período",
+  "statementTab": "Extracto",
+  "billsTab": "Cuentas",
+  "noBillsInMonth": "Ninguna cuenta en {month}.",
+  "@noBillsInMonth": {
+    "placeholders": {
+      "month": {"type": "String"}
+    }
+  },
+  "totalPayable": "Por pagar",
+  "totalReceivable": "Por cobrar",
+  "overdueCount": "{count} vencida(s)",
+  "@overdueCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "pay": "Pagar",
+  "alreadyPaid": "Ya pagué",
+  "editExpense": "Editar gasto",
+  "editIncome": "Editar ingreso",
+  "paidOn": "Pagada el {date}",
+  "@paidOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "reverseEntryPayment": "Revertir pago",
+  "paymentDetails": "Detalles",
+  "attachReceipt": "Adjuntar comprobante",
+  "receipt": "Comprobante",
+  "expense": "Gasto",
+  "income": "Ingreso",
+
+  "searchFinancial": "Buscar movimiento, proveedor, cliente...",
+  "deleteEntry": "Eliminar movimiento",
+  "cancelEntry": "Cancelar movimiento",
+  "confirmDeleteEntry": "¿Está seguro que desea eliminar este movimiento?",
+  "confirmCancelEntry": "¿Está seguro que desea cancelar este movimiento? Esta acción no se puede deshacer.",
+  "entryDeleted": "Movimiento eliminado",
+  "entryCancelled": "Movimiento cancelado",
+
+  "paymentHistory": "Historial de pagos",
+  "paidOf": "Pagado {paid} de {total}",
+  "@paidOf": {
+    "placeholders": {
+      "paid": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+
+  "exportOptions": "Opciones de exportación",
+  "exportDrePdf": "Exportar DRE (PDF)",
+  "exportStatementCsv": "Exportar extracto (CSV)"
 }

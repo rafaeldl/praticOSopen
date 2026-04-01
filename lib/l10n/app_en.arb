@@ -1537,5 +1537,58 @@
   "toReceive": "To receive",
   "toPay": "To pay",
   "others": "Others",
-  "noDataForPeriod": "No data for period"
+  "noDataForPeriod": "No data for period",
+  "statementTab": "Statement",
+  "billsTab": "Bills",
+  "noBillsInMonth": "No bills in {month}.",
+  "@noBillsInMonth": {
+    "placeholders": {
+      "month": {"type": "String"}
+    }
+  },
+  "totalPayable": "Payable",
+  "totalReceivable": "Receivable",
+  "overdueCount": "{count} overdue",
+  "@overdueCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "pay": "Pay",
+  "alreadyPaid": "Already paid",
+  "editExpense": "Edit expense",
+  "editIncome": "Edit income",
+  "paidOn": "Paid on {date}",
+  "@paidOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "reverseEntryPayment": "Reverse payment",
+  "paymentDetails": "Details",
+  "attachReceipt": "Attach receipt",
+  "receipt": "Receipt",
+  "expense": "Expense",
+  "income": "Income",
+
+  "searchFinancial": "Search entry, supplier, customer...",
+  "deleteEntry": "Delete entry",
+  "cancelEntry": "Cancel entry",
+  "confirmDeleteEntry": "Are you sure you want to delete this entry?",
+  "confirmCancelEntry": "Are you sure you want to cancel this entry? This action cannot be undone.",
+  "entryDeleted": "Entry deleted",
+  "entryCancelled": "Entry cancelled",
+
+  "paymentHistory": "Payment history",
+  "paidOf": "Paid {paid} of {total}",
+  "@paidOf": {
+    "placeholders": {
+      "paid": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+
+  "exportOptions": "Export options",
+  "exportDrePdf": "Export DRE (PDF)",
+  "exportStatementCsv": "Export statement (CSV)"
 }

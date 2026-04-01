@@ -17,6 +17,11 @@ class BalanceHeader extends StatefulWidget {
   final DateTime currentMonth;
   final VoidCallback onPreviousMonth;
   final VoidCallback onNextMonth;
+  final bool showEntryKPIs;
+  final double totalPayable;
+  final double totalReceivable;
+  final int overdueCount;
+  final VoidCallback? onOverdueTap;
 
   const BalanceHeader({
     super.key,
@@ -28,6 +33,11 @@ class BalanceHeader extends StatefulWidget {
     required this.currentMonth,
     required this.onPreviousMonth,
     required this.onNextMonth,
+    this.showEntryKPIs = false,
+    this.totalPayable = 0,
+    this.totalReceivable = 0,
+    this.overdueCount = 0,
+    this.onOverdueTap,
   });
 
   @override
@@ -256,6 +266,58 @@ class _BalanceHeaderState extends State<BalanceHeader> {
   }
 
   Widget _buildInlineSummary(BuildContext context, Color secondaryColor) {
+    if (widget.showEntryKPIs) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '${context.l10n.totalPayable} ',
+            style: TextStyle(fontSize: 13, color: secondaryColor),
+          ),
+          Text(
+            '-${_formatValue(widget.totalPayable)}',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: CupertinoColors.systemRed,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '${context.l10n.totalReceivable} ',
+            style: TextStyle(fontSize: 13, color: secondaryColor),
+          ),
+          Text(
+            '+${_formatValue(widget.totalReceivable)}',
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: CupertinoColors.systemGreen,
+            ),
+          ),
+          if (widget.overdueCount > 0) ...[
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: widget.onOverdueTap,
+              behavior: HitTestBehavior.opaque,
+              child: Text(
+                context.l10n.overdueCount(widget.overdueCount),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: CupertinoColors.systemOrange,
+                  decoration: widget.onOverdueTap != null
+                      ? TextDecoration.underline
+                      : TextDecoration.none,
+                  decorationColor: CupertinoColors.systemOrange,
+                ),
+              ),
+            ),
+          ],
+        ],
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

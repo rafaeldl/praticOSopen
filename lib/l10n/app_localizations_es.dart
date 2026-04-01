@@ -2479,7 +2479,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get unitShort => 'UNIT.';
 
   @override
-  String get alreadyPaid => 'Ya pagado';
+  String get alreadyPaid => 'Ya pagué';
 
   @override
   String get remainingBalance => 'SALDO RESTANTE';
@@ -3148,7 +3148,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get contract => 'Contrato';
 
   @override
-  String get attachReceipt => 'Adjuntar Comprobante';
+  String get attachReceipt => 'Adjuntar comprobante';
 
   @override
   String get chooseFile => 'Elegir Archivo';
@@ -3463,7 +3463,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String paidOf(String paid, String total) {
-    return 'Pagado: $paid de $total';
+    return 'Pagado $paid de $total';
   }
 
   @override
@@ -3606,4 +3606,81 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noDataForPeriod => 'Sin datos para el período';
+
+  @override
+  String get statementTab => 'Extracto';
+
+  @override
+  String get billsTab => 'Cuentas';
+
+  @override
+  String noBillsInMonth(String month) {
+    return 'Ninguna cuenta en $month.';
+  }
+
+  @override
+  String get totalPayable => 'Por pagar';
+
+  @override
+  String get totalReceivable => 'Por cobrar';
+
+  @override
+  String overdueCount(int count) {
+    return '$count vencida(s)';
+  }
+
+  @override
+  String get pay => 'Pagar';
+
+  @override
+  String get editExpense => 'Editar gasto';
+
+  @override
+  String get editIncome => 'Editar ingreso';
+
+  @override
+  String paidOn(String date) {
+    return 'Pagada el $date';
+  }
+
+  @override
+  String get reverseEntryPayment => 'Revertir pago';
+
+  @override
+  String get paymentDetails => 'Detalles';
+
+  @override
+  String get searchFinancial => 'Buscar movimiento, proveedor, cliente...';
+
+  @override
+  String get deleteEntry => 'Eliminar movimiento';
+
+  @override
+  String get cancelEntry => 'Cancelar movimiento';
+
+  @override
+  String get confirmDeleteEntry =>
+      '¿Está seguro que desea eliminar este movimiento?';
+
+  @override
+  String get confirmCancelEntry =>
+      '¿Está seguro que desea cancelar este movimiento? Esta acción no se puede deshacer.';
+
+  @override
+  String get entryDeleted => 'Movimiento eliminado';
+
+  @override
+  String get entryCancelled => 'Movimiento cancelado';
+
+  @override
+  String get paymentHistory => 'Historial de pagos';
+
+  @override
+  String get exportOptions => 'Opciones de exportación';
+
+  @override
+  String get exportDrePdf => 'Exportar DRE (PDF)';
+
+  @override
+  String get exportStatementCsv => 'Exportar extracto (CSV)';
 }

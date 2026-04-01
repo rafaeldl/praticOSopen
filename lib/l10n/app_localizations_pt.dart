@@ -2478,7 +2478,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get unitShort => 'UNIT.';
 
   @override
-  String get alreadyPaid => 'Ja pago';
+  String get alreadyPaid => 'Já paguei';
 
   @override
   String get remainingBalance => 'SALDO RESTANTE';
@@ -3141,7 +3141,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get contract => 'Contrato';
 
   @override
-  String get attachReceipt => 'Anexar Comprovante';
+  String get attachReceipt => 'Anexar comprovante';
 
   @override
   String get chooseFile => 'Escolher Arquivo';
@@ -3455,7 +3455,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String paidOf(String paid, String total) {
-    return 'Pago: $paid de $total';
+    return 'Pago $paid de $total';
   }
 
   @override
@@ -3598,4 +3598,81 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get noDataForPeriod => 'Sem dados para o período';
+
+  @override
+  String get statementTab => 'Extrato';
+
+  @override
+  String get billsTab => 'Contas';
+
+  @override
+  String noBillsInMonth(String month) {
+    return 'Nenhuma conta em $month.';
+  }
+
+  @override
+  String get totalPayable => 'A pagar';
+
+  @override
+  String get totalReceivable => 'A receber';
+
+  @override
+  String overdueCount(int count) {
+    return '$count vencida(s)';
+  }
+
+  @override
+  String get pay => 'Pagar';
+
+  @override
+  String get editExpense => 'Editar despesa';
+
+  @override
+  String get editIncome => 'Editar recebimento';
+
+  @override
+  String paidOn(String date) {
+    return 'Paga em $date';
+  }
+
+  @override
+  String get reverseEntryPayment => 'Estornar pagamento';
+
+  @override
+  String get paymentDetails => 'Detalhes';
+
+  @override
+  String get searchFinancial => 'Buscar lançamento, fornecedor, cliente...';
+
+  @override
+  String get deleteEntry => 'Excluir lançamento';
+
+  @override
+  String get cancelEntry => 'Cancelar lançamento';
+
+  @override
+  String get confirmDeleteEntry =>
+      'Tem certeza que deseja excluir este lançamento?';
+
+  @override
+  String get confirmCancelEntry =>
+      'Tem certeza que deseja cancelar este lançamento? Esta ação não pode ser desfeita.';
+
+  @override
+  String get entryDeleted => 'Lançamento excluído';
+
+  @override
+  String get entryCancelled => 'Lançamento cancelado';
+
+  @override
+  String get paymentHistory => 'Histórico de pagamentos';
+
+  @override
+  String get exportOptions => 'Opções de exportação';
+
+  @override
+  String get exportDrePdf => 'Exportar DRE (PDF)';
+
+  @override
+  String get exportStatementCsv => 'Exportar extrato (CSV)';
 }

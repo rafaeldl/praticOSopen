@@ -15,6 +15,18 @@ abstract class _FinancialEntryStore with Store {
   @observable
   ObservableStream<List<FinancialEntry?>>? entryList;
 
+  @observable
+  ObservableStream<List<FinancialEntry?>>? monthEntryList;
+
+  @observable
+  double totalPayable = 0;
+
+  @observable
+  double totalReceivable = 0;
+
+  @observable
+  int overdueCount = 0;
+
   String? companyId;
 
   _FinancialEntryStore() {
@@ -33,6 +45,35 @@ abstract class _FinancialEntryStore with Store {
     } else {
       entryList = repository.streamPending(companyId!).asObservable();
     }
+  }
+
+  @action
+  void loadByDueDateRange(DateTime start, DateTime end) {
+    if (companyId == null) return;
+    monthEntryList = repository
+        .streamByDueDateRange(companyId!, start, end)
+        .asObservable();
+  }
+
+  @action
+  void calculateEntryKPIs(List<FinancialEntry?> entries) {
+    double payable = 0, receivable = 0;
+    int overdue = 0;
+    for (final e in entries) {
+      if (e == null || e.deletedAt != null) continue;
+      if (e.status == FinancialEntryStatus.cancelled) continue;
+      if (e.status == FinancialEntryStatus.paid) continue;
+      final remaining = e.remainingBalance;
+      if (e.direction == FinancialEntryDirection.payable) {
+        payable += remaining;
+      } else if (e.direction == FinancialEntryDirection.receivable) {
+        receivable += remaining;
+      }
+      if (e.isOverdue) overdue++;
+    }
+    totalPayable = payable;
+    totalReceivable = receivable;
+    overdueCount = overdue;
   }
 
   @action
@@ -93,6 +134,15 @@ abstract class _FinancialEntryStore with Store {
     if (companyId == null) return;
     entry.deletedAt = DateTime.now();
     entry.deletedBy = Global.userAggr;
+    await repository.updateItem(companyId!, entry);
+  }
+
+  @action
+  Future<void> cancelEntry(FinancialEntry entry) async {
+    if (companyId == null) return;
+    entry.status = FinancialEntryStatus.cancelled;
+    entry.updatedAt = DateTime.now();
+    entry.updatedBy = Global.userAggr;
     await repository.updateItem(companyId!, entry);
   }
 
@@ -174,7 +224,9 @@ abstract class _FinancialEntryStore with Store {
     double activePaidAmount = 0;
     for (final doc in paymentsSnapshot.docs) {
       final data = doc.data();
-      if (data['status'] == 'completed' && data['deletedAt'] == null) {
+      if (data['status'] == 'completed' &&
+          data['deletedAt'] == null &&
+          data['reversedPaymentId'] == null) {
         activePaidAmount += (data['amount'] as num?)?.toDouble() ?? 0;
       }
     }

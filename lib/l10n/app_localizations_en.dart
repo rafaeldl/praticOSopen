@@ -3130,7 +3130,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contract => 'Contract';
 
   @override
-  String get attachReceipt => 'Attach Receipt';
+  String get attachReceipt => 'Attach receipt';
 
   @override
   String get chooseFile => 'Choose File';
@@ -3444,7 +3444,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String paidOf(String paid, String total) {
-    return 'Paid: $paid of $total';
+    return 'Paid $paid of $total';
   }
 
   @override
@@ -3587,4 +3587,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noDataForPeriod => 'No data for period';
+
+  @override
+  String get statementTab => 'Statement';
+
+  @override
+  String get billsTab => 'Bills';
+
+  @override
+  String noBillsInMonth(String month) {
+    return 'No bills in $month.';
+  }
+
+  @override
+  String get totalPayable => 'Payable';
+
+  @override
+  String get totalReceivable => 'Receivable';
+
+  @override
+  String overdueCount(int count) {
+    return '$count overdue';
+  }
+
+  @override
+  String get pay => 'Pay';
+
+  @override
+  String get editExpense => 'Edit expense';
+
+  @override
+  String get editIncome => 'Edit income';
+
+  @override
+  String paidOn(String date) {
+    return 'Paid on $date';
+  }
+
+  @override
+  String get reverseEntryPayment => 'Reverse payment';
+
+  @override
+  String get paymentDetails => 'Details';
+
+  @override
+  String get searchFinancial => 'Search entry, supplier, customer...';
+
+  @override
+  String get deleteEntry => 'Delete entry';
+
+  @override
+  String get cancelEntry => 'Cancel entry';
+
+  @override
+  String get confirmDeleteEntry =>
+      'Are you sure you want to delete this entry?';
+
+  @override
+  String get confirmCancelEntry =>
+      'Are you sure you want to cancel this entry? This action cannot be undone.';
+
+  @override
+  String get entryDeleted => 'Entry deleted';
+
+  @override
+  String get entryCancelled => 'Entry cancelled';
+
+  @override
+  String get paymentHistory => 'Payment history';
+
+  @override
+  String get exportOptions => 'Export options';
+
+  @override
+  String get exportDrePdf => 'Export DRE (PDF)';
+
+  @override
+  String get exportStatementCsv => 'Export statement (CSV)';
 }

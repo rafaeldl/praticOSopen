@@ -1582,5 +1582,58 @@
   "toReceive": "A receber",
   "toPay": "A pagar",
   "others": "Outros",
-  "noDataForPeriod": "Sem dados para o período"
+  "noDataForPeriod": "Sem dados para o período",
+  "statementTab": "Extrato",
+  "billsTab": "Contas",
+  "noBillsInMonth": "Nenhuma conta em {month}.",
+  "@noBillsInMonth": {
+    "placeholders": {
+      "month": {"type": "String"}
+    }
+  },
+  "totalPayable": "A pagar",
+  "totalReceivable": "A receber",
+  "overdueCount": "{count} vencida(s)",
+  "@overdueCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "pay": "Pagar",
+  "alreadyPaid": "Já paguei",
+  "editExpense": "Editar despesa",
+  "editIncome": "Editar recebimento",
+  "paidOn": "Paga em {date}",
+  "@paidOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "reverseEntryPayment": "Estornar pagamento",
+  "paymentDetails": "Detalhes",
+  "attachReceipt": "Anexar comprovante",
+  "receipt": "Comprovante",
+  "expense": "Despesa",
+  "income": "Recebimento",
+
+  "searchFinancial": "Buscar lançamento, fornecedor, cliente...",
+  "deleteEntry": "Excluir lançamento",
+  "cancelEntry": "Cancelar lançamento",
+  "confirmDeleteEntry": "Tem certeza que deseja excluir este lançamento?",
+  "confirmCancelEntry": "Tem certeza que deseja cancelar este lançamento? Esta ação não pode ser desfeita.",
+  "entryDeleted": "Lançamento excluído",
+  "entryCancelled": "Lançamento cancelado",
+
+  "paymentHistory": "Histórico de pagamentos",
+  "paidOf": "Pago {paid} de {total}",
+  "@paidOf": {
+    "placeholders": {
+      "paid": { "type": "String" },
+      "total": { "type": "String" }
+    }
+  },
+
+  "exportOptions": "Opções de exportação",
+  "exportDrePdf": "Exportar DRE (PDF)",
+  "exportStatementCsv": "Exportar extrato (CSV)"
 }

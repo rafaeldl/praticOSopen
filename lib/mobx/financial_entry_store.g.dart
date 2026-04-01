@@ -27,6 +27,78 @@ mixin _$FinancialEntryStore on _FinancialEntryStore, Store {
     });
   }
 
+  late final _$monthEntryListAtom = Atom(
+    name: '_FinancialEntryStore.monthEntryList',
+    context: context,
+  );
+
+  @override
+  ObservableStream<List<FinancialEntry?>>? get monthEntryList {
+    _$monthEntryListAtom.reportRead();
+    return super.monthEntryList;
+  }
+
+  @override
+  set monthEntryList(ObservableStream<List<FinancialEntry?>>? value) {
+    _$monthEntryListAtom.reportWrite(value, super.monthEntryList, () {
+      super.monthEntryList = value;
+    });
+  }
+
+  late final _$totalPayableAtom = Atom(
+    name: '_FinancialEntryStore.totalPayable',
+    context: context,
+  );
+
+  @override
+  double get totalPayable {
+    _$totalPayableAtom.reportRead();
+    return super.totalPayable;
+  }
+
+  @override
+  set totalPayable(double value) {
+    _$totalPayableAtom.reportWrite(value, super.totalPayable, () {
+      super.totalPayable = value;
+    });
+  }
+
+  late final _$totalReceivableAtom = Atom(
+    name: '_FinancialEntryStore.totalReceivable',
+    context: context,
+  );
+
+  @override
+  double get totalReceivable {
+    _$totalReceivableAtom.reportRead();
+    return super.totalReceivable;
+  }
+
+  @override
+  set totalReceivable(double value) {
+    _$totalReceivableAtom.reportWrite(value, super.totalReceivable, () {
+      super.totalReceivable = value;
+    });
+  }
+
+  late final _$overdueCountAtom = Atom(
+    name: '_FinancialEntryStore.overdueCount',
+    context: context,
+  );
+
+  @override
+  int get overdueCount {
+    _$overdueCountAtom.reportRead();
+    return super.overdueCount;
+  }
+
+  @override
+  set overdueCount(int value) {
+    _$overdueCountAtom.reportWrite(value, super.overdueCount, () {
+      super.overdueCount = value;
+    });
+  }
+
   late final _$createEntryAsyncAction = AsyncAction(
     '_FinancialEntryStore.createEntry',
     context: context,
@@ -69,6 +141,16 @@ mixin _$FinancialEntryStore on _FinancialEntryStore, Store {
     return _$deleteEntryAsyncAction.run(() => super.deleteEntry(entry));
   }
 
+  late final _$cancelEntryAsyncAction = AsyncAction(
+    '_FinancialEntryStore.cancelEntry',
+    context: context,
+  );
+
+  @override
+  Future<void> cancelEntry(FinancialEntry entry) {
+    return _$cancelEntryAsyncAction.run(() => super.cancelEntry(entry));
+  }
+
   late final _$_FinancialEntryStoreActionController = ActionController(
     name: '_FinancialEntryStore',
     context: context,
@@ -87,9 +169,37 @@ mixin _$FinancialEntryStore on _FinancialEntryStore, Store {
   }
 
   @override
+  void loadByDueDateRange(DateTime start, DateTime end) {
+    final _$actionInfo = _$_FinancialEntryStoreActionController.startAction(
+      name: '_FinancialEntryStore.loadByDueDateRange',
+    );
+    try {
+      return super.loadByDueDateRange(start, end);
+    } finally {
+      _$_FinancialEntryStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void calculateEntryKPIs(List<FinancialEntry?> entries) {
+    final _$actionInfo = _$_FinancialEntryStoreActionController.startAction(
+      name: '_FinancialEntryStore.calculateEntryKPIs',
+    );
+    try {
+      return super.calculateEntryKPIs(entries);
+    } finally {
+      _$_FinancialEntryStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
-entryList: ${entryList}
+entryList: ${entryList},
+monthEntryList: ${monthEntryList},
+totalPayable: ${totalPayable},
+totalReceivable: ${totalReceivable},
+overdueCount: ${overdueCount}
     ''';
   }
 }

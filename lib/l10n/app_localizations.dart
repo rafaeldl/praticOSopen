@@ -4807,7 +4807,7 @@ abstract class AppLocalizations {
   /// No description provided for @alreadyPaid.
   ///
   /// In pt, this message translates to:
-  /// **'Ja pago'**
+  /// **'Já paguei'**
   String get alreadyPaid;
 
   /// No description provided for @remainingBalance.
@@ -5959,7 +5959,7 @@ abstract class AppLocalizations {
   /// No description provided for @attachReceipt.
   ///
   /// In pt, this message translates to:
-  /// **'Anexar Comprovante'**
+  /// **'Anexar comprovante'**
   String get attachReceipt;
 
   /// No description provided for @chooseFile.
@@ -6553,7 +6553,7 @@ abstract class AppLocalizations {
   /// No description provided for @paidOf.
   ///
   /// In pt, this message translates to:
-  /// **'Pago: {paid} de {total}'**
+  /// **'Pago {paid} de {total}'**
   String paidOf(String paid, String total);
 
   /// No description provided for @invalidAmount.
@@ -6813,6 +6813,144 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Sem dados para o período'**
   String get noDataForPeriod;
+
+  /// No description provided for @statementTab.
+  ///
+  /// In pt, this message translates to:
+  /// **'Extrato'**
+  String get statementTab;
+
+  /// No description provided for @billsTab.
+  ///
+  /// In pt, this message translates to:
+  /// **'Contas'**
+  String get billsTab;
+
+  /// No description provided for @noBillsInMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma conta em {month}.'**
+  String noBillsInMonth(String month);
+
+  /// No description provided for @totalPayable.
+  ///
+  /// In pt, this message translates to:
+  /// **'A pagar'**
+  String get totalPayable;
+
+  /// No description provided for @totalReceivable.
+  ///
+  /// In pt, this message translates to:
+  /// **'A receber'**
+  String get totalReceivable;
+
+  /// No description provided for @overdueCount.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} vencida(s)'**
+  String overdueCount(int count);
+
+  /// No description provided for @pay.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagar'**
+  String get pay;
+
+  /// No description provided for @editExpense.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar despesa'**
+  String get editExpense;
+
+  /// No description provided for @editIncome.
+  ///
+  /// In pt, this message translates to:
+  /// **'Editar recebimento'**
+  String get editIncome;
+
+  /// No description provided for @paidOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Paga em {date}'**
+  String paidOn(String date);
+
+  /// No description provided for @reverseEntryPayment.
+  ///
+  /// In pt, this message translates to:
+  /// **'Estornar pagamento'**
+  String get reverseEntryPayment;
+
+  /// No description provided for @paymentDetails.
+  ///
+  /// In pt, this message translates to:
+  /// **'Detalhes'**
+  String get paymentDetails;
+
+  /// No description provided for @searchFinancial.
+  ///
+  /// In pt, this message translates to:
+  /// **'Buscar lançamento, fornecedor, cliente...'**
+  String get searchFinancial;
+
+  /// No description provided for @deleteEntry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Excluir lançamento'**
+  String get deleteEntry;
+
+  /// No description provided for @cancelEntry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar lançamento'**
+  String get cancelEntry;
+
+  /// No description provided for @confirmDeleteEntry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja excluir este lançamento?'**
+  String get confirmDeleteEntry;
+
+  /// No description provided for @confirmCancelEntry.
+  ///
+  /// In pt, this message translates to:
+  /// **'Tem certeza que deseja cancelar este lançamento? Esta ação não pode ser desfeita.'**
+  String get confirmCancelEntry;
+
+  /// No description provided for @entryDeleted.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lançamento excluído'**
+  String get entryDeleted;
+
+  /// No description provided for @entryCancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Lançamento cancelado'**
+  String get entryCancelled;
+
+  /// No description provided for @paymentHistory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico de pagamentos'**
+  String get paymentHistory;
+
+  /// No description provided for @exportOptions.
+  ///
+  /// In pt, this message translates to:
+  /// **'Opções de exportação'**
+  String get exportOptions;
+
+  /// No description provided for @exportDrePdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar DRE (PDF)'**
+  String get exportDrePdf;
+
+  /// No description provided for @exportStatementCsv.
+  ///
+  /// In pt, this message translates to:
+  /// **'Exportar extrato (CSV)'**
+  String get exportStatementCsv;
 }
 
 class _AppLocalizationsDelegate
