@@ -213,8 +213,6 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
         CupertinoColors.secondaryLabel.resolveFrom(context);
     final labelColor = CupertinoColors.label.resolveFrom(context);
     final payment = widget.payment;
-    final textDecoration =
-        _isReversed ? TextDecoration.lineThrough : TextDecoration.none;
 
     return Material(
       type: MaterialType.transparency,
@@ -271,7 +269,6 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
                           fontWeight: FontWeight.w600,
                           color:
                               _isReversed ? CupertinoColors.systemGrey : labelColor,
-                          decoration: textDecoration,
                         ),
                       ),
                     ),
@@ -282,7 +279,6 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: _typeColor,
-                        decoration: textDecoration,
                       ),
                     ),
                   ],
@@ -298,66 +294,43 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
                   style: TextStyle(
                     fontSize: 14,
                     color: secondaryLabelColor,
-                    decoration: textDecoration,
                   ),
                 ),
               ),
 
               const SizedBox(height: 12),
 
-              // Detail rows
-              _buildDetailRow(
-                  context, context.l10n.paymentDate,
-                  payment.paymentDate != null
-                      ? FormatService().formatDate(payment.paymentDate!)
-                      : '-'),
-              _buildDetailRow(
-                  context, context.l10n.accounts, payment.account?.name ?? '-'),
-              if (payment.category != null && payment.category!.isNotEmpty)
-                _buildDetailRow(
-                    context, context.l10n.category, payment.category!),
-              if (payment.supplier != null && payment.supplier!.isNotEmpty)
-                _buildDetailRow(
-                    context, context.l10n.supplier, payment.supplier!),
-              if (payment.customer?.name != null)
-                _buildDetailRow(
-                    context, context.l10n.customer, payment.customer!.name!),
-
-              // OS link
-              if (payment.orderId != null && payment.orderNumber != null)
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                    widget.onOrderTap?.call();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 6),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 100,
-                          child: Text(
-                            'OS',
-                            style: TextStyle(
-                                fontSize: 14, color: secondaryLabelColor),
-                          ),
-                        ),
-                        Text(
+              // Detail rows (insetGrouped)
+              CupertinoListSection.insetGrouped(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  _buildDetailTile(context, context.l10n.paymentDate,
+                      payment.paymentDate != null ? FormatService().formatDate(payment.paymentDate!) : '-'),
+                  _buildDetailTile(context, context.l10n.accounts, payment.account?.name ?? '-'),
+                  if (payment.category != null && payment.category!.isNotEmpty)
+                    _buildDetailTile(context, context.l10n.category, payment.category!),
+                  if (payment.supplier != null && payment.supplier!.isNotEmpty)
+                    _buildDetailTile(context, context.l10n.supplier, payment.supplier!),
+                  if (payment.customer?.name != null)
+                    _buildDetailTile(context, context.l10n.customer, payment.customer!.name!),
+                  if (payment.orderId != null && payment.orderNumber != null)
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                        widget.onOrderTap?.call();
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: CupertinoListTile(
+                        title: const Text('OS'),
+                        additionalInfo: Text(
                           '#${payment.orderNumber}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: CupertinoColors.activeBlue,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: const TextStyle(color: CupertinoColors.activeBlue, fontWeight: FontWeight.w500),
                         ),
-                        const SizedBox(width: 4),
-                        const Icon(CupertinoIcons.chevron_right,
-                            size: 14, color: CupertinoColors.activeBlue),
-                      ],
+                        trailing: const CupertinoListTileChevron(),
+                      ),
                     ),
-                  ),
-                ),
+                ],
+              ),
 
               // Reversed info
               if (_isReversed && payment.reversalReason != null)
@@ -493,31 +466,12 @@ class _PaymentDetailSheetState extends State<PaymentDetailSheet> {
     );
   }
 
-  Widget _buildDetailRow(
-      BuildContext context, String label, String value) {
+  Widget _buildDetailTile(BuildContext context, String label, String value) {
     final secondaryLabelColor =
         CupertinoColors.secondaryLabel.resolveFrom(context);
-    final labelColor = CupertinoColors.label.resolveFrom(context);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(fontSize: 14, color: secondaryLabelColor),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 14, color: labelColor),
-            ),
-          ),
-        ],
-      ),
+    return CupertinoListTile(
+      title: Text(label, style: TextStyle(color: secondaryLabelColor)),
+      additionalInfo: Text(value),
     );
   }
 }

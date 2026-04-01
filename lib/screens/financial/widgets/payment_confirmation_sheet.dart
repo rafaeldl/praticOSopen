@@ -125,7 +125,6 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
     final labelColor = CupertinoColors.label.resolveFrom(context);
     final secondaryLabelColor =
         CupertinoColors.secondaryLabel.resolveFrom(context);
-    final separatorColor = CupertinoColors.separator.resolveFrom(context);
     final formattedAmount = FormatService().formatCurrency(_amount);
     final methodLabel = _paymentMethodLabel(context, _selectedMethod);
     final accountName = _selectedAccount.name ?? '';
@@ -179,241 +178,143 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
                 ),
               const SizedBox(height: 16),
 
-              // Summary text (one-tap mode)
+              // === Quick mode: summary card ===
               if (!_showDetails) ...[
-                Text(
-                  '${context.l10n.confirm} $formattedAmount '
-                  '${methodLabel.isNotEmpty ? 'via $methodLabel ' : ''}'
-                  '${accountName.isNotEmpty ? '${context.l10n.account.toLowerCase()}: $accountName' : ''}',
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: labelColor,
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemGrey6.resolveFrom(context),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  textAlign: TextAlign.center,
+                  child: Column(
+                    children: [
+                      Text(
+                        formattedAmount,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: labelColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${methodLabel.isNotEmpty ? 'via $methodLabel' : ''}'
+                        '${accountName.isNotEmpty ? ' · $accountName' : ''}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: secondaryLabelColor,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                // Edit details link
+                const SizedBox(height: 12),
                 GestureDetector(
                   onTap: () => setState(() => _showDetails = true),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      context.l10n.editDetails,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: CupertinoColors.activeBlue,
-                      ),
+                  child: Text(
+                    context.l10n.editDetails,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: CupertinoColors.activeBlue,
                     ),
                   ),
                 ),
               ],
 
-              // Expanded details
+              // === Expanded mode: insetGrouped fields ===
               if (_showDetails) ...[
-                Divider(height: 1, color: separatorColor),
-                const SizedBox(height: 12),
-
-                // Amount
-                _buildField(
-                  context,
-                  label: context.l10n.value,
-                  child: CupertinoTextField(
-                    controller: TextEditingController(
-                      text: FormatService().formatDecimal(_amount),
-                    ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    onChanged: (value) {
-                      final parsed = double.tryParse(
-                        value.replaceAll(',', '.'),
-                      );
-                      if (parsed != null) {
-                        setState(() => _amount = parsed);
-                      }
-                    },
-                    placeholder: context.l10n.value,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Account picker
-                _buildField(
-                  context,
-                  label: context.l10n.account,
-                  child: GestureDetector(
-                    onTap: () => _showAccountPicker(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemBackground
-                            .resolveFrom(context),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: separatorColor),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              accountName,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: labelColor,
-                              ),
-                            ),
+                CupertinoListSection.insetGrouped(
+                  margin: EdgeInsets.zero,
+                  children: [
+                    // Amount row
+                    CupertinoListTile(
+                      title: Text(context.l10n.value),
+                      additionalInfo: SizedBox(
+                        width: 120,
+                        child: CupertinoTextField(
+                          controller: TextEditingController(
+                            text: FormatService().formatDecimal(_amount),
                           ),
-                          Icon(
-                            CupertinoIcons.chevron_down,
-                            size: 14,
-                            color: secondaryLabelColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Payment method picker
-                _buildField(
-                  context,
-                  label: context.l10n.paymentMethod,
-                  child: GestureDetector(
-                    onTap: () => _showMethodPicker(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemBackground
-                            .resolveFrom(context),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: separatorColor),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              methodLabel,
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: labelColor,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            CupertinoIcons.chevron_down,
-                            size: 14,
-                            color: secondaryLabelColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Date picker
-                _buildField(
-                  context,
-                  label: context.l10n.paymentDate,
-                  child: GestureDetector(
-                    onTap: () => _showDatePicker(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemBackground
-                            .resolveFrom(context),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: separatorColor),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              FormatService().formatDate(_selectedDate),
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: labelColor,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            CupertinoIcons.calendar,
-                            size: 16,
-                            color: secondaryLabelColor,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                // Discount toggle
-                GestureDetector(
-                  onTap: () =>
-                      setState(() => _showDiscount = !_showDiscount),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _showDiscount
-                              ? CupertinoIcons.chevron_down
-                              : CupertinoIcons.chevron_right,
-                          size: 14,
-                          color: CupertinoColors.activeBlue,
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          textAlign: TextAlign.right,
+                          decoration: null,
+                          style: TextStyle(fontSize: 17, color: labelColor),
+                          onChanged: (value) {
+                            final parsed = double.tryParse(value.replaceAll(',', '.'));
+                            if (parsed != null) setState(() => _amount = parsed);
+                          },
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          context.l10n.discount,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: CupertinoColors.activeBlue,
+                      ),
+                    ),
+                    // Account row
+                    GestureDetector(
+                      onTap: () => _showAccountPicker(context),
+                      behavior: HitTestBehavior.opaque,
+                      child: CupertinoListTile(
+                        title: Text(context.l10n.account),
+                        additionalInfo: Text(accountName, style: TextStyle(color: secondaryLabelColor)),
+                        trailing: const CupertinoListTileChevron(),
+                      ),
+                    ),
+                    // Method row
+                    GestureDetector(
+                      onTap: () => _showMethodPicker(context),
+                      behavior: HitTestBehavior.opaque,
+                      child: CupertinoListTile(
+                        title: Text(context.l10n.paymentMethod),
+                        additionalInfo: Text(methodLabel, style: TextStyle(color: secondaryLabelColor)),
+                        trailing: const CupertinoListTileChevron(),
+                      ),
+                    ),
+                    // Date row
+                    GestureDetector(
+                      onTap: () => _showDatePicker(context),
+                      behavior: HitTestBehavior.opaque,
+                      child: CupertinoListTile(
+                        title: Text(context.l10n.paymentDate),
+                        additionalInfo: Text(FormatService().formatDate(_selectedDate), style: TextStyle(color: secondaryLabelColor)),
+                        trailing: const CupertinoListTileChevron(),
+                      ),
+                    ),
+                    // Discount row
+                    GestureDetector(
+                      onTap: () => setState(() => _showDiscount = !_showDiscount),
+                      behavior: HitTestBehavior.opaque,
+                      child: CupertinoListTile(
+                        leading: Icon(
+                          _showDiscount ? CupertinoIcons.chevron_down : CupertinoIcons.chevron_right,
+                          size: 14, color: CupertinoColors.activeBlue,
+                        ),
+                        title: Text(context.l10n.discount, style: const TextStyle(color: CupertinoColors.activeBlue)),
+                      ),
+                    ),
+                    if (_showDiscount)
+                      CupertinoListTile(
+                        title: Text(context.l10n.discountAmount),
+                        additionalInfo: SizedBox(
+                          width: 120,
+                          child: CupertinoTextField(
+                            controller: TextEditingController(
+                              text: _discount > 0 ? FormatService().formatDecimal(_discount) : '',
+                            ),
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            textAlign: TextAlign.right,
+                            decoration: null,
+                            placeholder: '0,00',
+                            style: TextStyle(fontSize: 17, color: labelColor),
+                            onChanged: (value) {
+                              final parsed = double.tryParse(value.replaceAll(',', '.'));
+                              if (parsed != null) setState(() => _discount = parsed);
+                            },
                           ),
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                  ],
                 ),
-
-                if (_showDiscount) ...[
-                  const SizedBox(height: 8),
-                  _buildField(
-                    context,
-                    label: context.l10n.discountAmount,
-                    child: CupertinoTextField(
-                      controller: TextEditingController(
-                        text: _discount > 0
-                            ? FormatService().formatDecimal(_discount)
-                            : '',
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      onChanged: (value) {
-                        final parsed = double.tryParse(
-                          value.replaceAll(',', '.'),
-                        );
-                        if (parsed != null) {
-                          setState(() => _discount = parsed);
-                        }
-                      },
-                      placeholder: context.l10n.discountAmount,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
               ],
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 16),
 
               // Confirm button
               SizedBox(
@@ -435,29 +336,6 @@ class _PaymentConfirmationSheetState extends State<PaymentConfirmationSheet> {
         ),
       ),
     ),
-    );
-  }
-
-  Widget _buildField(
-    BuildContext context, {
-    required String label,
-    required Widget child,
-  }) {
-    final secondaryLabelColor =
-        CupertinoColors.secondaryLabel.resolveFrom(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            color: secondaryLabelColor,
-          ),
-        ),
-        const SizedBox(height: 4),
-        child,
-      ],
     );
   }
 
