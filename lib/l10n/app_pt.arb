@@ -1635,5 +1635,8 @@
 
   "exportOptions": "Opções de exportação",
   "exportDrePdf": "Exportar DRE (PDF)",
-  "exportStatementCsv": "Exportar extrato (CSV)"
+  "exportStatementCsv": "Exportar extrato (CSV)",
+
+  "attachDocument": "Anexar documento",
+  "addNote": "Adicione uma nota..."
 }

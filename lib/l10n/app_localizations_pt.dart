@@ -3675,4 +3675,10 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get exportStatementCsv => 'Exportar extrato (CSV)';
+
+  @override
+  String get attachDocument => 'Anexar documento';
+
+  @override
+  String get addNote => 'Adicione uma nota...';
 }

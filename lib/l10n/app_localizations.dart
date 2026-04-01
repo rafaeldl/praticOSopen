@@ -6951,6 +6951,18 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Exportar extrato (CSV)'**
   String get exportStatementCsv;
+
+  /// No description provided for @attachDocument.
+  ///
+  /// In pt, this message translates to:
+  /// **'Anexar documento'**
+  String get attachDocument;
+
+  /// No description provided for @addNote.
+  ///
+  /// In pt, this message translates to:
+  /// **'Adicione uma nota...'**
+  String get addNote;
 }
 
 class _AppLocalizationsDelegate

@@ -1590,5 +1590,8 @@
 
   "exportOptions": "Export options",
   "exportDrePdf": "Export DRE (PDF)",
-  "exportStatementCsv": "Export statement (CSV)"
+  "exportStatementCsv": "Export statement (CSV)",
+
+  "attachDocument": "Attach document",
+  "addNote": "Add a note..."
 }

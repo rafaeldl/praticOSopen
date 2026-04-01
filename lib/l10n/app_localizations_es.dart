@@ -3683,4 +3683,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get exportStatementCsv => 'Exportar extracto (CSV)';
+
+  @override
+  String get attachDocument => 'Adjuntar documento';
+
+  @override
+  String get addNote => 'Agregue una nota...';
 }
