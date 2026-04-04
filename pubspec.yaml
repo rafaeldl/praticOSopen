@@ -77,7 +77,8 @@ dependencies:
   table_calendar: ^3.1.2
   timezone: ^0.9.4
 
-  # In-App Purchase (RevenueCat)
+  # In-App Purchase / Subscription management (RevenueCat SDK)
+  # Keys injected via --dart-define=REVENUECAT_ANDROID_API_KEY / REVENUECAT_IOS_API_KEY
   purchases_flutter: ^8.0.0
 
 # dependency_overrides:
