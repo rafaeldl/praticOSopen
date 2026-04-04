@@ -16,6 +16,7 @@ class PdfMainOsBuilder {
   final pw.MemoryImage? logoImage;
   final SegmentConfigProvider config;
   final PdfLocalizations localizations;
+  final bool showWatermark;
 
   PdfMainOsBuilder({
     required this.baseFont,
@@ -23,6 +24,7 @@ class PdfMainOsBuilder {
     this.logoImage,
     required this.config,
     required this.localizations,
+    this.showWatermark = false,
   });
 
   // ============================================
@@ -942,6 +944,38 @@ class PdfMainOsBuilder {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // ============================================
+  // WATERMARK (marca d'agua para plano Free)
+  // ============================================
+
+  /// Constrói a marca d'água "PraticOS" rotacionada 45 graus.
+  ///
+  /// A marca d'água é sobreposta em todas as páginas quando [showWatermark] é true.
+  /// Usa opacidade de 8% para não atrapalhar a leitura do documento.
+  pw.Widget buildWatermark() {
+    if (!showWatermark) return pw.SizedBox();
+
+    return pw.FullPage(
+      ignoreMargins: true,
+      child: pw.Center(
+        child: pw.Transform.rotate(
+          angle: -0.785398, // -45 graus em radianos
+          child: pw.Opacity(
+            opacity: 0.08,
+            child: pw.Text(
+              'PraticOS',
+              style: pw.TextStyle(
+                font: boldFont,
+                fontSize: 72,
+                color: PdfColors.grey,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

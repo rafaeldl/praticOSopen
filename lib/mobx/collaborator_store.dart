@@ -5,12 +5,14 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/collaborator_exception.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/membership.dart';
+import 'package:praticos/models/subscription.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 import 'package:praticos/repositories/user_repository.dart';
-import 'package:praticos/services/invite_api_service.dart';
 import 'package:praticos/services/analytics_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/invite_api_service.dart';
 import 'package:praticos/utils/invite_utils.dart' as invite_utils;
 
 part 'collaborator_store.g.dart';
@@ -203,18 +205,29 @@ abstract class _CollaboratorStore with Store {
   /// Retorna uma tupla (wasAddedDirectly, inviteToken):
   /// - `wasAddedDirectly`: true se foi adicionado diretamente, false se foi criado convite
   /// - `inviteToken`: o token do convite criado (null se adicionado diretamente)
+  ///
+  /// Lança [FeatureGateLimitException] se o limite de colaboradores foi atingido.
   @action
   Future<(bool wasAdded, String? token)> addCollaborator(
     String? name,
     String? email,
     String? phone,
-    RolesType roleType,
-  ) async {
+    RolesType roleType, {
+    Subscription? subscription,
+  }) async {
     print('[CollaboratorStore] addCollaborator called - name: $name, email: $email, phone: $phone, role: ${roleType.name}');
 
     if (Global.companyAggr?.id == null) {
       print('[CollaboratorStore] Error: companyAggr is null');
       return (false, null);
+    }
+
+    // Verifica limite de colaboradores antes de adicionar
+    final sub = subscription ?? Global.subscription;
+    final gateResult = FeatureGateService.canAddCollaborator(sub);
+    if (!gateResult.isAllowed) {
+      print('[CollaboratorStore] Limite de colaboradores atingido: ${gateResult.currentUsage}/${gateResult.limit}');
+      throw FeatureGateLimitException(gateResult);
     }
 
     isLoading = true;
@@ -253,6 +266,8 @@ abstract class _CollaboratorStore with Store {
           method: 'invite',
           role: roleType.name,
         );
+        // Atualiza contador (convite conta como colaborador pendente)
+        await _updateCollaboratorCounter();
         return (false, inviteToken);
       }
 
@@ -301,6 +316,9 @@ abstract class _CollaboratorStore with Store {
 
       // 4. Commit atômico
       await batch.commit();
+
+      // 5. Atualiza contador de colaboradores
+      await _updateCollaboratorCounter();
 
       AnalyticsService.instance.logCollaboratorInvited(
         method: 'direct',
@@ -356,6 +374,8 @@ abstract class _CollaboratorStore with Store {
     try {
       await InviteApiService.instance.cancelInvite(inviteToken);
       await loadPendingInvites();
+      // Atualiza contador após cancelar convite
+      await _updateCollaboratorCounter();
     } catch (e) {
       errorMessage = e.toString();
       rethrow;
@@ -478,7 +498,10 @@ abstract class _CollaboratorStore with Store {
       // 3. Commit atômico
       await batch.commit();
 
-      // 4. Recarrega lista
+      // 4. Atualiza contador de colaboradores
+      await _updateCollaboratorCounter();
+
+      // 5. Recarrega lista
       await loadCollaborators();
 
     } catch (e) {
@@ -486,6 +509,54 @@ abstract class _CollaboratorStore with Store {
       rethrow;
     } finally {
       isLoading = false;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Feature Gate Counter
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Atualiza o contador de colaboradores no Firestore e localmente.
+  ///
+  /// Conta membros ativos + convites pendentes como uso atual.
+  /// Falha silenciosa - não bloqueia a operação principal.
+  Future<void> _updateCollaboratorCounter() async {
+    try {
+      if (Global.companyAggr?.id == null || Global.subscription == null) {
+        return;
+      }
+
+      final companyId = Global.companyAggr!.id!;
+
+      // Conta membros ativos na coleção memberships
+      final membershipsSnapshot = await _db
+          .collection('companies')
+          .doc(companyId)
+          .collection('memberships')
+          .get();
+      final memberCount = membershipsSnapshot.docs.length;
+
+      // Conta convites pendentes
+      final pendingCount = pendingInvites.where((i) => !i.isExpired).length;
+
+      // Total: membros + convites pendentes
+      final totalCollaborators = memberCount + pendingCount;
+
+      // Atualiza no Firestore
+      await _db
+          .collection('companies')
+          .doc(companyId)
+          .update({
+            'subscription.usage.collaborators': totalCollaborators,
+          });
+
+      // Atualiza localmente
+      Global.subscription!.usage.collaborators = totalCollaborators;
+
+      print('[CollaboratorStore] Contador de colaboradores atualizado: $totalCollaborators (membros: $memberCount, convites: $pendingCount)');
+    } catch (e) {
+      // Falha silenciosa - não bloqueia a operação principal
+      print('[CollaboratorStore] Erro ao atualizar contador de colaboradores: $e');
     }
   }
 }

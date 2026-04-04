@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_form.dart';
+import 'package:praticos/models/subscription.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/pdf/pdf_forms_builder.dart';
 import 'package:praticos/services/pdf/pdf_image_loader.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
@@ -65,11 +68,19 @@ class OsPdfOptions {
 class PdfService {
   final PdfImageLoader _imageLoader = PdfImageLoader();
 
-  /// Gera o PDF e retorna os bytes
+  /// Gera o PDF e retorna os bytes.
+  ///
+  /// Se [subscription] for null, usa [Global.subscription] para verificar
+  /// se deve exibir marca d'água (planos Free exibem marca d'água).
   Future<Uint8List> generateOsPdf(
     OsPdfData data, [
     OsPdfOptions options = const OsPdfOptions(),
+    Subscription? subscription,
   ]) async {
+    // 0. Verificar se deve exibir marca d'agua
+    final effectiveSubscription = subscription ?? Global.subscription;
+    final showWatermark = FeatureGateService.shouldShowPdfWatermark(effectiveSubscription);
+
     // 1. Carregar fontes
     final (baseFont, boldFont) = await _loadFonts();
 
@@ -83,6 +94,7 @@ class PdfService {
       logoImage: images.logo,
       config: data.config,
       localizations: data.localizations,
+      showWatermark: showWatermark,
     );
 
     final formsBuilder = PdfFormsBuilder(
@@ -109,11 +121,16 @@ class PdfService {
             return mainOsBuilder.buildFooter(context);
           },
           build: (pw.Context context) {
-            return mainOsBuilder.buildContent(
+            final content = mainOsBuilder.buildContent(
               order: data.order,
               customer: data.customer,
               company: data.company,
             );
+            // Adicionar marca d'agua como primeiro widget (background)
+            if (showWatermark) {
+              return [mainOsBuilder.buildWatermark(), ...content];
+            }
+            return content;
           },
         ),
       );
@@ -138,12 +155,17 @@ class PdfService {
               );
             },
             build: (pw.Context context) {
-              return formsBuilder.buildFormContent(
+              final content = formsBuilder.buildFormContent(
                 company: data.company,
                 order: data.order,
                 form: form,
                 itemPhotosMap: itemPhotosMap,
               );
+              // Adicionar marca d'agua nas paginas de formularios tambem
+              if (showWatermark) {
+                return [mainOsBuilder.buildWatermark(), ...content];
+              }
+              return content;
             },
           ),
         );
