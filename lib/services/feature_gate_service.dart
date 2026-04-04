@@ -24,13 +24,19 @@ class FeatureGateResult {
   /// Plano atual do usuário.
   final SubscriptionPlan currentPlan;
 
+  final String? _overrideMessage;
+  final SubscriptionPlan? _overrideSuggestedPlan;
+
   const FeatureGateResult({
     required this.isAllowed,
     required this.currentUsage,
     required this.limit,
     required this.featureType,
     required this.currentPlan,
-  });
+    String? message,
+    SubscriptionPlan? suggestedPlan,
+  })  : _overrideMessage = message,
+        _overrideSuggestedPlan = suggestedPlan;
 
   /// Porcentagem de uso (0.0 a 1.0+).
   double get usagePercentage {
@@ -45,11 +51,37 @@ class FeatureGateResult {
   /// Se está no limite (>= 100%).
   bool get isAtLimit => usagePercentage >= 1.0;
 
+  /// Se o plano é ilimitado para esta feature (limit == -1).
+  bool get isUnlimited => limit == -1;
+
   /// Quantidade restante disponível.
   int get remaining {
     if (limit == -1) return 999999; // ilimitado
     return (limit - currentUsage).clamp(0, limit);
   }
+
+  /// Mensagem descritiva do resultado (pode ser sobrescrita no construtor).
+  String? get message {
+    if (_overrideMessage != null) return _overrideMessage;
+    if (!isAllowed) {
+      return 'Limite de ${_featureTypeName(featureType)} atingido ($currentUsage/$limit).';
+    }
+    return null;
+  }
+
+  static String _featureTypeName(FeatureType type) {
+    switch (type) {
+      case FeatureType.photo:
+        return 'fotos';
+      case FeatureType.formTemplate:
+        return 'formulários';
+      case FeatureType.collaborator:
+        return 'colaboradores';
+    }
+  }
+
+  /// Alias de [suggestedUpgrade] para compatibilidade.
+  SubscriptionPlan? get suggestedPlan => _overrideSuggestedPlan ?? suggestedUpgrade;
 
   /// Plano sugerido para upgrade.
   SubscriptionPlan? get suggestedUpgrade {
@@ -87,27 +119,11 @@ class FeatureGateResult {
 /// Exceção lançada quando um limite de feature é atingido.
 class FeatureGateLimitException implements Exception {
   final FeatureGateResult result;
-  final String message;
 
-  FeatureGateLimitException(this.result)
-      : message = _buildMessage(result);
+  const FeatureGateLimitException(this.result);
 
-  static String _buildMessage(FeatureGateResult result) {
-    final featureName = _featureTypeName(result.featureType);
-    return 'Limite de $featureName atingido. '
-        'Uso: ${result.currentUsage}/${result.limit}';
-  }
-
-  static String _featureTypeName(FeatureType type) {
-    switch (type) {
-      case FeatureType.photo:
-        return 'fotos';
-      case FeatureType.formTemplate:
-        return 'formulários';
-      case FeatureType.collaborator:
-        return 'colaboradores';
-    }
-  }
+  String get message =>
+      result.message ?? 'Limite de feature atingido (${result.currentUsage}/${result.limit})';
 
   @override
   String toString() => 'FeatureGateLimitException: $message';
@@ -120,7 +136,11 @@ class FeatureGateService {
   /// Verifica se pode adicionar uma foto.
   ///
   /// Se [subscription] for null, usa limites do plano Free.
-  static FeatureGateResult canAddPhoto(Subscription? subscription) {
+  static FeatureGateResult canAddPhoto(Subscription? subscription) =>
+      canAddPhotoWithSubscription(subscription);
+
+  /// Alias of [canAddPhoto] — verifica se pode adicionar uma foto.
+  static FeatureGateResult canAddPhotoWithSubscription(Subscription? subscription) {
     final sub = subscription ?? Subscription();
     final limits = sub.limits;
     final currentUsage = sub.usage.photosThisMonth;

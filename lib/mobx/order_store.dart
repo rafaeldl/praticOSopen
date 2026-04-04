@@ -944,7 +944,8 @@ abstract class _OrderStore with Store {
           isAllowed: false,
           currentUsage: photoLimitResult!.currentUsage,
           limit: photoLimitResult!.limit,
-          usagePercentage: photoLimitResult!.usagePercentage,
+          featureType: photoLimitResult!.featureType,
+          currentPlan: photoLimitResult!.currentPlan,
           message: 'Voce selecionou ${files.length} fotos, mas so pode adicionar mais $remaining este mes.',
           suggestedPlan: photoLimitResult!.suggestedPlan,
         );
