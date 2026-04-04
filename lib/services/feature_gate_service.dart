@@ -1,3 +1,4 @@
+// ignore_for_file: lines_longer_than_80_chars
 import 'package:praticos/models/subscription.dart';
 
 /// Tipos de features limitadas por plano.
