@@ -1406,5 +1406,66 @@
   "pdfGeneral": "General",
   "pdfTrackOnline": "Seguimiento online",
   "pdfTrackOnlineDescription": "Escanee el codigo QR para rastrear esta orden de servicio",
-  "pdfEquipment": "Equipo"
+  "pdfEquipment": "Equipo",
+
+  "upgrade": "Actualizar plan",
+  "photos": "fotos",
+  "formTemplates": "formularios",
+
+  "featureGateNearLimit": "Quedan {count} {feature}",
+  "@featureGateNearLimit": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "feature": { "type": "String" }
+    }
+  },
+  "featureGateLimitReached": "Límite de {feature} alcanzado",
+  "@featureGateLimitReached": {
+    "placeholders": {
+      "feature": { "type": "String" }
+    }
+  },
+  "featureGateUpgradeSuggestion": "Actualiza al plan {plan} para más",
+  "@featureGateUpgradeSuggestion": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+  "featureGateUsageInfo": "Usado {current} de {limit}",
+  "@featureGateUsageInfo": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+  "featureGateLimitModalTitle": "Límite alcanzado",
+  "featureGateLimitModalMessage": "Has alcanzado el límite de {feature} de tu plan {plan}.",
+  "@featureGateLimitModalMessage": {
+    "placeholders": {
+      "feature": { "type": "String" },
+      "plan": { "type": "String" }
+    }
+  },
+  "featureGateLimitModalUsage": "{current} de {limit} {feature}",
+  "@featureGateLimitModalUsage": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "limit": { "type": "int" },
+      "feature": { "type": "String" }
+    }
+  },
+  "featureGateUpgradeButton": "Actualizar a {plan}",
+  "@featureGateUpgradeButton": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+  "featureGateUpgradeNewLimit": "Nuevo límite: {limit} {feature}",
+  "@featureGateUpgradeNewLimit": {
+    "placeholders": {
+      "limit": { "type": "String" },
+      "feature": { "type": "String" }
+    }
+  },
+  "unlimitedLabel": "ilimitado"
 }

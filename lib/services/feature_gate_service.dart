@@ -1,238 +1,191 @@
-import 'package:praticos/models/company.dart';
 import 'package:praticos/models/subscription.dart';
 
-/// Resultado da verificacao de feature gate.
+/// Tipos de features limitadas por plano.
+enum FeatureType {
+  photo,
+  formTemplate,
+  collaborator,
+}
+
+/// Resultado da verificação de limite de feature.
 class FeatureGateResult {
-  /// Se a acao e permitida
+  /// Se a feature está permitida.
   final bool isAllowed;
 
-  /// Uso atual da feature
+  /// Uso atual.
   final int currentUsage;
 
-  /// Limite do plano atual (-1 = ilimitado)
+  /// Limite do plano. -1 = ilimitado.
   final int limit;
 
-  /// Percentual de uso (0.0 a 1.0+)
-  final double usagePercentage;
+  /// Tipo da feature.
+  final FeatureType featureType;
 
-  /// Mensagem para exibir ao usuario
-  final String? message;
-
-  /// Plano sugerido para upgrade
-  final String? suggestedPlan;
+  /// Plano atual do usuário.
+  final SubscriptionPlan currentPlan;
 
   const FeatureGateResult({
     required this.isAllowed,
     required this.currentUsage,
     required this.limit,
-    required this.usagePercentage,
-    this.message,
-    this.suggestedPlan,
+    required this.featureType,
+    required this.currentPlan,
   });
 
-  /// Verifica se esta em 80% do limite (aviso suave).
-  bool get isNearLimit => usagePercentage >= 0.8 && usagePercentage < 1.0;
+  /// Porcentagem de uso (0.0 a 1.0+).
+  double get usagePercentage {
+    if (limit == -1) return 0.0;
+    if (limit == 0) return 1.0;
+    return currentUsage / limit;
+  }
 
-  /// Verifica se atingiu o limite.
+  /// Se está próximo do limite (>= 80%).
+  bool get isNearLimit => usagePercentage >= 0.8 && !isAtLimit;
+
+  /// Se está no limite (>= 100%).
   bool get isAtLimit => usagePercentage >= 1.0;
 
-  /// Se limite e ilimitado.
-  bool get isUnlimited => limit == -1;
+  /// Quantidade restante disponível.
+  int get remaining {
+    if (limit == -1) return 999999; // ilimitado
+    return (limit - currentUsage).clamp(0, limit);
+  }
+
+  /// Plano sugerido para upgrade.
+  SubscriptionPlan? get suggestedUpgrade {
+    if (isAllowed && !isNearLimit) return null;
+
+    // Encontra o próximo plano com limite maior
+    final plans = SubscriptionPlan.values;
+    final currentIndex = plans.indexOf(currentPlan);
+
+    for (var i = currentIndex + 1; i < plans.length; i++) {
+      final nextPlan = plans[i];
+      final nextLimits = SubscriptionLimits.forPlan(nextPlan);
+      final nextLimit = _getLimitForFeature(nextLimits, featureType);
+
+      if (nextLimit == -1 || nextLimit > limit) {
+        return nextPlan;
+      }
+    }
+
+    return null;
+  }
+
+  static int _getLimitForFeature(SubscriptionLimits limits, FeatureType type) {
+    switch (type) {
+      case FeatureType.photo:
+        return limits.photosPerMonth;
+      case FeatureType.formTemplate:
+        return limits.formTemplates;
+      case FeatureType.collaborator:
+        return limits.collaborators;
+    }
+  }
 }
 
-/// Servico para verificar e aplicar feature gates.
+/// Exceção lançada quando um limite de feature é atingido.
+class FeatureGateLimitException implements Exception {
+  final FeatureGateResult result;
+  final String message;
+
+  FeatureGateLimitException(this.result)
+      : message = _buildMessage(result);
+
+  static String _buildMessage(FeatureGateResult result) {
+    final featureName = _featureTypeName(result.featureType);
+    return 'Limite de $featureName atingido. '
+        'Uso: ${result.currentUsage}/${result.limit}';
+  }
+
+  static String _featureTypeName(FeatureType type) {
+    switch (type) {
+      case FeatureType.photo:
+        return 'fotos';
+      case FeatureType.formTemplate:
+        return 'formulários';
+      case FeatureType.collaborator:
+        return 'colaboradores';
+    }
+  }
+
+  @override
+  String toString() => 'FeatureGateLimitException: $message';
+}
+
+/// Serviço central para verificação de feature gates.
 ///
-/// Os feature gates limitam funcionalidades baseado no plano de assinatura:
-/// - Free: 30 fotos/mes, 1 formulario, 1 usuario, PDF com marca d'agua
-/// - Starter: 200 fotos/mes, 3 formularios, 3 usuarios
-/// - Pro: 500 fotos/mes, 10 formularios, 5 usuarios
-/// - Business: Ilimitado (-1)
+/// Verifica limites de uso baseado no plano de assinatura do usuário.
 class FeatureGateService {
-  /// Limites padrao para plano Free (lazy initialized)
-  static SubscriptionLimits? _defaultLimitsInstance;
-
-  static SubscriptionLimits get _defaultLimits {
-    _defaultLimitsInstance ??= SubscriptionLimitsConst.create(
-      photosPerMonth: 30,
-      formTemplates: 1,
-      users: 1,
-      pdfWatermark: true,
-    );
-    return _defaultLimitsInstance!;
-  }
-
-  /// Verifica se pode adicionar mais fotos.
-  static FeatureGateResult canAddPhoto(Company company) {
-    return canAddPhotoWithSubscription(company.subscription);
-  }
-
-  /// Verifica se pode adicionar mais fotos usando Subscription diretamente.
-  /// Util quando nao temos acesso ao Company completo.
-  static FeatureGateResult canAddPhotoWithSubscription(Subscription? subscription) {
-    final limits = subscription?.limits ?? _defaultLimits;
-    final usage = subscription?.usage;
-
-    final limit = limits.photosPerMonth ?? 30;
-    final current = usage?.photosThisMonth ?? 0;
-
-    // Ilimitado
-    if (limit == -1) {
-      return FeatureGateResult(
-        isAllowed: true,
-        currentUsage: current,
-        limit: -1,
-        usagePercentage: 0,
-      );
-    }
-
-    final percentage = limit > 0 ? current / limit : 0.0;
-    final isAllowed = current < limit;
-
-    String? message;
-    String? suggestedPlan;
-
-    if (!isAllowed) {
-      message = 'Voce atingiu o limite de $limit fotos este mes.';
-      suggestedPlan = _suggestPlanForPhotos(limit);
-    } else if (percentage >= 0.8) {
-      final remaining = limit - current;
-      message = 'Restam apenas $remaining fotos este mes.';
-    }
+  /// Verifica se pode adicionar uma foto.
+  ///
+  /// Se [subscription] for null, usa limites do plano Free.
+  static FeatureGateResult canAddPhoto(Subscription? subscription) {
+    final sub = subscription ?? Subscription();
+    final limits = sub.limits;
+    final currentUsage = sub.usage.photosThisMonth;
+    final limit = limits.photosPerMonth;
 
     return FeatureGateResult(
-      isAllowed: isAllowed,
-      currentUsage: current,
+      isAllowed: limit == -1 || currentUsage < limit,
+      currentUsage: currentUsage,
       limit: limit,
-      usagePercentage: percentage,
-      message: message,
-      suggestedPlan: suggestedPlan,
+      featureType: FeatureType.photo,
+      currentPlan: sub.plan,
     );
   }
 
-  /// Verifica se pode criar mais formularios.
-  static FeatureGateResult canCreateFormTemplate(Company company) {
-    final limits = company.subscription?.limits ?? _defaultLimits;
-    final usage = company.subscription?.usage;
-
-    final limit = limits.formTemplates ?? 1;
-    final current = usage?.formTemplatesActive ?? 0;
-
-    if (limit == -1) {
-      return FeatureGateResult(
-        isAllowed: true,
-        currentUsage: current,
-        limit: -1,
-        usagePercentage: 0,
-      );
-    }
-
-    final percentage = limit > 0 ? current / limit : 0.0;
-    final isAllowed = current < limit;
-
-    String? message;
-    String? suggestedPlan;
-
-    if (!isAllowed) {
-      message = 'Voce atingiu o limite de $limit formularios ativos.';
-      suggestedPlan = _suggestPlanForForms(limit);
-    } else if (percentage >= 0.8) {
-      final remaining = limit - current;
-      message = 'Voce pode criar mais $remaining formulario(s).';
-    }
+  /// Verifica se pode adicionar N fotos.
+  static FeatureGateResult canAddPhotos(Subscription? subscription, int count) {
+    final sub = subscription ?? Subscription();
+    final limits = sub.limits;
+    final currentUsage = sub.usage.photosThisMonth;
+    final limit = limits.photosPerMonth;
 
     return FeatureGateResult(
-      isAllowed: isAllowed,
-      currentUsage: current,
+      isAllowed: limit == -1 || (currentUsage + count) <= limit,
+      currentUsage: currentUsage,
       limit: limit,
-      usagePercentage: percentage,
-      message: message,
-      suggestedPlan: suggestedPlan,
+      featureType: FeatureType.photo,
+      currentPlan: sub.plan,
     );
   }
 
-  /// Verifica se pode adicionar mais usuarios.
-  static FeatureGateResult canAddUser(Company company) {
-    final limits = company.subscription?.limits ?? _defaultLimits;
-    final usage = company.subscription?.usage;
-
-    final limit = limits.users ?? 1;
-    final current = usage?.usersActive ?? 0;
-
-    if (limit == -1) {
-      return FeatureGateResult(
-        isAllowed: true,
-        currentUsage: current,
-        limit: -1,
-        usagePercentage: 0,
-      );
-    }
-
-    final percentage = limit > 0 ? current / limit : 0.0;
-    final isAllowed = current < limit;
-
-    String? message;
-    String? suggestedPlan;
-
-    if (!isAllowed) {
-      message = 'Voce atingiu o limite de $limit usuarios.';
-      suggestedPlan = _suggestPlanForUsers(limit);
-    } else if (percentage >= 0.8) {
-      final remaining = limit - current;
-      message = 'Voce pode adicionar mais $remaining usuario(s).';
-    }
+  /// Verifica se pode criar um formulário.
+  static FeatureGateResult canCreateFormTemplate(Subscription? subscription) {
+    final sub = subscription ?? Subscription();
+    final limits = sub.limits;
+    final currentUsage = sub.usage.formTemplates;
+    final limit = limits.formTemplates;
 
     return FeatureGateResult(
-      isAllowed: isAllowed,
-      currentUsage: current,
+      isAllowed: limit == -1 || currentUsage < limit,
+      currentUsage: currentUsage,
       limit: limit,
-      usagePercentage: percentage,
-      message: message,
-      suggestedPlan: suggestedPlan,
+      featureType: FeatureType.formTemplate,
+      currentPlan: sub.plan,
     );
   }
 
-  /// Verifica se PDF deve ter marca dagua.
-  static bool shouldShowPdfWatermark(Company company) {
-    final limits = company.subscription?.limits ?? _defaultLimits;
-    return limits.pdfWatermark ?? true;
+  /// Verifica se pode adicionar um colaborador.
+  static FeatureGateResult canAddCollaborator(Subscription? subscription) {
+    final sub = subscription ?? Subscription();
+    final limits = sub.limits;
+    final currentUsage = sub.usage.collaborators;
+    final limit = limits.collaborators;
+
+    return FeatureGateResult(
+      isAllowed: limit == -1 || currentUsage < limit,
+      currentUsage: currentUsage,
+      limit: limit,
+      featureType: FeatureType.collaborator,
+      currentPlan: sub.plan,
+    );
   }
 
-  /// Sugere plano baseado no limite de fotos atual.
-  static String _suggestPlanForPhotos(int currentLimit) {
-    if (currentLimit <= 30) return 'starter';
-    if (currentLimit <= 200) return 'pro';
-    return 'business';
-  }
-
-  /// Sugere plano baseado no limite de formularios atual.
-  static String _suggestPlanForForms(int currentLimit) {
-    if (currentLimit <= 1) return 'starter';
-    if (currentLimit <= 3) return 'pro';
-    return 'business';
-  }
-
-  /// Sugere plano baseado no limite de usuarios atual.
-  static String _suggestPlanForUsers(int currentLimit) {
-    if (currentLimit <= 1) return 'starter';
-    if (currentLimit <= 3) return 'pro';
-    return 'business';
-  }
-}
-
-/// Extensao para SubscriptionLimits com construtor const.
-extension SubscriptionLimitsConst on SubscriptionLimits {
-  /// Cria uma instancia com valores constantes.
-  static SubscriptionLimits create({
-    int? photosPerMonth,
-    int? formTemplates,
-    int? users,
-    bool? pdfWatermark,
-  }) {
-    final limits = SubscriptionLimits();
-    limits.photosPerMonth = photosPerMonth;
-    limits.formTemplates = formTemplates;
-    limits.users = users;
-    limits.pdfWatermark = pdfWatermark;
-    return limits;
+  /// Verifica se deve exibir marca d'água no PDF.
+  static bool shouldShowPdfWatermark(Subscription? subscription) {
+    final sub = subscription ?? Subscription();
+    return sub.limits.pdfWatermark;
   }
 }

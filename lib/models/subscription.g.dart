@@ -6,66 +6,85 @@ part of 'subscription.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Subscription _$SubscriptionFromJson(Map<String, dynamic> json) => Subscription()
-  ..plan = json['plan'] as String?
-  ..status = json['status'] as String?
-  ..rcSubscriberId = json['rcSubscriberId'] as String?
-  ..subscribedAt = json['subscribedAt'] == null
-      ? null
-      : DateTime.parse(json['subscribedAt'] as String)
-  ..expiresAt = json['expiresAt'] == null
-      ? null
-      : DateTime.parse(json['expiresAt'] as String)
-  ..cancelledAt = json['cancelledAt'] == null
-      ? null
-      : DateTime.parse(json['cancelledAt'] as String)
-  ..limits = json['limits'] == null
-      ? null
-      : SubscriptionLimits.fromJson(json['limits'] as Map<String, dynamic>)
-  ..usage = json['usage'] == null
-      ? null
-      : SubscriptionUsage.fromJson(json['usage'] as Map<String, dynamic>);
+SubscriptionUsage _$SubscriptionUsageFromJson(Map<String, dynamic> json) =>
+    SubscriptionUsage(
+      photosThisMonth: (json['photosThisMonth'] as num?)?.toInt() ?? 0,
+      formTemplates: (json['formTemplates'] as num?)?.toInt() ?? 0,
+      collaborators: (json['collaborators'] as num?)?.toInt() ?? 0,
+      periodStart: json['periodStart'] == null
+          ? null
+          : DateTime.parse(json['periodStart'] as String),
+      periodEnd: json['periodEnd'] == null
+          ? null
+          : DateTime.parse(json['periodEnd'] as String),
+    );
 
-Map<String, dynamic> _$SubscriptionToJson(Subscription instance) =>
+Map<String, dynamic> _$SubscriptionUsageToJson(SubscriptionUsage instance) =>
     <String, dynamic>{
-      'plan': instance.plan,
-      'status': instance.status,
-      'rcSubscriberId': instance.rcSubscriberId,
-      'subscribedAt': instance.subscribedAt?.toIso8601String(),
-      'expiresAt': instance.expiresAt?.toIso8601String(),
-      'cancelledAt': instance.cancelledAt?.toIso8601String(),
-      'limits': instance.limits?.toJson(),
-      'usage': instance.usage?.toJson(),
+      'photosThisMonth': instance.photosThisMonth,
+      'formTemplates': instance.formTemplates,
+      'collaborators': instance.collaborators,
+      'periodStart': instance.periodStart?.toIso8601String(),
+      'periodEnd': instance.periodEnd?.toIso8601String(),
     };
 
 SubscriptionLimits _$SubscriptionLimitsFromJson(Map<String, dynamic> json) =>
-    SubscriptionLimits()
-      ..photosPerMonth = (json['photosPerMonth'] as num?)?.toInt()
-      ..formTemplates = (json['formTemplates'] as num?)?.toInt()
-      ..users = (json['users'] as num?)?.toInt()
-      ..pdfWatermark = json['pdfWatermark'] as bool?;
+    SubscriptionLimits(
+      photosPerMonth: (json['photosPerMonth'] as num?)?.toInt() ?? 30,
+      formTemplates: (json['formTemplates'] as num?)?.toInt() ?? 1,
+      collaborators: (json['collaborators'] as num?)?.toInt() ?? 1,
+      pdfWatermark: json['pdfWatermark'] as bool? ?? true,
+    );
 
 Map<String, dynamic> _$SubscriptionLimitsToJson(SubscriptionLimits instance) =>
     <String, dynamic>{
       'photosPerMonth': instance.photosPerMonth,
       'formTemplates': instance.formTemplates,
-      'users': instance.users,
+      'collaborators': instance.collaborators,
       'pdfWatermark': instance.pdfWatermark,
     };
 
-SubscriptionUsage _$SubscriptionUsageFromJson(Map<String, dynamic> json) =>
-    SubscriptionUsage()
-      ..photosThisMonth = (json['photosThisMonth'] as num?)?.toInt()
-      ..formTemplatesActive = (json['formTemplatesActive'] as num?)?.toInt()
-      ..usersActive = (json['usersActive'] as num?)?.toInt()
-      ..usageResetAt = json['usageResetAt'] == null
-          ? null
-          : DateTime.parse(json['usageResetAt'] as String);
+Subscription _$SubscriptionFromJson(Map<String, dynamic> json) => Subscription(
+  id: json['id'] as String?,
+  plan:
+      $enumDecodeNullable(_$SubscriptionPlanEnumMap, json['plan']) ??
+      SubscriptionPlan.free,
+  status:
+      $enumDecodeNullable(_$SubscriptionStatusEnumMap, json['status']) ??
+      SubscriptionStatus.active,
+  usage: json['usage'] == null
+      ? null
+      : SubscriptionUsage.fromJson(json['usage'] as Map<String, dynamic>),
+  currentPeriodStart: json['currentPeriodStart'] == null
+      ? null
+      : DateTime.parse(json['currentPeriodStart'] as String),
+  currentPeriodEnd: json['currentPeriodEnd'] == null
+      ? null
+      : DateTime.parse(json['currentPeriodEnd'] as String),
+  revenueCatCustomerId: json['revenueCatCustomerId'] as String?,
+);
 
-Map<String, dynamic> _$SubscriptionUsageToJson(SubscriptionUsage instance) =>
+Map<String, dynamic> _$SubscriptionToJson(Subscription instance) =>
     <String, dynamic>{
-      'photosThisMonth': instance.photosThisMonth,
-      'formTemplatesActive': instance.formTemplatesActive,
-      'usersActive': instance.usersActive,
-      'usageResetAt': instance.usageResetAt?.toIso8601String(),
+      'id': instance.id,
+      'plan': _$SubscriptionPlanEnumMap[instance.plan]!,
+      'status': _$SubscriptionStatusEnumMap[instance.status]!,
+      'usage': instance.usage.toJson(),
+      'currentPeriodStart': instance.currentPeriodStart?.toIso8601String(),
+      'currentPeriodEnd': instance.currentPeriodEnd?.toIso8601String(),
+      'revenueCatCustomerId': instance.revenueCatCustomerId,
     };
+
+const _$SubscriptionPlanEnumMap = {
+  SubscriptionPlan.free: 'free',
+  SubscriptionPlan.starter: 'starter',
+  SubscriptionPlan.pro: 'pro',
+  SubscriptionPlan.business: 'business',
+};
+
+const _$SubscriptionStatusEnumMap = {
+  SubscriptionStatus.active: 'active',
+  SubscriptionStatus.canceled: 'canceled',
+  SubscriptionStatus.expired: 'expired',
+  SubscriptionStatus.trialing: 'trialing',
+};

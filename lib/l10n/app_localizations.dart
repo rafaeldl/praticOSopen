@@ -889,7 +889,7 @@ abstract class AppLocalizations {
   /// No description provided for @photos.
   ///
   /// In pt, this message translates to:
-  /// **'Fotos'**
+  /// **'fotos'**
   String get photos;
 
   /// No description provided for @photo.
@@ -6309,6 +6309,78 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Equipamento'**
   String get pdfEquipment;
+
+  /// No description provided for @upgrade.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fazer upgrade'**
+  String get upgrade;
+
+  /// No description provided for @formTemplates.
+  ///
+  /// In pt, this message translates to:
+  /// **'formulários'**
+  String get formTemplates;
+
+  /// No description provided for @featureGateNearLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Restam {count} {feature}'**
+  String featureGateNearLimit(int count, String feature);
+
+  /// No description provided for @featureGateLimitReached.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limite de {feature} atingido'**
+  String featureGateLimitReached(String feature);
+
+  /// No description provided for @featureGateUpgradeSuggestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Faça upgrade para o plano {plan} para mais'**
+  String featureGateUpgradeSuggestion(String plan);
+
+  /// No description provided for @featureGateUsageInfo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Usado {current} de {limit}'**
+  String featureGateUsageInfo(int current, int limit);
+
+  /// No description provided for @featureGateLimitModalTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Limite atingido'**
+  String get featureGateLimitModalTitle;
+
+  /// No description provided for @featureGateLimitModalMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você atingiu o limite de {feature} do seu plano {plan}.'**
+  String featureGateLimitModalMessage(String feature, String plan);
+
+  /// No description provided for @featureGateLimitModalUsage.
+  ///
+  /// In pt, this message translates to:
+  /// **'{current} de {limit} {feature}'**
+  String featureGateLimitModalUsage(int current, int limit, String feature);
+
+  /// No description provided for @featureGateUpgradeButton.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fazer upgrade para {plan}'**
+  String featureGateUpgradeButton(String plan);
+
+  /// No description provided for @featureGateUpgradeNewLimit.
+  ///
+  /// In pt, this message translates to:
+  /// **'Novo limite: {limit} {feature}'**
+  String featureGateUpgradeNewLimit(String limit, String feature);
+
+  /// No description provided for @unlimitedLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'ilimitado'**
+  String get unlimitedLabel;
 }
 
 class _AppLocalizationsDelegate

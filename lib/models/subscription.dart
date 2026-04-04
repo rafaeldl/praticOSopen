@@ -2,98 +2,142 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'subscription.g.dart';
 
-/// Modelo de assinatura da empresa.
-/// Representa o plano atual e limites de uso.
-@JsonSerializable(explicitToJson: true)
-class Subscription {
-  /// Plano atual: 'free', 'starter', 'pro', 'business'
-  String? plan;
-
-  /// Status: 'active', 'trialing', 'past_due', 'cancelled', 'expired'
-  String? status;
-
-  /// RevenueCat subscriber ID
-  String? rcSubscriberId;
-
-  /// Data de início da assinatura
-  DateTime? subscribedAt;
-
-  /// Data de expiração
-  DateTime? expiresAt;
-
-  /// Data de cancelamento
-  DateTime? cancelledAt;
-
-  /// Limites do plano atual
-  SubscriptionLimits? limits;
-
-  /// Uso atual (resetado mensalmente)
-  SubscriptionUsage? usage;
-
-  Subscription();
-
-  factory Subscription.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionFromJson(json);
-
-  Map<String, dynamic> toJson() => _$SubscriptionToJson(this);
-
-  /// Verifica se a assinatura está ativa
-  bool get isActive => status == 'active' || status == 'trialing';
-
-  /// Verifica se é um plano pago
-  bool get isPaid => plan != null && plan != 'free';
-
-  /// Verifica se a assinatura está expirada
-  bool get isExpired =>
-      status == 'expired' ||
-      (expiresAt != null && expiresAt!.isBefore(DateTime.now()));
+/// Planos disponíveis no PraticOS.
+enum SubscriptionPlan {
+  @JsonValue('free')
+  free,
+  @JsonValue('starter')
+  starter,
+  @JsonValue('pro')
+  pro,
+  @JsonValue('business')
+  business,
 }
 
-/// Limites de uso baseados no plano.
-@JsonSerializable()
-class SubscriptionLimits {
-  /// Fotos por mês: -1 = ilimitado
-  int? photosPerMonth;
-
-  /// Número de templates de formulário
-  int? formTemplates;
-
-  /// Número de usuários
-  int? users;
-
-  /// Se deve exibir marca d'água no PDF (true para Free)
-  bool? pdfWatermark;
-
-  SubscriptionLimits();
-
-  factory SubscriptionLimits.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionLimitsFromJson(json);
-
-  Map<String, dynamic> toJson() => _$SubscriptionLimitsToJson(this);
-
-  /// Verifica se o limite é ilimitado
-  bool isUnlimited(int? limit) => limit == -1;
+/// Status da assinatura.
+enum SubscriptionStatus {
+  @JsonValue('active')
+  active,
+  @JsonValue('canceled')
+  canceled,
+  @JsonValue('expired')
+  expired,
+  @JsonValue('trialing')
+  trialing,
 }
 
-/// Uso atual da assinatura.
+/// Contadores de uso do plano atual.
 @JsonSerializable()
 class SubscriptionUsage {
-  /// Fotos usadas no mês atual
-  int? photosThisMonth;
+  int photosThisMonth;
+  int formTemplates;
+  int collaborators;
+  DateTime? periodStart;
+  DateTime? periodEnd;
 
-  /// Templates de formulário ativos
-  int? formTemplatesActive;
-
-  /// Usuários ativos
-  int? usersActive;
-
-  /// Data de reset do uso (primeiro dia do próximo mês)
-  DateTime? usageResetAt;
-
-  SubscriptionUsage();
+  SubscriptionUsage({
+    this.photosThisMonth = 0,
+    this.formTemplates = 0,
+    this.collaborators = 0,
+    this.periodStart,
+    this.periodEnd,
+  });
 
   factory SubscriptionUsage.fromJson(Map<String, dynamic> json) =>
       _$SubscriptionUsageFromJson(json);
-
   Map<String, dynamic> toJson() => _$SubscriptionUsageToJson(this);
+}
+
+/// Limites do plano.
+@JsonSerializable()
+class SubscriptionLimits {
+  /// Fotos por mês. -1 = ilimitado.
+  final int photosPerMonth;
+
+  /// Formulários ativos. -1 = ilimitado.
+  final int formTemplates;
+
+  /// Usuários na empresa. -1 = ilimitado.
+  final int collaborators;
+
+  /// Exibir marca d'água no PDF.
+  final bool pdfWatermark;
+
+  const SubscriptionLimits({
+    this.photosPerMonth = 30,
+    this.formTemplates = 1,
+    this.collaborators = 1,
+    this.pdfWatermark = true,
+  });
+
+  factory SubscriptionLimits.fromJson(Map<String, dynamic> json) =>
+      _$SubscriptionLimitsFromJson(json);
+  Map<String, dynamic> toJson() => _$SubscriptionLimitsToJson(this);
+
+  /// Limites padrão por plano.
+  static const Map<SubscriptionPlan, SubscriptionLimits> defaults = {
+    SubscriptionPlan.free: SubscriptionLimits(
+      photosPerMonth: 30,
+      formTemplates: 1,
+      collaborators: 1,
+      pdfWatermark: true,
+    ),
+    SubscriptionPlan.starter: SubscriptionLimits(
+      photosPerMonth: 200,
+      formTemplates: 3,
+      collaborators: 3,
+      pdfWatermark: false,
+    ),
+    SubscriptionPlan.pro: SubscriptionLimits(
+      photosPerMonth: 500,
+      formTemplates: 10,
+      collaborators: 5,
+      pdfWatermark: false,
+    ),
+    SubscriptionPlan.business: SubscriptionLimits(
+      photosPerMonth: -1, // ilimitado
+      formTemplates: -1,
+      collaborators: -1,
+      pdfWatermark: false,
+    ),
+  };
+
+  /// Retorna limites para um plano específico.
+  static SubscriptionLimits forPlan(SubscriptionPlan plan) {
+    return defaults[plan] ?? const SubscriptionLimits();
+  }
+}
+
+/// Modelo de assinatura do PraticOS.
+@JsonSerializable(explicitToJson: true)
+class Subscription {
+  String? id;
+  SubscriptionPlan plan;
+  SubscriptionStatus status;
+  SubscriptionUsage usage;
+  DateTime? currentPeriodStart;
+  DateTime? currentPeriodEnd;
+  String? revenueCatCustomerId;
+
+  Subscription({
+    this.id,
+    this.plan = SubscriptionPlan.free,
+    this.status = SubscriptionStatus.active,
+    SubscriptionUsage? usage,
+    this.currentPeriodStart,
+    this.currentPeriodEnd,
+    this.revenueCatCustomerId,
+  }) : usage = usage ?? SubscriptionUsage();
+
+  factory Subscription.fromJson(Map<String, dynamic> json) =>
+      _$SubscriptionFromJson(json);
+  Map<String, dynamic> toJson() => _$SubscriptionToJson(this);
+
+  /// Retorna os limites do plano atual.
+  SubscriptionLimits get limits => SubscriptionLimits.forPlan(plan);
+
+  /// Verifica se a assinatura está ativa.
+  bool get isActive =>
+      status == SubscriptionStatus.active ||
+      status == SubscriptionStatus.trialing;
 }

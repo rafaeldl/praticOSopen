@@ -408,7 +408,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addPhotoOrAttachment => 'Photo / Attachment';
 
   @override
-  String get photos => 'Photos';
+  String get photos => 'photos';
 
   @override
   String get photo => 'Photo';
@@ -3317,4 +3317,56 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pdfEquipment => 'Equipment';
+
+  @override
+  String get upgrade => 'Upgrade';
+
+  @override
+  String get formTemplates => 'form templates';
+
+  @override
+  String featureGateNearLimit(int count, String feature) {
+    return '$count $feature remaining';
+  }
+
+  @override
+  String featureGateLimitReached(String feature) {
+    return '$feature limit reached';
+  }
+
+  @override
+  String featureGateUpgradeSuggestion(String plan) {
+    return 'Upgrade to $plan for more';
+  }
+
+  @override
+  String featureGateUsageInfo(int current, int limit) {
+    return 'Used $current of $limit';
+  }
+
+  @override
+  String get featureGateLimitModalTitle => 'Limit reached';
+
+  @override
+  String featureGateLimitModalMessage(String feature, String plan) {
+    return 'You\'ve reached the $feature limit of your $plan plan.';
+  }
+
+  @override
+  String featureGateLimitModalUsage(int current, int limit, String feature) {
+    return '$current of $limit $feature';
+  }
+
+  @override
+  String featureGateUpgradeButton(String plan) {
+    return 'Upgrade to $plan';
+  }
+
+  @override
+  String featureGateUpgradeNewLimit(String limit, String feature) {
+    return 'New limit: $limit $feature';
+  }
+
+  @override
+  String get unlimitedLabel => 'unlimited';
 }

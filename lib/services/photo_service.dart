@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
+import 'package:praticos/models/subscription.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/global.dart';
 
 /// Serviço centralizado para gerenciamento de fotos
@@ -149,16 +152,28 @@ class PhotoService {
 
   /// Upload específico para fotos de ordens de serviço
   /// Retorna OrderPhoto com metadados
+  ///
+  /// Lança [FeatureGateLimitException] se o limite de fotos foi atingido.
+  /// Passa [subscription] para verificar limites do plano.
   Future<OrderPhoto?> uploadOrderPhoto({
     required File file,
     required String companyId,
     required String orderId,
+    Subscription? subscription,
   }) async {
     try {
       await _validateAuth();
 
       if (Global.companyAggr?.id != companyId) {
         throw Exception('Sem permissão para upload nesta empresa');
+      }
+
+      // Verificar limite de fotos antes do upload
+      // Usa Global.subscription se não for passado explicitamente
+      final sub = subscription ?? Global.subscription;
+      final gateResult = FeatureGateService.canAddPhoto(sub);
+      if (!gateResult.isAllowed) {
+        throw FeatureGateLimitException(gateResult);
       }
 
       final now = DateTime.now();
@@ -170,6 +185,9 @@ class PhotoService {
 
       if (downloadUrl == null) return null;
 
+      // Incrementar contador de fotos após upload bem-sucedido
+      await _incrementPhotoCounter(companyId);
+
       return OrderPhoto()
         ..id = photoId
         ..url = downloadUrl
@@ -179,6 +197,29 @@ class PhotoService {
     } catch (e) {
       print('PhotoService: Erro no upload de foto da OS: $e');
       rethrow;
+    }
+  }
+
+  /// Incrementa o contador de fotos do mês no Firestore.
+  Future<void> _incrementPhotoCounter(String companyId) async {
+    try {
+      final companyRef =
+          FirebaseFirestore.instance.collection('tenants').doc(companyId);
+
+      await companyRef.update({
+        'subscription.usage.photosThisMonth': FieldValue.increment(1),
+      });
+
+      // Atualizar contador local para verificações subsequentes
+      if (Global.subscription != null) {
+        Global.subscription!.usage.photosThisMonth++;
+      }
+
+      print('PhotoService: Contador de fotos incrementado');
+    } catch (e) {
+      // Não falhar o upload se o incremento falhar
+      // O contador pode não existir ainda no documento
+      print('PhotoService: Erro ao incrementar contador de fotos: $e');
     }
   }
 

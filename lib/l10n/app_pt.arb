@@ -1451,5 +1451,66 @@
   "pdfGeneral": "Geral",
   "pdfTrackOnline": "Acompanhe online",
   "pdfTrackOnlineDescription": "Escaneie o QR Code para acompanhar esta ordem de servico",
-  "pdfEquipment": "Equipamento"
+  "pdfEquipment": "Equipamento",
+
+  "upgrade": "Fazer upgrade",
+  "photos": "fotos",
+  "formTemplates": "formulários",
+
+  "featureGateNearLimit": "Restam {count} {feature}",
+  "@featureGateNearLimit": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "feature": { "type": "String" }
+    }
+  },
+  "featureGateLimitReached": "Limite de {feature} atingido",
+  "@featureGateLimitReached": {
+    "placeholders": {
+      "feature": { "type": "String" }
+    }
+  },
+  "featureGateUpgradeSuggestion": "Faça upgrade para o plano {plan} para mais",
+  "@featureGateUpgradeSuggestion": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+  "featureGateUsageInfo": "Usado {current} de {limit}",
+  "@featureGateUsageInfo": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+  "featureGateLimitModalTitle": "Limite atingido",
+  "featureGateLimitModalMessage": "Você atingiu o limite de {feature} do seu plano {plan}.",
+  "@featureGateLimitModalMessage": {
+    "placeholders": {
+      "feature": { "type": "String" },
+      "plan": { "type": "String" }
+    }
+  },
+  "featureGateLimitModalUsage": "{current} de {limit} {feature}",
+  "@featureGateLimitModalUsage": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "limit": { "type": "int" },
+      "feature": { "type": "String" }
+    }
+  },
+  "featureGateUpgradeButton": "Fazer upgrade para {plan}",
+  "@featureGateUpgradeButton": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+  "featureGateUpgradeNewLimit": "Novo limite: {limit} {feature}",
+  "@featureGateUpgradeNewLimit": {
+    "placeholders": {
+      "limit": { "type": "String" },
+      "feature": { "type": "String" }
+    }
+  },
+  "unlimitedLabel": "ilimitado"
 }
