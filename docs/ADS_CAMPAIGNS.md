@@ -397,3 +397,45 @@
 - [Google Ads Query Builder](https://developers.google.com/google-ads/api/fields/v17/overview_query_builder)
 - [Meta Marketing API Docs](https://developers.facebook.com/docs/marketing-apis)
 - [Graph API Explorer](https://developers.facebook.com/tools/explorer)
+
+### 04/04/2026 (Refatoração Search + Novos Criativos Meta)
+
+#### Google Search — Refatorada e Reativada
+- Campanha estava PAUSED por gerar search terms irrelevantes (consultoria em sistemas, sistemas de gestão, etc.)
+- **Adicionadas 30 negative keywords** (batch 2):
+  - sistemas, sistema de gestão, consultoria em sistemas, gestão empresarial, sistemas empresariais
+  - financeiro empresa, controle de despesas, serviços automatizados
+  - crm implementation, implementation services
+  - excel, word, iso, scrum, kanban, agile, devops, saas b2b
+  - concorrentes: contele, field control, fieldcontrol, totvs, sap, oracle, salesforce, nuvemshop, bling
+- **Total negativas agora: 70** (40 originais + 30 novas)
+- **Adicionadas 9 keywords [EXACT] de alta intenção:**
+  - [app ordem de serviço], [sistema ordem de serviço]
+  - [app para técnico], [app para mecânico], [app para assistência técnica]
+  - [controle de OS app], [ordem de serviço celular]
+  - [app para técnico de celular], [sistema para oficina mecânica]
+- **Total keywords: 65** (56 originais + 9 novas EXACT)
+- Campanha **REATIVADA**: ENABLED | R$10/dia
+- **Monitorar em 48h**: verificar search terms. Se aparecerem termos irrelevantes, adicionar mais negativas imediatamente.
+
+#### Meta Ads — Novos Criativos A/B
+- 2 novos criativos criados e anúncios publicados no ad set Android:
+  - **Dor Ligacoes v1** (Ad ID: 6938954591375): "Para de atender ligação de cliente"
+    - Image hash: `d1c0600ea21e0e98e17f16d50d608c13`
+    - Creative ID: 1654040175635257
+  - **Preco Anchor v1** (Ad ID: 6938954601575): "R$59/mês. OS ilimitadas. Sem contrato."
+    - Image hash: `3e32801c5bd7b231bcd40e06b59c0b69`
+    - Creative ID: 1482880759951886
+- Ad set iOS (ID: 6916515435975) reativado — estava PAUSED sem motivo
+- Ad set Android agora tem 5 anúncios ativos para teste A/B
+- Benchmark a superar: WhatsApp GIF v2 (CTR 3,86%, CPC R$0,54)
+
+#### Status Final das Campanhas (04/04/2026)
+| Canal | Status | Budget/dia |
+|-------|--------|-----------|
+| Google App-Android | ENABLED | R$15 |
+| Google App-iOS | ENABLED | R$10 |
+| Google Search | ENABLED | R$10 |
+| Meta Android | ACTIVE | CBO R$22 |
+| Meta iOS | ACTIVE | CBO R$22 |
+| **Total** | | **R$79/dia** |
