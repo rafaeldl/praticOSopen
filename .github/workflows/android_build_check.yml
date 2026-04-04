@@ -5,6 +5,7 @@ on:
     branches: [ master ]
     paths:
       - 'android/**'
+      - 'lib/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
   workflow_dispatch:
