@@ -1,5 +1,6 @@
 import 'package:praticos/models/base.dart';
 import 'package:praticos/models/base_audit.dart';
+import 'package:praticos/models/subscription.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -24,6 +25,7 @@ class Company extends BaseAudit {
   bool? useContracts; // Recurring maintenance contracts
   UserAggr? owner;
   List<UserRoleAggr>? users;
+  Subscription? subscription;
 
   Company();
   factory Company.fromJson(Map<String, dynamic> json) =>

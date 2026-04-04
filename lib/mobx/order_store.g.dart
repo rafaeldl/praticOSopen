@@ -501,6 +501,24 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$photoLimitResultAtom = Atom(
+    name: '_OrderStore.photoLimitResult',
+    context: context,
+  );
+
+  @override
+  FeatureGateResult? get photoLimitResult {
+    _$photoLimitResultAtom.reportRead();
+    return super.photoLimitResult;
+  }
+
+  @override
+  set photoLimitResult(FeatureGateResult? value) {
+    _$photoLimitResultAtom.reportWrite(value, super.photoLimitResult, () {
+      super.photoLimitResult = value;
+    });
+  }
+
   late final _$hasContractAtom = Atom(
     name: '_OrderStore.hasContract',
     context: context,
@@ -1639,6 +1657,7 @@ photos: ${photos},
 documents: ${documents},
 isUploadingPhoto: ${isUploadingPhoto},
 isUploadingDocument: ${isUploadingDocument},
+photoLimitResult: ${photoLimitResult},
 hasContract: ${hasContract},
 childOrders: ${childOrders},
 paidAmount: ${paidAmount},

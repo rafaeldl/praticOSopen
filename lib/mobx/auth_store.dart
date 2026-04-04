@@ -6,6 +6,7 @@ import 'package:praticos/models/company.dart';
 import 'package:praticos/repositories/auth_repository.dart';
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/auth_service.dart';
+import 'package:praticos/services/subscription_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -155,6 +156,17 @@ abstract class _AuthStore with Store {
             ?.role
             ?.name,
       );
+
+      // Initialize RevenueCat with companyId as appUserId
+      // This links subscriptions to the company, not individual user
+      if (companyId != null) {
+        try {
+          await SubscriptionService.instance.initialize(companyId);
+        } catch (e) {
+          // Log but don't fail login if RevenueCat fails
+          print('AuthStore: Failed to initialize RevenueCat: $e');
+        }
+      }
     } catch (e) {
       print('AuthStore: error loading company data: $e');
       hasCompanyLoadError = true;
@@ -221,6 +233,8 @@ abstract class _AuthStore with Store {
     Global.currentUser = null;
     Global.companyAggr = null;
     AnalyticsService.instance.clearUser();
+    // Logout from RevenueCat
+    await SubscriptionService.instance.logout();
     _auth.signOutGoogle();
   }
 

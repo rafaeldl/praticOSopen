@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
@@ -21,6 +22,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:praticos/global.dart';
 import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/mobx/reminder_store.dart';
+import 'package:praticos/mobx/subscription_store.dart';
 part 'order_store.g.dart';
 
 class OrderStore = _OrderStore with _$OrderStore;
@@ -139,6 +141,10 @@ abstract class _OrderStore with Store {
 
   @observable
   bool isUploadingDocument = false;
+
+  /// Resultado da verificacao de limite de fotos
+  @observable
+  FeatureGateResult? photoLimitResult;
 
   @observable
   bool hasContract = false;
@@ -910,10 +916,41 @@ abstract class _OrderStore with Store {
   }
 
   /// Adiciona uma ou mais fotos da galeria
+  /// Verifica limite de fotos do plano antes de permitir upload.
+  /// Retorna false se limite atingido (photoLimitResult contera detalhes).
   @action
   Future<bool> addPhotoFromGallery() async {
+    // Verificar limite de fotos do plano usando SubscriptionStore
+    final subscriptionStore = SubscriptionStoreHolder.instance;
+    if (subscriptionStore != null) {
+      // Criar Subscription a partir do currentPlan do store
+      // Por enquanto usamos null para aplicar limites default (Free)
+      // TODO: Quando o Firebase sync estiver implementado, usar company.subscription
+      photoLimitResult = FeatureGateService.canAddPhotoWithSubscription(null);
+      if (!photoLimitResult!.isAllowed) {
+        return false;
+      }
+    }
+
     final List<File> files = await photoService.pickMultipleImagesFromGallery();
     if (files.isEmpty) return false;
+
+    // Verificar se quantidade selecionada ultrapassa limite
+    if (photoLimitResult != null && !photoLimitResult!.isUnlimited) {
+      final remaining = photoLimitResult!.limit - photoLimitResult!.currentUsage;
+      if (files.length > remaining) {
+        // Atualizar resultado com mensagem especifica
+        photoLimitResult = FeatureGateResult(
+          isAllowed: false,
+          currentUsage: photoLimitResult!.currentUsage,
+          limit: photoLimitResult!.limit,
+          usagePercentage: photoLimitResult!.usagePercentage,
+          message: 'Voce selecionou ${files.length} fotos, mas so pode adicionar mais $remaining este mes.',
+          suggestedPlan: photoLimitResult!.suggestedPlan,
+        );
+        return false;
+      }
+    }
 
     if (files.length == 1) {
       return await _uploadPhoto(files.first, source: 'gallery');
@@ -923,8 +960,21 @@ abstract class _OrderStore with Store {
   }
 
   /// Adiciona uma foto da câmera
+  /// Verifica limite de fotos do plano antes de permitir upload.
+  /// Retorna false se limite atingido (photoLimitResult contera detalhes).
   @action
   Future<bool> addPhotoFromCamera() async {
+    // Verificar limite de fotos do plano usando SubscriptionStore
+    final subscriptionStore = SubscriptionStoreHolder.instance;
+    if (subscriptionStore != null) {
+      // Por enquanto usamos null para aplicar limites default (Free)
+      // TODO: Quando o Firebase sync estiver implementado, usar company.subscription
+      photoLimitResult = FeatureGateService.canAddPhotoWithSubscription(null);
+      if (!photoLimitResult!.isAllowed) {
+        return false;
+      }
+    }
+
     final File? file = await photoService.takePhoto();
     if (file != null) {
       return await _uploadPhoto(file, source: 'camera');
