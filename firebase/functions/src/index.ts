@@ -6,6 +6,7 @@
 
 import * as functionsV1 from 'firebase-functions/v1';
 import { onRequest } from 'firebase-functions/v2/https';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import * as admin from 'firebase-admin';
 import express, { Request, Response, NextFunction } from 'express';
@@ -111,6 +112,35 @@ export const updateUserClaims = functionsV1
       console.error(`Error updating claims for ${userId}:`, error);
     }
   });
+
+// ============================================================================
+// SCHEDULED FUNCTIONS
+// ============================================================================
+
+import { resetMonthlyUsage } from './services/subscription.service';
+
+/**
+ * Scheduled function to reset monthly usage counters for subscriptions.
+ * Runs at midnight on the 1st of every month (BRT timezone = UTC-3).
+ *
+ * Resets:
+ * - photosThisMonth counter for all companies
+ * - Sets next usageResetAt to first day of following month
+ */
+export const scheduledResetMonthlyUsage = onSchedule(
+  {
+    schedule: '0 3 1 * *', // 3 AM UTC = midnight BRT on 1st of month
+    region: 'southamerica-east1',
+    timeZone: 'America/Sao_Paulo',
+    retryCount: 3,
+    memory: '256MiB',
+  },
+  async () => {
+    console.log('[Scheduled] Running monthly usage reset...');
+    const count = await resetMonthlyUsage();
+    console.log(`[Scheduled] Reset completed. ${count} companies updated.`);
+  }
+);
 
 // ============================================================================
 // AUTH BLOCKING FUNCTIONS
@@ -221,6 +251,9 @@ import publicOrdersRoutes from './routes/public/orders.routes';
 
 // Routes - User (Flutter app authenticated)
 import userLinkRoutes from './routes/user/link.routes';
+
+// Routes - Webhooks (no authentication - signature-based)
+import revenuecatWebhookRoutes from './routes/webhooks/revenuecat.routes';
 
 // Routes - API Bot
 import linkRoutes from './routes/bot/link.routes';
@@ -348,6 +381,9 @@ app.get('/health', (_req: Request, res: Response) => {
 
 // Public Routes (no authentication - magic links)
 app.use('/public/orders', publicLimiter, publicOrdersRoutes);
+
+// Webhook Routes (signature-based authentication)
+app.use('/webhooks/revenuecat', revenuecatWebhookRoutes);
 
 // API Core v1 Routes
 app.use('/v1/auth', authRoutes);

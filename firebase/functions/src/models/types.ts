@@ -422,6 +422,38 @@ export interface PendingItems {
 }
 
 // ============================================================================
+// Subscription Types (In-App Purchase)
+// ============================================================================
+
+export type SubscriptionPlan = 'free' | 'starter' | 'pro' | 'business';
+export type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'cancelled' | 'expired';
+
+export interface SubscriptionLimits {
+  photosPerMonth: number;      // -1 = unlimited
+  formTemplates: number;       // -1 = unlimited
+  users: number;               // -1 = unlimited
+  pdfWatermark: boolean;
+}
+
+export interface SubscriptionUsage {
+  photosThisMonth: number;
+  formTemplatesActive: number;
+  usersActive: number;
+  usageResetAt: string;        // ISO date
+}
+
+export interface Subscription {
+  plan: SubscriptionPlan;
+  status: SubscriptionStatus;
+  rcSubscriberId?: string;     // RevenueCat subscriber ID
+  subscribedAt?: string;
+  expiresAt?: string;
+  cancelledAt?: string;
+  limits: SubscriptionLimits;
+  usage: SubscriptionUsage;
+}
+
+// ============================================================================
 // Request Extensions
 // ============================================================================
 
