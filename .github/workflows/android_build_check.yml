@@ -7,6 +7,12 @@ on:
       - 'android/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or commit SHA to run against'
+        required: false
+        default: 'master'
 
 # Cancel previous runs for the same PR
 concurrency:
