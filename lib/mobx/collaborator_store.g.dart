@@ -113,10 +113,17 @@ mixin _$CollaboratorStore on _CollaboratorStore, Store {
     String? name,
     String? email,
     String? phone,
-    RolesType roleType,
-  ) {
+    RolesType roleType, {
+    Subscription? subscription,
+  }) {
     return _$addCollaboratorAsyncAction.run(
-      () => super.addCollaborator(name, email, phone, roleType),
+      () => super.addCollaborator(
+        name,
+        email,
+        phone,
+        roleType,
+        subscription: subscription,
+      ),
     );
   }
 
