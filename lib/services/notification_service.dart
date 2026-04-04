@@ -131,17 +131,17 @@ class NotificationService {
 
       _currentToken = token;
 
-      final String platform;
+      final String tokenPlatform;
       if (kIsWeb) {
-        platform = 'web';
+        tokenPlatform = 'web';
       } else {
-        platform = Platform.isIOS ? 'ios' : 'android';
+        tokenPlatform = Platform.isIOS ? 'ios' : 'android';
       }
 
       final fcmToken = FcmToken(
         token: token,
         deviceId: _deviceId,
-        platform: platform,
+        platform: tokenPlatform,
         createdAt: DateTime.now(),
         lastUsedAt: DateTime.now(),
       );
@@ -314,17 +314,17 @@ class NotificationService {
     if (userId != null) {
       _currentToken = newToken;
 
-      final String platform;
+      final String refreshPlatform;
       if (kIsWeb) {
-        platform = 'web';
+        refreshPlatform = 'web';
       } else {
-        platform = Platform.isIOS ? 'ios' : 'android';
+        refreshPlatform = Platform.isIOS ? 'ios' : 'android';
       }
 
       final fcmToken = FcmToken(
         token: newToken,
         deviceId: _deviceId,
-        platform: platform,
+        platform: refreshPlatform,
         createdAt: DateTime.now(),
         lastUsedAt: DateTime.now(),
       );
@@ -363,8 +363,8 @@ class NotificationService {
 
   /// Get unique device identifier
   Future<String> _getDeviceId() async {
-    if (kIsWeb) return 'web_device';
     try {
+      if (kIsWeb) return 'web_device';
       if (Platform.isIOS) {
         final iosInfo = await _deviceInfo.iosInfo;
         return iosInfo.identifierForVendor ?? 'unknown_ios';
@@ -480,13 +480,11 @@ class NotificationService {
     }
 
     await _localNotifications.zonedSchedule(
-      dailyReminderId,
-      title,
-      body,
-      scheduledDate,
-      _engagementNotificationDetails,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      id: dailyReminderId,
+      title: title,
+      body: body,
+      scheduledDate: scheduledDate,
+      notificationDetails: _engagementNotificationDetails,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
     );
@@ -495,7 +493,7 @@ class NotificationService {
 
   /// Cancel daily reminder
   Future<void> cancelDailyReminder() async {
-    await _localNotifications.cancel(dailyReminderId);
+    await _localNotifications.cancel(id: dailyReminderId);
     debugPrint('[NotificationService] Cancelled daily reminder');
   }
 
@@ -511,35 +509,29 @@ class NotificationService {
     final now = tz.TZDateTime.now(tz.local);
 
     await _localNotifications.zonedSchedule(
-      inactivity3dId,
-      title3d,
-      body3d,
-      now.add(const Duration(days: 3)),
-      _engagementNotificationDetails,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      id: inactivity3dId,
+      title: title3d,
+      body: body3d,
+      scheduledDate: now.add(const Duration(days: 3)),
+      notificationDetails: _engagementNotificationDetails,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
 
     await _localNotifications.zonedSchedule(
-      inactivity5dId,
-      title5d,
-      body5d,
-      now.add(const Duration(days: 5)),
-      _engagementNotificationDetails,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      id: inactivity5dId,
+      title: title5d,
+      body: body5d,
+      scheduledDate: now.add(const Duration(days: 5)),
+      notificationDetails: _engagementNotificationDetails,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
 
     await _localNotifications.zonedSchedule(
-      inactivity7dId,
-      title7d,
-      body7d,
-      now.add(const Duration(days: 7)),
-      _engagementNotificationDetails,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      id: inactivity7dId,
+      title: title7d,
+      body: body7d,
+      scheduledDate: now.add(const Duration(days: 7)),
+      notificationDetails: _engagementNotificationDetails,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
 
@@ -548,9 +540,9 @@ class NotificationService {
 
   /// Cancel all inactivity reminders
   Future<void> cancelInactivityReminders() async {
-    await _localNotifications.cancel(inactivity3dId);
-    await _localNotifications.cancel(inactivity5dId);
-    await _localNotifications.cancel(inactivity7dId);
+    await _localNotifications.cancel(id: inactivity3dId);
+    await _localNotifications.cancel(id: inactivity5dId);
+    await _localNotifications.cancel(id: inactivity7dId);
     debugPrint('[NotificationService] Cancelled inactivity reminders');
   }
 
@@ -570,13 +562,11 @@ class NotificationService {
           item.orderId != null ? 'orderId=${item.orderId}' : '';
 
       await _localNotifications.zonedSchedule(
-        _pendingOsBaseId + i,
-        item.title,
-        item.body,
-        tzTime,
-        _engagementNotificationDetails,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
+        id: _pendingOsBaseId + i,
+        title: item.title,
+        body: item.body,
+        scheduledDate: tzTime,
+        notificationDetails: _engagementNotificationDetails,
         androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         payload: payload,
       );
@@ -588,7 +578,7 @@ class NotificationService {
   /// Cancel all pending OS reminders
   Future<void> cancelPendingOsReminders() async {
     for (var i = 0; i < _maxPendingOsNotifications; i++) {
-      await _localNotifications.cancel(_pendingOsBaseId + i);
+      await _localNotifications.cancel(id: _pendingOsBaseId + i);
     }
     debugPrint('[NotificationService] Cancelled pending OS reminders');
   }
