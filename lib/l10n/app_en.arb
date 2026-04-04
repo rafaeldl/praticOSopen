@@ -1467,5 +1467,72 @@
       "feature": { "type": "String" }
     }
   },
-  "unlimitedLabel": "unlimited"
+  "unlimitedLabel": "unlimited",
+
+  "subscription": "Subscription",
+  "manageSubscription": "Manage subscription",
+  "viewPlanAndBilling": "View plan and billing",
+  "restorePurchases": "Restore purchases",
+  "restorePreviousPurchases": "Recover previous purchases",
+  "restoringPurchases": "Restoring purchases...",
+  "restorePurchasesSuccess": "Purchases restored successfully",
+  "restorePurchasesError": "Error restoring purchases. Please try again.",
+  "restorePurchasesDescription": "Restore your previous purchases if you changed devices",
+  "purchaseHistory": "Purchase History",
+  "success": "Success",
+  "free": "Free",
+  "renewsOn": "Renews on {date}",
+  "@renewsOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "subscriptionCancelled": "Subscription cancelled",
+  "changePlan": "Change plan",
+  "viewAvailablePlans": "View available plans",
+  "cancelSubscription": "Cancel subscription",
+  "manageInStore": "Manage in app store",
+  "choosePlan": "Choose plan",
+  "restore": "Restore",
+  "perMonth": "/month",
+  "mostPopular": "MOST POPULAR",
+  "currentPlan": "Current plan",
+  "yourCurrentPlan": "Your current plan",
+  "selectPlan": "Select plan",
+  "purchaseSuccessful": "Purchase completed successfully!",
+  "plansDisclaimer": "Subscriptions renew automatically. You can cancel anytime in store settings.",
+  "planFeatureUsers": "{count} users included",
+  "@planFeatureUsers": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planFeaturePhotos": "{count} photos/month",
+  "@planFeaturePhotos": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planFeatureForms": "{count} forms",
+  "@planFeatureForms": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planFeatureCleanPdf": "PDF without watermark",
+  "planFeaturePriority": "Priority support",
+  "planFeatureUnlimitedPhotos": "Unlimited photos",
+  "planFeatureUnlimitedForms": "Unlimited forms",
+  "planFeatureMultiCompany": "Multi-company",
+  "planFeatureApi": "API access",
+  "upgradePlanTitle": "Upgrade",
+  "featureLimitReached": "You've reached the limit for {feature}",
+  "@featureLimitReached": {
+    "placeholders": {
+      "feature": { "type": "String" }
+    }
+  },
+  "withUpgrade": "With upgrade",
+  "upgradeNow": "Upgrade now",
+  "maybeLater": "Maybe later"
 }

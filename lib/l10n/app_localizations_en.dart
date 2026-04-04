@@ -3369,4 +3369,137 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unlimitedLabel => 'unlimited';
+
+  @override
+  String get subscription => 'Subscription';
+
+  @override
+  String get manageSubscription => 'Manage subscription';
+
+  @override
+  String get viewPlanAndBilling => 'View plan and billing';
+
+  @override
+  String get restorePurchases => 'Restore purchases';
+
+  @override
+  String get restorePreviousPurchases => 'Recover previous purchases';
+
+  @override
+  String get restoringPurchases => 'Restoring purchases...';
+
+  @override
+  String get restorePurchasesSuccess => 'Purchases restored successfully';
+
+  @override
+  String get restorePurchasesError =>
+      'Error restoring purchases. Please try again.';
+
+  @override
+  String get restorePurchasesDescription =>
+      'Restore your previous purchases if you changed devices';
+
+  @override
+  String get purchaseHistory => 'Purchase History';
+
+  @override
+  String get success => 'Success';
+
+  @override
+  String get free => 'Free';
+
+  @override
+  String renewsOn(String date) {
+    return 'Renews on $date';
+  }
+
+  @override
+  String get subscriptionCancelled => 'Subscription cancelled';
+
+  @override
+  String get changePlan => 'Change plan';
+
+  @override
+  String get viewAvailablePlans => 'View available plans';
+
+  @override
+  String get cancelSubscription => 'Cancel subscription';
+
+  @override
+  String get manageInStore => 'Manage in app store';
+
+  @override
+  String get choosePlan => 'Choose plan';
+
+  @override
+  String get restore => 'Restore';
+
+  @override
+  String get perMonth => '/month';
+
+  @override
+  String get mostPopular => 'MOST POPULAR';
+
+  @override
+  String get currentPlan => 'Current plan';
+
+  @override
+  String get yourCurrentPlan => 'Your current plan';
+
+  @override
+  String get selectPlan => 'Select plan';
+
+  @override
+  String get purchaseSuccessful => 'Purchase completed successfully!';
+
+  @override
+  String get plansDisclaimer =>
+      'Subscriptions renew automatically. You can cancel anytime in store settings.';
+
+  @override
+  String planFeatureUsers(int count) {
+    return '$count users included';
+  }
+
+  @override
+  String planFeaturePhotos(int count) {
+    return '$count photos/month';
+  }
+
+  @override
+  String planFeatureForms(int count) {
+    return '$count forms';
+  }
+
+  @override
+  String get planFeatureCleanPdf => 'PDF without watermark';
+
+  @override
+  String get planFeaturePriority => 'Priority support';
+
+  @override
+  String get planFeatureUnlimitedPhotos => 'Unlimited photos';
+
+  @override
+  String get planFeatureUnlimitedForms => 'Unlimited forms';
+
+  @override
+  String get planFeatureMultiCompany => 'Multi-company';
+
+  @override
+  String get planFeatureApi => 'API access';
+
+  @override
+  String get upgradePlanTitle => 'Upgrade';
+
+  @override
+  String featureLimitReached(String feature) {
+    return 'You\'ve reached the limit for $feature';
+  }
+
+  @override
+  String get withUpgrade => 'With upgrade';
+
+  @override
+  String get upgradeNow => 'Upgrade now';
 }

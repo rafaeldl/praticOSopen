@@ -6381,6 +6381,246 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'ilimitado'**
   String get unlimitedLabel;
+
+  /// No description provided for @subscription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assinatura'**
+  String get subscription;
+
+  /// No description provided for @manageSubscription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerenciar assinatura'**
+  String get manageSubscription;
+
+  /// No description provided for @viewPlanAndBilling.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver plano e cobrança'**
+  String get viewPlanAndBilling;
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In pt, this message translates to:
+  /// **'Restaurar compras'**
+  String get restorePurchases;
+
+  /// No description provided for @restorePreviousPurchases.
+  ///
+  /// In pt, this message translates to:
+  /// **'Recuperar compras anteriores'**
+  String get restorePreviousPurchases;
+
+  /// No description provided for @restoringPurchases.
+  ///
+  /// In pt, this message translates to:
+  /// **'Restaurando compras...'**
+  String get restoringPurchases;
+
+  /// No description provided for @restorePurchasesSuccess.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compras restauradas com sucesso'**
+  String get restorePurchasesSuccess;
+
+  /// No description provided for @restorePurchasesError.
+  ///
+  /// In pt, this message translates to:
+  /// **'Erro ao restaurar compras. Tente novamente.'**
+  String get restorePurchasesError;
+
+  /// No description provided for @restorePurchasesDescription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Restaure suas compras anteriores caso tenha trocado de dispositivo'**
+  String get restorePurchasesDescription;
+
+  /// No description provided for @purchaseHistory.
+  ///
+  /// In pt, this message translates to:
+  /// **'Histórico de Compras'**
+  String get purchaseHistory;
+
+  /// No description provided for @success.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sucesso'**
+  String get success;
+
+  /// No description provided for @free.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gratuito'**
+  String get free;
+
+  /// No description provided for @renewsOn.
+  ///
+  /// In pt, this message translates to:
+  /// **'Renova em {date}'**
+  String renewsOn(String date);
+
+  /// No description provided for @subscriptionCancelled.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assinatura cancelada'**
+  String get subscriptionCancelled;
+
+  /// No description provided for @changePlan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Alterar plano'**
+  String get changePlan;
+
+  /// No description provided for @viewAvailablePlans.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver planos disponíveis'**
+  String get viewAvailablePlans;
+
+  /// No description provided for @cancelSubscription.
+  ///
+  /// In pt, this message translates to:
+  /// **'Cancelar assinatura'**
+  String get cancelSubscription;
+
+  /// No description provided for @manageInStore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Gerenciar na loja de aplicativos'**
+  String get manageInStore;
+
+  /// No description provided for @choosePlan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Escolher plano'**
+  String get choosePlan;
+
+  /// No description provided for @restore.
+  ///
+  /// In pt, this message translates to:
+  /// **'Restaurar'**
+  String get restore;
+
+  /// No description provided for @perMonth.
+  ///
+  /// In pt, this message translates to:
+  /// **'/mês'**
+  String get perMonth;
+
+  /// No description provided for @mostPopular.
+  ///
+  /// In pt, this message translates to:
+  /// **'MAIS POPULAR'**
+  String get mostPopular;
+
+  /// No description provided for @currentPlan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Plano atual'**
+  String get currentPlan;
+
+  /// No description provided for @yourCurrentPlan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Seu plano atual'**
+  String get yourCurrentPlan;
+
+  /// No description provided for @selectPlan.
+  ///
+  /// In pt, this message translates to:
+  /// **'Selecionar plano'**
+  String get selectPlan;
+
+  /// No description provided for @purchaseSuccessful.
+  ///
+  /// In pt, this message translates to:
+  /// **'Compra realizada com sucesso!'**
+  String get purchaseSuccessful;
+
+  /// No description provided for @plansDisclaimer.
+  ///
+  /// In pt, this message translates to:
+  /// **'As assinaturas são renovadas automaticamente. Você pode cancelar a qualquer momento nas configurações da loja.'**
+  String get plansDisclaimer;
+
+  /// No description provided for @planFeatureUsers.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} usuários inclusos'**
+  String planFeatureUsers(int count);
+
+  /// No description provided for @planFeaturePhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} fotos/mês'**
+  String planFeaturePhotos(int count);
+
+  /// No description provided for @planFeatureForms.
+  ///
+  /// In pt, this message translates to:
+  /// **'{count} formulários'**
+  String planFeatureForms(int count);
+
+  /// No description provided for @planFeatureCleanPdf.
+  ///
+  /// In pt, this message translates to:
+  /// **'PDF sem marca d\'água'**
+  String get planFeatureCleanPdf;
+
+  /// No description provided for @planFeaturePriority.
+  ///
+  /// In pt, this message translates to:
+  /// **'Suporte prioritário'**
+  String get planFeaturePriority;
+
+  /// No description provided for @planFeatureUnlimitedPhotos.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fotos ilimitadas'**
+  String get planFeatureUnlimitedPhotos;
+
+  /// No description provided for @planFeatureUnlimitedForms.
+  ///
+  /// In pt, this message translates to:
+  /// **'Formulários ilimitados'**
+  String get planFeatureUnlimitedForms;
+
+  /// No description provided for @planFeatureMultiCompany.
+  ///
+  /// In pt, this message translates to:
+  /// **'Multi-empresa'**
+  String get planFeatureMultiCompany;
+
+  /// No description provided for @planFeatureApi.
+  ///
+  /// In pt, this message translates to:
+  /// **'Acesso à API'**
+  String get planFeatureApi;
+
+  /// No description provided for @upgradePlanTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Faça upgrade'**
+  String get upgradePlanTitle;
+
+  /// No description provided for @featureLimitReached.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você atingiu o limite de {feature}'**
+  String featureLimitReached(String feature);
+
+  /// No description provided for @withUpgrade.
+  ///
+  /// In pt, this message translates to:
+  /// **'Com upgrade'**
+  String get withUpgrade;
+
+  /// No description provided for @upgradeNow.
+  ///
+  /// In pt, this message translates to:
+  /// **'Fazer upgrade'**
+  String get upgradeNow;
 }
 
 class _AppLocalizationsDelegate

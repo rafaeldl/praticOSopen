@@ -1512,5 +1512,72 @@
       "feature": { "type": "String" }
     }
   },
-  "unlimitedLabel": "ilimitado"
+  "unlimitedLabel": "ilimitado",
+
+  "subscription": "Assinatura",
+  "manageSubscription": "Gerenciar assinatura",
+  "viewPlanAndBilling": "Ver plano e cobrança",
+  "restorePurchases": "Restaurar compras",
+  "restorePreviousPurchases": "Recuperar compras anteriores",
+  "restoringPurchases": "Restaurando compras...",
+  "restorePurchasesSuccess": "Compras restauradas com sucesso",
+  "restorePurchasesError": "Erro ao restaurar compras. Tente novamente.",
+  "restorePurchasesDescription": "Restaure suas compras anteriores caso tenha trocado de dispositivo",
+  "purchaseHistory": "Histórico de Compras",
+  "success": "Sucesso",
+  "free": "Gratuito",
+  "renewsOn": "Renova em {date}",
+  "@renewsOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "subscriptionCancelled": "Assinatura cancelada",
+  "changePlan": "Alterar plano",
+  "viewAvailablePlans": "Ver planos disponíveis",
+  "cancelSubscription": "Cancelar assinatura",
+  "manageInStore": "Gerenciar na loja de aplicativos",
+  "choosePlan": "Escolher plano",
+  "restore": "Restaurar",
+  "perMonth": "/mês",
+  "mostPopular": "MAIS POPULAR",
+  "currentPlan": "Plano atual",
+  "yourCurrentPlan": "Seu plano atual",
+  "selectPlan": "Selecionar plano",
+  "purchaseSuccessful": "Compra realizada com sucesso!",
+  "plansDisclaimer": "As assinaturas são renovadas automaticamente. Você pode cancelar a qualquer momento nas configurações da loja.",
+  "planFeatureUsers": "{count} usuários inclusos",
+  "@planFeatureUsers": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planFeaturePhotos": "{count} fotos/mês",
+  "@planFeaturePhotos": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planFeatureForms": "{count} formulários",
+  "@planFeatureForms": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planFeatureCleanPdf": "PDF sem marca d'água",
+  "planFeaturePriority": "Suporte prioritário",
+  "planFeatureUnlimitedPhotos": "Fotos ilimitadas",
+  "planFeatureUnlimitedForms": "Formulários ilimitados",
+  "planFeatureMultiCompany": "Multi-empresa",
+  "planFeatureApi": "Acesso à API",
+  "upgradePlanTitle": "Faça upgrade",
+  "featureLimitReached": "Você atingiu o limite de {feature}",
+  "@featureLimitReached": {
+    "placeholders": {
+      "feature": { "type": "String" }
+    }
+  },
+  "withUpgrade": "Com upgrade",
+  "upgradeNow": "Fazer upgrade",
+  "maybeLater": "Talvez depois"
 }
