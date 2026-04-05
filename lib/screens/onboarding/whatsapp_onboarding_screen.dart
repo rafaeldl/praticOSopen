@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:praticos/mobx/whatsapp_link_store.dart';
 import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:praticos/services/tracking_transparency_service.dart';
 
 class WhatsAppOnboardingScreen extends StatefulWidget {
   const WhatsAppOnboardingScreen({super.key});
@@ -13,6 +14,14 @@ class WhatsAppOnboardingScreen extends StatefulWidget {
 
 class _WhatsAppOnboardingScreenState extends State<WhatsAppOnboardingScreen> {
   final WhatsAppLinkStore _whatsappStore = WhatsAppLinkStore();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      TrackingTransparencyService.instance.requestIfEligible();
+    });
+  }
 
   void _navigateToHome() {
     Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
