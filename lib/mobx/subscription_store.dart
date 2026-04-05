@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:mobx/mobx.dart';
 import 'package:purchases_flutter/purchases_flutter.dart' hide Store;
 import 'package:praticos/services/subscription_service.dart';
@@ -154,12 +155,14 @@ abstract class _SubscriptionStore with Store {
     try {
       customerInfo = await _service.purchasePackage(package);
       return true;
-    } on PurchasesErrorCode catch (e) {
-      if (e == PurchasesErrorCode.purchaseCancelledError) {
+    } on PlatformException catch (e) {
+      final errorCode = PurchasesErrorHelper.getErrorCode(e);
+      if (errorCode == PurchasesErrorCode.purchaseCancelledError) {
         // Usuario cancelou, nao e um erro
         debugPrint('SubscriptionStore: Purchase cancelled by user');
         return false;
       }
+      debugPrint('SubscriptionStore: Purchase error: $errorCode - ${e.message}');
       errorMessage = 'Erro ao processar compra. Tente novamente.';
       return false;
     } catch (e, stack) {

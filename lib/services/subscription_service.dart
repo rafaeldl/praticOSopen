@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
@@ -143,14 +144,15 @@ class SubscriptionService {
   /// [package] - Pacote a ser comprado (obtido via getOfferings)
   /// Retorna [CustomerInfo] atualizado apos a compra.
   ///
-  /// Throws [PurchasesErrorCode.purchaseCancelledError] se o usuario cancelar.
+  /// Throws [PlatformException] se ocorrer um erro ou cancelamento.
+  /// Use [PurchasesErrorHelper.getErrorCode] para verificar o tipo de erro.
   Future<CustomerInfo> purchasePackage(Package package) async {
     try {
       debugPrint('SubscriptionService: Purchasing package ${package.identifier}');
       final customerInfo = await Purchases.purchasePackage(package);
       debugPrint('SubscriptionService: Purchase successful');
       return customerInfo;
-    } on PurchasesErrorCode catch (e) {
+    } on PlatformException catch (e) {
       debugPrint('SubscriptionService: Purchase error: $e');
       rethrow;
     }
