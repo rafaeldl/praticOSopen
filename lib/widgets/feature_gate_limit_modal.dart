@@ -1,3 +1,4 @@
+import "package:praticos/services/analytics_service.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show LinearProgressIndicator, AlwaysStoppedAnimation;
 import 'package:praticos/extensions/context_extensions.dart';
@@ -27,6 +28,7 @@ class FeatureGateLimitModal {
     required FeatureGateResult result,
     VoidCallback? onUpgrade,
   }) async {
+    AnalyticsService.instance.logUpgradeModalShown(trigger: "${result.featureType.name}_limit");
     if (!result.isAtLimit) return true;
 
     final didUpgrade = await showCupertinoModalPopup<bool>(
