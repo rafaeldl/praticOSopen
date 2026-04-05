@@ -40,6 +40,14 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
 
+      - name: Install gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Enable required GCP APIs
+        run: |
+          gcloud services enable cloudscheduler.googleapis.com --project=praticos || true
+          gcloud services enable identitytoolkit.googleapis.com --project=praticos || true
+
       - name: Deploy to Firebase Functions
         working-directory: firebase
         run: firebase deploy --only functions --project praticos
