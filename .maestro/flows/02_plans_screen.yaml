@@ -1,0 +1,58 @@
+# Flow 02: Plans Screen (PlansScreen)
+# Captures screenshot of subscription plans
+appId: ${appId}
+tags:
+  - billing
+  - visual
+
+---
+
+# Prerequisites: User must be logged in
+- assertVisible:
+    id: "tab_home"
+    timeout: 5000
+
+# Navigate to Settings
+- tapOn:
+    id: "tab_settings"
+
+- waitForAnimationToEnd
+
+# Scroll to find subscription option
+- scroll:
+    direction: DOWN
+    duration: 1000
+
+# Tap on subscription/plans option
+- tapOn:
+    id: "settings_subscription"
+    optional: true
+
+- tapOn:
+    text: ".*[Pp]lano.*|.*[Ss]ubscri.*|.*[Aa]ssinat.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Capture Plans Screen
+- takeScreenshot: "02_plans_screen"
+
+# Verify key elements are visible
+- assertVisible:
+    text: "Free"
+    optional: true
+
+- assertVisible:
+    text: "Starter|Pro|Business"
+    optional: true
+
+# Scroll to see more plans
+- scroll:
+    direction: DOWN
+    duration: 500
+
+- takeScreenshot: "02_plans_screen_bottom"
+
+# Go back
+- back

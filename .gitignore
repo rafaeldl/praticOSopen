@@ -70,3 +70,6 @@ backend/bot/credentials/
 backend/bot/workspace/agents/main/sessions/
 backend/bot/workspace/media/
 backend/bot/workspace/cron/runs/
+
+# Maestro visual tests - screenshots output
+.maestro/screenshots/
