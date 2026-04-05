@@ -23,7 +23,7 @@ import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 /// flutter run --dart-define=REVENUECAT_IOS_API_KEY=your_key
 /// ```
 ///
-/// Para teste/desenvolvimento, a API key de teste sera usada como fallback:
+/// Para teste/desenvolvimento local, voce pode usar a key de sandbox:
 /// `test_rHipMRrqwezbhAuzyWKGLEqwfhP`
 ///
 /// ## Entitlements Suportados
@@ -53,10 +53,6 @@ class SubscriptionService {
     'REVENUECAT_ANDROID_API_KEY',
     defaultValue: '',
   );
-
-  /// API Key de teste para desenvolvimento
-  /// IMPORTANTE: Substitua por keys de producao antes de lancar
-  static const _testApiKey = 'test_rHipMRrqwezbhAuzyWKGLEqwfhP';
 
   /// Entitlement principal para ambiente de teste
   static const _mainEntitlement = 'Rafsoft Pro';
@@ -96,7 +92,6 @@ class SubscriptionService {
       await Purchases.configure(configuration);
       _isInitialized = true;
       debugPrint('SubscriptionService: Initialized successfully for user $userId');
-      debugPrint('SubscriptionService: Using ${apiKey == _testApiKey ? 'TEST' : 'PRODUCTION'} API key');
     } catch (e, stack) {
       debugPrint('SubscriptionService: Error initializing: $e\n$stack');
       rethrow;
@@ -104,24 +99,13 @@ class SubscriptionService {
   }
 
   /// Retorna a API key apropriada para a plataforma atual.
-  /// Usa a key de teste como fallback se nenhuma estiver configurada.
   String _getApiKey() {
     if (kIsWeb) return '';
 
-    String platformKey = '';
-    if (Platform.isIOS) {
-      platformKey = _iosApiKey;
-    } else if (Platform.isAndroid) {
-      platformKey = _androidApiKey;
-    }
+    if (Platform.isIOS) return _iosApiKey;
+    if (Platform.isAndroid) return _androidApiKey;
 
-    // Se nenhuma key de producao estiver configurada, usa a de teste
-    if (platformKey.isEmpty) {
-      debugPrint('SubscriptionService: No production API key, using test key');
-      return _testApiKey;
-    }
-
-    return platformKey;
+    return '';
   }
 
   /// Busca informacoes do assinante atual.
