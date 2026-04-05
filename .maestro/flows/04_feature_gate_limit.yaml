@@ -1,0 +1,94 @@
+# Flow 04: Feature Gate Limit Modal (100% limit)
+# Captures modal when user hits limit
+appId: ${appId}
+tags:
+  - billing
+  - feature-gates
+  - visual
+
+---
+
+# Prerequisites: User must be logged in
+- assertVisible:
+    id: "tab_home"
+    timeout: 5000
+
+# This flow attempts to trigger the feature gate limit modal
+# Works best with a Free plan account that has reached limits
+
+# Navigate to form templates (likely to hit limit)
+- tapOn:
+    id: "tab_settings"
+
+- waitForAnimationToEnd
+
+- scroll:
+    direction: DOWN
+    duration: 1000
+
+# Look for form templates option
+- tapOn:
+    id: "settings_form_templates"
+    optional: true
+
+- tapOn:
+    text: ".*[Ff]ormul[aá]rio.*|.*[Tt]emplate.*|.*[Mm]odelo.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Try to add a new template (may trigger limit)
+- tapOn:
+    id: "add_template_button"
+    optional: true
+
+- tapOn:
+    text: ".*[Aa]dicionar.*|.*[Nn]ovo.*|.*[Cc]riar.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Capture limit modal if it appears
+- takeScreenshot: "04_feature_gate_limit_modal"
+
+# Look for upgrade button in modal
+- assertVisible:
+    text: ".*[Uu]pgrade.*|.*[Aa]tualizar.*|.*[Mm]elhorar.*"
+    optional: true
+
+# Capture full modal
+- takeScreenshot: "04_feature_gate_limit_full"
+
+# Cancel modal
+- tapOn:
+    text: "Cancelar|Cancel|Fechar|Close"
+    optional: true
+
+# Alternative: Try collaborators (another limit)
+- back
+
+- tapOn:
+    id: "settings_collaborators"
+    optional: true
+
+- tapOn:
+    text: ".*[Cc]olaborador.*|.*[Ee]quipe.*|.*[Tt]eam.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- tapOn:
+    text: ".*[Aa]dicionar.*|.*[Cc]onvidar.*|.*[Ii]nvite.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+- takeScreenshot: "04_feature_gate_limit_collaborators"
+
+# Go back
+- back
+- back

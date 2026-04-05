@@ -1,0 +1,39 @@
+# Helper Flow: Logout
+# Logs out the current user
+appId: ${appId}
+tags:
+  - auth
+  - helper
+
+---
+
+# Navigate to settings
+- tapOn:
+    id: "tab_settings"
+
+- waitForAnimationToEnd
+
+# Scroll to logout button
+- scroll:
+    direction: DOWN
+    duration: 1000
+
+# Tap logout
+- tapOn:
+    id: "logout_button"
+    optional: true
+
+- tapOn:
+    text: ".*[Ss]air.*|.*[Ll]ogout.*|.*[Ss]ign [Oo]ut.*|.*[Cc]errar.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Confirm logout dialog
+- tapOn:
+    text: ".*[Ss]air.*|.*[Ll]ogout.*|.*[Ss]ign [Oo]ut.*|.*[Cc]onfirm.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 5000

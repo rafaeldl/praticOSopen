@@ -6621,6 +6621,108 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Fazer upgrade'**
   String get upgradeNow;
+
+  /// No description provided for @segmentationOnboardingTitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nos conte sobre seu negócio'**
+  String get segmentationOnboardingTitle;
+
+  /// No description provided for @segmentationOnboardingSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ajude-nos a personalizar sua experiência (30 segundos)'**
+  String get segmentationOnboardingSubtitle;
+
+  /// No description provided for @segmentationServiceTypeQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Qual tipo de serviço você faz?'**
+  String get segmentationServiceTypeQuestion;
+
+  /// No description provided for @serviceTypeTechnicalAssistance.
+  ///
+  /// In pt, this message translates to:
+  /// **'Assistência técnica (celular, eletrônico)'**
+  String get serviceTypeTechnicalAssistance;
+
+  /// No description provided for @serviceTypeHvac.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ar condicionado / Refrigeração'**
+  String get serviceTypeHvac;
+
+  /// No description provided for @serviceTypeElectricalPlumbing.
+  ///
+  /// In pt, this message translates to:
+  /// **'Elétrica / Hidráulica'**
+  String get serviceTypeElectricalPlumbing;
+
+  /// No description provided for @serviceTypeAutomotive.
+  ///
+  /// In pt, this message translates to:
+  /// **'Oficina mecânica'**
+  String get serviceTypeAutomotive;
+
+  /// No description provided for @segmentationMonthlyVolumeQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Quantos serviços você faz por mês?'**
+  String get segmentationMonthlyVolumeQuestion;
+
+  /// No description provided for @monthlyVolumeLt10.
+  ///
+  /// In pt, this message translates to:
+  /// **'Menos de 10'**
+  String get monthlyVolumeLt10;
+
+  /// No description provided for @monthlyVolume10To30.
+  ///
+  /// In pt, this message translates to:
+  /// **'10 a 30'**
+  String get monthlyVolume10To30;
+
+  /// No description provided for @monthlyVolume30To60.
+  ///
+  /// In pt, this message translates to:
+  /// **'30 a 60'**
+  String get monthlyVolume30To60;
+
+  /// No description provided for @monthlyVolumeGt60.
+  ///
+  /// In pt, this message translates to:
+  /// **'Mais de 60'**
+  String get monthlyVolumeGt60;
+
+  /// No description provided for @segmentationTeamSizeQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você trabalha...'**
+  String get segmentationTeamSizeQuestion;
+
+  /// No description provided for @teamSizeSolo.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sozinho'**
+  String get teamSizeSolo;
+
+  /// No description provided for @teamSize1To3.
+  ///
+  /// In pt, this message translates to:
+  /// **'Com 1-3 funcionários'**
+  String get teamSize1To3;
+
+  /// No description provided for @teamSize4To10.
+  ///
+  /// In pt, this message translates to:
+  /// **'Com 4-10 funcionários'**
+  String get teamSize4To10;
+
+  /// No description provided for @teamSizeGt10.
+  ///
+  /// In pt, this message translates to:
+  /// **'Com mais de 10 funcionários'**
+  String get teamSizeGt10;
 }
 
 class _AppLocalizationsDelegate

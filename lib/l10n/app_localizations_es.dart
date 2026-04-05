@@ -3521,4 +3521,59 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get upgradeNow => 'Actualizar ahora';
+
+  @override
+  String get segmentationOnboardingTitle => 'Nos conte sobre seu negócio';
+
+  @override
+  String get segmentationOnboardingSubtitle =>
+      'Ajude-nos a personalizar sua experiência (30 segundos)';
+
+  @override
+  String get segmentationServiceTypeQuestion =>
+      'Qual tipo de serviço você faz?';
+
+  @override
+  String get serviceTypeTechnicalAssistance =>
+      'Assistência técnica (celular, eletrônico)';
+
+  @override
+  String get serviceTypeHvac => 'Ar condicionado / Refrigeração';
+
+  @override
+  String get serviceTypeElectricalPlumbing => 'Elétrica / Hidráulica';
+
+  @override
+  String get serviceTypeAutomotive => 'Oficina mecânica';
+
+  @override
+  String get segmentationMonthlyVolumeQuestion =>
+      'Quantos serviços você faz por mês?';
+
+  @override
+  String get monthlyVolumeLt10 => 'Menos de 10';
+
+  @override
+  String get monthlyVolume10To30 => '10 a 30';
+
+  @override
+  String get monthlyVolume30To60 => '30 a 60';
+
+  @override
+  String get monthlyVolumeGt60 => 'Mais de 60';
+
+  @override
+  String get segmentationTeamSizeQuestion => 'Você trabalha...';
+
+  @override
+  String get teamSizeSolo => 'Sozinho';
+
+  @override
+  String get teamSize1To3 => 'Com 1-3 funcionários';
+
+  @override
+  String get teamSize4To10 => 'Com 4-10 funcionários';
+
+  @override
+  String get teamSizeGt10 => 'Com mais de 10 funcionários';
 }

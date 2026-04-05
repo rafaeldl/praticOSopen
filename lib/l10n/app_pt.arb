@@ -1579,5 +1579,26 @@
   },
   "withUpgrade": "Com upgrade",
   "upgradeNow": "Fazer upgrade",
-  "maybeLater": "Talvez depois"
+  "maybeLater": "Talvez depois",
+
+  "segmentationOnboardingTitle": "Nos conte sobre seu negócio",
+  "segmentationOnboardingSubtitle": "Ajude-nos a personalizar sua experiência (30 segundos)",
+
+  "segmentationServiceTypeQuestion": "Qual tipo de serviço você faz?",
+  "serviceTypeTechnicalAssistance": "Assistência técnica (celular, eletrônico)",
+  "serviceTypeHvac": "Ar condicionado / Refrigeração",
+  "serviceTypeElectricalPlumbing": "Elétrica / Hidráulica",
+  "serviceTypeAutomotive": "Oficina mecânica",
+
+  "segmentationMonthlyVolumeQuestion": "Quantos serviços você faz por mês?",
+  "monthlyVolumeLt10": "Menos de 10",
+  "monthlyVolume10To30": "10 a 30",
+  "monthlyVolume30To60": "30 a 60",
+  "monthlyVolumeGt60": "Mais de 60",
+
+  "segmentationTeamSizeQuestion": "Você trabalha...",
+  "teamSizeSolo": "Sozinho",
+  "teamSize1To3": "Com 1-3 funcionários",
+  "teamSize4To10": "Com 4-10 funcionários",
+  "teamSizeGt10": "Com mais de 10 funcionários"
 }

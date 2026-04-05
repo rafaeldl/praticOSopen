@@ -1,0 +1,70 @@
+# Flow 03: Feature Gate Warning (80% limit)
+# Captures warning banner when user is near limit
+appId: ${appId}
+tags:
+  - billing
+  - feature-gates
+  - visual
+
+---
+
+# Prerequisites: User must be logged in
+- assertVisible:
+    id: "tab_home"
+    timeout: 5000
+
+# Navigate to an area that shows feature gate warnings
+# This depends on the user's subscription state
+
+# Option 1: Check for warning banner on home screen
+- evalScript:
+    script: |
+      // Look for feature gate warning elements
+      output.hasWarning = false;
+
+# Try to find warning banner
+- assertVisible:
+    id: "feature_gate_warning"
+    optional: true
+
+- takeScreenshot: "03_feature_gate_warning_home"
+
+# Option 2: Try to trigger warning by navigating to photos
+- tapOn:
+    id: "tab_home"
+
+# Find an order to open
+- tapOn:
+    id: "order_card_.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Look for photo section that might show warning
+- scroll:
+    direction: DOWN
+    duration: 500
+
+# Capture any feature gate warnings visible
+- takeScreenshot: "03_feature_gate_warning_order"
+
+# Try to add a photo (may trigger warning)
+- tapOn:
+    id: "add_photo_button"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Capture warning modal if it appears
+- takeScreenshot: "03_feature_gate_warning_modal"
+
+# Cancel any modal
+- tapOn:
+    text: "Cancelar|Cancel"
+    optional: true
+
+# Go back to home
+- back
+- back
