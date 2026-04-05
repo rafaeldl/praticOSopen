@@ -41,7 +41,7 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "📌 Using tag: $TAG"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ steps.get_tag.outputs.tag }}
 
@@ -60,7 +60,7 @@ jobs:
 
       # Setup Java
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
