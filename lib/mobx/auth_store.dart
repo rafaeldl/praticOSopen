@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:praticos/mobx/company_store.dart';
 import 'package:praticos/mobx/locale_store.dart';
@@ -84,7 +85,7 @@ abstract class _AuthStore with Store {
               .collection('users')
               .doc(user.uid)
               .update({'preferredLanguage': deviceLocale}).catchError((e) {
-            print('AuthStore: failed to backfill preferredLanguage: $e');
+            debugPrint('AuthStore: failed to backfill preferredLanguage: $e');
           });
         }
       }
@@ -164,11 +165,11 @@ abstract class _AuthStore with Store {
           await SubscriptionService.instance.initialize(companyId);
         } catch (e) {
           // Log but don't fail login if RevenueCat fails
-          print('AuthStore: Failed to initialize RevenueCat: $e');
+          debugPrint('AuthStore: Failed to initialize RevenueCat: $e');
         }
       }
     } catch (e) {
-      print('AuthStore: error loading company data: $e');
+      debugPrint('AuthStore: error loading company data: $e');
       hasCompanyLoadError = true;
     }
   }
@@ -289,7 +290,7 @@ abstract class _AuthStore with Store {
       _isCompanyLoaded = false;
       hasCompanyLoadError = false;
     } catch (e) {
-      print('Error deleting account: $e');
+      debugPrint('Error deleting account: $e');
       rethrow;
     }
   }

@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
@@ -31,7 +32,7 @@ class PhotoService {
   /// Abre a galeria para selecionar uma imagem
   Future<File?> pickImageFromGallery() async {
     if (_isPickingImage) {
-      print('PhotoService: Picker já ativo, ignorando');
+      debugPrint('PhotoService: Picker já ativo, ignorando');
       return null;
     }
 
@@ -46,7 +47,7 @@ class PhotoService {
   /// Abre a galeria para selecionar múltiplas imagens
   Future<List<File>> pickMultipleImagesFromGallery() async {
     if (_isPickingImage) {
-      print('PhotoService: Picker já ativo, ignorando');
+      debugPrint('PhotoService: Picker já ativo, ignorando');
       return [];
     }
 
@@ -58,7 +59,7 @@ class PhotoService {
       );
       return images.map((xfile) => File(xfile.path)).toList();
     } catch (e) {
-      print('PhotoService: multi image_picker erro: $e');
+      debugPrint('PhotoService: multi image_picker erro: $e');
       return [];
     } finally {
       _isPickingImage = false;
@@ -68,7 +69,7 @@ class PhotoService {
   /// Abre a câmera para tirar uma foto
   Future<File?> takePhoto() async {
     if (_isPickingImage) {
-      print('PhotoService: Camera já ativa, ignorando');
+      debugPrint('PhotoService: Camera já ativa, ignorando');
       return null;
     }
 
@@ -89,7 +90,7 @@ class PhotoService {
       );
       return image != null ? File(image.path) : null;
     } catch (e) {
-      print('PhotoService: image_picker erro: $e');
+      debugPrint('PhotoService: image_picker erro: $e');
       return null;
     }
   }
@@ -106,7 +107,7 @@ class PhotoService {
     final outputPath = '${tempDir.path}/$photoId.jpg';
 
     final originalSize = await input.length();
-    print('PhotoService: Convertendo ${(originalSize / 1024).toStringAsFixed(0)}KB -> JPEG');
+    debugPrint('PhotoService: Convertendo ${(originalSize / 1024).toStringAsFixed(0)}KB -> JPEG');
 
     final result = await FlutterImageCompress.compressAndGetFile(
       input.absolute.path,
@@ -123,7 +124,7 @@ class PhotoService {
     final convertedFile = File(result.path);
     final convertedSize = await convertedFile.length();
     final reduction = ((1 - convertedSize / originalSize) * 100).toStringAsFixed(0);
-    print('PhotoService: Convertido ${(convertedSize / 1024).toStringAsFixed(0)}KB (-$reduction%)');
+    debugPrint('PhotoService: Convertido ${(convertedSize / 1024).toStringAsFixed(0)}KB (-$reduction%)');
 
     return convertedFile;
   }
@@ -145,7 +146,7 @@ class PhotoService {
       final jpegFile = await _convertToJpeg(file);
       return await _uploadWithFallback(jpegFile, storagePath);
     } catch (e) {
-      print('PhotoService: Erro no upload: $e');
+      debugPrint('PhotoService: Erro no upload: $e');
       return null;
     }
   }
@@ -195,7 +196,7 @@ class PhotoService {
         ..createdAt = now
         ..createdBy = Global.userAggr;
     } catch (e) {
-      print('PhotoService: Erro no upload de foto da OS: $e');
+      debugPrint('PhotoService: Erro no upload de foto da OS: $e');
       rethrow;
     }
   }
@@ -215,11 +216,11 @@ class PhotoService {
         Global.subscription!.usage.photosThisMonth++;
       }
 
-      print('PhotoService: Contador de fotos incrementado');
+      debugPrint('PhotoService: Contador de fotos incrementado');
     } catch (e) {
       // Não falhar o upload se o incremento falhar
       // O contador pode não existir ainda no documento
-      print('PhotoService: Erro ao incrementar contador de fotos: $e');
+      debugPrint('PhotoService: Erro ao incrementar contador de fotos: $e');
     }
   }
 
@@ -231,14 +232,14 @@ class PhotoService {
 
     // Estratégia 1: putData com metadata (mais confiável)
     try {
-      print('PhotoService: Upload para $storagePath');
+      debugPrint('PhotoService: Upload para $storagePath');
       final snapshot = await ref.putData(
         bytes,
         SettableMetadata(contentType: contentType),
       );
       return await _getDownloadUrl(snapshot.ref);
     } on FirebaseException catch (e) {
-      print('PhotoService: Tentativa 1 falhou: ${e.code}');
+      debugPrint('PhotoService: Tentativa 1 falhou: ${e.code}');
     }
 
     // Estratégia 2: putFile
@@ -249,7 +250,7 @@ class PhotoService {
       );
       return await _getDownloadUrl(snapshot.ref);
     } on FirebaseException catch (e) {
-      print('PhotoService: Tentativa 2 falhou: ${e.code}');
+      debugPrint('PhotoService: Tentativa 2 falhou: ${e.code}');
     }
 
     // Estratégia 3: putData sem metadata
@@ -257,7 +258,7 @@ class PhotoService {
       final snapshot = await ref.putData(bytes);
       return await _getDownloadUrl(snapshot.ref);
     } catch (e) {
-      print('PhotoService: Todas as tentativas falharam: $e');
+      debugPrint('PhotoService: Todas as tentativas falharam: $e');
       return null;
     }
   }
@@ -281,7 +282,7 @@ class PhotoService {
       final ref = _storage.ref().child(storagePath);
       return await ref.getDownloadURL();
     } catch (e) {
-      print('PhotoService: Erro ao obter URL atualizada: $e');
+      debugPrint('PhotoService: Erro ao obter URL atualizada: $e');
       return null;
     }
   }
@@ -301,7 +302,7 @@ class PhotoService {
       );
       return result?.files.firstOrNull;
     } catch (e) {
-      print('PhotoService: Erro ao selecionar documento: $e');
+      debugPrint('PhotoService: Erro ao selecionar documento: $e');
       return null;
     }
   }
@@ -326,7 +327,7 @@ class PhotoService {
       return await _uploadWithFallback(file, storagePath,
           contentType: contentType);
     } catch (e) {
-      print('PhotoService: Erro no upload do arquivo: $e');
+      debugPrint('PhotoService: Erro no upload do arquivo: $e');
       return null;
     }
   }
@@ -376,7 +377,7 @@ class PhotoService {
         ..createdAt = now
         ..createdBy = Global.userAggr;
     } catch (e) {
-      print('PhotoService: Erro no upload de documento da OS: $e');
+      debugPrint('PhotoService: Erro no upload de documento da OS: $e');
       rethrow;
     }
   }
@@ -419,7 +420,7 @@ class PhotoService {
         'fileName': fileName,
       };
     } catch (e) {
-      print('PhotoService: Erro no upload de comprovante: $e');
+      debugPrint('PhotoService: Erro no upload de comprovante: $e');
       rethrow;
     }
   }
@@ -435,7 +436,7 @@ class PhotoService {
       await _storage.ref().child(storagePath).delete();
       return true;
     } catch (e) {
-      print('PhotoService: Erro ao excluir: $e');
+      debugPrint('PhotoService: Erro ao excluir: $e');
       return false;
     }
   }
@@ -458,7 +459,7 @@ class PhotoService {
       }
       return true;
     } catch (e) {
-      print('PhotoService: Erro ao excluir fotos: $e');
+      debugPrint('PhotoService: Erro ao excluir fotos: $e');
       return false;
     }
   }
