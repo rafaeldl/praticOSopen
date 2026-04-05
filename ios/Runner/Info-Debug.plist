@@ -108,7 +108,7 @@
 		</dict>
 	</array>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>O PraticOS utiliza este identificador para medir a eficácia de campanhas publicitárias e melhorar sua experiência.</string>
+	<string>Seus dados serão usados para oferecer uma experiência personalizada e medir a eficácia das nossas melhorias no PraticOS.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

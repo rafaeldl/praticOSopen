@@ -10,6 +10,7 @@ import 'package:praticos/screens/agenda/agenda_screen.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/engagement_scheduler.dart';
+import 'package:praticos/services/tracking_transparency_service.dart';
 
 import 'home.dart';
 
@@ -87,6 +88,9 @@ class _NavigationControllerState extends State<NavigationController>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      TrackingTransparencyService.instance.requestIfEligible();
+    });
   }
 
   @override
