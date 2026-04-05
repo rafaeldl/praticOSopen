@@ -6,6 +6,8 @@
 
 import * as functionsV1 from 'firebase-functions/v1';
 import { onRequest } from 'firebase-functions/v2/https';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import * as admin from 'firebase-admin';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
@@ -112,6 +114,119 @@ export const updateUserClaims = functionsV1
   });
 
 // ============================================================================
+// SCHEDULED FUNCTIONS
+// ============================================================================
+
+import { resetMonthlyUsage } from './services/subscription.service';
+
+/**
+ * Scheduled function to reset monthly usage counters for subscriptions.
+ * Runs at midnight on the 1st of every month (BRT timezone = UTC-3).
+ *
+ * Resets:
+ * - photosThisMonth counter for all companies
+ * - Sets next usageResetAt to first day of following month
+ */
+export const scheduledResetMonthlyUsage = onSchedule(
+  {
+    schedule: '0 3 1 * *', // 3 AM UTC = midnight BRT on 1st of month
+    region: 'southamerica-east1',
+    timeZone: 'America/Sao_Paulo',
+    retryCount: 3,
+    memory: '256MiB',
+  },
+  async () => {
+    console.log('[Scheduled] Running monthly usage reset...');
+    const count = await resetMonthlyUsage();
+    console.log(`[Scheduled] Reset completed. ${count} companies updated.`);
+  }
+);
+
+// ============================================================================
+// AUTH BLOCKING FUNCTIONS
+// ============================================================================
+
+/**
+ * Blocks suspicious signups before a Firebase Auth user is created.
+ *
+ * Context: Google Ads campaign generated bot signups matching the pattern
+ * `firstname.NNNNN@gmail.com` (e.g. brenthayes.94058@gmail.com).
+ * These bots complete Google OAuth but never run app code, leaving orphan
+ * Auth users with no corresponding Firestore /users/ document.
+ *
+ * Requires: Firebase Authentication with Identity Platform (free up to 3000 DAUs).
+ * Enable at: https://console.firebase.google.com/project/_/authentication/providers
+ *
+ * Issue: #191
+ */
+export const blockSuspiciousSignups = beforeUserCreated(
+  { region: 'southamerica-east1' },
+  async (event) => {
+    const { HttpsError } = await import('firebase-functions/v2/https');
+
+    const email = (event.data?.email || '').toLowerCase().trim();
+    const ipAddress = event.ipAddress || '';
+
+    // Heuristic 1: block bot email pattern — firstname.NNNNN@gmail.com
+    // Observed pattern from click-fraud campaign: 84.7% non-BR traffic
+    const BOT_EMAIL_PATTERN = /^[a-z]{3,}[a-z]*\.[0-9]{4,6}@gmail\.com$/;
+    if (BOT_EMAIL_PATTERN.test(email)) {
+      console.warn('[blockSuspiciousSignups] Blocked bot email pattern', {
+        email,
+        ip: ipAddress,
+        uid: event.data?.uid,
+      });
+      throw new HttpsError('permission-denied', 'Signup not allowed');
+    }
+
+    // Heuristic 2: rate limiting — block if same IP has attempted 5+ signups
+    // in the last 10 minutes (stored in Firestore signupRateLimits collection)
+    if (ipAddress) {
+      const rateLimitRef = db.collection('signupRateLimits').doc(ipAddress);
+      const now = Date.now();
+      const windowMs = 10 * 60 * 1000; // 10 minutes
+
+      try {
+        const blocked = await db.runTransaction(async (tx) => {
+          const doc = await tx.get(rateLimitRef);
+          const data = doc.data() || { count: 0, windowStart: now };
+
+          const windowStart: number = data.windowStart;
+          const count: number = data.count;
+
+          if (now - windowStart > windowMs) {
+            // New window — reset counter
+            tx.set(rateLimitRef, { count: 1, windowStart: now });
+            return false;
+          }
+
+          if (count >= 5) {
+            return true; // Block
+          }
+
+          tx.set(rateLimitRef, { count: count + 1, windowStart });
+          return false;
+        });
+
+        if (blocked) {
+          console.warn('[blockSuspiciousSignups] Blocked by IP rate limit', {
+            email,
+            ip: ipAddress,
+            uid: event.data?.uid,
+          });
+          throw new HttpsError('permission-denied', 'Too many signups from this IP');
+        }
+      } catch (err) {
+        // If it's our own HttpsError, rethrow it
+        if ((err as any)?.code === 'permission-denied') throw err;
+        // Otherwise log and allow (don't block legitimate users due to rate limit errors)
+        console.error('[blockSuspiciousSignups] Rate limit check error (allowing signup):', err);
+      }
+    }
+  }
+);
+
+// ============================================================================
 // HTTP API (Express)
 // ============================================================================
 
@@ -136,6 +251,9 @@ import publicOrdersRoutes from './routes/public/orders.routes';
 
 // Routes - User (Flutter app authenticated)
 import userLinkRoutes from './routes/user/link.routes';
+
+// Routes - Webhooks (no authentication - signature-based)
+import revenuecatWebhookRoutes from './routes/webhooks/revenuecat.routes';
 
 // Routes - API Bot
 import linkRoutes from './routes/bot/link.routes';
@@ -263,6 +381,9 @@ app.get('/health', (_req: Request, res: Response) => {
 
 // Public Routes (no authentication - magic links)
 app.use('/public/orders', publicLimiter, publicOrdersRoutes);
+
+// Webhook Routes (signature-based authentication)
+app.use('/webhooks/revenuecat', revenuecatWebhookRoutes);
 
 // API Core v1 Routes
 app.use('/v1/auth', authRoutes);

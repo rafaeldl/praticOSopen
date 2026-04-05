@@ -98,6 +98,16 @@ service cloud.firestore {
     }
 
     // ════════════════════════════════════════════════════════════════════════
+    // INTERNAL / ADMIN-ONLY COLLECTIONS
+    // ════════════════════════════════════════════════════════════════════════
+
+    // signupRateLimits - used by blockSuspiciousSignups Cloud Function (Admin SDK only)
+    // No client should ever read or write this collection directly.
+    match /signupRateLimits/{ip} {
+      allow read, write: if false;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
     // GLOBAL COLLECTIONS
     // ════════════════════════════════════════════════════════════════════════
 
