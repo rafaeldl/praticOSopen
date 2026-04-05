@@ -10,6 +10,7 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/screens/menu_navigation/navigation_controller.dart';
 import 'package:praticos/screens/onboarding/welcome_screen.dart';
 import 'package:praticos/screens/onboarding/pending_invites_screen.dart';
+import 'package:praticos/screens/onboarding/segmentation_onboarding_screen.dart';
 import 'package:praticos/screens/loading_screen.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -381,6 +382,7 @@ class _SegmentLoader extends StatefulWidget {
 
 class _SegmentLoaderState extends State<_SegmentLoader> {
   bool _isLoading = true;
+  bool _shouldShowSegmentationOnboarding = false;
   String? _error;
 
   @override
@@ -464,8 +466,14 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         OrderStore().checkAndGenerateDueOrders();
       }
 
+      final shouldShowSegmentationOnboarding =
+          await _checkSegmentationOnboardingNeeded();
+
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
+        _shouldShowSegmentationOnboarding = shouldShowSegmentationOnboarding;
       });
     } catch (e) {
       if (!mounted) return;
@@ -474,6 +482,22 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<bool> _checkSegmentationOnboardingNeeded() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return false;
+
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (!userDoc.exists) return true;
+
+    final onboardingSegment =
+        userDoc.data()?['onboardingSegment'] as Map<String, dynamic>?;
+    return onboardingSegment == null || onboardingSegment.isEmpty;
   }
 
   @override
@@ -500,6 +524,17 @@ class _SegmentLoaderState extends State<_SegmentLoader> {
             ],
           ),
         ),
+      );
+    }
+
+    if (_shouldShowSegmentationOnboarding) {
+      return SegmentationOnboardingScreen(
+        onCompleted: () {
+          if (!mounted) return;
+          setState(() {
+            _shouldShowSegmentationOnboarding = false;
+          });
+        },
       );
     }
 
