@@ -144,7 +144,8 @@ class SubscriptionService {
   /// [package] - Pacote a ser comprado (obtido via getOfferings)
   /// Retorna [CustomerInfo] atualizado apos a compra.
   ///
-  /// Throws [PurchasesErrorCode.purchaseCancelledError] se o usuario cancelar.
+  /// Throws [PlatformException] se ocorrer um erro ou cancelamento.
+  /// Use [PurchasesErrorHelper.getErrorCode] para verificar o tipo de erro.
   Future<CustomerInfo> purchasePackage(Package package) async {
     try {
       debugPrint('SubscriptionService: Purchasing package ${package.identifier}');
