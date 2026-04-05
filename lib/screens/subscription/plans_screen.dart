@@ -1,3 +1,4 @@
+import "package:praticos/services/analytics_service.dart";
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Colors;
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -41,6 +42,8 @@ class _PlansScreenState extends State<PlansScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    AnalyticsService.instance.logPlansScreenViewed(source: args?["source"] ?? "deeplink");
     _subscriptionStore = Provider.of<SubscriptionStore>(context, listen: false);
   }
 
@@ -542,6 +545,7 @@ class _PlansScreenState extends State<PlansScreen> {
   }
 
   Future<void> _subscribeToPlan(PlanData plan) async {
+    AnalyticsService.instance.logUpgradeClicked(planId: plan.id, period: "monthly");
     setState(() => _selectedPlanId = plan.id);
 
     // Encontrar o pacote correspondente ao plano nas offerings
@@ -571,6 +575,7 @@ class _PlansScreenState extends State<PlansScreen> {
     if (!mounted) return;
 
     if (success) {
+      AnalyticsService.instance.logPurchaseCompleted(planId: plan.id, period: package.packageType.name, value: plan.price.toDouble());
       // Navegar para tela de sucesso
       Navigator.pushReplacementNamed(
         context,
@@ -578,6 +583,7 @@ class _PlansScreenState extends State<PlansScreen> {
         arguments: {'plan': plan.name},
       );
     } else if (_subscriptionStore.errorMessage != null) {
+      AnalyticsService.instance.logPurchaseFailed(planId: plan.id, reason: _subscriptionStore.errorMessage!);
       showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
