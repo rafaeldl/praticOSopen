@@ -37,9 +37,17 @@ git branch feat/PRA-XXX origin/master
 # Criar worktree isolado
 git worktree add /Users/rafaeldl/Projetos/praticOSopen-worktrees/PRA-XXX feat/PRA-XXX
 
+# Copiar arquivos de configuracao (OBRIGATORIO para rodar o app)
+./scripts/setup-worktree.sh /Users/rafaeldl/Projetos/praticOSopen-worktrees/PRA-XXX
+
 # Trabalhar no worktree
 cd /Users/rafaeldl/Projetos/praticOSopen-worktrees/PRA-XXX
+flutter pub get
 ```
+
+> **IMPORTANTE:** O script `setup-worktree.sh` copia arquivos de configuracao
+> ignorados pelo git (Firebase, keystore, credenciais Fastlane, etc.) do repo
+> principal para o worktree. Sem essa etapa, o app nao compila.
 
 ### 3. Nomenclatura de Branches
 
@@ -147,6 +155,22 @@ git worktree remove /Users/rafaeldl/Projetos/praticOSopen-worktrees/PRA-XXX 2>/d
 - [ ] `git status` mostra "working tree clean"
 - [ ] Nenhum stash pendente relacionado a esta tarefa
 - [ ] Branch aponta para o remote correto
+
+## Arquivos de Configuracao (Ignorados pelo Git)
+
+Os seguintes arquivos NAO estao no git e precisam ser copiados para cada worktree
+via `scripts/setup-worktree.sh`:
+
+| Arquivo | Descricao |
+|---------|-----------|
+| `android/app/google-services.json` | Configuracao Firebase Android |
+| `android/local.properties` | Caminhos do SDK Android |
+| `android/app/rafsoft.keystore` | Keystore de assinatura do app |
+| `android/fastlane/play_store_credentials.json` | Credenciais para deploy Play Store |
+| `ios/GoogleService-Info.plist` | Configuracao Firebase iOS |
+| `ios/fastlane/.env` | Variaveis de ambiente Fastlane iOS |
+
+Para adicionar novos arquivos a lista, editar o array `CONFIG_FILES` em `scripts/setup-worktree.sh`.
 
 ## Manutencao
 
