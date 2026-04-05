@@ -223,4 +223,79 @@ class AnalyticsService {
       },
     ));
   }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // P4 — Billing & Monetization (PRA-33)
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Logs plans_screen_viewed event.
+  /// [source] can be: menu, limit_modal, upgrade_prompt, deeplink.
+  void logPlansScreenViewed({required String source}) {
+    _safe(() => _analytics.logEvent(
+      name: 'plans_screen_viewed',
+      parameters: {
+        'source': source,
+      },
+    ));
+  }
+
+  /// Logs upgrade_clicked event when user selects a plan to buy.
+  void logUpgradeClicked({required String planId, required String period}) {
+    _safe(() => _analytics.logEvent(
+      name: 'upgrade_clicked',
+      parameters: {
+        'plan_id': planId,
+        'period': period,
+      },
+    ));
+  }
+
+  /// Logs purchase_completed event using Firebase logPurchase (standard).
+  /// This event is automatically mapped to revenue conversions in Google Ads.
+  void logPurchaseCompleted({
+    required String planId,
+    required String period,
+    required double value,
+    String currency = 'BRL',
+  }) {
+    _safe(() => _analytics.logPurchase(
+      value: value,
+      currency: currency,
+      items: [
+        AnalyticsEventItem(
+          itemId: planId,
+          itemName: 'Subscription: $planId ($period)',
+          itemCategory: 'subscription',
+          price: value,
+          quantity: 1,
+        ),
+      ],
+      parameters: {
+        'plan_id': planId,
+        'period': period,
+      },
+    ));
+  }
+
+  /// Logs purchase_failed event.
+  void logPurchaseFailed({required String planId, required String reason}) {
+    _safe(() => _analytics.logEvent(
+      name: 'purchase_failed',
+      parameters: {
+        'plan_id': planId,
+        'reason': reason,
+      },
+    ));
+  }
+
+  /// Logs upgrade_modal_shown event when a feature gate blocks an action.
+  /// [trigger] can be: photo_limit_80, photo_limit_100, form_limit, collaborator_limit.
+  void logUpgradeModalShown({required String trigger}) {
+    _safe(() => _analytics.logEvent(
+      name: 'upgrade_modal_shown',
+      parameters: {
+        'trigger': trigger,
+      },
+    ));
+  }
 }
