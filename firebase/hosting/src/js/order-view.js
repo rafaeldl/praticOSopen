@@ -343,6 +343,7 @@
 
         // Render cards
         renderInfoCard(order, customer);
+        renderDevicesCard(order);
         renderPhotosCard(order);
         renderServicesCard(order);
         renderProductsCard(order);
@@ -411,15 +412,16 @@
             ? order.devices
             : (order.device ? [{ id: order.device.id || '_single', name: order.device.name, serial: order.device.serial }] : []);
         const map = {};
-        devices.forEach(d => { map[d.id] = d.name; });
-        return { map, isMulti: devices.length >= 2 };
+        devices.forEach(d => { map[d.id] = { name: d.name, serial: d.serial }; });
+        return { devices, map, isMulti: devices.length >= 2 };
     }
 
     // Render grouped items (services or products) by device
     function renderGroupedItems(items, deviceMap, renderFn) {
         const groups = {};
         items.forEach(item => {
-            const key = item.deviceId || '_general';
+            // Items with unknown/missing deviceId go to _general
+            const key = (item.deviceId && deviceMap.map[item.deviceId]) ? item.deviceId : '_general';
             if (!groups[key]) groups[key] = [];
             groups[key].push(item);
         });
@@ -427,17 +429,12 @@
         let html = '';
         // Render items by device order, then general at the end
         const deviceIds = Object.keys(deviceMap.map);
-        const orderedKeys = [...deviceIds.filter(k => groups[k]), ...(['_general' in groups ? ['_general'] : []])];
-
-        // Add any deviceId keys not in the map (safety)
-        Object.keys(groups).forEach(k => {
-            if (!orderedKeys.includes(k)) orderedKeys.push(k);
-        });
+        const orderedKeys = [...deviceIds.filter(k => groups[k]), ...('_general' in groups ? ['_general'] : [])];
 
         orderedKeys.forEach(key => {
             if (!groups[key]) return;
-            const label = key === '_general' ? text.general : (deviceMap.map[key] || text.general);
-            html += `<div class="device-group-header">${label}</div>`;
+            const label = key === '_general' ? text.general : deviceMap.map[key].name;
+            html += `<div class="device-group-header"><span class="device-group-name">${label}</span></div>`;
             html += groups[key].map(renderFn).join('');
         });
 
@@ -450,25 +447,20 @@
 
         const customerName = order.customer?.name || customer?.name || '-';
         const customerPhone = order.customer?.phone || customer?.phone || '';
-        const { map: deviceNameMap, isMulti } = buildDeviceMap(order);
-        const deviceNames = Object.values(deviceNameMap);
+        const { devices, map: deviceNameMap, isMulti } = buildDeviceMap(order);
 
-        // Build device display
+        // Build device display — single device shows inline; multi-device gets its own card
         let deviceHtml = '';
-        if (deviceNames.length === 1) {
+        if (devices.length === 1) {
+            const dev = devices[0];
+            const serialHtml = dev.serial ? `<span class="info-serial">${dev.serial}</span>` : '';
             deviceHtml = `
                     <div class="info-item">
                         <span class="info-label">${text.device}</span>
-                        <span class="info-value">${deviceNames[0]}</span>
-                    </div>`;
-        } else if (deviceNames.length >= 2) {
-            const extra = deviceNames.length - 1;
-            deviceHtml = `
-                    <div class="info-item">
-                        <span class="info-label">${text.devices}</span>
-                        <span class="info-value">${deviceNames[0]} <span class="device-more">+${extra}</span></span>
+                        <span class="info-value">${dev.name}${serialHtml ? ' ' + serialHtml : ''}</span>
                     </div>`;
         }
+        // Multi-device: no device row here — renderDevicesCard() handles it
 
         const card = document.createElement('div');
         card.className = 'order-card';
@@ -500,6 +492,45 @@
                     </div>
                     ` : ''}
                 </div>
+            </div>
+        `;
+        container.appendChild(card);
+    }
+
+    // Render devices card (multi-device only: 2+ devices)
+    function renderDevicesCard(order) {
+        const { devices, isMulti } = buildDeviceMap(order);
+        if (!isMulti) return;
+
+        const container = document.querySelector('.order-cards');
+        const card = document.createElement('div');
+        card.className = 'order-card';
+
+        const rowsHtml = devices.map((d, i) => {
+            const serialHtml = d.serial
+                ? `<div class="device-serial">${d.serial}</div>`
+                : '';
+            return `
+                <div class="device-row">
+                    <div class="device-index">${i + 1}</div>
+                    <div class="device-details">
+                        <div class="device-name">${d.name || '-'}</div>
+                        ${serialHtml}
+                    </div>
+                </div>`;
+        }).join('');
+
+        card.innerHTML = `
+            <div class="card-header">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+                <h3>${text.devices}</h3>
+            </div>
+            <div class="card-body">
+                <div class="devices-list">${rowsHtml}</div>
             </div>
         `;
         container.appendChild(card);

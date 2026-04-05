@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/models/form_definition.dart';
+import 'package:praticos/models/subscription.dart';
 import 'package:praticos/repositories/v2/form_template_repository_v2.dart';
 import 'package:praticos/repositories/segment/segment_form_template_repository.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'user_store.dart';
@@ -83,12 +86,29 @@ abstract class _FormTemplateStore with Store {
     globalTemplateList = segmentRepository.streamTemplates(segmentId!).asObservable();
   }
 
+  /// Cria um novo template.
+  ///
+  /// Verifica limite de formulários antes de criar. Se limite atingido,
+  /// lança [FeatureGateLimitException].
+  ///
+  /// [subscription] - Assinatura a usar para verificação. Se null, usa Global.subscription.
   @action
-  Future<void> saveTemplate(FormDefinition template) async {
+  Future<void> saveTemplate(FormDefinition template, {Subscription? subscription}) async {
     if (companyId == null) return;
+
+    // Verifica limite de formulários
+    final sub = subscription ?? Global.subscription;
+    final gateResult = FeatureGateService.canCreateFormTemplate(sub);
+    if (!gateResult.isAllowed) {
+      throw FeatureGateLimitException(gateResult);
+    }
+
     template.createdAt = DateTime.now();
     template.updatedAt = DateTime.now();
     await repository.createItem(companyId!, template);
+
+    // Atualiza contador de formulários
+    await _updateFormTemplateCounter();
   }
 
   @action
@@ -102,20 +122,54 @@ abstract class _FormTemplateStore with Store {
   Future<void> deleteTemplate(FormDefinition template) async {
     if (companyId == null) return;
     await repository.removeItem(companyId!, template.id);
+
+    // Atualiza contador de formulários
+    await _updateFormTemplateCounter();
   }
 
+  /// Ativa ou desativa um template.
+  ///
+  /// Ao ativar, verifica limite de formulários. Se limite atingido,
+  /// lança [FeatureGateLimitException].
+  ///
+  /// [subscription] - Assinatura a usar para verificação. Se null, usa Global.subscription.
   @action
-  Future<void> toggleTemplateStatus(FormDefinition template) async {
+  Future<void> toggleTemplateStatus(FormDefinition template, {Subscription? subscription}) async {
     if (companyId == null) return;
+
+    // Se estiver ativando, verifica limite
+    if (!template.isActive) {
+      final sub = subscription ?? Global.subscription;
+      final gateResult = FeatureGateService.canCreateFormTemplate(sub);
+      if (!gateResult.isAllowed) {
+        throw FeatureGateLimitException(gateResult);
+      }
+    }
+
     template.isActive = !template.isActive;
     template.updatedAt = DateTime.now();
     await repository.updateItem(companyId!, template);
+
+    // Atualiza contador de formulários
+    await _updateFormTemplateCounter();
   }
 
-  /// Importa um formulário global (do segmento) para a empresa
+  /// Importa um formulário global (do segmento) para a empresa.
+  ///
+  /// Verifica limite de formulários antes de importar. Se limite atingido,
+  /// lança [FeatureGateLimitException].
+  ///
+  /// [subscription] - Assinatura a usar para verificação. Se null, usa Global.subscription.
   @action
-  Future<void> importGlobalTemplate(FormDefinition globalTemplate) async {
+  Future<void> importGlobalTemplate(FormDefinition globalTemplate, {Subscription? subscription}) async {
     if (companyId == null) return;
+
+    // Verifica limite de formulários
+    final sub = subscription ?? Global.subscription;
+    final gateResult = FeatureGateService.canCreateFormTemplate(sub);
+    if (!gateResult.isAllowed) {
+      throw FeatureGateLimitException(gateResult);
+    }
 
     isImporting = true;
 
@@ -132,8 +186,49 @@ abstract class _FormTemplateStore with Store {
       );
 
       await repository.createItem(companyId!, importedTemplate);
+
+      // Atualiza contador de formulários
+      await _updateFormTemplateCounter();
     } finally {
       isImporting = false;
+    }
+  }
+
+  /// Atualiza o contador de formulários ativos no Firestore e local.
+  ///
+  /// Conta quantos templates ativos existem e atualiza:
+  /// 1. Firestore: company.subscription.usage.formTemplates
+  /// 2. Local: Global.subscription.usage.formTemplates
+  Future<void> _updateFormTemplateCounter() async {
+    if (companyId == null) return;
+
+    try {
+      // Conta templates ativos
+      final snapshot = await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .collection('formTemplates')
+          .where('isActive', isEqualTo: true)
+          .count()
+          .get();
+
+      final activeCount = snapshot.count ?? 0;
+
+      // Atualiza no Firestore
+      await FirebaseFirestore.instance
+          .collection('companies')
+          .doc(companyId)
+          .update({
+        'subscription.usage.formTemplates': activeCount,
+      });
+
+      // Atualiza local
+      if (Global.subscription != null) {
+        Global.subscription!.usage.formTemplates = activeCount;
+      }
+    } catch (e) {
+      // Falha na atualização do contador não deve bloquear a operação
+      // O contador será recalculado na próxima vez
     }
   }
 }

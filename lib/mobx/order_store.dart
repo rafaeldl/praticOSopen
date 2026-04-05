@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/payment_transaction.dart';
@@ -12,6 +14,7 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
 import 'package:praticos/repositories/v2/order_repository_v2.dart';
+import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:mobx/mobx.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
@@ -19,6 +22,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:praticos/global.dart';
 import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/mobx/reminder_store.dart';
+import 'package:praticos/mobx/subscription_store.dart';
 part 'order_store.g.dart';
 
 class OrderStore = _OrderStore with _$OrderStore;
@@ -130,7 +134,23 @@ abstract class _OrderStore with Store {
   ObservableList<OrderPhoto> photos = ObservableList();
 
   @observable
+  ObservableList<OrderDocument> documents = ObservableList();
+
+  @observable
   bool isUploadingPhoto = false;
+
+  @observable
+  bool isUploadingDocument = false;
+
+  /// Resultado da verificacao de limite de fotos
+  @observable
+  FeatureGateResult? photoLimitResult;
+
+  @observable
+  bool hasContract = false;
+
+  @observable
+  ObservableStream<List<Order?>>? childOrders;
 
   @observable
   double? paidAmount;
@@ -273,6 +293,8 @@ abstract class _OrderStore with Store {
       transactions = ObservableList<PaymentTransaction>();
       order!.photos = [];
       photos = ObservableList<OrderPhoto>();
+      order!.documents = [];
+      documents = ObservableList<OrderDocument>();
       order!.devices = [];
       devices = ObservableList<DeviceAggr>();
       order!.createdAt = DateTime.now();
@@ -330,6 +352,7 @@ abstract class _OrderStore with Store {
     services = order.services?.asObservable() ?? ObservableList<OrderService>();
     products = order.products?.asObservable() ?? ObservableList<OrderProduct>();
     photos = order.photos?.asObservable() ?? ObservableList<OrderPhoto>();
+    documents = order.documents?.asObservable() ?? ObservableList<OrderDocument>();
     transactions = order.transactions?.asObservable() ?? ObservableList<PaymentTransaction>();
     paidAmount = order.paidAmount ?? 0.0;
     dueDate = order.dueDate != null
@@ -342,8 +365,20 @@ abstract class _OrderStore with Store {
     address = order.address;
     latitude = order.latitude;
     longitude = order.longitude;
+    hasContract = order.contract != null;
     updateTotal();
     updatePayment();
+    loadChildOrders();
+  }
+
+  @action
+  void loadChildOrders() {
+    if (companyId == null || order?.id == null || !hasContract) {
+      childOrders = null;
+      return;
+    }
+    final tenantRepo = TenantOrderRepository();
+    childOrders = tenantRepo.streamChildOrders(companyId!, order!.id!).asObservable();
   }
 
   @action
@@ -378,6 +413,7 @@ abstract class _OrderStore with Store {
     devices = order!.devices!.asObservable();
     order!.device = aggr;
     device = aggr;
+    order!.syncDeviceIds();
     createItem();
   }
 
@@ -393,6 +429,7 @@ abstract class _OrderStore with Store {
     // Sync backward compat
     order!.device = order!.devices!.first;
     device = order!.device;
+    order!.syncDeviceIds();
 
     createItem();
   }
@@ -406,6 +443,7 @@ abstract class _OrderStore with Store {
     order!.device =
         order!.devices?.isNotEmpty == true ? order!.devices!.first : null;
     device = order!.device;
+    order!.syncDeviceIds();
 
     // Orphan cleanup: items linked to removed device become global
     for (final s in order!.services ?? <OrderService>[]) {
@@ -430,6 +468,7 @@ abstract class _OrderStore with Store {
     order!.device =
         order!.devices?.isNotEmpty == true ? order!.devices!.first : null;
     device = order!.device;
+    order!.syncDeviceIds();
 
     // Remove items linked to this device
     order!.services?.removeWhere((s) => s.deviceId == deviceId);
@@ -474,6 +513,187 @@ abstract class _OrderStore with Store {
     order!.scheduledDate = null;
     scheduledDate = null;
     createItem();
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Contract methods
+  // ═══════════════════════════════════════════════════════════════════
+
+  @action
+  void toggleContract(bool value) {
+    if (order == null) return;
+    hasContract = value;
+    if (value) {
+      order!.contract ??= OrderContract()
+        ..frequency = 'monthly'
+        ..interval = 1
+        ..autoGenerate = true
+        ..active = true
+        ..reminderDaysBefore = 3
+        ..startDate = DateTime.now()
+        ..nextDueDate = DateTime(
+          DateTime.now().year,
+          DateTime.now().month + 1,
+          DateTime.now().day,
+        )
+        ..generatedCount = 0;
+      order!.isContract = true;
+    } else {
+      order!.contract = null;
+      order!.isContract = null;
+    }
+    createItem();
+  }
+
+  @action
+  void setContractFrequency(String frequency) {
+    if (order?.contract == null) return;
+    order!.contract!.frequency = frequency;
+    // Recompute nextDueDate based on new frequency
+    order!.contract!.nextDueDate = order!.contract!.computeNextDueDate()
+        ?? order!.contract!.startDate;
+    createItem();
+  }
+
+  @action
+  void setContractInterval(int interval) {
+    if (order?.contract == null) return;
+    order!.contract!.interval = interval;
+    order!.contract!.nextDueDate = order!.contract!.computeNextDueDate()
+        ?? order!.contract!.startDate;
+    createItem();
+  }
+
+  @action
+  void setContractStartDate(DateTime date) {
+    if (order?.contract == null) return;
+    order!.contract!.startDate = date;
+    order!.contract!.nextDueDate = order!.contract!.computeNextDueDate() ?? date;
+    createItem();
+  }
+
+  @action
+  void setContractEndDate(DateTime? date) {
+    if (order?.contract == null) return;
+    order!.contract!.endDate = date;
+    createItem();
+  }
+
+  @action
+  void setContractAutoGenerate(bool value) {
+    if (order?.contract == null) return;
+    order!.contract!.autoGenerate = value;
+    createItem();
+  }
+
+  @action
+  void setContractReminderDays(int days) {
+    if (order?.contract == null) return;
+    order!.contract!.reminderDaysBefore = days;
+    createItem();
+  }
+
+  /// Generate an Order from a contract template
+  Future<Order?> generateOrderFromContract(Order template) async {
+    if (companyId == null || template.id == null) return null;
+
+    final newOrder = Order()
+      ..company = Global.companyAggr
+      ..status = 'quote'
+      ..payment = 'unpaid'
+      ..createdAt = DateTime.now()
+      ..createdBy = template.createdBy
+      ..updatedAt = DateTime.now()
+      ..updatedBy = template.createdBy
+      ..customer = template.customer
+      ..devices = template.devices != null ? List.from(template.devices!) : null
+      ..device = template.device
+      ..services = template.services?.map((s) => OrderService()
+        ..service = s.service
+        ..description = s.description
+        ..value = s.value
+      ).toList()
+      ..products = template.products?.map((p) => OrderProduct()
+        ..product = p.product
+        ..description = p.description
+        ..value = p.value
+        ..quantity = p.quantity
+        ..total = p.total
+      ).toList()
+      ..assignedTo = template.assignedTo
+      ..contract = (OrderContract()
+        ..parentOrderId = template.id
+        ..parentOrderNumber = template.number);
+
+    newOrder.syncDeviceIds();
+
+    // Calculate total from services + products
+    double total = 0;
+    for (final s in newOrder.services ?? <OrderService>[]) {
+      total += s.value ?? 0;
+    }
+    for (final p in newOrder.products ?? <OrderProduct>[]) {
+      total += p.total ?? (p.value ?? 0) * (p.quantity ?? 1);
+    }
+    newOrder.total = total;
+
+    final tenantRepo = TenantOrderRepository();
+    await tenantRepo.createItem(companyId!, newOrder);
+
+    // Update template contract tracking
+    template.contract!.lastGeneratedDate = DateTime.now();
+    template.contract!.generatedCount =
+        (template.contract!.generatedCount ?? 0) + 1;
+    template.contract!.nextDueDate =
+        template.contract!.computeNextDueDate();
+
+    // Deactivate if expired
+    if (template.contract!.isExpired) {
+      template.contract!.active = false;
+    }
+
+    await tenantRepo.updateItem(companyId!, template);
+
+    return newOrder;
+  }
+
+  /// Check and auto-generate orders for all due contracts (called on app startup)
+  Future<int> checkAndGenerateDueOrders() async {
+    if (companyId == null) {
+      print('[Contracts] companyId is null, skipping');
+      return 0;
+    }
+
+    try {
+      final tenantRepo = TenantOrderRepository();
+      final orders = await tenantRepo.streamContractOrders(companyId!).first;
+      print('[Contracts] Found ${orders.length} contract orders');
+
+      for (final o in orders.whereType<Order>()) {
+        print('[Contracts] Order #${o.number}: isDue=${o.contract?.isDue}, autoGenerate=${o.contract?.autoGenerate}, nextDueDate=${o.contract?.nextDueDate}, active=${o.contract?.active}');
+      }
+
+      final dueOrders = orders
+          .whereType<Order>()
+          .where((o) =>
+              o.contract?.isDue == true &&
+              o.contract?.autoGenerate == true)
+          .toList();
+
+      print('[Contracts] ${dueOrders.length} due orders to generate');
+
+      int generated = 0;
+      for (final template in dueOrders) {
+        await generateOrderFromContract(template);
+        generated++;
+      }
+      print('[Contracts] Generated $generated orders');
+      return generated;
+    } catch (e, stack) {
+      print('[Contracts] Error: $e');
+      print('[Contracts] Stack: $stack');
+      return 0;
+    }
   }
 
   /// Schedule a local reminder for the current order
@@ -696,10 +916,42 @@ abstract class _OrderStore with Store {
   }
 
   /// Adiciona uma ou mais fotos da galeria
+  /// Verifica limite de fotos do plano antes de permitir upload.
+  /// Retorna false se limite atingido (photoLimitResult contera detalhes).
   @action
   Future<bool> addPhotoFromGallery() async {
+    // Verificar limite de fotos do plano usando SubscriptionStore
+    final subscriptionStore = SubscriptionStoreHolder.instance;
+    if (subscriptionStore != null) {
+      // Criar Subscription a partir do currentPlan do store
+      // Por enquanto usamos null para aplicar limites default (Free)
+      // TODO: Quando o Firebase sync estiver implementado, usar company.subscription
+      photoLimitResult = FeatureGateService.canAddPhotoWithSubscription(null);
+      if (!photoLimitResult!.isAllowed) {
+        return false;
+      }
+    }
+
     final List<File> files = await photoService.pickMultipleImagesFromGallery();
     if (files.isEmpty) return false;
+
+    // Verificar se quantidade selecionada ultrapassa limite
+    if (photoLimitResult != null && !photoLimitResult!.isUnlimited) {
+      final remaining = photoLimitResult!.limit - photoLimitResult!.currentUsage;
+      if (files.length > remaining) {
+        // Atualizar resultado com mensagem especifica
+        photoLimitResult = FeatureGateResult(
+          isAllowed: false,
+          currentUsage: photoLimitResult!.currentUsage,
+          limit: photoLimitResult!.limit,
+          featureType: photoLimitResult!.featureType,
+          currentPlan: photoLimitResult!.currentPlan,
+          message: 'Voce selecionou ${files.length} fotos, mas so pode adicionar mais $remaining este mes.',
+          suggestedPlan: photoLimitResult!.suggestedPlan,
+        );
+        return false;
+      }
+    }
 
     if (files.length == 1) {
       return await _uploadPhoto(files.first, source: 'gallery');
@@ -709,8 +961,21 @@ abstract class _OrderStore with Store {
   }
 
   /// Adiciona uma foto da câmera
+  /// Verifica limite de fotos do plano antes de permitir upload.
+  /// Retorna false se limite atingido (photoLimitResult contera detalhes).
   @action
   Future<bool> addPhotoFromCamera() async {
+    // Verificar limite de fotos do plano usando SubscriptionStore
+    final subscriptionStore = SubscriptionStoreHolder.instance;
+    if (subscriptionStore != null) {
+      // Por enquanto usamos null para aplicar limites default (Free)
+      // TODO: Quando o Firebase sync estiver implementado, usar company.subscription
+      photoLimitResult = FeatureGateService.canAddPhotoWithSubscription(null);
+      if (!photoLimitResult!.isAllowed) {
+        return false;
+      }
+    }
+
     final File? file = await photoService.takePhoto();
     if (file != null) {
       return await _uploadPhoto(file, source: 'camera');
@@ -846,6 +1111,195 @@ abstract class _OrderStore with Store {
     createItem();
   }
 
+  // ============================================================
+  // DOCUMENT MANAGEMENT
+  // ============================================================
+
+  /// Adds a document to the order
+  @action
+  Future<bool> addDocument(
+    File file,
+    OrderDocumentType type,
+    String contentType,
+    String fileName, {
+    String? description,
+    int? fileSize,
+  }) async {
+    if (order == null || companyId == null) return false;
+
+    // Ensure order is saved first
+    if (order!.id == null) {
+      await repository.createItem(companyId!, order);
+    }
+
+    if (order!.id == null || order!.company?.id == null) return false;
+
+    isUploadingDocument = true;
+
+    try {
+      final OrderDocument? doc = await photoService.uploadOrderDocument(
+        file: file,
+        companyId: order!.company!.id!,
+        orderId: order!.id!,
+        contentType: contentType,
+        fileName: fileName,
+        fileSize: fileSize,
+      );
+
+      isUploadingDocument = false;
+
+      if (doc != null) {
+        doc.type = type;
+        doc.description = description;
+
+        order!.documents ??= [];
+        order!.documents!.add(doc);
+        documents.add(doc);
+        createItem();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      isUploadingDocument = false;
+      print('Erro no upload do documento: $e');
+      return false;
+    }
+  }
+
+  /// Deletes a document by index
+  @action
+  Future<bool> deleteDocument(int index) async {
+    if (order == null ||
+        order!.documents == null ||
+        index >= order!.documents!.length) {
+      return false;
+    }
+
+    final doc = order!.documents![index];
+
+    if (doc.storagePath != null) {
+      final deleted = await photoService.deletePhoto(doc.storagePath!);
+      if (!deleted) return false;
+    }
+
+    // If this document is a receipt linked to a transaction, clear the reference
+    if (doc.linkedTransactionId != null) {
+      final txn = order!.transactions?.firstWhere(
+        (t) => t.id == doc.linkedTransactionId,
+        orElse: () => PaymentTransaction(type: PaymentTransactionType.payment, amount: 0),
+      );
+      if (txn != null && txn.amount > 0) {
+        txn.receiptDocumentId = null;
+        final txnIndex = transactions.indexWhere((t) => t.id == doc.linkedTransactionId);
+        if (txnIndex >= 0) {
+          transactions[txnIndex] = txn;
+        }
+      }
+    }
+
+    order!.documents!.removeAt(index);
+    documents.removeAt(index);
+    createItem();
+    return true;
+  }
+
+  // ============================================================
+  // RECEIPT MANAGEMENT (PAYMENT TRANSACTIONS)
+  // ============================================================
+
+  /// Attaches a receipt to a payment transaction as an OrderDocument
+  @action
+  Future<bool> attachReceiptToTransaction(int index, File file,
+      String contentType, String fileName) async {
+    if (order == null ||
+        companyId == null ||
+        order!.id == null ||
+        order!.transactions == null ||
+        index >= order!.transactions!.length) {
+      return false;
+    }
+
+    // Ensure order is saved first
+    if (order!.id == null) {
+      await repository.createItem(companyId!, order);
+    }
+    if (order!.id == null || order!.company?.id == null) return false;
+
+    final transaction = order!.transactions![index];
+
+    isUploadingDocument = true;
+
+    try {
+      final doc = await photoService.uploadOrderDocument(
+        file: file,
+        companyId: order!.company!.id!,
+        orderId: order!.id!,
+        contentType: contentType,
+        fileName: fileName,
+      );
+
+      isUploadingDocument = false;
+
+      if (doc != null) {
+        doc.type = OrderDocumentType.receipt;
+        doc.linkedTransactionId = transaction.id;
+
+        // Add to order documents
+        order!.documents ??= [];
+        order!.documents!.add(doc);
+        documents.add(doc);
+
+        // Link receipt to transaction
+        transaction.receiptDocumentId = doc.id;
+
+        // Update observable list to trigger UI refresh
+        transactions[index] = transaction;
+        order!.transactions![index] = transaction;
+        createItem();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      isUploadingDocument = false;
+      print('Erro no upload do comprovante: $e');
+      return false;
+    }
+  }
+
+  /// Removes a receipt from a payment transaction
+  @action
+  Future<bool> removeReceiptFromTransaction(int index) async {
+    if (order == null ||
+        order!.transactions == null ||
+        index >= order!.transactions!.length) {
+      return false;
+    }
+
+    final transaction = order!.transactions![index];
+    final docId = transaction.receiptDocumentId;
+    if (docId == null) return false;
+
+    // Find and remove the linked OrderDocument
+    final docIndex = order!.documents?.indexWhere((d) => d.id == docId) ?? -1;
+    if (docIndex >= 0) {
+      final doc = order!.documents![docIndex];
+      if (doc.storagePath != null) {
+        await photoService.deletePhoto(doc.storagePath!);
+      }
+      order!.documents!.removeAt(docIndex);
+      documents.removeAt(docIndex);
+    }
+
+    // Clear reference on transaction
+    transaction.receiptDocumentId = null;
+
+    // Update observable list to trigger UI refresh
+    transactions[index] = transaction;
+    order!.transactions![index] = transaction;
+    createItem();
+    return true;
+  }
+
   @action
   setDiscount(double value) {
     order!.discount = value;
@@ -859,11 +1313,13 @@ abstract class _OrderStore with Store {
   void addPayment(double amount, {String? description}) {
     if (order == null || amount <= 0) return;
 
+    final txnId = DateTime.now().millisecondsSinceEpoch.toString();
     final transaction = PaymentTransaction.payment(
       amount: amount,
       description: description,
       createdBy: Global.userAggr,
     );
+    transaction.id = txnId;
 
     // Inicializa listas se necessário
     order!.transactions ??= [];
@@ -952,7 +1408,7 @@ abstract class _OrderStore with Store {
 
   /// Remove uma transação pelo índice
   @action
-  void removeTransaction(int index) {
+  Future<void> removeTransaction(int index) async {
     if (order == null ||
         order!.transactions == null ||
         index >= order!.transactions!.length) {
@@ -960,6 +1416,21 @@ abstract class _OrderStore with Store {
     }
 
     final transaction = order!.transactions![index];
+
+    // Delete associated receipt document if exists
+    if (transaction.receiptDocumentId != null) {
+      final docIndex = order!.documents?.indexWhere(
+        (d) => d.id == transaction.receiptDocumentId,
+      ) ?? -1;
+      if (docIndex >= 0) {
+        final doc = order!.documents![docIndex];
+        if (doc.storagePath != null) {
+          await photoService.deletePhoto(doc.storagePath!);
+        }
+        order!.documents!.removeAt(docIndex);
+        documents.removeAt(docIndex);
+      }
+    }
 
     // Remove da lista
     order!.transactions!.removeAt(index);
@@ -976,6 +1447,48 @@ abstract class _OrderStore with Store {
       discount = order!.discount;
       updateTotal();
     }
+
+    _updatePaymentStatus();
+    createItem();
+  }
+
+  /// Resets all payments: removes all transactions and their receipt documents
+  @action
+  Future<void> resetAllPayments() async {
+    if (order == null) return;
+
+    // Delete receipt documents from storage and order.documents
+    final txns = order!.transactions ?? [];
+    for (final txn in txns) {
+      if (txn.receiptDocumentId != null) {
+        final docIndex = order!.documents?.indexWhere(
+          (d) => d.id == txn.receiptDocumentId,
+        ) ?? -1;
+        if (docIndex >= 0) {
+          final doc = order!.documents![docIndex];
+          if (doc.storagePath != null) {
+            await photoService.deletePhoto(doc.storagePath!);
+          }
+          order!.documents!.removeAt(docIndex);
+        }
+      }
+    }
+
+    // Sync observable documents list
+    documents.clear();
+    documents.addAll(order!.documents ?? []);
+
+    // Clear transactions
+    order!.transactions?.clear();
+    transactions.clear();
+
+    // Reset payment values
+    order!.payment = 'unpaid';
+    order!.paidAmount = 0;
+    order!.discount = 0;
+    paidAmount = 0;
+    discount = 0;
+    updateTotal();
 
     _updatePaymentStatus();
     createItem();
@@ -1001,6 +1514,7 @@ abstract class _OrderStore with Store {
 
   createItem() {
     if (order == null || companyId == null) return;
+    order!.syncDeviceIds();
 
     if (order!.id == null) {
       // Para nova OS, verifica duplicação pelo número

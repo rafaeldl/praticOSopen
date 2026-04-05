@@ -447,6 +447,24 @@ mixin _$OrderStore on _OrderStore, Store {
     });
   }
 
+  late final _$documentsAtom = Atom(
+    name: '_OrderStore.documents',
+    context: context,
+  );
+
+  @override
+  ObservableList<OrderDocument> get documents {
+    _$documentsAtom.reportRead();
+    return super.documents;
+  }
+
+  @override
+  set documents(ObservableList<OrderDocument> value) {
+    _$documentsAtom.reportWrite(value, super.documents, () {
+      super.documents = value;
+    });
+  }
+
   late final _$isUploadingPhotoAtom = Atom(
     name: '_OrderStore.isUploadingPhoto',
     context: context,
@@ -462,6 +480,78 @@ mixin _$OrderStore on _OrderStore, Store {
   set isUploadingPhoto(bool value) {
     _$isUploadingPhotoAtom.reportWrite(value, super.isUploadingPhoto, () {
       super.isUploadingPhoto = value;
+    });
+  }
+
+  late final _$isUploadingDocumentAtom = Atom(
+    name: '_OrderStore.isUploadingDocument',
+    context: context,
+  );
+
+  @override
+  bool get isUploadingDocument {
+    _$isUploadingDocumentAtom.reportRead();
+    return super.isUploadingDocument;
+  }
+
+  @override
+  set isUploadingDocument(bool value) {
+    _$isUploadingDocumentAtom.reportWrite(value, super.isUploadingDocument, () {
+      super.isUploadingDocument = value;
+    });
+  }
+
+  late final _$photoLimitResultAtom = Atom(
+    name: '_OrderStore.photoLimitResult',
+    context: context,
+  );
+
+  @override
+  FeatureGateResult? get photoLimitResult {
+    _$photoLimitResultAtom.reportRead();
+    return super.photoLimitResult;
+  }
+
+  @override
+  set photoLimitResult(FeatureGateResult? value) {
+    _$photoLimitResultAtom.reportWrite(value, super.photoLimitResult, () {
+      super.photoLimitResult = value;
+    });
+  }
+
+  late final _$hasContractAtom = Atom(
+    name: '_OrderStore.hasContract',
+    context: context,
+  );
+
+  @override
+  bool get hasContract {
+    _$hasContractAtom.reportRead();
+    return super.hasContract;
+  }
+
+  @override
+  set hasContract(bool value) {
+    _$hasContractAtom.reportWrite(value, super.hasContract, () {
+      super.hasContract = value;
+    });
+  }
+
+  late final _$childOrdersAtom = Atom(
+    name: '_OrderStore.childOrders',
+    context: context,
+  );
+
+  @override
+  ObservableStream<List<Order?>>? get childOrders {
+    _$childOrdersAtom.reportRead();
+    return super.childOrders;
+  }
+
+  @override
+  set childOrders(ObservableStream<List<Order?>>? value) {
+    _$childOrdersAtom.reportWrite(value, super.childOrders, () {
+      super.childOrders = value;
     });
   }
 
@@ -932,6 +1022,94 @@ mixin _$OrderStore on _OrderStore, Store {
     return _$deletePhotoAsyncAction.run(() => super.deletePhoto(index));
   }
 
+  late final _$addDocumentAsyncAction = AsyncAction(
+    '_OrderStore.addDocument',
+    context: context,
+  );
+
+  @override
+  Future<bool> addDocument(
+    File file,
+    OrderDocumentType type,
+    String contentType,
+    String fileName, {
+    String? description,
+    int? fileSize,
+  }) {
+    return _$addDocumentAsyncAction.run(
+      () => super.addDocument(
+        file,
+        type,
+        contentType,
+        fileName,
+        description: description,
+        fileSize: fileSize,
+      ),
+    );
+  }
+
+  late final _$deleteDocumentAsyncAction = AsyncAction(
+    '_OrderStore.deleteDocument',
+    context: context,
+  );
+
+  @override
+  Future<bool> deleteDocument(int index) {
+    return _$deleteDocumentAsyncAction.run(() => super.deleteDocument(index));
+  }
+
+  late final _$attachReceiptToTransactionAsyncAction = AsyncAction(
+    '_OrderStore.attachReceiptToTransaction',
+    context: context,
+  );
+
+  @override
+  Future<bool> attachReceiptToTransaction(
+    int index,
+    File file,
+    String contentType,
+    String fileName,
+  ) {
+    return _$attachReceiptToTransactionAsyncAction.run(
+      () =>
+          super.attachReceiptToTransaction(index, file, contentType, fileName),
+    );
+  }
+
+  late final _$removeReceiptFromTransactionAsyncAction = AsyncAction(
+    '_OrderStore.removeReceiptFromTransaction',
+    context: context,
+  );
+
+  @override
+  Future<bool> removeReceiptFromTransaction(int index) {
+    return _$removeReceiptFromTransactionAsyncAction.run(
+      () => super.removeReceiptFromTransaction(index),
+    );
+  }
+
+  late final _$removeTransactionAsyncAction = AsyncAction(
+    '_OrderStore.removeTransaction',
+    context: context,
+  );
+
+  @override
+  Future<void> removeTransaction(int index) {
+    return _$removeTransactionAsyncAction.run(
+      () => super.removeTransaction(index),
+    );
+  }
+
+  late final _$resetAllPaymentsAsyncAction = AsyncAction(
+    '_OrderStore.resetAllPayments',
+    context: context,
+  );
+
+  @override
+  Future<void> resetAllPayments() {
+    return _$resetAllPaymentsAsyncAction.run(() => super.resetAllPayments());
+  }
+
   late final _$loadOrdersForDashboardCustomRangeAsyncAction = AsyncAction(
     '_OrderStore.loadOrdersForDashboardCustomRange',
     context: context,
@@ -1004,6 +1182,18 @@ mixin _$OrderStore on _OrderStore, Store {
     );
     try {
       return super.setOrder(order);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void loadChildOrders() {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.loadChildOrders',
+    );
+    try {
+      return super.loadChildOrders();
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }
@@ -1100,6 +1290,90 @@ mixin _$OrderStore on _OrderStore, Store {
     );
     try {
       return super.clearScheduledDate();
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void toggleContract(bool value) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.toggleContract',
+    );
+    try {
+      return super.toggleContract(value);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractFrequency(String frequency) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractFrequency',
+    );
+    try {
+      return super.setContractFrequency(frequency);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractInterval(int interval) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractInterval',
+    );
+    try {
+      return super.setContractInterval(interval);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractStartDate(DateTime date) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractStartDate',
+    );
+    try {
+      return super.setContractStartDate(date);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractEndDate(DateTime? date) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractEndDate',
+    );
+    try {
+      return super.setContractEndDate(date);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractAutoGenerate(bool value) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractAutoGenerate',
+    );
+    try {
+      return super.setContractAutoGenerate(value);
+    } finally {
+      _$_OrderStoreActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void setContractReminderDays(int days) {
+    final _$actionInfo = _$_OrderStoreActionController.startAction(
+      name: '_OrderStore.setContractReminderDays',
+    );
+    try {
+      return super.setContractReminderDays(days);
     } finally {
       _$_OrderStoreActionController.endAction(_$actionInfo);
     }
@@ -1250,18 +1524,6 @@ mixin _$OrderStore on _OrderStore, Store {
   }
 
   @override
-  void removeTransaction(int index) {
-    final _$actionInfo = _$_OrderStoreActionController.startAction(
-      name: '_OrderStore.removeTransaction',
-    );
-    try {
-      return super.removeTransaction(index);
-    } finally {
-      _$_OrderStoreActionController.endAction(_$actionInfo);
-    }
-  }
-
-  @override
   dynamic setCustomerFilter(Customer? customerFilter) {
     final _$actionInfo = _$_OrderStoreActionController.startAction(
       name: '_OrderStore.setCustomerFilter',
@@ -1392,7 +1654,12 @@ customerFilter: ${customerFilter},
 services: ${services},
 products: ${products},
 photos: ${photos},
+documents: ${documents},
 isUploadingPhoto: ${isUploadingPhoto},
+isUploadingDocument: ${isUploadingDocument},
+photoLimitResult: ${photoLimitResult},
+hasContract: ${hasContract},
+childOrders: ${childOrders},
 paidAmount: ${paidAmount},
 transactions: ${transactions},
 totalPaidAmount: ${totalPaidAmount},

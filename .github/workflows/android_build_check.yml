@@ -5,8 +5,15 @@ on:
     branches: [ master ]
     paths:
       - 'android/**'
+      - 'lib/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or commit SHA to run against'
+        required: false
+        default: 'master'
 
 # Cancel previous runs for the same PR
 concurrency:
@@ -21,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -29,7 +36,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.0'
+          flutter-version: '3.38.5'
           channel: stable
           cache: true
 

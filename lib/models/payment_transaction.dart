@@ -34,6 +34,9 @@ class PaymentTransaction {
   /// Usuário que registrou a transação
   UserAggr? createdBy;
 
+  /// Reference to the OrderDocument that stores the receipt
+  String? receiptDocumentId;
+
   PaymentTransaction({
     this.id,
     required this.type,
@@ -41,7 +44,11 @@ class PaymentTransaction {
     this.description,
     DateTime? createdAt,
     this.createdBy,
+    this.receiptDocumentId,
   }) : createdAt = createdAt ?? DateTime.now();
+
+  /// Whether this transaction has a receipt attached
+  bool get hasReceipt => receiptDocumentId != null;
 
   factory PaymentTransaction.fromJson(Map<String, dynamic> json) =>
       _$PaymentTransactionFromJson(json);

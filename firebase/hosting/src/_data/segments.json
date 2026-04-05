@@ -3,6 +3,7 @@
     "title": "Segmentos",
     "links": [
       { "href": "segmentos/assistencia-celular.html", "label": "Assistência de Celular" },
+      { "href": "segmentos/bicicletaria.html", "label": "Bicicletaria" },
       { "href": "segmentos/automacao.html", "label": "Automação Residencial" },
       { "href": "segmentos/dedetizacao.html", "label": "Dedetização" },
       { "href": "segmentos/eletrica.html", "label": "Elétrica" },
@@ -12,7 +13,10 @@
       { "href": "segmentos/energia-solar.html", "label": "Energia Solar" },
       { "href": "segmentos/informatica.html", "label": "Informática" },
       { "href": "segmentos/limpeza.html", "label": "Limpeza" },
+      { "href": "segmentos/manutencao-ativos.html", "label": "Manutenção de Ativos" },
+      { "href": "segmentos/manutencao-predial.html", "label": "Manutenção Predial" },
       { "href": "segmentos/moveis.html", "label": "Móveis" },
+      { "href": "segmentos/obras-publicas.html", "label": "Obras Públicas / Prefeituras" },
       { "href": "segmentos/automotivo.html", "label": "Oficina Mecânica" },
       { "href": "segmentos/refrigeracao.html", "label": "Refrigeração" },
       { "href": "segmentos/seguranca-cftv.html", "label": "Segurança CFTV" }
@@ -29,10 +33,14 @@
       { "href": "segmentos/eletronica-en.html", "label": "Electronics Repair" },
       { "href": "segmentos/elevadores-en.html", "label": "Elevator Maintenance" },
       { "href": "segmentos/energia-solar-en.html", "label": "Solar Installer" },
+      { "href": "segmentos/manutencao-ativos-en.html", "label": "Asset Maintenance" },
+      { "href": "segmentos/manutencao-predial-en.html", "label": "Building Maintenance" },
       { "href": "segmentos/moveis-en.html", "label": "Furniture Assembly" },
       { "href": "segmentos/informatica-en.html", "label": "IT Services" },
       { "href": "segmentos/limpeza-en.html", "label": "Cleaning Company" },
+      { "href": "segmentos/obras-publicas-en.html", "label": "Public Works / Municipalities" },
       { "href": "segmentos/automotivo-en.html", "label": "Auto Repair Shop" },
+      { "href": "segmentos/bicicletaria-en.html", "label": "Bike Shop" },
       { "href": "segmentos/refrigeracao-en.html", "label": "HVAC Technician" },
       { "href": "segmentos/seguranca-cftv-en.html", "label": "CCTV & Security" }
     ]
@@ -41,6 +49,7 @@
     "title": "Segmentos",
     "links": [
       { "href": "segmentos/assistencia-celular-es.html", "label": "Asistencia de Celular" },
+      { "href": "segmentos/bicicletaria-es.html", "label": "Bicicletería" },
       { "href": "segmentos/automacao-es.html", "label": "Automatización Residencial" },
       { "href": "segmentos/dedetizacao-es.html", "label": "Control de Plagas" },
       { "href": "segmentos/eletrica-es.html", "label": "Electricista" },
@@ -50,7 +59,10 @@
       { "href": "segmentos/energia-solar-es.html", "label": "Energía Solar" },
       { "href": "segmentos/informatica-es.html", "label": "Informática" },
       { "href": "segmentos/limpeza-es.html", "label": "Limpieza" },
+      { "href": "segmentos/manutencao-ativos-es.html", "label": "Mantenimiento de Activos" },
+      { "href": "segmentos/manutencao-predial-es.html", "label": "Mantenimiento de Edificios" },
       { "href": "segmentos/moveis-es.html", "label": "Muebles" },
+      { "href": "segmentos/obras-publicas-es.html", "label": "Obras Públicas / Municipios" },
       { "href": "segmentos/automotivo-es.html", "label": "Taller Mecánico" },
       { "href": "segmentos/refrigeracao-es.html", "label": "Refrigeración" },
       { "href": "segmentos/seguranca-cftv-es.html", "label": "CFTV y Seguridad" }

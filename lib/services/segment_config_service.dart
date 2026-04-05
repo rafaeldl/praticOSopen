@@ -25,6 +25,18 @@ class SegmentConfigService {
   final Map<String, String> _labelCache = {};
   final List<CustomField> _customFields = [];
 
+  // Segment-level default for fieldService
+  bool _segmentFieldService = true;
+
+  // Segment-level default terms of service (i18n)
+  String? _defaultTermsOfService;
+
+  // Resolved company config (set once at startup, read directly in runtime)
+  bool _fieldService = true;
+  bool _useScheduling = true;
+  bool _useDeviceManagement = false;
+  bool _useContracts = false;
+
   // Mapeamento de chaves técnicas de status para label keys
   static const Map<String, String> _statusKeyMapping = {
     'quote': 'status.quote',
@@ -129,6 +141,14 @@ class SegmentConfigService {
       }
 
       final data = doc.data()!;
+
+      // Read segment-level fieldService default
+      _segmentFieldService = data['fieldService'] as bool? ?? true;
+
+      // Read segment-level default terms of service (i18n)
+      final termsI18n = data['defaultTermsOfService'] as Map<String, dynamic>?;
+      _defaultTermsOfService = termsI18n?[_locale] ?? termsI18n?['pt-BR'];
+
       final customFieldsJson = data['customFields'] as List? ?? [];
 
       // Parse dos customFields
@@ -192,6 +212,8 @@ class SegmentConfigService {
         return _l10n!.phone;
 
       // Campos de device
+      case 'device.category':
+        return _l10n!.deviceCategory;
       case 'device.brand':
         return _l10n!.brand;
       case 'device.model':
@@ -481,11 +503,80 @@ class SegmentConfigService {
     return grouped;
   }
 
+  /// Obtém campos de formulário agrupados por seção localizada
+  ///
+  /// Filtra campos 'config' e 'label', agrupa por seção traduzida,
+  /// e ordena por [order] dentro de cada seção.
+  ///
+  /// [exclude] permite excluir keys de campos já renderizados pelo form
+  /// (campos hardcoded como device.serial, device.brand, etc).
+  /// O campo continua acessível via getField()/getMasks()/label() para
+  /// configurar o campo hardcoded, mas não aparece como campo dinâmico.
+  Map<String, List<CustomField>> fieldsGroupedBySectionLocalized(
+    String namespace, {
+    Set<String>? exclude,
+  }) {
+    final fields = fieldsFor(namespace)
+        .where((f) => f.isField && f.type != 'config')
+        .where((f) => exclude == null || !exclude.contains(f.key))
+        .toList();
+
+    final grouped = <String, List<CustomField>>{};
+    for (final field in fields) {
+      final sectionName = field.getSectionLabel(_locale);
+      grouped.putIfAbsent(sectionName, () => []).add(field);
+    }
+
+    // Sort fields within each section by order
+    for (final section in grouped.values) {
+      section.sort((a, b) => (a.order ?? 999).compareTo(b.order ?? 999));
+    }
+
+    return grouped;
+  }
+
+  /// Sets resolved company config values (called once at startup)
+  void setCompanyConfig({
+    required bool fieldService,
+    required bool useScheduling,
+    required bool useDeviceManagement,
+    required bool useContracts,
+  }) {
+    _fieldService = fieldService;
+    _useScheduling = useScheduling;
+    _useDeviceManagement = useDeviceManagement;
+    _useContracts = useContracts;
+  }
+
+  /// Whether the company does field service (attends at customer location)
+  bool get fieldService => _fieldService;
+
+  /// Whether the company uses scheduling (scheduledDate in orders)
+  bool get useScheduling => _useScheduling;
+
+  /// Default fieldService value from the segment document
+  bool get segmentFieldServiceDefault => _segmentFieldService;
+
+  /// Whether the company uses device management (status, history, etc.)
+  bool get useDeviceManagement => _useDeviceManagement;
+
+  /// Whether the company uses recurring maintenance contracts
+  bool get useContracts => _useContracts;
+
+  /// Default terms of service text for the current segment and locale
+  String? get defaultTermsOfService => _defaultTermsOfService;
+
   /// Limpa todo o cache
   void clear() {
     _segmentId = null;
     _labelCache.clear();
     _customFields.clear();
+    _segmentFieldService = true;
+    _defaultTermsOfService = null;
+    _fieldService = true;
+    _useScheduling = true;
+    _useDeviceManagement = false;
+    _useContracts = false;
   }
 
   /// Getters de estado

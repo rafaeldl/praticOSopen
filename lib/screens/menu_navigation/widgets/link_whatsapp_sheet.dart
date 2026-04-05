@@ -77,9 +77,7 @@ class _LinkWhatsAppSheetState extends State<LinkWhatsAppSheet> {
 
   Future<void> _openWhatsApp(String link) async {
     final uri = Uri.parse(link);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override

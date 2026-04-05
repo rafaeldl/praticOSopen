@@ -8,7 +8,9 @@ import 'package:praticos/mobx/locale_store.dart';
 import 'package:praticos/mobx/user_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/mobx/reminder_store.dart';
+import 'package:praticos/mobx/engagement_reminder_store.dart';
 import 'package:praticos/mobx/whatsapp_link_store.dart';
+import 'package:praticos/services/notification_service.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -49,6 +51,7 @@ class _SettingsState extends State<Settings> {
     AuthorizationService.setUserStore(_userStore);
     final themeStore = Provider.of<ThemeStore>(context);
     final reminderStore = Provider.of<ReminderStore>(context);
+    final engagementStore = Provider.of<EngagementReminderStore>(context);
     final config = context.watch<SegmentConfigProvider>();
 
     return CupertinoPageScaffold(
@@ -153,57 +156,6 @@ class _SettingsState extends State<Settings> {
                 return const SizedBox.shrink();
               }),
 
-              // Connected Channels Section (WhatsApp)
-              CupertinoListSection.insetGrouped(
-                header: Text(context.l10n.connectedChannels.toUpperCase()),
-                children: [
-                  Observer(
-                    builder: (_) {
-                      final isLinked = _whatsappStore.isLinked;
-                      final isLoading = _whatsappStore.isLoading;
-
-                      return CupertinoListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: isLinked
-                                ? CupertinoColors.systemGreen
-                                : CupertinoColors.systemGrey,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.chat_bubble_2_fill,
-                            color: CupertinoColors.white,
-                            size: 20,
-                          ),
-                        ),
-                        title: const Text('WhatsApp'),
-                        subtitle: Text(
-                          isLoading
-                              ? context.l10n.loading
-                              : isLinked
-                                  ? _whatsappStore.linkedNumber ?? context.l10n.linked
-                                  : context.l10n.notLinked,
-                        ),
-                        trailing: isLoading
-                            ? const CupertinoActivityIndicator()
-                            : isLinked
-                                ? Icon(
-                                    CupertinoIcons.checkmark_circle_fill,
-                                    color: CupertinoColors.systemGreen.resolveFrom(context),
-                                  )
-                                : const CupertinoListTileChevron(),
-                        onTap: isLoading
-                            ? null
-                            : isLinked
-                                ? () => _showUnlinkWhatsAppDialog(context)
-                                : () => _showLinkWhatsAppSheet(context),
-                      );
-                    },
-                  ),
-                ],
-              ),
-
               // Admin/Management Section - RBAC based
               Observer(builder: (ctx) {
                 final canManageCompany = _authService.hasPermission(PermissionType.manageCompany);
@@ -270,6 +222,15 @@ class _SettingsState extends State<Settings> {
                         onTap: () => Navigator.pushNamed(context, '/form_template_list'),
                       ),
 
+                    // Contracts - visible when useContracts is active
+                    if (config.useContracts && canManageCompany)
+                      _buildSettingsTile(
+                        icon: CupertinoIcons.repeat,
+                        color: CupertinoColors.systemOrange,
+                        title: context.l10n.contracts,
+                        onTap: () => Navigator.pushNamed(context, '/contract_list'),
+                      ),
+
                     // Avaliações - Admin/Manager podem visualizar
                     if (canManageCompany)
                       _buildSettingsTile(
@@ -317,22 +278,6 @@ class _SettingsState extends State<Settings> {
                     trailing: const CupertinoListTileChevron(),
                     onTap: () => _showThemeSelectionDialog(context, themeStore, config),
                   ),
-                  Observer(builder: (_) {
-                    return CupertinoListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.systemYellow,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Icon(CupertinoIcons.bell_fill, color: CupertinoColors.white, size: 20),
-                      ),
-                      title: Text(context.l10n.scheduleReminder),
-                      additionalInfo: Text(_getReminderText(context, reminderStore.reminderMinutes)),
-                      trailing: const CupertinoListTileChevron(),
-                      onTap: () => _showReminderSelectionDialog(context, reminderStore),
-                    );
-                  }),
                   // Reabrir Onboarding - para reconfigurar empresa e capturar screenshots
                   Observer(builder: (_) {
                     if (_authService.hasPermission(PermissionType.manageCompany)) {
@@ -361,10 +306,182 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
 
+              // Reminders Section
+              CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.engagementReminders.toUpperCase()),
+                children: [
+                  Observer(builder: (_) {
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemYellow,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.bell_fill, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.scheduleReminder),
+                      additionalInfo: Text(_getReminderText(context, reminderStore.reminderMinutes)),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showReminderSelectionDialog(context, reminderStore),
+                    );
+                  }),
+                  Observer(builder: (_) {
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemOrange,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.clock_fill, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.dailyReminderTitle),
+                      subtitle: Text(context.l10n.dailyReminderDescription),
+                      trailing: CupertinoSwitch(
+                        value: engagementStore.dailyEnabled,
+                        onChanged: (value) {
+                          engagementStore.setDailyEnabled(value);
+                          if (!value) {
+                            NotificationService.instance.cancelDailyReminder();
+                          }
+                        },
+                      ),
+                    );
+                  }),
+                  Observer(builder: (_) {
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemPurple,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.arrow_counterclockwise, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.inactivityReminderTitle),
+                      subtitle: Text(context.l10n.inactivityReminderDescription),
+                      trailing: CupertinoSwitch(
+                        value: engagementStore.inactivityEnabled,
+                        onChanged: (value) {
+                          engagementStore.setInactivityEnabled(value);
+                          if (!value) {
+                            NotificationService.instance.cancelInactivityReminders();
+                          }
+                        },
+                      ),
+                    );
+                  }),
+                  Observer(builder: (_) {
+                    return CupertinoListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemRed,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Icon(CupertinoIcons.exclamationmark_circle_fill, color: CupertinoColors.white, size: 20),
+                      ),
+                      title: Text(context.l10n.pendingOsReminderTitle),
+                      subtitle: Text(context.l10n.pendingOsReminderDescription),
+                      trailing: CupertinoSwitch(
+                        value: engagementStore.pendingOsEnabled,
+                        onChanged: (value) {
+                          engagementStore.setPendingOsEnabled(value);
+                          if (!value) {
+                            NotificationService.instance.cancelPendingOsReminders();
+                          }
+                        },
+                      ),
+                    );
+                  }),
+                ],
+              ),
+
+              // Subscription Section
+              CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.subscription.toUpperCase()),
+                children: [
+                  CupertinoListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemPurple,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(CupertinoIcons.star_fill, color: CupertinoColors.white, size: 20),
+                    ),
+                    title: Text(context.l10n.manageSubscription),
+                    subtitle: Text(context.l10n.viewPlanAndBilling),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () => Navigator.pushNamed(context, '/manage_subscription'),
+                  ),
+                  CupertinoListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemGreen,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(CupertinoIcons.arrow_counterclockwise, color: CupertinoColors.white, size: 20),
+                    ),
+                    title: Text(context.l10n.restorePurchases),
+                    subtitle: Text(context.l10n.restorePreviousPurchases),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () => _restorePurchases(context),
+                  ),
+                ],
+              ),
+
               // Account Section
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.account.toUpperCase()),
                 children: [
+                  // WhatsApp link
+                  Observer(
+                    builder: (_) {
+                      final isLinked = _whatsappStore.isLinked;
+                      final isLoading = _whatsappStore.isLoading;
+
+                      return CupertinoListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: isLinked
+                                ? CupertinoColors.systemGreen
+                                : CupertinoColors.systemGrey,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Icon(
+                            CupertinoIcons.chat_bubble_2_fill,
+                            color: CupertinoColors.white,
+                            size: 20,
+                          ),
+                        ),
+                        title: const Text('WhatsApp'),
+                        subtitle: Text(
+                          isLoading
+                              ? context.l10n.loading
+                              : isLinked
+                                  ? _whatsappStore.linkedNumber ?? context.l10n.linked
+                                  : context.l10n.notLinked,
+                        ),
+                        trailing: isLoading
+                            ? const CupertinoActivityIndicator()
+                            : isLinked
+                                ? Icon(
+                                    CupertinoIcons.checkmark_circle_fill,
+                                    color: CupertinoColors.systemGreen.resolveFrom(context),
+                                  )
+                                : const CupertinoListTileChevron(),
+                        onTap: isLoading
+                            ? null
+                            : isLinked
+                                ? () => _showUnlinkWhatsAppDialog(context)
+                                : () => _showLinkWhatsAppSheet(context),
+                      );
+                    },
+                  ),
                   // Accept Invite - join another company
                   CupertinoListTile(
                     leading: Container(
@@ -661,6 +778,64 @@ class _SettingsState extends State<Settings> {
         ),
       ),
     );
+  }
+
+  /// Restore previous in-app purchases
+  Future<void> _restorePurchases(BuildContext context) async {
+    // Show loading dialog
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => CupertinoAlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CupertinoActivityIndicator(),
+            const SizedBox(height: 16),
+            Text(context.l10n.restoringPurchases),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      // TODO: Implementar restauração real via in_app_purchase
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: Text(context.l10n.success),
+            content: Text(context.l10n.restorePurchasesSuccess),
+            actions: [
+              CupertinoDialogAction(
+                child: Text(context.l10n.ok),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: Text(context.l10n.error),
+            content: Text(context.l10n.restorePurchasesError),
+            actions: [
+              CupertinoDialogAction(
+                child: Text(context.l10n.ok),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   /// Show bottom sheet to link WhatsApp

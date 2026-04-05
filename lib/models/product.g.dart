@@ -28,7 +28,8 @@ Product _$ProductFromJson(Map<String, dynamic> json) => Product()
   ..photo = json['photo'] as String?
   ..keywords = (json['keywords'] as List<dynamic>?)
       ?.map((e) => e as String)
-      .toList();
+      .toList()
+  ..customData = json['customData'] as Map<String, dynamic>?;
 
 Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
   'id': instance.id,
@@ -41,6 +42,7 @@ Map<String, dynamic> _$ProductToJson(Product instance) => <String, dynamic>{
   'value': instance.value,
   'photo': instance.photo,
   'keywords': instance.keywords,
+  'customData': instance.customData,
 };
 
 ProductAggr _$ProductAggrFromJson(Map<String, dynamic> json) => ProductAggr()

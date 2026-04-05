@@ -54,9 +54,9 @@ class LabelKeys {
   /// Exemplos: "Categoria", "Tipo"
   static const deviceCategory = 'device.category';
 
-  /// Label do campo "serialNumber"
+  /// Label do campo "serial"
   /// Exemplos: "Número de Série", "Placa", "IMEI"
-  static const deviceSerialNumber = 'device.serialNumber';
+  static const deviceSerialNumber = 'device.serial';
 
   /// Label do campo "description"
   /// Exemplo: "Descrição"

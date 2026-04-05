@@ -47,6 +47,34 @@ class ConfirmBootstrapScreen extends StatefulWidget {
 class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
   bool _isCreating = false;
   String _statusMessage = '';
+  bool _useScheduling = true;
+  bool _fieldService = true;
+  String? _defaultTermsOfService;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSegmentDefaults();
+  }
+
+  Future<void> _loadSegmentDefaults() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('segments')
+        .doc(widget.segmentId)
+        .get();
+    if (doc.exists && mounted) {
+      final data = doc.data();
+      final defaultTermsI18n = data?['defaultTermsOfService'] as Map<String, dynamic>?;
+      setState(() {
+        _fieldService = data?['fieldService'] as bool? ?? true;
+        if (defaultTermsI18n != null) {
+          _defaultTermsOfService = defaultTermsI18n[_currentLocale]
+              ?? defaultTermsI18n['pt-BR'] as String?
+              ?? '';
+        }
+      });
+    }
+  }
 
   /// Obtém o locale atual do dispositivo
   String get _currentLocale {
@@ -120,6 +148,8 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
         existingCompany.segment = widget.segmentId;
         existingCompany.subspecialties =
             widget.subspecialties.isEmpty ? null : widget.subspecialties;
+        existingCompany.fieldService = _fieldService;
+        existingCompany.useScheduling = _useScheduling;
         existingCompany.updatedAt = DateTime.now();
         existingCompany.updatedBy = dbUser.toAggr();
         if (logoUrl != null) {
@@ -177,11 +207,14 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
           ..subspecialties =
               widget.subspecialties.isEmpty ? null : widget.subspecialties
           ..logo = logoUrl
+          ..fieldService = _fieldService
+          ..useScheduling = _useScheduling
+          ..termsOfService = _defaultTermsOfService
           ..owner = userAggr
           ..createdAt = DateTime.now()
-        ..createdBy = userAggr
-        ..updatedAt = DateTime.now()
-        ..updatedBy = userAggr;
+          ..createdBy = userAggr
+          ..updatedAt = DateTime.now()
+          ..updatedBy = userAggr;
 
         await userStore.createCompanyForUser(company);
 
@@ -315,6 +348,48 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
                       ),
 
                       const SizedBox(height: 32),
+
+                      // Feature toggles
+                      CupertinoListSection.insetGrouped(
+                        header: Text(context.l10n.companyFeatures),
+                        children: [
+                          CupertinoListTile(
+                            title: Text(context.l10n.schedulingLabel),
+                            subtitle: Text(context.l10n.schedulingDescription),
+                            trailing: CupertinoSwitch(
+                              value: _useScheduling,
+                              onChanged: (v) =>
+                                  setState(() => _useScheduling = v),
+                            ),
+                          ),
+                          CupertinoListTile(
+                            title: Text(context.l10n.fieldServiceLabel),
+                            subtitle:
+                                Text(context.l10n.fieldServiceDescription),
+                            trailing: CupertinoSwitch(
+                              value: _fieldService,
+                              onChanged: (v) =>
+                                  setState(() => _fieldService = v),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          context.l10n.youCanChangeThisLater,
+                          style: CupertinoTheme.of(context)
+                              .textTheme
+                              .textStyle
+                              .copyWith(
+                                color: CupertinoColors.secondaryLabel
+                                    .resolveFrom(context),
+                                fontSize: 13,
+                              ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
 
                       // Lista de benefícios
                       Container(

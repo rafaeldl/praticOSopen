@@ -253,11 +253,18 @@
 - [x] **Meta Ads - Criar campanha de instalações**: Campanha Facebook/Instagram para installs do PraticOS (Android). Criada em 23/02/2026.
 - [x] **Meta Ads - Criar ad sets iOS**: Ad sets iOS criados em 23/02/2026.
 - [x] **Meta Ads - Ativar campanha**: Campanha ativada em 23/02/2026 (Android + iOS).
+- [x] **Meta Ads - Reativar ad set iOS**: Ad set iOS (ID: 6916515435975) estava PAUSED. Reativado em 04/04/2026 via API.
+- [x] **Meta Ads - Novos criativos A/B**: 2 novos criativos criados e ads publicados em 04/04/2026:
+  - "Dor Ligacoes v1" (Ad ID: 6938954591375, Creative ID: 1654040175635257) — copy: "Para de atender ligação de cliente"
+  - "Preco Anchor v1" (Ad ID: 6938954601575, Creative ID: 1482880759951886) — copy: "R$59/mês. OS ilimitadas."
+  - Image hashes: `d1c0600ea21e0e98e17f16d50d608c13` (dor) | `3e32801c5bd7b231bcd40e06b59c0b69` (preço)
+  - Arquivos: `creatives/dor_ligacoes_feed_1080x1080.png` | `creatives/preco_anchor_feed_1080x1080.png`
 
 ### Prioridade Média
 
-- [ ] **Google Ads - Monitorar App-iOS**: Monitorar impressões e conversões do App-iOS nas primeiras 48h. Verificar se o app icon aparece corretamente na UI do Google Ads.
-- [ ] **Meta Ads - Monitorar CTR criativos v2**: Monitorar CTR nas primeiras 24-48h dos novos criativos. Comparar WhatsApp GIF vs WhatsApp Estático vs App Completo. Pausar variações com CTR baixo após 72h.
+- [ ] **Google Ads - Monitorar App-iOS**: Continua praticamente inativo (1 impressão). Requer ATT prompt implementado no Flutter para gerar sinal de conversão.
+- [ ] **Meta Ads - Monitorar CTR novos criativos**: Monitorar CTR de "Dor Ligacoes v1" e "Preco Anchor v1" nas próximas 48-72h. Comparar com WhatsApp GIF (CTR benchmark: 3,86%). Pausar se CTR < 1,5% após 72h.
+- [ ] **Google Search - NÃO reativar ainda**: Termos capturados são irrelevantes (consultoria, sistemas de gestão empresarial). Reativar só após refatoração completa de keywords com foco em "sistema OS", "app ordem de serviço", "app para técnico". Requer revisão manual das 56 keywords atuais.
 - [ ] **Meta Ads - Criativos Stories dedicados**: As imagens 1080x1920 (Stories) foram geradas mas não vinculadas a creatives separados. Considerar criar ad creatives específicos para Stories/Reels com as imagens verticais.
 - [x] **Google Ads - Acesso Padrão**: Aprovado em 23/02/2026. Escrita via API funcionando.
 - [x] **Google Ads - Keywords negativas**: 25 keywords negativas adicionadas + 18 keywords convertidas para PHRASE match (23/02/2026).
@@ -390,3 +397,45 @@
 - [Google Ads Query Builder](https://developers.google.com/google-ads/api/fields/v17/overview_query_builder)
 - [Meta Marketing API Docs](https://developers.facebook.com/docs/marketing-apis)
 - [Graph API Explorer](https://developers.facebook.com/tools/explorer)
+
+### 04/04/2026 (Refatoração Search + Novos Criativos Meta)
+
+#### Google Search — Refatorada e Reativada
+- Campanha estava PAUSED por gerar search terms irrelevantes (consultoria em sistemas, sistemas de gestão, etc.)
+- **Adicionadas 30 negative keywords** (batch 2):
+  - sistemas, sistema de gestão, consultoria em sistemas, gestão empresarial, sistemas empresariais
+  - financeiro empresa, controle de despesas, serviços automatizados
+  - crm implementation, implementation services
+  - excel, word, iso, scrum, kanban, agile, devops, saas b2b
+  - concorrentes: contele, field control, fieldcontrol, totvs, sap, oracle, salesforce, nuvemshop, bling
+- **Total negativas agora: 70** (40 originais + 30 novas)
+- **Adicionadas 9 keywords [EXACT] de alta intenção:**
+  - [app ordem de serviço], [sistema ordem de serviço]
+  - [app para técnico], [app para mecânico], [app para assistência técnica]
+  - [controle de OS app], [ordem de serviço celular]
+  - [app para técnico de celular], [sistema para oficina mecânica]
+- **Total keywords: 65** (56 originais + 9 novas EXACT)
+- Campanha **REATIVADA**: ENABLED | R$10/dia
+- **Monitorar em 48h**: verificar search terms. Se aparecerem termos irrelevantes, adicionar mais negativas imediatamente.
+
+#### Meta Ads — Novos Criativos A/B
+- 2 novos criativos criados e anúncios publicados no ad set Android:
+  - **Dor Ligacoes v1** (Ad ID: 6938954591375): "Para de atender ligação de cliente"
+    - Image hash: `d1c0600ea21e0e98e17f16d50d608c13`
+    - Creative ID: 1654040175635257
+  - **Preco Anchor v1** (Ad ID: 6938954601575): "R$59/mês. OS ilimitadas. Sem contrato."
+    - Image hash: `3e32801c5bd7b231bcd40e06b59c0b69`
+    - Creative ID: 1482880759951886
+- Ad set iOS (ID: 6916515435975) reativado — estava PAUSED sem motivo
+- Ad set Android agora tem 5 anúncios ativos para teste A/B
+- Benchmark a superar: WhatsApp GIF v2 (CTR 3,86%, CPC R$0,54)
+
+#### Status Final das Campanhas (04/04/2026)
+| Canal | Status | Budget/dia |
+|-------|--------|-----------|
+| Google App-Android | ENABLED | R$15 |
+| Google App-iOS | ENABLED | R$10 |
+| Google Search | ENABLED | R$10 |
+| Meta Android | ACTIVE | CBO R$22 |
+| Meta iOS | ACTIVE | CBO R$22 |
+| **Total** | | **R$79/dia** |

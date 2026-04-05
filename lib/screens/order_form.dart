@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Colors, Material, MaterialType, Divider;
 // Keeping Material for some specific helpers or if absolutely needed, but main UI is Cupertino.
@@ -14,14 +15,19 @@ import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/device.dart';
+import 'package:praticos/repositories/v2/device_repository_v2.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/models/permission.dart';
-import 'package:praticos/screens/widgets/order_photos_widget.dart';
+import 'package:praticos/models/order_document.dart';
+import 'package:praticos/screens/widgets/order_media_widget.dart';
+import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/screens/widgets/device_picker_sheet.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 
 // Formulários Dinâmicos
@@ -33,8 +39,11 @@ import 'package:praticos/screens/forms/form_fill_screen.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_service.dart';
 import 'package:praticos/screens/widgets/share_link_sheet.dart';
+import 'package:praticos/services/share_link_service.dart';
+import 'package:praticos/global.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
 import 'package:praticos/services/location_service.dart';
+import 'package:praticos/widgets/dynamic_field_builder.dart';
 
 class OrderForm extends StatefulWidget {
   @override
@@ -138,10 +147,14 @@ class _OrderFormState extends State<OrderForm> {
 
                   return SliverList(
                     delegate: SliverChildListDelegate([
-                      _buildPhotosSection(context, config),
+                      _buildMediaSection(context, config),
                       _buildClientDeviceSection(context, config),
-                      _buildSummarySection(context, config),
                       _buildDevicesSection(context, config),
+                      _buildSummarySection(context, config),
+                      if (config.useContracts)
+                        _buildContractSection(context, config),
+                      // Dynamic Custom Field Sections (from segment config)
+                      ..._buildCustomFieldSections(config),
                       // Items sections — conditional on device grouping
                       if (_store.devices.length >= 2) ...[
                         _buildGroupedItemsByDevice(context, config, services, products, forms),
@@ -155,6 +168,8 @@ class _OrderFormState extends State<OrderForm> {
                       ],
                       // Always show consolidated add button
                       _buildConsolidatedAddSection(context, config),
+                      if (config.useContracts)
+                        _buildChildOrdersSection(context, config),
                       _buildCommentsSection(context),
                       const SizedBox(height: 40),
                     ]),
@@ -257,12 +272,11 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  Widget _buildPhotosSection(BuildContext context, SegmentConfigProvider config) {
+  Widget _buildMediaSection(BuildContext context, SegmentConfigProvider config) {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      child: OrderPhotosWidget(
+      child: OrderMediaWidget(
         store: _store,
-        onAddPhoto: () => _showAddPhotoOptions(config),
       ),
     );
   }
@@ -306,7 +320,8 @@ class _OrderFormState extends State<OrderForm> {
               showChevron: true,
               valueColor: _getStatusColorCupertino(_store.status),
             ),
-            _buildScheduledDateTile(context),
+            if (SegmentConfigService().useScheduling)
+              _buildScheduledDateTile(context),
             _buildListTile(
               context: context,
               icon: CupertinoIcons.calendar,
@@ -354,6 +369,208 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
+  Widget _buildContractSection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(
+      builder: (_) {
+        final contract = _store.order?.contract;
+        final isActive = _store.hasContract;
+
+        // Only show section when contract is active
+        if (!isActive || contract == null) return const SizedBox.shrink();
+
+        // Child order — show link to parent contract
+        if (contract.parentOrderId != null) {
+          final parentLabel = contract.parentOrderNumber != null
+              ? '${context.l10n.orderShort} #${contract.parentOrderNumber}'
+              : '';
+          return _buildGroupedSection(
+            header: context.l10n.contract.toUpperCase(),
+            children: [
+              _buildListTile(
+                context: context,
+                icon: CupertinoIcons.link,
+                title: context.l10n.recurringContract,
+                value: parentLabel,
+                onTap: () {
+                  final parentOrder = Order()..id = contract.parentOrderId;
+                  Navigator.of(context, rootNavigator: true).pushNamed(
+                    '/order',
+                    arguments: {'order': parentOrder},
+                  );
+                },
+                showChevron: true,
+                isLast: true,
+              ),
+            ],
+          );
+        }
+
+        // Template order — show contract details (frequency, next due, auto-gen)
+        final formatService = FormatService();
+        final freqLabel = _contractFrequencyLabel(context, contract.frequency);
+        final nextDate = contract.nextDueDate != null
+            ? formatService.formatDate(contract.nextDueDate!)
+            : '';
+        final autoGen = contract.autoGenerate == true
+            ? context.l10n.yes
+            : context.l10n.no;
+
+        return _buildGroupedSection(
+          header: context.l10n.recurringContract.toUpperCase(),
+          children: [
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.repeat,
+              title: context.l10n.frequency,
+              value: freqLabel,
+              onTap: () => _showContractModal(context),
+              showChevron: true,
+            ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.calendar,
+              title: context.l10n.contractNextDue,
+              value: nextDate,
+              onTap: () => _showContractModal(context),
+              showChevron: true,
+            ),
+            _buildListTile(
+              context: context,
+              icon: CupertinoIcons.bolt,
+              title: context.l10n.automaticGeneration,
+              value: autoGen,
+              onTap: () => _showContractModal(context),
+              showChevron: true,
+              isLast: true,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _contractFrequencyLabel(BuildContext context, String? frequency) {
+    switch (frequency) {
+      case 'daily':
+        return context.l10n.frequencyDaily;
+      case 'weekly':
+        return context.l10n.frequencyWeekly;
+      case 'monthly':
+        return context.l10n.frequencyMonthly;
+      case 'yearly':
+        return context.l10n.frequencyYearly;
+      default:
+        return frequency ?? '';
+    }
+  }
+
+  void _showContractModal(BuildContext context) {
+    final contract = _store.order?.contract;
+    if (contract == null) return;
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => _ContractConfigSheet(
+        contract: contract,
+        onFrequencyChanged: (f) => _store.setContractFrequency(f),
+        onIntervalChanged: (i) => _store.setContractInterval(i),
+        onStartDateChanged: (d) => _store.setContractStartDate(d),
+        onEndDateChanged: (d) => _store.setContractEndDate(d),
+        onAutoGenerateChanged: (v) => _store.setContractAutoGenerate(v),
+        onReminderDaysChanged: (d) => _store.setContractReminderDays(d),
+      ),
+    );
+  }
+
+  void _confirmDeactivateContract() {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(context.l10n.deactivateContract),
+        content: Text(context.l10n.deactivateContractConfirm),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(context.l10n.cancel),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            child: Text(context.l10n.deactivateContract),
+            onPressed: () {
+              Navigator.pop(ctx);
+              _store.toggleContract(false);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Keys of hardcoded fields already rendered in the order form.
+  /// The segment may configure these fields (label, mask, validation)
+  /// but they must not appear as duplicate dynamic fields.
+  static const _builtInFieldKeys = {
+    'service_order.status',
+    'service_order.scheduledDate',
+    'service_order.dueDate',
+    'service_order.total',
+    'service_order.payment',
+    'service_order.address',
+  };
+
+  List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
+    final grouped = config.fieldsGroupedBySectionLocalized(
+      'service_order',
+      exclude: _builtInFieldKeys,
+    );
+    if (grouped.isEmpty) return [];
+
+    final locale = config.locale;
+    final sections = <Widget>[];
+
+    for (final entry in grouped.entries) {
+      final sectionName = entry.key;
+      final fields = entry.value;
+
+      sections.add(
+        CupertinoListSection.insetGrouped(
+          header: Text(
+            sectionName.toUpperCase(),
+            style: TextStyle(
+              fontSize: 13,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+          ),
+          children: fields.map((field) {
+            return DynamicFieldBuilder(
+              field: field,
+              value: _store.order?.customData?[field.fieldName] ?? _store.order?.customData?[field.key],
+              locale: locale,
+              onChanged: (newValue) {
+                setState(() {
+                  _store.order?.customData ??= {};
+                  if (newValue == null) {
+                    _store.order!.customData!.remove(field.fieldName);
+                  } else {
+                    _store.order!.customData![field.fieldName] = newValue;
+                  }
+                  _store.order!.customData!.remove(field.key); // migrate old key
+                  // Clean up empty customData
+                  if (_store.order!.customData!.isEmpty) {
+                    _store.order!.customData = null;
+                  }
+                });
+                _store.createItem();
+              },
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    return sections;
+  }
+
   Widget _buildClientDeviceSection(BuildContext context, SegmentConfigProvider config) {
     return Observer(
       builder: (_) {
@@ -377,7 +594,8 @@ class _OrderFormState extends State<OrderForm> {
               enabled: canEditFields,
             ),
             // Address inline text field
-            _buildAddressField(context, canEditFields, hasAddress, hasCoordinates),
+            if (SegmentConfigService().fieldService)
+              _buildAddressField(context, canEditFields, hasAddress, hasCoordinates),
             // Shortcut to add device (hidden once a device is added)
             if (_store.devices.isEmpty)
               _buildListTile(
@@ -814,6 +1032,111 @@ class _OrderFormState extends State<OrderForm> {
     }
   }
 
+  /// Child orders section - shows orders generated from this contract template
+  Widget _buildChildOrdersSection(BuildContext context, SegmentConfigProvider config) {
+    return Observer(
+      builder: (_) {
+        if (!_store.hasContract) return const SizedBox.shrink();
+
+        final children = _store.childOrders?.value?.whereType<Order>().toList() ?? [];
+        if (children.isEmpty) return const SizedBox.shrink();
+        // Sort client-side (descending by createdAt) to avoid composite index
+        children.sort((a, b) => (b.createdAt ?? DateTime(0)).compareTo(a.createdAt ?? DateTime(0)));
+
+        final formatService = FormatService();
+
+        return _buildGroupedSection(
+          header: context.l10n.generatedOrdersCount(children.length).toUpperCase(),
+          children: children.asMap().entries.map((entry) {
+            final index = entry.key;
+            final child = entry.value;
+            final isLast = index == children.length - 1;
+            final dateStr = child.createdAt != null
+                ? formatService.formatDate(child.createdAt!)
+                : '';
+
+            return GestureDetector(
+              onTap: () {
+                Navigator.of(context, rootNavigator: true)
+                    .pushNamed('/order', arguments: {'order': child});
+              },
+              child: Container(
+                color: CupertinoColors.systemBackground.resolveFrom(context),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _getChildOrderStatusColor(child.status),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              child.number != null ? '#${child.number}' : '',
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                                color: CupertinoColors.label.resolveFrom(context),
+                              ),
+                            ),
+                          ),
+                          if (dateStr.isNotEmpty)
+                            Text(
+                              dateStr,
+                              style: TextStyle(
+                                fontSize: 17,
+                                color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                              ),
+                            ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            CupertinoIcons.chevron_right,
+                            size: 16,
+                            color: CupertinoColors.systemGrey3.resolveFrom(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (!isLast)
+                      Divider(
+                        height: 1,
+                        indent: 36,
+                        color: CupertinoColors.systemGrey5.resolveFrom(context),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Color _getChildOrderStatusColor(String? status) {
+    switch (status) {
+      case 'quote':
+        return CupertinoColors.systemOrange;
+      case 'approved':
+        return CupertinoColors.systemBlue;
+      case 'done':
+        return CupertinoColors.systemGreen;
+      case 'canceled':
+        return CupertinoColors.systemRed;
+      case 'progress':
+        return CupertinoColors.systemPurple;
+      default:
+        return CupertinoColors.systemGrey;
+    }
+  }
+
   /// Comments section - shows customer and team comments on the order
   Widget _buildCommentsSection(BuildContext context) {
     return Observer(
@@ -1021,7 +1344,7 @@ class _OrderFormState extends State<OrderForm> {
     if (canEditFields) {
       actions.add(_buildActionWithIcon(
         CupertinoIcons.wrench,
-        '${context.l10n.add} ${context.l10n.service}',
+        context.l10n.service,
         () {
           Navigator.pop(context);
           _addService(presetDeviceId: deviceId);
@@ -1029,7 +1352,7 @@ class _OrderFormState extends State<OrderForm> {
       ));
       actions.add(_buildActionWithIcon(
         CupertinoIcons.cube_box,
-        '${context.l10n.add} ${context.l10n.product}',
+        context.l10n.product,
         () {
           Navigator.pop(context);
           _addProduct(presetDeviceId: deviceId);
@@ -1040,7 +1363,7 @@ class _OrderFormState extends State<OrderForm> {
     if (canManageForms) {
       actions.add(_buildActionWithIcon(
         CupertinoIcons.doc_text,
-        '${context.l10n.add} ${context.l10n.form}',
+        context.l10n.form,
         () {
           Navigator.pop(context);
           _addForm(config, presetDeviceId: deviceId);
@@ -1049,8 +1372,8 @@ class _OrderFormState extends State<OrderForm> {
     }
 
     actions.add(_buildActionWithIcon(
-      CupertinoIcons.camera,
-      context.l10n.addPhoto,
+      CupertinoIcons.paperclip,
+      context.l10n.addPhotoOrAttachment,
       () {
         Navigator.pop(context);
         _showAddPhotoOptions(config);
@@ -1102,17 +1425,17 @@ class _OrderFormState extends State<OrderForm> {
     if (canEditFields) {
       actions.add(_buildActionWithIcon(
         config.deviceIcon,
-        '${context.l10n.add} ${config.device}',
+        config.device,
         () { Navigator.pop(context); _selectDevice(); },
       ));
       actions.add(_buildActionWithIcon(
         CupertinoIcons.wrench,
-        '${context.l10n.add} ${context.l10n.service}',
+        context.l10n.service,
         () { Navigator.pop(context); _addService(); },
       ));
       actions.add(_buildActionWithIcon(
         CupertinoIcons.cube_box,
-        '${context.l10n.add} ${context.l10n.product}',
+        context.l10n.product,
         () { Navigator.pop(context); _addProduct(); },
       ));
     }
@@ -1120,14 +1443,14 @@ class _OrderFormState extends State<OrderForm> {
     if (canManageForms) {
       actions.add(_buildActionWithIcon(
         CupertinoIcons.doc_text,
-        '${context.l10n.add} ${context.l10n.form}',
+        context.l10n.form,
         () { Navigator.pop(context); _addForm(config); },
       ));
     }
 
     actions.add(_buildActionWithIcon(
-      CupertinoIcons.camera,
-      context.l10n.addPhoto,
+      CupertinoIcons.paperclip,
+      context.l10n.addPhotoOrAttachment,
       () { Navigator.pop(context); _showAddPhotoOptions(config); },
     ));
 
@@ -1273,6 +1596,7 @@ class _OrderFormState extends State<OrderForm> {
                     const SizedBox(width: 12),
                   ],
                   Expanded(
+                    flex: 2,
                     child: Text(
                       title,
                       style: TextStyle(
@@ -1288,21 +1612,15 @@ class _OrderFormState extends State<OrderForm> {
                   ),
                   if (hasValue || placeholder.isNotEmpty) ...[
                     const SizedBox(width: 8),
-                    Flexible(
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          hasValue ? value : placeholder,
-                          style: TextStyle(
-                            fontSize: 17,
-                            color: enabled
-                                ? (hasValue
-                                    ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
-                                    : CupertinoColors.placeholderText.resolveFrom(context))
-                                : CupertinoColors.tertiaryLabel.resolveFrom(context),
-                          ),
-                          textAlign: TextAlign.end,
-                        ),
+                    Text(
+                      hasValue ? value : placeholder,
+                      style: TextStyle(
+                        fontSize: 17,
+                        color: enabled
+                            ? (hasValue
+                                ? (valueColor ?? CupertinoColors.secondaryLabel.resolveFrom(context))
+                                : CupertinoColors.placeholderText.resolveFrom(context))
+                            : CupertinoColors.tertiaryLabel.resolveFrom(context),
                       ),
                     ),
                   ],
@@ -1522,24 +1840,30 @@ class _OrderFormState extends State<OrderForm> {
       canDelete = _authService.canDeleteOrder(_store.order!);
     }
 
+    final canManagePayments =
+        _store.order?.id != null &&
+        !['quote', 'canceled'].contains(_store.status);
+
     showCupertinoModalPopup<void>(
       context: context,
       builder: (BuildContext context) => CupertinoActionSheet(
         actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: Text(config.label(LabelKeys.addPhoto)),
-            onPressed: () {
-              Navigator.pop(context);
-              _showAddPhotoOptions(config);
-            },
-          ),
+          // Pagamentos
+          if (canManagePayments && canViewPrices)
+            CupertinoActionSheetAction(
+              child: Text(context.l10n.payments),
+              onPressed: () {
+                Navigator.pop(context);
+                _openPaymentManagement();
+              },
+            ),
           // Enviar link para cliente
           if (_store.order?.id != null)
             CupertinoActionSheetAction(
               child: Text(context.l10n.shareWithCustomer),
               onPressed: () {
                 Navigator.pop(context);
-                _openShareLinkSheet();
+                ShareLinkSheet.show(context, _store.order!);
               },
             ),
           // Compartilhar PDF para usuários com acesso a valores
@@ -1549,6 +1873,23 @@ class _OrderFormState extends State<OrderForm> {
               onPressed: () {
                 Navigator.pop(context);
                 _onShare(context, _store.order, config);
+              },
+            ),
+          // Contrato recorrente
+          if (config.useContracts && _store.order?.id != null)
+            CupertinoActionSheetAction(
+              isDestructiveAction: _store.hasContract,
+              child: Text(_store.hasContract
+                  ? context.l10n.deactivateContract
+                  : context.l10n.activateContract),
+              onPressed: () {
+                Navigator.pop(context);
+                if (_store.hasContract) {
+                  _confirmDeactivateContract();
+                } else {
+                  _store.toggleContract(true);
+                  _showContractModal(context);
+                }
               },
             ),
           // Excluir OS (se permitido)
@@ -1570,11 +1911,82 @@ class _OrderFormState extends State<OrderForm> {
     );
   }
 
-  /// Open the share link sheet
-  void _openShareLinkSheet({String? statusContext}) {
-    final order = _store.order;
-    if (order?.id == null) return;
-    ShareLinkSheet.show(context, order!, statusContext: statusContext);
+  /// Open native share sheet directly with a share link
+  Future<void> _openShareLinkSheet({String? statusContext}) async {
+    final nullableOrder = _store.order;
+    if (nullableOrder?.id == null) return;
+    final order = nullableOrder!;
+
+    final service = ShareLinkService.instance;
+
+    // Show loading overlay
+    final overlay = OverlayEntry(
+      builder: (_) => const ColoredBox(
+        color: Color(0x44000000),
+        child: Center(child: CupertinoActivityIndicator(radius: 16)),
+      ),
+    );
+    Overlay.of(context).insert(overlay);
+
+    try {
+      String? url;
+
+      // 1. Check local cached link
+      final existingLink = order.shareLink;
+      if (existingLink != null &&
+          !existingLink.isExpired &&
+          existingLink.url != null) {
+        url = existingLink.url;
+      }
+
+      // 2. Fetch active tokens from API
+      if (url == null) {
+        try {
+          final tokens = await service.getShareTokens(order.id!);
+          final active = tokens.where((t) => !t.isExpired).toList();
+          if (active.isNotEmpty) {
+            url = 'https://praticos.web.app/q/${active.first.token}';
+          }
+        } catch (_) {
+          // Will generate new link below
+        }
+      }
+
+      // 3. Generate new link if none found
+      if (url == null) {
+        final result = await service.generateShareLink(orderId: order.id!);
+        url = result.url;
+      }
+
+      if (url == null) return;
+
+      // Build share message and open native share sheet
+      final message = service.buildShareMessage(
+        customerName: order.customer?.name ?? '',
+        orderNumber: order.number ?? 0,
+        companyName: Global.companyAggr?.name,
+        locale: context.l10n.localeName,
+        statusContext: statusContext,
+      );
+
+      final box = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin =
+          box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+      await service.shareViaSheet(
+        url: url,
+        message: message,
+        subject: '${context.l10n.order} #${order.number}',
+        sharePositionOrigin: sharePositionOrigin,
+      );
+    } catch (e) {
+      // Fallback to ShareLinkSheet on error
+      if (mounted) {
+        ShareLinkSheet.show(context, order, statusContext: statusContext);
+      }
+    } finally {
+      overlay.remove();
+    }
   }
 
   void _selectCustomer() {
@@ -1589,9 +2001,13 @@ class _OrderFormState extends State<OrderForm> {
     });
   }
 
-  void _editDevice(DeviceAggr deviceAggr) {
-    // Convert DeviceAggr to Device for the form screen
-    final device = Device.fromJson(deviceAggr.toJson());
+  void _editDevice(DeviceAggr deviceAggr) async {
+    // Fetch full Device from Firestore to preserve all fields (category, manufacturer, etc.)
+    final fullDevice = _store.companyId != null
+        ? await DeviceRepositoryV2().getSingle(_store.companyId!, deviceAggr.id)
+        : null;
+    final device = fullDevice ?? Device.fromJson(deviceAggr.toJson());
+    if (!mounted) return;
     Navigator.pushNamed(
       context,
       '/device_form',
@@ -2192,48 +2608,79 @@ class _OrderFormState extends State<OrderForm> {
     showCupertinoModalPopup(
       context: context,
       builder: (actionSheetContext) => CupertinoActionSheet(
-        title: Text(context.l10n.addPhoto),
+        title: Text(context.l10n.addPhotoOrAttachment),
         actions: [
            CupertinoActionSheetAction(
-            child: Text(context.l10n.takePhoto),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.camera, size: 20),
+                const SizedBox(width: 8),
+                Text(context.l10n.takePhoto),
+              ],
+            ),
             onPressed: () async {
               Navigator.pop(actionSheetContext);
               final success = await _store.addPhotoFromCamera();
               if (!success && mounted) {
-                showCupertinoDialog(
-                  context: widgetContext,
-                  builder: (dialogContext) => CupertinoAlertDialog(
-                    title: Text(widgetContext.l10n.errorOccurred),
-                    content: Text(widgetContext.l10n.errorOccurred),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text(widgetContext.l10n.ok),
-                        onPressed: () => Navigator.pop(dialogContext),
-                      ),
-                    ],
-                  ),
-                );
+                // Verificar se foi limite atingido
+                final limitResult = _store.photoLimitResult;
+                if (limitResult != null && !limitResult.isAllowed) {
+                  _showPhotoLimitDialog(widgetContext, limitResult);
+                } else {
+                  _showMediaError(widgetContext);
+                }
               }
             },
           ),
            CupertinoActionSheetAction(
-            child: Text(context.l10n.chooseFromGallery),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.photo, size: 20),
+                const SizedBox(width: 8),
+                Text(context.l10n.chooseFromGallery),
+              ],
+            ),
             onPressed: () async {
               Navigator.pop(actionSheetContext);
               final success = await _store.addPhotoFromGallery();
               if (!success && mounted) {
-                showCupertinoDialog(
-                  context: widgetContext,
-                  builder: (dialogContext) => CupertinoAlertDialog(
-                    title: Text(widgetContext.l10n.errorOccurred),
-                    content: Text(widgetContext.l10n.errorOccurred),
-                    actions: [
-                      CupertinoDialogAction(
-                        child: Text(widgetContext.l10n.ok),
-                        onPressed: () => Navigator.pop(dialogContext),
-                      ),
-                    ],
-                  ),
+                // Verificar se foi limite atingido
+                final limitResult = _store.photoLimitResult;
+                if (limitResult != null && !limitResult.isAllowed) {
+                  _showPhotoLimitDialog(widgetContext, limitResult);
+                } else {
+                  _showMediaError(widgetContext);
+                }
+              }
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.doc, size: 20),
+                const SizedBox(width: 8),
+                Text(context.l10n.fromFiles),
+              ],
+            ),
+            onPressed: () async {
+              Navigator.pop(actionSheetContext);
+              final photoService = PhotoService();
+              final platformFile = await photoService.pickDocument();
+              if (platformFile != null &&
+                  platformFile.path != null &&
+                  widgetContext.mounted) {
+                final file = File(platformFile.path!);
+                final ext = platformFile.extension?.toLowerCase() ?? '';
+                final contentType = _getContentTypeForExtension(ext);
+                _selectDocumentType(
+                  widgetContext,
+                  file,
+                  contentType,
+                  platformFile.name,
+                  fileSize: platformFile.size,
                 );
               }
             },
@@ -2245,6 +2692,155 @@ class _OrderFormState extends State<OrderForm> {
         ),
       ),
     );
+  }
+
+  void _showMediaError(BuildContext ctx) {
+    showCupertinoDialog(
+      context: ctx,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(ctx.l10n.errorOccurred),
+        content: Text(ctx.l10n.errorOccurred),
+        actions: [
+          CupertinoDialogAction(
+            child: Text(ctx.l10n.ok),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Mostra dialog de upgrade quando limite de fotos e atingido.
+  void _showPhotoLimitDialog(BuildContext ctx, FeatureGateResult result) {
+    showCupertinoDialog(
+      context: ctx,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Limite atingido'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(result.message ?? 'Voce atingiu o limite de fotos do seu plano.'),
+            const SizedBox(height: 12),
+            Text(
+              'Faca upgrade para adicionar mais fotos.',
+              style: TextStyle(
+                fontSize: 13,
+                color: CupertinoColors.secondaryLabel.resolveFrom(ctx),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: false,
+            child: const Text('Agora nao'),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('Ver planos'),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              Navigator.pushNamed(ctx, '/subscription/plans');
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _selectDocumentType(
+    BuildContext ctx,
+    File file,
+    String contentType,
+    String fileName, {
+    int? fileSize,
+  }) {
+    showCupertinoModalPopup(
+      context: ctx,
+      builder: (sheetCtx) => CupertinoActionSheet(
+        title: Text(ctx.l10n.selectDocumentType),
+        actions: [
+          for (final entry in {
+            OrderDocumentType.receipt: ctx.l10n.receipt,
+            OrderDocumentType.invoice: ctx.l10n.invoice,
+            OrderDocumentType.contract: ctx.l10n.contract,
+            OrderDocumentType.warranty: ctx.l10n.warranty,
+            OrderDocumentType.other: ctx.l10n.other,
+          }.entries)
+            CupertinoActionSheetAction(
+              child: Text(entry.value),
+              onPressed: () async {
+                Navigator.pop(sheetCtx);
+                final success = await _store.addDocument(
+                  file, entry.key, contentType, fileName,
+                  fileSize: fileSize,
+                );
+                if (ctx.mounted) {
+                  _showMediaFeedback(ctx, success);
+                }
+              },
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(ctx.l10n.cancel),
+          onPressed: () => Navigator.pop(sheetCtx),
+        ),
+      ),
+    );
+  }
+
+  void _showMediaFeedback(BuildContext ctx, bool success) {
+    showCupertinoDialog(
+      context: ctx,
+      builder: (dialogCtx) => CupertinoAlertDialog(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              success
+                  ? CupertinoIcons.checkmark_circle_fill
+                  : CupertinoIcons.xmark_circle_fill,
+              color: success
+                  ? CupertinoColors.systemGreen
+                  : CupertinoColors.systemRed,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(success
+                  ? ctx.l10n.documentAdded
+                  : ctx.l10n.errorUploadingDocument),
+            ),
+          ],
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: Text(ctx.l10n.ok),
+            onPressed: () => Navigator.pop(dialogCtx),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getContentTypeForExtension(String extension) {
+    switch (extension) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'doc':
+        return 'application/msword';
+      case 'docx':
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      default:
+        return 'application/octet-stream';
+    }
   }
 
   Color _getStatusColorCupertino(String? status) {
@@ -2364,5 +2960,384 @@ class _OrderFormState extends State<OrderForm> {
         );
       }
     }
+  }
+}
+
+/// Bottom sheet for configuring contract parameters
+class _ContractConfigSheet extends StatefulWidget {
+  final OrderContract contract;
+  final ValueChanged<String> onFrequencyChanged;
+  final ValueChanged<int> onIntervalChanged;
+  final ValueChanged<DateTime> onStartDateChanged;
+  final ValueChanged<DateTime?> onEndDateChanged;
+  final ValueChanged<bool> onAutoGenerateChanged;
+  final ValueChanged<int> onReminderDaysChanged;
+
+  const _ContractConfigSheet({
+    required this.contract,
+    required this.onFrequencyChanged,
+    required this.onIntervalChanged,
+    required this.onStartDateChanged,
+    required this.onEndDateChanged,
+    required this.onAutoGenerateChanged,
+    required this.onReminderDaysChanged,
+  });
+
+  @override
+  State<_ContractConfigSheet> createState() => _ContractConfigSheetState();
+}
+
+class _ContractConfigSheetState extends State<_ContractConfigSheet> {
+  late String _frequency;
+  late int _interval;
+  late DateTime _startDate;
+  DateTime? _endDate;
+  late bool _autoGenerate;
+  late int _reminderDays;
+
+  @override
+  void initState() {
+    super.initState();
+    _frequency = widget.contract.frequency ?? 'monthly';
+    _interval = widget.contract.interval ?? 1;
+    _startDate = widget.contract.startDate ?? DateTime.now();
+    _endDate = widget.contract.endDate;
+    _autoGenerate = widget.contract.autoGenerate ?? true;
+    _reminderDays = widget.contract.reminderDaysBefore ?? 3;
+  }
+
+  String _frequencyLabel(String frequency) {
+    switch (frequency) {
+      case 'daily':
+        return context.l10n.frequencyDaily;
+      case 'weekly':
+        return context.l10n.frequencyWeekly;
+      case 'monthly':
+        return context.l10n.frequencyMonthly;
+      case 'yearly':
+        return context.l10n.frequencyYearly;
+      default:
+        return frequency;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+      height: MediaQuery.of(context).size.height * 0.55,
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGroupedBackground.resolveFrom(context),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: CupertinoColors.systemBackground.resolveFrom(context),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  context.l10n.configure,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: CupertinoColors.label.resolveFrom(context),
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          // Content
+          Expanded(
+            child: ListView(
+              children: [
+                CupertinoListSection.insetGrouped(
+                  children: [
+                    // Frequency
+                    CupertinoListTile(
+                      title: Text(context.l10n.frequency),
+                      additionalInfo: Text(_frequencyLabel(_frequency)),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showFrequencyPicker(),
+                    ),
+                    // Interval
+                    CupertinoListTile(
+                      title: Text(context.l10n.interval),
+                      additionalInfo: Text('$_interval'),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showIntervalPicker(),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  children: [
+                    // Start date
+                    CupertinoListTile(
+                      title: Text(context.l10n.startDate),
+                      additionalInfo: Text(
+                        FormatService().formatDate(_startDate),
+                      ),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showStartDatePicker(),
+                    ),
+                    // End date
+                    CupertinoListTile(
+                      title: Text(context.l10n.endDate),
+                      additionalInfo: Text(
+                        _endDate != null
+                            ? FormatService().formatDate(_endDate!)
+                            : context.l10n.indefinite,
+                      ),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showEndDatePicker(),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  children: [
+                    // Auto-generate toggle
+                    CupertinoListTile(
+                      title: Text(context.l10n.contractAutoGenerate),
+                      trailing: CupertinoSwitch(
+                        value: _autoGenerate,
+                        onChanged: (val) {
+                          setState(() => _autoGenerate = val);
+                          widget.onAutoGenerateChanged(val);
+                        },
+                      ),
+                    ),
+                    // Reminder days
+                    CupertinoListTile(
+                      title: Text(context.l10n.contractReminderDays),
+                      additionalInfo: Text('$_reminderDays'),
+                      trailing: const CupertinoListTileChevron(),
+                      onTap: () => _showReminderDaysPicker(),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  child: Text(
+                    context.l10n.contractAutoGenerateDescription,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+    );
+  }
+
+  void _showFrequencyPicker() {
+    final options = ['daily', 'weekly', 'monthly', 'yearly'];
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: options.map((f) => CupertinoActionSheetAction(
+          onPressed: () {
+            setState(() => _frequency = f);
+            widget.onFrequencyChanged(f);
+            Navigator.pop(ctx);
+          },
+          child: Text(_frequencyLabel(f)),
+        )).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
+  void _showIntervalPicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 250,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            Expanded(
+              child: CupertinoPicker(
+                itemExtent: 32,
+                scrollController: FixedExtentScrollController(
+                  initialItem: _interval - 1,
+                ),
+                onSelectedItemChanged: (index) {
+                  setState(() => _interval = index + 1);
+                  widget.onIntervalChanged(index + 1);
+                },
+                children: List.generate(
+                  12,
+                  (i) => Center(child: Text('${i + 1}')),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showStartDatePicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 300,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: _startDate,
+                onDateTimeChanged: (date) {
+                  setState(() => _startDate = date);
+                  widget.onStartDateChanged(date);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEndDatePicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              setState(() => _endDate = null);
+              widget.onEndDateChanged(null);
+              Navigator.pop(ctx);
+            },
+            child: Text(context.l10n.indefinite),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showEndDatePickerDate();
+            },
+            child: Text(context.l10n.selectDate),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
+  void _showEndDatePickerDate() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 300,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: _endDate ?? DateTime.now().add(const Duration(days: 365)),
+                minimumDate: _startDate,
+                onDateTimeChanged: (date) {
+                  setState(() => _endDate = date);
+                  widget.onEndDateChanged(date);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showReminderDaysPicker() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        height: 250,
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  child: Text(context.l10n.done),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+            ),
+            Expanded(
+              child: CupertinoPicker(
+                itemExtent: 32,
+                scrollController: FixedExtentScrollController(
+                  initialItem: _reminderDays,
+                ),
+                onSelectedItemChanged: (index) {
+                  setState(() => _reminderDays = index);
+                  widget.onReminderDaysChanged(index);
+                },
+                children: List.generate(
+                  31,
+                  (i) => Center(child: Text('$i')),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

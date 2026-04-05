@@ -46,6 +46,20 @@ class NotificationService {
   static const String _remindersChannelDescription =
       'Lembretes de agendamento';
 
+  /// Engagement notification channel
+  static const String _engagementChannelId = 'engagement_channel';
+  static const String _engagementChannelName = 'Engajamento';
+  static const String _engagementChannelDescription =
+      'Lembretes de engajamento e OS pendentes';
+
+  /// Engagement notification IDs (reserved range 900000000+)
+  static const int dailyReminderId = 900000001;
+  static const int inactivity3dId = 900000002;
+  static const int inactivity5dId = 900000003;
+  static const int inactivity7dId = 900000004;
+  static const int _pendingOsBaseId = 910000000;
+  static const int _maxPendingOsNotifications = 50;
+
   /// Callback for handling notification taps - set this from your app
   void Function(String? orderId, String? companyId)? onNotificationTap;
 
@@ -212,6 +226,21 @@ class NotificationService {
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(remindersChannel);
+
+    // Engagement channel
+    const engagementChannel = AndroidNotificationChannel(
+      _engagementChannelId,
+      _engagementChannelName,
+      description: _engagementChannelDescription,
+      importance: Importance.defaultImportance,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(engagementChannel);
   }
 
   /// Handle foreground messages
@@ -407,4 +436,169 @@ class NotificationService {
     }
     return map;
   }
+
+  // ─── Engagement Notifications ────────────────────────────────────────
+
+  NotificationDetails get _engagementNotificationDetails => NotificationDetails(
+        android: AndroidNotificationDetails(
+          _engagementChannelId,
+          _engagementChannelName,
+          channelDescription: _engagementChannelDescription,
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+          icon: '@mipmap/ic_launcher',
+        ),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      );
+
+  /// Schedule daily reminder at 9 AM using recurring schedule
+  Future<void> scheduleDailyReminder({
+    required String title,
+    required String body,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(tz.local, now.year, now.month, now.day, 9);
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    await _localNotifications.zonedSchedule(
+      dailyReminderId,
+      title,
+      body,
+      scheduledDate,
+      _engagementNotificationDetails,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+    debugPrint('[NotificationService] Scheduled daily reminder at 09:00');
+  }
+
+  /// Cancel daily reminder
+  Future<void> cancelDailyReminder() async {
+    await _localNotifications.cancel(dailyReminderId);
+    debugPrint('[NotificationService] Cancelled daily reminder');
+  }
+
+  /// Schedule inactivity reminders at 3, 5, and 7 days from now
+  Future<void> scheduleInactivityReminders({
+    required String title3d,
+    required String body3d,
+    required String title5d,
+    required String body5d,
+    required String title7d,
+    required String body7d,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+
+    await _localNotifications.zonedSchedule(
+      inactivity3dId,
+      title3d,
+      body3d,
+      now.add(const Duration(days: 3)),
+      _engagementNotificationDetails,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+
+    await _localNotifications.zonedSchedule(
+      inactivity5dId,
+      title5d,
+      body5d,
+      now.add(const Duration(days: 5)),
+      _engagementNotificationDetails,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+
+    await _localNotifications.zonedSchedule(
+      inactivity7dId,
+      title7d,
+      body7d,
+      now.add(const Duration(days: 7)),
+      _engagementNotificationDetails,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+    );
+
+    debugPrint('[NotificationService] Scheduled inactivity reminders (3d, 5d, 7d)');
+  }
+
+  /// Cancel all inactivity reminders
+  Future<void> cancelInactivityReminders() async {
+    await _localNotifications.cancel(inactivity3dId);
+    await _localNotifications.cancel(inactivity5dId);
+    await _localNotifications.cancel(inactivity7dId);
+    debugPrint('[NotificationService] Cancelled inactivity reminders');
+  }
+
+  /// Schedule pending OS reminders from a list of items
+  Future<void> schedulePendingOsReminders(
+      List<PendingOsNotification> items) async {
+    final limit = items.length > _maxPendingOsNotifications
+        ? _maxPendingOsNotifications
+        : items.length;
+
+    for (var i = 0; i < limit; i++) {
+      final item = items[i];
+      final tzTime = tz.TZDateTime.from(item.scheduledTime, tz.local);
+      if (tzTime.isBefore(tz.TZDateTime.now(tz.local))) continue;
+
+      final payload =
+          item.orderId != null ? 'orderId=${item.orderId}' : '';
+
+      await _localNotifications.zonedSchedule(
+        _pendingOsBaseId + i,
+        item.title,
+        item.body,
+        tzTime,
+        _engagementNotificationDetails,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        payload: payload,
+      );
+    }
+    debugPrint(
+        '[NotificationService] Scheduled $limit pending OS reminders');
+  }
+
+  /// Cancel all pending OS reminders
+  Future<void> cancelPendingOsReminders() async {
+    for (var i = 0; i < _maxPendingOsNotifications; i++) {
+      await _localNotifications.cancel(_pendingOsBaseId + i);
+    }
+    debugPrint('[NotificationService] Cancelled pending OS reminders');
+  }
+
+  /// Cancel all engagement notifications (daily + inactivity + pending OS)
+  Future<void> cancelAllEngagementNotifications() async {
+    await cancelDailyReminder();
+    await cancelInactivityReminders();
+    await cancelPendingOsReminders();
+  }
+}
+
+/// Data class for pending OS notification scheduling
+class PendingOsNotification {
+  final String title;
+  final String body;
+  final DateTime scheduledTime;
+  final String? orderId;
+
+  PendingOsNotification({
+    required this.title,
+    required this.body,
+    required this.scheduledTime,
+    this.orderId,
+  });
 }

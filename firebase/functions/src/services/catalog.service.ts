@@ -98,7 +98,7 @@ export async function searchServices(
   const keyword = normalizeSearchTerm(query);
   if (!keyword) return [];
 
-  // 1. Primary search: by keywords (new records with keywords field)
+  // 1. Primary search: by keywords (full phrase match)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
@@ -111,17 +111,69 @@ export async function searchServices(
     })) as Service[];
   }
 
-  // 2. Fallback: search by name in memory (old records without keywords)
+  // 2. Individual word search when phrase has multiple words
+  const words = keyword.split(' ').filter((w) => w.length > 1);
+  if (words.length > 1) {
+    const wordResults = await Promise.all(
+      words.map((word) =>
+        collection.where('keywords', 'array-contains', word).limit(limit).get()
+      )
+    );
+
+    const scoreMap = new Map<string, { doc: Service; score: number }>();
+    for (const snap of wordResults) {
+      for (const doc of snap.docs) {
+        const existing = scoreMap.get(doc.id);
+        if (existing) {
+          existing.score++;
+        } else {
+          scoreMap.set(doc.id, {
+            doc: { ...doc.data(), id: doc.id } as Service,
+            score: 1,
+          });
+        }
+      }
+    }
+
+    if (scoreMap.size > 0) {
+      return [...scoreMap.values()]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map((entry) => entry.doc);
+    }
+  }
+
+  // 3. Fallback: search by name in memory (old records without keywords)
   const allSnapshot = await collection
     .orderBy('name')
     .limit(100)
     .get();
 
+  const allDocs = allSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Service));
   const queryNormalized = removeAccents(query.toLowerCase());
-  return allSnapshot.docs
-    .map((doc) => ({ ...doc.data(), id: doc.id } as Service))
-    .filter((s) => removeAccents(s.name?.toLowerCase() || '').includes(queryNormalized))
-    .slice(0, limit);
+
+  // Try full phrase match on name first
+  const phraseMatches = allDocs.filter((s) =>
+    removeAccents(s.name?.toLowerCase() || '').includes(queryNormalized)
+  );
+  if (phraseMatches.length > 0) return phraseMatches.slice(0, limit);
+
+  // Try individual word match on name (score by matches)
+  const queryWords = queryNormalized.split(/\s+/).filter((w) => w.length > 1);
+  if (queryWords.length > 1) {
+    const scored = allDocs
+      .map((s) => {
+        const nameLower = removeAccents(s.name?.toLowerCase() || '');
+        const score = queryWords.filter((w) => nameLower.includes(w)).length;
+        return { doc: s, score };
+      })
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    if (scored.length > 0) return scored.slice(0, limit).map((e) => e.doc);
+  }
+
+  return [];
 }
 
 export interface CreateServiceInput {
@@ -273,7 +325,7 @@ export async function searchProducts(
   const keyword = normalizeSearchTerm(query);
   if (!keyword) return [];
 
-  // 1. Primary search: by keywords (new records with keywords field)
+  // 1. Primary search: by keywords (full phrase match)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
@@ -286,17 +338,69 @@ export async function searchProducts(
     })) as Product[];
   }
 
-  // 2. Fallback: search by name in memory (old records without keywords)
+  // 2. Individual word search when phrase has multiple words
+  const words = keyword.split(' ').filter((w) => w.length > 1);
+  if (words.length > 1) {
+    const wordResults = await Promise.all(
+      words.map((word) =>
+        collection.where('keywords', 'array-contains', word).limit(limit).get()
+      )
+    );
+
+    const scoreMap = new Map<string, { doc: Product; score: number }>();
+    for (const snap of wordResults) {
+      for (const doc of snap.docs) {
+        const existing = scoreMap.get(doc.id);
+        if (existing) {
+          existing.score++;
+        } else {
+          scoreMap.set(doc.id, {
+            doc: { ...doc.data(), id: doc.id } as Product,
+            score: 1,
+          });
+        }
+      }
+    }
+
+    if (scoreMap.size > 0) {
+      return [...scoreMap.values()]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map((entry) => entry.doc);
+    }
+  }
+
+  // 3. Fallback: search by name in memory (old records without keywords)
   const allSnapshot = await collection
     .orderBy('name')
     .limit(100)
     .get();
 
+  const allDocs = allSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Product));
   const queryNormalized = removeAccents(query.toLowerCase());
-  return allSnapshot.docs
-    .map((doc) => ({ ...doc.data(), id: doc.id } as Product))
-    .filter((p) => removeAccents(p.name?.toLowerCase() || '').includes(queryNormalized))
-    .slice(0, limit);
+
+  // Try full phrase match on name first
+  const phraseMatches = allDocs.filter((p) =>
+    removeAccents(p.name?.toLowerCase() || '').includes(queryNormalized)
+  );
+  if (phraseMatches.length > 0) return phraseMatches.slice(0, limit);
+
+  // Try individual word match on name (score by matches)
+  const queryWords = queryNormalized.split(/\s+/).filter((w) => w.length > 1);
+  if (queryWords.length > 1) {
+    const scored = allDocs
+      .map((p) => {
+        const nameLower = removeAccents(p.name?.toLowerCase() || '');
+        const score = queryWords.filter((w) => nameLower.includes(w)).length;
+        return { doc: p, score };
+      })
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    if (scored.length > 0) return scored.slice(0, limit).map((e) => e.doc);
+  }
+
+  return [];
 }
 
 export interface CreateProductInput {

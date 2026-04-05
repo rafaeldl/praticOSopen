@@ -34,6 +34,16 @@
 				<string>fb2156455528501761</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleURLName</key>
+			<string>praticos</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>praticos</string>
+			</array>
+		</dict>
 	</array>
 	<key>FacebookAppID</key>
 	<string>2156455528501761</string>

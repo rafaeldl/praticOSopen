@@ -1,0 +1,78 @@
+# Flow 05: PDF Watermark (Free plan)
+# Generates a PDF and captures watermark
+appId: ${appId}
+tags:
+  - billing
+  - pdf
+  - visual
+
+---
+
+# Prerequisites: User must be logged in
+- assertVisible:
+    id: "tab_home"
+    timeout: 5000
+
+# Find an order with completed form to generate PDF
+- tapOn:
+    id: "order_card_.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Scroll to forms section
+- scroll:
+    direction: DOWN
+    duration: 1000
+
+# Find a completed form (checkmark icon)
+- tapOn:
+    id: "form_item_completed"
+    optional: true
+
+# Alternative: find any form item
+- tapOn:
+    id: "form_item_.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Look for PDF/Share button
+- tapOn:
+    id: "share_pdf_button"
+    optional: true
+
+- tapOn:
+    id: "export_button"
+    optional: true
+
+- tapOn:
+    text: ".*PDF.*|.*[Cc]ompartilhar.*|.*[Ss]hare.*|.*[Ee]xportar.*"
+    optional: true
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Capture PDF preview (should show watermark for Free plan)
+- takeScreenshot: "05_pdf_watermark_preview"
+
+# If there's a PDF viewer, scroll to see watermark
+- scroll:
+    direction: DOWN
+    duration: 500
+
+- takeScreenshot: "05_pdf_watermark_page2"
+
+# Cancel/close PDF preview
+- tapOn:
+    text: "Cancelar|Cancel|Fechar|Close|Done"
+    optional: true
+
+- back
+- back
+
+# Return to home
+- tapOn:
+    id: "tab_home"

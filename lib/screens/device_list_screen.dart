@@ -269,6 +269,12 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
           onTap: () {
             if (isSelectionMode) {
               Navigator.pop(context, device);
+            } else if (config.useDeviceManagement) {
+              Navigator.pushNamed(
+                context,
+                '/device_detail',
+                arguments: {'device': device},
+              );
             } else {
               Navigator.pushNamed(
                 context,
@@ -290,13 +296,31 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '${device.name ?? ''} ${device.serial ?? ''}',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: CupertinoColors.label.resolveFrom(context),
-                            ),
+                          Row(
+                            children: [
+                              if (config.useDeviceManagement) ...[
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: _statusColor(device.status),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                              ],
+                              Expanded(
+                                child: Text(
+                                  '${device.name ?? ''} ${device.serial ?? ''}',
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                    color: CupertinoColors.label.resolveFrom(context),
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
                           if (device.manufacturer != null && device.manufacturer!.isNotEmpty) ...[
                             const SizedBox(height: 2),
@@ -326,6 +350,21 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
         ),
       ),
     );
+  }
+
+  Color _statusColor(String? status) {
+    switch (status) {
+      case 'active':
+        return CupertinoColors.systemGreen;
+      case 'maintenance':
+        return CupertinoColors.systemOrange;
+      case 'inactive':
+        return CupertinoColors.systemGrey;
+      case 'decommissioned':
+        return CupertinoColors.systemRed;
+      default:
+        return CupertinoColors.systemGreen;
+    }
   }
 
   Widget _buildDeviceAvatar(Device device) {

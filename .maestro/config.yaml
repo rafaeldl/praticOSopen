@@ -1,0 +1,22 @@
+# Maestro Configuration for PraticOS
+# Documentation: https://maestro.mobile.dev/
+
+appId:
+  android: com.rafsoft.praticos
+  ios: com.rafsoft.praticos
+
+# Default tags for all flows
+tags:
+  - billing
+  - qa
+
+# Environment variables
+env:
+  DEMO_EMAIL: demo-pt@praticos.com.br
+  DEMO_PASSWORD: Demo@2024!
+
+# Screenshot output directory
+outputDir: .maestro/screenshots
+
+# Implicit wait timeout (ms)
+waitTimeout: 10000

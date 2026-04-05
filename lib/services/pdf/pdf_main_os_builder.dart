@@ -1,6 +1,7 @@
 import 'package:pdf/pdf.dart';
-import 'package:praticos/services/format_service.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:praticos/models/device.dart';
+import 'package:praticos/services/format_service.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
@@ -8,13 +9,14 @@ import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
 import 'package:praticos/services/pdf/pdf_styles.dart';
 
-/// Builder para a pagina principal da OS no PDF
+/// Builder para a pagina principal da OS no PDF (layout compacto A4)
 class PdfMainOsBuilder {
   final pw.Font baseFont;
   final pw.Font boldFont;
   final pw.MemoryImage? logoImage;
   final SegmentConfigProvider config;
   final PdfLocalizations localizations;
+  final bool showWatermark;
 
   PdfMainOsBuilder({
     required this.baseFont,
@@ -22,6 +24,7 @@ class PdfMainOsBuilder {
     this.logoImage,
     required this.config,
     required this.localizations,
+    this.showWatermark = false,
   });
 
   // ============================================
@@ -32,319 +35,113 @@ class PdfMainOsBuilder {
     return FormatService().formatCurrency(value ?? 0.0);
   }
 
-  // ============================================
-  // HEADER
-  // ============================================
-
-  /// Constroi o header com fundo azul completo
-  pw.Widget buildHeader(Company company, Order order) {
-    final statusText = config.getStatus(order.status);
-
-    return pw.Column(
-      children: [
-        // Header com fundo azul completo
-        pw.Container(
-          width: double.infinity,
-          decoration: pw.BoxDecoration(
-            gradient: pw.LinearGradient(
-              colors: [
-                PdfStyles.primaryColor,
-                const PdfColor.fromInt(0xFF0d47a1), // Azul mais escuro
-              ],
-              begin: pw.Alignment.centerLeft,
-              end: pw.Alignment.centerRight,
-            ),
-          ),
-          padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              // Logo + Company Info
-              pw.Expanded(
-                flex: 3,
-                child: pw.Row(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    if (logoImage != null) ...[
-                      pw.Container(
-                        width: 40,
-                        height: 40,
-                        decoration: pw.BoxDecoration(
-                          color: PdfColors.white,
-                          borderRadius: pw.BorderRadius.circular(4),
-                        ),
-                        padding: const pw.EdgeInsets.all(4),
-                        child: pw.Image(logoImage!, fit: pw.BoxFit.contain),
-                      ),
-                      pw.SizedBox(width: 12),
-                    ],
-                    pw.Expanded(
-                      child: pw.Column(
-                        crossAxisAlignment: pw.CrossAxisAlignment.start,
-                        children: [
-                          pw.Text(
-                            config.serviceOrder.toUpperCase(),
-                            style: pw.TextStyle(
-                              font: boldFont,
-                              fontSize: 16.0,
-                              color: PdfColors.white,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                          pw.SizedBox(height: 3),
-                          pw.Text(
-                            company.name ?? '',
-                            style: pw.TextStyle(
-                              font: boldFont,
-                              fontSize: 10.0,
-                              color: PdfColors.white,
-                            ),
-                          ),
-                          pw.SizedBox(height: 3),
-                          // Contatos da empresa
-                          if (company.phone != null && company.phone!.isNotEmpty)
-                            pw.Text(
-                              company.phone!,
-                              style: pw.TextStyle(
-                                font: baseFont,
-                                fontSize: 8.0,
-                                color: PdfColors.white,
-                              ),
-                            ),
-                          if (company.email != null && company.email!.isNotEmpty)
-                            pw.Text(
-                              company.email!,
-                              style: pw.TextStyle(
-                                font: baseFont,
-                                fontSize: 8.0,
-                                color: PdfColors.white,
-                              ),
-                            ),
-                          if (company.site != null && company.site!.isNotEmpty)
-                            pw.Text(
-                              company.site!,
-                              style: pw.TextStyle(
-                                font: baseFont,
-                                fontSize: 8.0,
-                                color: PdfColors.white,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // OS Number and Info
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.end,
-                children: [
-                  pw.Text(
-                    '${config.serviceOrder.toUpperCase()} Nº',
-                    style: pw.TextStyle(
-                      font: baseFont,
-                      fontSize: 7.0,
-                      color: PdfColors.white,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  pw.Text(
-                    order.number?.toString() ?? localizations.newOrder,
-                    style: pw.TextStyle(
-                      font: boldFont,
-                      fontSize: 20.0,
-                      color: PdfColors.white,
-                    ),
-                  ),
-                  pw.SizedBox(height: 3),
-                  if (order.createdAt != null)
-                    pw.Text(
-                      FormatService().formatDate(order.createdAt!),
-                      style: pw.TextStyle(
-                        font: baseFont,
-                        fontSize: 8.0,
-                        color: PdfColors.white,
-                      ),
-                    ),
-                  pw.SizedBox(height: 3),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: pw.BoxDecoration(
-                      color: PdfColors.white,
-                      borderRadius: pw.BorderRadius.circular(2),
-                    ),
-                    child: pw.Text(
-                      statusText.toUpperCase(),
-                      style: pw.TextStyle(
-                        font: boldFont,
-                        fontSize: 6.5,
-                        color: PdfStyles.primaryDark,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        pw.SizedBox(height: 12),
-      ],
-    );
+  String _formatDate(DateTime? date) {
+    if (date == null) return '--';
+    return FormatService().formatDate(date);
   }
 
   // ============================================
-  // FOOTER
+  // HEADER (gradient teal)
   // ============================================
 
-  /// Constroi o footer com informacoes do PraticOS
-  pw.Widget buildFooter(
-    pw.Context context,
-    pw.MemoryImage? praticosLogo,
-    pw.MemoryImage? appStoreBadge,
-    pw.MemoryImage? playStoreBadge,
-  ) {
-    const appStoreUrl = 'https://apps.apple.com/br/app/praticos/id1534604555';
-    const playStoreUrl = 'https://play.google.com/store/apps/details?id=br.com.rafsoft.praticos';
-    const siteUrl = 'https://praticos.web.app';
-
+  pw.Widget buildHeader(Company company, Order order) {
     return pw.Container(
-      margin: const pw.EdgeInsets.only(top: 20),
-      padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+      width: double.infinity,
       decoration: const pw.BoxDecoration(
-        border: pw.Border(
-          top: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+        gradient: pw.LinearGradient(
+          colors: [PdfStyles.headerGradientStart, PdfStyles.headerGradientEnd],
+          begin: pw.Alignment.centerLeft,
+          end: pw.Alignment.centerRight,
         ),
       ),
+      padding: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 16),
       child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          // Paginacao
-          pw.Text(
-            localizations.formatPageOf(context.pageNumber, context.pagesCount),
-            style: pw.TextStyle(
-              font: baseFont,
-              fontSize: 7,
-              color: PdfStyles.textSecondary,
+          // Logo + Company Info
+          pw.Expanded(
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                if (logoImage != null) ...[
+                  pw.Container(
+                    width: 40,
+                    height: 40,
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.white,
+                      borderRadius: pw.BorderRadius.circular(8),
+                    ),
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Image(logoImage!, fit: pw.BoxFit.contain),
+                  ),
+                  pw.SizedBox(width: 12),
+                ],
+                pw.Expanded(
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        company.name ?? '',
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 10.0,
+                          color: PdfColors.white,
+                        ),
+                      ),
+                      pw.SizedBox(height: 2),
+                      if (company.address != null && company.address!.isNotEmpty)
+                        pw.Text(
+                          company.address!,
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 8.0,
+                            color: const PdfColor.fromInt(0xBBFFFFFF),
+                          ),
+                        ),
+                      if (company.phone != null && company.phone!.isNotEmpty)
+                        pw.Text(
+                          company.phone!,
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 8.0,
+                            color: const PdfColor.fromInt(0xBBFFFFFF),
+                          ),
+                        ),
+                      if (company.email != null && company.email!.isNotEmpty)
+                        pw.Text(
+                          company.email!,
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 8.0,
+                            color: const PdfColor.fromInt(0xBBFFFFFF),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // Logo + Texto PraticOS + Site com link
-          pw.Row(
-            mainAxisSize: pw.MainAxisSize.min,
+          // OS Number
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              if (praticosLogo != null) ...[
-                pw.Container(
-                  width: 16,
-                  height: 16,
-                  child: pw.Image(praticosLogo, fit: pw.BoxFit.contain),
-                ),
-                pw.SizedBox(width: 6),
-              ],
               pw.Text(
-                '${localizations.generatedByPraticos} | ',
+                config.serviceOrder.toUpperCase(),
                 style: pw.TextStyle(
                   font: baseFont,
-                  fontSize: 7,
-                  color: PdfStyles.textSecondary,
+                  fontSize: 9.0,
+                  color: const PdfColor.fromInt(0x99FFFFFF),
                 ),
               ),
-              pw.UrlLink(
-                destination: siteUrl,
-                child: pw.Text(
-                  'https://praticos.web.app',
-                  style: pw.TextStyle(
-                    font: boldFont,
-                    fontSize: 7,
-                    color: PdfStyles.primaryColor,
-                    decoration: pw.TextDecoration.underline,
-                  ),
+              pw.Text(
+                '#${order.number?.toString() ?? localizations.newOrder}',
+                style: pw.TextStyle(
+                  font: boldFont,
+                  fontSize: 22.0,
+                  color: PdfColors.white,
                 ),
-              ),
-            ],
-          ),
-
-          // Badges das lojas
-          pw.Row(
-            mainAxisSize: pw.MainAxisSize.min,
-            children: [
-              // App Store
-              pw.UrlLink(
-                destination: appStoreUrl,
-                child: appStoreBadge != null
-                    ? pw.Container(
-                        height: 16,
-                        child: pw.Image(appStoreBadge, fit: pw.BoxFit.contain),
-                      )
-                    : pw.Container(
-                        padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                        decoration: pw.BoxDecoration(
-                          color: PdfColors.black,
-                          borderRadius: pw.BorderRadius.circular(4),
-                        ),
-                        child: pw.Row(
-                          mainAxisSize: pw.MainAxisSize.min,
-                          children: [
-                            pw.Text(
-                              '',
-                              style: pw.TextStyle(
-                                font: baseFont,
-                                fontSize: 10,
-                                color: PdfColors.white,
-                              ),
-                            ),
-                            pw.SizedBox(width: 3),
-                            pw.Text(
-                              'App Store',
-                              style: pw.TextStyle(
-                                font: boldFont,
-                                fontSize: 6,
-                                color: PdfColors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-              ),
-              pw.SizedBox(width: 6),
-              // Play Store
-              pw.UrlLink(
-                destination: playStoreUrl,
-                child: playStoreBadge != null
-                    ? pw.Container(
-                        height: 20,
-                        child: pw.Image(playStoreBadge, fit: pw.BoxFit.contain),
-                      )
-                    : pw.Container(
-                        padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                        decoration: pw.BoxDecoration(
-                          color: PdfColors.black,
-                          borderRadius: pw.BorderRadius.circular(4),
-                        ),
-                        child: pw.Row(
-                          mainAxisSize: pw.MainAxisSize.min,
-                          children: [
-                            pw.Text(
-                              '▶',
-                              style: pw.TextStyle(
-                                font: baseFont,
-                                fontSize: 8,
-                                color: PdfColors.green400,
-                              ),
-                            ),
-                            pw.SizedBox(width: 3),
-                            pw.Text(
-                              'Google Play',
-                              style: pw.TextStyle(
-                                font: boldFont,
-                                fontSize: 6,
-                                color: PdfColors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
               ),
             ],
           ),
@@ -354,266 +151,209 @@ class PdfMainOsBuilder {
   }
 
   // ============================================
-  // CARDS DE CLIENTE E EQUIPAMENTO
+  // STATUS BAR
   // ============================================
 
-  /// Constroi o card de cliente
-  pw.Widget buildCustomerCard(Customer? customer) {
-    return pw.Expanded(
-      child: pw.Container(
-        padding: const pw.EdgeInsets.all(12),
-        decoration: PdfStyles.cardDecoration(),
-        child: pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              config.customer.toUpperCase(),
-              style: pw.TextStyle(
-                font: boldFont,
-                fontSize: 8,
-                color: PdfStyles.primaryDark,
-                letterSpacing: 0.5,
-              ),
-            ),
-            pw.SizedBox(height: 6),
-            pw.Text(
-              customer?.name ?? localizations.notInformed,
-              style: pw.TextStyle(
-                font: boldFont,
-                fontSize: 12,
-                color: PdfColors.grey800,
-              ),
-            ),
-            if (customer?.phone != null && customer!.phone!.isNotEmpty) ...[
-              pw.SizedBox(height: 4),
-              pw.Text(
-                customer.phone!,
-                style: pw.TextStyle(
-                  font: baseFont,
-                  fontSize: 9,
-                  color: PdfStyles.textSecondary,
-                ),
-              ),
-            ],
-            if (customer?.email != null && customer!.email!.isNotEmpty) ...[
-              pw.SizedBox(height: 2),
-              pw.Text(
-                customer.email!,
-                style: pw.TextStyle(
-                  font: baseFont,
-                  fontSize: 9,
-                  color: PdfStyles.textSecondary,
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+  pw.Widget buildStatusBar(Order order) {
+    final statusText = config.getStatus(order.status);
+    final statusColor = PdfStyles.getStatusColor(order.status);
+    final techName = order.assignedTo?.name;
 
-  /// Constroi o card de equipamento/dispositivo
-  pw.Widget buildDeviceCard(Order order) {
-    return pw.Expanded(
-      child: pw.Container(
-        padding: const pw.EdgeInsets.all(12),
-        decoration: PdfStyles.cardDecoration(),
-        child: pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text(
-              config.device.toUpperCase(),
-              style: pw.TextStyle(
-                font: boldFont,
-                fontSize: 8,
-                color: PdfStyles.primaryDark,
-                letterSpacing: 0.5,
-              ),
-            ),
-            pw.SizedBox(height: 6),
-            pw.Text(
-              order.device?.name ?? localizations.notInformed,
-              style: pw.TextStyle(
-                font: boldFont,
-                fontSize: 12,
-                color: PdfColors.grey800,
-              ),
-            ),
-            if (order.device?.serial != null && order.device!.serial!.isNotEmpty) ...[
-              pw.SizedBox(height: 4),
+    return pw.Container(
+      width: double.infinity,
+      color: PdfStyles.statusBarBg,
+      padding: const pw.EdgeInsets.symmetric(horizontal: 32, vertical: 6),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          // Left: status dot + status text + technician
+          pw.Row(
+            children: [
               pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                width: 6,
+                height: 6,
                 decoration: pw.BoxDecoration(
-                  color: PdfColors.grey300,
-                  borderRadius: pw.BorderRadius.circular(3),
+                  color: statusColor,
+                  shape: pw.BoxShape.circle,
                 ),
-                child: pw.Text(
-                  order.device!.serial!,
+              ),
+              pw.SizedBox(width: 4),
+              pw.Text(
+                statusText.toUpperCase(),
+                style: pw.TextStyle(
+                  font: boldFont,
+                  fontSize: 8,
+                  color: statusColor,
+                ),
+              ),
+              if (techName != null && techName.isNotEmpty) ...[
+                pw.SizedBox(width: 6),
+                pw.Text(
+                  ' · ',
                   style: pw.TextStyle(
-                    font: boldFont,
-                    fontSize: 10,
-                    color: PdfColors.grey800,
+                    font: baseFont,
+                    fontSize: 8,
+                    color: PdfStyles.textMuted,
                   ),
                 ),
-              ),
+                pw.Text(
+                  '${localizations.technician}: $techName',
+                  style: pw.TextStyle(
+                    font: baseFont,
+                    fontSize: 8,
+                    color: PdfStyles.textSecondary,
+                  ),
+                ),
+              ],
             ],
-          ],
-        ),
+          ),
+
+          // Right: dates
+          pw.Row(
+            children: [
+              pw.Text(
+                '${localizations.createdDate}: ${_formatDate(order.createdAt)}',
+                style: pw.TextStyle(font: baseFont, fontSize: 7.5, color: PdfStyles.textMuted),
+              ),
+              if (order.status == 'done' && order.updatedAt != null) ...[
+                pw.Text(
+                  '  ·  ${localizations.completedDate}: ${_formatDate(order.updatedAt)}',
+                  style: pw.TextStyle(font: baseFont, fontSize: 7.5, color: PdfStyles.textMuted),
+                ),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }
 
   // ============================================
-  // TABELAS
+  // SECTION HEADER
   // ============================================
 
-  pw.Widget _buildTableHeader(String text, {bool alignRight = false}) {
+  pw.Widget _buildSectionHeader(String title) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      padding: const pw.EdgeInsets.only(bottom: 6),
       child: pw.Text(
-        text,
-        textAlign: alignRight ? pw.TextAlign.right : pw.TextAlign.left,
+        title.toUpperCase(),
         style: pw.TextStyle(
           font: boldFont,
-          fontSize: 8.0,
-          color: PdfStyles.textSecondary,
+          fontSize: 7.5,
+          color: PdfStyles.sectionIconColor,
+          letterSpacing: 1,
         ),
       ),
     );
   }
 
-  pw.Widget _buildTableCell(String text, {bool alignRight = false, bool alignCenter = false}) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      child: pw.Text(
-        text,
-        textAlign: alignRight ? pw.TextAlign.right : (alignCenter ? pw.TextAlign.center : pw.TextAlign.left),
-        style: pw.TextStyle(
-          font: baseFont,
-          fontSize: 9.0,
-          color: PdfColors.black,
-        ),
-      ),
-    );
-  }
+  // ============================================
+  // CLIENT + FINANCIAL (side by side)
+  // ============================================
 
-  /// Constroi a tabela de servicos
-  pw.Widget buildServicesTable(Order order) {
-    if (order.services == null || order.services!.isEmpty) {
-      return pw.SizedBox();
+  pw.Widget buildClientAndFinancial(Customer? customer, Order order) {
+    final customerParts = <String>[];
+    if (customer?.phone != null && customer!.phone!.isNotEmpty) {
+      customerParts.add(customer.phone!);
+    }
+    if (customer?.email != null && customer!.email!.isNotEmpty) {
+      customerParts.add(customer.email!);
     }
 
-    return pw.Table(
-      border: pw.TableBorder(
-        bottom: const pw.BorderSide(color: PdfColors.grey300, width: 0.5),
-        horizontalInside: const pw.BorderSide(color: PdfColors.grey200, width: 0.5),
-      ),
-      columnWidths: {
-        0: const pw.FlexColumnWidth(3),
-        1: const pw.FixedColumnWidth(80),
-      },
+    // Use Table so both cells share the same row height
+    return pw.Column(
       children: [
-        pw.TableRow(
-          decoration: pw.BoxDecoration(color: PdfStyles.backgroundLight),
+        // Headers side by side
+        pw.Row(
           children: [
-            _buildTableHeader(localizations.serviceDescriptionColumn),
-            _buildTableHeader(localizations.value, alignRight: true),
+            pw.Expanded(child: _buildSectionHeader(config.customer)),
+            pw.SizedBox(width: 12),
+            pw.SizedBox(width: 260, child: _buildSectionHeader(localizations.summary)),
           ],
         ),
-        ...order.services!.map((s) {
-          final description = s.description != null && s.description!.isNotEmpty
-              ? '${s.service?.name ?? ''} - ${s.description}'
-              : s.service?.name ?? '';
-          return pw.TableRow(
-            children: [
-              _buildTableCell(description),
-              _buildTableCell(_formatCurrency(s.value), alignRight: true),
-            ],
-          );
-        }),
-      ],
-    );
-  }
-
-  /// Constroi a tabela de produtos
-  pw.Widget buildProductsTable(Order order) {
-    if (order.products == null || order.products!.isEmpty) {
-      return pw.SizedBox();
-    }
-
-    return pw.Table(
-      border: pw.TableBorder(
-        bottom: const pw.BorderSide(color: PdfColors.grey300, width: 0.5),
-        horizontalInside: const pw.BorderSide(color: PdfColors.grey200, width: 0.5),
-      ),
-      columnWidths: {
-        0: const pw.FixedColumnWidth(40),
-        1: const pw.FlexColumnWidth(3),
-        2: const pw.FixedColumnWidth(70),
-        3: const pw.FixedColumnWidth(70),
-      },
-      children: [
-        pw.TableRow(
-          decoration: pw.BoxDecoration(color: PdfStyles.backgroundLight),
+        // Cards with equal height via Table row
+        pw.Table(
+          columnWidths: {
+            0: const pw.FlexColumnWidth(),
+            1: const pw.FixedColumnWidth(12),
+            2: const pw.FixedColumnWidth(260),
+          },
           children: [
-            _buildTableHeader(localizations.quantityShort),
-            _buildTableHeader(localizations.descriptionColumn),
-            _buildTableHeader(localizations.unitShort, alignRight: true),
-            _buildTableHeader(localizations.total, alignRight: true),
+            pw.TableRow(
+              verticalAlignment: pw.TableCellVerticalAlignment.full,
+              children: [
+                // Client card
+                pw.Container(
+                  padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  decoration: pw.BoxDecoration(
+                    borderRadius: pw.BorderRadius.circular(4),
+                    border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        customer?.name ?? localizations.notInformed,
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 10,
+                          color: PdfStyles.textPrimary,
+                        ),
+                      ),
+                      if (customerParts.isNotEmpty) ...[
+                        pw.SizedBox(height: 3),
+                        pw.Text(
+                          customerParts.join(' · '),
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 8,
+                            color: PdfStyles.textSecondary,
+                          ),
+                          maxLines: 2,
+                        ),
+                      ],
+                      // Service Location inside client card
+                      if (order.address != null && order.address!.isNotEmpty) ...[
+                        pw.SizedBox(height: 6),
+                        pw.Text(
+                          localizations.serviceLocation.toUpperCase(),
+                          style: pw.TextStyle(
+                            font: boldFont,
+                            fontSize: 7,
+                            color: PdfStyles.textMuted,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        pw.SizedBox(height: 2),
+                        pw.Text(
+                          order.address!,
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 8.5,
+                            color: PdfStyles.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                // Spacer column
+                pw.SizedBox(),
+                // Financial summary
+                _buildFinancialCard(order),
+              ],
+            ),
           ],
         ),
-        ...order.products!.map((p) {
-          final description = p.description != null && p.description!.isNotEmpty
-              ? '${p.product?.name ?? ''} - ${p.description}'
-              : p.product?.name ?? '';
-          return pw.TableRow(
-            children: [
-              _buildTableCell(p.quantity?.toString() ?? '1', alignCenter: true),
-              _buildTableCell(description),
-              _buildTableCell(_formatCurrency(p.value), alignRight: true),
-              _buildTableCell(_formatCurrency(p.total), alignRight: true),
-            ],
-          );
-        }),
       ],
     );
   }
 
   // ============================================
-  // CABECALHOS DE SECAO
+  // FINANCIAL CARD
   // ============================================
 
-  /// Constroi o cabecalho de uma secao
-  pw.Widget buildSectionHeader(String title, String subtitle) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-        pw.Text(
-          title,
-          style: pw.TextStyle(
-            font: boldFont,
-            color: PdfStyles.primaryDark,
-            fontSize: 10,
-            letterSpacing: 0.5,
-          ),
-        ),
-        pw.Text(
-          subtitle,
-          style: pw.TextStyle(
-            font: baseFont,
-            color: PdfColors.grey500,
-            fontSize: 8,
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ============================================
-  // RESUMO E TOTAIS
-  // ============================================
-
-  pw.Widget _buildSummaryRow(String label, double value, {bool isBold = false, PdfColor? color}) {
+  pw.Widget _buildFinancialSummaryRow(String label, String value, {bool isBold = false, PdfColor? color}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.symmetric(vertical: 2),
       child: pw.Row(
@@ -623,15 +363,16 @@ class PdfMainOsBuilder {
             label,
             style: pw.TextStyle(
               font: isBold ? boldFont : baseFont,
-              fontSize: 10,
+              fontSize: 8.5,
+              color: color ?? PdfStyles.textSecondary,
             ),
           ),
           pw.Text(
-            _formatCurrency(value),
+            value,
             style: pw.TextStyle(
               font: isBold ? boldFont : baseFont,
-              fontSize: 10,
-              color: color,
+              fontSize: isBold ? 12 : 8.5,
+              color: color ?? PdfStyles.textPrimary,
             ),
           ),
         ],
@@ -639,196 +380,603 @@ class PdfMainOsBuilder {
     );
   }
 
-  /// Constroi a secao de resumo com totais
-  pw.Widget buildTotalsSummary(Order order) {
+  pw.Widget _buildFinancialCard(Order order) {
     final totalServices = order.services?.fold(0.0, (sum, s) => sum + (s.value ?? 0)) ?? 0.0;
     final totalProducts = order.products?.fold(0.0, (sum, p) => sum + (p.total ?? 0)) ?? 0.0;
-    final subtotal = totalServices + totalProducts;
     final discount = order.discount ?? 0.0;
     final total = order.total ?? 0.0;
     final paidAmount = order.paidAmount ?? 0.0;
-    final remaining = total - paidAmount;
     final isPaid = order.payment == 'paid';
-    final hasPartialPayment = paidAmount > 0 && !isPaid;
 
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.end,
-      children: [
-        pw.Container(
-          width: 220,
-          decoration: pw.BoxDecoration(
-            borderRadius: pw.BorderRadius.circular(6),
-            border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
-          ),
-          child: pw.Column(
-            children: [
-              // Summary rows
-              pw.Container(
-                padding: const pw.EdgeInsets.all(10),
-                child: pw.Column(
-                  children: [
-                    if (totalServices > 0) _buildSummaryRow(localizations.services, totalServices),
-                    if (totalProducts > 0) _buildSummaryRow(localizations.products, totalProducts),
-                    pw.Divider(color: PdfStyles.borderColor, height: 16),
-                    _buildSummaryRow(localizations.subtotal, subtotal),
-                    if (discount > 0) _buildSummaryRow(localizations.discount, -discount, color: PdfColors.red600),
-                    _buildSummaryRow(localizations.total, total, isBold: true),
-                    // Mostrar pagamentos parciais
-                    if (hasPartialPayment) ...[
-                      pw.SizedBox(height: 4),
-                      pw.Divider(color: PdfStyles.borderColor, height: 8),
-                      pw.SizedBox(height: 4),
-                      _buildSummaryRow(localizations.alreadyPaid, paidAmount, color: PdfColors.green700),
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        borderRadius: pw.BorderRadius.circular(4),
+        border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
+      ),
+      child: pw.Column(
+        children: [
+          pw.Container(
+            padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: pw.Column(
+              children: [
+                if (totalServices > 0)
+                  _buildFinancialSummaryRow(localizations.services, _formatCurrency(totalServices)),
+                if (totalProducts > 0)
+                  _buildFinancialSummaryRow(localizations.products, _formatCurrency(totalProducts)),
+                if (discount > 0)
+                  _buildFinancialSummaryRow(localizations.discount, '- ${_formatCurrency(discount)}', color: PdfColors.red600),
+                pw.Divider(color: PdfStyles.borderColor, height: 12),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.symmetric(vertical: 2),
+                  child: pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        localizations.total.toUpperCase(),
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 10,
+                          color: PdfStyles.sectionIconColor,
+                        ),
+                      ),
+                      pw.Text(
+                        _formatCurrency(total),
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 12,
+                          color: PdfStyles.sectionIconColor,
+                        ),
+                      ),
                     ],
-                  ],
-                ),
-              ),
-              // Footer com status de pagamento
-              pw.Container(
-                padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                decoration: pw.BoxDecoration(
-                  color: isPaid
-                      ? PdfColors.green700
-                      : (hasPartialPayment ? PdfColors.orange700 : PdfStyles.primaryDark),
-                  borderRadius: const pw.BorderRadius.only(
-                    bottomLeft: pw.Radius.circular(5),
-                    bottomRight: pw.Radius.circular(5),
                   ),
                 ),
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text(
-                      isPaid
-                          ? localizations.totalPaid.toUpperCase()
-                          : (hasPartialPayment ? localizations.remainingBalance : localizations.totalToPay),
+                if (isPaid || paidAmount > 0) ...[
+                  pw.SizedBox(height: 4),
+                  _buildFinancialSummaryRow(
+                    localizations.paid,
+                    _formatCurrency(paidAmount > 0 ? paidAmount : total),
+                    color: const PdfColor.fromInt(0xFF16A34A),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================
+  // EQUIPMENT BLOCKS (multi-device)
+  // ============================================
+
+  pw.Widget _buildCompactTableHeader(String text, {pw.TextAlign align = pw.TextAlign.left}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+      child: pw.Text(
+        text,
+        textAlign: align,
+        style: pw.TextStyle(
+          font: boldFont,
+          fontSize: 7.5,
+          color: PdfStyles.sectionIconColor,
+        ),
+      ),
+    );
+  }
+
+  pw.Widget _buildCompactTableCell(String text, {
+    pw.TextAlign align = pw.TextAlign.left,
+    bool isBold = false,
+    PdfColor? color,
+  }) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 6),
+      child: pw.Text(
+        text,
+        textAlign: align,
+        style: pw.TextStyle(
+          font: isBold ? boldFont : baseFont,
+          fontSize: 8.5,
+          color: color ?? PdfStyles.textPrimary,
+        ),
+      ),
+    );
+  }
+
+  /// Builds a type badge cell (Servico/Peca) with color
+  pw.Widget _buildTypeBadge(String text, PdfColor color) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 4),
+      child: pw.Text(
+        text,
+        style: pw.TextStyle(
+          font: boldFont,
+          fontSize: 7,
+          color: color,
+        ),
+      ),
+    );
+  }
+
+  /// Builds a single equipment block with its services and products
+  pw.Widget buildEquipmentBlock({
+    required int deviceIndex,
+    required DeviceAggr device,
+    required List<OrderService> services,
+    required List<OrderProduct> products,
+    required bool showBadge,
+  }) {
+    final hasItems = services.isNotEmpty || products.isNotEmpty;
+
+    final subtotal = services.fold(0.0, (sum, s) => sum + (s.value ?? 0)) +
+        products.fold(0.0, (sum, p) => sum + (p.total ?? 0));
+
+    // Device metadata
+    final metaParts = <String>[];
+    if (device.serial != null && device.serial!.isNotEmpty) {
+      metaParts.add(device.serial!);
+    }
+    if (device.manufacturer != null && device.manufacturer!.isNotEmpty) {
+      metaParts.add(device.manufacturer!);
+    }
+
+    return pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          // Equipment header
+          pw.Container(
+            width: double.infinity,
+            decoration: pw.BoxDecoration(
+              color: PdfStyles.equipmentCardBg,
+              borderRadius: const pw.BorderRadius.only(
+                topLeft: pw.Radius.circular(6),
+                topRight: pw.Radius.circular(6),
+              ),
+              border: pw.Border.all(color: PdfStyles.equipmentCardBorder, width: 0.5),
+            ),
+            padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: pw.Row(
+              children: [
+                if (showBadge) ...[
+                  pw.Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const pw.BoxDecoration(
+                      color: PdfStyles.primaryColor,
+                      shape: pw.BoxShape.circle,
+                    ),
+                    alignment: pw.Alignment.center,
+                    child: pw.Text(
+                      '${deviceIndex + 1}',
                       style: pw.TextStyle(
                         font: boldFont,
-                        color: PdfColors.white,
                         fontSize: 9,
-                      ),
-                    ),
-                    pw.Text(
-                      _formatCurrency(isPaid ? total : remaining),
-                      style: pw.TextStyle(
-                        font: boldFont,
                         color: PdfColors.white,
-                        fontSize: 14,
                       ),
                     ),
+                  ),
+                  pw.SizedBox(width: 8),
+                ],
+                pw.Expanded(
+                  child: pw.Row(
+                    children: [
+                      pw.Text(
+                        device.name ?? localizations.equipment,
+                        style: pw.TextStyle(
+                          font: boldFont,
+                          fontSize: 10,
+                          color: PdfStyles.textPrimary,
+                        ),
+                      ),
+                      if (metaParts.isNotEmpty) ...[
+                        pw.SizedBox(width: 8),
+                        pw.Text(
+                          metaParts.join(' · '),
+                          style: pw.TextStyle(
+                            font: baseFont,
+                            fontSize: 8,
+                            color: PdfStyles.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (hasItems)
+                  pw.Text(
+                    _formatCurrency(subtotal),
+                    style: pw.TextStyle(
+                      font: boldFont,
+                      fontSize: 10,
+                      color: PdfStyles.sectionIconColor,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
+          // Unified table (services + products) - only if has items
+          if (hasItems)
+            pw.Table(
+              border: pw.TableBorder(
+                left: pw.BorderSide(color: PdfStyles.equipmentCardBorder, width: 0.5),
+                right: pw.BorderSide(color: PdfStyles.equipmentCardBorder, width: 0.5),
+                bottom: pw.BorderSide(color: PdfStyles.equipmentCardBorder, width: 0.5),
+                horizontalInside: pw.BorderSide(color: PdfStyles.dividerColor, width: 0.5),
+              ),
+              columnWidths: {
+                0: const pw.FixedColumnWidth(45),
+                1: const pw.FlexColumnWidth(),
+                2: const pw.FixedColumnWidth(28),
+                3: const pw.FixedColumnWidth(70),
+                4: const pw.FixedColumnWidth(70),
+              },
+              children: [
+                // Header row
+                pw.TableRow(
+                  decoration: const pw.BoxDecoration(color: PdfStyles.backgroundLighter),
+                  children: [
+                    _buildCompactTableHeader(localizations.itemType),
+                    _buildCompactTableHeader(localizations.descriptionColumn),
+                    _buildCompactTableHeader(localizations.quantityShort, align: pw.TextAlign.center),
+                    _buildCompactTableHeader(localizations.unitValue, align: pw.TextAlign.right),
+                    _buildCompactTableHeader(localizations.total, align: pw.TextAlign.right),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
-      ],
+                // Service rows
+                ...services.map((s) {
+                  final description = s.description != null && s.description!.isNotEmpty
+                      ? '${s.service?.name ?? ''} - ${s.description}'
+                      : s.service?.name ?? '';
+                  return pw.TableRow(
+                    children: [
+                      _buildTypeBadge(localizations.serviceType, PdfStyles.serviceTypeColor),
+                      _buildCompactTableCell(description),
+                      _buildCompactTableCell('1', align: pw.TextAlign.center, color: PdfStyles.textSecondary),
+                      _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
+                      _buildCompactTableCell(_formatCurrency(s.value), align: pw.TextAlign.right, isBold: true),
+                    ],
+                  );
+                }),
+                // Product rows
+                ...products.map((p) {
+                  final description = p.description != null && p.description!.isNotEmpty
+                      ? '${p.product?.name ?? ''} - ${p.description}'
+                      : p.product?.name ?? '';
+                  return pw.TableRow(
+                    children: [
+                      _buildTypeBadge(localizations.productType, PdfStyles.productTypeColor),
+                      _buildCompactTableCell(description),
+                      _buildCompactTableCell(p.quantity?.toString() ?? '1', align: pw.TextAlign.center, color: PdfStyles.textSecondary),
+                      _buildCompactTableCell(_formatCurrency(p.value), align: pw.TextAlign.right, color: PdfStyles.textSecondary),
+                      _buildCompactTableCell(_formatCurrency(p.total), align: pw.TextAlign.right, isBold: true),
+                    ],
+                  );
+                }),
+              ],
+            ),
+        ],
     );
   }
 
-  // ============================================
-  // ASSINATURA
-  // ============================================
+  /// Builds all equipment blocks for the order
+  pw.Widget buildEquipmentBlocks(Order order) {
+    final devices = order.effectiveDevices;
+    final isMulti = order.isMultiDevice;
 
-  /// Constroi a linha de assinatura
-  pw.Widget buildSignatureLine(Customer? customer) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.start,
-      children: [
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Container(
-              width: 250,
-              child: pw.Divider(color: PdfColors.grey600, thickness: 0.5),
-            ),
-            pw.SizedBox(height: 4),
-            pw.Text(
-              customer?.name ?? config.customer,
-              style: pw.TextStyle(
-                font: boldFont,
-                fontSize: 10,
-                color: PdfColors.grey800,
-              ),
-            ),
-            pw.Text(
-              localizations.customerSignature,
-              style: pw.TextStyle(
-                font: baseFont,
-                fontSize: 8,
-                color: PdfColors.grey500,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+    // If no devices, render a single block with all items
+    if (devices.isEmpty) {
+      final hasItems = (order.services != null && order.services!.isNotEmpty) ||
+          (order.products != null && order.products!.isNotEmpty);
+      if (!hasItems) return pw.SizedBox();
 
-  // ============================================
-  // FOTOS
-  // ============================================
+      return buildEquipmentBlock(
+        deviceIndex: 0,
+        device: DeviceAggr()..name = localizations.equipment,
+        services: order.services ?? [],
+        products: order.products ?? [],
+        showBadge: false,
+      );
+    }
 
-  /// Constroi o grid de fotos da OS
-  pw.Widget buildPhotosGrid(List<pw.MemoryImage>? photos, int totalCount) {
-    if (photos == null || photos.isEmpty) {
-      return pw.Container(
-        padding: const pw.EdgeInsets.all(12),
-        decoration: PdfStyles.cardDecoration(),
-        child: pw.Row(
-          children: [
-            pw.Icon(
-              const pw.IconData(0xe412),
-              size: 16,
-              color: PdfStyles.textSecondary,
-            ),
-            pw.SizedBox(width: 8),
-            pw.Text(
-              localizations.photosAvailableDigitally,
-              style: pw.TextStyle(
-                font: baseFont,
-                fontSize: 10.0,
-                color: PdfStyles.textSecondary,
-                fontStyle: pw.FontStyle.italic,
-              ),
-            ),
-          ],
+    // Single device: render one block without badge
+    if (!isMulti) {
+      return buildEquipmentBlock(
+        deviceIndex: 0,
+        device: devices.first,
+        services: order.services ?? [],
+        products: order.products ?? [],
+        showBadge: false,
+      );
+    }
+
+    // Multi device: group items by deviceId
+    final blocks = <pw.Widget>[];
+
+    // Collect general items (no deviceId)
+    final generalServices = (order.services ?? [])
+        .where((s) => s.deviceId == null || s.deviceId!.isEmpty)
+        .toList();
+    final generalProducts = (order.products ?? [])
+        .where((p) => p.deviceId == null || p.deviceId!.isEmpty)
+        .toList();
+
+    for (var i = 0; i < devices.length; i++) {
+      final device = devices[i];
+      final deviceId = device.id;
+
+      final deviceServices = (order.services ?? [])
+          .where((s) => s.deviceId == deviceId)
+          .toList();
+      final deviceProducts = (order.products ?? [])
+          .where((p) => p.deviceId == deviceId)
+          .toList();
+
+      if (blocks.isNotEmpty) {
+        blocks.add(pw.SizedBox(height: 10));
+      }
+
+      blocks.add(
+        buildEquipmentBlock(
+          deviceIndex: i,
+          device: device,
+          services: deviceServices,
+          products: deviceProducts,
+          showBadge: true,
         ),
       );
+    }
+
+    // Add general items block (items without deviceId)
+    if (generalServices.isNotEmpty || generalProducts.isNotEmpty) {
+      if (blocks.isNotEmpty) {
+        blocks.add(pw.SizedBox(height: 10));
+      }
+      blocks.add(
+        buildEquipmentBlock(
+          deviceIndex: devices.length,
+          device: DeviceAggr()..name = localizations.general,
+          services: generalServices,
+          products: generalProducts,
+          showBadge: false,
+        ),
+      );
+    }
+
+    if (blocks.isEmpty) return pw.SizedBox();
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: blocks,
+    );
+  }
+
+  // ============================================
+  // QR CODE BLOCK
+  // ============================================
+
+  pw.Widget buildQrCodeBlock(Order order) {
+    final shareUrl = order.shareLink?.url;
+    if (shareUrl == null) return pw.SizedBox();
+
+    return pw.Container(
+      width: double.infinity,
+      padding: const pw.EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: pw.BoxDecoration(
+        borderRadius: pw.BorderRadius.circular(4),
+        border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
+      ),
+      child: pw.Row(
+        children: [
+          pw.BarcodeWidget(
+            barcode: pw.Barcode.qrCode(),
+            data: shareUrl,
+            width: 64,
+            height: 64,
+            color: PdfStyles.textPrimary,
+          ),
+          pw.SizedBox(width: 12),
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  localizations.trackOnline,
+                  style: pw.TextStyle(
+                    font: boldFont,
+                    fontSize: 10,
+                    color: PdfStyles.primaryColor,
+                  ),
+                ),
+                pw.SizedBox(height: 3),
+                pw.Text(
+                  localizations.trackOnlineDescription,
+                  style: pw.TextStyle(
+                    font: baseFont,
+                    fontSize: 8,
+                    color: PdfStyles.textSecondary,
+                  ),
+                ),
+                pw.SizedBox(height: 4),
+                pw.UrlLink(
+                  destination: shareUrl,
+                  child: pw.Text(
+                    shareUrl,
+                    style: pw.TextStyle(
+                      font: baseFont,
+                      fontSize: 7.5,
+                      color: PdfStyles.primaryColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================
+  // TERMS AND CONDITIONS
+  // ============================================
+
+  pw.Widget buildTermsSection(String? termsOfService) {
+    if (termsOfService == null || termsOfService.trim().isEmpty) {
+      return pw.SizedBox();
     }
 
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(
-          localizations.formatAttachedPhotosCount(totalCount),
-          style: pw.TextStyle(
-            font: boldFont,
-            fontSize: 14.0,
-            color: PdfStyles.primaryColor,
+        _buildSectionHeader(localizations.termsAndConditions),
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: pw.BoxDecoration(
+            color: PdfStyles.backgroundLight,
+            borderRadius: pw.BorderRadius.circular(4),
+            border: pw.Border.all(color: PdfStyles.borderColor, width: 0.5),
+          ),
+          child: pw.Text(
+            termsOfService,
+            style: pw.TextStyle(
+              font: baseFont,
+              fontSize: 7.5,
+              color: PdfStyles.textSecondary,
+              lineSpacing: 1.4,
+            ),
           ),
         ),
-        pw.SizedBox(height: 12),
-        pw.GridView(
-          crossAxisCount: 3,
-          childAspectRatio: 1,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-          children: photos.map((image) {
-            return pw.Container(
-              decoration: pw.BoxDecoration(
-                border: pw.Border.all(color: PdfColors.grey300, width: 1),
-                borderRadius: pw.BorderRadius.circular(4),
-              ),
-              child: pw.ClipRRect(
-                verticalRadius: 4,
-                horizontalRadius: 4,
-                child: pw.Image(image, fit: pw.BoxFit.contain),
-              ),
-            );
-          }).toList(),
-        ),
       ],
+    );
+  }
+
+  // ============================================
+  // SIGNATURES (two columns)
+  // ============================================
+
+  pw.Widget buildSignatures(Customer? customer, Company company) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(top: 20),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.center,
+        children: [
+          _buildSignatureBlock(
+            localizations.clientSignature,
+            customer?.name,
+          ),
+          pw.SizedBox(width: 32),
+          _buildSignatureBlock(
+            localizations.companySignature,
+            company.name,
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildSignatureBlock(String label, String? name) {
+    return pw.Column(
+      children: [
+        pw.Container(
+          width: 200,
+          child: pw.Divider(color: PdfStyles.textMuted, thickness: 0.5),
+        ),
+        pw.SizedBox(height: 4),
+        pw.Text(
+          label,
+          style: pw.TextStyle(
+            font: boldFont,
+            fontSize: 8.5,
+            color: PdfStyles.textPrimary,
+          ),
+        ),
+        if (name != null && name.isNotEmpty) ...[
+          pw.SizedBox(height: 2),
+          pw.Text(
+            name,
+            style: pw.TextStyle(
+              font: baseFont,
+              fontSize: 7.5,
+              color: PdfStyles.textSecondary,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // ============================================
+  // FOOTER (simplified)
+  // ============================================
+
+  pw.Widget buildFooter(pw.Context context) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 32),
+      decoration: const pw.BoxDecoration(
+        color: PdfStyles.backgroundLight,
+        border: pw.Border(
+          top: pw.BorderSide(color: PdfStyles.borderColor, width: 0.5),
+        ),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.UrlLink(
+            destination: 'https://praticos.web.app',
+            child: pw.Text(
+              '${localizations.generatedByPraticos} · praticos.web.app',
+              style: pw.TextStyle(
+                font: baseFont,
+                fontSize: 7,
+                color: PdfStyles.footerTextColor,
+              ),
+            ),
+          ),
+          pw.Text(
+            localizations.formatPageOf(context.pageNumber, context.pagesCount),
+            style: pw.TextStyle(
+              font: baseFont,
+              fontSize: 7,
+              color: PdfStyles.footerTextColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================
+  // WATERMARK (marca d'agua para plano Free)
+  // ============================================
+
+  /// Constrói a marca d'água "PraticOS" rotacionada 45 graus.
+  ///
+  /// A marca d'água é sobreposta em todas as páginas quando [showWatermark] é true.
+  /// Usa opacidade de 8% para não atrapalhar a leitura do documento.
+  pw.Widget buildWatermark() {
+    if (!showWatermark) return pw.SizedBox();
+
+    return pw.FullPage(
+      ignoreMargins: true,
+      child: pw.Center(
+        child: pw.Transform.rotate(
+          angle: -0.785398, // -45 graus em radianos
+          child: pw.Opacity(
+            opacity: 0.08,
+            child: pw.Text(
+              'PraticOS',
+              style: pw.TextStyle(
+                font: boldFont,
+                fontSize: 72,
+                color: PdfColors.grey,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -841,85 +989,43 @@ class PdfMainOsBuilder {
     required Order order,
     required Customer? customer,
     required Company company,
-    List<pw.MemoryImage>? osPhotos,
   }) {
     return [
-      // Client & Device Cards
-      pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          buildCustomerCard(customer),
-          pw.SizedBox(width: 12),
-          buildDeviceCard(order),
-        ],
-      ),
+      // Status Bar
+      buildStatusBar(order),
 
-      // Service Location
-      if (order.address != null && order.address!.isNotEmpty)
-        pw.Container(
-          width: double.infinity,
-          margin: const pw.EdgeInsets.only(top: 8),
-          padding: const pw.EdgeInsets.all(10),
-          decoration: PdfStyles.cardDecoration(),
-          child: pw.Row(
-            children: [
-              pw.Text(
-                '${localizations.serviceLocation}: ',
-                style: pw.TextStyle(
-                  font: boldFont,
-                  fontSize: 9,
-                  color: PdfStyles.primaryDark,
-                ),
-              ),
-              pw.Expanded(
-                child: pw.Text(
-                  order.address!,
-                  style: pw.TextStyle(
-                    font: baseFont,
-                    fontSize: 9,
-                    color: PdfColors.grey800,
-                  ),
-                ),
-              ),
-            ],
-          ),
+      // Body with padding
+      pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(
+          horizontal: PdfStyles.bodyHorizontalPadding,
+          vertical: PdfStyles.bodyVerticalPadding,
         ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            // Client + Financial Summary (side by side)
+            buildClientAndFinancial(customer, order),
 
-      pw.SizedBox(height: 20),
+            pw.SizedBox(height: 14),
 
-      // Services Section
-      if (order.services != null && order.services!.isNotEmpty) ...[
-        buildSectionHeader(localizations.services.toUpperCase(), localizations.formatItemsCount(order.services!.length)),
-        pw.SizedBox(height: 8),
-        buildServicesTable(order),
-        pw.SizedBox(height: 16),
-      ],
+            // Equipment Blocks (multi-device)
+            buildEquipmentBlocks(order),
 
-      // Products Section
-      if (order.products != null && order.products!.isNotEmpty) ...[
-        buildSectionHeader(localizations.partsAndProducts, localizations.formatItemsCount(order.products!.length)),
-        pw.SizedBox(height: 8),
-        buildProductsTable(order),
-        pw.SizedBox(height: 16),
-      ],
+            pw.SizedBox(height: 14),
 
-      // Summary Section
-      buildTotalsSummary(order),
+            // QR Code Block
+            buildQrCodeBlock(order),
 
-      pw.SizedBox(height: 30),
+            pw.SizedBox(height: 14),
 
-      // Signature Section
-      buildSignatureLine(customer),
+            // Terms and Conditions
+            buildTermsSection(company.termsOfService),
 
-      // Photos Section
-      if (order.photos != null && order.photos!.isNotEmpty) ...[
-        pw.SizedBox(height: 20),
-        pw.Divider(color: PdfStyles.borderColor),
-        pw.SizedBox(height: 12),
-        buildSectionHeader(localizations.photoRecord, localizations.formatPhotosCount(order.photos!.length)),
-        pw.SizedBox(height: 10),
-        buildPhotosGrid(osPhotos, order.photos!.length),
-      ],
+            // Signatures
+            buildSignatures(customer, company),
+          ],
+        ),
+      ),
     ];
   }
 }

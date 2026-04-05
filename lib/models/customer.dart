@@ -14,6 +14,7 @@ class Customer extends BaseAuditCompany {
   double? latitude;
   double? longitude;
   List<String>? keywords;
+  Map<String, dynamic>? customData;
 
   Customer();
   factory Customer.fromJson(Map<String, dynamic> json) =>

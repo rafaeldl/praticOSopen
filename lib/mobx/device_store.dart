@@ -37,13 +37,24 @@ abstract class _DeviceStore with Store {
   saveDevice(Device device) async {
     if (companyId == null) return;
     User? user = await (userStore.getSingleUserById());
-    device.createdAt = DateTime.now();
-    device.createdBy = user?.toAggr();
+
+    final isEditing = device.id != null;
+
+    if (!isEditing) {
+      device.createdAt = DateTime.now();
+      device.createdBy = user?.toAggr();
+    }
+
     device.company = Global.companyAggr;
     device.updatedAt = DateTime.now();
     device.updatedBy = user?.toAggr();
     device.keywords = generateKeywords(device.name);
-    await repository.createItem(companyId!, device);
+
+    if (isEditing) {
+      await repository.updateItem(companyId!, device);
+    } else {
+      await repository.createItem(companyId!, device);
+    }
   }
 
   @action

@@ -1,11 +1,20 @@
+import 'dart:io';
+
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType, Divider;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:praticos/mobx/order_store.dart';
+import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/models/permission.dart';
+import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Unified payment management screen that combines:
 /// - Financial summary
@@ -27,6 +36,11 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   int _selectedType = 0; // 0 = payment, 1 = discount
   final TextEditingController _valueController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+
+  // Receipt attachment state
+  File? _receiptFile;
+  String? _receiptContentType;
+  String? _receiptFileName;
 
   @override
   void didChangeDependencies() {
@@ -349,15 +363,19 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                                 .resolveFrom(context),
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        context.l10n.payment,
-                        style: TextStyle(
-                          color: _selectedType == 0
-                              ? CupertinoColors.label.resolveFrom(context)
-                              : CupertinoColors.secondaryLabel
-                                  .resolveFrom(context),
-                        ),
-                      ),
+                      Builder(builder: (ctx) {
+                        final segConfig = ctx.read<SegmentConfigProvider>();
+                        final paymentLabel = segConfig.label('financial.payment');
+                        return Text(
+                          paymentLabel.isNotEmpty ? paymentLabel : context.l10n.payment,
+                          style: TextStyle(
+                            color: _selectedType == 0
+                                ? CupertinoColors.label.resolveFrom(context)
+                                : CupertinoColors.secondaryLabel
+                                    .resolveFrom(context),
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -477,6 +495,36 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
             ],
           ),
         ),
+
+        // Attach receipt button (only for payments, requires attachPhotos permission)
+        if (isPayment && AuthorizationService.instance.hasPermission(PermissionType.attachPhotos))
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: _receiptFile != null
+                ? _buildReceiptPreview()
+                : CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: _showAttachReceiptOptions,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          CupertinoIcons.paperclip,
+                          color: CupertinoTheme.of(context).primaryColor,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          context.l10n.attachReceipt,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: CupertinoTheme.of(context).primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
 
         // Register button
         Padding(
@@ -665,6 +713,20 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
                       ],
                     ),
                   ),
+                  // Receipt indicator (requires viewPhotos permission)
+                  if (transaction.hasReceipt &&
+                      AuthorizationService.instance.hasPermission(PermissionType.viewPhotos))
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () => _openReceipt(transaction),
+                        child: Icon(
+                          CupertinoIcons.paperclip,
+                          color: CupertinoColors.activeBlue,
+                          size: 16,
+                        ),
+                      ),
+                    ),
                   // Amount
                   Text(
                     isPayment
@@ -780,7 +842,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     return null;
   }
 
-  void _registerTransaction() {
+  void _registerTransaction() async {
     final error = _validateValue(_valueController.text);
     if (error != null) {
       _showError(error);
@@ -794,12 +856,30 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
 
     if (_selectedType == 0) {
       _store?.addPayment(value, description: description);
+
+      // Upload receipt if one was attached
+      if (_receiptFile != null && _store != null) {
+        final txnIndex = _store!.transactions.length - 1;
+        if (txnIndex >= 0) {
+          await _store!.attachReceiptToTransaction(
+            txnIndex,
+            _receiptFile!,
+            _receiptContentType ?? 'application/octet-stream',
+            _receiptFileName ?? 'receipt',
+          );
+        }
+      }
     } else {
       _store?.addDiscountTransaction(value, description: description);
     }
 
     // Clear form and refill with new remaining balance
     _descriptionController.clear();
+    setState(() {
+      _receiptFile = null;
+      _receiptContentType = null;
+      _receiptFileName = null;
+    });
     _prefillValue();
 
     // Show feedback
@@ -839,14 +919,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  void _resetPayment() {
+  void _resetPayment() async {
     if (_store != null) {
-      _store!.order!.payment = 'unpaid';
-      _store!.order!.paidAmount = 0;
-      _store!.paidAmount = 0;
-      _store!.transactions.clear();
-      _store!.order!.transactions?.clear();
-      _store!.updateOrder();
+      await _store!.resetAllPayments();
     }
     _prefillValue();
   }
@@ -879,6 +954,191 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         ],
       ),
     );
+  }
+
+  // ============================================================
+  // RECEIPT ACTIONS
+  // ============================================================
+
+  Widget _buildReceiptPreview() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGrey6.resolveFrom(context),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _receiptContentType?.startsWith('image/') == true
+                ? CupertinoIcons.photo
+                : CupertinoIcons.doc_text,
+            color: CupertinoColors.activeBlue,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              _receiptFileName ?? context.l10n.receipt,
+              style: TextStyle(
+                fontSize: 14,
+                color: CupertinoColors.label.resolveFrom(context),
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            onPressed: () {
+              setState(() {
+                _receiptFile = null;
+                _receiptContentType = null;
+                _receiptFileName = null;
+              });
+            },
+            child: Icon(
+              CupertinoIcons.xmark_circle_fill,
+              color: CupertinoColors.systemGrey,
+              size: 20,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAttachReceiptOptions() {
+    final photoService = PhotoService();
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.camera, size: 20),
+                const SizedBox(width: 8),
+                Text(context.l10n.takePhoto),
+              ],
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final file = await photoService.takePhoto();
+              if (file != null) {
+                setState(() {
+                  _receiptFile = file;
+                  _receiptContentType = 'image/jpeg';
+                  _receiptFileName =
+                      'foto_${DateTime.now().millisecondsSinceEpoch}.jpg';
+                });
+              }
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.photo, size: 20),
+                const SizedBox(width: 8),
+                Text(context.l10n.gallery),
+              ],
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final file = await photoService.pickImageFromGallery();
+              if (file != null) {
+                setState(() {
+                  _receiptFile = file;
+                  _receiptContentType = 'image/jpeg';
+                  _receiptFileName =
+                      'foto_${DateTime.now().millisecondsSinceEpoch}.jpg';
+                });
+              }
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(CupertinoIcons.doc, size: 20),
+                const SizedBox(width: 8),
+                Text(context.l10n.fromFiles),
+              ],
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final result = await photoService.pickDocument();
+              if (result != null && result.path != null) {
+                setState(() {
+                  _receiptFile = File(result.path!);
+                  _receiptFileName = result.name;
+                  final ext = result.extension?.toLowerCase() ?? '';
+                  _receiptContentType = _getContentType(ext);
+                });
+              }
+            },
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
+  }
+
+  void _openReceipt(PaymentTransaction transaction) async {
+    if (transaction.receiptDocumentId == null || _store == null) return;
+
+    final doc = _store!.documents.cast<OrderDocument?>().firstWhere(
+      (d) => d?.id == transaction.receiptDocumentId,
+      orElse: () => null,
+    );
+    if (doc == null) return;
+
+    // Refresh URL from storagePath to avoid stale tokens
+    String? url = doc.url;
+    if (doc.storagePath != null) {
+      final freshUrl = await PhotoService().getFreshDownloadUrl(doc.storagePath!);
+      if (freshUrl != null) {
+        url = freshUrl;
+        doc.url = freshUrl;
+      }
+    }
+
+    if (url == null || !mounted) return;
+
+    if (doc.isImage) {
+      Navigator.of(context).push(
+        CupertinoPageRoute(
+          builder: (context) => _ReceiptImageViewer(
+            url: url!,
+            title: doc.fileName ?? context.l10n.receipt,
+          ),
+        ),
+      );
+    } else {
+      launchUrl(
+          Uri.parse(url),
+          mode: LaunchMode.externalApplication);
+    }
+  }
+
+  String _getContentType(String extension) {
+    switch (extension) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      default:
+        return 'application/octet-stream';
+    }
   }
 
   void _showError(String message) {
@@ -920,6 +1180,61 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
             onPressed: () => Navigator.pop(context),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Full-screen receipt image viewer
+class _ReceiptImageViewer extends StatelessWidget {
+  final String url;
+  final String title;
+
+  const _ReceiptImageViewer({
+    required this.url,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.black,
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: CupertinoColors.black.withValues(alpha: 0.8),
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child:
+              const Icon(CupertinoIcons.back, color: CupertinoColors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        middle: Text(
+          title,
+          style: const TextStyle(color: CupertinoColors.white),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      child: SafeArea(
+        child: InteractiveViewer(
+          minScale: 0.5,
+          maxScale: 3.0,
+          child: Center(
+            child: Image.network(
+              url,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return const CupertinoActivityIndicator();
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Icon(
+                  CupertinoIcons.exclamationmark_triangle,
+                  color: CupertinoColors.systemGrey,
+                  size: 48,
+                );
+              },
+            ),
+          ),
+        ),
       ),
     );
   }

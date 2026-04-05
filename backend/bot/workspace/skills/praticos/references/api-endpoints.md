@@ -1,15 +1,18 @@
 # API Endpoints - Referência Completa
 
-Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" e base "$PRATICOS_API_URL"
-
-**formatContext:** Todos os endpoints bot retornam `formatContext: { country, currency, locale }`. Usar para formatar moedas e datas. Ver SOUL.md > Dados da API.
+Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" e base "$PRATICOS_API_URL". Retornam `formatContext` (ver SOUL.md > Dados da API).
 
 ## Busca Unificada (USAR SEMPRE)
 POST /bot/search/unified
 Parametros JSON (string OU array de strings): customer, customerPhone, device, deviceSerial, service, product
-Exemplo com arrays: {"service":["tela","bateria"],"product":["película"]}
-Resposta: {exact, suggestions, available}
-exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\",\"service\":\"tela\"}' \"$PRATICOS_API_URL/bot/search/unified\"")
+🔴 SEMPRE usar arrays para buscar multiplos termos de uma vez. NUNCA fazer chamadas separadas.
+Exemplo com arrays: {"customer":"Joao","service":["tela","bateria"],"product":["película"]}
+Resposta por entidade:
+- customer/device: `{ exact, suggestions, available }` — `exact` = match exato (1 resultado ou null), `suggestions` = matches por nome
+- service/product: `{ results, available }` — `results` = matches encontrados no catalogo
+- `available` (todas): lista de itens cadastrados como fallback (retornado quando sem matches)
+🔴 Se `available` tem match similar ao pedido → usar o ID dele + `description` customizada. NAO criar novo.
+exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\",\"service\":[\"tela\",\"bateria\"]}' \"$PRATICOS_API_URL/bot/search/unified\"")
 
 ## Resumo
 GET /bot/summary/today - resumo do dia
@@ -23,33 +26,40 @@ exec(command="curl -s -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number
 
 ## OS - Status
 PATCH /bot/orders/{NUM}/status `{"status":"approved|progress|done|canceled"}` (→ se "done": sugerir notificar cliente via link)
+Resposta: retorna `order` atualizado (mesmo formato de /details) + `formatContext` + `previousStatus` + `newStatus`.
 exec(command="curl -s -X PATCH -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"status\":\"approved\"}' \"$PRATICOS_API_URL/bot/orders/42/status\"")
 
 ## OS - Criar
 POST /bot/orders/full
 Body: {customerId, deviceId?, deviceIds?:["id1","id2"], services:[{serviceId,value?,description?,deviceId?}], products:[{productId,quantity?,value?,description?,deviceId?}], dueDate?, scheduledDate?}
 `deviceIds` para multi-device. Se passado, ignora `deviceId`. Cada service/product pode ter `deviceId` para vincular ao dispositivo.
+Resposta: retorna `order` completo (mesmo formato de /details) + `formatContext` + `shareUrl` auto-criado. NAO precisa chamar GET /details apos criar.
 exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customerId\":\"abc\",\"services\":[{\"serviceId\":\"srv1\",\"value\":350}]}' \"$PRATICOS_API_URL/bot/orders/full\"")
 
 ## OS - Atualizar
 PATCH /bot/orders/{NUM} `{"status":"approved","dueDate":"2026-02-20T18:00:00.000Z","scheduledDate":"2026-02-20T09:00:00.000Z","assignedTo":"userId"}`
 Todos os campos opcionais. Passar `null` para limpar um campo (ex: `{"scheduledDate":null}`).
+Resposta: retorna `order` atualizado (mesmo formato de /details) + `formatContext`.
 exec(command="curl -s -X PATCH -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"scheduledDate\":\"2026-02-20T09:00:00.000Z\"}' \"$PRATICOS_API_URL/bot/orders/42\"")
 
 ## OS - Itens
 POST /bot/orders/{NUM}/services `{"serviceId":"ID","value":N,"description":"txt","deviceId":"ID"}`
 POST /bot/orders/{NUM}/products `{"productId":"ID","quantity":N,"value":N,"description":"txt","deviceId":"ID"}`
 `deviceId` opcional — vincula item a um dispositivo especifico da OS.
+`description` opcional — texto livre para especificar detalhes. Ver exemplos em SKILL.md regra 5.
 DELETE /bot/orders/{NUM}/services/{I} | DELETE /bot/orders/{NUM}/products/{I}
-PATCH /bot/orders/{NUM}/customer | PATCH /bot/orders/{NUM}/device
+PATCH /bot/orders/{NUM}/customer `{"customerId":"ID"}` — corrigir cliente da OS
+PATCH /bot/orders/{NUM}/device `{"deviceId":"ID"}` — corrigir dispositivo da OS
+🔴 **TODOS os endpoints de mutacao** (POST /full, POST/DELETE /services, POST/DELETE /products, PATCH /status, PATCH /:number, PATCH /customer, PATCH /device, POST/DELETE /devices) retornam `{ order, formatContext }` no mesmo formato de /details. Usar dados do response para montar card. NAO re-fetch /details.
 
 ## OS - Dispositivos
-POST /bot/orders/{NUM}/devices `{"deviceId":"ID"}` — adicionar dispositivo à OS
-DELETE /bot/orders/{NUM}/devices/{DEVICE_ID} — remover dispositivo da OS
+POST /bot/orders/{NUM}/devices `{"deviceId":"ID"}` — adicionar dispositivo à OS (retorna order detail)
+DELETE /bot/orders/{NUM}/devices/{DEVICE_ID} — remover dispositivo da OS (retorna order detail)
 GET /bot/orders/{NUM}/details retorna `devices[]` (lista completa) e `deviceCount` (quantidade)
 
 ## OS - Fotos
 POST /bot/orders/{NUM}/photos/upload - multipart com -F "file=@/path"
+exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -F \"file=@/path/to/photo.jpg\" \"$PRATICOS_API_URL/bot/orders/{NUM}/photos/upload\"")
 GET /bot/orders/{NUM}/photos - listar (retorna downloadUrl)
 GET /bot/orders/{NUM}/photos/{ID} - download binario
 DELETE /bot/orders/{NUM}/photos/{ID}
@@ -76,17 +86,8 @@ POST /bot/invite/create `{"collaboratorName":"Nome","role":"technician|admin|sup
 GET /bot/invite/list | DELETE /bot/invite/{CODE}
 
 ## Magic Link
-POST /bot/orders/{NUM}/share `{"permissions":["view","approve","comment"],"expiresInDays":7}`
-GET /bot/orders/{NUM}/share | DELETE /bot/orders/{NUM}/share/{TOKEN}
+🔴 **NAO chamar POST /share.** shareUrl é auto-criado em TODOS os endpoints de mutacao.
+GET /bot/orders/{NUM}/share | DELETE /bot/orders/{NUM}/share/{TOKEN} (consulta/remocao apenas)
 
 ## Checklists
-GET /bot/forms/templates - templates disponiveis
-GET /bot/orders/{NUM}/forms - listar checklists da OS
-GET /bot/orders/{NUM}/forms/{FID} - detalhes
-POST /bot/orders/{NUM}/forms `{"templateId":"ID"}`
-POST /bot/orders/{NUM}/forms/{FID}/items/{IID} `{"value":"resposta"}`
-POST /bot/orders/{NUM}/forms/{FID}/items/{IID}/photos - multipart
-PATCH /bot/orders/{NUM}/forms/{FID}/status `{"status":"completed"}`
-
-Tipos: text(string) | number(num/string) | boolean(true/false/yes/no/sim/não/sí/no — aceitar no idioma do usuario) | select(indice 1-N ou valor) | checklist("1,3,5" ou [1,3,5]) | photo_only(so foto)
-Status: pending → in_progress → completed (completed requer obrigatorios preenchidos)
+Ver detalhes: `read(file_path="skills/praticos/references/checklists.md")`

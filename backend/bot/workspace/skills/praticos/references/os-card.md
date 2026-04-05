@@ -3,11 +3,12 @@
 Quando precisar mostrar uma OS, seguir TODOS os passos abaixo.
 
 ## Passo 1 — Buscar dados
-exec: GET /bot/orders/{NUM}/details
+Se os dados da OS ja estao no contexto (ex: acabou de criar/modificar via POST /full, POST /services, PATCH, etc), usar diretamente.
+So chamar GET /bot/orders/{NUM}/details se NAO tem os dados (ex: usuario pediu "mostra OS 42").
 → retorna `order` com `mainPhotoUrl`, `photosCount`, `shareUrl`
 
 ## Passo 2 — Link
-Se `shareUrl` veio no passo 1, usar. Se nao: POST /bot/orders/{NUM}/share → retorna `url`.
+`shareUrl` ja vem em TODOS os responses da API (criado automaticamente). Usar direto no card. NAO chamar POST /share.
 
 ## Passo 3 — Formatar card
 

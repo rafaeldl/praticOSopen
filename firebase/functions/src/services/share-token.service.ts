@@ -100,10 +100,10 @@ export async function incrementViewCount(token: string): Promise<void> {
 /**
  * Mark token as approved
  */
-export async function markTokenApproved(token: string): Promise<void> {
-  await db.collection(SHARE_TOKENS_COLLECTION).doc(token).update({
-    approvedAt: new Date().toISOString(),
-  });
+export async function markTokenApproved(token: string, termsAcceptedAt?: string): Promise<void> {
+  const update: Record<string, any> = { approvedAt: new Date().toISOString() };
+  if (termsAcceptedAt) update.termsAcceptedAt = termsAcceptedAt;
+  await db.collection(SHARE_TOKENS_COLLECTION).doc(token).update(update);
 }
 
 /**

@@ -6,6 +6,7 @@ import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/global.dart';
 import 'package:mobx/mobx.dart';
 import 'package:praticos/services/notification_service.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 
 part 'agenda_store.g.dart';
@@ -17,6 +18,8 @@ abstract class _AgendaStore with Store {
   final AuthorizationService _authService = AuthorizationService.instance;
   StreamSubscription<List<Order?>>? _monthSubscription;
   ReminderStore? _reminderStore;
+
+  bool get _useScheduling => SegmentConfigService().useScheduling;
 
   /// Set the reminder store reference (call from UI after provider is available)
   void setReminderStore(ReminderStore store) {
@@ -38,22 +41,27 @@ abstract class _AgendaStore with Store {
   @observable
   bool isLoading = false;
 
+  /// Returns the relevant date for an order based on scheduling mode
+  DateTime? _orderDate(Order? order) {
+    return _useScheduling ? order?.scheduledDate : order?.dueDate;
+  }
+
   @computed
   List<Order?> get ordersForSelectedDate {
     final day = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
     final nextDay = day.add(const Duration(days: 1));
 
     final dayOrders = filteredOrders.where((order) {
-      if (order?.scheduledDate == null) return false;
-      final sd = order!.scheduledDate!;
-      return sd.isAfter(day.subtract(const Duration(seconds: 1))) &&
-             sd.isBefore(nextDay);
+      final date = _orderDate(order);
+      if (date == null) return false;
+      return date.isAfter(day.subtract(const Duration(seconds: 1))) &&
+             date.isBefore(nextDay);
     }).toList();
 
     // Sort: orders with time (not midnight) first, then midnight ("all day") at end
     dayOrders.sort((a, b) {
-      final aDate = a?.scheduledDate ?? DateTime(2099);
-      final bDate = b?.scheduledDate ?? DateTime(2099);
+      final aDate = _orderDate(a) ?? DateTime(2099);
+      final bDate = _orderDate(b) ?? DateTime(2099);
       final aIsMidnight = aDate.hour == 0 && aDate.minute == 0;
       final bIsMidnight = bDate.hour == 0 && bDate.minute == 0;
 
@@ -69,9 +77,9 @@ abstract class _AgendaStore with Store {
   Map<DateTime, int> get eventMarkers {
     final Map<DateTime, int> markers = {};
     for (final order in filteredOrders) {
-      if (order?.scheduledDate == null) continue;
-      final sd = order!.scheduledDate!;
-      final dayKey = DateTime(sd.year, sd.month, sd.day);
+      final date = _orderDate(order);
+      if (date == null) continue;
+      final dayKey = DateTime(date.year, date.month, date.day);
       markers[dayKey] = (markers[dayKey] ?? 0) + 1;
     }
     return markers;
@@ -109,14 +117,17 @@ abstract class _AgendaStore with Store {
     final endDate = DateTime(month.year, month.month + 1, 1);
 
     _monthSubscription?.cancel();
-    _monthSubscription = repository
-        .streamOrdersByScheduledDateRange(companyId!, startDate, endDate)
-        .listen(
+
+    final stream = _useScheduling
+        ? repository.streamOrdersByScheduledDateRange(companyId!, startDate, endDate)
+        : repository.streamOrdersByDueDateRange(companyId!, startDate, endDate);
+
+    _monthSubscription = stream.listen(
       (result) {
         orders.clear();
         orders.addAll(result);
         isLoading = false;
-        _rescheduleReminders(result);
+        if (_useScheduling) _rescheduleReminders(result);
       },
       onError: (e) {
         print('Erro ao carregar agenda: $e');

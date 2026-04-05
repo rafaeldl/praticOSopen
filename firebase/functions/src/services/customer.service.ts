@@ -141,7 +141,7 @@ export async function searchCustomers(
     })) as Customer[];
   }
 
-  // 1. Primary search: by keywords (records with keywords field)
+  // 1. Primary search: by keywords (full phrase match)
   const snapshot = await collection
     .where('keywords', 'array-contains', keyword)
     .limit(limit)
@@ -154,7 +154,39 @@ export async function searchCustomers(
     })) as Customer[];
   }
 
-  // 2. Prefix query on nameLower (works for ALL records, no keywords needed)
+  // 2. Individual word search when phrase has multiple words
+  const words = keyword.split(' ').filter((w) => w.length > 1);
+  if (words.length > 1) {
+    const wordResults = await Promise.all(
+      words.map((word) =>
+        collection.where('keywords', 'array-contains', word).limit(limit).get()
+      )
+    );
+
+    const scoreMap = new Map<string, { doc: Customer; score: number }>();
+    for (const snap of wordResults) {
+      for (const doc of snap.docs) {
+        const existing = scoreMap.get(doc.id);
+        if (existing) {
+          existing.score++;
+        } else {
+          scoreMap.set(doc.id, {
+            doc: { ...doc.data(), id: doc.id } as Customer,
+            score: 1,
+          });
+        }
+      }
+    }
+
+    if (scoreMap.size > 0) {
+      return [...scoreMap.values()]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit)
+        .map((entry) => entry.doc);
+    }
+  }
+
+  // 3. Prefix query on nameLower (works for ALL records, no keywords needed)
   const queryLower = removeAccents(query.toLowerCase().trim());
   if (queryLower.length >= 2) {
     const prefixSnapshot = await collection
@@ -173,26 +205,47 @@ export async function searchCustomers(
     }
   }
 
-  // 3. Fallback: search by name or phone in memory (broader substring match)
+  // 4. Fallback: search by name or phone in memory (broader substring match)
   const allSnapshot = await collection
     .orderBy('name')
     .limit(500)
     .get();
 
+  const allDocs = allSnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Customer));
   const queryNormalized = removeAccents(query.toLowerCase());
-  // For phone search, also try matching digits only
   const queryDigits = query.replace(/\D/g, '');
-  const results = allSnapshot.docs
-    .map((doc) => ({ ...doc.data(), id: doc.id } as Customer))
-    .filter((c) => {
-      const nameMatch = removeAccents(c.name?.toLowerCase() || '').includes(queryNormalized);
-      const phoneMatch = queryDigits.length >= 4 && (c.phone?.replace(/\D/g, '') || '').includes(queryDigits);
-      return nameMatch || phoneMatch;
-    })
-    .slice(0, limit);
 
-  backfillKeywords(collection, results);
-  return results;
+  // Try full phrase match first
+  const phraseMatches = allDocs.filter((c) => {
+    const nameMatch = removeAccents(c.name?.toLowerCase() || '').includes(queryNormalized);
+    const phoneMatch = queryDigits.length >= 4 && (c.phone?.replace(/\D/g, '') || '').includes(queryDigits);
+    return nameMatch || phoneMatch;
+  });
+  if (phraseMatches.length > 0) {
+    backfillKeywords(collection, phraseMatches.slice(0, limit));
+    return phraseMatches.slice(0, limit);
+  }
+
+  // Try individual word match on name (score by matches)
+  const queryWords = queryNormalized.split(/\s+/).filter((w) => w.length > 1);
+  if (queryWords.length > 1) {
+    const scored = allDocs
+      .map((c) => {
+        const nameLower = removeAccents(c.name?.toLowerCase() || '');
+        const score = queryWords.filter((w) => nameLower.includes(w)).length;
+        return { doc: c, score };
+      })
+      .filter((entry) => entry.score > 0)
+      .sort((a, b) => b.score - a.score);
+
+    if (scored.length > 0) {
+      const results = scored.slice(0, limit).map((e) => e.doc);
+      backfillKeywords(collection, results);
+      return results;
+    }
+  }
+
+  return [];
 }
 
 // ============================================================================

@@ -172,6 +172,30 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     return streamQueryList(companyId, orderBy: orderBy, args: filterList);
   }
 
+  /// Stream de orders por intervalo de dueDate.
+  Stream<List<Order?>> streamOrdersByDueDateRange(
+    String companyId,
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    final List<QueryArgs> filterList = [
+      QueryArgs(
+        'dueDate',
+        startDate.toIso8601String(),
+        oper: 'isGreaterThanOrEqualTo',
+      ),
+      QueryArgs(
+        'dueDate',
+        endDate.toIso8601String(),
+        oper: 'isLessThan',
+      ),
+    ];
+
+    final List<OrderBy> orderBy = [OrderBy('dueDate')];
+
+    return streamQueryList(companyId, orderBy: orderBy, args: filterList);
+  }
+
   /// Stream de orders com filtros opcionais.
   Stream<List<Order?>> streamOrders(
     String companyId, {
@@ -204,5 +228,55 @@ class TenantOrderRepository extends TenantRepository<Order?> {
     }
 
     return streamQueryList(companyId, orderBy: orderBy, args: filterList);
+  }
+
+  /// Stream de orders que contêm um device específico
+  Stream<List<Order?>> streamOrdersByDevice(
+    String companyId,
+    String deviceId,
+  ) {
+    return streamQueryList(
+      companyId,
+      args: [QueryArgs('deviceIds', deviceId, oper: 'arrayContains')],
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Child orders (generated from contract templates)
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Stream of orders generated from a contract template.
+  /// No orderBy to avoid composite index requirement — sorted client-side.
+  Stream<List<Order?>> streamChildOrders(String companyId, String parentOrderId) {
+    return streamQueryList(
+      companyId,
+      args: [QueryArgs('contract.parentOrderId', parentOrderId)],
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Contract queries
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// All orders with active contract (for list and auto-generation)
+  Stream<List<Order?>> streamContractOrders(String companyId) {
+    return streamQueryList(
+      companyId,
+      args: [QueryArgs('isContract', true)],
+    );
+  }
+
+  /// Orders with contract linked to a specific device
+  Stream<List<Order?>> streamContractsByDevice(
+    String companyId,
+    String deviceId,
+  ) {
+    return streamQueryList(
+      companyId,
+      args: [
+        QueryArgs('isContract', true),
+        QueryArgs('deviceIds', deviceId, oper: 'arrayContains'),
+      ],
+    );
   }
 }

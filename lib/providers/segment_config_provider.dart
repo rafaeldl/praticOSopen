@@ -39,6 +39,40 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Código do país (ISO 3166-1 alpha-2)
   String? get countryCode => _service.countryCode;
 
+  /// Whether the company does field service (attends at customer location)
+  bool get fieldService => _service.fieldService;
+
+  /// Whether the company uses scheduling (scheduledDate in orders)
+  bool get useScheduling => _service.useScheduling;
+
+  /// Default fieldService value from the segment document
+  bool get segmentFieldServiceDefault => _service.segmentFieldServiceDefault;
+
+  /// Whether the company uses device management (status, history, etc.)
+  bool get useDeviceManagement => _service.useDeviceManagement;
+
+  /// Whether the company uses recurring maintenance contracts
+  bool get useContracts => _service.useContracts;
+
+  /// Default terms of service text for the current segment and locale
+  String? get defaultTermsOfService => _service.defaultTermsOfService;
+
+  /// Sets resolved company config values and notifies listeners
+  void setCompanyConfig({
+    required bool fieldService,
+    required bool useScheduling,
+    required bool useDeviceManagement,
+    required bool useContracts,
+  }) {
+    _service.setCompanyConfig(
+      fieldService: fieldService,
+      useScheduling: useScheduling,
+      useDeviceManagement: useDeviceManagement,
+      useContracts: useContracts,
+    );
+    notifyListeners();
+  }
+
   /// Define se o device deve ser exibido na listagem de OS
   /// Por enquanto, true para todos os segmentos
   bool get showDeviceInOrderList {
@@ -71,6 +105,8 @@ class SegmentConfigProvider extends ChangeNotifier {
         return CupertinoIcons.sun_max;
       case 'printers':
         return CupertinoIcons.printer;
+      case 'public_works':
+        return CupertinoIcons.hammer;
       default:
         return CupertinoIcons.tag; // Genérico
     }
@@ -166,6 +202,16 @@ class SegmentConfigProvider extends ChangeNotifier {
   /// Obtém campos customizados agrupados por section
   Map<String, List<CustomField>> fieldsGroupedBySection(String namespace) =>
       _service.fieldsGroupedBySection(namespace);
+
+  /// Obtém campos de formulário agrupados por seção localizada
+  ///
+  /// [exclude] permite excluir keys de campos já renderizados pelo form
+  /// (campos hardcoded), evitando duplicação.
+  Map<String, List<CustomField>> fieldsGroupedBySectionLocalized(
+    String namespace, {
+    Set<String>? exclude,
+  }) =>
+      _service.fieldsGroupedBySectionLocalized(namespace, exclude: exclude);
 
   // ════════════════════════════════════════════════════════════
   // FIELD VALIDATION & MASKS

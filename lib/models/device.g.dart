@@ -29,9 +29,11 @@ Device _$DeviceFromJson(Map<String, dynamic> json) => Device()
   ..category = json['category'] as String?
   ..description = json['description'] as String?
   ..photo = json['photo'] as String?
+  ..status = json['status'] as String?
   ..keywords = (json['keywords'] as List<dynamic>?)
       ?.map((e) => e as String)
-      .toList();
+      .toList()
+  ..customData = json['customData'] as Map<String, dynamic>?;
 
 Map<String, dynamic> _$DeviceToJson(Device instance) => <String, dynamic>{
   'id': instance.id,
@@ -46,14 +48,19 @@ Map<String, dynamic> _$DeviceToJson(Device instance) => <String, dynamic>{
   'category': instance.category,
   'description': instance.description,
   'photo': instance.photo,
+  'status': instance.status,
   'keywords': instance.keywords,
+  'customData': instance.customData,
 };
 
 DeviceAggr _$DeviceAggrFromJson(Map<String, dynamic> json) => DeviceAggr()
   ..id = json['id'] as String?
   ..serial = json['serial'] as String?
   ..name = json['name'] as String?
-  ..photo = json['photo'] as String?;
+  ..photo = json['photo'] as String?
+  ..category = json['category'] as String?
+  ..manufacturer = json['manufacturer'] as String?
+  ..status = json['status'] as String?;
 
 Map<String, dynamic> _$DeviceAggrToJson(DeviceAggr instance) =>
     <String, dynamic>{
@@ -61,4 +68,7 @@ Map<String, dynamic> _$DeviceAggrToJson(DeviceAggr instance) =>
       'serial': instance.serial,
       'name': instance.name,
       'photo': instance.photo,
+      'category': instance.category,
+      'manufacturer': instance.manufacturer,
+      'status': instance.status,
     };

@@ -9,6 +9,7 @@ import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
@@ -291,13 +292,14 @@ class _AgendaScreenState extends State<AgendaScreen> {
     bool isLast,
     SegmentConfigProvider config,
   ) {
-    final scheduledDate = order.scheduledDate;
-    final isMidnight = scheduledDate != null &&
-        scheduledDate.hour == 0 &&
-        scheduledDate.minute == 0;
+    final useScheduling = SegmentConfigService().useScheduling;
+    final relevantDate = useScheduling ? order.scheduledDate : order.dueDate;
+    final isMidnight = !useScheduling || (relevantDate != null &&
+        relevantDate.hour == 0 &&
+        relevantDate.minute == 0);
     final timeStr = isMidnight
         ? context.l10n.allDay
-        : _formatService.formatTime(scheduledDate!);
+        : _formatService.formatTime(relevantDate!);
 
     final customerName = order.customer?.name ?? '';
     final deviceName = order.device?.name ?? '';
@@ -416,7 +418,9 @@ class _AgendaScreenState extends State<AgendaScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              context.l10n.noScheduledOrders,
+              SegmentConfigService().useScheduling
+                  ? context.l10n.noScheduledOrders
+                  : context.l10n.noOrdersDueOnDate,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 15,

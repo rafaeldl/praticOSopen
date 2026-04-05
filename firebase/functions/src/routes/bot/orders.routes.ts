@@ -6,8 +6,8 @@
 import { Router, Response } from 'express';
 import { AuthenticatedRequest, OrderStatus } from '../../models/types';
 import * as orderService from '../../services/order.service';
-
 import { getUserAggr } from '../../middleware/company.middleware';
+import { buildOrderDetail } from '../../utils/bot-response.utils';
 
 const router: Router = Router();
 
@@ -213,15 +213,9 @@ router.patch('/:number/status', async (req: AuthenticatedRequest, res: Response)
       return;
     }
 
-    res.json({
-      success: true,
-      data: {
-        orderNumber,
-        previousStatus: currentStatus,
-        newStatus,
-
-      },
-    });
+    const freshOrder = await orderService.getOrderByNumber(companyId, orderNumber);
+    const detail = await buildOrderDetail(freshOrder!, companyId, req.auth?.companyCountry, updatedBy);
+    res.json({ success: true, data: { ...detail, previousStatus: currentStatus, newStatus } });
   } catch (error) {
     console.error('Bot Update order status error:', error);
     res.status(500).json({

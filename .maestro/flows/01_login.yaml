@@ -1,0 +1,59 @@
+# Flow 01: Login
+# Performs login with demo account
+appId: ${appId}
+tags:
+  - auth
+  - smoke
+
+---
+
+# Wait for app to load
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Check if already logged in
+- runFlow:
+    when:
+      visible: "tab_home"
+    file: logout.yaml
+
+# Click on email login link
+- tapOn:
+    id: "email_login_link"
+    optional: true
+
+- tapOn:
+    text: ".*email.*"
+    optional: true
+
+# Wait for login screen
+- waitForAnimationToEnd
+
+# Enter email
+- inputText:
+    text: ${DEMO_EMAIL}
+    id: "email_field"
+
+# Enter password
+- inputText:
+    text: ${DEMO_PASSWORD}
+    id: "password_field"
+
+# Tap login button
+- tapOn:
+    id: "login_button"
+
+# Wait for home screen to load
+- waitForAnimationToEnd:
+    timeout: 15000
+
+- assertVisible:
+    id: "tab_home"
+    timeout: 15000
+
+# Dismiss WhatsApp banner if present
+- tapOn:
+    id: "dismiss_banner"
+    optional: true
+
+- takeScreenshot: "01_login_success"

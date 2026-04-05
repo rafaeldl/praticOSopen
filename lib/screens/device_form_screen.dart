@@ -4,6 +4,7 @@ import 'package:praticos/mobx/device_store.dart';
 import 'package:praticos/models/device.dart';
 import 'package:praticos/widgets/cached_image.dart';
 import 'package:praticos/widgets/dynamic_text_field.dart';
+import 'package:praticos/widgets/dynamic_field_builder.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
@@ -33,6 +34,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
       } else {
         _device = Device();
       }
+      _device!.customData ??= {};
       _initialized = true;
     }
   }
@@ -43,12 +45,83 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       _formKey.currentState!.save();
+      // Clean up empty customData to avoid storing empty map in Firestore
+      if (_device!.customData != null && _device!.customData!.isEmpty) {
+        _device!.customData = null;
+      }
       await _deviceStore.saveDevice(_device!);
       setState(() => _isLoading = false);
       if (mounted) {
         Navigator.pop(context, _device);
       }
     }
+  }
+
+  Color _statusColor(String? status) {
+    switch (status) {
+      case 'active':
+        return CupertinoColors.systemGreen;
+      case 'maintenance':
+        return CupertinoColors.systemOrange;
+      case 'inactive':
+        return CupertinoColors.systemGrey;
+      case 'decommissioned':
+        return CupertinoColors.systemRed;
+      default:
+        return CupertinoColors.systemGreen;
+    }
+  }
+
+  String _statusLabel(BuildContext context, String? status) {
+    switch (status) {
+      case 'active':
+        return context.l10n.deviceStatusActive;
+      case 'maintenance':
+        return context.l10n.deviceStatusMaintenance;
+      case 'inactive':
+        return context.l10n.deviceStatusInactive;
+      case 'decommissioned':
+        return context.l10n.deviceStatusDecommissioned;
+      default:
+        return context.l10n.deviceStatusActive;
+    }
+  }
+
+  void _pickStatus(BuildContext context) {
+    final statuses = ['active', 'maintenance', 'inactive', 'decommissioned'];
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext ctx) => CupertinoActionSheet(
+        title: Text(context.l10n.status),
+        actions: statuses.map((status) {
+          return CupertinoActionSheetAction(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: _statusColor(status),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(_statusLabel(context, status)),
+              ],
+            ),
+            onPressed: () {
+              setState(() => _device?.status = status);
+              Navigator.pop(ctx);
+            },
+          );
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          child: Text(context.l10n.cancel),
+          onPressed: () => Navigator.pop(ctx),
+        ),
+      ),
+    );
   }
 
   Future<void> _pickImage() async {
@@ -138,7 +211,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            CupertinoIcons.car_detailed,
+                            config.deviceIcon,
                             size: 50,
                             color: CupertinoColors.systemGrey.resolveFrom(context),
                           ),
@@ -186,7 +259,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                     title: SizedBox(
                       width: 100,
                       child: Text(
-                        context.l10n.deviceCategory,
+                        config.label(LabelKeys.deviceCategory),
                         style: const TextStyle(fontSize: 16),
                       ),
                     ),
@@ -204,7 +277,7 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                       size: 20,
                       color: CupertinoColors.systemGrey.resolveFrom(context),
                     ),
-                    onTap: () => _selectCategory(context),
+                    onTap: () => _selectCategory(context, config),
                   ),
 
                   // Brand/Manufacturer Field
@@ -268,6 +341,41 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
                   ),
                 ],
               ),
+
+              // Status Section (only when device management is enabled)
+              if (config.useDeviceManagement)
+                CupertinoListSection.insetGrouped(
+                  header: Text(context.l10n.status.toUpperCase()),
+                  children: [
+                    CupertinoListTile(
+                      title: Text(context.l10n.status),
+                      additionalInfo: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: _statusColor(_device?.status),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(_statusLabel(context, _device?.status)),
+                        ],
+                      ),
+                      trailing: Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 20,
+                        color: CupertinoColors.systemGrey.resolveFrom(context),
+                      ),
+                      onTap: () => _pickStatus(context),
+                    ),
+                  ],
+                ),
+
+              // Dynamic Custom Field Sections (from segment config)
+              ..._buildCustomFieldSections(config),
             ],
           ),
         ),
@@ -275,13 +383,71 @@ class _DeviceFormScreenState extends State<DeviceFormScreen> {
     );
   }
 
-  Future<void> _selectCategory(BuildContext context) async {
+  /// Keys dos campos hardcoded que já são renderizados acima.
+  /// O segmento pode configurar esses campos (label, mask, validation)
+  /// mas eles não devem aparecer como campos dinâmicos duplicados.
+  static const _builtInFieldKeys = {
+    'device.category',
+    'device.brand',
+    'device.model',
+    'device.serial',
+  };
+
+  List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
+    final grouped = config.fieldsGroupedBySectionLocalized(
+      'device',
+      exclude: _builtInFieldKeys,
+    );
+    if (grouped.isEmpty) return [];
+
+    final locale = config.locale;
+    final sections = <Widget>[];
+
+    for (final entry in grouped.entries) {
+      final sectionName = entry.key;
+      final fields = entry.value;
+
+      sections.add(
+        CupertinoListSection.insetGrouped(
+          header: Text(
+            sectionName.toUpperCase(),
+            style: TextStyle(
+              fontSize: 13,
+              color: CupertinoColors.secondaryLabel.resolveFrom(context),
+            ),
+          ),
+          children: fields.map((field) {
+            return DynamicFieldBuilder(
+              field: field,
+              value: _device?.customData?[field.fieldName] ?? _device?.customData?[field.key],
+              locale: locale,
+              onChanged: (newValue) {
+                setState(() {
+                  _device?.customData ??= {};
+                  if (newValue == null) {
+                    _device!.customData!.remove(field.fieldName);
+                  } else {
+                    _device!.customData![field.fieldName] = newValue;
+                  }
+                  _device!.customData!.remove(field.key); // migrate old key
+                });
+              },
+            );
+          }).toList(),
+        ),
+      );
+    }
+
+    return sections;
+  }
+
+  Future<void> _selectCategory(BuildContext context, SegmentConfigProvider config) async {
     final value = await Navigator.pushNamed(
       context,
       '/accumulated_value_list',
       arguments: {
         'fieldType': 'deviceCategory',
-        'title': context.l10n.deviceCategory,
+        'title': config.label(LabelKeys.deviceCategory),
         'currentValue': _device?.category,
         'allowClear': true,
       },
