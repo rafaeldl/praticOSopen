@@ -51,8 +51,12 @@ platform :ios do
     UI.message("Current build: #{current_build}, Next build: #{next_build}")
 
     # 🏗️ Flutter build com build number correto (sem code sign)
+    flutter_build_args = ["flutter", "build", "ios", "--release", "--no-codesign", "--build-number=#{next_build}"]
+    revenuecat_key = ENV['REVENUECAT_IOS_API_KEY']
+    flutter_build_args << "--dart-define=REVENUECAT_IOS_API_KEY=#{revenuecat_key}" if revenuecat_key && !revenuecat_key.empty?
+
     Dir.chdir("..") do
-      sh("flutter", "build", "ios", "--release", "--no-codesign", "--build-number=#{next_build}")
+      sh(*flutter_build_args)
     end
 
     # 🔧 força assinatura só no Runner (Release)
@@ -135,8 +139,12 @@ platform :ios do
     UI.message("Current build: #{current_build}, Next build: #{next_build}")
 
     # 🏗️ Flutter build com build number correto (sem code sign)
+    flutter_build_args = ["flutter", "build", "ios", "--release", "--no-codesign", "--build-number=#{next_build}"]
+    revenuecat_key = ENV['REVENUECAT_IOS_API_KEY']
+    flutter_build_args << "--dart-define=REVENUECAT_IOS_API_KEY=#{revenuecat_key}" if revenuecat_key && !revenuecat_key.empty?
+
     Dir.chdir("..") do
-      sh("flutter", "build", "ios", "--release", "--no-codesign", "--build-number=#{next_build}")
+      sh(*flutter_build_args)
     end
 
     # 🔧 força assinatura só no Runner (Release)

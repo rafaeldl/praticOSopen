@@ -112,6 +112,7 @@ jobs:
         env:
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
+          REVENUECAT_ANDROID_API_KEY: ${{ secrets.REVENUECAT_ANDROID_API_KEY }}
         run: bundle exec fastlane internal
 
       # 📦 Upload AAB to GitHub Release

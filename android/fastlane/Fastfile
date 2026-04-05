@@ -10,11 +10,15 @@ platform :android do
   lane :build_flutter do |options|
     version_code = options[:version_code]
     version_name = options[:version_name]
-    
+
     # Constrói o comando flutter build
     build_args = ["build", "appbundle", "--release"]
     build_args << "--build-number=#{version_code}" if version_code
     build_args << "--build-name=#{version_name}" if version_name
+
+    # RevenueCat API key (injected via CI secret REVENUECAT_ANDROID_API_KEY)
+    revenuecat_key = ENV['REVENUECAT_ANDROID_API_KEY']
+    build_args << "--dart-define=REVENUECAT_ANDROID_API_KEY=#{revenuecat_key}" if revenuecat_key && !revenuecat_key.empty?
 
     # Executa o build do Flutter na raiz do projeto (../)
     Dir.chdir("..") do
