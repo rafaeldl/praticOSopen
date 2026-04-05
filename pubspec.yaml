@@ -79,7 +79,9 @@ dependencies:
 
   # In-App Purchase / Subscription management (RevenueCat SDK)
   # Keys injected via --dart-define=REVENUECAT_ANDROID_API_KEY / REVENUECAT_IOS_API_KEY
+  # For test environment, use: test_rHipMRrqwezbhAuzyWKGLEqwfhP
   purchases_flutter: ^8.0.0
+  purchases_ui_flutter: ^8.0.0  # RevenueCat Paywalls and Customer Center
 
 # dependency_overrides:
 #   firebase_core_platform_interface: 4.5.1
