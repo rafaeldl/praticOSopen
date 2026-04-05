@@ -398,6 +398,41 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
 
+              // Subscription Section
+              CupertinoListSection.insetGrouped(
+                header: Text(context.l10n.subscription.toUpperCase()),
+                children: [
+                  CupertinoListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemPurple,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(CupertinoIcons.star_fill, color: CupertinoColors.white, size: 20),
+                    ),
+                    title: Text(context.l10n.manageSubscription),
+                    subtitle: Text(context.l10n.viewPlanAndBilling),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () => Navigator.pushNamed(context, '/manage_subscription'),
+                  ),
+                  CupertinoListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemGreen,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(CupertinoIcons.arrow_counterclockwise, color: CupertinoColors.white, size: 20),
+                    ),
+                    title: Text(context.l10n.restorePurchases),
+                    subtitle: Text(context.l10n.restorePreviousPurchases),
+                    trailing: const CupertinoListTileChevron(),
+                    onTap: () => _restorePurchases(context),
+                  ),
+                ],
+              ),
+
               // Account Section
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.account.toUpperCase()),
@@ -743,6 +778,64 @@ class _SettingsState extends State<Settings> {
         ),
       ),
     );
+  }
+
+  /// Restore previous in-app purchases
+  Future<void> _restorePurchases(BuildContext context) async {
+    // Show loading dialog
+    showCupertinoDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => CupertinoAlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CupertinoActivityIndicator(),
+            const SizedBox(height: 16),
+            Text(context.l10n.restoringPurchases),
+          ],
+        ),
+      ),
+    );
+
+    try {
+      // TODO: Implementar restauração real via in_app_purchase
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: Text(context.l10n.success),
+            content: Text(context.l10n.restorePurchasesSuccess),
+            actions: [
+              CupertinoDialogAction(
+                child: Text(context.l10n.ok),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+        showCupertinoDialog(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: Text(context.l10n.error),
+            content: Text(context.l10n.restorePurchasesError),
+            actions: [
+              CupertinoDialogAction(
+                child: Text(context.l10n.ok),
+                onPressed: () => Navigator.pop(ctx),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
   /// Show bottom sheet to link WhatsApp

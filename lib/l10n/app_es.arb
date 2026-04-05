@@ -1406,5 +1406,133 @@
   "pdfGeneral": "General",
   "pdfTrackOnline": "Seguimiento online",
   "pdfTrackOnlineDescription": "Escanee el codigo QR para rastrear esta orden de servicio",
-  "pdfEquipment": "Equipo"
+  "pdfEquipment": "Equipo",
+
+  "upgrade": "Actualizar plan",
+  "photos": "fotos",
+  "formTemplates": "formularios",
+
+  "featureGateNearLimit": "Quedan {count} {feature}",
+  "@featureGateNearLimit": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "feature": { "type": "String" }
+    }
+  },
+  "featureGateLimitReached": "Límite de {feature} alcanzado",
+  "@featureGateLimitReached": {
+    "placeholders": {
+      "feature": { "type": "String" }
+    }
+  },
+  "featureGateUpgradeSuggestion": "Actualiza al plan {plan} para más",
+  "@featureGateUpgradeSuggestion": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+  "featureGateUsageInfo": "Usado {current} de {limit}",
+  "@featureGateUsageInfo": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "limit": { "type": "int" }
+    }
+  },
+  "featureGateLimitModalTitle": "Límite alcanzado",
+  "featureGateLimitModalMessage": "Has alcanzado el límite de {feature} de tu plan {plan}.",
+  "@featureGateLimitModalMessage": {
+    "placeholders": {
+      "feature": { "type": "String" },
+      "plan": { "type": "String" }
+    }
+  },
+  "featureGateLimitModalUsage": "{current} de {limit} {feature}",
+  "@featureGateLimitModalUsage": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "limit": { "type": "int" },
+      "feature": { "type": "String" }
+    }
+  },
+  "featureGateUpgradeButton": "Actualizar a {plan}",
+  "@featureGateUpgradeButton": {
+    "placeholders": {
+      "plan": { "type": "String" }
+    }
+  },
+  "featureGateUpgradeNewLimit": "Nuevo límite: {limit} {feature}",
+  "@featureGateUpgradeNewLimit": {
+    "placeholders": {
+      "limit": { "type": "String" },
+      "feature": { "type": "String" }
+    }
+  },
+  "unlimitedLabel": "ilimitado",
+
+  "subscription": "Suscripción",
+  "manageSubscription": "Gestionar suscripción",
+  "viewPlanAndBilling": "Ver plan y facturación",
+  "restorePurchases": "Restaurar compras",
+  "restorePreviousPurchases": "Recuperar compras anteriores",
+  "restoringPurchases": "Restaurando compras...",
+  "restorePurchasesSuccess": "Compras restauradas con éxito",
+  "restorePurchasesError": "Error al restaurar compras. Inténtelo de nuevo.",
+  "restorePurchasesDescription": "Restaure sus compras anteriores si cambió de dispositivo",
+  "purchaseHistory": "Historial de Compras",
+  "success": "Éxito",
+  "free": "Gratis",
+  "renewsOn": "Renueva el {date}",
+  "@renewsOn": {
+    "placeholders": {
+      "date": { "type": "String" }
+    }
+  },
+  "subscriptionCancelled": "Suscripción cancelada",
+  "changePlan": "Cambiar plan",
+  "viewAvailablePlans": "Ver planes disponibles",
+  "cancelSubscription": "Cancelar suscripción",
+  "manageInStore": "Gestionar en tienda de apps",
+  "choosePlan": "Elegir plan",
+  "restore": "Restaurar",
+  "perMonth": "/mes",
+  "mostPopular": "MÁS POPULAR",
+  "currentPlan": "Plan actual",
+  "yourCurrentPlan": "Su plan actual",
+  "selectPlan": "Seleccionar plan",
+  "purchaseSuccessful": "¡Compra realizada con éxito!",
+  "plansDisclaimer": "Las suscripciones se renuevan automáticamente. Puede cancelar en cualquier momento en la configuración de la tienda.",
+  "planFeatureUsers": "{count} usuarios incluidos",
+  "@planFeatureUsers": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planFeaturePhotos": "{count} fotos/mes",
+  "@planFeaturePhotos": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planFeatureForms": "{count} formularios",
+  "@planFeatureForms": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "planFeatureCleanPdf": "PDF sin marca de agua",
+  "planFeaturePriority": "Soporte prioritario",
+  "planFeatureUnlimitedPhotos": "Fotos ilimitadas",
+  "planFeatureUnlimitedForms": "Formularios ilimitados",
+  "planFeatureMultiCompany": "Multi-empresa",
+  "planFeatureApi": "Acceso a API",
+  "upgradePlanTitle": "Actualizar",
+  "featureLimitReached": "Ha alcanzado el límite de {feature}",
+  "@featureLimitReached": {
+    "placeholders": {
+      "feature": { "type": "String" }
+    }
+  },
+  "withUpgrade": "Con actualización",
+  "upgradeNow": "Actualizar ahora",
+  "maybeLater": "Quizás después"
 }

@@ -13,6 +13,7 @@ import 'package:praticos/mobx/agenda_store.dart';
 import 'package:praticos/mobx/theme_store.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 import 'package:praticos/mobx/engagement_reminder_store.dart';
+import 'package:praticos/mobx/subscription_store.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/screens/login.dart';
@@ -72,6 +73,11 @@ Future<void> main() async {
           create: (_) => EngagementReminderStore(),
         ),
         Provider<NotificationStore>(create: (_) => NotificationStore()),
+        Provider<SubscriptionStore>(create: (_) {
+          final store = SubscriptionStore();
+          SubscriptionStoreHolder.instance = store;
+          return store;
+        }),
         ChangeNotifierProvider<SegmentConfigProvider>(
           create: (_) => SegmentConfigProvider(),
         ),

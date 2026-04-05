@@ -105,8 +105,13 @@ mixin _$FormTemplateStore on _FormTemplateStore, Store {
   );
 
   @override
-  Future<void> saveTemplate(FormDefinition template) {
-    return _$saveTemplateAsyncAction.run(() => super.saveTemplate(template));
+  Future<void> saveTemplate(
+    FormDefinition template, {
+    Subscription? subscription,
+  }) {
+    return _$saveTemplateAsyncAction.run(
+      () => super.saveTemplate(template, subscription: subscription),
+    );
   }
 
   late final _$updateTemplateAsyncAction = AsyncAction(
@@ -139,9 +144,12 @@ mixin _$FormTemplateStore on _FormTemplateStore, Store {
   );
 
   @override
-  Future<void> toggleTemplateStatus(FormDefinition template) {
+  Future<void> toggleTemplateStatus(
+    FormDefinition template, {
+    Subscription? subscription,
+  }) {
     return _$toggleTemplateStatusAsyncAction.run(
-      () => super.toggleTemplateStatus(template),
+      () => super.toggleTemplateStatus(template, subscription: subscription),
     );
   }
 
@@ -151,9 +159,15 @@ mixin _$FormTemplateStore on _FormTemplateStore, Store {
   );
 
   @override
-  Future<void> importGlobalTemplate(FormDefinition globalTemplate) {
+  Future<void> importGlobalTemplate(
+    FormDefinition globalTemplate, {
+    Subscription? subscription,
+  }) {
     return _$importGlobalTemplateAsyncAction.run(
-      () => super.importGlobalTemplate(globalTemplate),
+      () => super.importGlobalTemplate(
+        globalTemplate,
+        subscription: subscription,
+      ),
     );
   }
 

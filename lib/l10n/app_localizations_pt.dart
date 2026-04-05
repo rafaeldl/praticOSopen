@@ -410,7 +410,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get addPhotoOrAttachment => 'Foto / Anexo';
 
   @override
-  String get photos => 'Fotos';
+  String get photos => 'fotos';
 
   @override
   String get photo => 'Foto';
@@ -3328,4 +3328,189 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get pdfEquipment => 'Equipamento';
+
+  @override
+  String get upgrade => 'Fazer upgrade';
+
+  @override
+  String get formTemplates => 'formulários';
+
+  @override
+  String featureGateNearLimit(int count, String feature) {
+    return 'Restam $count $feature';
+  }
+
+  @override
+  String featureGateLimitReached(String feature) {
+    return 'Limite de $feature atingido';
+  }
+
+  @override
+  String featureGateUpgradeSuggestion(String plan) {
+    return 'Faça upgrade para o plano $plan para mais';
+  }
+
+  @override
+  String featureGateUsageInfo(int current, int limit) {
+    return 'Usado $current de $limit';
+  }
+
+  @override
+  String get featureGateLimitModalTitle => 'Limite atingido';
+
+  @override
+  String featureGateLimitModalMessage(String feature, String plan) {
+    return 'Você atingiu o limite de $feature do seu plano $plan.';
+  }
+
+  @override
+  String featureGateLimitModalUsage(int current, int limit, String feature) {
+    return '$current de $limit $feature';
+  }
+
+  @override
+  String featureGateUpgradeButton(String plan) {
+    return 'Fazer upgrade para $plan';
+  }
+
+  @override
+  String featureGateUpgradeNewLimit(String limit, String feature) {
+    return 'Novo limite: $limit $feature';
+  }
+
+  @override
+  String get unlimitedLabel => 'ilimitado';
+
+  @override
+  String get subscription => 'Assinatura';
+
+  @override
+  String get manageSubscription => 'Gerenciar assinatura';
+
+  @override
+  String get viewPlanAndBilling => 'Ver plano e cobrança';
+
+  @override
+  String get restorePurchases => 'Restaurar compras';
+
+  @override
+  String get restorePreviousPurchases => 'Recuperar compras anteriores';
+
+  @override
+  String get restoringPurchases => 'Restaurando compras...';
+
+  @override
+  String get restorePurchasesSuccess => 'Compras restauradas com sucesso';
+
+  @override
+  String get restorePurchasesError =>
+      'Erro ao restaurar compras. Tente novamente.';
+
+  @override
+  String get restorePurchasesDescription =>
+      'Restaure suas compras anteriores caso tenha trocado de dispositivo';
+
+  @override
+  String get purchaseHistory => 'Histórico de Compras';
+
+  @override
+  String get success => 'Sucesso';
+
+  @override
+  String get free => 'Gratuito';
+
+  @override
+  String renewsOn(String date) {
+    return 'Renova em $date';
+  }
+
+  @override
+  String get subscriptionCancelled => 'Assinatura cancelada';
+
+  @override
+  String get changePlan => 'Alterar plano';
+
+  @override
+  String get viewAvailablePlans => 'Ver planos disponíveis';
+
+  @override
+  String get cancelSubscription => 'Cancelar assinatura';
+
+  @override
+  String get manageInStore => 'Gerenciar na loja de aplicativos';
+
+  @override
+  String get choosePlan => 'Escolher plano';
+
+  @override
+  String get restore => 'Restaurar';
+
+  @override
+  String get perMonth => '/mês';
+
+  @override
+  String get mostPopular => 'MAIS POPULAR';
+
+  @override
+  String get currentPlan => 'Plano atual';
+
+  @override
+  String get yourCurrentPlan => 'Seu plano atual';
+
+  @override
+  String get selectPlan => 'Selecionar plano';
+
+  @override
+  String get purchaseSuccessful => 'Compra realizada com sucesso!';
+
+  @override
+  String get plansDisclaimer =>
+      'As assinaturas são renovadas automaticamente. Você pode cancelar a qualquer momento nas configurações da loja.';
+
+  @override
+  String planFeatureUsers(int count) {
+    return '$count usuários inclusos';
+  }
+
+  @override
+  String planFeaturePhotos(int count) {
+    return '$count fotos/mês';
+  }
+
+  @override
+  String planFeatureForms(int count) {
+    return '$count formulários';
+  }
+
+  @override
+  String get planFeatureCleanPdf => 'PDF sem marca d\'água';
+
+  @override
+  String get planFeaturePriority => 'Suporte prioritário';
+
+  @override
+  String get planFeatureUnlimitedPhotos => 'Fotos ilimitadas';
+
+  @override
+  String get planFeatureUnlimitedForms => 'Formulários ilimitados';
+
+  @override
+  String get planFeatureMultiCompany => 'Multi-empresa';
+
+  @override
+  String get planFeatureApi => 'Acesso à API';
+
+  @override
+  String get upgradePlanTitle => 'Faça upgrade';
+
+  @override
+  String featureLimitReached(String feature) {
+    return 'Você atingiu o limite de $feature';
+  }
+
+  @override
+  String get withUpgrade => 'Com upgrade';
+
+  @override
+  String get upgradeNow => 'Fazer upgrade';
 }

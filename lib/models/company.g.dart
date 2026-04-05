@@ -41,7 +41,10 @@ Company _$CompanyFromJson(Map<String, dynamic> json) => Company()
       : UserAggr.fromJson(json['owner'] as Map<String, dynamic>)
   ..users = (json['users'] as List<dynamic>?)
       ?.map((e) => UserRoleAggr.fromJson(e as Map<String, dynamic>))
-      .toList();
+      .toList()
+  ..subscription = json['subscription'] == null
+      ? null
+      : Subscription.fromJson(json['subscription'] as Map<String, dynamic>);
 
 Map<String, dynamic> _$CompanyToJson(Company instance) => <String, dynamic>{
   'id': instance.id,
@@ -65,6 +68,7 @@ Map<String, dynamic> _$CompanyToJson(Company instance) => <String, dynamic>{
   'useContracts': instance.useContracts,
   'owner': instance.owner?.toJson(),
   'users': instance.users?.map((e) => e.toJson()).toList(),
+  'subscription': instance.subscription?.toJson(),
 };
 
 CompanyAggr _$CompanyAggrFromJson(Map<String, dynamic> json) => CompanyAggr()

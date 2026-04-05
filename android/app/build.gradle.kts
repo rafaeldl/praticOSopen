@@ -1,3 +1,4 @@
+// praticOS Android application build configuration
 plugins {
     id("com.android.application")
     id("kotlin-android")

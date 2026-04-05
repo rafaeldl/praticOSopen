@@ -1,3 +1,4 @@
+import "package:flutter/foundation.dart";
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:mobx/mobx.dart';
@@ -5,12 +6,14 @@ import 'package:praticos/global.dart';
 import 'package:praticos/models/collaborator_exception.dart';
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/membership.dart';
+import 'package:praticos/models/subscription.dart';
 import 'package:praticos/models/user_role.dart';
 import 'package:praticos/repositories/invite_repository.dart';
 import 'package:praticos/repositories/tenant/tenant_membership_repository.dart';
 import 'package:praticos/repositories/user_repository.dart';
-import 'package:praticos/services/invite_api_service.dart';
 import 'package:praticos/services/analytics_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
+import 'package:praticos/services/invite_api_service.dart';
 import 'package:praticos/utils/invite_utils.dart' as invite_utils;
 
 part 'collaborator_store.g.dart';
@@ -57,7 +60,7 @@ abstract class _CollaboratorStore with Store {
     try {
       await auth.FirebaseAuth.instance.currentUser?.getIdToken(true);
     } catch (e) {
-      print('[CollaboratorStore] Erro ao refresh token: $e');
+      debugPrint('[CollaboratorStore] Erro ao refresh token: $e');
     }
   }
 
@@ -172,7 +175,7 @@ abstract class _CollaboratorStore with Store {
       pendingInvites.clear();
       pendingInvites.addAll(invites.where((i) => !i.isExpired));
     } catch (e) {
-      print('[CollaboratorStore] Erro ao carregar convites: $e');
+      debugPrint('[CollaboratorStore] Erro ao carregar convites: $e');
     }
   }
 
@@ -203,18 +206,29 @@ abstract class _CollaboratorStore with Store {
   /// Retorna uma tupla (wasAddedDirectly, inviteToken):
   /// - `wasAddedDirectly`: true se foi adicionado diretamente, false se foi criado convite
   /// - `inviteToken`: o token do convite criado (null se adicionado diretamente)
+  ///
+  /// Lança [FeatureGateLimitException] se o limite de colaboradores foi atingido.
   @action
   Future<(bool wasAdded, String? token)> addCollaborator(
     String? name,
     String? email,
     String? phone,
-    RolesType roleType,
-  ) async {
-    print('[CollaboratorStore] addCollaborator called - name: $name, email: $email, phone: $phone, role: ${roleType.name}');
+    RolesType roleType, {
+    Subscription? subscription,
+  }) async {
+    debugPrint('[CollaboratorStore] addCollaborator called - name: $name, email: $email, phone: $phone, role: ${roleType.name}');
 
     if (Global.companyAggr?.id == null) {
-      print('[CollaboratorStore] Error: companyAggr is null');
+      debugPrint('[CollaboratorStore] Error: companyAggr is null');
       return (false, null);
+    }
+
+    // Verifica limite de colaboradores antes de adicionar
+    final sub = subscription ?? Global.subscription;
+    final gateResult = FeatureGateService.canAddCollaborator(sub);
+    if (!gateResult.isAllowed) {
+      debugPrint('[CollaboratorStore] Limite de colaboradores atingido: ${gateResult.currentUsage}/${gateResult.limit}');
+      throw FeatureGateLimitException(gateResult);
     }
 
     isLoading = true;
@@ -222,7 +236,7 @@ abstract class _CollaboratorStore with Store {
       final companyId = Global.companyAggr!.id!;
       final normalizedEmail = email?.toLowerCase().trim();
       final normalizedPhone = phone?.replaceAll(RegExp(r'\D'), '').trim();
-      print('[CollaboratorStore] Normalized - email: $normalizedEmail, phone: $normalizedPhone');
+      debugPrint('[CollaboratorStore] Normalized - email: $normalizedEmail, phone: $normalizedPhone');
 
       // 1. Search user by email (phone-only search skipped — security rules
       //    don't allow client-side queries on the users collection by phone;
@@ -230,33 +244,35 @@ abstract class _CollaboratorStore with Store {
       dynamic user;
       try {
         if (normalizedEmail != null && normalizedEmail.isNotEmpty) {
-          print('[CollaboratorStore] Searching user by email: $normalizedEmail');
+          debugPrint('[CollaboratorStore] Searching user by email: $normalizedEmail');
           user = await _userRepository.findUserByEmail(normalizedEmail);
         }
-        print('[CollaboratorStore] User search result: ${user?.id ?? 'not found'}');
+        debugPrint('[CollaboratorStore] User search result: ${user?.id ?? 'not found'}');
       } catch (e) {
-        print('[CollaboratorStore] Error searching user: $e');
+        debugPrint('[CollaboratorStore] Error searching user: $e');
         user = null;
       }
 
       // Se o usuário não existe, cria um convite
       if (user == null) {
-        print('[CollaboratorStore] User not found, creating invite...');
+        debugPrint('[CollaboratorStore] User not found, creating invite...');
         final inviteToken = await _createInvite(
           name,
           normalizedEmail,
           normalizedPhone,
           roleType,
         );
-        print('[CollaboratorStore] Invite created with token: $inviteToken');
+        debugPrint('[CollaboratorStore] Invite created with token: $inviteToken');
         AnalyticsService.instance.logCollaboratorInvited(
           method: 'invite',
           role: roleType.name,
         );
+        // Atualiza contador (convite conta como colaborador pendente)
+        await _updateCollaboratorCounter();
         return (false, inviteToken);
       }
 
-      print('[CollaboratorStore] User found: ${user.id}');
+      debugPrint('[CollaboratorStore] User found: ${user.id}');
 
       // 2. Verifica se o usuário já está na empresa
       final existingCompanyIndex = user.companies?.indexWhere(
@@ -302,6 +318,9 @@ abstract class _CollaboratorStore with Store {
       // 4. Commit atômico
       await batch.commit();
 
+      // 5. Atualiza contador de colaboradores
+      await _updateCollaboratorCounter();
+
       AnalyticsService.instance.logCollaboratorInvited(
         method: 'direct',
         role: roleType.name,
@@ -327,7 +346,7 @@ abstract class _CollaboratorStore with Store {
     String? phone,
     RolesType roleType,
   ) async {
-    print('[CollaboratorStore] Creating invite via API - name: $name, email: $email, phone: $phone, role: ${roleType.name}');
+    debugPrint('[CollaboratorStore] Creating invite via API - name: $name, email: $email, phone: $phone, role: ${roleType.name}');
 
     try {
       final result = await InviteApiService.instance.createInvite(
@@ -337,14 +356,14 @@ abstract class _CollaboratorStore with Store {
         role: roleType.name,
       );
 
-      print('[CollaboratorStore] Invite created via API - token: ${result.token}');
+      debugPrint('[CollaboratorStore] Invite created via API - token: ${result.token}');
 
       // Recarrega lista de convites
       await loadPendingInvites();
 
       return result.token;
     } on InviteApiException catch (e) {
-      print('[CollaboratorStore] API error: ${e.message}');
+      debugPrint('[CollaboratorStore] API error: ${e.message}');
       throw Exception(e.message);
     }
   }
@@ -356,6 +375,8 @@ abstract class _CollaboratorStore with Store {
     try {
       await InviteApiService.instance.cancelInvite(inviteToken);
       await loadPendingInvites();
+      // Atualiza contador após cancelar convite
+      await _updateCollaboratorCounter();
     } catch (e) {
       errorMessage = e.toString();
       rethrow;
@@ -478,7 +499,10 @@ abstract class _CollaboratorStore with Store {
       // 3. Commit atômico
       await batch.commit();
 
-      // 4. Recarrega lista
+      // 4. Atualiza contador de colaboradores
+      await _updateCollaboratorCounter();
+
+      // 5. Recarrega lista
       await loadCollaborators();
 
     } catch (e) {
@@ -486,6 +510,54 @@ abstract class _CollaboratorStore with Store {
       rethrow;
     } finally {
       isLoading = false;
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Feature Gate Counter
+  // ═══════════════════════════════════════════════════════════════════
+
+  /// Atualiza o contador de colaboradores no Firestore e localmente.
+  ///
+  /// Conta membros ativos + convites pendentes como uso atual.
+  /// Falha silenciosa - não bloqueia a operação principal.
+  Future<void> _updateCollaboratorCounter() async {
+    try {
+      if (Global.companyAggr?.id == null || Global.subscription == null) {
+        return;
+      }
+
+      final companyId = Global.companyAggr!.id!;
+
+      // Conta membros ativos na coleção memberships
+      final membershipsSnapshot = await _db
+          .collection('companies')
+          .doc(companyId)
+          .collection('memberships')
+          .get();
+      final memberCount = membershipsSnapshot.docs.length;
+
+      // Conta convites pendentes
+      final pendingCount = pendingInvites.where((i) => !i.isExpired).length;
+
+      // Total: membros + convites pendentes
+      final totalCollaborators = memberCount + pendingCount;
+
+      // Atualiza no Firestore
+      await _db
+          .collection('companies')
+          .doc(companyId)
+          .update({
+            'subscription.usage.collaborators': totalCollaborators,
+          });
+
+      // Atualiza localmente
+      Global.subscription!.usage.collaborators = totalCollaborators;
+
+      debugPrint('[CollaboratorStore] Contador de colaboradores atualizado: $totalCollaborators (membros: $memberCount, convites: $pendingCount)');
+    } catch (e) {
+      // Falha silenciosa - não bloqueia a operação principal
+      debugPrint('[CollaboratorStore] Erro ao atualizar contador de colaboradores: $e');
     }
   }
 }

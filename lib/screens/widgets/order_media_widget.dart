@@ -10,6 +10,7 @@ import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
+import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/services/photo_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/widgets/cached_image.dart';
@@ -485,7 +486,13 @@ class OrderMediaWidget extends StatelessWidget {
             ),
             onPressed: () async {
               Navigator.pop(ctx);
-              await store.addPhotoFromCamera();
+              final success = await store.addPhotoFromCamera();
+              if (!success && context.mounted) {
+                final limitResult = store.photoLimitResult;
+                if (limitResult != null && !limitResult.isAllowed) {
+                  _showPhotoLimitDialog(context, limitResult);
+                }
+              }
             },
           ),
           // Add photo (gallery)
@@ -500,7 +507,13 @@ class OrderMediaWidget extends StatelessWidget {
             ),
             onPressed: () async {
               Navigator.pop(ctx);
-              await store.addPhotoFromGallery();
+              final success = await store.addPhotoFromGallery();
+              if (!success && context.mounted) {
+                final limitResult = store.photoLimitResult;
+                if (limitResult != null && !limitResult.isAllowed) {
+                  _showPhotoLimitDialog(context, limitResult);
+                }
+              }
             },
           ),
           // Add as document (file picker)
@@ -686,6 +699,45 @@ class OrderMediaWidget extends StatelessWidget {
       default:
         return 'application/octet-stream';
     }
+  }
+
+  /// Mostra dialog de upgrade quando limite de fotos e atingido.
+  void _showPhotoLimitDialog(BuildContext ctx, FeatureGateResult result) {
+    showCupertinoDialog(
+      context: ctx,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Limite atingido'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(result.message ?? 'Voce atingiu o limite de fotos do seu plano.'),
+            const SizedBox(height: 12),
+            Text(
+              'Faca upgrade para adicionar mais fotos.',
+              style: TextStyle(
+                fontSize: 13,
+                color: CupertinoColors.secondaryLabel.resolveFrom(ctx),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: false,
+            child: const Text('Agora nao'),
+            onPressed: () => Navigator.pop(dialogContext),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('Ver planos'),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              Navigator.pushNamed(ctx, '/subscription/plans');
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
 
