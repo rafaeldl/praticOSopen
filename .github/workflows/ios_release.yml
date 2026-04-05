@@ -43,7 +43,7 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "📌 Using tag: $TAG"
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ steps.get_tag.outputs.tag }}
 
@@ -69,7 +69,7 @@ jobs:
           cache: true # Ativa o cache do SDK
 
       - name: Cache Pub deps
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.pub-cache
@@ -105,7 +105,7 @@ jobs:
 
       # 🔐 Importa o certificado .p12 no keychain
       - name: Import distribution cert
-        uses: apple-actions/import-codesign-certs@v2
+        uses: apple-actions/import-codesign-certs@v3
         with:
           p12-file-base64: ${{ secrets.IOS_DIST_CERTIFICATE_BASE64 }}
           p12-password: ${{ secrets.IOS_DIST_CERTIFICATE_PASSWORD }}
@@ -131,7 +131,7 @@ jobs:
           echo "Using profile: $NAME (UUID $UUID) - TEAM $TEAM"
 
       - name: Cache CocoaPods
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
