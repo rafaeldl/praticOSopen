@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:praticos/models/invite.dart';
 import 'package:praticos/models/company.dart';
@@ -22,7 +22,7 @@ class InviteApiService {
     if (kDebugMode) {
       // Use ngrok for iOS simulator (localhost:5000 conflicts with AirTunes)
       // For Android emulator, use 10.0.2.2
-      if (Platform.isAndroid) {
+      if (!kIsWeb && Platform.isAndroid) {
         return 'http://10.0.2.2:5000/praticos/southamerica-east1/api';
       }
       // iOS simulator - use ngrok tunnel
