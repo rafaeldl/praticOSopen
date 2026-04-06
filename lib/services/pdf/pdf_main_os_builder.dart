@@ -954,26 +954,22 @@ class PdfMainOsBuilder {
 
   /// Constrói a marca d'água "PraticOS" rotacionada 45 graus.
   ///
-  /// A marca d'água é sobreposta em todas as páginas quando [showWatermark] é true.
-  /// Usa opacidade de 8% para não atrapalhar a leitura do documento.
+  /// Projetado para uso via `pageTheme.buildForeground` do MultiPage,
+  /// renderizado como overlay sem afetar a paginacao.
   pw.Widget buildWatermark() {
     if (!showWatermark) return pw.SizedBox();
 
-    return pw.FullPage(
-      ignoreMargins: true,
-      child: pw.Center(
-        child: pw.Transform.rotate(
-          angle: -0.785398, // -45 graus em radianos
-          child: pw.Opacity(
-            opacity: 0.08,
-            child: pw.Text(
-              'PraticOS',
-              style: pw.TextStyle(
-                font: boldFont,
-                fontSize: 72,
-                color: PdfColors.grey,
-              ),
-            ),
+    return pw.Watermark(
+      angle: -0.785398, // -45 graus
+      fit: pw.BoxFit.none,
+      child: pw.Opacity(
+        opacity: 0.06,
+        child: pw.Text(
+          'PraticOS',
+          style: pw.TextStyle(
+            font: boldFont,
+            fontSize: 72,
+            color: PdfColors.grey,
           ),
         ),
       ),
