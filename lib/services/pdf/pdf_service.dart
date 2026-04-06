@@ -112,8 +112,13 @@ class PdfService {
     if (options.includeMainOs) {
       doc.addPage(
         pw.MultiPage(
-          pageFormat: PdfStyles.pageFormat,
-          margin: PdfStyles.pageMargin,
+          pageTheme: pw.PageTheme(
+            pageFormat: PdfStyles.pageFormat,
+            margin: PdfStyles.pageMargin,
+            buildForeground: showWatermark
+                ? (_) => mainOsBuilder.buildWatermark()
+                : null,
+          ),
           header: (pw.Context context) {
             return mainOsBuilder.buildHeader(data.company, data.order);
           },
@@ -121,16 +126,11 @@ class PdfService {
             return mainOsBuilder.buildFooter(context);
           },
           build: (pw.Context context) {
-            final content = mainOsBuilder.buildContent(
+            return mainOsBuilder.buildContent(
               order: data.order,
               customer: data.customer,
               company: data.company,
             );
-            // Adicionar marca d'agua como primeiro widget (background)
-            if (showWatermark) {
-              return [mainOsBuilder.buildWatermark(), ...content];
-            }
-            return content;
           },
         ),
       );
@@ -143,8 +143,13 @@ class PdfService {
 
         doc.addPage(
           pw.MultiPage(
-            pageFormat: PdfStyles.pageFormat,
-            margin: PdfStyles.pageMargin,
+            pageTheme: pw.PageTheme(
+              pageFormat: PdfStyles.pageFormat,
+              margin: PdfStyles.pageMargin,
+              buildForeground: showWatermark
+                  ? (_) => mainOsBuilder.buildWatermark()
+                  : null,
+            ),
             footer: (pw.Context context) {
               return formsBuilder.buildFormFooter(
                 context,
@@ -155,17 +160,12 @@ class PdfService {
               );
             },
             build: (pw.Context context) {
-              final content = formsBuilder.buildFormContent(
+              return formsBuilder.buildFormContent(
                 company: data.company,
                 order: data.order,
                 form: form,
                 itemPhotosMap: itemPhotosMap,
               );
-              // Adicionar marca d'agua nas paginas de formularios tambem
-              if (showWatermark) {
-                return [mainOsBuilder.buildWatermark(), ...content];
-              }
-              return content;
             },
           ),
         );
