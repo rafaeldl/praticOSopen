@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   if (!allData) {
     const db = getAdminDb()
     const now = new Date()
-    const monthAgo = new Date(now.getTime() - 30 * 86400000)
+    const activeWindowStart = new Date(now.getTime() - 7 * 86400000) // active = OS in last 7 days
 
     const [ordersSnap, companiesSnap] = await Promise.all([
       db.collectionGroup('orders').orderBy('createdAt', 'desc').limit(10000).get(),
@@ -48,8 +48,9 @@ export default defineEventHandler(async (event) => {
     allData = companiesSnap.docs.map((doc) => {
       const d = doc.data()
       const stats = companyOrderStats.get(doc.id)
-      const lastOrderDate = stats?.lastOrderDate || null
-      const isActive = lastOrderDate ? new Date(lastOrderDate) >= monthAgo : false
+      // Prefer lastOrderDate from company doc (set by trigger), fallback to orders scan
+      const lastOrderDate = parseFirestoreDate(d.lastOrderDate)?.toISOString() || stats?.lastOrderDate || null
+      const isActive = lastOrderDate ? new Date(lastOrderDate) >= activeWindowStart : false
 
       return {
         id: doc.id,

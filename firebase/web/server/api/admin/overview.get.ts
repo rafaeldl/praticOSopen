@@ -57,6 +57,7 @@ export default defineEventHandler(async (event) => {
       country: d.country as string | undefined,
       membersCount: Array.isArray(d.users) ? d.users.length : 0,
       createdAt: parseFirestoreDate(d.createdAt),
+      lastOrderDate: parseFirestoreDate(d.lastOrderDate),
       nextOrderNumber: (d.nextOrderNumber as number) || 0,
     }
   })
@@ -70,20 +71,21 @@ export default defineEventHandler(async (event) => {
   // --- PERIOD-FILTERED orders (everything below uses this) ---
   const periodOrders = allOrders.filter((o) => o.effectiveDate && o.effectiveDate >= periodStart)
 
-  // Active companies (had orders in period)
+  // Active companies = had at least 1 OS in the last 7 days (using lastOrderDate from company doc)
+  const ACTIVE_WINDOW_DAYS = 7
+  const activeWindowStart = new Date(now.getTime() - ACTIVE_WINDOW_DAYS * 86400000)
   const activeCompanyIds = new Set(
-    periodOrders.filter((o) => o.companyId).map((o) => o.companyId),
+    companies
+      .filter((c) => c.lastOrderDate && c.lastOrderDate >= activeWindowStart)
+      .map((c) => c.id),
   )
 
-  // Retention: active in period vs active in previous equivalent period
-  const prevPeriodStart = new Date(periodStart.getTime() - periodDays * 86400000)
-  const prevPeriodActiveIds = new Set(
-    allOrders
-      .filter((o) => o.effectiveDate && o.effectiveDate >= prevPeriodStart && o.effectiveDate < periodStart && o.companyId)
-      .map((o) => o.companyId),
-  )
-  const retentionRate = prevPeriodActiveIds.size > 0
-    ? Math.round((activeCompanyIds.size / prevPeriodActiveIds.size) * 100)
+  // Retention: of companies registered in the selected period, how many are still active?
+  // "Active" = created at least 1 OS in the last 7 days (lastOrderDate >= 7 days ago)
+  const companiesInPeriod = companies.filter((c) => c.createdAt && c.createdAt >= periodStart)
+  const retainedCount = companiesInPeriod.filter((c) => activeCompanyIds.has(c.id)).length
+  const retentionRate = companiesInPeriod.length > 0
+    ? Math.round((retainedCount / companiesInPeriod.length) * 100)
     : 0
 
   // Orders by status (period-filtered)
