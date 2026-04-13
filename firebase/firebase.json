@@ -59,13 +59,6 @@
         }
       },
       {
-        "source": "/admin",
-        "run": {
-          "serviceId": "praticos-web",
-          "region": "southamerica-east1"
-        }
-      },
-      {
         "source": "/admin/**",
         "run": {
           "serviceId": "praticos-web",
