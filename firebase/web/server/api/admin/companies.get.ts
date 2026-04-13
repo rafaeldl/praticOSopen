@@ -1,6 +1,6 @@
 import { getAdminDb } from '~/server/utils/firebase'
 import { verifyAdminToken } from '~/server/utils/admin-auth'
-import { getCached, setCache } from '~/server/utils/admin-cache'
+import { getCached, setCache, getTtlForPeriod } from '~/server/utils/admin-cache'
 import { parseFirestoreDate } from '~/server/utils/parse-date'
 
 const CACHE_KEY = 'admin:companies'
@@ -8,13 +8,8 @@ const CACHE_KEY = 'admin:companies'
 export default defineEventHandler(async (event) => {
   await verifyAdminToken(event)
 
-  const query = getQuery(event)
-  const search = ((query.search as string) || '').toLowerCase()
-  const segmentFilter = (query.segment as string) || ''
-  const countryFilter = (query.country as string) || ''
-  const statusFilter = (query.status as string) || '' // 'active' | 'inactive' | ''
-
-  let allData = getCached<any[]>(CACHE_KEY)
+  const CACHE_TTL = 5 * 60_000 // 5 min cache
+  let allData = getCached<any>(CACHE_KEY, CACHE_TTL)
 
   if (!allData) {
     const db = getAdminDb()
@@ -73,32 +68,13 @@ export default defineEventHandler(async (event) => {
       }
     })
 
+    // Extract unique segments and countries for filter options
+    const segments = [...new Set(allData.map((c: any) => c.segment).filter(Boolean))].sort()
+    const countries = [...new Set(allData.map((c: any) => c.country).filter(Boolean))].sort()
+
+    allData = { companies: allData, filters: { segments, countries } }
     setCache(CACHE_KEY, allData)
   }
 
-  // Apply filters
-  let result = allData
-  if (search) {
-    result = result.filter((c: any) => c.name.toLowerCase().includes(search))
-  }
-  if (segmentFilter) {
-    result = result.filter((c: any) => c.segment === segmentFilter)
-  }
-  if (countryFilter) {
-    result = result.filter((c: any) => c.country === countryFilter)
-  }
-  if (statusFilter === 'active') {
-    result = result.filter((c: any) => c.active)
-  } else if (statusFilter === 'inactive') {
-    result = result.filter((c: any) => !c.active)
-  }
-
-  // Sort by totalOrders desc
-  result.sort((a: any, b: any) => b.totalOrders - a.totalOrders)
-
-  // Extract unique segments and countries for filter options
-  const segments = [...new Set(allData.map((c: any) => c.segment).filter(Boolean))].sort()
-  const countries = [...new Set(allData.map((c: any) => c.country).filter(Boolean))].sort()
-
-  return { data: result, filters: { segments, countries } }
+  return { data: allData.companies, filters: allData.filters }
 })

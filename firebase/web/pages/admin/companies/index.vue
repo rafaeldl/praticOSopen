@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between mb-8">
       <div>
         <h1 class="text-xl font-semibold text-white">Empresas</h1>
-        <p class="text-sm text-slate-500 mt-1">{{ filteredCount }} empresas encontradas</p>
+        <p class="text-sm text-slate-500 mt-1">{{ filteredCompanies.length }} de {{ allCompanies.length }} empresas</p>
       </div>
       <div v-if="lastUpdated" class="text-xs text-slate-600">
         Atualizado {{ timeAgo(lastUpdated) }}
@@ -20,7 +20,7 @@
         <input
           v-model="search"
           type="text"
-          placeholder="Buscar por nome..."
+          placeholder="Buscar por nome ou email..."
           class="w-full bg-slate-900 border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500"
         />
       </div>
@@ -72,19 +72,31 @@
         <table class="w-full text-sm">
           <thead>
             <tr class="text-left text-xs text-slate-500 uppercase tracking-wider border-b border-slate-800">
-              <th class="px-5 py-3">Empresa</th>
-              <th class="px-5 py-3">Segmento</th>
-              <th class="px-5 py-3">Pais</th>
-              <th class="px-5 py-3 text-right">Membros</th>
-              <th class="px-5 py-3 text-right">OS total</th>
-              <th class="px-5 py-3 text-right">Receita</th>
-              <th class="px-5 py-3">Ultima OS</th>
-              <th class="px-5 py-3 text-center">Status</th>
+              <th
+                v-for="col in columns"
+                :key="col.key"
+                :class="[
+                  'px-5 py-3 cursor-pointer select-none hover:text-slate-300 transition-colors',
+                  col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : '',
+                ]"
+                @click="toggleSort(col.key)"
+              >
+                <span class="inline-flex items-center gap-1">
+                  {{ col.label }}
+                  <svg v-if="sortBy === col.key" class="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path v-if="sortDir === 'asc'" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L10 6.414l-3.293 3.293a1 1 0 01-1.414 0z" />
+                    <path v-else d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L10 13.586l3.293-3.293a1 1 0 011.414 0z" />
+                  </svg>
+                  <svg v-else class="w-3 h-3 text-slate-700" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                  </svg>
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-800/50">
             <tr
-              v-for="company in companies"
+              v-for="company in filteredCompanies"
               :key="company.id"
               class="hover:bg-slate-800/30 cursor-pointer transition-colors"
               @click="navigateTo(`/admin/companies/${company.id}`)"
@@ -96,7 +108,7 @@
               <td class="px-5 py-3.5 text-slate-400">{{ company.segment || '-' }}</td>
               <td class="px-5 py-3.5 text-slate-400">{{ company.country || '-' }}</td>
               <td class="px-5 py-3.5 text-right text-slate-300">{{ company.membersCount }}</td>
-              <td class="px-5 py-3.5 text-right text-slate-300">{{ company.totalOrders }}</td>
+              <td class="px-5 py-3.5 text-right text-slate-300">{{ company.totalOrders.toLocaleString('pt-BR') }}</td>
               <td class="px-5 py-3.5 text-right text-slate-300">{{ formatCurrency(company.revenue) }}</td>
               <td class="px-5 py-3.5 text-slate-400">{{ company.lastOrderDate ? formatDate(company.lastOrderDate) : '-' }}</td>
               <td class="px-5 py-3.5 text-center">
@@ -107,7 +119,7 @@
         </table>
       </div>
 
-      <div v-if="companies.length === 0" class="py-12 text-center text-slate-500 text-sm">
+      <div v-if="filteredCompanies.length === 0" class="py-12 text-center text-slate-500 text-sm">
         Nenhuma empresa encontrada
       </div>
     </div>
@@ -118,10 +130,13 @@
 definePageMeta({ layout: 'admin', middleware: ['admin-auth'] })
 
 const { fetchAdmin } = useAdminApi()
+
 const search = ref('')
 const segmentFilter = ref('')
 const countryFilter = ref('')
 const statusFilter = ref('')
+const sortBy = ref('totalOrders')
+const sortDir = ref<'asc' | 'desc'>('desc')
 
 const statusOptions = [
   { label: 'Todas', value: '' },
@@ -129,23 +144,75 @@ const statusOptions = [
   { label: 'Inativas', value: 'inactive' },
 ]
 
-const queryParams = computed(() => {
-  const params = new URLSearchParams()
-  if (search.value) params.set('search', search.value)
-  if (segmentFilter.value) params.set('segment', segmentFilter.value)
-  if (countryFilter.value) params.set('country', countryFilter.value)
-  if (statusFilter.value) params.set('status', statusFilter.value)
-  return params.toString()
-})
+const columns = [
+  { key: 'name', label: 'Empresa' },
+  { key: 'segment', label: 'Segmento' },
+  { key: 'country', label: 'Pais' },
+  { key: 'membersCount', label: 'Membros', align: 'right' },
+  { key: 'totalOrders', label: 'OS total', align: 'right' },
+  { key: 'revenue', label: 'Receita', align: 'right' },
+  { key: 'lastOrderDate', label: 'Ultima OS' },
+  { key: 'active', label: 'Status', align: 'center' },
+]
 
+function toggleSort(key: string) {
+  if (sortBy.value === key) {
+    sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = key
+    sortDir.value = ['name', 'segment', 'country', 'lastOrderDate'].includes(key) ? 'asc' : 'desc'
+  }
+}
+
+// Fetch all data once, filter/sort client-side
 const { data: response, loading, error, lastUpdated } = useAdminPolling(
-  () => fetchAdmin<{ data: any[]; filters: any }>(`/api/admin/companies?${queryParams.value}`),
-  30000,
+  () => fetchAdmin<{ data: any[]; filters: any }>('/api/admin/companies'),
+  60000, // poll every 60s since data is cached server-side
 )
 
-const companies = computed(() => response.value?.data || [])
+const allCompanies = computed(() => response.value?.data || [])
 const filters = computed(() => response.value?.filters || { segments: [], countries: [] })
-const filteredCount = computed(() => companies.value.length)
+
+const filteredCompanies = computed(() => {
+  let result = allCompanies.value
+
+  // Search by name or email
+  const q = search.value.toLowerCase().trim()
+  if (q) {
+    result = result.filter(
+      (c: any) => c.name?.toLowerCase().includes(q) || c.ownerEmail?.toLowerCase().includes(q),
+    )
+  }
+
+  // Filters
+  if (segmentFilter.value) {
+    result = result.filter((c: any) => c.segment === segmentFilter.value)
+  }
+  if (countryFilter.value) {
+    result = result.filter((c: any) => c.country === countryFilter.value)
+  }
+  if (statusFilter.value === 'active') {
+    result = result.filter((c: any) => c.active)
+  } else if (statusFilter.value === 'inactive') {
+    result = result.filter((c: any) => !c.active)
+  }
+
+  // Sort
+  const key = sortBy.value
+  const dir = sortDir.value === 'asc' ? 1 : -1
+  result = [...result].sort((a: any, b: any) => {
+    const va = a[key]
+    const vb = b[key]
+    if (va == null && vb == null) return 0
+    if (va == null) return 1
+    if (vb == null) return -1
+    if (typeof va === 'string') return va.localeCompare(vb) * dir
+    if (typeof va === 'boolean') return (va === vb ? 0 : va ? -1 : 1) * dir
+    return (va - vb) * dir
+  })
+
+  return result
+})
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
