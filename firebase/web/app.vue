@@ -1,9 +1,14 @@
 <template>
-  <NuxtPage />
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
 onMounted(() => {
-  document.documentElement.setAttribute('data-theme', 'light')
+  const route = useRoute()
+  if (!route.path.startsWith('/admin')) {
+    document.documentElement.setAttribute('data-theme', 'light')
+  }
 })
 </script>

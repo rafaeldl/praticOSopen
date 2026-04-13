@@ -2,10 +2,23 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: true,
   modules: ['@nuxtjs/tailwindcss'],
+  ignore: ['**/node_modules/**', '**/.git/**', '**/.nuxt/**', '**/.output/**'],
+  watchers: {
+    chokidar: {
+      ignored: ['**/node_modules/**', '**/.git/**'],
+      ignoreInitial: true,
+    },
+  },
   runtimeConfig: {
     apiBaseUrl: process.env.API_BASE_URL || 'https://southamerica-east1-praticos.cloudfunctions.net/api',
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://southamerica-east1-praticos.cloudfunctions.net/api',
+      firebaseConfig: {
+        apiKey: 'AIzaSyCzd0yGNoLaj3KGkrACvLy4lP_ynAYcFms',
+        authDomain: 'praticos.firebaseapp.com',
+        projectId: 'praticos',
+        storageBucket: 'praticos.appspot.com',
+      },
     },
   },
   app: {
@@ -27,10 +40,14 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/pro/**': { swr: 3600 },
+    '/admin/**': { ssr: false },
   },
   nitro: {
     externals: {
       external: ['firebase-admin'],
+    },
+    watchOptions: {
+      ignored: ['**/node_modules/**', '**/.git/**'],
     },
   },
   compatibilityDate: '2025-01-01',
