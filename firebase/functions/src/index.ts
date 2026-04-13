@@ -53,7 +53,10 @@ export const firestoreUpdateTenantOSNumber = functionsV1
       const currentNumber = companyData?.nextOrderNumber || 1;
 
       transaction.update(orderRef, { number: currentNumber });
-      transaction.update(companyRef, { nextOrderNumber: currentNumber + 1 });
+      transaction.update(companyRef, {
+        nextOrderNumber: currentNumber + 1,
+        lastOrderDate: data.createdAt || admin.firestore.FieldValue.serverTimestamp(),
+      });
 
       console.log(`OS #${currentNumber} assigned to order ${orderRef.id} of company ${companyId}`);
     });
