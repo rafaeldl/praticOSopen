@@ -76,6 +76,12 @@ message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
    🔴 NUNCA fazer multiplos /search/unified sequenciais. UMA chamada com todos os termos.
 2. **Criar OS:** busca (1 call com arrays) → IDs → POST /bot/orders/full.
    Apos criar → OS ativa. Adicionar item: se ha OS ativa, usar /services ou /products. So criar nova se pedido explicitamente.
+   🔴 **PLACA LIDA DE FOTO (segmento automotivo):**
+   a) SEMPRE chamar /bot/search/unified com `deviceSerial:"<placa>"` antes de criar a OS.
+   b) Se `device.exact` ou `device.suggestions[].serial` bater com a placa → usar `deviceId` desse resultado em /orders/full.
+   c) Se NAO bateu → passar `device:{name:"<Marca Modelo>", serial:"<placa>", brand:"<Marca>", model:"<Modelo>"}` inline em /orders/full. A API resolve via find-or-create automaticamente.
+   d) Para corrigir uma OS sem placa: PATCH /bot/orders/{NUM}/device com `{"deviceId":"ID"}` OU `{"device":{...}}` inline. Mesma logica de find-or-create.
+   🔴 NUNCA inventar endpoint para "vincular placa" depois (ex: /update-device, /orders/id, /bot/orders/{NUM}/update-device). Eles NAO existem. Use SOMENTE PATCH /bot/orders/{NUM}/device.
 3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
 4. **Fotos:** upload multipart: `curl -s -X POST -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" -F "file=@/path/to/photo.jpg" "$PRATICOS_API_URL/bot/orders/{NUM}/photos/upload"`
    Multiplas fotos: uma chamada por foto. Listar: GET /photos. Deletar: DELETE /photos/{ID}.

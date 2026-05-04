@@ -56,7 +56,33 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
     // Normalize common bot field name variations before validation
     const body = { ...req.body };
     if (body.orderId && !body.id) body.id = body.orderId;
-    if (body.device?.id && !body.deviceId) body.deviceId = body.device.id;
+
+    // Inline device → deviceId via find-or-create.
+    // Bot frequently sends `device: { brand, model, serial }` after reading a license plate
+    // from a photo. Without this, the field would be silently dropped and the order
+    // created with no device. See issue #241.
+    if (body.device && !body.deviceId && !body.deviceIds) {
+      const d = body.device;
+      if (d.id) {
+        body.deviceId = d.id;
+      } else {
+        const name: string = (d.name && String(d.name).trim()) ||
+          [d.brand, d.model].filter(Boolean).map(String).map((s) => s.trim()).join(' ').trim();
+        const serial: string | undefined = typeof d.serial === 'string' && d.serial.trim()
+          ? d.serial.trim()
+          : undefined;
+        if (name || serial) {
+          const { device: deviceAggr } = await deviceService.getOrCreateDevice(
+            companyId,
+            name || serial!,
+            serial,
+            getUserAggr(req),
+            getCompanyAggr(req)
+          );
+          body.deviceId = deviceAggr.id;
+        }
+      }
+    }
     delete body.orderId;
     delete body.device;
     delete body.paidAmount; // Not supported on creation, bot sometimes sends it
@@ -735,8 +761,34 @@ router.patch('/:number/device', requireLinked, async (req: AuthenticatedRequest,
       return;
     }
 
+    // Inline device → deviceId via find-or-create. Same fallback as POST /full.
+    const body = { ...req.body };
+    if (body.device && !body.deviceId) {
+      const d = body.device;
+      if (d.id) {
+        body.deviceId = d.id;
+      } else {
+        const name: string = (d.name && String(d.name).trim()) ||
+          [d.brand, d.model].filter(Boolean).map(String).map((s) => s.trim()).join(' ').trim();
+        const serial: string | undefined = typeof d.serial === 'string' && d.serial.trim()
+          ? d.serial.trim()
+          : undefined;
+        if (name || serial) {
+          const { device: deviceAggr } = await deviceService.getOrCreateDevice(
+            companyId,
+            name || serial!,
+            serial,
+            getUserAggr(req),
+            getCompanyAggr(req)
+          );
+          body.deviceId = deviceAggr.id;
+        }
+      }
+      delete body.device;
+    }
+
     // Validate input
-    const validation = validateInput(updateOrderDeviceSchema, req.body);
+    const validation = validateInput(updateOrderDeviceSchema, body);
     if (!validation.success) {
       res.status(400).json({
         success: false,
