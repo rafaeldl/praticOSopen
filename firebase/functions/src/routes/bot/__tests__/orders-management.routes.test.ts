@@ -95,6 +95,57 @@ describe('Bot Orders Management Routes', () => {
       expect(res.body.data.formatContext).toBeDefined();
       expect(res.body.data.message).toBeUndefined();
     });
+
+    it('promotes inline device {brand,model,serial} via getOrCreateDevice', async () => {
+      mockCustomerService.getCustomer.mockResolvedValue(fakeCustomer as any);
+      mockDeviceService.getOrCreateDevice = jest.fn().mockResolvedValue({
+        device: { id: 'd-resolved', name: 'Chevrolet Tracker', serial: 'REG9H64' },
+        created: true,
+      });
+      mockDeviceService.getDevice.mockResolvedValue({ id: 'd-resolved', name: 'Chevrolet Tracker', serial: 'REG9H64' } as any);
+      mockOrderService.createOrder.mockResolvedValue({ id: 'ord3', number: 3, status: 'quote' } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue({ ...fakeOrder, number: 3 } as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .post('/full')
+        .send({
+          customerId: 'c1',
+          device: { brand: 'Chevrolet', model: 'Tracker', serial: 'REG9H64' },
+        });
+
+      expect(res.status).toBe(201);
+      expect(mockDeviceService.getOrCreateDevice).toHaveBeenCalledWith(
+        'comp1',
+        'Chevrolet Tracker',
+        'REG9H64',
+        expect.objectContaining({ id: 'user1' }),
+        expect.objectContaining({ id: 'comp1' })
+      );
+      expect(mockDeviceService.getDevice).toHaveBeenCalledWith('comp1', 'd-resolved');
+    });
+
+    it('uses inline device.id directly when provided (legacy path)', async () => {
+      mockCustomerService.getCustomer.mockResolvedValue(fakeCustomer as any);
+      mockDeviceService.getOrCreateDevice = jest.fn();
+      mockDeviceService.getDevice.mockResolvedValue({ id: 'd-existing', name: 'iPhone' } as any);
+      mockOrderService.createOrder.mockResolvedValue({ id: 'ord4', number: 4, status: 'quote' } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue({ ...fakeOrder, number: 4 } as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .post('/full')
+        .send({
+          customerId: 'c1',
+          device: { id: 'd-existing' },
+        });
+
+      expect(res.status).toBe(201);
+      expect(mockDeviceService.getOrCreateDevice).not.toHaveBeenCalled();
+      expect(mockDeviceService.getDevice).toHaveBeenCalledWith('comp1', 'd-existing');
+    });
   });
 
   // ----- POST /:number/services ---------------------------------------------
@@ -205,6 +256,32 @@ describe('Bot Orders Management Routes', () => {
       expect(res.body.data.order.number).toBe(1);
       expect(res.body.data.formatContext).toBeDefined();
       expect(res.body.data.message).toBeUndefined();
+    });
+
+    it('accepts inline device {brand,model,serial} via getOrCreateDevice', async () => {
+      mockDeviceService.getOrCreateDevice = jest.fn().mockResolvedValue({
+        device: { id: 'd-resolved', name: 'Honda HR-V', serial: 'RYW7H55' },
+        created: false,
+      });
+      mockDeviceService.getDevice.mockResolvedValue({ id: 'd-resolved', name: 'Honda HR-V', serial: 'RYW7H55' } as any);
+      mockOrderService.updateOrderDevice.mockResolvedValue({ success: true } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .patch('/1/device')
+        .send({ device: { brand: 'Honda', model: 'HR-V', serial: 'RYW7H55' } });
+
+      expect(res.status).toBe(200);
+      expect(mockDeviceService.getOrCreateDevice).toHaveBeenCalledWith(
+        'comp1',
+        'Honda HR-V',
+        'RYW7H55',
+        expect.objectContaining({ id: 'user1' }),
+        expect.objectContaining({ id: 'comp1' })
+      );
+      expect(mockDeviceService.getDevice).toHaveBeenCalledWith('comp1', 'd-resolved');
     });
   });
 

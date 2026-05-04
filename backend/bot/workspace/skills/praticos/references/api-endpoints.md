@@ -31,8 +31,10 @@ exec(command="curl -s -X PATCH -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsA
 
 ## OS - Criar
 POST /bot/orders/full
-Body: {customerId, deviceId?, deviceIds?:["id1","id2"], services:[{serviceId,value?,description?,deviceId?}], products:[{productId,quantity?,value?,description?,deviceId?}], dueDate?, scheduledDate?}
+Body: {customerId, deviceId?, deviceIds?:["id1","id2"], device?:{name?,serial?,brand?,model?}, services:[{serviceId,value?,description?,deviceId?}], products:[{productId,quantity?,value?,description?,deviceId?}], dueDate?, scheduledDate?}
 `deviceIds` para multi-device. Se passado, ignora `deviceId`. Cada service/product pode ter `deviceId` para vincular ao dispositivo.
+🔴 PREFERIR `deviceId` resolvido via /bot/search/unified. Só usar `device:{}` inline quando NAO ha match em search/unified E voce acabou de ler dados novos (ex: placa lida de foto). A API faz find-or-create automaticamente por serial→nome.
+🔴 NUNCA passar `device:{}` quando search/unified retornou `exact` ou `suggestions[].serial` igual a placa lida — usar o id retornado.
 Resposta: retorna `order` completo (mesmo formato de /details) + `formatContext` + `shareUrl` auto-criado. NAO precisa chamar GET /details apos criar.
 exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customerId\":\"abc\",\"services\":[{\"serviceId\":\"srv1\",\"value\":350}]}' \"$PRATICOS_API_URL/bot/orders/full\"")
 
@@ -49,7 +51,7 @@ POST /bot/orders/{NUM}/products `{"productId":"ID","quantity":N,"value":N,"descr
 `description` opcional — texto livre para especificar detalhes. Ver exemplos em SKILL.md regra 5.
 DELETE /bot/orders/{NUM}/services/{I} | DELETE /bot/orders/{NUM}/products/{I}
 PATCH /bot/orders/{NUM}/customer `{"customerId":"ID"}` — corrigir cliente da OS
-PATCH /bot/orders/{NUM}/device `{"deviceId":"ID"}` — corrigir dispositivo da OS
+PATCH /bot/orders/{NUM}/device `{"deviceId":"ID"}` ou `{"device":{"name?","serial?","brand?","model?"}}` — corrigir/definir dispositivo da OS (find-or-create automatico por serial→nome quando inline)
 🔴 **TODOS os endpoints de mutacao** (POST /full, POST/DELETE /services, POST/DELETE /products, PATCH /status, PATCH /:number, PATCH /customer, PATCH /device, POST/DELETE /devices) retornam `{ order, formatContext }` no mesmo formato de /details. Usar dados do response para montar card. NAO re-fetch /details.
 
 ## OS - Dispositivos
