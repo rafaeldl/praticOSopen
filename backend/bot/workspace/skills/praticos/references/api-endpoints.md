@@ -10,8 +10,9 @@ Exemplo com arrays: {"customer":"Joao","service":["tela","bateria"],"product":["
 Resposta por entidade:
 - customer/device: `{ exact, suggestions, available }` — `exact` = match exato (1 resultado ou null), `suggestions` = matches por nome
 - service/product: `{ results, available }` — `results` = matches encontrados no catalogo
-- `available` (todas): lista de itens cadastrados como fallback (retornado quando sem matches)
+- `available` (todas): lista de itens cadastrados como fallback para buscas POR NOME (retornado quando sem matches)
 🔴 Se `available` tem match similar ao pedido → usar o ID dele + `description` customizada. NAO criar novo.
+🔴 **`available` é SEMPRE `null` quando a busca foi por `deviceSerial` (placa).** Placa é exata: se `device.exact` é `null` e `device.suggestions` está vazio, NAO usar nenhum id de `available` (eles NAO sao matches para a placa). Use inline `device:{name,serial,brand,model}` em /orders/full, PATCH /:number/device ou POST /:number/devices — a API resolve via find-or-create.
 exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customer\":\"Joao\",\"service\":[\"tela\",\"bateria\"]}' \"$PRATICOS_API_URL/bot/search/unified\"")
 
 ## Resumo
@@ -55,7 +56,7 @@ PATCH /bot/orders/{NUM}/device `{"deviceId":"ID"}` ou `{"device":{"name?","seria
 🔴 **TODOS os endpoints de mutacao** (POST /full, POST/DELETE /services, POST/DELETE /products, PATCH /status, PATCH /:number, PATCH /customer, PATCH /device, POST/DELETE /devices) retornam `{ order, formatContext }` no mesmo formato de /details. Usar dados do response para montar card. NAO re-fetch /details.
 
 ## OS - Dispositivos
-POST /bot/orders/{NUM}/devices `{"deviceId":"ID"}` — adicionar dispositivo à OS (retorna order detail)
+POST /bot/orders/{NUM}/devices `{"deviceId":"ID"}` OU `{"device":{"name":"Marca Modelo","serial":"PLACA","brand":"Marca","model":"Modelo"}}` — adicionar dispositivo à OS (retorna order detail). Quando passar `device:{...}` inline (sem id), a API faz find-or-create por serial → name. Use isso para placas lidas de foto que nao casam com nada na busca.
 DELETE /bot/orders/{NUM}/devices/{DEVICE_ID} — remover dispositivo da OS (retorna order detail)
 GET /bot/orders/{NUM}/details retorna `devices[]` (lista completa) e `deviceCount` (quantidade)
 

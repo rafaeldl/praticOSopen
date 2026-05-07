@@ -8,6 +8,24 @@ jest.mock('../../../services/customer.service');
 jest.mock('../../../services/device.service');
 jest.mock('../../../services/catalog.service');
 jest.mock('../../../services/share-token.service');
+jest.mock('../../../services/firestore.service', () => {
+  const actual = jest.requireActual('../../../services/firestore.service');
+  // Stub `db` so the upsert path in POST /full (which calls db.collection().doc().update()
+  // directly instead of going through orderService) doesn't blow up in tests.
+  const stubUpdate = jest.fn().mockResolvedValue(undefined);
+  return {
+    ...actual,
+    db: {
+      collection: () => ({
+        doc: () => ({
+          collection: () => ({
+            doc: () => ({ update: stubUpdate }),
+          }),
+        }),
+      }),
+    },
+  };
+});
 jest.mock('../../../middleware/auth.middleware', () => ({
   requireLinked: (_req: any, _res: any, next: any) => next(),
 }));
@@ -124,6 +142,62 @@ describe('Bot Orders Management Routes', () => {
         expect.objectContaining({ id: 'comp1' })
       );
       expect(mockDeviceService.getDevice).toHaveBeenCalledWith('comp1', 'd-resolved');
+    });
+
+    it('idempotent: reuses recent OS for same customer+createdBy (no id passed)', async () => {
+      // Bot's WhatsApp lane lock can fail on photo bursts → 2nd agent turn
+      // creates a duplicate. Server-side idempotency: if a recent OS exists
+      // for the same customer+createdBy in the last 60s, treat the call as
+      // an update on that OS instead of creating a new one.
+      const recentOrder = { id: 'ord-existing', number: 7, status: 'quote', services: [], products: [] };
+      mockOrderService.findRecentOrderByCustomer = jest.fn().mockResolvedValue(recentOrder as any);
+      mockOrderService.getOrder = jest.fn().mockResolvedValue(recentOrder as any);
+      mockCustomerService.getCustomer.mockResolvedValue(fakeCustomer as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue({ ...fakeOrder, number: 7 } as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .post('/full')
+        .send({ customerId: 'c1' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.updated).toBe(true);
+      expect(mockOrderService.findRecentOrderByCustomer).toHaveBeenCalledWith('comp1', 'c1', 'user1');
+      expect(mockOrderService.createOrder).not.toHaveBeenCalled();
+    });
+
+    it('idempotent: creates new OS when no recent match found', async () => {
+      mockOrderService.findRecentOrderByCustomer = jest.fn().mockResolvedValue(null);
+      mockCustomerService.getCustomer.mockResolvedValue(fakeCustomer as any);
+      mockOrderService.createOrder.mockResolvedValue({ id: 'ord-new', number: 8, status: 'quote' } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue({ ...fakeOrder, number: 8 } as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .post('/full')
+        .send({ customerId: 'c1' });
+
+      expect(res.status).toBe(201);
+      expect(mockOrderService.findRecentOrderByCustomer).toHaveBeenCalled();
+      expect(mockOrderService.createOrder).toHaveBeenCalled();
+    });
+
+    it('skips idempotency lookup when explicit id is passed', async () => {
+      mockOrderService.findRecentOrderByCustomer = jest.fn();
+      mockOrderService.getOrder = jest.fn().mockResolvedValue({ id: 'ord-x', number: 9, services: [], products: [] } as any);
+      mockCustomerService.getCustomer.mockResolvedValue(fakeCustomer as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue({ ...fakeOrder, number: 9 } as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .post('/full')
+        .send({ customerId: 'c1', id: 'ord-x' });
+
+      expect(res.status).toBe(200);
+      expect(mockOrderService.findRecentOrderByCustomer).not.toHaveBeenCalled();
     });
 
     it('uses inline device.id directly when provided (legacy path)', async () => {
@@ -326,6 +400,36 @@ describe('Bot Orders Management Routes', () => {
       expect(res.body.data.order).toBeDefined();
       expect(res.body.data.formatContext).toBeDefined();
       expect(res.body.data.message).toBeUndefined();
+    });
+
+    it('accepts inline device {brand,model,serial} via getOrCreateDevice', async () => {
+      // Mirror of the PATCH /:number/device fix (eb8cd8de). Without inline
+      // support, the bot would have to resolve a deviceId via search/unified —
+      // but search by plate that doesn't exist yet returns no match, leading
+      // to wrong device IDs being attached.
+      mockDeviceService.getOrCreateDevice = jest.fn().mockResolvedValue({
+        device: { id: 'd-resolved', name: 'Jeep Compass', serial: 'RKZ1J37' },
+        created: true,
+      });
+      mockDeviceService.getDevice.mockResolvedValue({ id: 'd-resolved', name: 'Jeep Compass', serial: 'RKZ1J37' } as any);
+      mockOrderService.addDeviceToOrder.mockResolvedValue({ success: true, devices: [{ id: 'd-resolved' }] } as any);
+      mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
+      mockShareTokenService.getTokensForOrder.mockResolvedValue([]);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .post('/1/devices')
+        .send({ device: { brand: 'Jeep', model: 'Compass', serial: 'RKZ1J37' } });
+
+      expect(res.status).toBe(200);
+      expect(mockDeviceService.getOrCreateDevice).toHaveBeenCalledWith(
+        'comp1',
+        'Jeep Compass',
+        'RKZ1J37',
+        expect.objectContaining({ id: 'user1' }),
+        expect.objectContaining({ id: 'comp1' })
+      );
+      expect(mockDeviceService.getDevice).toHaveBeenCalledWith('comp1', 'd-resolved');
     });
   });
 

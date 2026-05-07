@@ -129,6 +129,39 @@ export async function getOrderByNumber(
 }
 
 /**
+ * Find the most recent order created by `createdById` for `customerId` within
+ * the time window. Returns null if none.
+ *
+ * Used by `POST /bot/orders/full` to dedupe rapid-fire creations (e.g. when two
+ * WhatsApp photos arrive in the same burst before the bot's "OS ativa" memory
+ * write completes).
+ */
+export async function findRecentOrderByCustomer(
+  companyId: string,
+  customerId: string,
+  createdById: string,
+  sinceMs: number = 60_000
+): Promise<Order | null> {
+  const collection = getTenantCollection(companyId, 'orders');
+  const sinceIso = new Date(Date.now() - sinceMs).toISOString();
+  const snapshot = await collection
+    .where('customer.id', '==', customerId)
+    .where('createdBy.id', '==', createdById)
+    .where('createdAt', '>=', sinceIso)
+    .orderBy('createdAt', 'desc')
+    .limit(1)
+    .get();
+
+  if (snapshot.empty) return null;
+
+  const doc = snapshot.docs[0];
+  return {
+    ...doc.data(),
+    id: doc.id,
+  } as Order;
+}
+
+/**
  * Get orders by status
  */
 export async function getOrdersByStatus(
