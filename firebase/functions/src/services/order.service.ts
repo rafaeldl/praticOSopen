@@ -135,6 +135,12 @@ export async function getOrderByNumber(
  * Used by `POST /bot/orders/full` to dedupe rapid-fire creations (e.g. when two
  * WhatsApp photos arrive in the same burst before the bot's "OS ativa" memory
  * write completes).
+ *
+ * Index reuse: Firestore query uses only `(customer.id ==, createdAt >=)`,
+ * covered by the existing composite index `(customer.id ASC, createdAt DESC)`
+ * in firestore.indexes.json. The `createdBy.id` match is post-filtered in
+ * memory to avoid requiring a new 3-field composite index. The limit(5) margin
+ * is plenty since a single customer rarely gets >1 OS per minute.
  */
 export async function findRecentOrderByCustomer(
   companyId: string,
@@ -146,19 +152,20 @@ export async function findRecentOrderByCustomer(
   const sinceIso = new Date(Date.now() - sinceMs).toISOString();
   const snapshot = await collection
     .where('customer.id', '==', customerId)
-    .where('createdBy.id', '==', createdById)
     .where('createdAt', '>=', sinceIso)
     .orderBy('createdAt', 'desc')
-    .limit(1)
+    .limit(5)
     .get();
 
   if (snapshot.empty) return null;
 
-  const doc = snapshot.docs[0];
-  return {
-    ...doc.data(),
-    id: doc.id,
-  } as Order;
+  for (const doc of snapshot.docs) {
+    const data = doc.data() as Order & { createdBy?: { id?: string } };
+    if (data.createdBy?.id === createdById) {
+      return { ...data, id: doc.id } as Order;
+    }
+  }
+  return null;
 }
 
 /**
