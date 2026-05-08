@@ -104,6 +104,22 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
     const createdBy = getUserAggr(req);
     const company = getCompanyAggr(req);
 
+    // Idempotency: if no explicit id was passed and the bot already created an
+    // OS for the same customer+user in the last 60s, treat this as an update on
+    // that OS. Protects against the WhatsApp multi-photo burst race where the
+    // 2nd agent turn doesn't yet see "OS ativa" in memory and would otherwise
+    // create a duplicate.
+    if (!data.id && createdBy?.id) {
+      const recent = await orderService.findRecentOrderByCustomer(
+        companyId,
+        data.customerId,
+        createdBy.id
+      );
+      if (recent?.id) {
+        data.id = recent.id;
+      }
+    }
+
     // Get customer by ID (required)
     const customer = await customerService.getCustomer(companyId, data.customerId);
     if (!customer) {
@@ -941,7 +957,35 @@ router.post('/:number/devices', requireLinked, async (req: AuthenticatedRequest,
       return;
     }
 
-    const validation = validateInput(addDeviceToOrderSchema, req.body);
+    // Inline device → deviceId via find-or-create. Same fallback as POST /full
+    // and PATCH /:number/device. Keeps the bot's plate-from-photo flow working
+    // when the plate isn't already in the catalog.
+    const body = { ...req.body };
+    if (body.device && !body.deviceId) {
+      const d = body.device;
+      if (d.id) {
+        body.deviceId = d.id;
+      } else {
+        const name: string = (d.name && String(d.name).trim()) ||
+          [d.brand, d.model].filter(Boolean).map(String).map((s) => s.trim()).join(' ').trim();
+        const serial: string | undefined = typeof d.serial === 'string' && d.serial.trim()
+          ? d.serial.trim()
+          : undefined;
+        if (name || serial) {
+          const { device: deviceAggrInline } = await deviceService.getOrCreateDevice(
+            companyId,
+            name || serial!,
+            serial,
+            getUserAggr(req),
+            getCompanyAggr(req)
+          );
+          body.deviceId = deviceAggrInline.id;
+        }
+      }
+      delete body.device;
+    }
+
+    const validation = validateInput(addDeviceToOrderSchema, body);
     if (!validation.success) {
       res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: validation.errors.join(', ') } });
       return;

@@ -350,7 +350,17 @@ router.post('/unified', requireLinked, async (req: AuthenticatedRequest, res: Re
 
     // Process device results
     if (deviceTerms.length > 0 || data.deviceSerial !== undefined) {
-      const needsFallback = deviceResult && !deviceResult.exact && deviceResult.suggestions.length === 0;
+      // When searching by `deviceSerial` (a license plate / serial), a fallback
+      // list of unrelated devices misled the bot LLM into picking arbitrary
+      // ids as if they matched the plate. Plate searches are exact-match by
+      // nature: when no exact/suggestion match, the bot must use inline
+      // `device:{...}` (find-or-create), not pick from `available`.
+      const queriedBySerial = data.deviceSerial !== undefined;
+      const needsFallback =
+        !queriedBySerial &&
+        deviceResult &&
+        !deviceResult.exact &&
+        deviceResult.suggestions.length === 0;
       response.device = {
         exact: deviceResult?.exact ?? null,
         suggestions: deviceResult?.suggestions ?? [],

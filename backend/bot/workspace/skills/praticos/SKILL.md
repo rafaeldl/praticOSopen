@@ -79,9 +79,11 @@ message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
    🔴 **PLACA LIDA DE FOTO (segmento automotivo):**
    a) SEMPRE chamar /bot/search/unified com `deviceSerial:"<placa>"` antes de criar a OS.
    b) Se `device.exact` ou `device.suggestions[].serial` bater com a placa → usar `deviceId` desse resultado em /orders/full.
-   c) Se NAO bateu → passar `device:{name:"<Marca Modelo>", serial:"<placa>", brand:"<Marca>", model:"<Modelo>"}` inline em /orders/full. A API resolve via find-or-create automaticamente.
+   c) Se NAO bateu (`exact:null` e `suggestions:[]`) → passar `device:{name:"<Marca Modelo>", serial:"<placa>", brand:"<Marca>", model:"<Modelo>"}` inline em /orders/full. A API resolve via find-or-create automaticamente.
    d) Para corrigir uma OS sem placa: PATCH /bot/orders/{NUM}/device com `{"deviceId":"ID"}` OU `{"device":{...}}` inline. Mesma logica de find-or-create.
-   🔴 NUNCA inventar endpoint para "vincular placa" depois (ex: /update-device, /orders/id, /bot/orders/{NUM}/update-device). Eles NAO existem. Use SOMENTE PATCH /bot/orders/{NUM}/device.
+   e) Para ADICIONAR mais um veiculo a uma OS existente: POST /bot/orders/{NUM}/devices com `{"deviceId":"ID"}` OU `{"device":{...}}` inline (find-or-create igual ao /orders/full).
+   🔴 **`available` NUNCA é match para `deviceSerial`.** Quando a busca foi por placa e veio `exact:null + suggestions:[]`, a API ja retorna `available:null` — nao tem fallback. Se voce ver itens em `available` numa busca por placa, é bug; ignore. **Sempre** use inline `device:{...}` quando nao tem match exato.
+   🔴 NUNCA inventar endpoint para "vincular placa" depois (ex: /update-device, /orders/id, /bot/orders/{NUM}/update-device). Eles NAO existem. Use SOMENTE PATCH /bot/orders/{NUM}/device ou POST /bot/orders/{NUM}/devices.
 3. **CRUD:** buscar primeiro, confirmar editar/excluir. Criar CLIENTE: pedir contato WhatsApp (vCard). ⚠️ Telefone do vCard = dado do CLIENTE (campo `phone`). NUNCA usar como {NUMERO}.
 4. **Fotos:** upload multipart: `curl -s -X POST -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" -F "file=@/path/to/photo.jpg" "$PRATICOS_API_URL/bot/orders/{NUM}/photos/upload"`
    Multiplas fotos: uma chamada por foto. Listar: GET /photos. Deletar: DELETE /photos/{ID}.

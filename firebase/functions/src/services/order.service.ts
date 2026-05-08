@@ -129,6 +129,46 @@ export async function getOrderByNumber(
 }
 
 /**
+ * Find the most recent order created by `createdById` for `customerId` within
+ * the time window. Returns null if none.
+ *
+ * Used by `POST /bot/orders/full` to dedupe rapid-fire creations (e.g. when two
+ * WhatsApp photos arrive in the same burst before the bot's "OS ativa" memory
+ * write completes).
+ *
+ * Index reuse: Firestore query uses only `(customer.id ==, createdAt >=)`,
+ * covered by the existing composite index `(customer.id ASC, createdAt DESC)`
+ * in firestore.indexes.json. The `createdBy.id` match is post-filtered in
+ * memory to avoid requiring a new 3-field composite index. The limit(5) margin
+ * is plenty since a single customer rarely gets >1 OS per minute.
+ */
+export async function findRecentOrderByCustomer(
+  companyId: string,
+  customerId: string,
+  createdById: string,
+  sinceMs: number = 60_000
+): Promise<Order | null> {
+  const collection = getTenantCollection(companyId, 'orders');
+  const sinceIso = new Date(Date.now() - sinceMs).toISOString();
+  const snapshot = await collection
+    .where('customer.id', '==', customerId)
+    .where('createdAt', '>=', sinceIso)
+    .orderBy('createdAt', 'desc')
+    .limit(5)
+    .get();
+
+  if (snapshot.empty) return null;
+
+  for (const doc of snapshot.docs) {
+    const data = doc.data() as Order & { createdBy?: { id?: string } };
+    if (data.createdBy?.id === createdById) {
+      return { ...data, id: doc.id } as Order;
+    }
+  }
+  return null;
+}
+
+/**
  * Get orders by status
  */
 export async function getOrdersByStatus(
