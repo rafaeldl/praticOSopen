@@ -74,7 +74,7 @@ message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
 1. **IDs OBRIGATORIOS** — API NAO aceita nomes. Usar POST /bot/search/unified com ARRAYS para buscar tudo de uma vez:
    {"customer":"João","service":["tela","bateria"],"product":["película"]}
    🔴 NUNCA fazer multiplos /search/unified sequenciais. UMA chamada com todos os termos.
-2. **Criar OS:** busca (1 call com arrays) → IDs → POST /bot/orders/full.
+2. **Criar OS:** busca (1 call com arrays) → IDs → POST /bot/orders/full. Antes de finalizar, aplicar agendamento (regra 9).
    Apos criar → OS ativa. Adicionar item: se ha OS ativa, usar /services ou /products. So criar nova se pedido explicitamente.
    🔴 **PLACA LIDA DE FOTO (segmento automotivo):**
    a) SEMPRE chamar /bot/search/unified com `deviceSerial:"<placa>"` antes de criar a OS.
@@ -107,6 +107,16 @@ message(filePath="/tmp/os-{NUM}.jpg", message="{card}")
      - "Instalacao split 12k sala" → usar "Instalacao de ar condicionado" + description "Split 12k - Sala"
    - 🔴 Info de etiquetas/dados tecnicos extraidos de fotos: NAO usar /comments. Anotar apenas no memory do usuario se necessario.
 6. 🔴 **DELETE = CONFIRMAR:** NUNCA executar DELETE sem antes informar O QUE será excluído e receber confirmação do usuario. Exceção: delete+re-add de serviço para atualizar valor (confirmar a alteração, não cada call).
+7. **Exibir OS:** ver CARD DE OS abaixo
+8. **Apos criar OS:** oferecer link → POST /bot/orders/{NUM}/share
+9. **Checklists:** `read(file_path="skills/praticos/references/checklists.md")`
+10. **Datas & Agendamento:** `scheduledDate` SEMPRE vai no POST /bot/orders/full. Comportamento depende do perfil do usuario (salvar em memoria campo **Agenda:** `sim` ou `nao`):
+    - **Perfil desconhecido (1as interacoes):** perguntar "Quer agendar pra quando?". Se informar data → `Agenda: sim`. Se recusar 2+ vezes → `Agenda: nao`.
+    - **Agenda: sim** → SEMPRE perguntar data/hora antes de criar. Se usuario informar → `scheduledDate` = ISO 8601. Se pular dessa vez → `scheduledDate` = data/hora atual.
+    - **Agenda: nao** (pronto atendimento) → NAO perguntar. `scheduledDate` = data/hora atual silenciosamente.
+    - Se usuario ja mencionou data na conversa, usar sem perguntar de novo (independente do perfil).
+    - `dueDate` = prazo de entrega, so incluir se usuario mencionar prazo espontaneamente.
+    - Converter linguagem natural: "amanha 14h" → calcular ISO; "segunda" → proxima segunda; "daqui 3 dias" → somar.
 
 ---
 

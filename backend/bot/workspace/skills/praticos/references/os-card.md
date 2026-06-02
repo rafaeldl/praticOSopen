@@ -48,14 +48,16 @@ Montar o texto a partir dos campos do `order`:
 🏷️ *Desconto:* {VALOR_FORMATADO}
 ✅ *Pago:* {VALOR_FORMATADO}
 ⏳ *A receber:* {VALOR_FORMATADO}
+🗓️ *Agendado:* {scheduledDate}
 📅 *Previsão:* {dueDate}
 
 🔗 *Link:* {shareUrl}
 ```
-**Labels:** Traduzir no idioma do usuario. Referência pt-BR: Cliente, Endereço, Serviços, Produtos, Total, Desconto, Pago, A receber, Previsão, Link. Ex en: Customer, Address, Services, Products, Total, Discount, Paid, Balance, Due date, Link.
+**Labels:** Traduzir no idioma do usuario. Referência pt-BR: Cliente, Endereço, Serviços, Produtos, Total, Desconto, Pago, A receber, Agendado, Previsão, Link. Ex en: Customer, Address, Services, Products, Total, Discount, Paid, Balance, Scheduled, Due date, Link.
 **Status:** Traduzir no idioma do usuario. Valores internos e referência pt-BR: quote=Orçamento | approved=Aprovado | progress=Em andamento | done=Concluído | canceled=Cancelado. Ex en: Quote | Approved | In progress | Completed | Canceled.
-**Omitir:** campos null, vazio ou com valor 0. Ex: paidAmount=0 → nao mostrar "Pago". discount=0 → nao mostrar "Desconto". address=null → nao mostrar "Endereço".
-**Moeda/Valores:** Usar `formatContext` retornado pelo endpoint `/bot/orders/{NUM}/details`. O `currency` define o simbolo (BRL=R$, EUR=€, USD=$) e o `locale` define o formato numerico: pt-BR → R$ 1.234,56 | en-US → $1,234.56 | fr-FR → 1 234,56 €. A API retorna valores raw (numeros).
+**Omitir:** campos null, vazio ou com valor 0. Ex: paidAmount=0 → nao mostrar "Pago". discount=0 → nao mostrar "Desconto". address=null → nao mostrar "Endereço". scheduledDate=null → nao mostrar "Agendado".
+**Moeda/Valores:** Usar `formatContext` retornado pelo endpoint. O `currency` define o simbolo (BRL=R$, EUR=€, USD=$) e o `locale` define o formato numerico: pt-BR → R$ 1.234,56 | en-US → $1,234.56 | fr-FR → 1 234,56 €. A API retorna valores raw (numeros).
+**Datas:** formato BR dia/mes/ano + hora. Ex: 20/02/2026 09:00 — NUNCA ISO 8601 no card. Se hora for 00:00, mostrar so data.
 **remaining** = total - discount - paidAmount.
 **Multi-device:** Usar `deviceCount` da resposta de /details. Se `deviceCount > 1`, listar todos os devices numerados e agrupar serviços/produtos por `deviceId`. Itens sem `deviceId` ficam em "Geral" (traduzir). O label plural do device vem de `segment.labels` (ex: "Veículos", "Aparelhos"). Se nao houver, usar "Dispositivos"/"Devices"/etc.
 

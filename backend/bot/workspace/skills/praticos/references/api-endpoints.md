@@ -37,7 +37,8 @@ Body: {customerId, deviceId?, deviceIds?:["id1","id2"], device?:{name?,serial?,b
 🔴 PREFERIR `deviceId` resolvido via /bot/search/unified. Só usar `device:{}` inline quando NAO ha match em search/unified E voce acabou de ler dados novos (ex: placa lida de foto). A API faz find-or-create automaticamente por serial→nome.
 🔴 NUNCA passar `device:{}` quando search/unified retornou `exact` ou `suggestions[].serial` igual a placa lida — usar o id retornado.
 Resposta: retorna `order` completo (mesmo formato de /details) + `formatContext` + `shareUrl` auto-criado. NAO precisa chamar GET /details apos criar.
-exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customerId\":\"abc\",\"services\":[{\"serviceId\":\"srv1\",\"value\":350}]}' \"$PRATICOS_API_URL/bot/orders/full\"")
+exec(command="curl -s -X POST -H \"X-API-Key: $PRATICOS_API_KEY\" -H \"X-WhatsApp-Number: {NUMERO}\" -H \"Content-Type: application/json\" -d '{\"customerId\":\"abc\",\"services\":[{\"serviceId\":\"srv1\",\"value\":350}],\"scheduledDate\":\"2026-02-20T14:00:00.000Z\"}' \"$PRATICOS_API_URL/bot/orders/full\"")
+
 
 ## OS - Atualizar
 PATCH /bot/orders/{NUM} `{"status":"approved","dueDate":"2026-02-20T18:00:00.000Z","scheduledDate":"2026-02-20T09:00:00.000Z","assignedTo":"userId"}`
