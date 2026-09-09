@@ -112,7 +112,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
 
       final List<OrderBy> orderBy = [OrderBy('createdAt', descending: true)];
 
-      return getQueryList(companyId, orderBy: orderBy, args: filterList);
+      return await getQueryList(companyId, orderBy: orderBy, args: filterList);
     } catch (e) {
       print('Erro ao buscar ordens por intervalo de datas: $e');
       return [];
@@ -141,7 +141,7 @@ class TenantOrderRepository extends TenantRepository<Order?> {
 
       final List<OrderBy> orderBy = [OrderBy('scheduledDate')];
 
-      return getQueryList(companyId, orderBy: orderBy, args: filterList);
+      return await getQueryList(companyId, orderBy: orderBy, args: filterList);
     } catch (e) {
       print('Erro ao buscar ordens por scheduledDate: $e');
       return [];

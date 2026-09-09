@@ -48,7 +48,7 @@ class OsPdfOptions {
   /// Incluir fotos nos itens dos formularios
   final bool includeFormPhotos;
 
-  /// Numero maximo de fotos na pagina principal
+  /// Numero maximo de fotos anexadas a OS incluidas na pagina principal
   final int maxOsPhotos;
 
   /// Numero maximo de fotos por item de formulario
@@ -59,7 +59,7 @@ class OsPdfOptions {
     this.includeForms = true,
     this.includeOsPhotos = true,
     this.includeFormPhotos = true,
-    this.maxOsPhotos = 3,
+    this.maxOsPhotos = 30,
     this.maxPhotosPerItem = 8,
   });
 }
@@ -130,6 +130,7 @@ class PdfService {
               order: data.order,
               customer: data.customer,
               company: data.company,
+              osPhotos: images.osPhotos,
             );
           },
         ),
@@ -196,13 +197,35 @@ class PdfService {
 
   /// Carrega todas as imagens necessarias
   Future<_PdfImages> _loadImages(OsPdfData data, OsPdfOptions options) async {
-    // Logo da empresa
-    final logo = await _imageLoader.loadLogo(data.company.logo);
+    // Logo da empresa + logo do PraticOS e badges das lojas (em paralelo)
+    final assets = await Future.wait([
+      _imageLoader.loadLogo(data.company.logo),
+      _imageLoader.loadPraticosLogo(),
+      _imageLoader.loadAppStoreBadge(),
+      _imageLoader.loadPlayStoreBadge(),
+    ]);
+    final logo = assets[0];
+    final praticosLogo = assets[1];
+    final appStoreBadge = assets[2];
+    final playStoreBadge = assets[3];
 
-    // Logo do PraticOS e badges das lojas
-    final praticosLogo = await _imageLoader.loadPraticosLogo();
-    final appStoreBadge = await _imageLoader.loadAppStoreBadge();
-    final playStoreBadge = await _imageLoader.loadPlayStoreBadge();
+    // Fotos anexadas diretamente a OS
+    List<pw.MemoryImage> osPhotos = [];
+
+    if (options.includeMainOs && options.includeOsPhotos) {
+      final urls = (data.order.photos ?? [])
+          .map((photo) => photo.url)
+          .whereType<String>()
+          .where((url) => url.isNotEmpty)
+          .toList();
+
+      if (urls.isNotEmpty) {
+        osPhotos = await _imageLoader.loadPhotos(
+          urls,
+          limit: options.maxOsPhotos,
+        );
+      }
+    }
 
     // Fotos dos itens dos formularios
     // Map<formId, Map<itemId, List<Image>>>
@@ -235,6 +258,7 @@ class PdfService {
       praticosLogo: praticosLogo,
       appStoreBadge: appStoreBadge,
       playStoreBadge: playStoreBadge,
+      osPhotos: osPhotos,
       formItemPhotos: formItemPhotos,
     );
   }
@@ -251,6 +275,7 @@ class _PdfImages {
   final pw.MemoryImage? praticosLogo;
   final pw.MemoryImage? appStoreBadge;
   final pw.MemoryImage? playStoreBadge;
+  final List<pw.MemoryImage> osPhotos;
   final Map<String, Map<String, List<pw.MemoryImage>>> formItemPhotos;
 
   _PdfImages({
@@ -258,6 +283,7 @@ class _PdfImages {
     this.praticosLogo,
     this.appStoreBadge,
     this.playStoreBadge,
+    required this.osPhotos,
     required this.formItemPhotos,
   });
 }
