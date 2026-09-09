@@ -7,6 +7,7 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/models/order.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
+import 'package:praticos/services/pdf/pdf_photo_grid.dart';
 import 'package:praticos/services/pdf/pdf_styles.dart';
 
 /// Builder para a pagina principal da OS no PDF (layout compacto A4)
@@ -822,6 +823,39 @@ class PdfMainOsBuilder {
   // TERMS AND CONDITIONS
   // ============================================
 
+  // ============================================
+  // FOTOS DA OS
+  // ============================================
+
+  /// Constroi a secao de fotos anexadas a OS.
+  ///
+  /// Retorna uma lista de widgets de nivel superior (e nao um unico widget)
+  /// para que o grid possa quebrar entre paginas dentro do [pw.MultiPage].
+  List<pw.Widget> buildPhotosSection(List<pw.MemoryImage> photos) {
+    if (photos.isEmpty) {
+      return [];
+    }
+
+    return [
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(
+          left: PdfStyles.bodyHorizontalPadding,
+          right: PdfStyles.bodyHorizontalPadding,
+          top: 14,
+        ),
+        child: _buildSectionHeader(
+          localizations.formatAttachedPhotosCount(photos.length),
+        ),
+      ),
+      pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(
+          horizontal: PdfStyles.bodyHorizontalPadding,
+        ),
+        child: PdfPhotoGrid.build(photos),
+      ),
+    ];
+  }
+
   pw.Widget buildTermsSection(String? termsOfService) {
     if (termsOfService == null || termsOfService.trim().isEmpty) {
       return pw.SizedBox();
@@ -985,6 +1019,7 @@ class PdfMainOsBuilder {
     required Order order,
     required Customer? customer,
     required Company company,
+    List<pw.MemoryImage> osPhotos = const [],
   }) {
     return [
       // Status Bar
@@ -992,9 +1027,10 @@ class PdfMainOsBuilder {
 
       // Body with padding
       pw.Padding(
-        padding: const pw.EdgeInsets.symmetric(
-          horizontal: PdfStyles.bodyHorizontalPadding,
-          vertical: PdfStyles.bodyVerticalPadding,
+        padding: const pw.EdgeInsets.only(
+          left: PdfStyles.bodyHorizontalPadding,
+          right: PdfStyles.bodyHorizontalPadding,
+          top: PdfStyles.bodyVerticalPadding,
         ),
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -1011,9 +1047,23 @@ class PdfMainOsBuilder {
 
             // QR Code Block
             buildQrCodeBlock(order),
+          ],
+        ),
+      ),
 
-            pw.SizedBox(height: 14),
+      // Attached photos (grid can span multiple pages)
+      ...buildPhotosSection(osPhotos),
 
+      pw.Padding(
+        padding: const pw.EdgeInsets.only(
+          left: PdfStyles.bodyHorizontalPadding,
+          right: PdfStyles.bodyHorizontalPadding,
+          top: 14,
+          bottom: PdfStyles.bodyVerticalPadding,
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
             // Terms and Conditions
             buildTermsSection(company.termsOfService),
 

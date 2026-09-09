@@ -2,10 +2,24 @@ import 'package:flutter/services.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 
+/// Assinatura da funcao usada para buscar uma imagem por HTTP
+typedef PdfHttpGet = Future<http.Response> Function(Uri url);
+
 /// Utilitario para download e cache de imagens para PDF
 class PdfImageLoader {
+  /// Numero maximo de downloads simultaneos
+  static const int maxConcurrentDownloads = 5;
+
+  /// Funcao de download (injetavel em testes)
+  final PdfHttpGet _httpGet;
+
+  PdfImageLoader({PdfHttpGet? httpGet}) : _httpGet = httpGet ?? http.get;
+
   /// Cache de imagens em memoria
   final Map<String, pw.MemoryImage> _cache = {};
+
+  /// Downloads em andamento, para nao baixar a mesma URL duas vezes
+  final Map<String, Future<pw.MemoryImage?>> _inFlight = {};
 
   /// Carrega o logo do PraticOS dos assets locais
   Future<pw.MemoryImage?> loadPraticosLogo() async {
@@ -57,21 +71,28 @@ class PdfImageLoader {
 
   /// Download de multiplas fotos com limite
   ///
+  /// Os downloads sao feitos em paralelo, em lotes de [maxConcurrentDownloads],
+  /// preservando a ordem original das URLs no resultado.
+  ///
   /// [urls] Lista de URLs das fotos
   /// [limit] Numero maximo de fotos a baixar (default: 10)
   ///
   /// Retorna lista de imagens baixadas com sucesso
   Future<List<pw.MemoryImage>> loadPhotos(List<String> urls, {int limit = 10}) async {
-    final List<pw.MemoryImage> images = [];
-    final urlsToLoad = urls.take(limit).toList();
+    final urlsToLoad =
+        urls.where((url) => url.isNotEmpty).take(limit).toList();
+    if (urlsToLoad.isEmpty) return [];
 
-    for (final url in urlsToLoad) {
-      if (url.isEmpty) continue;
-      final image = await _loadImage(url, url);
-      if (image != null) {
-        images.add(image);
-      }
+    final List<pw.MemoryImage> images = [];
+
+    for (var i = 0; i < urlsToLoad.length; i += maxConcurrentDownloads) {
+      final batch = urlsToLoad.skip(i).take(maxConcurrentDownloads);
+      final results = await Future.wait(
+        batch.map((url) => _loadImage(url, url)),
+      );
+      images.addAll(results.whereType<pw.MemoryImage>());
     }
+
     return images;
   }
 
@@ -100,14 +121,33 @@ class PdfImageLoader {
   }
 
   /// Metodo interno para download de imagem com cache
+  ///
+  /// Downloads simultaneos da mesma URL compartilham a mesma requisicao.
   Future<pw.MemoryImage?> _loadImage(String url, String cacheKey) async {
     // Verifica cache primeiro
     if (_cache.containsKey(cacheKey)) {
       return _cache[cacheKey];
     }
 
+    // Reaproveita um download ja em andamento para a mesma imagem
+    final inFlight = _inFlight[cacheKey];
+    if (inFlight != null) {
+      return inFlight;
+    }
+
+    final future = _download(url, cacheKey);
+    _inFlight[cacheKey] = future;
     try {
-      final response = await http.get(Uri.parse(url));
+      return await future;
+    } finally {
+      _inFlight.remove(cacheKey);
+    }
+  }
+
+  /// Executa o download efetivo e popula o cache
+  Future<pw.MemoryImage?> _download(String url, String cacheKey) async {
+    try {
+      final response = await _httpGet(Uri.parse(url));
       if (response.statusCode == 200) {
         final image = pw.MemoryImage(response.bodyBytes);
         _cache[cacheKey] = image;

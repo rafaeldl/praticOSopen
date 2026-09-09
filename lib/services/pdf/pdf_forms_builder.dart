@@ -7,6 +7,7 @@ import 'package:praticos/models/order.dart';
 import 'package:praticos/models/order_form.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/services/pdf/pdf_localizations.dart';
+import 'package:praticos/services/pdf/pdf_photo_grid.dart';
 import 'package:praticos/services/pdf/pdf_styles.dart';
 
 /// Builder para as paginas de formularios/checklists no PDF
@@ -474,32 +475,8 @@ class PdfFormsBuilder {
 
   /// Constroi o grid de fotos de um item
   pw.Widget buildItemPhotosGrid(List<pw.MemoryImage> photos) {
-    if (photos.isEmpty) {
-      return pw.SizedBox();
-    }
-
-    // Limita a 4 fotos por linha, max 2 linhas = 8 fotos
-    final photosToShow = photos.take(8).toList();
-
-    return pw.Wrap(
-      spacing: 5,
-      runSpacing: 5,
-      children: photosToShow.map((image) {
-        return pw.Container(
-          width: 75,
-          height: 75,
-          decoration: pw.BoxDecoration(
-            border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
-            borderRadius: pw.BorderRadius.circular(3),
-          ),
-          child: pw.ClipRRect(
-            verticalRadius: 3,
-            horizontalRadius: 3,
-            child: pw.Image(image, fit: pw.BoxFit.contain),
-          ),
-        );
-      }).toList(),
-    );
+    // Limita a 8 fotos por item (4 por linha, max 2 linhas)
+    return PdfPhotoGrid.build(photos, limit: 8);
   }
 
   // ============================================

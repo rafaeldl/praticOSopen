@@ -804,6 +804,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/I18N.md` - Sistema de internacionalização completo
 - `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
 - `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
+- `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
 - `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
