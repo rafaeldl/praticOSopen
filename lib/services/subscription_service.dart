@@ -149,9 +149,13 @@ class SubscriptionService {
   Future<CustomerInfo> purchasePackage(Package package) async {
     try {
       debugPrint('SubscriptionService: Purchasing package ${package.identifier}');
-      final customerInfo = await Purchases.purchasePackage(package);
+      // A partir do purchases_flutter 9, Purchases.purchase retorna um
+      // PurchaseResult (CustomerInfo + StoreTransaction) em vez de CustomerInfo
+      final result = await Purchases.purchase(
+        PurchaseParams.package(package),
+      );
       debugPrint('SubscriptionService: Purchase successful');
-      return customerInfo;
+      return result.customerInfo;
     } on PlatformException catch (e) {
       debugPrint('SubscriptionService: Purchase error: $e');
       rethrow;

@@ -12,9 +12,19 @@
 Este documento descreve os passos para configurar o RevenueCat como provedor de billing para o PraticOS.
 
 ### Stack
-- **Frontend:** Flutter (`purchases_flutter: ^8.0.0`, `purchases_ui_flutter: ^8.0.0`)
+- **Frontend:** Flutter (`purchases_flutter: ^10.11.0`, `purchases_ui_flutter: ^10.11.0`)
 - **Backend:** Firebase Cloud Functions (webhook receiver)
 - **Billing Provider:** RevenueCat (gratis ate $2.5k MRR)
+
+> **Play Billing Library 8** — o SDK 10.x empacota a `com.android.billingclient:billing:8.3.0`.
+> O Google Play recusa uploads com PBL < 8.0.0 desde 2026. Ao mexer na versao do
+> `purchases_flutter`, confirme a billing library resolvida com:
+> `cd android && ./gradlew -q app:dependencies --configuration releaseRuntimeClasspath | grep billing`
+>
+> **Atencao com produtos one-time (lifetime):** a partir do SDK 9, a PBL 8 nao permite
+> mais consultar compras consumidas. Produtos vitalicios precisam estar configurados como
+> **non-consumable** no dashboard do RevenueCat — se estiverem como consumable, o SDK os
+> consome e o usuario nao consegue mais restaurar a compra.
 
 ### Ambiente de Teste
 
@@ -369,7 +379,7 @@ REVENUECAT_WEBHOOK_SECRET=whsec_xxxxx
 
 ### Erro: "Customer Center not available"
 - Verificar se Customer Center foi habilitado no RevenueCat Dashboard
-- Verificar versao do SDK (`purchases_ui_flutter: ^8.0.0`)
+- Verificar versao do SDK (`purchases_ui_flutter: ^10.11.0`)
 
 ### Debug: Ver logs do SDK
 O SubscriptionService loga todas operacoes com prefixo `SubscriptionService:`.
