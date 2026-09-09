@@ -318,6 +318,9 @@ class _FormTemplateFormScreenState extends State<FormTemplateFormScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     buildDefaultDragHandles: false,
                     itemCount: _items.length,
+                    // TODO: migrar para onReorderItem, que ja entrega o
+                    // newIndex ajustado (dispensa o -1 em _onReorder)
+                    // ignore: deprecated_member_use
                     onReorder: _onReorder,
                     proxyDecorator: (child, index, animation) {
                       return Material(

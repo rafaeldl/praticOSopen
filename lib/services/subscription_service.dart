@@ -309,7 +309,7 @@ class SubscriptionService {
         debugPrint('SubscriptionService: Offering $offeringIdentifier not found');
         throw Exception('Offering $offeringIdentifier not found');
       }
-      return presentPaywall(offering: offering);
+      return await presentPaywall(offering: offering);
     } catch (e, stack) {
       debugPrint('SubscriptionService: Error presenting paywall for offering: $e\n$stack');
       rethrow;
