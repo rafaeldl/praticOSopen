@@ -116,6 +116,12 @@ A Apple limita o número de certificados de distribuição por conta. Se o CI pu
 | `No code signing identity found` | Storage vazio ou sem certificado para o team `46AUA3GASK` |
 | `Your certificate has expired` | Fazer a renovação anual acima |
 
+## Inventario de acessos
+
+Onde cada credencial de release está guardada (passphrase do match, deploy key, certificado, profile, keystore do Android) e quando cada uma vence fica documentado em `ACESSOS.md`, no repositório **privado** `rafaeldl/praticos-certificates`.
+
+Fica lá de propósito: este repositório é público, e mesmo sem valores secretos um mapa de onde estão as credenciais não deve ser exposto.
+
 ## Referencias
 
 - #250 — incidente do certificado expirado que motivou a migração
