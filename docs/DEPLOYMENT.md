@@ -161,9 +161,9 @@ Para que o CI funcione, as seguintes secrets devem estar configuradas no reposit
 - `ANDROID_GOOGLE_SERVICES_JSON_BASE64`: Arquivo `google-services.json`.
 
 ### iOS
-- `IOS_DIST_CERTIFICATE_BASE64`: Certificado `.p12` de distribuição.
-- `IOS_DIST_CERTIFICATE_PASSWORD`: Senha do certificado.
-- `IOS_PROVISIONING_PROFILE_BASE64`: Arquivo `.mobileprovision`.
+A assinatura usa **fastlane match** — ver `docs/IOS_CODE_SIGNING.md`. Os secrets do match são criados por `ios/scripts/bootstrap_match.sh`.
+- `MATCH_PASSWORD`: Passphrase que descriptografa o repo de certificados.
+- `MATCH_GIT_PRIVATE_KEY`: Deploy key SSH somente leitura do `rafaeldl/praticos-certificates`.
 - `APP_STORE_CONNECT_API_KEY_ID`: Key ID da App Store Connect API.
 - `APP_STORE_CONNECT_API_KEY_ISSUER_ID`: Issuer ID.
 - `APP_STORE_CONNECT_API_KEY_PRIVATE_KEY`: Conteúdo da chave `.p8`.

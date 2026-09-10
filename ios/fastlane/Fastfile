@@ -8,6 +8,11 @@ platform :ios do
   # estiverem no storage, falha explicitamente em vez de criar um certificado
   # novo e queimar um dos poucos slots de distribuicao da conta Apple.
   def sync_signing
+    # Cria um keychain temporario para o match importar o certificado. Sem
+    # isso, no runner macOS do GitHub a importacao trava ou falha (antes era
+    # a action import-codesign-certs que criava o keychain). No-op fora do CI.
+    setup_ci
+
     sync_code_signing(type: "appstore")
 
     app_identifier = ENV['BUNDLE_ID'] || "br.com.rafsoft.praticos"
@@ -60,6 +65,11 @@ platform :ios do
       key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
     )
 
+    # 🔐 certificado + provisioning profile via match
+    # Roda ANTES do build do Flutter: se a assinatura nao estiver disponivel,
+    # a lane falha em segundos em vez de depois de ~30 min de compilacao.
+    profile_name = sync_signing
+
     # Busca o próximo build number
     current_build = latest_testflight_build_number(app_identifier: ENV['BUNDLE_ID'])
     next_build = current_build + 1
@@ -73,9 +83,6 @@ platform :ios do
     Dir.chdir("..") do
       sh(*flutter_build_args)
     end
-
-    # 🔐 certificado + provisioning profile via match
-    profile_name = sync_signing
 
     # 🔧 força assinatura só no Runner (Release)
     update_code_signing_settings(
@@ -150,6 +157,11 @@ platform :ios do
       key_content: ENV['APP_STORE_CONNECT_API_KEY_PRIVATE_KEY']
     )
 
+    # 🔐 certificado + provisioning profile via match
+    # Roda ANTES do build do Flutter: se a assinatura nao estiver disponivel,
+    # a lane falha em segundos em vez de depois de ~30 min de compilacao.
+    profile_name = sync_signing
+
     # Busca o próximo build number
     current_build = latest_testflight_build_number(app_identifier: ENV['BUNDLE_ID'])
     next_build = current_build + 1
@@ -163,9 +175,6 @@ platform :ios do
     Dir.chdir("..") do
       sh(*flutter_build_args)
     end
-
-    # 🔐 certificado + provisioning profile via match
-    profile_name = sync_signing
 
     # 🔧 força assinatura só no Runner (Release)
     update_code_signing_settings(
