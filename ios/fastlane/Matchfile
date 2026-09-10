@@ -3,9 +3,13 @@
 # Os certificados ficam criptografados no repositorio privado abaixo.
 # O conteudo so e legivel com a passphrase em MATCH_PASSWORD.
 #
-# Ver docs/IOS_CODE_SIGNING.md para o passo a passo de bootstrap e rotacao.
+# Acesso ao repo via SSH:
+# - localmente, com a chave SSH pessoal de quem roda o bootstrap;
+# - no CI, com uma deploy key somente leitura (MATCH_GIT_PRIVATE_KEY).
+#
+# Ver docs/IOS_CODE_SIGNING.md e ios/scripts/bootstrap_match.sh.
 
-git_url(ENV["MATCH_GIT_URL"] || "https://github.com/rafaeldl/praticos-certificates.git")
+git_url(ENV["MATCH_GIT_URL"] || "git@github.com:rafaeldl/praticos-certificates.git")
 storage_mode("git")
 
 type("appstore")
@@ -13,6 +17,7 @@ type("appstore")
 app_identifier(["br.com.rafsoft.praticos"])
 team_id("46AUA3GASK")
 
-# No CI nunca criamos/renovamos credenciais: apenas consumimos o que ja esta
-# no storage. A criacao e feita deliberadamente por um humano (match nobreak).
+# No CI nunca criamos nem renovamos credenciais: so consumimos o que ja esta
+# no storage. A criacao e feita deliberadamente por uma pessoa, via
+# ios/scripts/bootstrap_match.sh. (O setup_ci da lane tambem forca readonly.)
 readonly(ENV["CI"] == "true")

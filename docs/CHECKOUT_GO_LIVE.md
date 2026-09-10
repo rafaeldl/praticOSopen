@@ -169,7 +169,7 @@ gh secret set REVENUECAT_WEBHOOK_SECRET --body "whsec_VALOR_AQUI"
 gh secret list
 ```
 
-**Secrets esperados (total 15):**
+**Secrets esperados (total 14):**
 | Secret | Status |
 |--------|--------|
 | `ANDROID_GOOGLE_SERVICES_JSON_BASE64` | Ja existe |
@@ -179,11 +179,12 @@ gh secret list
 | `APP_STORE_CONNECT_API_KEY_ISSUER_ID` | Ja existe |
 | `APP_STORE_CONNECT_API_KEY_PRIVATE_KEY` | Ja existe |
 | `FIREBASE_SERVICE_ACCOUNT_PRATICOS` | Ja existe |
-| `IOS_DIST_CERTIFICATE_BASE64` | Ja existe |
-| `IOS_DIST_CERTIFICATE_PASSWORD` | Ja existe |
 | `IOS_GOOGLE_SERVICE_INFO_PLIST_BASE64` | Ja existe |
-| `IOS_PROVISIONING_PROFILE_BASE64` | Ja existe |
+| `MATCH_PASSWORD` | Criado por `ios/scripts/bootstrap_match.sh` |
+| `MATCH_GIT_PRIVATE_KEY` | Criado por `ios/scripts/bootstrap_match.sh` |
 | `PAT_TOKEN` | Ja existe |
+
+> Os antigos `IOS_DIST_CERTIFICATE_BASE64`, `IOS_DIST_CERTIFICATE_PASSWORD` e `IOS_PROVISIONING_PROFILE_BASE64` foram substituidos pelo fastlane match (ver `docs/IOS_CODE_SIGNING.md`).
 | `REVENUECAT_IOS_API_KEY` | **NOVO** |
 | `REVENUECAT_ANDROID_API_KEY` | **NOVO** |
 | `REVENUECAT_WEBHOOK_SECRET` | **NOVO** |

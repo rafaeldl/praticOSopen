@@ -116,6 +116,25 @@ jobs:
         shell: bash
         run: echo "DEVELOPMENT_TEAM=46AUA3GASK" >> $GITHUB_ENV
 
+      # Deploy key somente leitura do repo de certificados. Falha aqui, em
+      # segundos, se o bootstrap do match ainda nao foi feito.
+      - name: Setup match access
+        shell: bash
+        env:
+          MATCH_DEPLOY_KEY: ${{ secrets.MATCH_GIT_PRIVATE_KEY }}
+          MATCH_PASSWORD_CHECK: ${{ secrets.MATCH_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "$MATCH_DEPLOY_KEY" ] || [ -z "$MATCH_PASSWORD_CHECK" ]; then
+            echo "::error::Secrets do fastlane match ausentes (MATCH_GIT_PRIVATE_KEY / MATCH_PASSWORD). Rode ios/scripts/bootstrap_match.sh - ver docs/IOS_CODE_SIGNING.md"
+            exit 1
+          fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$MATCH_DEPLOY_KEY" > ~/.ssh/match_deploy_key
+          chmod 600 ~/.ssh/match_deploy_key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          echo "MATCH_GIT_PRIVATE_KEY=$HOME/.ssh/match_deploy_key" >> "$GITHUB_ENV"
+
       - name: Cache CocoaPods
         uses: actions/cache@v5
         with:
@@ -155,9 +174,9 @@ jobs:
           BUNDLE_ID: ${{ env.BUNDLE_ID }}
           DEVELOPMENT_TEAM: ${{ env.DEVELOPMENT_TEAM }}
           REVENUECAT_IOS_API_KEY: ${{ secrets.REVENUECAT_IOS_API_KEY }}
-          # fastlane match: passphrase de descriptografia + acesso ao repo de certificados
+          # fastlane match: passphrase de descriptografia. O acesso ao repo de
+          # certificados vem de MATCH_GIT_PRIVATE_KEY, definido no step "Setup match access"
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
         run: bundle exec fastlane beta
