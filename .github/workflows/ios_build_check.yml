@@ -11,6 +11,7 @@ on:
       # Mudancas no proprio CI precisam ser validadas pelo CI
       - '.github/workflows/**'
       - '.fvmrc'
+      - '.xcode-version'
   workflow_dispatch:
     inputs:
       ref:
@@ -25,7 +26,8 @@ concurrency:
 
 jobs:
   build-check:
-    runs-on: macos-14
+    # Mesma imagem do release (macos-26, com Xcode 26)
+    runs-on: macos-26
 
     steps:
       - uses: actions/checkout@v5
@@ -54,15 +56,20 @@ jobs:
       - name: Flutter deps
         run: flutter pub get
 
+      # Versao do Xcode vem do .xcode-version — fonte unica para release e build check
+      - name: Resolve Xcode version
+        id: xcode_version
+        run: echo "version=$(tr -d '[:space:]' < .xcode-version)" >> "$GITHUB_OUTPUT"
+
       - name: Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '16.2'
+          xcode-version: ${{ steps.xcode_version.outputs.version }}
 
       - name: Accept Xcode license
         run: sudo xcodebuild -license accept
 
-      # iOS 18.2 simulator já vem pré-instalado no macos-14
+      # Simulador do iOS 26 ja vem pre-instalado no macos-26
 
       # Ruby + Bundler (igual ao release workflow)
       - name: Ruby (bundler cache)
