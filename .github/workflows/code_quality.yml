@@ -7,6 +7,9 @@ on:
       - 'lib/**'
       - 'pubspec.yaml'
       - 'pubspec.lock'
+      # Mudancas no proprio CI precisam ser validadas pelo CI
+      - '.github/workflows/**'
+      - '.fvmrc'
 
 jobs:
   analyze:
