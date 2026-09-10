@@ -1,0 +1,18 @@
+# fastlane match - gerenciamento de certificados e provisioning profiles iOS
+#
+# Os certificados ficam criptografados no repositorio privado abaixo.
+# O conteudo so e legivel com a passphrase em MATCH_PASSWORD.
+#
+# Ver docs/IOS_CODE_SIGNING.md para o passo a passo de bootstrap e rotacao.
+
+git_url(ENV["MATCH_GIT_URL"] || "https://github.com/rafaeldl/praticos-certificates.git")
+storage_mode("git")
+
+type("appstore")
+
+app_identifier(["br.com.rafsoft.praticos"])
+team_id("46AUA3GASK")
+
+# No CI nunca criamos/renovamos credenciais: apenas consumimos o que ja esta
+# no storage. A criacao e feita deliberadamente por um humano (match nobreak).
+readonly(ENV["CI"] == "true")

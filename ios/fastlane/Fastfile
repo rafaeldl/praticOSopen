@@ -1,6 +1,21 @@
 default_platform(:ios)
 
 platform :ios do
+  # Instala certificado + provisioning profile via match e devolve o nome do
+  # profile para uso no export.
+  #
+  # No CI o match roda em readonly (ver Matchfile): se as credenciais nao
+  # estiverem no storage, falha explicitamente em vez de criar um certificado
+  # novo e queimar um dos poucos slots de distribuicao da conta Apple.
+  def sync_signing
+    sync_code_signing(type: "appstore")
+
+    app_identifier = ENV['BUNDLE_ID'] || "br.com.rafsoft.praticos"
+    profile_name = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING][app_identifier]
+    UI.message("Assinatura via match - profile: #{profile_name}")
+    profile_name
+  end
+
   desc "Build check para CI (simulador, sem assinatura)"
   lane :build_check do
     # Gera arquivos Flutter necessários (não faz build completo, não roda pod install)
@@ -37,7 +52,7 @@ platform :ios do
     next_build
   end
 
-  desc "Build + upload para TestFlight (sem match)"
+  desc "Build + upload para TestFlight (assinatura via match)"
   lane :beta do
     app_store_connect_api_key(
       key_id: ENV['APP_STORE_CONNECT_API_KEY_ID'],
@@ -59,6 +74,9 @@ platform :ios do
       sh(*flutter_build_args)
     end
 
+    # 🔐 certificado + provisioning profile via match
+    profile_name = sync_signing
+
     # 🔧 força assinatura só no Runner (Release)
     update_code_signing_settings(
       use_automatic_signing: false,
@@ -67,8 +85,7 @@ platform :ios do
       build_configurations: ["Release"],
       team_id: ENV['DEVELOPMENT_TEAM'],
       code_sign_identity: "Apple Distribution",
-      profile_name: ENV['PROFILE_NAME'],   # nome do .mobileprovision (o "Name" extraído)
-      profile_uuid: ENV['PROFILE_UUID']    # opcional, ajuda a fixar
+      profile_name: profile_name
     )
 
     # 🏗️ archive + export
@@ -81,7 +98,7 @@ platform :ios do
       export_options: {
         signingStyle: "manual",
         provisioningProfiles: {
-          ENV['BUNDLE_ID'] => ENV['PROFILE_NAME']
+          ENV['BUNDLE_ID'] => profile_name
         }
       },
       xcargs: "DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} CODE_SIGN_STYLE=Manual"
@@ -147,6 +164,9 @@ platform :ios do
       sh(*flutter_build_args)
     end
 
+    # 🔐 certificado + provisioning profile via match
+    profile_name = sync_signing
+
     # 🔧 força assinatura só no Runner (Release)
     update_code_signing_settings(
       use_automatic_signing: false,
@@ -155,8 +175,7 @@ platform :ios do
       build_configurations: ["Release"],
       team_id: ENV['DEVELOPMENT_TEAM'],
       code_sign_identity: "Apple Distribution",
-      profile_name: ENV['PROFILE_NAME'],
-      profile_uuid: ENV['PROFILE_UUID']
+      profile_name: profile_name
     )
 
     # 🏗️ archive + export
@@ -169,7 +188,7 @@ platform :ios do
       export_options: {
         signingStyle: "manual",
         provisioningProfiles: {
-          ENV['BUNDLE_ID'] => ENV['PROFILE_NAME']
+          ENV['BUNDLE_ID'] => profile_name
         }
       },
       xcargs: "DEVELOPMENT_TEAM=#{ENV['DEVELOPMENT_TEAM']} CODE_SIGN_STYLE=Manual"

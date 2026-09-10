@@ -103,32 +103,13 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      # 🔐 Importa o certificado .p12 no keychain
-      - name: Import distribution cert
-        uses: apple-actions/import-codesign-certs@v3
-        with:
-          p12-file-base64: ${{ secrets.IOS_DIST_CERTIFICATE_BASE64 }}
-          p12-password: ${{ secrets.IOS_DIST_CERTIFICATE_PASSWORD }}
-
-      # 📄 Instala o .mobileprovision vindo da secret (Base64)
-      - name: Install provisioning profile
+      # 🔐 Certificado e provisioning profile vem do fastlane match, dentro da
+      # lane (ver ios/fastlane/Matchfile). Nao ha mais .p12 nem .mobileprovision
+      # em secrets: o match os baixa criptografados do repo de certificados.
+      # Ver docs/IOS_CODE_SIGNING.md
+      - name: Define team id
         shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          PROFILE="$HOME/Library/MobileDevice/Provisioning Profiles/AppStore.mobileprovision"
-          echo -n "${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}" | base64 --decode > "$PROFILE"
-
-          /usr/bin/security cms -D -i "$PROFILE" > profile.plist
-          NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' profile.plist)
-          UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' profile.plist)
-          TEAM=$(/usr/libexec/PlistBuddy -c 'Print :TeamIdentifier:0' profile.plist)
-
-          echo "PROFILE_NAME=$NAME" >> $GITHUB_ENV
-          echo "PROFILE_UUID=$UUID" >> $GITHUB_ENV
-          echo "DEVELOPMENT_TEAM=$TEAM" >> $GITHUB_ENV
-
-          echo "Using profile: $NAME (UUID $UUID) - TEAM $TEAM"
+        run: echo "DEVELOPMENT_TEAM=46AUA3GASK" >> $GITHUB_ENV
 
       - name: Cache CocoaPods
         uses: actions/cache@v5
@@ -168,9 +149,10 @@ jobs:
           APP_STORE_CONNECT_API_KEY_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_PRIVATE_KEY }}
           BUNDLE_ID: ${{ env.BUNDLE_ID }}
           DEVELOPMENT_TEAM: ${{ env.DEVELOPMENT_TEAM }}
-          PROFILE_UUID: ${{ env.PROFILE_UUID }}
-          PROFILE_NAME: ${{ env.PROFILE_NAME }}
           REVENUECAT_IOS_API_KEY: ${{ secrets.REVENUECAT_IOS_API_KEY }}
+          # fastlane match: passphrase de descriptografia + acesso ao repo de certificados
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
           FASTLANE_SKIP_UPDATE_CHECK: "true"
           CI: "true"
         run: bundle exec fastlane beta
