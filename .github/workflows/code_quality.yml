@@ -22,9 +22,15 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      # Versao do Flutter vem do .fvmrc — fonte unica para CI e ambiente local
+      - name: Resolve Flutter version
+        id: flutter_version
+        run: echo "version=$(jq -r .flutter .fvmrc)" >> "$GITHUB_OUTPUT"
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: ${{ steps.flutter_version.outputs.version }}
           channel: stable
           cache: true
 
