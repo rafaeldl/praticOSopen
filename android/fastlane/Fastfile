@@ -17,8 +17,7 @@ platform :android do
     build_args << "--build-name=#{version_name}" if version_name
 
     # RevenueCat API key (injected via CI secret REVENUECAT_ANDROID_API_KEY)
-    revenuecat_key = ENV['REVENUECAT_ANDROID_API_KEY']
-    build_args << "--dart-define=REVENUECAT_ANDROID_API_KEY=#{revenuecat_key}" if revenuecat_key && !revenuecat_key.empty?
+    build_args.concat(revenuecat_dart_defines('REVENUECAT_ANDROID_API_KEY', 'goog_'))
 
     # Executa o build do Flutter na raiz do projeto (../)
     Dir.chdir("..") do
@@ -270,6 +269,26 @@ platform :android do
       locale: "pt-BR",
       force_logout: force_logout
     )
+  end
+
+  # API key do RevenueCat como --dart-define, validada antes do build.
+  #
+  # Uma key da Test Store (test_) em build de release faz o SDK do RevenueCat
+  # (9+) encerrar o app de proposito, e uma key de outra plataforma nao
+  # funciona. Nesses casos (e sem key) a key nao entra no build: o app sai sem
+  # RevenueCat (assinaturas desativadas) e o CI emite um alerta.
+  def revenuecat_dart_defines(env_name, expected_prefix)
+    key = ENV[env_name].to_s.strip
+    return ["--dart-define=#{env_name}=#{key}"] if key.start_with?(expected_prefix)
+
+    problem = key.empty? ? "nao definida" : "invalida (esperado prefixo '#{expected_prefix}', recebido '#{key[0, 5]}')"
+    message = "#{env_name} #{problem}: build SEM RevenueCat, assinaturas desativadas"
+    UI.important(message)
+    # Anotacao no resumo da execucao do GitHub Actions (log do fastlane passa despercebido).
+    # $stdout direto: o `puts` do Fastfile vira a action do fastlane, que prefixa a linha
+    # com timestamp e o GitHub deixa de reconhecer o comando.
+    $stdout.puts "::warning title=RevenueCat::#{message}" if ENV['GITHUB_ACTIONS']
+    []
   end
 
   # Helper function to get Android SDK path

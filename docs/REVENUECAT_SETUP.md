@@ -2,7 +2,7 @@
 
 **Data:** 2026-04-05 (atualizado)
 **Autor:** CTO Agent
-**Status:** Configuracao de Teste Disponivel
+**Status:** RevenueCat DESATIVADO temporariamente (cobranca ainda nao ativa) — ver 1.1
 **Relacionado:** PRA-11, PRA-38, PR #224, PR #225
 
 ---
@@ -10,6 +10,24 @@
 ## 1. Visao Geral
 
 Este documento descreve os passos para configurar o RevenueCat como provedor de billing para o PraticOS.
+
+### 1.1 Estado atual: desativado
+
+A cobranca ainda nao esta ativa no app, entao o RevenueCat esta desligado no codigo:
+`SubscriptionService.revenueCatEnabled = false`. Com isso o SDK nunca e configurado
+(no login, `initialize` retorna sem chamar o SDK), qualquer que seja a key do build.
+A tela de planos mostra "Plano nao disponivel no momento" ao tentar assinar.
+
+Motivo: a 1.48.1 (116) do Android saiu com a key da Test Store e o SDK 10.x encerrava o
+app no login (ver aviso em "Ambiente de Teste").
+
+**Para reativar:**
+1. Configurar os produtos/offerings de producao no RevenueCat e nas lojas.
+2. Trocar os secrets `REVENUECAT_ANDROID_API_KEY` (`goog_...`) e `REVENUECAT_IOS_API_KEY`
+   (`appl_...`) pelas keys reais do dashboard.
+3. Mudar `revenueCatEnabled` para `true` e atualizar o teste
+   `test/services/subscription_service_test.dart`.
+4. Conferir no resumo do workflow de release que nao ha alerta "RevenueCat".
 
 ### Stack
 - **Frontend:** Flutter (`purchases_flutter: ^10.11.0`, `purchases_ui_flutter: ^10.11.0`)
@@ -33,7 +51,19 @@ Para desenvolvimento e testes, use a API Key de teste:
 test_rHipMRrqwezbhAuzyWKGLEqwfhP
 ```
 
-Esta key sera usada automaticamente se nenhuma key de producao for configurada.
+> **Nunca use a key `test_` em build de release.** A partir do SDK 9, o RevenueCat
+> encerra o app de proposito quando configurado com uma key da Test Store em release
+> (`SimulatedStoreErrorDialogActivity` no Android, `fatalError` no iOS). Foi o que
+> derrubou a 1.48.1 (116) no Android. Protecoes em camadas:
+>
+> - **CI:** se a key nao tiver o prefixo da loja (`goog_` no Android, `appl_` no iOS),
+>   os lanes do fastlane NAO a embutem no build e emitem um alerta (`::warning`) no
+>   resumo da execucao do GitHub Actions. A versao sai sem assinaturas, mas sem crash.
+> - **App:** `SubscriptionService.shouldConfigureSdk` recusa key `test_` em release — o app
+>   segue sem assinaturas e registra um erro nao-fatal no Crashlytics.
+>
+> Sem key configurada, o RevenueCat fica desativado (a key de teste NAO e usada
+> automaticamente).
 
 **Entitlement de teste:** `Rafsoft Pro`
 
@@ -64,10 +94,13 @@ flutter pub get
 
 ### 2.2 Executar o App
 
-Sem configurar nada, o app usara a API key de teste automaticamente:
+Sem key, o app roda com o RevenueCat desativado. Para testar assinaturas em debug,
+passe a key da Test Store:
 
 ```bash
-flutter run
+flutter run \
+  --dart-define=REVENUECAT_IOS_API_KEY=test_rHipMRrqwezbhAuzyWKGLEqwfhP \
+  --dart-define=REVENUECAT_ANDROID_API_KEY=test_rHipMRrqwezbhAuzyWKGLEqwfhP
 ```
 
 ### 2.3 Usar o SubscriptionService
@@ -285,6 +318,10 @@ REVENUECAT_IOS_API_KEY=appl_xxxxx
 REVENUECAT_ANDROID_API_KEY=goog_xxxxx
 REVENUECAT_WEBHOOK_SECRET=whsec_xxxxx
 ```
+
+Os lanes de release (`android: internal/deploy_with_metadata`, `ios: beta/release_store`)
+validam o prefixo: uma key `test_` (ou da plataforma errada) fica fora do build e a
+execucao mostra o alerta "RevenueCat" — confira o resumo do workflow antes de promover.
 
 ### 5.3 Via VS Code launch.json
 
