@@ -1,15 +1,7 @@
 Novedades en esta versión:
 
-• Agenda con Calendario: Visualice y gestione citas en el calendario, con filtro por técnico y navegación por día, semana y mes.
+• Fotos en el PDF de la orden de servicio: las fotos adjuntas a la orden de servicio ahora aparecen en el PDF y en la impresión, junto con los datos del servicio.
 
-• Recordatorios Inteligentes: Reciba notificaciones automáticas antes de las citas programadas (15, 30 o 60 minutos).
-
-• Integración WhatsApp: Comparta órdenes de servicio directamente por WhatsApp, con asistente de IA para mensajes.
-
-• Enlaces de Seguimiento: Envíe enlaces seguros para que los clientes sigan el progreso del servicio y dejen evaluaciones.
-
-• Fotos HEIC/HEIF: Soporte nativo de fotos iOS con compresión inteligente para ahorro de almacenamiento.
-
-• Mejoras de Rendimiento: Carga más rápida, optimizaciones de memoria y diversas correcciones.
+• Mejoras de estabilidad y correcciones.
 
 ¡Felicidades por elegir la mejor app de gestión de órdenes de servicio!

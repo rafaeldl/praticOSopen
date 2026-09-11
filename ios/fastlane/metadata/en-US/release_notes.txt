@@ -1,15 +1,7 @@
 What's new in this version:
 
-• Calendar Scheduling: View and manage appointments on the calendar, with technician filter and day, week, and month navigation.
+• Photos in the work order PDF: photos attached to a work order now appear in the PDF and printouts, along with the service details.
 
-• Smart Reminders: Receive automatic notifications before scheduled appointments (15, 30, or 60 minutes).
-
-• WhatsApp Integration: Share work orders directly via WhatsApp, with AI assistant for messages.
-
-• Share Links: Send secure links so customers can track service progress and leave ratings.
-
-• HEIC/HEIF Photos: Native iOS photo support with smart compression for storage savings.
-
-• Performance Improvements: Faster loading, memory optimizations, and various fixes.
+• Stability improvements and bug fixes.
 
 Congratulations on choosing the best work order management app!
