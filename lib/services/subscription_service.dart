@@ -1,4 +1,5 @@
 import 'dart:io' show Platform;
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -26,6 +27,15 @@ import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 ///
 /// Para teste/desenvolvimento local, voce pode usar a key de sandbox:
 /// `test_rHipMRrqwezbhAuzyWKGLEqwfhP`
+///
+/// A key da Test Store (`test_`) funciona SOMENTE em debug: em build de
+/// release o SDK encerra o app de proposito, entao o servico a ignora e
+/// segue sem assinaturas (ver [shouldConfigureSdk]).
+///
+/// ## RevenueCat desativado temporariamente
+///
+/// A cobranca ainda nao esta ativa no app: enquanto [revenueCatEnabled] for
+/// `false`, o SDK nao e configurado, independente das keys do build.
 ///
 /// ## Entitlements Suportados
 ///
@@ -83,8 +93,21 @@ class SubscriptionService {
     }
 
     final apiKey = _getApiKey();
-    if (apiKey.isEmpty) {
-      debugPrint('SubscriptionService: No API key configured, skipping initialization');
+    if (!shouldConfigureSdk(apiKey)) {
+      if (!revenueCatEnabled) {
+        debugPrint('SubscriptionService: RevenueCat disabled, skipping initialization');
+      } else if (apiKey.isEmpty) {
+        debugPrint('SubscriptionService: No API key configured, skipping initialization');
+      } else {
+        // Key da Test Store em release: o SDK encerraria o app de proposito.
+        // Segue sem assinaturas e registra no Crashlytics para ser corrigido.
+        FirebaseCrashlytics.instance.recordError(
+          StateError('RevenueCat Test Store API key used in release build'),
+          StackTrace.current,
+          reason: 'SubscriptionService',
+          fatal: false,
+        );
+      }
       return;
     }
 
@@ -96,6 +119,40 @@ class SubscriptionService {
     } catch (e, stack) {
       debugPrint('SubscriptionService: Error initializing: $e\n$stack');
       rethrow;
+    }
+  }
+
+  /// Chave geral do RevenueCat.
+  ///
+  /// Desativado temporariamente: a cobranca ainda nao esta ativa no app.
+  /// Enquanto `false`, o SDK nunca e configurado (sem assinaturas e sem risco
+  /// de crash por key invalida). Para reativar: trocar os secrets
+  /// REVENUECAT_*_API_KEY pelas keys reais (goog_/appl_) e mudar para `true`.
+  static const revenueCatEnabled = false;
+
+  /// Indica se o SDK deve ser configurado com a API key.
+  ///
+  /// Nunca configura com o RevenueCat desativado ([revenueCatEnabled]). Keys da
+  /// Test Store (`test_`) so funcionam em debug: em build de release o SDK do
+  /// RevenueCat (9+) encerra o app de proposito ao configurar com elas.
+  @visibleForTesting
+  static bool shouldConfigureSdk(
+    String apiKey, {
+    bool enabled = revenueCatEnabled,
+    bool releaseMode = kReleaseMode,
+  }) {
+    if (!enabled || apiKey.isEmpty) return false;
+    if (releaseMode && apiKey.startsWith('test_')) return false;
+    return true;
+  }
+
+  /// Falha em Dart quando o SDK nao foi configurado (sem key ou key recusada).
+  ///
+  /// Chamar o SDK nativo sem configurar derruba o app no iOS
+  /// (`Purchases.shared` da fatalError).
+  void _ensureInitialized() {
+    if (!_isInitialized) {
+      throw StateError('SubscriptionService: RevenueCat not initialized');
     }
   }
 
@@ -113,6 +170,7 @@ class SubscriptionService {
   ///
   /// Retorna [CustomerInfo] com entitlements ativos, datas de expiracao, etc.
   Future<CustomerInfo> getCustomerInfo() async {
+    _ensureInitialized();
     return await Purchases.getCustomerInfo();
   }
 
@@ -121,6 +179,7 @@ class SubscriptionService {
   /// Retorna [Offerings] com os pacotes configurados no RevenueCat.
   /// Pacotes esperados: monthly, yearly, lifetime
   Future<Offerings?> getOfferings() async {
+    _ensureInitialized();
     try {
       final offerings = await Purchases.getOfferings();
       debugPrint('SubscriptionService: Fetched offerings: ${offerings.current?.identifier}');
@@ -147,6 +206,7 @@ class SubscriptionService {
   /// Throws [PlatformException] se ocorrer um erro ou cancelamento.
   /// Use [PurchasesErrorHelper.getErrorCode] para verificar o tipo de erro.
   Future<CustomerInfo> purchasePackage(Package package) async {
+    _ensureInitialized();
     try {
       debugPrint('SubscriptionService: Purchasing package ${package.identifier}');
       // A partir do purchases_flutter 9, Purchases.purchase retorna um
@@ -167,6 +227,7 @@ class SubscriptionService {
   /// Util para usuarios que reinstalaram o app ou trocaram de dispositivo.
   /// Retorna [CustomerInfo] com assinaturas restauradas.
   Future<CustomerInfo> restorePurchases() async {
+    _ensureInitialized();
     try {
       debugPrint('SubscriptionService: Restoring purchases');
       final customerInfo = await Purchases.restorePurchases();
@@ -287,6 +348,7 @@ class SubscriptionService {
   /// }
   /// ```
   Future<PaywallResult> presentPaywall({Offering? offering}) async {
+    _ensureInitialized();
     try {
       debugPrint('SubscriptionService: Presenting paywall');
       final result = await RevenueCatUI.presentPaywall(
@@ -339,6 +401,7 @@ class SubscriptionService {
   Future<PaywallResult> presentPaywallIfNeeded({
     String? requiredEntitlement,
   }) async {
+    _ensureInitialized();
     try {
       final entitlement = requiredEntitlement ?? _mainEntitlement;
       debugPrint('SubscriptionService: Presenting paywall if needed for: $entitlement');
@@ -371,6 +434,7 @@ class SubscriptionService {
   /// await SubscriptionService.instance.presentCustomerCenter();
   /// ```
   Future<void> presentCustomerCenter() async {
+    _ensureInitialized();
     try {
       debugPrint('SubscriptionService: Presenting customer center');
       await RevenueCatUI.presentCustomerCenter();
@@ -403,6 +467,7 @@ class SubscriptionService {
   ///
   /// Util quando o usuario faz login em uma conta diferente.
   Future<CustomerInfo> logIn(String userId) async {
+    _ensureInitialized();
     final result = await Purchases.logIn(userId);
     debugPrint('SubscriptionService: Logged in as $userId');
     return result.customerInfo;
