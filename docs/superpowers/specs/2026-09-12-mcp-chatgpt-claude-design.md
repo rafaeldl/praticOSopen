@@ -41,7 +41,8 @@ nenhum handler. O middleware `requireLinked` só verifica a existência de
 ChatGPT / Claude
        │  Streamable HTTP (JSON-RPC)
        ▼
-  POST /mcp/t/{token}      ← mesmo app Express das Functions (southamerica-east1)
+  POST /mcp/t/{token}      ← praticos.web.app, via rewrite do Hosting
+       │                     para a function `api` (southamerica-east1)
        │
        ├─ mcpAuth (novo)          → token → req.auth { companyId, userId, permissions }
        ├─ resolveCompanyContext   → (existente, sem alteração)
@@ -78,6 +79,24 @@ impedimento para Streamable HTTP stateless.
 
 `src/mcp/` fica isolado o suficiente para virar serviço próprio depois, se
 necessário.
+
+### Decisão: expor pelo domínio do Hosting
+
+O endereço do connector é `https://praticos.web.app/mcp/...`, não a URL crua do
+Cloud Functions. Além de ser um endereço apresentável, usar o domínio da marca
+conta a favor na revisão dos diretórios.
+
+Hoje o `firebase.json` só tem rewrite para o serviço `praticos-web`. Entra um
+rewrite novo apontando `/mcp/**` para a function `api`, que preserva o path
+completo — então o `app.use('/mcp', ...)` do Express funciona sem alteração.
+
+Dois cuidados:
+
+- O rewrite do Hosting tem timeout de 60s. O transporte usado é
+  request/response, então não há problema. SSE de longa duração exigiria
+  revisitar essa decisão.
+- As respostas de `/mcp` precisam de `Cache-Control: no-store`, senão o CDN do
+  Hosting pode cachear resposta de JSON-RPC.
 
 ### Decisão: bridge in-process
 
@@ -172,7 +191,7 @@ sem autenticação ou OAuth. Não há campo para header customizado. Enquanto o
 OAuth não existe, o token vai no path:
 
 ```
-https://southamerica-east1-praticos-app.cloudfunctions.net/api/mcp/t/{token}
+https://praticos.web.app/mcp/t/{token}
 ```
 
 O usuário cola essa URL como endereço do connector. Para o cliente MCP é "sem
