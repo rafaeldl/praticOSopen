@@ -19,11 +19,17 @@ A API de integrações já existe e já foi desenhada para consumo conversaciona
 pelo bot do WhatsApp. O namespace `/bot` cobre busca unificada, criação completa
 de OS, fotos, comentários e faturamento.
 
-Mais importante: as rotas de `/bot` leem o tenant de `req.userContext.companyId`,
-preenchido pelo middleware `resolveCompanyContext` a partir de `req.auth`. Trocar
+Mais importante: as rotas de `/bot` leem o tenant de `req.userContext`. Trocar
 apenas o middleware de autenticação dá acesso a toda essa superfície sem alterar
 nenhum handler. O middleware `requireLinked` só verifica a existência de
 `req.userContext`, então também não bloqueia o reuso.
+
+O `mcpAuth` preenche `req.userContext` diretamente, como a autenticação do bot já
+faz. Isso é deliberado: `resolveCompanyContext` trata apenas `apiKey` e `bearer`,
+e um tipo novo cairia no 401 final dele. Adicionar um ramo `mcp` ali significaria
+mexer num middleware que toda rota da aplicação atravessa. Em vez disso, o
+`mcpAuth` aproveita o curto-circuito `if (req.userContext)` que abre aquele
+middleware — o compartilhado fica intocado.
 
 ### Não objetivos
 
@@ -44,8 +50,7 @@ ChatGPT / Claude
   POST /mcp/t/{token}      ← praticos.web.app, via rewrite do Hosting
        │                     para a function `api` (southamerica-east1)
        │
-       ├─ mcpAuth (novo)          → token → req.auth { companyId, userId, permissions }
-       ├─ resolveCompanyContext   → (existente, sem alteração)
+       ├─ mcpAuth (novo)          → token → req.auth + req.userContext
        │
        ▼
   src/mcp/
