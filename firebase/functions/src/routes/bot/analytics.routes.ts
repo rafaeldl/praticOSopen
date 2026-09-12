@@ -126,7 +126,6 @@ router.get('/financial', async (req: AuthenticatedRequest, res: Response) => {
           topCustomers: summary.topCustomers,
           topServices: summary.topServices,
         },
-
       },
     });
   } catch (error) {

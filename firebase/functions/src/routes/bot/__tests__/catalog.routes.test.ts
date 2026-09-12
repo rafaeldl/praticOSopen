@@ -27,7 +27,7 @@ describe('Bot Catalog Routes', () => {
   // ----- GET /search --------------------------------------------------------
 
   describe('GET /search', () => {
-    it('returns formatContext', async () => {
+    it('does NOT return formatContext', async () => {
       mockCatalogService.searchServices.mockResolvedValue([]);
       mockCatalogService.searchProducts.mockResolvedValue([]);
 
@@ -35,8 +35,9 @@ describe('Bot Catalog Routes', () => {
       const res = await request(app).get('/search?q=test');
 
       expect(res.status).toBe(200);
-      expect(res.body.data.formatContext).toBeDefined();
-      expect(res.body.data.formatContext.country).toBe('BR');
+      expect(res.body.success).toBe(true);
+      // formatContext is served only by GET /bot/link/context
+      expect(res.body.data.formatContext).toBeUndefined();
     });
 
     it('does NOT return message', async () => {

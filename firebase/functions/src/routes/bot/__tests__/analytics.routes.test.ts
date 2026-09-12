@@ -37,15 +37,16 @@ describe('Bot Analytics Routes', () => {
   // ----- GET /financial -----------------------------------------------------
 
   describe('GET /financial', () => {
-    it('returns formatContext', async () => {
+    it('does NOT return formatContext', async () => {
       mockAnalyticsService.getAnalyticsSummary.mockResolvedValue(fakeSummary as any);
 
       const app = buildApp(router);
       const res = await request(app).get('/financial');
 
       expect(res.status).toBe(200);
-      expect(res.body.data.formatContext).toBeDefined();
-      expect(res.body.data.formatContext.country).toBe('BR');
+      expect(res.body.success).toBe(true);
+      // formatContext is served only by GET /bot/link/context
+      expect(res.body.data.formatContext).toBeUndefined();
     });
 
     it('does NOT return message', async () => {
@@ -66,13 +67,14 @@ describe('Bot Analytics Routes', () => {
       expect(res.body.data.summary.period.label).toMatch(/^\d{4}-\d{2}$/);
     });
 
-    it('returns USD currency when companyCountry=US', async () => {
+    it('does NOT return formatContext even when companyCountry=US', async () => {
       mockAnalyticsService.getAnalyticsSummary.mockResolvedValue(fakeSummary as any);
 
       const app = buildApp(router, { companyCountry: 'US' });
       const res = await request(app).get('/financial');
 
-      expect(res.body.data.formatContext.currency).toBe('USD');
+      // Country -> currency/locale mapping is covered by format.utils.test.ts
+      expect(res.body.data.formatContext).toBeUndefined();
     });
   });
 });

@@ -1,6 +1,6 @@
 # API Endpoints - Referência Completa
 
-Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" e base "$PRATICOS_API_URL". Retornam `formatContext` (ver SOUL.md > Dados da API).
+Todos os endpoints usam: -H "X-API-Key: $PRATICOS_API_KEY" -H "X-WhatsApp-Number: {NUMERO}" e base "$PRATICOS_API_URL". Formatar valores com Pais/Moeda/Locale do memory (ver SOUL.md > Dados da API). `formatContext` vem do GET /bot/link/context no inicio da sessao e tambem acompanha as respostas de detalhe/mutacao de OS.
 
 ## Busca Unificada (USAR SEMPRE)
 POST /bot/search/unified

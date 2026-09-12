@@ -28,6 +28,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/theme/app_theme.dart';
 import 'package:praticos/routes.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
+import 'package:praticos/services/tracking_transparency_service.dart';
 
 LocaleStore _localeStore = LocaleStore();
 AuthStore _authStore = AuthStore();
@@ -86,6 +87,11 @@ Future<void> main() async {
       child: MyApp(),
     ),
   );
+
+  // Pedido de rastreamento (ATT) no inicio do app, antes do login: a Apple
+  // exige o alerta antes de qualquer coleta. O servico espera o app ficar
+  // ativo, senao o iOS nega em silencio.
+  TrackingTransparencyService.instance.requestIfEligible();
 }
 
 class MyApp extends StatelessWidget {

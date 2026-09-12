@@ -111,7 +111,6 @@ router.get('/search', async (req: AuthenticatedRequest, res: Response) => {
         services,
         products,
         totalResults: services.length + products.length,
-
       },
     });
   } catch (error) {

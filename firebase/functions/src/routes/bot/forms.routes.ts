@@ -51,7 +51,6 @@ router.get('/templates', requireLinked, async (req: AuthenticatedRequest, res: R
           descriptionI18n: t.descriptionI18n,
         })),
         count: templates.length,
-
       },
     });
   } catch (error) {
@@ -126,7 +125,6 @@ router.get('/:number/forms', requireLinked, async (req: AuthenticatedRequest, re
         forms: formattedForms,
         count: forms.length,
         orderNumber,
-
       },
     });
   } catch (error) {
@@ -228,7 +226,6 @@ router.get('/:number/forms/:formId', requireLinked, async (req: AuthenticatedReq
         })),
         titleI18n: form.titleI18n,
         orderNumber,
-
       },
     });
   } catch (error) {
@@ -308,7 +305,6 @@ router.post('/:number/forms', requireLinked, async (req: AuthenticatedRequest, r
         status: form.status,
         itemCount: form.items.length,
         orderNumber,
-
       },
     });
   } catch (error) {
@@ -394,7 +390,6 @@ router.post('/:number/forms/:formId/items/:itemId', requireLinked, async (req: A
         itemId: itemIdParam,
         status: updatedForm.status,
         progress,
-
       },
     });
   } catch (error) {
@@ -531,7 +526,6 @@ router.post('/:number/forms/:formId/items/:itemId/photos', requireLinked, async 
           itemId: itemIdParam,
           photoCount,
           progress,
-  
         },
       });
     } catch (error) {
@@ -634,7 +628,6 @@ router.patch('/:number/forms/:formId/status', requireLinked, async (req: Authent
         status: updatedForm.status,
         statusLabel,
         statusEmoji,
-
       },
     });
   } catch (error) {
