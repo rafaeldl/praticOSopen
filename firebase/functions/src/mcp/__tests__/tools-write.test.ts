@@ -206,4 +206,29 @@ describe('write tools', () => {
     expect(auditEntry).not.toHaveProperty('email');
     expect(auditEntry).not.toHaveProperty('name');
   });
+
+  // RULING: the card's action buttons call update_order_status via
+  // tools/call from inside the iframe. Per the MCP Apps spec (l.401), a host
+  // rejects a card-originated tools/call for a tool whose visibility doesn't
+  // include "app"; the omitted default is ["model", "app"] (l.397). This is
+  // a regression guard, not a feature test: it already passes today because
+  // no tool declares `visibility` at all. It exists to fail if someone later
+  // adds `visibility: ['app']` and silently drops the tool from the model's
+  // chat surface.
+  it('update_order_status continua visivel ao modelo e ao card', () => {
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const meta = server.tools.get('update_order_status')!.config._meta as
+      | { ui?: { visibility?: string[] } }
+      | undefined;
+
+    // Omitted visibility defaults to ["model", "app"] (MCP Apps spec).
+    // Declaring ["app"] would hide the tool from the chat.
+    const visibility = meta?.ui?.visibility;
+    if (visibility !== undefined) {
+      expect(visibility).toEqual(expect.arrayContaining(['model', 'app']));
+    }
+    expect(meta?.['openai/widgetAccessible' as keyof typeof meta]).toBeUndefined();
+  });
 });

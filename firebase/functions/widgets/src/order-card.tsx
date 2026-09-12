@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { connect, onToolResult } from './bridge';
+import { callTool, connect, onToolResult } from './bridge';
 
 interface OrderItem {
   name?: string;
@@ -31,9 +31,56 @@ const STATUS: Record<string, { label: string; color: string }> = {
 const money = (value?: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value ?? 0);
 
+const btnStyle: React.CSSProperties = {
+  fontSize: 13,
+  padding: '6px 12px',
+  borderRadius: 8,
+  border: '1px solid rgba(128,128,128,0.35)',
+  background: 'transparent',
+  color: 'inherit',
+  cursor: 'pointer',
+};
+
 export function OrderCard({ order }: { order: OrderData }) {
   const status = STATUS[order.status ?? ''] ?? { label: order.status ?? '—', color: '#8E8E93' };
   const items = [...(order.services ?? []), ...(order.products ?? [])];
+
+  const [pending, setPending] = React.useState<'done' | 'approved' | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [done, setDone] = React.useState<string | null>(null);
+  const [showLink, setShowLink] = React.useState(false);
+
+  // The sandboxed frame may not grant clipboard access; feature-detect and
+  // fall back to showing the link for manual copy (spec ext-apps 2026-01-26,
+  // l.171: apps must not assume permissions).
+  const copyLink = async () => {
+    if (!order.shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(order.shareUrl);
+      setDone('Link copiado');
+    } catch {
+      setShowLink(true);
+    }
+  };
+
+  // A click that writes skips the confirmation the chat normally gives, so
+  // every write goes through an explicit confirm state first.
+  const confirmStatus = async (status: 'done' | 'approved') => {
+    if (!order.number) return;
+    setBusy(true);
+    try {
+      const result = await callTool('update_order_status', {
+        orderNumber: order.number,
+        status,
+      });
+      setDone(result?.isError ? 'Não foi possível atualizar' : status === 'done' ? 'Concluída' : 'Aprovada');
+    } catch {
+      setDone('Não foi possível atualizar');
+    } finally {
+      setBusy(false);
+      setPending(null);
+    }
+  };
 
   return (
     <div style={{
@@ -90,6 +137,40 @@ export function OrderCard({ order }: { order: OrderData }) {
       }}>
         <span>Total</span>
         <span>{money(order.total)}</span>
+      </div>
+
+      <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {done && <span style={{ fontSize: 13 }}>{done}</span>}
+
+        {showLink && order.shareUrl && (
+          <span style={{ fontSize: 12, userSelect: 'all', wordBreak: 'break-all' }}>{order.shareUrl}</span>
+        )}
+
+        {!done && pending === null && (
+          <>
+            {order.shareUrl && (
+              <button onClick={copyLink} style={btnStyle}>Copiar link do cliente</button>
+            )}
+            {order.status !== 'done' && order.status !== 'canceled' && (
+              <button onClick={() => setPending('done')} style={btnStyle}>Marcar como concluída</button>
+            )}
+            {order.status === 'quote' && (
+              <button onClick={() => setPending('approved')} style={btnStyle}>Aprovar</button>
+            )}
+          </>
+        )}
+
+        {!done && pending !== null && (
+          <>
+            <span style={{ fontSize: 13, alignSelf: 'center' }}>
+              {pending === 'done' ? 'Concluir esta OS?' : 'Aprovar esta OS?'}
+            </span>
+            <button disabled={busy} onClick={() => confirmStatus(pending)} style={btnStyle}>
+              {busy ? '...' : 'Confirmar'}
+            </button>
+            <button disabled={busy} onClick={() => setPending(null)} style={btnStyle}>Cancelar</button>
+          </>
+        )}
       </div>
     </div>
   );
