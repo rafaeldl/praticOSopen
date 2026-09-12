@@ -204,9 +204,16 @@ autenticação"; o token no path identifica a empresa.
 
 **Riscos e mitigações.** Token em URL aparece em log de servidor e em histórico
 de navegação. É aceito como ponte temporária porque o token é opaco e aleatório,
-vinculado a uma única empresa, revogável a qualquer momento, expira em 90 dias,
-e o middleware redige o path nos logs. A fase 2 substitui esse mecanismo e não é
-opcional.
+vinculado a uma única empresa, revogável a qualquer momento e expira em 90 dias.
+O middleware de log da aplicação redige o path.
+
+**O que a redação não alcança:** Cloud Run e Firebase Hosting registram a URL
+completa nos próprios logs de plataforma, antes de qualquer código nosso rodar.
+Nenhuma mitigação no nível da aplicação muda isso. Ou seja, enquanto o token
+viajar na URL, ele está nos logs de plataforma do projeto — acessível a quem
+tiver acesso de leitura a eles. É a razão mais forte para a fase 2 não ser
+opcional, e precisa estar escrito na documentação pública da feature para que
+quem gera um token saiba o que está aceitando.
 
 **Armazenamento.** Reusa a coleção `apiKeys`, com `type: 'mcp'` e `userId`. O
 middleware `mcpAuth` preenche `req.auth` e o restante do pipeline funciona sem
