@@ -1,23 +1,9 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { callTool, connect, onToolResult } from './bridge';
+import { applyStatusResult, availableActions, writeFailed, OrderData } from './card-state';
 
-interface OrderItem {
-  name?: string;
-  value?: number;
-  quantity?: number;
-}
-
-export interface OrderData {
-  number?: number;
-  status?: string;
-  customer?: { name?: string } | null;
-  devices?: { name?: string; serial?: string }[];
-  services?: OrderItem[];
-  products?: OrderItem[];
-  total?: number;
-  shareUrl?: string | null;
-}
+export type { OrderData };
 
 // OrderStatus is 'quote' | 'approved' | 'progress' | 'done' | 'canceled'.
 const STATUS: Record<string, { label: string; color: string }> = {
@@ -41,41 +27,61 @@ const btnStyle: React.CSSProperties = {
   cursor: 'pointer',
 };
 
-export function OrderCard({ order }: { order: OrderData }) {
+export function OrderCard({ order: initialOrder }: { order: OrderData }) {
+  // The card owns its current order from here on: a successful write
+  // replaces it (see confirmStatus/applyStatusResult), so the badge and the
+  // button set reflect the latest known state instead of going stale after
+  // an approve/done. The App component below remounts this component (via
+  // `key={order.number}`) whenever a genuinely different order arrives.
+  const [order, setOrder] = React.useState<OrderData>(initialOrder);
+  const [pending, setPending] = React.useState<'done' | 'approved' | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [message, setMessage] = React.useState<{ text: string; error: boolean } | null>(null);
+  const [showLink, setShowLink] = React.useState(false);
+
   const status = STATUS[order.status ?? ''] ?? { label: order.status ?? '—', color: '#8E8E93' };
   const items = [...(order.services ?? []), ...(order.products ?? [])];
 
-  const [pending, setPending] = React.useState<'done' | 'approved' | null>(null);
-  const [busy, setBusy] = React.useState(false);
-  const [done, setDone] = React.useState<string | null>(null);
-  const [showLink, setShowLink] = React.useState(false);
+  // Which buttons show is derived from the current order alone, never from
+  // `message` or from whether a previous write succeeded or failed — a
+  // failed write must leave every button available to retry, and a
+  // successful one must not hide copy-link.
+  const actions = availableActions(order);
 
   // The sandboxed frame may not grant clipboard access; feature-detect and
   // fall back to showing the link for manual copy (spec ext-apps 2026-01-26,
-  // l.171: apps must not assume permissions).
+  // l.171: apps must not assume permissions). Read-only, so it never touches
+  // the write buttons or the write message.
   const copyLink = async () => {
     if (!order.shareUrl) return;
     try {
       await navigator.clipboard.writeText(order.shareUrl);
-      setDone('Link copiado');
+      setMessage({ text: 'Link copiado', error: false });
     } catch {
       setShowLink(true);
     }
   };
 
   // A click that writes skips the confirmation the chat normally gives, so
-  // every write goes through an explicit confirm state first.
-  const confirmStatus = async (status: 'done' | 'approved') => {
-    if (!order.number) return;
+  // every write goes through an explicit confirm state first. On success the
+  // order (and therefore the button set) is refreshed from the tool result;
+  // on failure — rejection or `isError` — the order is left untouched and the
+  // buttons stay available so the user can retry.
+  const confirmStatus = async (requestedStatus: 'done' | 'approved') => {
+    if (!order.number || busy) return;
     setBusy(true);
     try {
       const result = await callTool('update_order_status', {
         orderNumber: order.number,
-        status,
+        status: requestedStatus,
       });
-      setDone(result?.isError ? 'Não foi possível atualizar' : status === 'done' ? 'Concluída' : 'Aprovada');
+      const outcome = applyStatusResult(order, result, requestedStatus);
+      setOrder(outcome.order);
+      setMessage({ text: outcome.message, error: Boolean(outcome.error) });
     } catch {
-      setDone('Não foi possível atualizar');
+      const outcome = writeFailed(order);
+      setOrder(outcome.order);
+      setMessage({ text: outcome.message, error: true });
     } finally {
       setBusy(false);
       setPending(null);
@@ -140,27 +146,29 @@ export function OrderCard({ order }: { order: OrderData }) {
       </div>
 
       <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {done && <span style={{ fontSize: 13 }}>{done}</span>}
+        {message && (
+          <span style={{ fontSize: 13, color: message.error ? '#FF3B30' : 'inherit' }}>{message.text}</span>
+        )}
 
         {showLink && order.shareUrl && (
           <span style={{ fontSize: 12, userSelect: 'all', wordBreak: 'break-all' }}>{order.shareUrl}</span>
         )}
 
-        {!done && pending === null && (
+        {pending === null && (
           <>
-            {order.shareUrl && (
+            {actions.copyLink && (
               <button onClick={copyLink} style={btnStyle}>Copiar link do cliente</button>
             )}
-            {order.status !== 'done' && order.status !== 'canceled' && (
+            {actions.markDone && (
               <button onClick={() => setPending('done')} style={btnStyle}>Marcar como concluída</button>
             )}
-            {order.status === 'quote' && (
+            {actions.approve && (
               <button onClick={() => setPending('approved')} style={btnStyle}>Aprovar</button>
             )}
           </>
         )}
 
-        {!done && pending !== null && (
+        {pending !== null && (
           <>
             <span style={{ fontSize: 13, alignSelf: 'center' }}>
               {pending === 'done' ? 'Concluir esta OS?' : 'Aprovar esta OS?'}
@@ -187,7 +195,10 @@ function App() {
   }, []);
 
   if (!order) return null;
-  return <OrderCard order={order} />;
+  // Keyed by order number so a genuinely different order (a later tool call
+  // about a different OS) remounts the card instead of reusing the previous
+  // order's internal write state.
+  return <OrderCard key={order.number} order={order} />;
 }
 
 const root = document.getElementById('root');
