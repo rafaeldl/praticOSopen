@@ -1,5 +1,5 @@
 const STATUS_LABELS: Record<string, string> = {
-  budget: 'Orçamento',
+  quote: 'Orçamento',
   approved: 'Aprovada',
   progress: 'Em andamento',
   done: 'Concluída',
@@ -43,7 +43,7 @@ export function formatOrder(order: any): string {
     lines.push('');
     lines.push('Serviços:');
     for (const s of services) {
-      lines.push(`- ${s.name}${s.description ? ` — ${s.description}` : ''}: ${money(s.value)}`);
+      lines.push(`- ${s.name}: ${money(s.value)}`);
     }
   }
 
@@ -70,7 +70,8 @@ export function formatOrderList(orders: any[], omitted = 0): string {
 
   const lines = orders.map((o) => {
     const customer = o.customer?.name ? ` — ${o.customer.name}` : '';
-    return `- **#${o.number}** ${statusLabel(o.status)}${customer} — ${money(o.total)}`;
+    const status = o.status ? statusLabel(o.status) : '';
+    return `- **#${o.number}**${status ? ` ${status}` : ''}${customer} — ${money(o.total)}`;
   });
 
   if (omitted > 0) lines.push(`_(+${omitted} não exibidas)_`);
