@@ -242,6 +242,14 @@ class _SettingsState extends State<Settings> {
                         title: context.l10n.ratings,
                         onTap: () => Navigator.pushNamed(context, '/ratings'),
                       ),
+
+                    // Integrações (MCP) - backend valida owner/admin
+                    _buildSettingsTile(
+                      icon: CupertinoIcons.link,
+                      color: CupertinoColors.systemBlue,
+                      title: context.l10n.integrations,
+                      onTap: () => Navigator.pushNamed(context, '/integrations'),
+                    ),
                   ],
                 );
               }),

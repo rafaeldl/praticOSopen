@@ -3160,6 +3160,108 @@ abstract class AppLocalizations {
   /// **'Gerenciamento'**
   String get management;
 
+  /// No description provided for @integrations.
+  ///
+  /// In pt, this message translates to:
+  /// **'Integrações'**
+  String get integrations;
+
+  /// No description provided for @integrationsSubtitle.
+  ///
+  /// In pt, this message translates to:
+  /// **'Conecte o PraticOS ao ChatGPT e ao Claude'**
+  String get integrationsSubtitle;
+
+  /// No description provided for @integrationsEmpty.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nenhuma conexão ainda'**
+  String get integrationsEmpty;
+
+  /// No description provided for @integrationsNew.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nova conexão'**
+  String get integrationsNew;
+
+  /// No description provided for @integrationsName.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nome da conexão'**
+  String get integrationsName;
+
+  /// No description provided for @integrationsNameHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ex: Meu ChatGPT'**
+  String get integrationsNameHint;
+
+  /// No description provided for @integrationsUrlOnce.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copie esta URL agora. Ela não será exibida novamente.'**
+  String get integrationsUrlOnce;
+
+  /// No description provided for @integrationsCopy.
+  ///
+  /// In pt, this message translates to:
+  /// **'Copiar URL'**
+  String get integrationsCopy;
+
+  /// No description provided for @integrationsCopied.
+  ///
+  /// In pt, this message translates to:
+  /// **'URL copiada'**
+  String get integrationsCopied;
+
+  /// No description provided for @integrationsRevoke.
+  ///
+  /// In pt, this message translates to:
+  /// **'Revogar'**
+  String get integrationsRevoke;
+
+  /// No description provided for @integrationsRevokeConfirm.
+  ///
+  /// In pt, this message translates to:
+  /// **'Revogar esta conexão? Quem estiver usando esta URL perde o acesso.'**
+  String get integrationsRevokeConfirm;
+
+  /// No description provided for @integrationsCreatedAt.
+  ///
+  /// In pt, this message translates to:
+  /// **'Criada em {date}'**
+  String integrationsCreatedAt(String date);
+
+  /// No description provided for @integrationsNeverUsed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Nunca usada'**
+  String get integrationsNeverUsed;
+
+  /// No description provided for @integrationsLastUsed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Último uso em {date}'**
+  String integrationsLastUsed(String date);
+
+  /// No description provided for @integrationsErrorForbidden.
+  ///
+  /// In pt, this message translates to:
+  /// **'Apenas o dono ou administradores podem gerenciar integrações.'**
+  String get integrationsErrorForbidden;
+
+  /// No description provided for @integrationsErrorNotFound.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta conexão não existe mais.'**
+  String get integrationsErrorNotFound;
+
+  /// No description provided for @integrationsErrorGeneric.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível concluir. Tente novamente.'**
+  String get integrationsErrorGeneric;
+
   /// No description provided for @companyData.
   ///
   /// In pt, this message translates to:

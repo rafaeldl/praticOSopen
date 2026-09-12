@@ -1557,6 +1557,66 @@ class AppLocalizationsPt extends AppLocalizations {
   String get management => 'Gerenciamento';
 
   @override
+  String get integrations => 'Integrações';
+
+  @override
+  String get integrationsSubtitle =>
+      'Conecte o PraticOS ao ChatGPT e ao Claude';
+
+  @override
+  String get integrationsEmpty => 'Nenhuma conexão ainda';
+
+  @override
+  String get integrationsNew => 'Nova conexão';
+
+  @override
+  String get integrationsName => 'Nome da conexão';
+
+  @override
+  String get integrationsNameHint => 'Ex: Meu ChatGPT';
+
+  @override
+  String get integrationsUrlOnce =>
+      'Copie esta URL agora. Ela não será exibida novamente.';
+
+  @override
+  String get integrationsCopy => 'Copiar URL';
+
+  @override
+  String get integrationsCopied => 'URL copiada';
+
+  @override
+  String get integrationsRevoke => 'Revogar';
+
+  @override
+  String get integrationsRevokeConfirm =>
+      'Revogar esta conexão? Quem estiver usando esta URL perde o acesso.';
+
+  @override
+  String integrationsCreatedAt(String date) {
+    return 'Criada em $date';
+  }
+
+  @override
+  String get integrationsNeverUsed => 'Nunca usada';
+
+  @override
+  String integrationsLastUsed(String date) {
+    return 'Último uso em $date';
+  }
+
+  @override
+  String get integrationsErrorForbidden =>
+      'Apenas o dono ou administradores podem gerenciar integrações.';
+
+  @override
+  String get integrationsErrorNotFound => 'Esta conexão não existe mais.';
+
+  @override
+  String get integrationsErrorGeneric =>
+      'Não foi possível concluir. Tente novamente.';
+
+  @override
   String get companyData => 'Dados da Empresa';
 
   @override
