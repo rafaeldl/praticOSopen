@@ -215,9 +215,10 @@ tiver acesso de leitura a eles. É a razão mais forte para a fase 2 não ser
 opcional, e precisa estar escrito na documentação pública da feature para que
 quem gera um token saiba o que está aceitando.
 
-**Armazenamento.** Reusa a coleção `apiKeys`, com `type: 'mcp'` e `userId`. O
-middleware `mcpAuth` preenche `req.auth` e o restante do pipeline funciona sem
-alteração.
+**Armazenamento.** Reusa a coleção `apiKeys`, com `type: 'mcp'` e `userId`. O middleware `mcpAuth` preenche `req.auth` **e** `req.userContext` — este
+último porque `resolveCompanyContext` só trata `apiKey` e `bearer`; preencher
+`userContext` aproveita o curto-circuito do middleware compartilhado, sem
+alterá-lo.
 
 ### Fase 1: tela no app
 
@@ -295,11 +296,13 @@ escrita no card entra em estado de confirmação primeiro — o botão vira
 "Confirmar? Sim / Cancelar" — antes de chamar a tool. Ações de leitura vão
 direto.
 
-### Risco a validar cedo
+### Fotos no card
 
-As fotos vêm de URL assinada do Firebase Storage e o iframe do ChatGPT tem CSP
-restritiva. O domínio do Storage precisa ser declarado. Validar na primeira
-semana de implementação, não no fim.
+O card da fase 1 não mostra foto, e o resource não declara CSP. Se passar a
+mostrar, o domínio do Firebase Storage deve ser liberado em
+`_meta.ui.csp.resourceDomains` do resource (spec MCP Apps). O
+`structuredContent` também não carrega URL de foto hoje — a allowlist de
+`toCardData` teria de incluí-la explicitamente.
 
 ## Segurança
 
