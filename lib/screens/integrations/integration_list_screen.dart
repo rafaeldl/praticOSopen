@@ -43,6 +43,7 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -99,6 +100,7 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
       final created = await IntegrationApiService.instance.create(name: name);
       if (!mounted) return;
       await _showUrlOnce(created);
+      if (!mounted) return;
       await _load();
     } on IntegrationApiException catch (e) {
       if (!mounted) return;
@@ -168,6 +170,7 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
 
     try {
       await IntegrationApiService.instance.revoke(token.id!);
+      if (!mounted) return;
       await _load();
     } on IntegrationApiException catch (e) {
       if (!mounted) return;
