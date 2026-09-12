@@ -2,6 +2,12 @@
 // The View talks to the host over JSON-RPC via postMessage. The host sends
 // nothing until the View completes ui/initialize + notifications/initialized.
 
+import {
+  classifyMessage,
+  isAcknowledgedHostRequest,
+  buildHostRequestReply,
+} from './bridge-protocol';
+
 type Pending = { resolve: (value: any) => void; reject: (error: any) => void };
 
 const PROTOCOL_VERSION = '2026-01-26';
@@ -22,18 +28,32 @@ function request(method: string, params?: Record<string, unknown>): Promise<any>
 window.addEventListener('message', (event: MessageEvent) => {
   if (event.source !== window.parent) return;
   const message = event.data;
-  if (!message || message.jsonrpc !== '2.0') return;
+  const classified = classifyMessage(message, (id) => pending.has(id));
 
-  if (typeof message.id === 'number' && pending.has(message.id)) {
-    const { resolve, reject } = pending.get(message.id)!;
-    pending.delete(message.id);
-    if (message.error) reject(message.error);
-    else resolve(message.result);
-    return;
-  }
-
-  if (message.method === 'ui/notifications/tool-result') {
-    for (const listener of toolResultListeners) listener(message.params);
+  switch (classified.kind) {
+    case 'response': {
+      const { resolve, reject } = pending.get(classified.id)!;
+      pending.delete(classified.id);
+      if (message.error) reject(message.error);
+      else resolve(message.result);
+      return;
+    }
+    case 'hostRequest':
+      // The host expects a reply to `ping` and `ui/resource-teardown` (the
+      // spec says it SHOULD wait for the teardown response before tearing
+      // the iframe down); neither carries anything the View needs to act
+      // on, so an empty result is the correct acknowledgment.
+      if (isAcknowledgedHostRequest(classified.method)) {
+        window.parent.postMessage(buildHostRequestReply(classified.id), '*');
+      }
+      return;
+    case 'notification':
+      if (classified.method === 'ui/notifications/tool-result') {
+        for (const listener of toolResultListeners) listener(classified.params);
+      }
+      return;
+    case 'ignore':
+      return;
   }
 });
 
