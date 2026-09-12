@@ -1,3 +1,4 @@
+import type { PendingItems } from '../../models/types';
 import { money, statusLabel, truncate } from './order';
 
 export function formatSummary(summary: any): string {
@@ -18,7 +19,8 @@ export function formatRevenue(revenue: any): string {
   ].join('\n');
 }
 
-export function formatSearchResult(result: any): string {
+export function formatSearchResult(result: any, limit = 20): string {
+  const maxLimit = Math.min(Math.max(1, limit || 20), 50);
   const blocks: string[] = [];
 
   for (const key of ['customer', 'device', 'service', 'product']) {
@@ -34,7 +36,7 @@ export function formatSearchResult(result: any): string {
 
     if (!itemsToShow?.length) continue;
 
-    const { items, omitted } = truncate(itemsToShow, 20);
+    const { items, omitted } = truncate(itemsToShow, maxLimit);
     const label = isAlternative ? `${key} (alternativas)` : key;
     blocks.push(`**${label}**`);
     for (const item of items) {
@@ -63,6 +65,34 @@ export function formatEntityList(type: string, items: any[], omitted = 0): strin
   if (omitted > 0) lines.push(`_(+${omitted} não exibidos)_`);
 
   return lines.join('\n');
+}
+
+export function formatPendingItems(pending: PendingItems): string {
+  const blocks: string[] = [];
+
+  const sections: Array<[string, any[]]> = [
+    ['Aguardando aprovação', pending.toApprove || []],
+    ['Vence hoje', pending.dueToday || []],
+    ['Não pago', pending.unpaid || []],
+    ['Vencido', pending.overdue || []],
+  ];
+
+  for (const [heading, items] of sections) {
+    if (!items.length) continue;
+
+    const { items: truncated, omitted } = truncate(items, 20);
+    blocks.push(`**${heading}**`);
+    for (const order of truncated) {
+      const device = order.device?.name || 'N/A';
+      const customer = order.customer?.name || 'N/A';
+      blocks.push(`- **#${order.number}** ${customer} — ${device} — ${money(order.total)}`);
+    }
+    if (omitted) blocks.push(`_(+${omitted})_`);
+    blocks.push('');
+  }
+
+  if (!blocks.length) return 'Nenhum item pendente.';
+  return blocks.slice(0, -1).join('\n');
 }
 
 export { statusLabel };

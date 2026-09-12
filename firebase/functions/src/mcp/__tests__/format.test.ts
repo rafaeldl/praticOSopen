@@ -1,17 +1,29 @@
 import { formatOrder, formatOrderList, truncate } from '../format/order';
-import { formatSummary, formatRevenue, formatSearchResult, formatEntityList } from '../format/list';
+import { formatSummary, formatRevenue, formatSearchResult, formatEntityList, formatPendingItems } from '../format/list';
 import type { TodaySummaryData } from '../../services/analytics.service';
-import type { RevenueMetrics, PendingOrder, OrderStatus } from '../../models/types';
+import type { RevenueMetrics, PendingOrder, OrderStatus, PendingItems } from '../../models/types';
+import type { OrderDetail } from '../../utils/bot-response.utils';
+import type { CustomerResult, DeviceResult, CatalogResult } from '../../routes/bot/unified-search.routes';
 
 // Test fixtures with proper types from real API responses
-const orderDetail = {
+const orderDetail: OrderDetail = {
   number: 42,
   status: 'progress' as OrderStatus,
   customer: { name: 'João Silva', phone: '11999999999' },
+  device: null,
   devices: [{ name: 'Fiat Uno', serial: 'ABC1D23' }],
+  deviceCount: 1,
   services: [{ name: 'Troca de óleo', value: 150, deviceId: null }],
   products: [{ name: 'Filtro', quantity: 2, value: 40, deviceId: null }],
   total: 230,
+  discount: 0,
+  paidAmount: 0,
+  dueDate: undefined,
+  scheduledDate: undefined,
+  createdAt: '2026-09-12T10:00:00Z',
+  rating: undefined,
+  photosCount: 1,
+  mainPhotoUrl: 'https://example.com/photo.jpg',
   shareUrl: 'https://praticos.web.app/q/ST_x',
 };
 
@@ -40,6 +52,47 @@ const pendingOrder: PendingOrder = {
   remainingBalance: 100,
   dueDate: '2026-09-15',
   createdAt: '2026-09-12T10:00:00Z',
+};
+
+const pendingItems: PendingItems = {
+  toApprove: [
+    { ...pendingOrder, number: 1, total: 100, remainingBalance: 100 },
+    { ...pendingOrder, number: 2, total: 200, remainingBalance: 50 },
+  ],
+  dueToday: [
+    { ...pendingOrder, number: 3, total: 150, remainingBalance: 75, dueDate: '2026-09-12' },
+  ],
+  unpaid: [
+    { ...pendingOrder, number: 4, total: 300, remainingBalance: 300 },
+    { ...pendingOrder, number: 5, total: 250, remainingBalance: 250 },
+    { ...pendingOrder, number: 6, total: 180, remainingBalance: 180 },
+  ],
+  overdue: [
+    { ...pendingOrder, number: 7, total: 500, remainingBalance: 500, daysOverdue: 5 },
+  ],
+};
+
+const customerResult: CustomerResult = {
+  exact: { id: 'c1', name: 'João Silva', phone: '11999999999' },
+  suggestions: [],
+  available: null,
+};
+
+const deviceResult: DeviceResult = {
+  exact: null,
+  suggestions: [],
+  available: [
+    { id: 'd1', name: 'Fiat Uno', serial: 'ABC123' },
+    { id: 'd2', name: 'Honda Civic', serial: 'DEF456' },
+  ],
+};
+
+const catalogResult: CatalogResult = {
+  results: [],
+  available: [
+    { id: 's1', name: 'Troca de óleo', value: 150 },
+    { id: 's2', name: 'Limpeza', value: 100 },
+  ],
 };
 
 describe('formatOrder', () => {
@@ -125,32 +178,18 @@ describe('formatRevenue', () => {
 
 describe('formatSearchResult', () => {
   it('formata resultados de busca com exact match', () => {
-    const result = {
-      customer: {
-        exact: { id: 'c1', name: 'João Silva', phone: '11999999999' },
-        suggestions: [],
-        available: null,
-      },
-    };
+    const result = { customer: customerResult };
     const text = formatSearchResult(result);
     expect(text).toContain('customer');
     expect(text).toContain('João Silva');
   });
 
   it('mostra available como alternativas quando não há exact/suggestions', () => {
-    const result = {
-      device: {
-        exact: null,
-        suggestions: [],
-        available: [
-          { id: 'd1', name: 'Fiat Uno', serial: 'ABC123' },
-          { id: 'd2', name: 'Honda Civic', serial: 'DEF456' },
-        ],
-      },
-    };
+    const result = { device: deviceResult };
     const text = formatSearchResult(result);
     expect(text).toContain('d1');
     expect(text).toContain('Fiat Uno');
+    expect(text).toContain('(alternativas)');
   });
 
   it('avisa quando nada é encontrado', () => {
@@ -163,7 +202,7 @@ describe('formatSearchResult', () => {
       id: `id-${i}`,
       name: `Item ${i}`,
     }));
-    const result = {
+    const result: Record<string, CatalogResult> = {
       service: {
         results: items,
         available: null,
@@ -171,6 +210,43 @@ describe('formatSearchResult', () => {
     };
     const text = formatSearchResult(result);
     expect(text).toContain('+10');
+  });
+
+  it('respeita limite customizado até 50', () => {
+    const items = Array.from({ length: 60 }, (_, i) => ({
+      id: `id-${i}`,
+      name: `Item ${i}`,
+    }));
+    const result: Record<string, CatalogResult> = {
+      service: {
+        results: items,
+        available: null,
+      },
+    };
+    const text = formatSearchResult(result, 50);
+    expect(text).toContain('+10');
+  });
+
+  it('limita máximo em 50 mesmo se passar valor maior', () => {
+    const items = Array.from({ length: 100 }, (_, i) => ({
+      id: `id-${i}`,
+      name: `Item ${i}`,
+    }));
+    const result: Record<string, CatalogResult> = {
+      service: {
+        results: items,
+        available: null,
+      },
+    };
+    const text = formatSearchResult(result, 100);
+    expect(text).toContain('+50');
+  });
+
+  it('usa catalogResult typed fixture', () => {
+    const result = { service: catalogResult };
+    const text = formatSearchResult(result);
+    expect(text).toContain('(alternativas)');
+    expect(text).toContain('Troca de óleo');
   });
 });
 
@@ -199,5 +275,64 @@ describe('formatEntityList', () => {
   it('mostra omitted count', () => {
     const text = formatEntityList('serviço', [{ id: 's1', name: 'Serviço' }], 5);
     expect(text).toContain('+5 não exibidos');
+  });
+});
+
+describe('formatPendingItems', () => {
+  it('formata cada bucket de items pendentes', () => {
+    const text = formatPendingItems(pendingItems);
+    expect(text).toContain('Aguardando aprovação');
+    expect(text).toContain('Vence hoje');
+    expect(text).toContain('Não pago');
+    expect(text).toContain('Vencido');
+  });
+
+  it('mostra orders em cada bucket', () => {
+    const text = formatPendingItems(pendingItems);
+    expect(text).toContain('#1');
+    expect(text).toContain('#3');
+    expect(text).toContain('#4');
+    expect(text).toContain('#7');
+  });
+
+  it('omite buckets vazios', () => {
+    const empty: PendingItems = {
+      toApprove: [],
+      dueToday: [],
+      unpaid: [pendingOrder],
+      overdue: [],
+    };
+    const text = formatPendingItems(empty);
+    expect(text).toContain('Não pago');
+    expect(text).not.toContain('Aguardando aprovação');
+  });
+
+  it('trunca em 20 items por bucket', () => {
+    const manyOrders = Array.from({ length: 25 }, (_, i) => ({
+      ...pendingOrder,
+      number: i + 100,
+    }));
+    const text = formatPendingItems({
+      toApprove: manyOrders,
+      dueToday: [],
+      unpaid: [],
+      overdue: [],
+    });
+    expect(text).toContain('+5');
+  });
+
+  it('avisa quando nenhum item pendente', () => {
+    const empty: PendingItems = {
+      toApprove: [],
+      dueToday: [],
+      unpaid: [],
+      overdue: [],
+    };
+    expect(formatPendingItems(empty)).toContain('Nenhum item pendente');
+  });
+
+  it('mostra dispositivo singular corretamente', () => {
+    const text = formatPendingItems(pendingItems);
+    expect(text).toContain('Fiat Uno');
   });
 });

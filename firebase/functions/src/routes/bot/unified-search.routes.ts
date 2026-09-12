@@ -18,19 +18,19 @@ const router: Router = Router();
 // Types
 // ============================================================================
 
-interface CustomerResult {
+export interface CustomerResult {
   exact: { id: string; name: string; phone?: string } | null;
   suggestions: Array<{ id: string; name: string; phone?: string }>;
   available: Array<{ id: string; name: string; phone?: string }> | null;
 }
 
-interface DeviceResult {
+export interface DeviceResult {
   exact: { id: string; name: string; serial?: string } | null;
   suggestions: Array<{ id: string; name: string; serial?: string }>;
   available: Array<{ id: string; name: string; serial?: string }> | null;
 }
 
-interface CatalogResult {
+export interface CatalogResult {
   results: Array<{ id: string; name: string; value?: number }>;
   available: Array<{ id: string; name: string; value?: number }> | null;
 }
