@@ -31,7 +31,6 @@ router.get('/today', requireLinked, async (req: AuthenticatedRequest, res: Respo
       success: true,
       data: {
         data,
-
       },
     });
   } catch (error) {
@@ -64,7 +63,6 @@ router.get('/pending', requireLinked, async (req: AuthenticatedRequest, res: Res
       success: true,
       data: {
         data,
-
       },
     });
   } catch (error) {

@@ -88,7 +88,6 @@ router.post('/:number/photos', requireLinked, async (req: AuthenticatedRequest, 
         url: photo.url,
         storagePath: photo.storagePath,
         photoCount,
-
       },
     });
   } catch (error) {
@@ -214,7 +213,6 @@ router.post('/:number/photos/upload', requireLinked, async (req: AuthenticatedRe
           url: photo.url,
           storagePath: photo.storagePath,
           photoCount,
-  
         },
       });
     } catch (error) {
@@ -297,7 +295,6 @@ router.get('/:number/photos', requireLinked, async (req: AuthenticatedRequest, r
       data: {
         photos: photosWithDownloadUrls,
         count: photos.length,
-
       },
     });
   } catch (error) {
@@ -445,7 +442,6 @@ router.delete('/:number/photos/:photoId', requireLinked, async (req: Authenticat
       success: true,
       data: {
         remainingPhotos: remainingCount,
-
       },
     });
   } catch (error) {

@@ -64,7 +64,6 @@ router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
       data: {
         count: result.total,
         orders: lightOrders,
-
       },
     });
   } catch (error) {
@@ -117,7 +116,6 @@ router.get('/:number', async (req: AuthenticatedRequest, res: Response) => {
       success: true,
       data: {
         order,
-
       },
     });
   } catch (error) {
