@@ -551,6 +551,8 @@ bundle exec fastlane beta               # TestFlight (manual)
 
 Bot WhatsApp rodando em GCE VM `praticos-bot` (zona `southamerica-east1-b`). Todos os comandos em `backend/bot/`.
 
+> **Status:** a VM `praticos-bot` está parada e o sync automático (`.github/workflows/bot-sync.yml`) está desligado; só roda via `workflow_dispatch`. Para religar, restaurar o bloco `push` comentado no workflow.
+
 ### Comandos Essenciais
 
 ```bash
