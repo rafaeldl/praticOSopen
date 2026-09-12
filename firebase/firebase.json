@@ -22,6 +22,12 @@
     ],
     "headers": [
       {
+        "source": "/mcp/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store, no-transform" }
+        ]
+      },
+      {
         "source": "/sitemap.xml",
         "headers": [
           { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
@@ -39,8 +45,7 @@
     "rewrites": [
       {
         "source": "/mcp/**",
-        "function": "api",
-        "region": "southamerica-east1"
+        "function": { "functionId": "api", "region": "southamerica-east1" }
       },
       {
         "source": "/_nuxt/**",

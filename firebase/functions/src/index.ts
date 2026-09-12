@@ -279,6 +279,7 @@ import botUserRoutes from './routes/bot/user.routes';
 
 // Routes - MCP Connector
 import mcpRouter from './mcp/router';
+import { redactMcpTokenFromPath } from './utils/log-redaction.utils';
 
 // Initialize Express app
 const app = express();
@@ -303,7 +304,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   const timestamp = new Date().toISOString();
   // The MCP connector token travels in the URL path (/mcp/t/{token}), so it
   // must never reach the logs verbatim.
-  const safePath = req.path.replace(/\/t\/mcp_[0-9a-f]+/, '/t/mcp_***');
+  const safePath = redactMcpTokenFromPath(req.path);
 
   // Log request
   console.log(`\n--- [${timestamp}] INCOMING REQUEST ---`);
@@ -364,7 +365,31 @@ const botLimiter = rateLimit({
   },
 });
 
-// Rate limiter for the MCP connector
+// Rate limiters for the MCP connector — two layers, mounted in front of
+// mcpRouter (see app.use('/mcp', ...) below), so both run before mcpAuth's
+// Firestore lookup.
+//
+// Keying only on the token (the original design) lets an unauthenticated
+// flood through unthrottled: every distinct — including forged, rotated —
+// token value gets its own independent 120/window budget, and combining the
+// token with req.ip into a single key wouldn't close that, since an attacker
+// varying the token on every request from one IP still produces a fresh
+// composite key each time. An IP-keyed limiter that runs first bounds total
+// request volume per source regardless of how many token values are tried,
+// which is what actually stops that flood; the token-keyed limiter stays
+// behind it to cap abuse of one specific (e.g. leaked) token independently
+// of how many other clients share its IP.
+const mcpIpLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 300,
+  message: {
+    jsonrpc: '2.0',
+    error: { code: -32000, message: 'Too many requests' },
+    id: null,
+  },
+  keyGenerator: (req: Request) => req.ip || 'unknown',
+});
+
 const mcpLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 120,
@@ -453,7 +478,7 @@ app.use('/bot/registration', botLimiter, botAuth, botRegistrationRoutes);
 app.use('/bot/user', botLimiter, botAuth, botUserRoutes);
 
 // MCP Connector (ChatGPT / Claude — token-based auth carried in the URL path)
-app.use('/mcp', mcpLimiter, mcpRouter);
+app.use('/mcp', mcpIpLimiter, mcpLimiter, mcpRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
