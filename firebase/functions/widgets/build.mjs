@@ -7,9 +7,12 @@ const OUT = '../src/mcp/widgets/bundle.ts';
 
 const widgetsRequire = createRequire(new URL('./package.json', import.meta.url));
 
-// firebase/.pnp.cjs (a leftover Yarn PnP manifest) makes esbuild use PnP
-// resolution, which cannot see widgets/node_modules. Resolve bare imports
-// with Node's algorithm instead.
+// esbuild's default resolver can pick up an unrelated Yarn PnP setup
+// elsewhere in the monorepo and use PnP resolution, which cannot see
+// widgets/node_modules. Force bare imports through Node's own resolution
+// algorithm (via widgetsRequire.resolve) instead, so this bundle always
+// resolves against widgets/node_modules regardless of what's configured
+// above it.
 const nodeResolve = {
   name: 'node-resolve-bare-imports',
   setup(build) {
