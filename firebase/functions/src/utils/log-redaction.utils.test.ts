@@ -1,4 +1,4 @@
-import { redactMcpTokenFromPath } from './log-redaction.utils';
+import { redactMcpTokenFromPath, shouldLogPayload } from './log-redaction.utils';
 
 describe('redactMcpTokenFromPath', () => {
   it('redacts a normal mcp_ token', () => {
@@ -28,5 +28,26 @@ describe('redactMcpTokenFromPath', () => {
   it('leaves unrelated paths untouched', () => {
     expect(redactMcpTokenFromPath('/bot/summary/today')).toBe('/bot/summary/today');
     expect(redactMcpTokenFromPath('/health')).toBe('/health');
+  });
+});
+
+describe('shouldLogPayload', () => {
+  it('disallows body/response logging for /mcp/t/<token>', () => {
+    expect(shouldLogPayload('/mcp/t/mcp_aabbccdd112233')).toBe(false);
+    expect(shouldLogPayload('/mcp/t/anything-at-all')).toBe(false);
+  });
+
+  it('disallows logging for the bare /mcp path too', () => {
+    expect(shouldLogPayload('/mcp')).toBe(false);
+  });
+
+  it('keeps logging enabled for normal API paths', () => {
+    expect(shouldLogPayload('/bot/summary/today')).toBe(true);
+    expect(shouldLogPayload('/v1/orders')).toBe(true);
+    expect(shouldLogPayload('/health')).toBe(true);
+  });
+
+  it('does not false-positive on a path that merely starts with the letters "mcp"', () => {
+    expect(shouldLogPayload('/mcpxyz/whatever')).toBe(true);
   });
 });

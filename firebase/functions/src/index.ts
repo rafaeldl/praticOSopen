@@ -280,7 +280,7 @@ import botUserRoutes from './routes/bot/user.routes';
 
 // Routes - MCP Connector
 import mcpRouter from './mcp/router';
-import { redactMcpTokenFromPath } from './utils/log-redaction.utils';
+import { redactMcpTokenFromPath, shouldLogPayload } from './utils/log-redaction.utils';
 
 // Initialize Express app
 const app = express();
@@ -309,6 +309,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   // The MCP connector token travels in the URL path (/mcp/t/{token}), so it
   // must never reach the logs verbatim.
   const safePath = redactMcpTokenFromPath(req.path);
+  // Every MCP tools/call body (and many tool responses) carries end-customer
+  // personal data — see shouldLogPayload()'s doc comment. Neither the
+  // request body nor the response body may be logged for /mcp/**.
+  const logPayload = shouldLogPayload(req.path);
 
   // Log request
   console.log(`\n--- [${timestamp}] INCOMING REQUEST ---`);
@@ -321,15 +325,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     'content-type': req.headers['content-type']
   }, null, 2));
   if (Object.keys(req.query).length) console.log(`QUERY:`, JSON.stringify(req.query, null, 2));
-  if (req.body && Object.keys(req.body).length) console.log(`BODY:`, JSON.stringify(req.body, null, 2));
-  
+  if (logPayload && req.body && Object.keys(req.body).length) console.log(`BODY:`, JSON.stringify(req.body, null, 2));
+
   // Capture the original send to log response
   const originalSend = res.send;
   res.send = function(body): Response {
     const duration = Date.now() - start;
     console.log(`--- [${timestamp}] RESPONSE (${duration}ms) ---`);
     console.log(`STATUS: ${res.statusCode}`);
-    console.log(`RESULT:`, typeof body === 'string' ? body : JSON.stringify(body, null, 2));
+    if (logPayload) {
+      console.log(`RESULT:`, typeof body === 'string' ? body : JSON.stringify(body, null, 2));
+    }
     console.log(`---------------------------------------\n`);
     return originalSend.call(this, body);
   };
