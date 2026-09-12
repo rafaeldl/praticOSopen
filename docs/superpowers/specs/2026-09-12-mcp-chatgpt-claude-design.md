@@ -258,7 +258,7 @@ e isso é motivo de reprovação na revisão dos diretórios.
 Nessa fase o token passa a ser por pessoa, não por empresa, o que habilita
 naturalmente a fase 4.
 
-## Card da OS (ChatGPT)
+## Card da OS (MCP Apps — ChatGPT e Claude)
 
 Um único componente, reusado por `get_order`, `create_order`,
 `update_order_status` e `add_order_item`. O conteúdo segue o que já está
@@ -269,13 +269,20 @@ Bundle React pequeno, embutido no recurso HTML.
 
 ### Regra de degradação
 
-**O texto da tool precisa ser completo sozinho.** O Claude não renderiza widget.
-Se alguma informação essencial existir apenas no card, a experiência no Claude
-quebra. O card é apresentação, nunca conteúdo exclusivo.
+**O texto da tool precisa ser completo sozinho.** O card segue o padrão aberto
+MCP Apps e renderiza em ChatGPT e Claude, mas um host sem suporte trata a tool
+como tool comum e mostra só o texto — a própria spec do MCP Apps exige fallback
+em texto. O card é apresentação, nunca conteúdo exclusivo.
+
+**Correção desta seção.** Uma versão anterior dizia que o Claude não renderiza
+widget e especificava as chaves exclusivas do ChatGPT (`text/html+skybridge`,
+`openai/widgetAccessible`, `window.openai`). As duas coisas estavam erradas: o
+Claude suporta MCP Apps, e aquelas chaves são aliases legados. O plano usa
+`text/html;profile=mcp-app`, `_meta.ui.resourceUri` e a ponte `postMessage`.
 
 ### Botões de ação
 
-O card tem botões que chamam tools via `window.openai.callTool`:
+O card tem botões que chamam tools pelo request `tools/call` da ponte MCP Apps:
 
 | Botão | Tipo | Comportamento |
 |---|---|---|
