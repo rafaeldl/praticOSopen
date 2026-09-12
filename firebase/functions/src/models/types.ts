@@ -13,8 +13,11 @@ export type DateValue = FirebaseFirestore.Timestamp | string;
  * Convert DateValue (Timestamp or ISO string) to JavaScript Date
  * Handles both Firestore Timestamp objects and ISO string formats
  */
-export function toDate(value: DateValue | null | undefined): Date | null {
+export function toDate(value: DateValue | null | undefined | Date): Date | null {
   if (!value) return null;
+  if (value instanceof Date) {
+    return value;
+  }
   if (typeof value === 'string') {
     return new Date(value);
   }
@@ -39,6 +42,9 @@ export interface ApiKeyData {
   active: boolean;
   createdAt: DateValue;
   expiresAt?: DateValue;
+  type?: 'integration' | 'mcp';
+  userId?: string;
+  lastUsedAt?: DateValue;
 }
 
 export interface ChannelLink {
@@ -459,7 +465,7 @@ export interface Subscription {
 
 export interface AuthenticatedRequest extends Request {
   auth?: {
-    type: 'apiKey' | 'bot' | 'bearer' | 'shareToken';
+    type: 'apiKey' | 'bot' | 'bearer' | 'shareToken' | 'mcp';
     companyId: string;
     userId?: string;
     permissions?: string[];
