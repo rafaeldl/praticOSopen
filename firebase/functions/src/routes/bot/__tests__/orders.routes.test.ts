@@ -15,6 +15,7 @@ jest.mock('../../../middleware/company.middleware', () => ({
 
 import * as orderService from '../../../services/order.service';
 import * as shareTokenService from '../../../services/share-token.service';
+import { Order } from '../../../models/types';
 const mockOrderService = orderService as jest.Mocked<typeof orderService>;
 const mockShareTokenService = shareTokenService as jest.Mocked<typeof shareTokenService>;
 
@@ -43,6 +44,29 @@ const fakeOrder = {
   createdAt: '2026-01-01',
   createdBy: { id: 'user1', name: 'Test User' },
 };
+
+type ListOrdersResult = Awaited<ReturnType<typeof orderService.listOrders>>;
+
+function makeOrder(number: number): Order {
+  return {
+    id: `ord${number}`,
+    number,
+    status: 'approved',
+    total: 100,
+    discount: 0,
+    paidAmount: 0,
+    done: false,
+    paid: false,
+    payment: 'unpaid',
+    company: { id: 'comp1', name: 'Test Co' },
+    createdAt: '2026-01-01',
+    createdBy: { id: 'user1', name: 'Test User' },
+  };
+}
+
+function listResult(data: Order[], total: number = data.length): ListOrdersResult {
+  return { data, total, hasMore: data.length < total };
+}
 
 // ---- Tests -----------------------------------------------------------------
 
@@ -88,6 +112,87 @@ describe('Bot Orders Routes', () => {
       expect(order.photosCount).toBe(1);
       expect(order.photos).toBeUndefined();
       expect(order.transactions).toBeUndefined();
+    });
+
+    describe('pagination', () => {
+      const listCallParams = () => mockOrderService.listOrders.mock.calls[0][1];
+
+      it('defaults to limit 10 and offset 0 when not sent (WhatsApp bot behavior)', async () => {
+        mockOrderService.listOrders.mockResolvedValue(listResult([]));
+
+        const res = await request(buildApp(router)).get('/list');
+
+        expect(res.status).toBe(200);
+        expect(mockOrderService.listOrders).toHaveBeenCalledWith(
+          'comp1',
+          expect.objectContaining({ limit: 10, offset: 0 }),
+        );
+      });
+
+      it('honors the requested limit and returns every order', async () => {
+        const orders = Array.from({ length: 30 }, (_, i) => makeOrder(i + 1));
+        mockOrderService.listOrders.mockResolvedValue(listResult(orders, 42));
+
+        const res = await request(buildApp(router)).get('/list?limit=30&status=approved');
+
+        expect(listCallParams()).toEqual({ status: 'approved', limit: 30, offset: 0 });
+        expect(res.body.data.orders).toHaveLength(30);
+        expect(res.body.data.count).toBe(42);
+      });
+
+      it('honors the requested offset', async () => {
+        mockOrderService.listOrders.mockResolvedValue(listResult([makeOrder(21)], 21));
+
+        await request(buildApp(router)).get('/list?limit=20&offset=20');
+
+        expect(listCallParams()).toEqual(expect.objectContaining({ limit: 20, offset: 20 }));
+      });
+
+      it('caps limit at 50', async () => {
+        mockOrderService.listOrders.mockResolvedValue(listResult([]));
+
+        await request(buildApp(router)).get('/list?limit=100000');
+
+        expect(listCallParams().limit).toBe(50);
+      });
+
+      it('caps offset at 1000', async () => {
+        mockOrderService.listOrders.mockResolvedValue(listResult([]));
+
+        await request(buildApp(router)).get('/list?offset=100000');
+
+        expect(listCallParams().offset).toBe(1000);
+      });
+
+      it.each(['abc', '0', '-5', '1.5', '10abc', ''])(
+        'falls back to the default limit for invalid value %p',
+        async (value) => {
+          mockOrderService.listOrders.mockResolvedValue(listResult([]));
+
+          await request(buildApp(router)).get(`/list?limit=${encodeURIComponent(value)}`);
+
+          expect(listCallParams().limit).toBe(10);
+        },
+      );
+
+      it('falls back to the default limit when limit is repeated', async () => {
+        mockOrderService.listOrders.mockResolvedValue(listResult([]));
+
+        await request(buildApp(router)).get('/list?limit=30&limit=40');
+
+        expect(listCallParams().limit).toBe(10);
+      });
+
+      it.each(['abc', '-1', '2.5'])(
+        'falls back to offset 0 for invalid value %p',
+        async (value) => {
+          mockOrderService.listOrders.mockResolvedValue(listResult([]));
+
+          await request(buildApp(router)).get(`/list?offset=${encodeURIComponent(value)}`);
+
+          expect(listCallParams().offset).toBe(0);
+        },
+      );
     });
   });
 

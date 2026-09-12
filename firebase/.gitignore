@@ -64,3 +64,8 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+# Yarn PnP/Berry (o projeto usa npm; evita reintroduzir manifesto PnP)
+.pnp.*
+.yarn/
+yarn.lock

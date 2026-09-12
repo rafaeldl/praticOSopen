@@ -20,9 +20,28 @@ const validTransitions: Record<string, string[]> = {
   canceled: [],
 };
 
+// Default stays at 10: the WhatsApp bot never sends `limit` and its token budget
+// was sized for 10 orders. MCP clients always send an explicit limit.
+const LIST_DEFAULT_LIMIT = 10;
+const LIST_MAX_LIMIT = 50;
+// paginatedQuery reads `offset` docs to find the cursor, so it must be bounded too
+const LIST_MAX_OFFSET = 1000;
+
 /**
- * GET /api/bot/orders/list
- * List orders for the bot with formatted output
+ * Parse a query param as a bounded integer. Anything that is not a plain
+ * integer >= min (non-numeric, decimal, repeated param) falls back to `fallback`.
+ */
+function parseBoundedInt(value: unknown, fallback: number, min: number, max: number): number {
+  if (typeof value !== 'string' || !/^\d+$/.test(value)) return fallback;
+  const parsed = Number(value);
+  if (parsed < min) return fallback;
+  return Math.min(parsed, max);
+}
+
+/**
+ * GET /api/bot/orders/list?status=&limit=&offset=
+ * List orders for the bot with formatted output.
+ * limit: 1-50 (default 10); offset: 0-1000 (default 0). Invalid values use the default.
  */
 router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -37,11 +56,13 @@ router.get('/list', async (req: AuthenticatedRequest, res: Response) => {
     }
 
     const status = req.query.status as OrderStatus;
+    const limit = parseBoundedInt(req.query.limit, LIST_DEFAULT_LIMIT, 1, LIST_MAX_LIMIT);
+    const offset = parseBoundedInt(req.query.offset, 0, 0, LIST_MAX_OFFSET);
 
     const result = await orderService.listOrders(companyId, {
       status,
-      limit: 10,
-      offset: 0,
+      limit,
+      offset,
     });
 
     // Allowlist: only fields the bot needs — saves ~75% tokens vs spreading everything

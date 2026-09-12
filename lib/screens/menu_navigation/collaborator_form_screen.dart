@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Material, MaterialType;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/collaborator_store.dart';
 import 'package:praticos/models/invite.dart';
@@ -83,15 +84,18 @@ class _CollaboratorFormScreenState extends State<CollaboratorFormScreen> {
             context.l10n.collaboratorAdded,
             context.l10n.collaboratorAddedSuccess,
           );
-        } else if (inviteToken != null && phone.isNotEmpty) {
-          // Invite created with phone → show WhatsApp success dialog
+        } else if (kWhatsAppBotEnabled &&
+            inviteToken != null &&
+            phone.isNotEmpty) {
+          // Invite created with phone → show WhatsApp bot success dialog
           await _showWhatsAppInviteSuccess(
             inviteToken,
             name.isNotEmpty ? name : phone,
             phone,
           );
         } else {
-          // Invite created with email only → show share sheet
+          // Invite created without the bot → share sheet (WhatsApp goes to
+          // the typed phone when there is one). See [kWhatsAppBotEnabled].
           if (inviteToken != null) {
             await _showInviteShareSheet(inviteToken);
           }
