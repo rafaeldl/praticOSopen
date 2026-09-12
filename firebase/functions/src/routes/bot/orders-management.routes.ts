@@ -109,7 +109,15 @@ router.post('/full', requireLinked, async (req: AuthenticatedRequest, res: Respo
     // that OS. Protects against the WhatsApp multi-photo burst race where the
     // 2nd agent turn doesn't yet see "OS ativa" in memory and would otherwise
     // create a duplicate.
-    if (!data.id && createdBy?.id) {
+    //
+    // MCP callers are excluded: an MCP client issues one call per intended
+    // order (there is no "OS ativa" burst to dedup), and this tool's contract
+    // never exposes `id` precisely so it can never silently upsert (see the
+    // comment in mcp/tools/write.ts). Applying the bot's recency heuristic
+    // here would reintroduce that same silent overwrite through the back
+    // door: "open two orders for the same customer within a minute" would
+    // collapse into one.
+    if (!data.id && createdBy?.id && req.auth?.type !== 'mcp') {
       const recent = await orderService.findRecentOrderByCustomer(
         companyId,
         data.customerId,

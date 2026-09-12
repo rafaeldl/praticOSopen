@@ -251,6 +251,37 @@ describe('write tools routing (real callRoute, real routers)', () => {
     expect(result.content[0].text).toContain('Zylphoria Nonstandard');
   });
 
+  it('create_order always creates a new order, even when a recent order exists for the customer (no MCP upsert)', async () => {
+    // findRecentOrderByCustomer is the bot's WhatsApp-burst dedup heuristic.
+    // If create_order ever let it fire, an MCP client opening two orders for
+    // the same customer within ~60s would have the second call silently
+    // overwrite the first (upsert path) instead of creating a new order.
+    // Every other test in this file mocks findRecentOrderByCustomer to
+    // return null, which would hide this regression completely.
+    mockOrderService.findRecentOrderByCustomer.mockResolvedValue({
+      id: 'order-recent-999',
+      number: 9999,
+      status: 'quote',
+    } as any);
+    mockOrderService.getOrderByNumber.mockResolvedValue(orderForCreate);
+
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const result = await server.tools.get('create_order')!.handler({
+      customerId: 'cust-9987',
+      services: [{ serviceId: 'srv-4471' }],
+    });
+
+    assertRouteResolved(result);
+    // The create path ran (new order #6173), not the upsert path onto the
+    // "recent" order (#9999).
+    expect(result.content[0].text).toContain('#6173');
+    expect(result.content[0].text).not.toContain('#9999');
+    expect(mockOrderService.createOrder).toHaveBeenCalled();
+    expect(mockOrderService.getOrder).not.toHaveBeenCalled();
+  });
+
   it('update_order_status resolves via orders.routes PATCH /:number/status (NOT orders-management)', async () => {
     mockOrderService.getOrderByNumber.mockResolvedValue(orderForStatus);
     const server = fakeServer();

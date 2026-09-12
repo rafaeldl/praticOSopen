@@ -128,6 +128,12 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
       // `id` field: the route treats a body with `id` as an upsert onto an
       // existing order, which a tool named "create" must not silently do.
       // update_order already covers editing.
+      //
+      // The route also has a bot-only recency lookup (findRecentOrderByCustomer)
+      // that can set `id` itself even without one in the body, to dedup
+      // WhatsApp photo bursts. That lookup is gated on `req.auth?.type !==
+      // 'mcp'`, so it never fires for this call — create_order always takes
+      // the create path, never the upsert path.
       const result = await callRoute(botOrdersManagementRoutes, {
         method: 'POST',
         path: '/full',
