@@ -801,6 +801,7 @@ Antes de finalizar uma feature, verificar:
 ## Documentação Adicional
 
 - `docs/AUTO_VERSIONING.md` - Versionamento automático e Conventional Commits
+- `docs/APP_TRACKING_TRANSPARENCY.md` - Permissão de rastreamento no iOS (ATT) e exigências da App Review
 - `docs/I18N.md` - Sistema de internacionalização completo
 - `docs/SEGMENT_CUSTOM_FIELDS.md` - Campos customizados por segmento
 - `docs/FIELD_VALIDATION_MASKS.md` - Máscaras e validações por segmento/país
