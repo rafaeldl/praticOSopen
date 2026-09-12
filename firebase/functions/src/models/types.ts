@@ -39,6 +39,9 @@ export interface ApiKeyData {
   active: boolean;
   createdAt: DateValue;
   expiresAt?: DateValue;
+  type?: 'integration' | 'mcp';
+  userId?: string;
+  lastUsedAt?: DateValue;
 }
 
 export interface ChannelLink {
@@ -459,7 +462,7 @@ export interface Subscription {
 
 export interface AuthenticatedRequest extends Request {
   auth?: {
-    type: 'apiKey' | 'bot' | 'bearer' | 'shareToken';
+    type: 'apiKey' | 'bot' | 'bearer' | 'shareToken' | 'mcp';
     companyId: string;
     userId?: string;
     permissions?: string[];

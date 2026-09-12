@@ -6,6 +6,59 @@
 import * as shareTokenService from '../services/share-token.service';
 import { getFormatContext } from './format.utils';
 
+export interface OrderDetailService {
+  name: string;
+  value: number;
+  deviceId: string | null;
+}
+
+export interface OrderDetailProduct {
+  name: string;
+  quantity: number;
+  value: number;
+  deviceId: string | null;
+}
+
+export interface OrderDetailDevice {
+  name: string;
+  serial?: string;
+}
+
+export interface OrderDetailCustomer {
+  name: string;
+  phone?: string;
+}
+
+export interface OrderDetail {
+  number: number;
+  status: string;
+  customer: OrderDetailCustomer | null;
+  device: OrderDetailDevice | null;
+  devices: OrderDetailDevice[];
+  deviceCount: number;
+  services?: OrderDetailService[];
+  products?: OrderDetailProduct[];
+  total: number;
+  discount?: number;
+  paidAmount?: number;
+  dueDate?: string;
+  scheduledDate?: string;
+  createdAt: string;
+  rating?: number;
+  photosCount: number;
+  mainPhotoUrl: string | null;
+  shareUrl: string | null;
+}
+
+export interface OrderDetailResponse {
+  order: OrderDetail;
+  formatContext: {
+    country: string;
+    locale: string;
+    currency: string;
+  };
+}
+
 /**
  * Build a full order detail payload (same format as GET /details).
  * Used by all mutation endpoints so the bot LLM can render the card
@@ -16,7 +69,7 @@ export async function buildOrderDetail(
   companyId: string,
   companyCountry?: string,
   createdBy?: any
-) {
+): Promise<OrderDetailResponse> {
   const photosCount = order.photos?.length || 0;
   const mainPhotoUrl = photosCount > 0
     ? `/bot/orders/${order.number}/photos/${order.photos![0].id}`

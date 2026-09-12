@@ -249,6 +249,7 @@ import companyRoutes from './routes/v1/company.routes';
 import analyticsRoutes from './routes/v1/analytics.routes';
 import shareRoutes from './routes/v1/share.routes';
 import appInviteRoutes from './routes/v1/invite.routes';
+import integrationsRoutes from './routes/v1/integrations.routes';
 
 // Routes - Public (no authentication required)
 import publicOrdersRoutes from './routes/public/orders.routes';
@@ -277,6 +278,10 @@ import botCommentsRoutes from './routes/bot/comments.routes';
 import botRegistrationRoutes from './routes/bot/registration.routes';
 import botUserRoutes from './routes/bot/user.routes';
 
+// Routes - MCP Connector
+import mcpRouter from './mcp/router';
+import { redactMcpTokenFromPath, shouldLogPayload } from './utils/log-redaction.utils';
+
 // Initialize Express app
 const app = express();
 
@@ -301,10 +306,17 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   const timestamp = new Date().toISOString();
-  
+  // The MCP connector token travels in the URL path (/mcp/t/{token}), so it
+  // must never reach the logs verbatim.
+  const safePath = redactMcpTokenFromPath(req.path);
+  // Every MCP tools/call body (and many tool responses) carries end-customer
+  // personal data — see shouldLogPayload()'s doc comment. Neither the
+  // request body nor the response body may be logged for /mcp/**.
+  const logPayload = shouldLogPayload(req.path);
+
   // Log request
   console.log(`\n--- [${timestamp}] INCOMING REQUEST ---`);
-  console.log(`${req.method} ${req.path}`);
+  console.log(`${req.method} ${safePath}`);
   console.log(`HEADERS:`, JSON.stringify({
     'x-api-key': req.headers['x-api-key'],
     'x-api-secret': req.headers['x-api-secret'],
@@ -313,15 +325,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     'content-type': req.headers['content-type']
   }, null, 2));
   if (Object.keys(req.query).length) console.log(`QUERY:`, JSON.stringify(req.query, null, 2));
-  if (req.body && Object.keys(req.body).length) console.log(`BODY:`, JSON.stringify(req.body, null, 2));
-  
+  if (logPayload && req.body && Object.keys(req.body).length) console.log(`BODY:`, JSON.stringify(req.body, null, 2));
+
   // Capture the original send to log response
   const originalSend = res.send;
   res.send = function(body): Response {
     const duration = Date.now() - start;
     console.log(`--- [${timestamp}] RESPONSE (${duration}ms) ---`);
     console.log(`STATUS: ${res.statusCode}`);
-    console.log(`RESULT:`, typeof body === 'string' ? body : JSON.stringify(body, null, 2));
+    if (logPayload) {
+      console.log(`RESULT:`, typeof body === 'string' ? body : JSON.stringify(body, null, 2));
+    }
     console.log(`---------------------------------------\n`);
     return originalSend.call(this, body);
   };
@@ -358,6 +372,45 @@ const botLimiter = rateLimit({
   },
   keyGenerator: (req: Request) => {
     return req.headers['x-whatsapp-number'] as string || req.ip || 'unknown';
+  },
+});
+
+// Rate limiters for the MCP connector — two layers, mounted in front of
+// mcpRouter (see app.use('/mcp', ...) below), so both run before mcpAuth's
+// Firestore lookup.
+//
+// Keying only on the token (the original design) lets an unauthenticated
+// flood through unthrottled: every distinct — including forged, rotated —
+// token value gets its own independent 120/window budget, and combining the
+// token with req.ip into a single key wouldn't close that, since an attacker
+// varying the token on every request from one IP still produces a fresh
+// composite key each time. An IP-keyed limiter that runs first bounds total
+// request volume per source regardless of how many token values are tried,
+// which is what actually stops that flood; the token-keyed limiter stays
+// behind it to cap abuse of one specific (e.g. leaked) token independently
+// of how many other clients share its IP.
+const mcpIpLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 300,
+  message: {
+    jsonrpc: '2.0',
+    error: { code: -32000, message: 'Too many requests' },
+    id: null,
+  },
+  keyGenerator: (req: Request) => req.ip || 'unknown',
+});
+
+const mcpLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  message: {
+    jsonrpc: '2.0',
+    error: { code: -32000, message: 'Too many requests' },
+    id: null,
+  },
+  keyGenerator: (req: Request) => {
+    const match = req.path.match(/^\/t\/([^/]+)/);
+    return match ? match[1] : req.ip || 'unknown';
   },
 });
 
@@ -409,6 +462,7 @@ app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, sha
 app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customersRoutes);
 app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
 app.use('/v1/app/invites', apiCoreLimiter, bearerAuth, resolveCompanyContext, appInviteRoutes);
+app.use('/v1/app/integrations', apiCoreLimiter, bearerAuth, resolveCompanyContext, integrationsRoutes);
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
 app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);
@@ -432,6 +486,9 @@ app.use('/bot/search', botLimiter, botAuth, botUnifiedSearchRoutes);
 app.use('/bot', botLimiter, botAuth, botEntitiesRoutes);
 app.use('/bot/registration', botLimiter, botAuth, botRegistrationRoutes);
 app.use('/bot/user', botLimiter, botAuth, botUserRoutes);
+
+// MCP Connector (ChatGPT / Claude — token-based auth carried in the URL path)
+app.use('/mcp', mcpIpLimiter, mcpLimiter, mcpRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
