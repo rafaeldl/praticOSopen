@@ -2,13 +2,16 @@
 
 name: Sync Bot Workspace
 
+# Sync automatico desligado: a VM praticos-bot foi parada e o `make sync`
+# falha sem ela. Para religar, restaurar o gatilho push abaixo:
+#
+#   push:
+#     branches:
+#       - master
+#     paths:
+#       - 'backend/bot/workspace/**'
+#       - 'backend/bot/clawdbot.prod.json'
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'backend/bot/workspace/**'
-      - 'backend/bot/clawdbot.prod.json'
   workflow_dispatch:
 
 jobs:
