@@ -42,6 +42,34 @@ export function onToolResult(listener: (result: any) => void): void {
   toolResultListeners.push(listener);
 }
 
+let lastSize: { width: number; height: number } | undefined;
+
+/**
+ * Reports the rendered size to the host (spec ext-apps 2026-01-26, l.718 —
+ * hosts with flexible dimensions MUST resize the iframe from this
+ * notification; l.1204-1217 — the View SHOULD send it when content size
+ * changes, via ResizeObserver). Only sent once `initialized` has gone out,
+ * and only when width or height actually changed, so a layout pass that
+ * doesn't move the box doesn't spam the host with no-op notifications.
+ */
+function observeSize(): void {
+  if (typeof ResizeObserver === 'undefined') return;
+
+  const observer = new ResizeObserver((entries) => {
+    const entry = entries[0];
+    if (!entry) return;
+
+    const width = Math.round(entry.contentRect.width);
+    const height = Math.round(entry.contentRect.height);
+    if (lastSize && lastSize.width === width && lastSize.height === height) return;
+
+    lastSize = { width, height };
+    send({ method: 'ui/notifications/size-changed', params: { width, height } });
+  });
+
+  observer.observe(document.documentElement);
+}
+
 export async function connect(): Promise<void> {
   await request('ui/initialize', {
     protocolVersion: PROTOCOL_VERSION,
@@ -49,6 +77,7 @@ export async function connect(): Promise<void> {
     appCapabilities: { availableDisplayModes: ['inline'] },
   });
   send({ method: 'ui/notifications/initialized' });
+  observeSize();
 }
 
 /** Resolves with the tool's CallToolResult; rejects on a JSON-RPC error. */

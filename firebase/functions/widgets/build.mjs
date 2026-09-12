@@ -1,8 +1,21 @@
 import { build } from 'esbuild';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
+import { createRequire } from 'module';
 
 const OUT = '../src/mcp/widgets/bundle.ts';
+
+const widgetsRequire = createRequire(new URL('./package.json', import.meta.url));
+
+// firebase/.pnp.cjs (a leftover Yarn PnP manifest) makes esbuild use PnP
+// resolution, which cannot see widgets/node_modules. Resolve bare imports
+// with Node's algorithm instead.
+const nodeResolve = {
+  name: 'node-resolve-bare-imports',
+  setup(build) {
+    build.onResolve({ filter: /^[^./]/ }, (args) => ({ path: widgetsRequire.resolve(args.path) }));
+  },
+};
 
 await build({
   entryPoints: ['src/order-card.tsx'],
@@ -12,6 +25,7 @@ await build({
   target: 'es2020',
   outfile: 'dist/order-card.js',
   define: { 'process.env.NODE_ENV': '"production"' },
+  plugins: [nodeResolve],
 });
 
 const js = readFileSync('dist/order-card.js', 'utf8');
