@@ -38,6 +38,11 @@
     ],
     "rewrites": [
       {
+        "source": "/mcp/**",
+        "function": "api",
+        "region": "southamerica-east1"
+      },
+      {
         "source": "/_nuxt/**",
         "run": {
           "serviceId": "praticos-web",

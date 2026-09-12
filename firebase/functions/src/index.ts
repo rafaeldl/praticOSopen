@@ -277,6 +277,9 @@ import botCommentsRoutes from './routes/bot/comments.routes';
 import botRegistrationRoutes from './routes/bot/registration.routes';
 import botUserRoutes from './routes/bot/user.routes';
 
+// Routes - MCP Connector
+import mcpRouter from './mcp/router';
+
 // Initialize Express app
 const app = express();
 
@@ -298,10 +301,13 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   const timestamp = new Date().toISOString();
-  
+  // The MCP connector token travels in the URL path (/mcp/t/{token}), so it
+  // must never reach the logs verbatim.
+  const safePath = req.path.replace(/\/t\/mcp_[0-9a-f]+/, '/t/mcp_***');
+
   // Log request
   console.log(`\n--- [${timestamp}] INCOMING REQUEST ---`);
-  console.log(`${req.method} ${req.path}`);
+  console.log(`${req.method} ${safePath}`);
   console.log(`HEADERS:`, JSON.stringify({
     'x-api-key': req.headers['x-api-key'],
     'x-api-secret': req.headers['x-api-secret'],
@@ -355,6 +361,21 @@ const botLimiter = rateLimit({
   },
   keyGenerator: (req: Request) => {
     return req.headers['x-whatsapp-number'] as string || req.ip || 'unknown';
+  },
+});
+
+// Rate limiter for the MCP connector
+const mcpLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  message: {
+    jsonrpc: '2.0',
+    error: { code: -32000, message: 'Too many requests' },
+    id: null,
+  },
+  keyGenerator: (req: Request) => {
+    const match = req.path.match(/^\/t\/([^/]+)/);
+    return match ? match[1] : req.ip || 'unknown';
   },
 });
 
@@ -430,6 +451,9 @@ app.use('/bot/search', botLimiter, botAuth, botUnifiedSearchRoutes);
 app.use('/bot', botLimiter, botAuth, botEntitiesRoutes);
 app.use('/bot/registration', botLimiter, botAuth, botRegistrationRoutes);
 app.use('/bot/user', botLimiter, botAuth, botUserRoutes);
+
+// MCP Connector (ChatGPT / Claude — token-based auth carried in the URL path)
+app.use('/mcp', mcpLimiter, mcpRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
