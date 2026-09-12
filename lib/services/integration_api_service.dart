@@ -7,7 +7,8 @@ import 'package:praticos/models/integration_token.dart';
 
 class IntegrationApiException implements Exception {
   final String message;
-  IntegrationApiException(this.message);
+  final String? code;
+  IntegrationApiException(this.message, {this.code});
 
   @override
   String toString() => message;
@@ -69,7 +70,7 @@ class IntegrationApiService {
   Future<Map<String, String>> _headers() async {
     final token = await _tokenProvider();
     if (token == null) {
-      throw IntegrationApiException('User not authenticated');
+      throw IntegrationApiException('User not authenticated', code: 'UNAUTHENTICATED');
     }
     return {
       'Authorization': 'Bearer $token',
@@ -81,14 +82,16 @@ class IntegrationApiService {
     if (response.statusCode >= 200 && response.statusCode < 300) return;
 
     String message = 'Request failed (${response.statusCode})';
+    String? code;
     try {
       final decoded = jsonDecode(response.body) as Map<String, dynamic>;
       final error = decoded['error'] as Map<String, dynamic>?;
       if (error?['message'] is String) message = error!['message'] as String;
+      if (error?['code'] is String) code = error!['code'] as String;
     } catch (_) {
-      // keep the default message
+      // keep the default message and leave code as null
     }
-    throw IntegrationApiException(message);
+    throw IntegrationApiException(message, code: code);
   }
 
   Future<List<IntegrationToken>> list() async {
