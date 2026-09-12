@@ -236,6 +236,7 @@ export const blockSuspiciousSignups = beforeUserCreated(
 // Middleware
 import { apiKeyAuth, botAuth, bearerAuth } from './middleware/auth.middleware';
 import { resolveCompanyContext } from './middleware/company.middleware';
+import { configureTrustProxy } from './utils/trust-proxy.utils';
 
 // Routes - API Core v1
 import authRoutes from './routes/v1/auth.routes';
@@ -278,6 +279,9 @@ import botUserRoutes from './routes/bot/user.routes';
 
 // Initialize Express app
 const app = express();
+
+// Make req.ip the real client IP (rate limiter keys) — see trust-proxy.utils.ts
+configureTrustProxy(app);
 
 // CORS configuration
 app.use(cors({
