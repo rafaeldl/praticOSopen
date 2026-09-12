@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show ThemeMode, Material, MaterialType;
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/global.dart';
 import 'package:praticos/mobx/auth_store.dart';
 import 'package:praticos/mobx/locale_store.dart';
@@ -35,7 +36,9 @@ class _SettingsState extends State<Settings> {
   @override
   void initState() {
     super.initState();
-    _whatsappStore.loadStatus();
+    if (kWhatsAppBotEnabled) {
+      _whatsappStore.loadStatus();
+    }
   }
 
   @override
@@ -437,51 +440,53 @@ class _SettingsState extends State<Settings> {
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.account.toUpperCase()),
                 children: [
-                  // WhatsApp link
-                  Observer(
-                    builder: (_) {
-                      final isLinked = _whatsappStore.isLinked;
-                      final isLoading = _whatsappStore.isLoading;
+                  if (kWhatsAppBotEnabled) ...[
+                    // WhatsApp link
+                    Observer(
+                      builder: (_) {
+                        final isLinked = _whatsappStore.isLinked;
+                        final isLoading = _whatsappStore.isLoading;
 
-                      return CupertinoListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: isLinked
-                                ? CupertinoColors.systemGreen
-                                : CupertinoColors.systemGrey,
-                            borderRadius: BorderRadius.circular(6),
+                        return CupertinoListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: isLinked
+                                  ? CupertinoColors.systemGreen
+                                  : CupertinoColors.systemGrey,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.chat_bubble_2_fill,
+                              color: CupertinoColors.white,
+                              size: 20,
+                            ),
                           ),
-                          child: const Icon(
-                            CupertinoIcons.chat_bubble_2_fill,
-                            color: CupertinoColors.white,
-                            size: 20,
+                          title: const Text('WhatsApp'),
+                          subtitle: Text(
+                            isLoading
+                                ? context.l10n.loading
+                                : isLinked
+                                    ? _whatsappStore.linkedNumber ?? context.l10n.linked
+                                    : context.l10n.notLinked,
                           ),
-                        ),
-                        title: const Text('WhatsApp'),
-                        subtitle: Text(
-                          isLoading
-                              ? context.l10n.loading
+                          trailing: isLoading
+                              ? const CupertinoActivityIndicator()
                               : isLinked
-                                  ? _whatsappStore.linkedNumber ?? context.l10n.linked
-                                  : context.l10n.notLinked,
-                        ),
-                        trailing: isLoading
-                            ? const CupertinoActivityIndicator()
-                            : isLinked
-                                ? Icon(
-                                    CupertinoIcons.checkmark_circle_fill,
-                                    color: CupertinoColors.systemGreen.resolveFrom(context),
-                                  )
-                                : const CupertinoListTileChevron(),
-                        onTap: isLoading
-                            ? null
-                            : isLinked
-                                ? () => _showUnlinkWhatsAppDialog(context)
-                                : () => _showLinkWhatsAppSheet(context),
-                      );
-                    },
-                  ),
+                                  ? Icon(
+                                      CupertinoIcons.checkmark_circle_fill,
+                                      color: CupertinoColors.systemGreen.resolveFrom(context),
+                                    )
+                                  : const CupertinoListTileChevron(),
+                          onTap: isLoading
+                              ? null
+                              : isLinked
+                                  ? () => _showUnlinkWhatsAppDialog(context)
+                                  : () => _showLinkWhatsAppSheet(context),
+                        );
+                      },
+                    ),
+                  ],
                   // Accept Invite - join another company
                   CupertinoListTile(
                     leading: Container(

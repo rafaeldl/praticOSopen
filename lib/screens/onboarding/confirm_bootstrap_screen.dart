@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/models/company.dart';
 import 'package:praticos/mobx/auth_store.dart';
@@ -258,13 +259,18 @@ class _ConfirmBootstrapScreenState extends State<ConfirmBootstrapScreen> {
 
         AnalyticsService.instance.logTutorialComplete();
 
-        // Navigate to WhatsApp onboarding screen
-        Navigator.of(context).pushAndRemoveUntil(
-          CupertinoPageRoute(
-            builder: (_) => const WhatsAppOnboardingScreen(),
-          ),
-          (route) => false,
-        );
+        if (kWhatsAppBotEnabled) {
+          // Navigate to WhatsApp onboarding screen
+          Navigator.of(context).pushAndRemoveUntil(
+            CupertinoPageRoute(
+              builder: (_) => const WhatsAppOnboardingScreen(),
+            ),
+            (route) => false,
+          );
+        } else {
+          // Bot off: go straight to the home screen, skipping the link step
+          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        }
       }
     } catch (e, stack) {
       debugPrint('❌ Error in _saveCompany: $e');
