@@ -5,6 +5,7 @@ import { z } from 'zod/v3';
 import { McpToolContext } from '../types';
 import { callRoute } from '../bridge';
 import { formatOrder } from '../format/order';
+import { orderCardMeta, withOrderCard } from '../widgets/order-card';
 
 import botOrdersRoutes from '../../routes/bot/orders.routes';
 import botOrdersManagementRoutes from '../../routes/bot/orders-management.routes';
@@ -42,7 +43,8 @@ function fail(body: any) {
 // In every case `data.order` is the OrderDetail — there is no other shape to
 // guess between, so the unwrap below is exact, not a fallback chain.
 function orderResult(body: any) {
-  return ok(formatOrder(body.data.order));
+  const order = body.data.order;
+  return withOrderCard(order, formatOrder(order));
 }
 
 // The audit log must never carry end-customer personal data (phone, email,
@@ -117,6 +119,7 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
         status: z.enum(['quote', 'approved', 'progress']).optional(),
       },
       annotations: { readOnlyHint: false, destructiveHint: false },
+      _meta: orderCardMeta(),
     },
     async (args: Record<string, unknown>) => {
       auditWrite(ctx, 'create_order', args);
@@ -148,6 +151,7 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
         status: z.enum(['approved', 'progress', 'done', 'canceled']),
       },
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+      _meta: orderCardMeta(),
     },
     async (args: { orderNumber: number; status: string }) => {
       auditWrite(ctx, 'update_order_status', args);
@@ -180,6 +184,7 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
         assignedTo: z.string().nullable().optional(),
       },
       annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true },
+      _meta: orderCardMeta(),
     },
     async (args: Record<string, unknown>) => {
       auditWrite(ctx, 'update_order', args);
@@ -213,6 +218,7 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
         deviceId: z.string().optional(),
       },
       annotations: { readOnlyHint: false, destructiveHint: false },
+      _meta: orderCardMeta(),
     },
     async (args: {
       orderNumber: number;

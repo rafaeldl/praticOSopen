@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { AuthenticatedRequest } from '../models/types';
 import { registerReadTools } from './tools/read';
 import { registerWriteTools } from './tools/write';
+import { registerOrderCardResource } from './widgets/order-card';
 
 const INSTRUCTIONS = `PraticOS service order management for a single company.
 
@@ -21,6 +22,7 @@ export function buildMcpServer(req: AuthenticatedRequest): McpServer {
 
   registerReadTools(server, { req });
   registerWriteTools(server, { req });
+  registerOrderCardResource(server);
 
   return server;
 }

@@ -26,3 +26,6 @@ npm-debug.log*
 .firebase/
 firebase-debug.log
 ui-debug.log
+
+# Widget build intermediate (bundle.ts is the committed artifact)
+widgets/dist/

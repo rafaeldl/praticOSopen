@@ -10,6 +10,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpToolContext } from '../types';
 import { callRoute } from '../bridge';
 import { formatOrder, formatOrderList, truncate } from '../format/order';
+import { orderCardMeta, withOrderCard } from '../widgets/order-card';
 import {
   formatSummary,
   formatRevenue,
@@ -130,6 +131,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
         'Returns the full detail of one service order by its number: customer, devices, services, products, total and the customer share link.',
       inputSchema: { orderNumber: z.number() },
       annotations: { readOnlyHint: true },
+      _meta: orderCardMeta(),
     },
     async (args: { orderNumber: number }) => {
       // GET routes/bot/orders-management.routes -> /:number/details
@@ -142,7 +144,8 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       });
 
       if (result.status >= 400) return fail(result.body);
-      return ok(formatOrder(result.body.data.order));
+      const order = result.body.data.order;
+      return withOrderCard(order, formatOrder(order));
     },
   );
 
