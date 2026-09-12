@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' show Material, MaterialType, Divider, Lin
 
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:praticos/config/feature_flags.dart';
 import 'package:praticos/mobx/notification_store.dart';
 import 'package:praticos/mobx/order_store.dart';
 import 'package:praticos/mobx/whatsapp_link_store.dart';
@@ -98,7 +99,7 @@ class _HomeState extends State<Home> {
     }
 
     // Load WhatsApp status once for navbar button and banner
-    if (!_whatsappStatusLoaded) {
+    if (kWhatsAppBotEnabled && !_whatsappStatusLoaded) {
       _whatsappStatusLoaded = true;
       _whatsappStore.loadStatus().then((_) {
         _bannerStore.updateLinkStatus(_whatsappStore.isLinked);
@@ -240,57 +241,7 @@ class _HomeState extends State<Home> {
         identifier: 'home_title',
         child: Text(config.serviceOrderPlural),
       ),
-      leading: Observer(
-        builder: (_) {
-          final isLinked = _whatsappStore.isLinked;
-          return Semantics(
-            identifier: 'whatsapp_button',
-            button: true,
-            label: 'WhatsApp',
-            child: CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  FaIcon(
-                    FontAwesomeIcons.whatsapp,
-                    size: 24,
-                    color: isLinked
-                        ? const Color(0xFF25D366)
-                        : CupertinoColors.secondaryLabel.resolveFrom(context),
-                  ),
-                  if (!isLinked)
-                    Positioned(
-                      right: -4,
-                      top: -4,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: CupertinoColors.systemRed,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              onPressed: () {
-                HapticFeedback.lightImpact();
-                if (isLinked) {
-                  final uri = Uri.parse('https://wa.me/${_whatsappStore.botNumber}');
-                  launchUrl(uri, mode: LaunchMode.externalApplication);
-                } else {
-                  LinkWhatsAppSheet.show(context, _whatsappStore).then((_) {
-                    _whatsappStore.loadStatus().then((_) {
-                      _bannerStore.updateLinkStatus(_whatsappStore.isLinked);
-                    });
-                  });
-                }
-              },
-            ),
-          );
-        },
-      ),
+      leading: _buildWhatsAppNavButton(context),
       trailing: Observer(
         builder: (_) => Row(
           mainAxisSize: MainAxisSize.min,
@@ -540,7 +491,67 @@ class _HomeState extends State<Home> {
     }
   }
 
+  /// WhatsApp bot shortcut in the navigation bar. Hidden while the bot is off —
+  /// the MCP connector covers this role. See [kWhatsAppBotEnabled].
+  Widget? _buildWhatsAppNavButton(BuildContext context) {
+    if (!kWhatsAppBotEnabled) return null;
+    return Observer(
+      builder: (_) {
+        final isLinked = _whatsappStore.isLinked;
+        return Semantics(
+          identifier: 'whatsapp_button',
+          button: true,
+          label: 'WhatsApp',
+          child: CupertinoButton(
+            padding: EdgeInsets.zero,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                FaIcon(
+                  FontAwesomeIcons.whatsapp,
+                  size: 24,
+                  color: isLinked
+                      ? const Color(0xFF25D366)
+                      : CupertinoColors.secondaryLabel.resolveFrom(context),
+                ),
+                if (!isLinked)
+                  Positioned(
+                    right: -4,
+                    top: -4,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: CupertinoColors.systemRed,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              if (isLinked) {
+                final uri = Uri.parse('https://wa.me/${_whatsappStore.botNumber}');
+                launchUrl(uri, mode: LaunchMode.externalApplication);
+              } else {
+                LinkWhatsAppSheet.show(context, _whatsappStore).then((_) {
+                  _whatsappStore.loadStatus().then((_) {
+                    _bannerStore.updateLinkStatus(_whatsappStore.isLinked);
+                  });
+                });
+              }
+            },
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildWhatsAppBanner() {
+    if (!kWhatsAppBotEnabled) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
     return SliverToBoxAdapter(
       child: Observer(
         builder: (_) {
