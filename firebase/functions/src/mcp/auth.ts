@@ -1,12 +1,15 @@
 import { Response, NextFunction } from 'express';
 import { db } from '../services/firestore.service';
-import { AuthenticatedRequest, ApiKeyData, toDate } from '../models/types';
+import { AuthenticatedRequest, ApiKeyData, toDate, CompanyAggr } from '../models/types';
+import { normalizeRole, getRolePermissions } from '../middleware/auth.middleware';
 
 /**
  * Resolves the MCP token carried in the request path into an auth context.
  *
  * The token travels in the URL because neither ChatGPT nor claude.ai allow a
  * custom header on a connector. This is a phase 1 bridge, replaced by OAuth.
+ *
+ * Populates both req.auth and req.userContext for use by downstream handlers.
  */
 export async function mcpAuth(
   req: AuthenticatedRequest,
@@ -31,7 +34,6 @@ export async function mcpAuth(
     const snap = await db
       .collection('apiKeys')
       .where('key', '==', token)
-      .where('active', '==', true)
       .limit(1)
       .get();
 
@@ -41,6 +43,11 @@ export async function mcpAuth(
     }
 
     const data = snap.docs[0].data() as ApiKeyData;
+
+    if (!data.active) {
+      unauthorized();
+      return;
+    }
 
     if (data.type !== 'mcp') {
       unauthorized();
@@ -58,6 +65,51 @@ export async function mcpAuth(
       companyId: data.companyId,
       userId: data.userId,
       permissions: data.permissions || [],
+    };
+
+    // Resolve user and company context for req.userContext
+    const { companyId, userId } = req.auth;
+
+    // Get user info
+    const userDoc = await db.collection('users').doc(userId!).get();
+
+    if (!userDoc.exists) {
+      unauthorized();
+      return;
+    }
+
+    const userData = userDoc.data();
+
+    // Get company info
+    const companyDoc = await db.collection('companies').doc(companyId).get();
+
+    if (!companyDoc.exists) {
+      unauthorized();
+      return;
+    }
+
+    const companyData = companyDoc.data();
+
+    // Find user's role in this company
+    const companies = userData?.companies || [];
+    const companyRole = companies.find(
+      (c: { company: CompanyAggr }) => c.company.id === companyId
+    );
+
+    if (!companyRole) {
+      unauthorized();
+      return;
+    }
+
+    const normalizedRole = normalizeRole(companyRole.role);
+
+    req.userContext = {
+      userId: userId!,
+      userName: userData?.name || '',
+      companyId: companyId,
+      companyName: companyData?.name || '',
+      role: normalizedRole,
+      permissions: getRolePermissions(normalizedRole),
     };
 
     next();

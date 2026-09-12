@@ -13,11 +13,8 @@ export type DateValue = FirebaseFirestore.Timestamp | string;
  * Convert DateValue (Timestamp or ISO string) to JavaScript Date
  * Handles both Firestore Timestamp objects and ISO string formats
  */
-export function toDate(value: DateValue | null | undefined | Date): Date | null {
+export function toDate(value: DateValue | null | undefined): Date | null {
   if (!value) return null;
-  if (value instanceof Date) {
-    return value;
-  }
   if (typeof value === 'string') {
     return new Date(value);
   }
