@@ -52,7 +52,7 @@ describe('Bot Orders Routes', () => {
   // ----- GET /list ----------------------------------------------------------
 
   describe('GET /list', () => {
-    it('returns formatContext with correct shape', async () => {
+    it('does NOT return formatContext', async () => {
       mockOrderService.listOrders.mockResolvedValue({ data: [], total: 0 } as any);
 
       const app = buildApp(router);
@@ -60,11 +60,8 @@ describe('Bot Orders Routes', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.data.formatContext).toEqual({
-        country: 'BR',
-        locale: 'pt-BR',
-        currency: 'BRL',
-      });
+      // formatContext is served only by GET /bot/link/context
+      expect(res.body.data.formatContext).toBeUndefined();
     });
 
     it('does NOT return formattedList or message', async () => {
@@ -97,15 +94,16 @@ describe('Bot Orders Routes', () => {
   // ----- GET /:number -------------------------------------------------------
 
   describe('GET /:number', () => {
-    it('returns formatContext', async () => {
+    it('does NOT return formatContext', async () => {
       mockOrderService.getOrderByNumber.mockResolvedValue(fakeOrder as any);
 
       const app = buildApp(router);
       const res = await request(app).get('/1');
 
       expect(res.status).toBe(200);
-      expect(res.body.data.formatContext).toBeDefined();
-      expect(res.body.data.formatContext.country).toBe('BR');
+      expect(res.body.success).toBe(true);
+      // formatContext is served only by GET /bot/link/context
+      expect(res.body.data.formatContext).toBeUndefined();
     });
 
     it('does NOT return message', async () => {

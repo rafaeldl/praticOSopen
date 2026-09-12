@@ -42,14 +42,17 @@ describe('Bot Summary Routes', () => {
   // ----- GET /today ---------------------------------------------------------
 
   describe('GET /today', () => {
-    it('returns formatContext', async () => {
+    it('does NOT return formatContext', async () => {
       mockAnalyticsService.getTodaySummary.mockResolvedValue(fakeTodayData as any);
 
       const app = buildApp(router);
       const res = await request(app).get('/today');
 
       expect(res.status).toBe(200);
-      expect(res.body.data.formatContext).toBeDefined();
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.data).toEqual(fakeTodayData);
+      // formatContext is served only by GET /bot/link/context
+      expect(res.body.data.formatContext).toBeUndefined();
     });
 
     it('does NOT return message', async () => {
@@ -65,14 +68,17 @@ describe('Bot Summary Routes', () => {
   // ----- GET /pending -------------------------------------------------------
 
   describe('GET /pending', () => {
-    it('returns formatContext', async () => {
+    it('does NOT return formatContext', async () => {
       mockAnalyticsService.getPendingItems.mockResolvedValue(fakePendingData as any);
 
       const app = buildApp(router);
       const res = await request(app).get('/pending');
 
       expect(res.status).toBe(200);
-      expect(res.body.data.formatContext).toBeDefined();
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.data).toEqual(fakePendingData);
+      // formatContext is served only by GET /bot/link/context
+      expect(res.body.data.formatContext).toBeUndefined();
     });
   });
 });
