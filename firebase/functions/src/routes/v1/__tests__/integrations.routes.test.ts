@@ -59,4 +59,17 @@ describe('integrations.routes', () => {
     const res = await request(buildApp('owner')).delete('/tokens/nope');
     expect(res.status).toBe(404);
   });
+
+  it('retorna 500 com erro interno quando criar token falha', async () => {
+    mockService.createIntegrationToken.mockRejectedValue(
+      new Error('Database error'),
+    );
+    const res = await request(buildApp('admin'))
+      .post('/tokens')
+      .send({ name: 'Meu ChatGPT' });
+    expect(res.status).toBe(500);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe('INTERNAL_ERROR');
+    expect(res.body.error.message).toBe('Failed to create token');
+  });
 });
