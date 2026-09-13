@@ -32,10 +32,12 @@ await build({
 });
 
 const js = readFileSync('dist/order-card.js', 'utf8');
+const css = readFileSync('dist/order-card.css', 'utf8');
 
 // The bundle is inlined into a TS constant so the function needs no extra asset.
 const contents = `// GENERATED FILE - run \`npm run build\` in widgets/. Do not edit.
 export const ORDER_CARD_BUNDLE = ${JSON.stringify(js)};
+export const ORDER_CARD_CSS = ${JSON.stringify(css)};
 `;
 
 mkdirSync(dirname(OUT), { recursive: true });

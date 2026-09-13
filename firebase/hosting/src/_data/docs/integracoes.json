@@ -154,6 +154,21 @@
             "answer": "Não. Trate a URL como uma senha da sua empresa. Cole apenas na tela de configuração do connector do ChatGPT ou do Claude, e revogue imediatamente se desconfiar que ela vazou."
           }
         ]
+      },
+      {
+        "id": "order-card",
+        "title": "Card da ordem de serviço",
+        "intro": "O card mostra a foto de capa, quando disponível, os dados do dispositivo e cliente, serviços, produtos e total. Sem foto, os dados ocupam o espaço. O visual acompanha o tema claro ou escuro do chat.",
+        "subsections": [
+          {
+            "title": "Compartilhar",
+            "content": "Abre o menu de compartilhamento do dispositivo para escolher onde enviar o resumo e link da OS. Se indisponível ou bloqueado, permite copiar o link para usar em qualquer aplicativo. Cancelar o menu não envia nada."
+          }
+        ],
+        "infoCard": {
+          "title": "Outras ações",
+          "content": "Abrir no PraticOS abre a página web da OS. Abertura direta da OS no aplicativo instalado ainda não está disponível. Aprovar e Concluir OS continuam exigindo confirmação."
+        }
       }
     ]
   },
@@ -312,6 +327,21 @@
             "answer": "No. Treat the URL like a password for your company. Only paste it into ChatGPT's or Claude's connector setup screen, and revoke it immediately if you suspect it leaked."
           }
         ]
+      },
+      {
+        "id": "order-card",
+        "title": "Service order card",
+        "intro": "The card shows the cover photo when available, device and customer details, services, products and total. Without a photo, the details fill the space. The card follows the chat’s light or dark theme.",
+        "subsections": [
+          {
+            "title": "Share",
+            "content": "Opens the device share menu to choose where to send the order summary and link. When unavailable or blocked, copy the link to use in any app. Canceling sends nothing."
+          }
+        ],
+        "infoCard": {
+          "title": "Other actions",
+          "content": "Open in PraticOS opens the order web page. Opening the order directly in the installed app is not available yet. Approve and Complete order still require confirmation."
+        }
       }
     ]
   },
@@ -470,6 +500,21 @@
             "answer": "No. Trata la URL como una contraseña de tu empresa. Pégala únicamente en la pantalla de configuración del conector de ChatGPT o Claude, y revócala de inmediato si sospechas que se filtró."
           }
         ]
+      },
+      {
+        "id": "order-card",
+        "title": "Tarjeta de la orden de servicio",
+        "intro": "La tarjeta muestra la foto de portada cuando está disponible, datos del dispositivo y cliente, servicios, productos y total. Sin foto, los datos ocupan el espacio. El diseño sigue el tema claro u oscuro del chat.",
+        "subsections": [
+          {
+            "title": "Compartir",
+            "content": "Abre el menú de compartir del dispositivo para elegir dónde enviar el resumen y enlace de la OS. Si no está disponible o está bloqueado, permite copiar el enlace para usarlo en cualquier aplicación. Cancelar no envía nada."
+          }
+        ],
+        "infoCard": {
+          "title": "Otras acciones",
+          "content": "Abrir en PraticOS abre la página web de la OS. Abrir la OS directamente en la aplicación instalada aún no está disponible. Aprobar y Completar OS siguen pidiendo confirmación."
+        }
       }
     ]
   }

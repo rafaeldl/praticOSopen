@@ -1,5 +1,5 @@
 import { OrderDetail } from '../../utils/bot-response.utils';
-import { ORDER_CARD_BUNDLE } from './bundle';
+import { ORDER_CARD_BUNDLE, ORDER_CARD_CSS } from './bundle';
 
 export const ORDER_CARD_URI = 'ui://praticos/order-card';
 
@@ -34,11 +34,14 @@ const STYLE = `
 `;
 
 const HTML = `<!doctype html>
-<html>
+<html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PraticOS</title>
     <meta name="color-scheme" content="light dark" />
-    <style>${STYLE}</style>
+    <style>${STYLE}
+${ORDER_CARD_CSS}</style>
   </head>
   <body>
     <div id="root"></div>
