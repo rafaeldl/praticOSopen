@@ -2,7 +2,23 @@ import {
   classifyMessage,
   isAcknowledgedHostRequest,
   buildHostRequestReply,
+  buildInitializeParams,
 } from '../../../widgets/src/bridge-protocol';
+
+describe('bridge-protocol: buildInitializeParams', () => {
+  it('sends every field the ext-apps McpUiInitializeRequest schema requires', () => {
+    // ChatGPT validates ui/initialize with the ext-apps SDK schema, which
+    // requires appInfo, appCapabilities and protocolVersion. Sending
+    // `clientInfo` instead of `appInfo` made the host answer with an error,
+    // so the card never received the tool result and rendered blank.
+    const params = buildInitializeParams();
+
+    expect(params.appInfo).toEqual({ name: 'praticos-order-card', version: '1.0.0' });
+    expect(params.appCapabilities).toEqual({ availableDisplayModes: ['inline'] });
+    expect(params.protocolVersion).toBe('2026-01-26');
+    expect(params).not.toHaveProperty('clientInfo');
+  });
+});
 
 describe('bridge-protocol: classifyMessage', () => {
   it('classifies a response whose id matches a pending request', () => {

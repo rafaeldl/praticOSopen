@@ -71,6 +71,30 @@ export function isAcknowledgedHostRequest(method: string): boolean {
   return ACKNOWLEDGED_HOST_METHODS.has(method);
 }
 
+export const PROTOCOL_VERSION = '2026-01-26';
+
+/**
+ * Params for the View's `ui/initialize` request.
+ *
+ * The View identifies itself with `appInfo`, not `clientInfo`: the
+ * `clientInfo` examples in the spec text belong to the plain MCP `initialize`
+ * handshake. The ext-apps SDK schema — which ChatGPT's sandbox embeds to
+ * validate this request — requires `appInfo`; without it the host answers
+ * with a JSON-RPC error, no tool result ever arrives and the card renders
+ * nothing.
+ */
+export function buildInitializeParams(): {
+  protocolVersion: string;
+  appInfo: { name: string; version: string };
+  appCapabilities: { availableDisplayModes: string[] };
+} {
+  return {
+    protocolVersion: PROTOCOL_VERSION,
+    appInfo: { name: 'praticos-order-card', version: '1.0.0' },
+    appCapabilities: { availableDisplayModes: ['inline'] },
+  };
+}
+
 /** Builds the empty-result reply the spec requires for `ping` / `ui/resource-teardown`. */
 export function buildHostRequestReply(id: number): {
   jsonrpc: '2.0';

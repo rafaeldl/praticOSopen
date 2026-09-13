@@ -6,11 +6,11 @@ import {
   classifyMessage,
   isAcknowledgedHostRequest,
   buildHostRequestReply,
+  buildInitializeParams,
 } from './bridge-protocol';
 
 type Pending = { resolve: (value: any) => void; reject: (error: any) => void };
 
-const PROTOCOL_VERSION = '2026-01-26';
 const pending = new Map<number, Pending>();
 const toolResultListeners: Array<(result: any) => void> = [];
 const hostContextListeners: Array<(context: any) => void> = [];
@@ -105,11 +105,7 @@ function observeSize(): void {
 }
 
 export async function connect(): Promise<void> {
-  const result = await request('ui/initialize', {
-    protocolVersion: PROTOCOL_VERSION,
-    clientInfo: { name: 'praticos-order-card', version: '1.0.0' },
-    appCapabilities: { availableDisplayModes: ['inline'] },
-  });
+  const result = await request('ui/initialize', buildInitializeParams());
   if (result?.hostContext) {
     for (const listener of hostContextListeners) listener(result.hostContext);
   }
