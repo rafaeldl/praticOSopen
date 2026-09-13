@@ -20,10 +20,19 @@ function send(message: Record<string, unknown>): void {
   window.parent.postMessage({ jsonrpc: '2.0', ...message }, '*');
 }
 
-function request(method: string, params?: Record<string, unknown>): Promise<any> {
+function request(method: string, params?: Record<string, unknown>, timeoutMs?: number): Promise<any> {
   const id = nextId++;
-  send({ id, method, params });
-  return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+  return new Promise((resolve, reject) => {
+    const timer = timeoutMs === undefined ? undefined : setTimeout(() => {
+      pending.delete(id);
+      reject(new Error('Host request timed out'));
+    }, timeoutMs);
+    pending.set(id, {
+      resolve: value => { clearTimeout(timer); resolve(value); },
+      reject: error => { clearTimeout(timer); reject(error); },
+    });
+    send({ id, method, params });
+  });
 }
 
 window.addEventListener('message', (event: MessageEvent) => {
@@ -120,4 +129,12 @@ export async function connect(): Promise<void> {
 /** Resolves with the tool's CallToolResult; rejects on a JSON-RPC error. */
 export function callTool(name: string, args: Record<string, unknown>): Promise<any> {
   return request('tools/call', { name, arguments: args });
+}
+
+/** Ask the host to open a link outside the sandbox; never send a message. */
+export async function openLink(url: string): Promise<void> {
+  const result: unknown = await request('ui/open-link', { url }, 10000);
+  if (typeof result === 'object' && result !== null && 'isError' in result && result.isError) {
+    throw new Error('Host refused to open the external link');
+  }
 }

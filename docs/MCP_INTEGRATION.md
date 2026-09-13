@@ -116,7 +116,7 @@ Toda tool de listagem usa `DEFAULT_LIMIT = 20` e `MAX_LIMIT = 50` (`tools/read.t
 - A ligação tool → card é feita por `_meta.ui.resourceUri` (padrão MCP Apps, funciona em ChatGPT e Claude) e pelo alias `_meta['openai/outputTemplate']` (compatibilidade com runtimes mais antigos do ChatGPT).
 - `ui.visibility` é deliberadamente omitido: o padrão (`["model", "app"]`) mantém a tool chamável tanto pelo modelo quanto pelo card.
 - O card conversa com o host via `postMessage` (JSON-RPC, spec `ext-apps 2026-01-26`), implementado em `widgets/src/bridge.ts`.
-- Botões do card: **Aprovar**, **Concluir** (ambos passam por um estado de confirmação dentro do próprio card antes de disparar a escrita) e **Copiar link do cliente**. Os botões de status só aparecem quando o status atual da OS permite a ação (`availableActions` em `card-state.ts`); uma falha de rede deixa a OS como estava, sem assumir nada sobre o estado do servidor.
+- Botões do card: **Aprovar**, **Concluir** (ambos passam por um estado de confirmação dentro do próprio card antes de disparar a escrita) e **Abrir no PraticOS** e **Compartilhar**. Os botões de status só aparecem quando o status atual da OS permite a ação (`availableActions` em `card-state.ts`); uma falha de rede deixa a OS como estava, sem assumir nada sobre o estado do servidor.
 - Um novo `ui/notifications/tool-result` da **mesma** OS (ex.: o modelo mudou o status pelo chat com o card aberto) substitui a OS local do card sem remontá-lo; a confirmação aberta só sobrevive se a nova OS ainda permitir aquela escrita, e a mensagem é limpa se o status mudou (`receiveOrder` em `card-state.ts`). OS diferente remonta o card (`key={order.number}`).
 - Tema: o HTML do recurso declara `color-scheme: light dark` e valores de fallback em `:root` para as variáveis de estilo que o card usa (`--color-text-primary`, `--color-border-*`, `--color-text-danger`, `--font-sans`). Quando o host manda `theme` e `styles.variables` (no `hostContext` do `ui/initialize` ou em `ui/notifications/host-context-changed`, que é parcial e é mesclado), elas são aplicadas inline no `<html>` e têm prioridade. `styles.css.fonts` não é injetado; a fonte cai no restante da pilha de `--font-sans`.
 - Nunca dar `height: 100%` / `100vh` a `html`, `body` ou `#root`: a ponte mede o tamanho observando `document.documentElement` para enviar `ui/notifications/size-changed`, e isso só reflete a altura do conteúdo enquanto nada estica esses elementos (há teste em `widgets.test.ts`).
@@ -198,3 +198,13 @@ Resposta (resumida): um `content` de texto sempre completo e, quando a tool est�
 4. `add_order_comment` / `add_order_item` para detalhar a OS conforme a conversa avança.
 
 Toda chamada de escrita gera uma linha `mcp_write` no log, e toda chamada passa pelo mesmo isolamento multi-tenant (`companyId` de `req.userContext`) que o restante do sistema.
+
+### Card redesenhado e compartilhamento
+
+O card usa `widgets/DESIGN.md`, estilos em `src/card.css`, ícones SVG e textos PT/EN/ES em `src/card-locale.ts`. O idioma vem de `hostContext.locale`, do navegador ou do fallback PT; a moeda continua BRL conforme o contrato atual da OS. O FormatService Flutter não está disponível no widget React, que usa Intl centralizado. Foto de capa quadrada ao lado da identificação, status suave, grupos de serviços/produtos e faixa de total compõem o layout. Imagem ausente ou com erro libera o espaço para os dados.
+
+Compartilhar usa Web Share API (`navigator.share`) com título, resumo e `shareUrl`. A pessoa escolhe o aplicativo e destinatário. Se a API não existir ou for bloqueada no iframe, o card exibe o link e permite copiá-lo. Cancelamento não é erro. Abrir no PraticOS usa `ui/open-link` para abrir a página web pública da OS; não é um deep link nativo. Recusa/erro/timeout exibe alternativa de cópia. Não adiciona dados ao allowlist nem altera Firestore, permissões ou isolamento por empresa.
+
+O build do widget agora embute JS **e CSS** em `bundle.ts`. Sempre rodar `npm run build` em `firebase/functions/widgets` antes do build/deploy das Functions. A documentação pública é gerada por Eleventy a partir de `firebase/hosting/src/_data/docs/integracoes.json` nos três idiomas, não editada no diretório de saída `public`.
+
+Referência do protocolo: https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx (Open External Links).
