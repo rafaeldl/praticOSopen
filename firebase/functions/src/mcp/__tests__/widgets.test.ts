@@ -61,9 +61,28 @@ describe('order card (MCP Apps)', () => {
     expect(head).not.toMatch(/100vh/);
   });
 
-  it('declara o dominio do Storage no CSP do MCP Apps', () => {
-    const meta = orderCardMeta() as { ui: { csp?: { resourceDomains?: string[] } } };
-    expect(meta.ui.csp?.resourceDomains).toContain('https://storage.googleapis.com');
+  it('declara CSP e dominio do widget no resource (lista e leitura)', async () => {
+    let config: any;
+    let read: (() => Promise<any>) | undefined;
+    registerOrderCardResource({
+      registerResource: (_n: string, _u: string, c: unknown, cb: () => Promise<any>) => {
+        config = c;
+        read = cb;
+      },
+    });
+    const content = (await read!()).contents[0];
+
+    for (const meta of [config._meta, content._meta]) {
+      expect(meta.ui.csp).toEqual({
+        connectDomains: [],
+        resourceDomains: ['https://storage.googleapis.com'],
+      });
+      expect(meta['openai/widgetCSP']).toEqual({
+        connect_domains: [],
+        resource_domains: ['https://storage.googleapis.com'],
+      });
+      expect(meta['openai/widgetDomain']).toBe('https://praticos.web.app');
+    }
   });
 
   it('mantem o texto completo junto do card', () => {
