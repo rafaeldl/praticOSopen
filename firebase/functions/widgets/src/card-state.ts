@@ -51,6 +51,48 @@ export function availableActions(order: OrderData): AvailableActions {
   };
 }
 
+export type PendingWrite = 'done' | 'approved' | null;
+
+export interface CardMessage {
+  text: string;
+  error: boolean;
+}
+
+/** The parts of the card's local state a new tool result can invalidate. */
+export interface CardState {
+  order: OrderData;
+  pending: PendingWrite;
+  message: CardMessage | null;
+}
+
+function allows(order: OrderData, write: 'done' | 'approved'): boolean {
+  const actions = availableActions(order);
+  return write === 'approved' ? actions.approve : actions.markDone;
+}
+
+/**
+ * A new `ui/notifications/tool-result` arrived for the order the card is
+ * already showing (same number, so the card is not remounted) — e.g. the
+ * model changed the status from the chat while the card was open.
+ *
+ * The host's latest result is authoritative, so it replaces the local order.
+ * Around it:
+ * - a confirmation still open ("Concluir esta OS?") is kept only if the new
+ *   order still allows that write; otherwise it is closed, since confirming
+ *   would ask for something the order no longer supports;
+ * - the message is kept only if the status did not change: "Aprovada" or an
+ *   error about a previous write says nothing true about a status someone
+ *   else just changed.
+ */
+export function receiveOrder(state: CardState, incoming: OrderData): CardState {
+  const statusChanged = incoming.status !== state.order.status;
+  return {
+    order: incoming,
+    pending: state.pending !== null && allows(incoming, state.pending) ? state.pending : null,
+    message: statusChanged ? null : state.message,
+  };
+}
+
 export const WRITE_FAILED_MESSAGE = 'Não foi possível atualizar';
 
 const STATUS_MESSAGE: Record<'done' | 'approved', string> = {

@@ -1,6 +1,7 @@
 import {
   availableActions,
   applyStatusResult,
+  receiveOrder,
   writeFailed,
   WRITE_FAILED_MESSAGE,
   OrderData,
@@ -83,5 +84,42 @@ describe('card-state: applyStatusResult', () => {
     expect(outcome.error).toBe(true);
     expect(outcome.message).toBe(WRITE_FAILED_MESSAGE);
     expect(availableActions(outcome.order)).toEqual(availableActions(current));
+  });
+});
+
+describe('card-state: receiveOrder (novo tool-result para a mesma OS)', () => {
+  it('substitui o pedido local pelo que chegou, inclusive quando o modelo muda o status pelo chat', () => {
+    const current = order('quote');
+    const incoming = { ...order('done', 'https://praticos.web.app/q/tok123'), total: 250 };
+
+    const next = receiveOrder({ order: current, pending: null, message: null }, incoming);
+
+    expect(next.order).toEqual(incoming);
+    expect(availableActions(next.order)).toEqual({ approve: false, markDone: false, copyLink: true });
+  });
+
+  it('fecha a confirmacao aberta quando o novo pedido nao permite mais aquela escrita', () => {
+    const next = receiveOrder({ order: order('quote'), pending: 'approved', message: null }, order('approved'));
+
+    expect(next.pending).toBeNull();
+  });
+
+  it('mantem a confirmacao aberta quando o novo pedido ainda permite a escrita', () => {
+    const next = receiveOrder({ order: order('quote'), pending: 'done', message: null }, order('progress'));
+
+    expect(next.pending).toBe('done');
+  });
+
+  it('limpa a mensagem quando o status mudou', () => {
+    const state = { order: order('quote'), pending: null, message: { text: WRITE_FAILED_MESSAGE, error: true } };
+
+    expect(receiveOrder(state, order('canceled')).message).toBeNull();
+  });
+
+  it('mantem a mensagem quando o status nao mudou', () => {
+    const message = { text: 'Link copiado', error: false };
+    const state = { order: order('approved'), pending: null, message };
+
+    expect(receiveOrder(state, { ...order('approved'), total: 999 }).message).toEqual(message);
   });
 });

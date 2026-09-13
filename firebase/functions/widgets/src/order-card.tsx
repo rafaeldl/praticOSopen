@@ -1,7 +1,16 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { callTool, connect, onToolResult } from './bridge';
-import { applyStatusResult, availableActions, writeFailed, OrderData } from './card-state';
+import { callTool, connect, onHostContext, onToolResult } from './bridge';
+import {
+  applyStatusResult,
+  availableActions,
+  receiveOrder,
+  writeFailed,
+  CardMessage,
+  OrderData,
+  PendingWrite,
+} from './card-state';
+import { applyHostTheme, mergeHostContext, HostContext } from './host-theme';
 
 export type { OrderData };
 
@@ -21,23 +30,37 @@ const btnStyle: React.CSSProperties = {
   fontSize: 13,
   padding: '6px 12px',
   borderRadius: 8,
-  border: '1px solid rgba(128,128,128,0.35)',
+  border: '1px solid var(--color-border-primary)',
   background: 'transparent',
   color: 'inherit',
+  fontFamily: 'inherit',
   cursor: 'pointer',
 };
 
-export function OrderCard({ order: initialOrder }: { order: OrderData }) {
-  // The card owns its current order from here on: a successful write
-  // replaces it (see confirmStatus/applyStatusResult), so the badge and the
-  // button set reflect the latest known state instead of going stale after
-  // an approve/done. The App component below remounts this component (via
-  // `key={order.number}`) whenever a genuinely different order arrives.
-  const [order, setOrder] = React.useState<OrderData>(initialOrder);
-  const [pending, setPending] = React.useState<'done' | 'approved' | null>(null);
+export function OrderCard({ order: incomingOrder }: { order: OrderData }) {
+  // The card owns its current order: a successful write replaces it (see
+  // confirmStatus/applyStatusResult), so the badge and the button set reflect
+  // the latest known state instead of going stale after an approve/done. The
+  // App component below remounts this component (via `key={order.number}`)
+  // whenever a genuinely different order arrives.
+  const [order, setOrder] = React.useState<OrderData>(incomingOrder);
+  const [pending, setPending] = React.useState<PendingWrite>(null);
   const [busy, setBusy] = React.useState(false);
-  const [message, setMessage] = React.useState<{ text: string; error: boolean } | null>(null);
+  const [message, setMessage] = React.useState<CardMessage | null>(null);
   const [showLink, setShowLink] = React.useState(false);
+
+  // A new tool result for the SAME order (e.g. the model changed the status
+  // from the chat) keeps the key, so there is no remount: fold it into the
+  // local state here, during render, so the stale order is never painted.
+  // What survives the update is decided by receiveOrder.
+  const [seenOrder, setSeenOrder] = React.useState<OrderData>(incomingOrder);
+  if (incomingOrder !== seenOrder) {
+    setSeenOrder(incomingOrder);
+    const next = receiveOrder({ order, pending, message }, incomingOrder);
+    setOrder(next.order);
+    setPending(next.pending);
+    setMessage(next.message);
+  }
 
   const status = STATUS[order.status ?? ''] ?? { label: order.status ?? '—', color: '#8E8E93' };
   const items = [...(order.services ?? []), ...(order.products ?? [])];
@@ -66,7 +89,9 @@ export function OrderCard({ order: initialOrder }: { order: OrderData }) {
   // every write goes through an explicit confirm state first. On success the
   // order (and therefore the button set) is refreshed from the tool result;
   // on failure — rejection or `isError` — the order is left untouched and the
-  // buttons stay available so the user can retry.
+  // buttons stay available so the user can retry. The order is read through
+  // the functional update: a tool result for this order may have arrived
+  // while the call was in flight, and `order` in this closure predates it.
   const confirmStatus = async (requestedStatus: 'done' | 'approved') => {
     if (!order.number || busy) return;
     setBusy(true);
@@ -76,12 +101,11 @@ export function OrderCard({ order: initialOrder }: { order: OrderData }) {
         status: requestedStatus,
       });
       const outcome = applyStatusResult(order, result, requestedStatus);
-      setOrder(outcome.order);
+      setOrder((current) => applyStatusResult(current, result, requestedStatus).order);
       setMessage({ text: outcome.message, error: Boolean(outcome.error) });
     } catch {
-      const outcome = writeFailed(order);
-      setOrder(outcome.order);
-      setMessage({ text: outcome.message, error: true });
+      // writeFailed leaves the order as it is, so only the message changes.
+      setMessage({ text: writeFailed(order).message, error: true });
     } finally {
       setBusy(false);
       setPending(null);
@@ -90,8 +114,7 @@ export function OrderCard({ order: initialOrder }: { order: OrderData }) {
 
   return (
     <div style={{
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      border: '1px solid rgba(128,128,128,0.25)',
+      border: '1px solid var(--color-border-secondary)',
       borderRadius: 12,
       padding: 16,
       maxWidth: 460,
@@ -120,7 +143,7 @@ export function OrderCard({ order: initialOrder }: { order: OrderData }) {
       ))}
 
       {items.length > 0 && (
-        <div style={{ marginTop: 12, borderTop: '1px solid rgba(128,128,128,0.2)', paddingTop: 8 }}>
+        <div style={{ marginTop: 12, borderTop: '1px solid var(--color-border-tertiary)', paddingTop: 8 }}>
           {items.map((item, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '2px 0' }}>
               <span>
@@ -135,7 +158,7 @@ export function OrderCard({ order: initialOrder }: { order: OrderData }) {
 
       <div style={{
         marginTop: 12,
-        borderTop: '1px solid rgba(128,128,128,0.2)',
+        borderTop: '1px solid var(--color-border-tertiary)',
         paddingTop: 8,
         display: 'flex',
         justifyContent: 'space-between',
@@ -147,7 +170,7 @@ export function OrderCard({ order: initialOrder }: { order: OrderData }) {
 
       <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {message && (
-          <span style={{ fontSize: 13, color: message.error ? '#FF3B30' : 'inherit' }}>{message.text}</span>
+          <span style={{ fontSize: 13, color: message.error ? 'var(--color-text-danger)' : 'inherit' }}>{message.text}</span>
         )}
 
         {showLink && order.shareUrl && (
@@ -188,9 +211,20 @@ function App() {
   const [order, setOrder] = React.useState<OrderData | null>(null);
 
   React.useEffect(() => {
+    // Theme: the initial hostContext, then partial host-context-changed
+    // updates merged into it. Fallbacks live in the resource HTML's :root.
+    let hostContext: HostContext = {};
+    let appliedVariables: string[] = [];
+    onHostContext((update) => {
+      hostContext = mergeHostContext(hostContext, update);
+      appliedVariables = applyHostTheme(document.documentElement.style, hostContext, appliedVariables);
+    });
     onToolResult((result) => setOrder(result?.structuredContent?.order ?? null));
     connect().catch(() => {
-      // Host without MCP Apps: the tool's text content is what the user sees.
+      // The host answered ui/initialize with a JSON-RPC error, so no tool
+      // result will follow and the card stays empty; the chat still has the
+      // tool's text. (A host without MCP Apps never runs this View at all,
+      // and one that never answers leaves this promise pending, not rejected.)
     });
   }, []);
 

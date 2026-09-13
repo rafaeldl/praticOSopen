@@ -30,13 +30,13 @@ Pontos centrais:
 
 ### Widget (`firebase/functions/widgets/`)
 
-Fonte React do card em `src/order-card.tsx`, lógica pura de decisão (quais botões aparecem, o que muda após uma escrita) isolada em `src/card-state.ts`, e a ponte `postMessage` com o host em `src/bridge.ts`.
+Fonte React do card em `src/order-card.tsx`, lógica pura de decisão (quais botões aparecem, o que muda após uma escrita) isolada em `src/card-state.ts`, tema do host (merge do `hostContext` e aplicação das variáveis CSS) em `src/host-theme.ts`, e a ponte `postMessage` com o host em `src/bridge.ts`.
 
 ```bash
 cd firebase/functions/widgets && npm run build
 ```
 
-Esse comando roda o `build.mjs`: usa `esbuild` para empacotar `src/order-card.tsx` num único arquivo IIFE minificado (`dist/order-card.js`) e depois grava esse JS como uma constante de string em `../src/mcp/widgets/bundle.ts` (`export const ORDER_CARD_BUNDLE = "..."`). Esse arquivo gerado **é commitado** - o `predeploy` das Functions roda apenas `tsc`, não o build do widget, então `bundle.ts` precisa já estar atualizado no repositório antes do deploy. Sempre que `order-card.tsx`, `card-state.ts` ou `bridge.ts` mudarem, rodar o build e commitar o `bundle.ts` resultante junto.
+Esse comando roda o `build.mjs`: usa `esbuild` para empacotar `src/order-card.tsx` num único arquivo IIFE minificado (`dist/order-card.js`) e depois grava esse JS como uma constante de string em `../src/mcp/widgets/bundle.ts` (`export const ORDER_CARD_BUNDLE = "..."`). Esse arquivo gerado **é commitado** - o `predeploy` das Functions roda apenas `tsc`, não o build do widget, então `bundle.ts` precisa já estar atualizado no repositório antes do deploy. Sempre que `order-card.tsx`, `card-state.ts`, `host-theme.ts`, `bridge.ts` ou `bridge-protocol.ts` mudarem, rodar o build e commitar o `bundle.ts` resultante junto.
 
 O `build.mjs` registra um plugin de resolução (`node-resolve-bare-imports`) que resolve imports "nus" (`react`, `react-dom`, etc.) usando o algoritmo padrão do Node a partir de `widgets/node_modules`, em vez de deixar o `esbuild` descobrir sozinho - isso evita depender de qualquer configuração de resolução de módulos herdada do restante do monorepo `firebase/`.
 
@@ -114,6 +114,9 @@ Toda tool de listagem usa `DEFAULT_LIMIT = 20` e `MAX_LIMIT = 50` (`tools/read.t
 - `ui.visibility` é deliberadamente omitido: o padrão (`["model", "app"]`) mantém a tool chamável tanto pelo modelo quanto pelo card.
 - O card conversa com o host via `postMessage` (JSON-RPC, spec `ext-apps 2026-01-26`), implementado em `widgets/src/bridge.ts`.
 - Botões do card: **Aprovar**, **Concluir** (ambos passam por um estado de confirmação dentro do próprio card antes de disparar a escrita) e **Copiar link do cliente**. Os botões de status só aparecem quando o status atual da OS permite a ação (`availableActions` em `card-state.ts`); uma falha de rede deixa a OS como estava, sem assumir nada sobre o estado do servidor.
+- Um novo `ui/notifications/tool-result` da **mesma** OS (ex.: o modelo mudou o status pelo chat com o card aberto) substitui a OS local do card sem remontá-lo; a confirmação aberta só sobrevive se a nova OS ainda permitir aquela escrita, e a mensagem é limpa se o status mudou (`receiveOrder` em `card-state.ts`). OS diferente remonta o card (`key={order.number}`).
+- Tema: o HTML do recurso declara `color-scheme: light dark` e valores de fallback em `:root` para as variáveis de estilo que o card usa (`--color-text-primary`, `--color-border-*`, `--color-text-danger`, `--font-sans`). Quando o host manda `theme` e `styles.variables` (no `hostContext` do `ui/initialize` ou em `ui/notifications/host-context-changed`, que é parcial e é mesclado), elas são aplicadas inline no `<html>` e têm prioridade. `styles.css.fonts` não é injetado; a fonte cai no restante da pilha de `--font-sans`.
+- Nunca dar `height: 100%` / `100vh` a `html`, `body` ou `#root`: a ponte mede o tamanho observando `document.documentElement` para enviar `ui/notifications/size-changed`, e isso só reflete a altura do conteúdo enquanto nada estica esses elementos (há teste em `widgets.test.ts`).
 - `structuredContent` segue um **allowlist** explícito (`toCardData` em `widgets/order-card.ts`): número, status, total, `shareUrl`, nome do cliente, nome/serial dos dispositivos, itens (nome/valor/quantidade). Telefone do cliente e URL de foto (`mainPhotoUrl`) nunca saem do servidor nessa fase.
 - Um host sem suporte a MCP Apps simplesmente ignora o recurso e mostra apenas o texto da resposta - que é sempre completo, nunca um resumo pensado só para acompanhar o card.
 - Esta fase não mostra foto no card. Quando isso for adicionado, o domínio do Storage precisará ser liberado em `_meta.ui.csp.resourceDomains`.
