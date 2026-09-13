@@ -13,6 +13,7 @@ type Pending = { resolve: (value: any) => void; reject: (error: any) => void };
 const PROTOCOL_VERSION = '2026-01-26';
 const pending = new Map<number, Pending>();
 const toolResultListeners: Array<(result: any) => void> = [];
+const hostContextListeners: Array<(context: any) => void> = [];
 let nextId = 1;
 
 function send(message: Record<string, unknown>): void {
@@ -50,6 +51,8 @@ window.addEventListener('message', (event: MessageEvent) => {
     case 'notification':
       if (classified.method === 'ui/notifications/tool-result') {
         for (const listener of toolResultListeners) listener(classified.params);
+      } else if (classified.method === 'ui/notifications/host-context-changed') {
+        for (const listener of hostContextListeners) listener(classified.params);
       }
       return;
     case 'ignore':
@@ -60,6 +63,17 @@ window.addEventListener('message', (event: MessageEvent) => {
 /** Register before connect(): the result can arrive right after the handshake. */
 export function onToolResult(listener: (result: any) => void): void {
   toolResultListeners.push(listener);
+}
+
+/**
+ * Register before connect(). Called with the `hostContext` from the
+ * ui/initialize result (before `initialized` goes out, so the theme is in
+ * place before any tool result renders), then with each
+ * `ui/notifications/host-context-changed` payload — a PARTIAL update the
+ * listener must merge (see mergeHostContext in host-theme.ts).
+ */
+export function onHostContext(listener: (context: any) => void): void {
+  hostContextListeners.push(listener);
 }
 
 let lastSize: { width: number; height: number } | undefined;
@@ -91,11 +105,14 @@ function observeSize(): void {
 }
 
 export async function connect(): Promise<void> {
-  await request('ui/initialize', {
+  const result = await request('ui/initialize', {
     protocolVersion: PROTOCOL_VERSION,
     clientInfo: { name: 'praticos-order-card', version: '1.0.0' },
     appCapabilities: { availableDisplayModes: ['inline'] },
   });
+  if (result?.hostContext) {
+    for (const listener of hostContextListeners) listener(result.hostContext);
+  }
   send({ method: 'ui/notifications/initialized' });
   observeSize();
 }

@@ -40,6 +40,27 @@ describe('order card (MCP Apps)', () => {
     expect(result.contents[0].text).toContain('<div id="root">');
   });
 
+  it('declara color-scheme claro/escuro e cor de texto com fallback', async () => {
+    let read: (() => Promise<any>) | undefined;
+    registerOrderCardResource({ registerResource: (_n: string, _u: string, _c: unknown, cb: () => Promise<any>) => (read = cb) });
+    const html: string = (await read!()).contents[0].text;
+    const head = html.slice(0, html.indexOf('<script>'));
+
+    expect(head).toContain('color-scheme: light dark');
+    expect(head).toMatch(/--color-text-primary:/);
+    expect(head).toMatch(/color: var\(--color-text-primary\)/);
+  });
+
+  it('nao estica html/body/#root na altura do frame (quebraria o size-changed)', async () => {
+    let read: (() => Promise<any>) | undefined;
+    registerOrderCardResource({ registerResource: (_n: string, _u: string, _c: unknown, cb: () => Promise<any>) => (read = cb) });
+    const html: string = (await read!()).contents[0].text;
+    const head = html.slice(0, html.indexOf('<script>'));
+
+    expect(head).not.toMatch(/height\s*:\s*100%/);
+    expect(head).not.toMatch(/100vh/);
+  });
+
   it('mantem o texto completo junto do card', () => {
     const order: Pick<OrderDetail, 'number'> = { number: 42 };
     const result = withOrderCard(order, 'OS #42 — Em andamento');

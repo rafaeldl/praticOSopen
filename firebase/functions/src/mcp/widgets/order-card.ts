@@ -6,10 +6,41 @@ export const ORDER_CARD_URI = 'ui://praticos/order-card';
 // MCP Apps requires exactly this mime type (spec ext-apps 2026-01-26, l.268).
 export const ORDER_CARD_MIME = 'text/html;profile=mcp-app';
 
+// Theme: fallbacks for every host style variable the card uses (spec
+// ext-apps 2026-01-26, Theming — Views SHOULD set defaults for the variables
+// they use). The host's values are applied inline on <html> by host-theme.ts
+// and win over these. `CanvasText` follows `color-scheme`, so text stays
+// legible on a dark host even when it sends no variables at all.
+//
+// Do NOT give html, body or #root `height: 100%` / `100vh`: the bridge
+// reports the View's size by observing document.documentElement, which only
+// measures the content while nothing stretches it to the frame's height.
+const STYLE = `
+  :root {
+    color-scheme: light dark;
+    --color-text-primary: CanvasText;
+    --color-text-danger: #FF3B30;
+    --color-border-primary: rgba(128,128,128,0.35);
+    --color-border-secondary: rgba(128,128,128,0.25);
+    --color-border-tertiary: rgba(128,128,128,0.2);
+    --font-sans: system-ui, -apple-system, sans-serif;
+  }
+  body {
+    margin: 0;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+  }
+`;
+
 const HTML = `<!doctype html>
 <html>
-  <head><meta charset="utf-8" /></head>
-  <body style="margin:0">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="color-scheme" content="light dark" />
+    <style>${STYLE}</style>
+  </head>
+  <body>
     <div id="root"></div>
     <script>${ORDER_CARD_BUNDLE}</script>
   </body>
