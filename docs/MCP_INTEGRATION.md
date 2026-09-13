@@ -78,7 +78,7 @@ A resposta segue o caminho inverso: o corpo do `/bot` é formatado em texto (`fo
 
 ## Regras de Negócio
 
-### As 13 tools
+### As 16 tools
 
 **Leitura** (`readOnlyHint: true`):
 
@@ -86,7 +86,8 @@ A resposta segue o caminho inverso: o corpo do `/bot` é formatado em texto (`fo
 |---|---|
 | `search` | Resolve cliente, dispositivo, serviço ou produto em IDs. Deve ser chamada antes de `create_order` ou `add_order_item` - só os IDs retornados por ela são válidos. |
 | `list_orders` | Lista ordens de serviço, com filtro opcional por status. |
-| `get_order` | Detalhe completo de uma OS. |
+| `get_order` | Detalhe completo de uma OS (inclui foto de capa e contagem de fotos). |
+| `list_order_photos` | Lista as fotos anexadas à OS com link direto, descrição, autor e data. |
 | `get_today_summary` | Resumo do dia. |
 | `get_pending_orders` | OS pendentes. |
 | `get_revenue` | Faturamento. |
@@ -102,6 +103,8 @@ A resposta segue o caminho inverso: o corpo do `/bot` é formatado em texto (`fo
 | `add_order_item` | Adiciona um serviço ou produto a uma OS. |
 | `add_order_comment` | Adiciona um comentário a uma OS. |
 | `create_entity` | Cadastra cliente, dispositivo, serviço ou produto. |
+| `upload_order_photo` | Anexa uma foto (base64) à OS informada com descrição e nome opcionais. |
+| `delete_order_photo` | Exclui uma foto da OS pelo `photoId` (`destructiveHint: true`). |
 
 ### Limites de listagem
 
@@ -117,9 +120,9 @@ Toda tool de listagem usa `DEFAULT_LIMIT = 20` e `MAX_LIMIT = 50` (`tools/read.t
 - Um novo `ui/notifications/tool-result` da **mesma** OS (ex.: o modelo mudou o status pelo chat com o card aberto) substitui a OS local do card sem remontá-lo; a confirmação aberta só sobrevive se a nova OS ainda permitir aquela escrita, e a mensagem é limpa se o status mudou (`receiveOrder` em `card-state.ts`). OS diferente remonta o card (`key={order.number}`).
 - Tema: o HTML do recurso declara `color-scheme: light dark` e valores de fallback em `:root` para as variáveis de estilo que o card usa (`--color-text-primary`, `--color-border-*`, `--color-text-danger`, `--font-sans`). Quando o host manda `theme` e `styles.variables` (no `hostContext` do `ui/initialize` ou em `ui/notifications/host-context-changed`, que é parcial e é mesclado), elas são aplicadas inline no `<html>` e têm prioridade. `styles.css.fonts` não é injetado; a fonte cai no restante da pilha de `--font-sans`.
 - Nunca dar `height: 100%` / `100vh` a `html`, `body` ou `#root`: a ponte mede o tamanho observando `document.documentElement` para enviar `ui/notifications/size-changed`, e isso só reflete a altura do conteúdo enquanto nada estica esses elementos (há teste em `widgets.test.ts`).
-- `structuredContent` segue um **allowlist** explícito (`toCardData` em `widgets/order-card.ts`): número, status, total, `shareUrl`, nome do cliente, nome/serial dos dispositivos, itens (nome/valor/quantidade). Telefone do cliente e URL de foto (`mainPhotoUrl`) nunca saem do servidor nessa fase.
+- `structuredContent` segue um **allowlist** explícito (`toCardData` em `widgets/order-card.ts`): número, status, total, `shareUrl`, `coverPhotoUrl`, `photosCount`, nome do cliente, nome/serial dos dispositivos, itens (nome/valor/quantidade). Telefone do cliente e URL interna de foto do bot (`mainPhotoUrl`) nunca saem do servidor.
+- Foto de capa no card: Quando a OS possui fotos, a URL pública (`coverPhotoUrl`) é enviada no `structuredContent.order` e renderizada no topo do card. O domínio do Firebase Storage está liberado em `_meta.ui.csp.resourceDomains: ['https://storage.googleapis.com']`.
 - Um host sem suporte a MCP Apps simplesmente ignora o recurso e mostra apenas o texto da resposta - que é sempre completo, nunca um resumo pensado só para acompanhar o card.
-- Esta fase não mostra foto no card. Quando isso for adicionado, o domínio do Storage precisará ser liberado em `_meta.ui.csp.resourceDomains`.
 
 ### Auditoria de escrita
 
@@ -129,7 +132,7 @@ Toda tool de escrita loga uma linha estruturada antes de retornar (`auditWrite` 
 {"event":"mcp_write","tool":"update_order_status","origin":"mcp","companyId":"...","userId":"...","orderNumber":123}
 ```
 
-Apenas identificadores passam por um allowlist explícito (`orderNumber`, `type`, `customerId`, `serviceId`, `productId`, `deviceId` - com `add_order_item` resolvendo seu `itemId`+`type` para `serviceId`/`productId`). Telefone, e-mail, endereço e texto livre (corpo de comentário, descrições de item/cliente) nunca entram no log: um campo novo adicionado depois ao input de uma tool fica de fora do log por padrão, não vaza por padrão.
+Apenas identificadores passam por um allowlist explícito (`orderNumber`, `photoId`, `type`, `customerId`, `serviceId`, `productId`, `deviceId` - com `add_order_item` resolvendo seu `itemId`+`type` para `serviceId`/`productId`). Telefone, e-mail, endereço, buffer base64 e texto livre (corpo de comentário, descrições de item/cliente/foto) nunca entram no log: um campo novo adicionado depois ao input de uma tool fica de fora do log por padrão, não vaza por padrão.
 
 ### Quem pode gerar uma conexão
 

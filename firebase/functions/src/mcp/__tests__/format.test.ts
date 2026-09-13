@@ -1,4 +1,4 @@
-import { formatOrder, formatOrderList, truncate } from '../format/order';
+import { formatOrder, formatOrderList, formatOrderPhotos, truncate } from '../format/order';
 import { formatSummary, formatRevenue, formatSearchResult, formatEntityList, formatPendingItems } from '../format/list';
 import type { TodaySummaryData } from '../../services/analytics.service';
 import type { RevenueMetrics, PendingOrder, OrderStatus, PendingItems } from '../../models/types';
@@ -119,6 +119,43 @@ describe('formatOrder', () => {
   it('traduz status quote para Orçamento', () => {
     const text = formatOrder({ ...orderDetail, status: 'quote' as OrderStatus });
     expect(text).toContain('Orçamento');
+  });
+
+  it('inclui a foto de capa e contagem quando existirem', () => {
+    const text = formatOrder({
+      ...orderDetail,
+      coverPhotoUrl: 'https://storage.googleapis.com/bucket/photo1.jpg',
+      photosCount: 3,
+    });
+    expect(text).toContain('Foto de capa: https://storage.googleapis.com/bucket/photo1.jpg');
+    expect(text).toContain('Fotos anexadas: 3 (use `list_order_photos` para ver todas)');
+  });
+});
+
+describe('formatOrderPhotos', () => {
+  it('avisa quando não há fotos', () => {
+    expect(formatOrderPhotos([])).toContain('Nenhuma foto anexada a esta OS.');
+    expect(formatOrderPhotos(null as any)).toContain('Nenhuma foto anexada a esta OS.');
+  });
+
+  it('formata lista de fotos com ID, URL e descrição', () => {
+    const photos = [
+      {
+        id: 'photo-1',
+        url: 'https://storage.googleapis.com/test/photo-1.jpg',
+        description: 'Dano na lateral direita',
+        createdBy: 'Carlos',
+      },
+      {
+        id: 'photo-2',
+        url: 'https://storage.googleapis.com/test/photo-2.jpg',
+        createdBy: 'Carlos',
+      },
+    ];
+    const text = formatOrderPhotos(photos);
+    expect(text).toContain('Fotos da OS (2):');
+    expect(text).toContain('**Foto `photo-1`** — Dano na lateral direita (por Carlos): https://storage.googleapis.com/test/photo-1.jpg');
+    expect(text).toContain('**Foto `photo-2`** (por Carlos): https://storage.googleapis.com/test/photo-2.jpg');
   });
 });
 

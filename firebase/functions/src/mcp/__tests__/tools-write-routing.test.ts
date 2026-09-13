@@ -19,6 +19,7 @@ jest.mock('../../services/catalog.service');
 jest.mock('../../services/order.service');
 jest.mock('../../services/share-token.service');
 jest.mock('../../services/comment.service');
+jest.mock('../../services/photo-upload.service');
 
 import { registerWriteTools } from '../tools/write';
 import {
@@ -39,12 +40,14 @@ import * as catalogService from '../../services/catalog.service';
 import * as orderService from '../../services/order.service';
 import * as shareTokenService from '../../services/share-token.service';
 import * as commentService from '../../services/comment.service';
+import * as photoService from '../../services/photo-upload.service';
 
 const mockCustomerService = customerService as jest.Mocked<typeof customerService>;
 const mockCatalogService = catalogService as jest.Mocked<typeof catalogService>;
 const mockOrderService = orderService as jest.Mocked<typeof orderService>;
 const mockShareTokenService = shareTokenService as jest.Mocked<typeof shareTokenService>;
 const mockCommentService = commentService as jest.Mocked<typeof commentService>;
+const mockPhotoService = photoService as jest.Mocked<typeof photoService>;
 // deviceService is mocked but only toDeviceAggr/createDevice are touched by
 // these paths, both indirectly via jest.mock's auto-mock defaults.
 void deviceService;
@@ -371,5 +374,63 @@ describe('write tools routing (real callRoute, real routers)', () => {
 
     assertRouteResolved(result);
     expect(result.content[0].text).toContain('Cliente Cadastro Distintivo');
+  });
+
+  it('upload_order_photo resolves via photos.routes POST /:number/photos', async () => {
+    const order = {
+      id: 'order-p1',
+      number: 8881,
+      photos: [],
+    } as any;
+    mockOrderService.getOrderByNumber.mockResolvedValue(order);
+    mockPhotoService.uploadPhotoFromBase64.mockResolvedValue({
+      id: 'photo-new-99',
+      url: 'https://storage.googleapis.com/test/photo-new-99.jpg',
+      storagePath: 'tenants/c1/orders/order-p1/photos/photo-new-99.jpg',
+      createdAt: new Date().toISOString() as any,
+      createdBy: { id: 'u1', name: 'User' },
+    });
+    mockOrderService.addPhotoToOrder.mockResolvedValue(undefined as any);
+
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const result = await server.tools.get('upload_order_photo')!.handler({
+      orderNumber: 8881,
+      photoBase64: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      filename: 'foto-teste.png',
+    });
+
+    assertRouteResolved(result);
+    expect(result.content[0].text).toContain('8881');
+    expect(result.content[0].text).toContain('Foto anexada com sucesso');
+  });
+
+  it('delete_order_photo resolves via photos.routes DELETE /:number/photos/:photoId', async () => {
+    const orderWithPhoto = {
+      id: 'order-p2',
+      number: 8882,
+      photos: [
+        {
+          id: 'photo-del-1',
+          storagePath: 'tenants/c1/orders/order-p2/photos/photo-del-1.jpg',
+        },
+      ],
+    } as any;
+    mockOrderService.getOrderByNumber.mockResolvedValue(orderWithPhoto);
+    mockPhotoService.deletePhoto.mockResolvedValue(undefined as any);
+    mockOrderService.removePhotoFromOrder.mockResolvedValue(undefined as any);
+
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const result = await server.tools.get('delete_order_photo')!.handler({
+      orderNumber: 8882,
+      photoId: 'photo-del-1',
+    });
+
+    assertRouteResolved(result);
+    expect(result.content[0].text).toContain('8882');
+    expect(result.content[0].text).toContain('Foto excluída');
   });
 });

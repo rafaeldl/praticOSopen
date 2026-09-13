@@ -61,6 +61,11 @@ describe('order card (MCP Apps)', () => {
     expect(head).not.toMatch(/100vh/);
   });
 
+  it('declara o dominio do Storage no CSP do MCP Apps', () => {
+    const meta = orderCardMeta() as { ui: { csp?: { resourceDomains?: string[] } } };
+    expect(meta.ui.csp?.resourceDomains).toContain('https://storage.googleapis.com');
+  });
+
   it('mantem o texto completo junto do card', () => {
     const order: Pick<OrderDetail, 'number'> = { number: 42 };
     const result = withOrderCard(order, 'OS #42 — Em andamento');
@@ -69,7 +74,7 @@ describe('order card (MCP Apps)', () => {
     expect(result.structuredContent).toEqual({ order: { number: 42 } });
   });
 
-  it('nao vaza dado do cliente que o card nao desenha (telefone, foto)', () => {
+  it('nao vaza dado do cliente que o card nao desenha (telefone, rota interna do bot)', () => {
     const order: OrderDetail = {
       number: 7734,
       status: 'progress',
@@ -87,7 +92,8 @@ describe('order card (MCP Apps)', () => {
       createdAt: '2026-09-12T10:00:00Z',
       rating: undefined,
       photosCount: 3,
-      mainPhotoUrl: 'https://storage.googleapis.com/praticos/tenants/comp1/orders/7734/photos/main.jpg',
+      mainPhotoUrl: '/bot/orders/7734/photos/main.jpg',
+      coverPhotoUrl: 'https://storage.googleapis.com/praticos/tenants/comp1/orders/7734/photos/main.jpg',
       shareUrl: 'https://praticos.web.app/q/tok123',
     };
 
@@ -95,7 +101,6 @@ describe('order card (MCP Apps)', () => {
     const serialized = JSON.stringify(result.structuredContent);
 
     expect(serialized).not.toContain('91234-5678');
-    expect(serialized).not.toContain('storage.googleapis.com');
     expect(serialized).not.toContain('mainPhotoUrl');
     expect(serialized).not.toContain('phone');
 
@@ -105,6 +110,8 @@ describe('order card (MCP Apps)', () => {
         status: 'progress',
         total: 390,
         shareUrl: 'https://praticos.web.app/q/tok123',
+        coverPhotoUrl: 'https://storage.googleapis.com/praticos/tenants/comp1/orders/7734/photos/main.jpg',
+        photosCount: 3,
         customer: { name: 'Cliente Improvavel' },
         devices: [{ name: 'iPhone 12', serial: 'ABC123' }],
         services: [{ name: 'Troca de tela', value: 350 }],

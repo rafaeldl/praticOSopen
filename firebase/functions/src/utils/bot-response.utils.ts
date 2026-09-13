@@ -47,6 +47,7 @@ export interface OrderDetail {
   rating?: number;
   photosCount: number;
   mainPhotoUrl: string | null;
+  coverPhotoUrl?: string | null;
   shareUrl: string | null;
 }
 
@@ -73,6 +74,9 @@ export async function buildOrderDetail(
   const photosCount = order.photos?.length || 0;
   const mainPhotoUrl = photosCount > 0
     ? `/bot/orders/${order.number}/photos/${order.photos![0].id}`
+    : null;
+  const coverPhotoUrl = photosCount > 0
+    ? (order.photos![0]?.url || null)
     : null;
 
   // Fetch active share token; auto-create if customer exists and no active token
@@ -123,6 +127,7 @@ export async function buildOrderDetail(
       rating: order.rating,
       photosCount,
       mainPhotoUrl,
+      coverPhotoUrl,
       shareUrl,
     },
     formatContext: getFormatContext(companyCountry),

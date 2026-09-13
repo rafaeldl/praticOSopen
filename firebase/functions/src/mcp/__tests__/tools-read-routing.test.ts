@@ -312,4 +312,30 @@ describe('read tools routing (real callRoute, real routers)', () => {
     expect(result.content[0].text).toContain('cust-9987');
     expect(result.content[0].text).toContain('Zylphoria Nonstandard');
   });
+
+  it('list_order_photos resolves against photos.routes (GET /:number/photos)', async () => {
+    mockOrderService.getOrderByNumber.mockResolvedValue({
+      id: 'order-1',
+      number: 42,
+      photos: [
+        {
+          id: 'photo-uuid-1',
+          url: 'https://storage.googleapis.com/test/photo-uuid-1.jpg',
+          storagePath: 'tenants/c1/orders/o1/photos/photo-uuid-1.jpg',
+          description: 'Foto do painel',
+          createdAt: new Date(),
+          createdBy: { id: 'u1', name: 'Tecnico Teste' },
+        },
+      ],
+    } as any);
+
+    const server = fakeServer();
+    registerReadTools(server as any, { req });
+
+    const result = await server.tools.get('list_order_photos')!.handler({ orderNumber: 42 });
+
+    assertRouteResolved(result);
+    expect(result.content[0].text).toContain('photo-uuid-1');
+    expect(result.content[0].text).toContain('Foto do painel');
+  });
 });

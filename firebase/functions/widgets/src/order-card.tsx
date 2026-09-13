@@ -119,6 +119,27 @@ export function OrderCard({ order: incomingOrder }: { order: OrderData }) {
       padding: 16,
       maxWidth: 460,
     }}>
+      {order.coverPhotoUrl && (
+        <div style={{
+          marginBottom: 12,
+          borderRadius: 8,
+          overflow: 'hidden',
+          maxHeight: 180,
+          border: '1px solid var(--color-border-tertiary)',
+        }}>
+          <img
+            src={order.coverPhotoUrl}
+            alt="Foto da OS"
+            style={{
+              width: '100%',
+              maxHeight: 180,
+              objectFit: 'cover',
+              display: 'block',
+            }}
+          />
+        </div>
+      )}
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <strong style={{ fontSize: 17 }}>OS #{order.number}</strong>
         <span style={{

@@ -23,7 +23,7 @@ const req = { auth: { type: 'mcp', companyId: 'comp1' } } as unknown as Authenti
 describe('read tools', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('registra as 7 tools de consulta', () => {
+  it('registra as 8 tools de consulta', () => {
     const server = fakeServer();
     registerReadTools(server as any, { req });
 
@@ -33,6 +33,7 @@ describe('read tools', () => {
       'get_revenue',
       'get_today_summary',
       'list_entities',
+      'list_order_photos',
       'list_orders',
       'search',
     ]);
@@ -106,5 +107,34 @@ describe('read tools', () => {
       expect.anything(),
       expect.objectContaining({ query: expect.objectContaining({ limit: '50' }) }),
     );
+  });
+
+  it('list_order_photos busca fotos pelo número da OS', async () => {
+    mockCallRoute.mockResolvedValue({
+      status: 200,
+      body: {
+        data: {
+          photos: [
+            {
+              id: 'photo-1',
+              url: 'https://storage.googleapis.com/test/photo-1.jpg',
+              description: 'Dano lateral',
+              createdBy: 'João',
+            },
+          ],
+        },
+      },
+    });
+    const server = fakeServer();
+    registerReadTools(server as any, { req });
+
+    const result = await server.tools.get('list_order_photos')!.handler({ orderNumber: 42 });
+
+    expect(mockCallRoute).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ method: 'GET', path: '/42/photos' }),
+    );
+    expect(result.content[0].text).toContain('photo-1');
+    expect(result.content[0].text).toContain('Dano lateral');
   });
 });

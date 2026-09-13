@@ -60,7 +60,30 @@ export function formatOrder(order: any): string {
   lines.push('');
   lines.push(`Total: ${money(order.total)}`);
 
+  if (order.coverPhotoUrl) {
+    lines.push(`Foto de capa: ${order.coverPhotoUrl}`);
+  }
+  if (order.photosCount && order.photosCount > 1) {
+    lines.push(`Fotos anexadas: ${order.photosCount} (use \`list_order_photos\` para ver todas)`);
+  } else if (order.photosCount === 1 && !order.coverPhotoUrl) {
+    lines.push('Fotos anexadas: 1 (use `list_order_photos` para ver detalhes)');
+  }
+
   if (order.shareUrl) lines.push(`Link para o cliente: ${order.shareUrl}`);
+
+  return lines.join('\n');
+}
+
+export function formatOrderPhotos(photos: any[]): string {
+  if (!photos || !photos.length) return 'Nenhuma foto anexada a esta OS.';
+
+  const lines = [`**Fotos da OS (${photos.length}):**`];
+  for (let i = 0; i < photos.length; i++) {
+    const p = photos[i];
+    const desc = p.description ? ` — ${p.description}` : '';
+    const author = p.createdBy ? ` (por ${p.createdBy})` : '';
+    lines.push(`${i + 1}. **Foto \`${p.id}\`**${desc}${author}: ${p.url || p.downloadUrl}`);
+  }
 
   return lines.join('\n');
 }
