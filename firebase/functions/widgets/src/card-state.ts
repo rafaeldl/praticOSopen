@@ -23,6 +23,8 @@ export interface OrderData {
   products?: OrderItem[];
   total?: number;
   shareUrl?: string | null;
+  coverPhotoUrl?: string | null;
+  photosCount?: number;
 }
 
 /** Shape of the value bridge.ts's callTool() promise resolves with (CallToolResult). */

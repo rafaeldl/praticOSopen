@@ -106,7 +106,7 @@
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
             "color": "blue",
             "title": "Ordens de Serviço",
-            "description": "Buscar, listar, ver detalhes, criar, aprovar, marcar como concluída, adicionar itens e comentários."
+            "description": "Buscar, listar, ver detalhes (com foto de capa), listar e anexar fotos, criar, aprovar, marcar como concluída, adicionar itens e comentários."
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
@@ -142,8 +142,8 @@
             "answer": "O dono da empresa ou um administrador."
           },
           {
-            "question": "O assistente vê o telefone dos meus clientes ou fotos das ordens de serviço?",
-            "answer": "Não. Essas informações não são enviadas para o cartão visual nem aparecem nas respostas estruturadas usadas por ele."
+            "question": "O assistente vê o telefone dos meus clientes?",
+            "answer": "Não. O telefone dos seus clientes nunca é enviado para o cartão visual nem exposto ao assistente. A foto de capa da ordem de serviço é exibida no cartão visual quando houver fotos anexadas."
           },
           {
             "question": "O cartão visual sempre aparece?",
@@ -264,7 +264,7 @@
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
             "color": "blue",
             "title": "Service Orders",
-            "description": "Search, list, view details, create, approve, mark as done, add items and comments."
+            "description": "Search, list, view details (with cover photo), list and attach photos, create, approve, mark as done, add items and comments."
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
@@ -300,8 +300,8 @@
             "answer": "The company owner or an administrator."
           },
           {
-            "question": "Can the assistant see my customers' phone numbers or service order photos?",
-            "answer": "No. That information is never sent to the visual card or included in the structured data it uses."
+            "question": "Can the assistant see my customers' phone numbers?",
+            "answer": "No. Customer phone numbers are never sent to the visual card or exposed to the assistant. The service order cover photo is shown in the visual card when photos are attached."
           },
           {
             "question": "Does the visual card always show up?",
@@ -422,7 +422,7 @@
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline></svg>",
             "color": "blue",
             "title": "Órdenes de Servicio",
-            "description": "Buscar, listar, ver detalles, crear, aprobar, marcar como concluida, agregar ítems y comentarios."
+            "description": "Buscar, listar, ver detalles (con foto de portada), listar y adjuntar fotos, crear, aprobar, marcar como concluida, agregar ítems y comentarios."
           },
           {
             "icon": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"23\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg>",
@@ -458,8 +458,8 @@
             "answer": "El dueño de la empresa o un administrador."
           },
           {
-            "question": "¿El asistente ve el teléfono de mis clientes o las fotos de las órdenes de servicio?",
-            "answer": "No. Esa información nunca se envía a la tarjeta visual ni aparece en los datos estructurados que ella usa."
+            "question": "¿El asistente ve el teléfono de mis clientes?",
+            "answer": "No. El teléfono de tus clientes nunca se envía a la tarjeta visual ni se expone al asistente. La foto de portada de la orden de servicio se muestra en la tarjeta visual cuando hay fotos adjuntas."
           },
           {
             "question": "¿La tarjeta visual aparece siempre?",

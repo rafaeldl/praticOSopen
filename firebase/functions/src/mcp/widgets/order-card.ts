@@ -67,7 +67,12 @@ export function registerOrderCardResource(server: any): void {
  */
 export function orderCardMeta(): Record<string, unknown> {
   return {
-    ui: { resourceUri: ORDER_CARD_URI },
+    ui: {
+      resourceUri: ORDER_CARD_URI,
+      csp: {
+        resourceDomains: ['https://storage.googleapis.com'],
+      },
+    },
     'openai/outputTemplate': ORDER_CARD_URI,
   };
 }
@@ -81,6 +86,8 @@ export interface OrderCardData {
   devices?: { name?: string; serial?: string }[];
   services?: { name?: string; value?: number }[];
   products?: { name?: string; value?: number; quantity?: number }[];
+  coverPhotoUrl?: string | null;
+  photosCount?: number;
 }
 
 /**
@@ -104,6 +111,14 @@ function toCardData(order: unknown): OrderCardData {
     total: o.total as number | undefined,
     shareUrl: o.shareUrl as string | null | undefined,
   };
+
+  if (o.coverPhotoUrl !== undefined) {
+    data.coverPhotoUrl = o.coverPhotoUrl as string | null;
+  }
+
+  if (typeof o.photosCount === 'number') {
+    data.photosCount = o.photosCount;
+  }
 
   if (o.customer && typeof o.customer === 'object') {
     const customer = o.customer as { name?: string };

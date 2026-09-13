@@ -11,6 +11,7 @@ import botOrdersRoutes from '../../routes/bot/orders.routes';
 import botOrdersManagementRoutes from '../../routes/bot/orders-management.routes';
 import botCommentsRoutes from '../../routes/bot/comments.routes';
 import botEntitiesRoutes from '../../routes/bot/entities.routes';
+import botPhotosRoutes from '../../routes/bot/photos.routes';
 
 const ENTITY_TYPES = ['customer', 'device', 'service', 'product'] as const;
 type EntityType = (typeof ENTITY_TYPES)[number];
@@ -58,6 +59,7 @@ function auditWrite(ctx: McpToolContext, tool: string, args: Record<string, unkn
   const allowed: Record<string, unknown> = {};
 
   if (typeof args.orderNumber === 'number') allowed.orderNumber = args.orderNumber;
+  if (typeof args.photoId === 'string') allowed.photoId = args.photoId;
   if (typeof args.type === 'string') allowed.type = args.type;
   if (typeof args.customerId === 'string') allowed.customerId = args.customerId;
   if (typeof args.serviceId === 'string') allowed.serviceId = args.serviceId;
@@ -335,6 +337,81 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
           ? result.body.message
           : `Cadastrado: ${created?.name ?? created?.id}`;
       return ok(message);
+    },
+  );
+
+  server.registerTool(
+    'upload_order_photo',
+    {
+      title: 'Anexar foto à OS',
+      description:
+        'Uploads a photo to a service order using base64 encoded image data. Optional filename (e.g. "photo.jpg") and description.',
+      inputSchema: {
+        orderNumber: z.number(),
+        photoBase64: z.string().min(1),
+        filename: z.string().optional(),
+        description: z.string().max(500).optional(),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false },
+    },
+    async (args: {
+      orderNumber: number;
+      photoBase64: string;
+      filename?: string;
+      description?: string;
+    }) => {
+      const body: Record<string, unknown> = {
+        base64: args.photoBase64,
+        filename: args.filename || 'photo.jpg',
+      };
+      if (args.description) body.description = args.description;
+
+      // POST photos.routes -> /:number/photos.
+      const result = await callRoute(botPhotosRoutes, {
+        method: 'POST',
+        path: `/${args.orderNumber}/photos`,
+        body,
+        source: ctx.req,
+      });
+
+      if (result.status >= 400) return fail(result.body);
+
+      auditWrite(ctx, 'upload_order_photo', {
+        orderNumber: args.orderNumber,
+        photoId: result.body.data.photoId,
+      });
+
+      const count = result.body.data.photoCount;
+      return ok(`Foto anexada com sucesso à OS #${args.orderNumber}. Total de fotos: ${count}.`);
+    },
+  );
+
+  server.registerTool(
+    'delete_order_photo',
+    {
+      title: 'Excluir foto da OS',
+      description:
+        'Deletes a photo from a service order by its photoId. Always ask for user confirmation before deleting.',
+      inputSchema: {
+        orderNumber: z.number(),
+        photoId: z.string().min(1),
+      },
+      annotations: { readOnlyHint: false, destructiveHint: true },
+    },
+    async (args: { orderNumber: number; photoId: string }) => {
+      auditWrite(ctx, 'delete_order_photo', args);
+
+      // DELETE photos.routes -> /:number/photos/:photoId.
+      const result = await callRoute(botPhotosRoutes, {
+        method: 'DELETE',
+        path: `/${args.orderNumber}/photos/${args.photoId}`,
+        source: ctx.req,
+      });
+
+      if (result.status >= 400) return fail(result.body);
+
+      const remaining = result.body.data.remainingPhotos;
+      return ok(`Foto excluída da OS #${args.orderNumber}. Fotos restantes: ${remaining}.`);
     },
   );
 }

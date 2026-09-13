@@ -40,7 +40,7 @@ describe('write tools', () => {
     logSpy.mockRestore();
   });
 
-  it('registra as 6 tools de escrita', () => {
+  it('registra as 8 tools de escrita', () => {
     const server = fakeServer();
     registerWriteTools(server as any, { req });
 
@@ -49,8 +49,10 @@ describe('write tools', () => {
       'add_order_item',
       'create_entity',
       'create_order',
+      'delete_order_photo',
       'update_order',
       'update_order_status',
+      'upload_order_photo',
     ]);
   });
 
@@ -230,5 +232,90 @@ describe('write tools', () => {
       expect(visibility).toEqual(expect.arrayContaining(['model', 'app']));
     }
     expect(meta?.['openai/widgetAccessible' as keyof typeof meta]).toBeUndefined();
+  });
+
+  it('upload_order_photo posta em /:number/photos e audita photoId', async () => {
+    mockCallRoute.mockResolvedValue({
+      status: 200,
+      body: {
+        data: {
+          photoId: 'photo-123',
+          url: 'https://storage.googleapis.com/test/photo-123.jpg',
+          photoCount: 2,
+        },
+      },
+    });
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const result = await server.tools.get('upload_order_photo')!.handler({
+      orderNumber: 42,
+      photoBase64: 'dGVzdA==',
+      filename: 'dano.jpg',
+      description: 'Dano frontal',
+    });
+
+    expect(mockCallRoute).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: 'POST',
+        path: '/42/photos',
+        body: {
+          base64: 'dGVzdA==',
+          filename: 'dano.jpg',
+          description: 'Dano frontal',
+        },
+      }),
+    );
+    expect(result.content[0].text).toContain('Foto anexada com sucesso à OS #42');
+
+    const parsed = logSpy.mock.calls.map((c) => JSON.parse(c[0]));
+    const audit = parsed.find((p) => p.event === 'mcp_write' && p.tool === 'upload_order_photo');
+    expect(audit).toMatchObject({
+      origin: 'mcp',
+      companyId: 'comp1',
+      userId: 'user1',
+      orderNumber: 42,
+      photoId: 'photo-123',
+    });
+    expect(audit).not.toHaveProperty('photoBase64');
+    expect(audit).not.toHaveProperty('description');
+  });
+
+  it('delete_order_photo envia DELETE para /:number/photos/:photoId e audita', async () => {
+    mockCallRoute.mockResolvedValue({
+      status: 200,
+      body: {
+        data: {
+          remainingPhotos: 1,
+        },
+      },
+    });
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const result = await server.tools.get('delete_order_photo')!.handler({
+      orderNumber: 42,
+      photoId: 'photo-123',
+    });
+
+    expect(mockCallRoute).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: 'DELETE',
+        path: '/42/photos/photo-123',
+      }),
+    );
+    expect(result.content[0].text).toContain('Foto excluída da OS #42');
+
+    const parsed = logSpy.mock.calls.map((c) => JSON.parse(c[0]));
+    const audit = parsed.find((p) => p.event === 'mcp_write' && p.tool === 'delete_order_photo');
+    expect(audit).toMatchObject({
+      origin: 'mcp',
+      companyId: 'comp1',
+      userId: 'user1',
+      orderNumber: 42,
+      photoId: 'photo-123',
+    });
   });
 });

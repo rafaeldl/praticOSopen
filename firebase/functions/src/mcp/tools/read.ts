@@ -9,7 +9,7 @@ import { z } from 'zod/v3';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpToolContext } from '../types';
 import { callRoute } from '../bridge';
-import { formatOrder, formatOrderList, truncate } from '../format/order';
+import { formatOrder, formatOrderList, formatOrderPhotos, truncate } from '../format/order';
 import { orderCardMeta, withOrderCard } from '../widgets/order-card';
 import {
   formatSummary,
@@ -22,6 +22,7 @@ import {
 import unifiedSearchRoutes from '../../routes/bot/unified-search.routes';
 import botOrdersRoutes from '../../routes/bot/orders.routes';
 import botOrdersManagementRoutes from '../../routes/bot/orders-management.routes';
+import botPhotosRoutes from '../../routes/bot/photos.routes';
 import summaryRoutes from '../../routes/bot/summary.routes';
 import botAnalyticsRoutes from '../../routes/bot/analytics.routes';
 import botEntitiesRoutes from '../../routes/bot/entities.routes';
@@ -263,6 +264,29 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       const items: any[] = result.body.data;
       const { items: shown, omitted } = truncate(items, limit);
       return ok(formatEntityList(args.type, shown, omitted));
+    },
+  );
+
+  server.registerTool(
+    'list_order_photos',
+    {
+      title: 'Listar fotos da OS',
+      description:
+        'Lists all photos attached to a service order, including their direct URLs, upload date, author and descriptions.',
+      inputSchema: { orderNumber: z.number() },
+      annotations: { readOnlyHint: true },
+    },
+    async (args: { orderNumber: number }) => {
+      // GET routes/bot/photos.routes -> /:number/photos.
+      // Response: { success, data: { photos: [...], count } }.
+      const result = await callRoute(botPhotosRoutes, {
+        method: 'GET',
+        path: `/${args.orderNumber}/photos`,
+        source: ctx.req,
+      });
+
+      if (result.status >= 400) return fail(result.body);
+      return ok(formatOrderPhotos(result.body.data.photos));
     },
   );
 }
