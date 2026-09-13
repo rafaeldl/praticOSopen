@@ -46,13 +46,41 @@ const HTML = `<!doctype html>
   </body>
 </html>`;
 
+// Dedicated sandbox origin ChatGPT requires to submit an app with UI (must be
+// unique per app). Set through the ChatGPT alias rather than `ui.domain`:
+// the spec leaves the domain format to each host, so a ChatGPT-style origin
+// in the standard key could be rejected by Claude.
+export const ORDER_CARD_DOMAIN = 'https://praticos.web.app';
+
+// The card makes no network calls; it only loads the cover photo from
+// Firebase Storage. Keep this list as narrow as the card's real behavior —
+// the ChatGPT app review checks the policy against it.
+const RESOURCE_DOMAINS = ['https://storage.googleapis.com'];
+
+/**
+ * Resource _meta (resources/list and resources/read). Per the MCP Apps spec,
+ * CSP and domain belong to the UI resource, not to the tool that points at it.
+ * `openai/widgetCSP` mirrors `ui.csp` for older ChatGPT runtimes.
+ */
+export function orderCardResourceMeta(): Record<string, unknown> {
+  return {
+    ui: {
+      csp: { connectDomains: [], resourceDomains: RESOURCE_DOMAINS },
+    },
+    'openai/widgetCSP': { connect_domains: [], resource_domains: RESOURCE_DOMAINS },
+    'openai/widgetDomain': ORDER_CARD_DOMAIN,
+  };
+}
+
 export function registerOrderCardResource(server: any): void {
   server.registerResource(
     'order-card',
     ORDER_CARD_URI,
-    { title: 'Card da ordem de serviço', mimeType: ORDER_CARD_MIME },
+    { title: 'Card da ordem de serviço', mimeType: ORDER_CARD_MIME, _meta: orderCardResourceMeta() },
     async () => ({
-      contents: [{ uri: ORDER_CARD_URI, mimeType: ORDER_CARD_MIME, text: HTML }],
+      contents: [
+        { uri: ORDER_CARD_URI, mimeType: ORDER_CARD_MIME, text: HTML, _meta: orderCardResourceMeta() },
+      ],
     }),
   );
 }
@@ -67,12 +95,7 @@ export function registerOrderCardResource(server: any): void {
  */
 export function orderCardMeta(): Record<string, unknown> {
   return {
-    ui: {
-      resourceUri: ORDER_CARD_URI,
-      csp: {
-        resourceDomains: ['https://storage.googleapis.com'],
-      },
-    },
+    ui: { resourceUri: ORDER_CARD_URI },
     'openai/outputTemplate': ORDER_CARD_URI,
   };
 }
