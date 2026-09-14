@@ -1,6 +1,8 @@
 // Import from 'zod/v3', not 'zod'. The installed zod@3.25 exports v4 at the
 // top level, while @modelcontextprotocol/sdk@1.30 expects zod/v3 types; the
 // mismatch fails the build with TS2589 as soon as a tool has an inputSchema.
+import fs from 'fs';
+import path from 'path';
 import { z } from 'zod/v3';
 import { McpToolContext } from '../types';
 import { callRoute } from '../bridge';
@@ -30,7 +32,7 @@ function ok(text: string) {
 }
 
 function fail(body: any) {
-  const message = body?.error?.message ?? 'Request failed';
+  const message = typeof body === 'string' ? body : (body?.error?.message ?? 'Request failed');
   return { content: [{ type: 'text' as const, text: message }], isError: true };
 }
 
@@ -345,26 +347,82 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
     {
       title: 'Anexar foto à OS',
       description:
-        'Uploads a photo to a service order using base64 encoded image data. Optional filename (e.g. "photo.jpg") and description.',
+        'Uploads a photo to a service order using a file (ChatGPT fileParams), URL (http/https), local file path (if accessible to server), or base64 encoded image data. Optional filename and description.',
       inputSchema: {
-        orderNumber: z.number(),
-        photoBase64: z.string().min(1),
-        filename: z.string().optional(),
-        description: z.string().max(500).optional(),
+        orderNumber: z.number().describe('Service order number (e.g. 1042)'),
+        file: z
+          .object({
+            download_url: z.string().describe('Temporary download URL provided by ChatGPT'),
+            file_id: z.string().describe('ChatGPT file ID'),
+            mime_type: z.string().optional().describe('MIME type of the file'),
+            file_name: z.string().optional().describe('Original filename'),
+          })
+          .optional()
+          .describe('File object automatically provided by ChatGPT when the user attaches a file'),
+        fileUrl: z.string().optional().describe('Public or accessible HTTP/HTTPS URL of the image file'),
+        photoUrl: z.string().optional().describe('Alias for fileUrl'),
+        filePath: z.string().optional().describe('Local filesystem path to the image file (if accessible to server)'),
+        photoBase64: z.string().optional().describe('Base64-encoded image data or data URI'),
+        filename: z.string().optional().describe('Optional filename with extension (e.g. "vistoria.jpg")'),
+        description: z.string().max(500).optional().describe('Optional description or caption for the photo'),
       },
       annotations: { readOnlyHint: false, destructiveHint: false },
+      _meta: {
+        'openai/fileParams': ['file'],
+      },
     },
     async (args: {
       orderNumber: number;
-      photoBase64: string;
+      file?: {
+        download_url: string;
+        file_id: string;
+        mime_type?: string;
+        file_name?: string;
+      };
+      fileUrl?: string;
+      photoUrl?: string;
+      filePath?: string;
+      photoBase64?: string;
       filename?: string;
       description?: string;
     }) => {
-      const body: Record<string, unknown> = {
-        base64: args.photoBase64,
-        filename: args.filename || 'photo.jpg',
-      };
+      const body: Record<string, unknown> = {};
       if (args.description) body.description = args.description;
+
+      const targetUrl = args.file?.download_url || args.fileUrl || args.photoUrl;
+
+      if (targetUrl) {
+        body.url = targetUrl;
+        body.filename = args.filename || args.file?.file_name || 'photo.jpg';
+        if (args.file?.mime_type) body.mimeType = args.file.mime_type;
+      } else if (args.filePath) {
+        const rawPath = args.filePath.trim();
+        if (rawPath.startsWith('http://') || rawPath.startsWith('https://')) {
+          body.url = rawPath;
+          body.filename = args.filename || 'photo.jpg';
+        } else {
+          const cleanPath = rawPath.startsWith('file://') ? rawPath.replace(/^file:\/\//, '') : rawPath;
+          if (!fs.existsSync(cleanPath)) {
+            return fail(
+              `Arquivo não encontrado em "${args.filePath}". Se o servidor MCP estiver rodando na nuvem, ele não tem acesso ao sistema de arquivos local da sua máquina. Utilize envio via arquivo (ChatGPT), URL acessível (fileUrl) ou Base64 (photoBase64).`
+            );
+          }
+          try {
+            const fileBuffer = await fs.promises.readFile(cleanPath);
+            body.base64 = fileBuffer.toString('base64');
+            body.filename = args.filename || path.basename(cleanPath) || 'photo.jpg';
+          } catch (err: any) {
+            return fail(`Falha ao ler arquivo local: ${err?.message || err}`);
+          }
+        }
+      } else if (args.photoBase64) {
+        body.base64 = args.photoBase64;
+        body.filename = args.filename || 'photo.jpg';
+      } else {
+        return fail(
+          'Nenhum anexo de foto fornecido. Envie um arquivo (ChatGPT fileParams), URL acessível (fileUrl), caminho local (filePath) ou Base64 (photoBase64).'
+        );
+      }
 
       // POST photos.routes -> /:number/photos.
       const result = await callRoute(botPhotosRoutes, {

@@ -103,7 +103,7 @@ A resposta segue o caminho inverso: o corpo do `/bot` é formatado em texto (`fo
 | `add_order_item` | Adiciona um serviço ou produto a uma OS. |
 | `add_order_comment` | Adiciona um comentário a uma OS. |
 | `create_entity` | Cadastra cliente, dispositivo, serviço ou produto. |
-| `upload_order_photo` | Anexa uma foto (base64) à OS informada com descrição e nome opcionais. |
+| `upload_order_photo` | Anexa uma foto à OS informada. Suporta arquivos do ChatGPT via `_meta.openai/fileParams` (`file.download_url`), URLs diretas (`fileUrl`/`photoUrl`), caminhos locais (`filePath`) ou Base64 (`photoBase64`), com descrição e nome opcionais. |
 | `delete_order_photo` | Exclui uma foto da OS pelo `photoId` (`destructiveHint: true`). |
 
 ### Limites de listagem

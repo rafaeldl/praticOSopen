@@ -282,6 +282,114 @@ describe('write tools', () => {
     expect(audit).not.toHaveProperty('description');
   });
 
+  it('upload_order_photo aceita file (ChatGPT fileParams) e declara _meta.openai/fileParams', async () => {
+    mockCallRoute.mockResolvedValue({
+      status: 200,
+      body: {
+        data: {
+          photoId: 'photo-chatgpt-1',
+          url: 'https://storage.googleapis.com/test/photo-chatgpt-1.jpg',
+          photoCount: 1,
+        },
+      },
+    });
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const tool = server.tools.get('upload_order_photo')!;
+    expect(tool.config._meta).toEqual({
+      'openai/fileParams': ['file'],
+    });
+
+    const result = await tool.handler({
+      orderNumber: 42,
+      file: {
+        download_url: 'https://files.oaiusercontent.com/file-123',
+        file_id: 'file-123',
+        mime_type: 'image/jpeg',
+        file_name: 'vistoria.jpg',
+      },
+      description: 'Foto do ChatGPT',
+    });
+
+    expect(mockCallRoute).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: 'POST',
+        path: '/42/photos',
+        body: {
+          url: 'https://files.oaiusercontent.com/file-123',
+          filename: 'vistoria.jpg',
+          mimeType: 'image/jpeg',
+          description: 'Foto do ChatGPT',
+        },
+      }),
+    );
+    expect(result.content[0].text).toContain('Foto anexada com sucesso à OS #42');
+  });
+
+  it('upload_order_photo aceita fileUrl direta', async () => {
+    mockCallRoute.mockResolvedValue({
+      status: 200,
+      body: {
+        data: {
+          photoId: 'photo-url-1',
+          url: 'https://storage.googleapis.com/test/photo-url-1.jpg',
+          photoCount: 3,
+        },
+      },
+    });
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const result = await server.tools.get('upload_order_photo')!.handler({
+      orderNumber: 42,
+      fileUrl: 'https://example.com/imagem.png',
+      filename: 'custom.png',
+    });
+
+    expect(mockCallRoute).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        method: 'POST',
+        path: '/42/photos',
+        body: {
+          url: 'https://example.com/imagem.png',
+          filename: 'custom.png',
+        },
+      }),
+    );
+    expect(result.content[0].text).toContain('Total de fotos: 3');
+  });
+
+  it('upload_order_photo retorna erro explicativo se filePath não existir no servidor', async () => {
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const result = await server.tools.get('upload_order_photo')!.handler({
+      orderNumber: 42,
+      filePath: '/tmp/nao-existe-12345.jpg',
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Arquivo não encontrado');
+    expect(result.content[0].text).toContain('servidor MCP estiver rodando na nuvem');
+    expect(mockCallRoute).not.toHaveBeenCalled();
+  });
+
+  it('upload_order_photo falha se nenhum anexo for fornecido', async () => {
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const result = await server.tools.get('upload_order_photo')!.handler({
+      orderNumber: 42,
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Nenhum anexo de foto fornecido');
+    expect(mockCallRoute).not.toHaveBeenCalled();
+  });
+
   it('delete_order_photo envia DELETE para /:number/photos/:photoId e audita', async () => {
     mockCallRoute.mockResolvedValue({
       status: 200,
