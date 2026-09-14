@@ -162,7 +162,7 @@
         "subsections": [
           {
             "title": "Compartilhar",
-            "content": "Abre o menu de compartilhamento do dispositivo para escolher onde enviar o resumo e link da OS. Se indisponível ou bloqueado, permite copiar o link para usar em qualquer aplicativo. Cancelar o menu não envia nada."
+            "content": "Abre o menu de compartilhamento do dispositivo para escolher onde enviar o resumo e link da OS. Se indisponível ou bloqueado, oferece WhatsApp, Telegram ou copiar o link para usar em qualquer aplicativo. Cancelar o menu não envia nada."
           }
         ],
         "infoCard": {
@@ -335,7 +335,7 @@
         "subsections": [
           {
             "title": "Share",
-            "content": "Opens the device share menu to choose where to send the order summary and link. When unavailable or blocked, copy the link to use in any app. Canceling sends nothing."
+            "content": "Opens the device share menu to choose where to send the order summary and link. When unavailable or blocked, choose WhatsApp, Telegram, or copy the link to use in any app. Canceling sends nothing."
           }
         ],
         "infoCard": {
@@ -508,7 +508,7 @@
         "subsections": [
           {
             "title": "Compartir",
-            "content": "Abre el menú de compartir del dispositivo para elegir dónde enviar el resumen y enlace de la OS. Si no está disponible o está bloqueado, permite copiar el enlace para usarlo en cualquier aplicación. Cancelar no envía nada."
+            "content": "Abre el menú de compartir del dispositivo para elegir dónde enviar el resumen y enlace de la OS. Si no está disponible o está bloqueado, ofrece WhatsApp, Telegram o copiar el enlace para usarlo en cualquier aplicación. Cancelar no envía nada."
           }
         ],
         "infoCard": {

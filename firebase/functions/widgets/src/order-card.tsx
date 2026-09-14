@@ -21,6 +21,7 @@ export function OrderCard({ order: incomingOrder, locale = 'pt-BR' }: {
   const [sharing, setSharing] = React.useState(false);
   const [message, setMessage] = React.useState<CardMessage | null>(null);
   const [showLink, setShowLink] = React.useState(false);
+  const [showDestinations, setShowDestinations] = React.useState(false);
   const [failedPhoto, setFailedPhoto] = React.useState<string | null>(null);
   const [seenOrder, setSeenOrder] = React.useState(incomingOrder);
   if (incomingOrder !== seenOrder) {
@@ -61,18 +62,29 @@ export function OrderCard({ order: incomingOrder, locale = 'pt-BR' }: {
   const share = async () => {
     if (!sharePayload || sharing) return;
     setSharing(true);
+    setMessage(null);
     try {
       if (typeof navigator.share === 'function') {
         await navigator.share(sharePayload);
       } else {
-        setShowLink(true);
+        setShowDestinations(true);
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
-      setMessage({ text: labels.shareFailed, error: true });
-      setShowLink(true);
+      setShowDestinations(true);
     } finally {
       setSharing(false);
+    }
+  };
+  const shareTo = async (destination: 'whatsapp' | 'telegram') => {
+    if (!sharePayload) return;
+    const url = destination === 'whatsapp'
+      ? `https://wa.me/?text=${encodeURIComponent(`${sharePayload.text}\n${sharePayload.url}`)}`
+      : `https://t.me/share/url?url=${encodeURIComponent(sharePayload.url)}&text=${encodeURIComponent(sharePayload.text)}`;
+    try {
+      await openLink(url);
+    } catch {
+      setMessage({ text: labels.shareFailed, error: true });
     }
   };
   const confirmStatus = async (requestedStatus: 'done' | 'approved') => {
@@ -120,6 +132,15 @@ export function OrderCard({ order: incomingOrder, locale = 'pt-BR' }: {
         {sharePayload && <button type="button" className="card-button card-button-primary" onClick={share} disabled={sharing}>
           <CardIcon name="share" />{sharing ? labels.opening : labels.share}
         </button>}
+        {showDestinations && <section className="card-confirmation" aria-label={labels.chooseDestination}>
+          <p>{labels.chooseDestination}</p>
+          <div className="card-secondary">
+            <button type="button" className="card-button" onClick={() => shareTo('whatsapp')}>WhatsApp</button>
+            <button type="button" className="card-button" onClick={() => shareTo('telegram')}>Telegram</button>
+            <button type="button" className="card-button" onClick={copyLink}>{labels.copyLink}</button>
+            <button type="button" className="card-button" onClick={() => setShowDestinations(false)}>{labels.cancel}</button>
+          </div>
+        </section>}
         <div className="card-secondary">
           {actions.copyLink && <button type="button" className="card-button" onClick={openOrder}><CardIcon name="link" />{labels.copy}</button>}
           {pending === null && actions.markDone && <button type="button" className="card-button" onClick={() => setPending('done')}><CardIcon name="check" />{labels.complete}</button>}

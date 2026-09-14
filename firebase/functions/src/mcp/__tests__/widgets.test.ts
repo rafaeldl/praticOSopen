@@ -75,11 +75,11 @@ describe('order card (MCP Apps)', () => {
     for (const meta of [config._meta, content._meta]) {
       expect(meta.ui.csp).toEqual({
         connectDomains: [],
-        resourceDomains: ['https://storage.googleapis.com'],
+        resourceDomains: ['https://storage.googleapis.com', 'https://firebasestorage.googleapis.com'],
       });
       expect(meta['openai/widgetCSP']).toEqual({
         connect_domains: [],
-        resource_domains: ['https://storage.googleapis.com'],
+        resource_domains: ['https://storage.googleapis.com', 'https://firebasestorage.googleapis.com'],
       });
       expect(meta['openai/widgetDomain']).toBe('https://praticos.web.app');
     }
