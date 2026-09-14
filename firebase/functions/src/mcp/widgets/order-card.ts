@@ -58,7 +58,7 @@ export const ORDER_CARD_DOMAIN = 'https://praticos.web.app';
 // The card makes no network calls; it only loads the cover photo from
 // Firebase Storage. Keep this list as narrow as the card's real behavior —
 // the ChatGPT app review checks the policy against it.
-const RESOURCE_DOMAINS = ['https://storage.googleapis.com'];
+const RESOURCE_DOMAINS = ['https://storage.googleapis.com', 'https://firebasestorage.googleapis.com'];
 
 /**
  * Resource _meta (resources/list and resources/read). Per the MCP Apps spec,

@@ -203,9 +203,11 @@ Toda chamada de escrita gera uma linha `mcp_write` no log, e toda chamada passa 
 
 ### Card redesenhado e compartilhamento
 
+As capas aceitam os domínios `storage.googleapis.com` e `firebasestorage.googleapis.com` no CSP do resource, incluindo URLs geradas pelo SDK Firebase. A permissão `web-share` do iframe é controlada pelo host, não pelo card.
+
 O card usa `widgets/DESIGN.md`, estilos em `src/card.css`, ícones SVG e textos PT/EN/ES em `src/card-locale.ts`. O idioma vem de `hostContext.locale`, do navegador ou do fallback PT; a moeda continua BRL conforme o contrato atual da OS. O FormatService Flutter não está disponível no widget React, que usa Intl centralizado. Foto de capa quadrada ao lado da identificação, status suave, grupos de serviços/produtos e faixa de total compõem o layout. Imagem ausente ou com erro libera o espaço para os dados.
 
-Compartilhar usa Web Share API (`navigator.share`) com título, resumo e `shareUrl`. A pessoa escolhe o aplicativo e destinatário. Se a API não existir ou for bloqueada no iframe, o card exibe o link e permite copiá-lo. Cancelamento não é erro. Abrir no PraticOS usa `ui/open-link` para abrir a página web pública da OS; não é um deep link nativo. Recusa/erro/timeout exibe alternativa de cópia. Não adiciona dados ao allowlist nem altera Firestore, permissões ou isolamento por empresa.
+Compartilhar usa Web Share API (`navigator.share`) com título, resumo e `shareUrl`. A pessoa escolhe o aplicativo e destinatário. Se a API não existir ou for bloqueada no iframe, o card oferece WhatsApp, Telegram e cópia de link; cada destino só abre após escolha explícita via `ui/open-link`. O bloqueio do menu nativo não exibe erro. O link manual só aparece se a cópia ou abertura da OS falhar. Cancelamento não é erro. Abrir no PraticOS usa `ui/open-link` para abrir a página web pública da OS; não é um deep link nativo. Recusa/erro/timeout exibe alternativa de cópia. Não adiciona dados ao allowlist nem altera Firestore, permissões ou isolamento por empresa.
 
 O build do widget agora embute JS **e CSS** em `bundle.ts`. Sempre rodar `npm run build` em `firebase/functions/widgets` antes do build/deploy das Functions. A documentação pública é gerada por Eleventy a partir de `firebase/hosting/src/_data/docs/integracoes.json` nos três idiomas, não editada no diretório de saída `public`.
 

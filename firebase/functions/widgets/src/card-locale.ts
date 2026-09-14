@@ -3,6 +3,7 @@ import type { OrderData } from './card-state';
 const pt = {
   order: 'OS', total: 'Total da OS', services: 'Serviços', products: 'Produtos',
   share: 'Compartilhar', copy: 'Abrir no PraticOS', complete: 'Concluir OS',
+  chooseDestination: 'Escolha onde compartilhar',
   copyLink: 'Copiar link', openFailed: 'Não foi possível abrir o PraticOS. Use o link abaixo.',
   approve: 'Aprovar', confirm: 'Confirmar', cancel: 'Cancelar', saving: 'Salvando…',
   confirmDone: 'Concluir esta OS?', confirmApproved: 'Aprovar esta OS?',
@@ -17,6 +18,7 @@ export type CardLabels = { readonly [Key in keyof typeof pt]: string };
 const en: CardLabels = {
   order: 'Order', total: 'Order total', services: 'Services', products: 'Products',
   share: 'Share', copy: 'Open in PraticOS', complete: 'Complete order',
+  chooseDestination: 'Choose where to share',
   copyLink: 'Copy link', openFailed: 'Unable to open PraticOS. Use the link below.',
   approve: 'Approve', confirm: 'Confirm', cancel: 'Cancel', saving: 'Saving…',
   confirmDone: 'Complete this order?', confirmApproved: 'Approve this order?',
@@ -30,6 +32,7 @@ const en: CardLabels = {
 const es: CardLabels = {
   order: 'OS', total: 'Total de la OS', services: 'Servicios', products: 'Productos',
   share: 'Compartir', copy: 'Abrir en PraticOS', complete: 'Completar OS',
+  chooseDestination: 'Elige dónde compartir',
   copyLink: 'Copiar enlace', openFailed: 'No se pudo abrir PraticOS. Usa el enlace de abajo.',
   approve: 'Aprobar', confirm: 'Confirmar', cancel: 'Cancelar', saving: 'Guardando…',
   confirmDone: '¿Completar esta OS?', confirmApproved: '¿Aprobar esta OS?',
