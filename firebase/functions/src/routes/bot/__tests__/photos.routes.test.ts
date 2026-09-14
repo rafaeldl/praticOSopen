@@ -103,6 +103,37 @@ describe('Bot Photos Routes', () => {
     });
   });
 
+  describe('POST /:number/photos (url)', () => {
+    it('uploads photo from URL and returns photoId and count', async () => {
+      mockOrderService.getOrderByNumber
+        .mockResolvedValueOnce(fakeOrder as any)
+        .mockResolvedValueOnce(fakeOrder as any);
+      mockPhotoService.uploadPhotoFromUrl.mockResolvedValue({
+        id: 'ph-from-url',
+        url: 'http://photo-url.jpg',
+        storagePath: 'tenants/comp1/ph-from-url',
+      } as any);
+      mockOrderService.addPhotoToOrder.mockResolvedValue(undefined as any);
+
+      const app = buildApp(router);
+      const res = await request(app)
+        .post('/1/photos')
+        .send({ url: 'https://example.com/test.jpg', filename: 'test.jpg' });
+
+      expect(res.status).toBe(200);
+      expect(mockPhotoService.uploadPhotoFromUrl).toHaveBeenCalledWith(
+        'comp1',
+        'ord1',
+        expect.objectContaining({
+          url: 'https://example.com/test.jpg',
+          filename: 'test.jpg',
+        }),
+        expect.anything(),
+      );
+      expect(res.body.data.photoId).toBe('ph-from-url');
+    });
+  });
+
   // ----- GET /:number/photos ------------------------------------------------
 
   describe('GET /:number/photos', () => {

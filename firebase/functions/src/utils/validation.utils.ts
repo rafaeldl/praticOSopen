@@ -300,13 +300,28 @@ export const addDeviceToOrderSchema = z.object({
 // ============================================================================
 
 /**
- * Schema for uploading photo from base64
+ * Schema for uploading photo from base64 (legacy)
  */
 export const uploadPhotoBase64Schema = z.object({
   base64: z.string().min(1, 'Base64 data is required'),
   filename: z.string().min(1, 'Filename is required').max(255),
   description: z.string().max(500).optional(),
 });
+
+/**
+ * Schema for uploading photo from base64 or URL
+ */
+export const uploadPhotoSchema = z
+  .object({
+    base64: z.string().min(1).optional(),
+    url: z.string().url('Invalid URL format').optional(),
+    filename: z.string().max(255).optional(),
+    mimeType: z.string().optional(),
+    description: z.string().max(500).optional(),
+  })
+  .refine((data) => Boolean(data.base64 || data.url), {
+    message: 'Either base64 or url must be provided',
+  });
 
 // ============================================================================
 // Form/Checklist Schemas

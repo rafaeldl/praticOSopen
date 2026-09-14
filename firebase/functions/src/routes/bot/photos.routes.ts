@@ -5,18 +5,18 @@
 
 import { Router, Response } from 'express';
 import Busboy from 'busboy';
-import { AuthenticatedRequest } from '../../models/types';
+import { AuthenticatedRequest, OrderPhoto } from '../../models/types';
 import { requireLinked } from '../../middleware/auth.middleware';
 import { getUserAggr } from '../../middleware/company.middleware';
 import * as orderService from '../../services/order.service';
 import * as photoService from '../../services/photo-upload.service';
-import { validateInput, uploadPhotoBase64Schema } from '../../utils/validation.utils';
+import { validateInput, uploadPhotoSchema } from '../../utils/validation.utils';
 
 const router: Router = Router();
 
 /**
  * POST /bot/orders/:number/photos
- * Upload photo to order (base64 only)
+ * Upload photo to order (base64 or URL)
  */
 router.post('/:number/photos', requireLinked, async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -53,8 +53,8 @@ router.post('/:number/photos', requireLinked, async (req: AuthenticatedRequest, 
       return;
     }
 
-    // Validate base64 input
-    const validation = validateInput(uploadPhotoBase64Schema, req.body);
+    // Validate input (base64 or url)
+    const validation = validateInput(uploadPhotoSchema, req.body);
     if (!validation.success) {
       res.status(400).json({
         success: false,
@@ -63,16 +63,37 @@ router.post('/:number/photos', requireLinked, async (req: AuthenticatedRequest, 
       return;
     }
 
-    const photo = await photoService.uploadPhotoFromBase64(
-      companyId,
-      order.id,
-      {
-        base64: validation.data.base64,
-        filename: validation.data.filename,
-        description: validation.data.description,
-      },
-      createdBy
-    );
+    let photo: OrderPhoto;
+    if (validation.data.url) {
+      photo = await photoService.uploadPhotoFromUrl(
+        companyId,
+        order.id,
+        {
+          url: validation.data.url,
+          filename: validation.data.filename,
+          mimeType: validation.data.mimeType,
+          description: validation.data.description,
+        },
+        createdBy
+      );
+    } else if (validation.data.base64) {
+      photo = await photoService.uploadPhotoFromBase64(
+        companyId,
+        order.id,
+        {
+          base64: validation.data.base64,
+          filename: validation.data.filename || 'photo.jpg',
+          description: validation.data.description,
+        },
+        createdBy
+      );
+    } else {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Either base64 or url must be provided' },
+      });
+      return;
+    }
 
     // Add photo to order
     await orderService.addPhotoToOrder(companyId, order.id, photo);
@@ -92,9 +113,10 @@ router.post('/:number/photos', requireLinked, async (req: AuthenticatedRequest, 
     });
   } catch (error) {
     console.error('Upload photo error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to upload photo';
     res.status(500).json({
       success: false,
-      error: { code: 'INTERNAL_ERROR', message: 'Failed to upload photo' },
+      error: { code: 'INTERNAL_ERROR', message: errorMessage },
     });
   }
 });

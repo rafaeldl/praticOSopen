@@ -406,6 +406,45 @@ describe('write tools routing (real callRoute, real routers)', () => {
     expect(result.content[0].text).toContain('Foto anexada com sucesso');
   });
 
+  it('upload_order_photo resolves via photos.routes POST /:number/photos with fileUrl', async () => {
+    const order = {
+      id: 'order-p1',
+      number: 8881,
+      photos: [],
+    } as any;
+    mockOrderService.getOrderByNumber.mockResolvedValue(order);
+    mockPhotoService.uploadPhotoFromUrl.mockResolvedValue({
+      id: 'photo-url-99',
+      url: 'https://storage.googleapis.com/test/photo-url-99.jpg',
+      storagePath: 'tenants/c1/orders/order-p1/photos/photo-url-99.jpg',
+      createdAt: new Date().toISOString() as any,
+      createdBy: { id: 'u1', name: 'User' },
+    });
+    mockOrderService.addPhotoToOrder.mockResolvedValue(undefined as any);
+
+    const server = fakeServer();
+    registerWriteTools(server as any, { req });
+
+    const result = await server.tools.get('upload_order_photo')!.handler({
+      orderNumber: 8881,
+      fileUrl: 'https://example.com/test-remote.jpg',
+      filename: 'test-remote.jpg',
+    });
+
+    assertRouteResolved(result);
+    expect(result.content[0].text).toContain('8881');
+    expect(result.content[0].text).toContain('Foto anexada com sucesso');
+    expect(mockPhotoService.uploadPhotoFromUrl).toHaveBeenCalledWith(
+      'comp1',
+      'order-p1',
+      expect.objectContaining({
+        url: 'https://example.com/test-remote.jpg',
+        filename: 'test-remote.jpg',
+      }),
+      expect.anything(),
+    );
+  });
+
   it('delete_order_photo resolves via photos.routes DELETE /:number/photos/:photoId', async () => {
     const orderWithPhoto = {
       id: 'order-p2',
