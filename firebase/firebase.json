@@ -28,6 +28,12 @@
         ]
       },
       {
+        "source": "/api/orders/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "private, no-store" }
+        ]
+      },
+      {
         "source": "/sitemap.xml",
         "headers": [
           { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
@@ -84,6 +90,13 @@
       },
       {
         "source": "/api/admin/**",
+        "run": {
+          "serviceId": "praticos-web",
+          "region": "southamerica-east1"
+        }
+      },
+      {
+        "source": "/api/orders/**",
         "run": {
           "serviceId": "praticos-web",
           "region": "southamerica-east1"
