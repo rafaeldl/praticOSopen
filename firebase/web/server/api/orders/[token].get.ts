@@ -7,7 +7,12 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const data = await $fetch(`${config.apiBaseUrl}/public/orders/${token}`)
+    // Every /q/ visitor reaches the api from this server's IP; the secret gets
+    // these loads a per-link rate limit there instead of one shared IP bucket.
+    const headers: Record<string, string> = config.ssrApiSecret
+      ? { 'X-Praticos-SSR-Secret': config.ssrApiSecret }
+      : {}
+    const data = await $fetch(`${config.apiBaseUrl}/public/orders/${token}`, { headers })
     return data
   } catch (error: any) {
     const statusCode = error?.response?.status || error?.statusCode || 500

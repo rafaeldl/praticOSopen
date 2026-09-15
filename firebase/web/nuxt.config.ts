@@ -11,6 +11,9 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     apiBaseUrl: process.env.API_BASE_URL || 'https://southamerica-east1-praticos.cloudfunctions.net/api',
+    // Server-only. Set via NUXT_SSR_API_SECRET (Secret Manager SSR_API_SECRET);
+    // lets the api function tell SSR order loads apart from direct callers.
+    ssrApiSecret: '',
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://southamerica-east1-praticos.cloudfunctions.net/api',
       firebaseConfig: {
