@@ -12,8 +12,8 @@
     "start": "npm run shell",
     "deploy": "npm run build && firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "lint": "eslint --ext .ts src/",
-    "lint:fix": "eslint --ext .ts src/ --fix",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
     "setup-test": "npx ts-node scripts/setup-test-data.ts",
     "test": "jest",
     "test:watch": "jest --watch"
@@ -33,6 +33,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@eslint/js": "~9.39.2",
     "@types/busboy": "^1.5.4",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
@@ -40,15 +41,16 @@
     "@types/node": "^22.0.0",
     "@types/supertest": "^6.0.3",
     "@types/uuid": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.10.0",
-    "@typescript-eslint/parser": "^8.10.0",
     "eslint": "^9.13.0",
+    "eslint-plugin-promise": "^7.3.0",
     "firebase-functions-test": "^3.1.0",
+    "globals": "^17.12.0",
     "jest": "^30.2.0",
     "supertest": "^7.2.2",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.70.0"
   },
   "private": true
 }
