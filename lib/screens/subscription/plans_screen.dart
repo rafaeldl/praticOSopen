@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:purchases_flutter/purchases_flutter.dart' hide Store;
 import 'package:praticos/mobx/subscription_store.dart';
 import 'package:praticos/services/format_service.dart';
+import 'package:praticos/services/subscription_service.dart';
 
 /// Dados de um plano de assinatura para exibição.
 class PlanData {
@@ -42,6 +43,13 @@ class _PlansScreenState extends State<PlansScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Sem UI de compra no iOS enquanto nao houver IAP (guideline 3.1.1).
+    if (!SubscriptionService.purchaseUiEnabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).maybePop();
+      });
+      return;
+    }
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     AnalyticsService.instance.logPlansScreenViewed(source: args?["source"] ?? "deeplink");
     _subscriptionStore = Provider.of<SubscriptionStore>(context, listen: false);
@@ -109,6 +117,13 @@ class _PlansScreenState extends State<PlansScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Sem UI de compra no iOS: a tela nao chega a montar o store (guideline 3.1.1).
+    if (!SubscriptionService.purchaseUiEnabled) {
+      return const CupertinoPageScaffold(
+        backgroundColor: CupertinoColors.systemGroupedBackground,
+        child: SizedBox.shrink(),
+      );
+    }
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       child: Material(

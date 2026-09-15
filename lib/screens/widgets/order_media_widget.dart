@@ -20,6 +20,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:praticos/services/subscription_service.dart';
 
 class OrderMediaWidget extends StatelessWidget {
   final OrderStore store;
@@ -727,14 +728,15 @@ class OrderMediaWidget extends StatelessWidget {
             child: const Text('Agora nao'),
             onPressed: () => Navigator.pop(dialogContext),
           ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: const Text('Ver planos'),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              Navigator.pushNamed(ctx, '/subscription/plans');
-            },
-          ),
+          if (SubscriptionService.purchaseUiEnabled)
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: const Text('Ver planos'),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pushNamed(ctx, '/subscription/plans');
+              },
+            ),
         ],
       ),
     );
