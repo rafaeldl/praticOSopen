@@ -162,6 +162,12 @@ Browser → https://praticos.web.app/q/{token}
              Retorna Order + Comments
 ```
 
+A página `/q/{token}` (Nuxt, Cloud Run `praticos-web`) carrega a OS com `useFetch('/api/orders/{token}')`.
+No SSR o Nitro resolve essa rota em processo; no navegador, o `refresh()` (após aprovar/rejeitar ou avaliar)
+faz GET em `https://praticos.web.app/api/orders/{token}`. Por isso `firebase/firebase.json` precisa do rewrite
+`/api/orders/**` → Cloud Run `praticos-web` (com `Cache-Control: private, no-store`); sem ele o Hosting responde
+404 e a página cai na tela de erro.
+
 ### 3. Aprovação/Rejeição
 
 ```
