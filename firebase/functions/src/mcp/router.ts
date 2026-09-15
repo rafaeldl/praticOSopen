@@ -3,6 +3,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { AuthenticatedRequest } from '../models/types';
 import { mcpAuth } from './auth';
 import { buildMcpServer } from './server';
+import { createUnknownTokenGuard } from './token-guard';
 
 const router: Router = Router();
 
@@ -62,9 +63,21 @@ export function methodNotAllowed(_req: Request, res: Response): void {
 
 router.use(noStoreHeader, preserveCacheControl);
 
+// Caps, per instance, requests whose token hasn't authenticated recently —
+// see token-guard.ts. 300/min matches the IP-keyed limit this replaced; a
+// cold instance only spends it on the first request of each connected client.
+const unknownTokenGuard = createUnknownTokenGuard({
+  windowMs: 60 * 1000,
+  maxUnknownPerWindow: 300,
+  knownTokenTtlMs: 60 * 60 * 1000,
+  maxKnownTokens: 10_000,
+});
+
 router.post(
   '/t/:token',
+  unknownTokenGuard.limitUnknownTokens,
   mcpAuth,
+  unknownTokenGuard.rememberToken,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const server = buildMcpServer(req);

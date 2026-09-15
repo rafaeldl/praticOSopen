@@ -42,7 +42,6 @@ export function maskPhone(phone: string | null | undefined): string | null {
   if (digits.length < 10) return null;
 
   let areaCode: string;
-  let lastFour: string;
 
   // Handle Brazilian country code (55)
   if (digits.length >= 12 && digits.startsWith('55')) {
@@ -53,7 +52,7 @@ export function maskPhone(phone: string | null | undefined): string | null {
     areaCode = digits.substring(0, 2);
   }
 
-  lastFour = digits.substring(digits.length - 4);
+  const lastFour = digits.substring(digits.length - 4);
 
   return `(${areaCode}) *****-${lastFour}`;
 }

@@ -19,7 +19,8 @@ Pontos centrais:
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `router.ts` | Monta `POST /t/:token` em `/mcp` (`app.use('/mcp', mcpIpLimiter, mcpLimiter, mcpRouter)` em `src/index.ts`). Aplica cabeçalhos `Cache-Control: no-store, no-transform` antes de `mcpAuth`, inclusive na resposta 401, para que o token nunca fique em cache de CDN. Cria o `StreamableHTTPServerTransport` por requisição (stateless) e conecta o `McpServer`. Qualquer outro método em `/t/:token` (`GET`, `DELETE`, ...) recebe `405` com `Allow: POST` e erro JSON-RPC, sem passar por `mcpAuth`: em modo stateless não há stream SSE para abrir nem sessão para encerrar, e os clientes MCP sondam `GET` esperando `405`. |
+| `router.ts` | Monta `POST /t/:token` em `/mcp` (`app.use('/mcp', mcpLimiter, mcpRouter)` em `src/index.ts`). Aplica cabeçalhos `Cache-Control: no-store, no-transform` antes de `mcpAuth`, inclusive na resposta 401, para que o token nunca fique em cache de CDN. Cria o `StreamableHTTPServerTransport` por requisição (stateless) e conecta o `McpServer`. Qualquer outro método em `/t/:token` (`GET`, `DELETE`, ...) recebe `405` com `Allow: POST` e erro JSON-RPC, sem passar pelo `token-guard` nem por `mcpAuth`: em modo stateless não há stream SSE para abrir nem sessão para encerrar, e os clientes MCP sondam `GET` esperando `405`. |
+| `token-guard.ts` (`createUnknownTokenGuard`) | Teto global por instância (300/min) para requisições com token que não autenticou recentemente nessa instância, aplicado antes de `mcpAuth`. Tokens que autenticaram na última hora passam direto. |
 | `auth.ts` (`mcpAuth`) | Resolve o token do path (`req.params.token`) em `apiKeys` (`where('key', '==', token)`), valida `active`, `type === 'mcp'` e expiração, e popula `req.auth` e `req.userContext` - o mesmo formato que os handlers `/bot` já esperam. Usuário, empresa e papel vêm de `resolveUserContext` (`services/user-context.service.ts`), o mesmo helper do ramo `bearer` de `resolveCompanyContext`. Responde 401 (`Invalid or expired connection token`) sem revelar qual dessas condições falhou. Grava `lastUsedAt` no documento do token (ver abaixo). |
 | `bridge.ts` (`callRoute`) | Despacha uma chamada para um router Express **em processo** (sem HTTP real), simulando `req`/`res`. Tem um timeout de segurança de 25s (`RESPONSE_TIMEOUT_MS`) para o caso de um handler nunca responder. |
 | `server.ts` (`buildMcpServer`) | Monta o `McpServer` por requisição: registra o recurso do card (`registerOrderCardResource`) e as tools de leitura e escrita. |
@@ -42,7 +43,10 @@ O `build.mjs` registra um plugin de resolução (`node-resolve-bare-imports`) qu
 
 ### Segurança de transporte
 
-- Rate limiting dedicado (`mcpIpLimiter`, `mcpLimiter`) antes mesmo do router MCP ser alcançado.
+- Rate limiting antes da consulta ao Firestore em `mcpAuth`, em duas camadas:
+  - `mcpLimiter` (`src/index.ts`): 120/min por token, para limitar um token vazado.
+  - `token-guard.ts`: 300/min por instância para tokens desconhecidos. Uma enxurrada de tokens forjados (cada um com cota própria no `mcpLimiter`) esgota só esse teto, e os clientes já conectados continuam sendo atendidos.
+- Não há limitador por IP no `/mcp`, e isso é intencional. Os chamadores legítimos (ChatGPT e Claude) compartilham os IPs de saída da OpenAI e da Anthropic. Além disso, não há IP de cliente confiável nessa rota. Medição em produção (2026-09-15): pelo rewrite do Hosting chega `X-Forwarded-For: <cliente>, <borda do Hosting>`. Com `TRUST_PROXY_HOPS = 1`, o `req.ip` vira um IP de borda do Google que muda a cada requisição. Confiar em 2 hops só no `/mcp` não resolve, porque a URL direta da function também atende `/mcp` e ali essa posição do `X-Forwarded-For` é controlada pelo cliente. Ver `src/utils/trust-proxy.utils.ts`.
 - `firebase.json` tem uma entrada `/mcp/**` em `hosting.headers` reforçando `no-store` na borda da CDN - complementar ao header setado em `router.ts`, cobrindo inclusive respostas que nunca chegam à function (ex.: 429 do rate limiter).
 - Erros do handler nunca logam `req.path`/`req.params` (carregam o token); apenas o erro em si.
 

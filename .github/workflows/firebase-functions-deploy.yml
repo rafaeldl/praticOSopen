@@ -30,7 +30,7 @@ jobs:
 
       - name: Run lint
         working-directory: firebase/functions
-        run: npm run lint || true
+        run: npm run lint
 
       - name: Authenticate to Firebase
         uses: google-github-actions/auth@v3

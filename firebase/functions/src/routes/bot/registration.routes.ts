@@ -153,7 +153,7 @@ router.post('/update', async (req: AuthenticatedRequest, res: Response) => {
         newState = 'awaiting_segment';
         break;
 
-      case 'awaiting_segment':
+      case 'awaiting_segment': {
         if (!segmentId) {
           res.status(400).json({
             success: false,
@@ -188,6 +188,7 @@ router.post('/update', async (req: AuthenticatedRequest, res: Response) => {
           newState = 'awaiting_bootstrap';
         }
         break;
+      }
 
       case 'awaiting_subspecialties':
         // subspecialties can be empty array (user skipped)

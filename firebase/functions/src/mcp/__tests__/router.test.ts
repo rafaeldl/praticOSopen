@@ -1,7 +1,7 @@
 import request from 'supertest';
 import express from 'express';
 
-const mockMcpAuth = jest.fn((req: any, _res: any, next: any) => {
+const authenticate = (req: any, _res: any, next: any) => {
   req.auth = { type: 'mcp', companyId: 'comp1', userId: 'user1' };
   req.userContext = {
     userId: 'user1',
@@ -12,11 +12,31 @@ const mockMcpAuth = jest.fn((req: any, _res: any, next: any) => {
     permissions: ['read:all', 'write:all'],
   };
   next();
-});
+};
+
+const rejectToken = (_req: any, res: any) => {
+  res.status(401).json({
+    jsonrpc: '2.0',
+    error: { code: -32001, message: 'Invalid or expired connection token' },
+    id: null,
+  });
+};
+
+const mockMcpAuth = jest.fn(authenticate);
 
 jest.mock('../auth', () => ({
   mcpAuth: (req: any, res: any, next: any) => mockMcpAuth(req, res, next),
 }));
+
+// Small budget so the wiring test can exhaust it in a few requests.
+jest.mock('../token-guard', () => {
+  const actual = jest.requireActual('../token-guard');
+  return {
+    ...actual,
+    createUnknownTokenGuard: (options: any) =>
+      actual.createUnknownTokenGuard({ ...options, maxUnknownPerWindow: 3 }),
+  };
+});
 
 jest.mock('../bridge', () => ({
   callRoute: jest.fn().mockResolvedValue({
@@ -77,13 +97,7 @@ describe('mcp router', () => {
   });
 
   it('marca a rejeicao de auth (401) como no-store, no-transform tambem', async () => {
-    mockMcpAuth.mockImplementationOnce((_req: any, res: any) => {
-      res.status(401).json({
-        jsonrpc: '2.0',
-        error: { code: -32001, message: 'Invalid or expired connection token' },
-        id: null,
-      });
-    });
+    mockMcpAuth.mockImplementationOnce(rejectToken);
 
     const res = await rpc('tools/list');
 
@@ -122,5 +136,34 @@ describe('mcp router', () => {
     expect(body.jsonrpc).toBe('2.0');
     expect(body.error).toBeDefined();
     expect(res.headers['cache-control']).toContain('no-store');
+  });
+
+  it('barra tokens desconhecidos acima do teto antes do mcpAuth, sem derrubar token conectado', async () => {
+    // Authenticates mcp_fake, so it is a known token from here on.
+    expect((await rpc('tools/list')).status).toBe(200);
+
+    const unknown = (i: number) =>
+      request(app)
+        .post(`/mcp/t/mcp_unknown_${i}`)
+        .set('Accept', 'application/json, text/event-stream')
+        .send({ jsonrpc: '2.0', id: 1, method: 'tools/list' });
+
+    mockMcpAuth.mockImplementation(rejectToken);
+    try {
+      let res = await unknown(0);
+      for (let i = 1; i < 5 && res.status !== 429; i++) {
+        res = await unknown(i);
+      }
+      expect(res.status).toBe(429);
+      expect(res.headers['cache-control']).toContain('no-store');
+
+      const authCalls = mockMcpAuth.mock.calls.length;
+      expect((await unknown(5)).status).toBe(429);
+      expect(mockMcpAuth.mock.calls.length).toBe(authCalls);
+    } finally {
+      mockMcpAuth.mockImplementation(authenticate);
+    }
+
+    expect((await rpc('tools/list')).status).toBe(200);
   });
 });
