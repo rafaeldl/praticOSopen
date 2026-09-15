@@ -1,3 +1,5 @@
+import type { IncomingHttpHeaders } from 'http';
+
 /**
  * Redacts the MCP connector token from a request path before it reaches the
  * logs. The token travels in the URL (`/mcp/t/{token}`), so any log line
@@ -10,27 +12,91 @@
  * text in `req.path`). Matching unconditionally on the `/t/<segment>`
  * position instead of on the token's shape closes that gap — and any future
  * token format — at once.
+ *
+ * Express also routes case-insensitively by default (`/MCP/t/...` reaches the
+ * same router), so every pattern here is matched with the `i` flag.
  */
 export function redactMcpTokenFromPath(path: string): string {
-  return path.replace(/\/mcp\/t\/[^/]+/, '/mcp/t/***');
+  return path.replace(/(\/mcp\/t\/)[^/]+/i, '$1***');
+}
+
+/**
+ * Redacts every URL segment that carries a bearer-like credential before
+ * `req.path` reaches the logs:
+ * - `/mcp/t/{token}` — MCP connector token;
+ * - `/public/orders/{token}` — share link token (`ST_<uuid>`), which alone
+ *   grants access to the order, its customer and approve/reject actions;
+ * - `.../share/{token}` — the same share token on the revoke routes
+ *   (`/v1/orders`, `/v1/app/orders`, `/bot/orders`).
+ *
+ * Same rules as redactMcpTokenFromPath(): match by position, never by token
+ * shape, and case-insensitively.
+ */
+export function redactSensitivePath(path: string): string {
+  return redactMcpTokenFromPath(path)
+    .replace(/(\/public\/orders\/)[^/]+/i, '$1***')
+    .replace(/(\/share\/)[^/]+/i, '$1***');
+}
+
+type LoggableHeaders = {
+  'x-api-key'?: string;
+  'x-api-secret'?: string;
+  'x-whatsapp-number'?: string;
+  'authorization'?: string;
+  'content-type'?: string;
+};
+
+const REDACTED = '[REDACTED]';
+
+/**
+ * The WhatsApp number identifies a person (personal data under LGPD). Keeping
+ * only the last 4 digits is enough to correlate bot requests while debugging.
+ */
+function maskWhatsappNumber(value: string | string[]): string {
+  const digits = (Array.isArray(value) ? value[0] : value).replace(/\D/g, '');
+  return digits.length > 4 ? `***${digits.slice(-4)}` : '***';
+}
+
+/**
+ * Picks the headers the request logger prints, with credentials removed:
+ * `x-api-key` / `x-api-secret` (API Core key pair, or the bot key) and the
+ * bearer token only reveal whether they were sent; the WhatsApp number is
+ * masked. Headers that were not sent stay `undefined` (dropped by JSON).
+ */
+export function buildLoggableHeaders(headers: IncomingHttpHeaders): LoggableHeaders {
+  const whatsappNumber = headers['x-whatsapp-number'];
+  return {
+    'x-api-key': headers['x-api-key'] ? REDACTED : undefined,
+    'x-api-secret': headers['x-api-secret'] ? REDACTED : undefined,
+    'x-whatsapp-number': whatsappNumber ? maskWhatsappNumber(whatsappNumber) : undefined,
+    'authorization': headers['authorization'] ? 'Bearer [HIDDEN]' : undefined,
+    'content-type': headers['content-type'],
+  };
 }
 
 /**
  * Whether the app-wide request logger in index.ts is allowed to print a
- * request/response payload for this path.
+ * request/response payload (query, body and response) for this path.
  *
- * Every MCP `tools/call` body — and the order/customer detail many tool
- * responses return — can carry end-customer personal data: phone, email,
- * address (create_entity), free-text comment bodies (add_order_comment),
- * customer names and addresses embedded in an order. `mcp/tools/write.ts`'s
- * `auditWrite()` allowlists only a handful of identifiers specifically so
- * that data never reaches Cloud Logging; a logger that dumps the raw body
- * or the raw response elsewhere would defeat that allowlist entirely. See
- * docs/MCP_INTEGRATION.md, which states these fields never reach the log.
+ * - `/mcp/**`: every MCP `tools/call` body — and the order/customer detail
+ *   many tool responses return — can carry end-customer personal data:
+ *   phone, email, address (create_entity), free-text comment bodies
+ *   (add_order_comment), customer names and addresses embedded in an order.
+ *   `mcp/tools/write.ts`'s `auditWrite()` allowlists only a handful of
+ *   identifiers specifically so that data never reaches Cloud Logging; a
+ *   logger that dumps the raw body or the raw response elsewhere would defeat
+ *   that allowlist entirely. See docs/MCP_INTEGRATION.md, which states these
+ *   fields never reach the log.
+ * - `/public/**`: unauthenticated magic-link routes. Bodies are customer free
+ *   text (comments, rejection reason, rating comment) and responses carry the
+ *   order, company contact data and the comment thread.
+ * - `.../share` and `.../share/{token}`: share link management. Responses
+ *   return the share token and its URL, which would leak through `RESULT`
+ *   even with the path redacted.
  *
- * Every other path keeps logging its payload as before — this only turns
- * the behavior off for `/mcp/**`.
+ * Every other path keeps logging its payload as before. Matched
+ * case-insensitively because Express routes that way.
  */
 export function shouldLogPayload(path: string): boolean {
-  return !/^\/mcp(\/|$)/.test(path);
+  return !/^\/(mcp|public)(\/|$)|\/share(\/|$)/i.test(path);
 }
