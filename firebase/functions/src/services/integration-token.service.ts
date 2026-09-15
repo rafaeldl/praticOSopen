@@ -15,9 +15,9 @@ export interface CreatedToken {
 export interface TokenSummary {
   id: string;
   name: string;
-  createdAt: string;
+  createdAt: string | null;
   lastUsedAt: string | null;
-  expiresAt: string;
+  expiresAt: string | null;
 }
 
 export async function createIntegrationToken(
@@ -68,9 +68,11 @@ export async function listIntegrationTokens(
     .map(({ doc, data }) => ({
       id: doc.id,
       name: data.name,
-      createdAt: toDate(data.createdAt)?.toISOString() ?? '',
+      // null, never '': the app's generated fromJson only guards null, and
+      // DateTime.parse('') throws.
+      createdAt: toDate(data.createdAt)?.toISOString() ?? null,
       lastUsedAt: toDate(data.lastUsedAt)?.toISOString() ?? null,
-      expiresAt: toDate(data.expiresAt)?.toISOString() ?? '',
+      expiresAt: toDate(data.expiresAt)?.toISOString() ?? null,
     }));
 }
 

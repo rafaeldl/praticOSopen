@@ -15,6 +15,7 @@ jest.mock('../firestore.service', () => ({
 
 import {
   createIntegrationToken,
+  listIntegrationTokens,
   revokeIntegrationToken,
 } from '../integration-token.service';
 
@@ -45,6 +46,37 @@ describe('integration-token.service', () => {
     const a = await createIntegrationToken('comp1', 'user1', 'A');
     const b = await createIntegrationToken('comp1', 'user1', 'B');
     expect(a.token).not.toBe(b.token);
+  });
+
+  it('lista datas ausentes como null, nunca string vazia', async () => {
+    mockGet.mockResolvedValue({
+      docs: [
+        { id: 'tok1', data: () => ({ name: 'Sem datas', active: true }) },
+        {
+          id: 'tok2',
+          data: () => ({
+            name: 'Com datas',
+            active: true,
+            createdAt: { toDate: () => new Date('2026-09-12T10:00:00.000Z') },
+            lastUsedAt: { toDate: () => new Date('2026-09-13T10:00:00.000Z') },
+            expiresAt: { toDate: () => new Date('2026-12-11T10:00:00.000Z') },
+          }),
+        },
+      ],
+    });
+
+    const tokens = await listIntegrationTokens('comp1');
+
+    expect(tokens).toEqual([
+      { id: 'tok1', name: 'Sem datas', createdAt: null, lastUsedAt: null, expiresAt: null },
+      {
+        id: 'tok2',
+        name: 'Com datas',
+        createdAt: '2026-09-12T10:00:00.000Z',
+        lastUsedAt: '2026-09-13T10:00:00.000Z',
+        expiresAt: '2026-12-11T10:00:00.000Z',
+      },
+    ]);
   });
 
   it('não revoga token de outra empresa', async () => {

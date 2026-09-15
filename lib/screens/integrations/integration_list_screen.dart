@@ -23,6 +23,54 @@ String integrationErrorText(AppLocalizations l10n, IntegrationApiException e) {
   }
 }
 
+/// Asks for the connection name. Pops with the trimmed name, or null on cancel.
+///
+/// Owns its [TextEditingController] so it is disposed with the dialog, after
+/// the exit transition — disposing it as soon as the dialog future completes
+/// would still leave the text field rebuilding during that transition.
+class IntegrationNameDialog extends StatefulWidget {
+  const IntegrationNameDialog({super.key});
+
+  @override
+  State<IntegrationNameDialog> createState() => _IntegrationNameDialogState();
+}
+
+class _IntegrationNameDialogState extends State<IntegrationNameDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoAlertDialog(
+      title: Text(context.l10n.integrationsNew),
+      content: Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: CupertinoTextField(
+          controller: _controller,
+          placeholder: context.l10n.integrationsNameHint,
+          autofocus: true,
+        ),
+      ),
+      actions: [
+        CupertinoDialogAction(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.cancel),
+        ),
+        CupertinoDialogAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          child: Text(context.l10n.save),
+        ),
+      ],
+    );
+  }
+}
+
 class IntegrationListScreen extends StatefulWidget {
   const IntegrationListScreen({super.key});
 
@@ -65,33 +113,9 @@ class _IntegrationListScreenState extends State<IntegrationListScreen> {
   }
 
   Future<void> _create() async {
-    final controller = TextEditingController();
-
     final name = await showCupertinoDialog<String>(
       context: context,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: Text(dialogContext.l10n.integrationsNew),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: CupertinoTextField(
-            controller: controller,
-            placeholder: dialogContext.l10n.integrationsNameHint,
-            autofocus: true,
-          ),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(dialogContext.l10n.cancel),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () =>
-                Navigator.pop(dialogContext, controller.text.trim()),
-            child: Text(dialogContext.l10n.save),
-          ),
-        ],
-      ),
+      builder: (_) => const IntegrationNameDialog(),
     );
 
     if (name == null || name.isEmpty) return;

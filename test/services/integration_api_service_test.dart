@@ -27,6 +27,26 @@ void main() {
       expect(tokens.first.lastUsedAt, isNull);
     });
 
+    test('parseia datas null sem lançar', () {
+      final body = jsonEncode({
+        'success': true,
+        'data': [
+          {
+            'id': 'tok1',
+            'name': 'Sem datas',
+            'createdAt': null,
+            'lastUsedAt': null,
+            'expiresAt': null,
+          }
+        ],
+      });
+
+      final tokens = IntegrationApiService.parseList(body);
+
+      expect(tokens.first.createdAt, isNull);
+      expect(tokens.first.expiresAt, isNull);
+    });
+
     test('parseia o token criado', () {
       final body = jsonEncode({
         'success': true,
