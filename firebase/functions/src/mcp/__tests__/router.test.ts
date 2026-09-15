@@ -92,6 +92,24 @@ describe('mcp router', () => {
     expect(res.headers['cache-control']).toContain('no-transform');
   });
 
+  it.each(['get', 'delete', 'put', 'patch'] as const)(
+    'responde 405 com Allow: POST para %s, sem autenticar',
+    async (method) => {
+      const res = await request(app)[method]('/mcp/t/mcp_fake')
+        .set('Accept', 'application/json, text/event-stream');
+
+      expect(res.status).toBe(405);
+      expect(res.headers.allow).toBe('POST');
+      expect(res.headers['cache-control']).toBe('no-store, no-transform');
+      expect(res.body).toEqual({
+        jsonrpc: '2.0',
+        error: { code: -32000, message: 'Method not allowed.' },
+        id: null,
+      });
+      expect(mockMcpAuth).not.toHaveBeenCalled();
+    },
+  );
+
   it('retorna erro JSON-RPC 500 (sem travar) quando buildMcpServer lanca', async () => {
     mockBuildMcpServer.mockImplementationOnce(() => {
       throw new Error('malformed tool schema');

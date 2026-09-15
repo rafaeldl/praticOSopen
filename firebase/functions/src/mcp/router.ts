@@ -48,6 +48,18 @@ export function preserveCacheControl(_req: Request, res: Response, next: NextFun
   next();
 }
 
+// Stateless Streamable HTTP has no SSE stream to open (GET) and no session to
+// terminate (DELETE). Clients probe GET and expect 405, not the app's generic
+// 404. Cache-Control was already set by noStoreHeader above.
+export function methodNotAllowed(_req: Request, res: Response): void {
+  res.setHeader('Allow', 'POST');
+  res.status(405).json({
+    jsonrpc: '2.0',
+    error: { code: -32000, message: 'Method not allowed.' },
+    id: null,
+  });
+}
+
 router.use(noStoreHeader, preserveCacheControl);
 
 router.post(
@@ -89,5 +101,8 @@ router.post(
     }
   },
 );
+
+// Registered after router.post, so it only catches the other methods.
+router.all('/t/:token', methodNotAllowed);
 
 export default router;
