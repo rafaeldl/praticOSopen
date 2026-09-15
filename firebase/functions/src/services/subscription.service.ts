@@ -279,7 +279,7 @@ export async function processRevenueCatWebhook(event: RevenueCatWebhookEvent): P
   switch (type) {
     case 'INITIAL_PURCHASE':
     case 'RENEWAL':
-    case 'PRODUCT_CHANGE':
+    case 'PRODUCT_CHANGE': {
       if (!product_id) {
         console.error('[Webhook] Missing product_id for purchase event');
         return false;
@@ -294,6 +294,7 @@ export async function processRevenueCatWebhook(event: RevenueCatWebhookEvent): P
         expiresAt,
         event.subscriber?.original_app_user_id
       );
+    }
 
     case 'CANCELLATION':
     case 'EXPIRATION':

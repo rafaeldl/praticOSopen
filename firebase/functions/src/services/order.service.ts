@@ -299,7 +299,7 @@ export async function createOrder(
   const orderNumber = await getNextOrderNumber(companyId);
 
   // Process services
-  let orderServices: OrderServiceItem[] = [];
+  const orderServices: OrderServiceItem[] = [];
   let servicesTotal = 0;
 
   if (input.services && input.services.length > 0) {
@@ -323,7 +323,7 @@ export async function createOrder(
   }
 
   // Process products
-  let orderProducts: OrderProductItem[] = [];
+  const orderProducts: OrderProductItem[] = [];
   let productsTotal = 0;
 
   if (input.products && input.products.length > 0) {
