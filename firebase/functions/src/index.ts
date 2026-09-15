@@ -375,31 +375,26 @@ const botLimiter = rateLimit({
   },
 });
 
-// Rate limiters for the MCP connector — two layers, mounted in front of
-// mcpRouter (see app.use('/mcp', ...) below), so both run before mcpAuth's
-// Firestore lookup.
+// Rate limiting for the MCP connector — two layers, both before mcpAuth's
+// Firestore lookup:
 //
-// Keying only on the token (the original design) lets an unauthenticated
-// flood through unthrottled: every distinct — including forged, rotated —
-// token value gets its own independent 120/window budget, and combining the
-// token with req.ip into a single key wouldn't close that, since an attacker
-// varying the token on every request from one IP still produces a fresh
-// composite key each time. An IP-keyed limiter that runs first bounds total
-// request volume per source regardless of how many token values are tried,
-// which is what actually stops that flood; the token-keyed limiter stays
-// behind it to cap abuse of one specific (e.g. leaked) token independently
-// of how many other clients share its IP.
-const mcpIpLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 300,
-  message: {
-    jsonrpc: '2.0',
-    error: { code: -32000, message: 'Too many requests' },
-    id: null,
-  },
-  keyGenerator: (req: Request) => req.ip || 'unknown',
-});
-
+// 1. mcpLimiter (below) caps each token, e.g. a leaked one.
+// 2. The unknown-token guard in mcp/router.ts (mcp/token-guard.ts) caps,
+//    per instance, requests whose token hasn't authenticated recently. That
+//    is what stops a flood of rotating forged tokens — each of which would
+//    get a fresh budget from mcpLimiter — without 429-ing connected clients.
+//
+// There is deliberately no IP-keyed limiter. The legitimate callers are
+// ChatGPT and Claude, so every PraticOS customer shares the same OpenAI /
+// Anthropic egress IPs; and /mcp/** has no trustworthy client IP anyway.
+// Measured in production (2026-09-15): through the Hosting rewrite the request
+// arrives as `X-Forwarded-For: <client>, <Hosting edge>` (Hosting drops any
+// X-Forwarded-For the client sent), so with TRUST_PROXY_HOPS = 1 req.ip is a
+// Google edge IP (66.102.8.x, 192.178.11.x, 74.125.210.x) that changes on
+// every request. Trusting two hops for /mcp would recover the client IP via
+// Hosting, but the function's own URLs serve /mcp too, and there that entry —
+// like Fastly-Client-IP and the other Hosting headers — is client-controlled,
+// so an attacker could forge a fresh IP per request.
 const mcpLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 120,
@@ -488,7 +483,7 @@ app.use('/bot/registration', botLimiter, botAuth, botRegistrationRoutes);
 app.use('/bot/user', botLimiter, botAuth, botUserRoutes);
 
 // MCP Connector (ChatGPT / Claude — token-based auth carried in the URL path)
-app.use('/mcp', mcpIpLimiter, mcpLimiter, mcpRouter);
+app.use('/mcp', mcpLimiter, mcpRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
