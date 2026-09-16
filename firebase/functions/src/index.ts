@@ -6,6 +6,7 @@
 
 import * as functionsV1 from 'firebase-functions/v1';
 import { onRequest } from 'firebase-functions/v2/https';
+import { defineSecret } from 'firebase-functions/params';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import * as admin from 'firebase-admin';
@@ -237,6 +238,7 @@ export const blockSuspiciousSignups = beforeUserCreated(
 import { apiKeyAuth, botAuth, bearerAuth } from './middleware/auth.middleware';
 import { resolveCompanyContext } from './middleware/company.middleware';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
+import { createPublicOrdersLimiters } from './utils/public-rate-limit.utils';
 
 // Routes - API Core v1
 import authRoutes from './routes/v1/auth.routes';
@@ -403,21 +405,11 @@ const mcpLimiter = rateLimit({
   },
 });
 
-// Rate limiter for Public Routes (stricter)
-const publicLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 30,
-  message: {
-    success: false,
-    error: {
-      code: 'RATE_LIMIT_EXCEEDED',
-      message: 'Too many requests, please try again later',
-    },
-  },
-  keyGenerator: (req: Request) => {
-    return req.ip || 'unknown';
-  },
-});
+// Rate limiters for Public Routes (magic links): per IP for direct callers,
+// per share token for the Nuxt SSR, which reaches the function from one shared
+// IP for every visitor — see public-rate-limit.utils.ts
+const ssrApiSecret = defineSecret('SSR_API_SECRET');
+const publicOrdersLimiters = createPublicOrdersLimiters(() => ssrApiSecret.value());
 
 // Health Check
 app.get('/health', (_req: Request, res: Response) => {
@@ -429,7 +421,7 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // Public Routes (no authentication - magic links)
-app.use('/public/orders', publicLimiter, publicOrdersRoutes);
+app.use('/public/orders', ...publicOrdersLimiters, publicOrdersRoutes);
 
 // Webhook Routes (signature-based authentication)
 app.use('/webhooks/revenuecat', revenuecatWebhookRoutes);
@@ -533,6 +525,7 @@ export const api = onRequest(
     timeoutSeconds: 60,
     minInstances: 0,
     maxInstances: 100,
+    secrets: [ssrApiSecret],
   },
   app
 );

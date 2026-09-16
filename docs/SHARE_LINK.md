@@ -550,6 +550,43 @@ if (order.shareLink != null && !order.shareLink!.isExpired) {
 }
 ```
 
+## Rate Limiting (`/public/orders`)
+
+Implementação: `firebase/functions/src/utils/public-rate-limit.utils.ts`.
+
+A página `/q/{token}` (Nuxt, Cloud Run `praticos-web`) carrega a OS no servidor
+(`firebase/web/server/api/orders/[token].get.ts`). Medido em produção em
+2026-09-15: essas chamadas chegam na function com `X-Forwarded-For` igual ao IP
+de saída do `praticos-web` (user-agent `node`), o mesmo para todos os visitantes.
+Um limite só por IP colocaria todas as visualizações de `/q/` num único balde.
+
+| Chamador | Como é identificado | Limite (por minuto, por instância) |
+|----------|---------------------|------------------------------------|
+| Navegador (`order-view.js`, ações do Nuxt no cliente) | `req.ip` (ver `trust-proxy.utils.ts`) | 30 por IP |
+| SSR do Nuxt | Header `X-Praticos-SSR-Secret` igual ao secret `SSR_API_SECRET` | 30 por token + 300 respostas com erro no total (tokens inventados) |
+
+- Sem secret configurado, ninguém é tratado como SSR e vale o limite por IP.
+- O secret nunca é enviado ao navegador (`runtimeConfig.ssrApiSecret`, só servidor).
+- Não usa `trust proxy: true` nem headers que o cliente controla.
+
+### Configuração do secret
+
+O mesmo secret do Secret Manager é usado pelos dois serviços:
+
+```bash
+# 1. Criar o secret (uma vez)
+openssl rand -hex 32 | tr -d '\n' | gcloud secrets create SSR_API_SECRET --project praticos --data-file=-
+
+# 2. Permitir leitura pela conta de serviço do praticos-web
+gcloud secrets add-iam-policy-binding SSR_API_SECRET --project praticos \
+  --member="serviceAccount:940190275097-compute@developer.gserviceaccount.com" --role=roles/secretmanager.secretAccessor
+```
+
+- Function `api`: `defineSecret('SSR_API_SECRET')` (o Firebase CLI concede o acesso no deploy).
+- `praticos-web`: `--set-secrets NUXT_SSR_API_SECRET=SSR_API_SECRET:latest` em `.github/workflows/cloud-run-deploy.yml`.
+
+O secret precisa existir **antes** do deploy de qualquer um dos dois; sem ele o deploy falha.
+
 ## Considerações de Segurança
 
 1. **Tokens são únicos e não previsíveis** (UUID v4)
