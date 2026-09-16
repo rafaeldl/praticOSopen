@@ -130,6 +130,15 @@ class SubscriptionService {
   /// REVENUECAT_*_API_KEY pelas keys reais (goog_/appl_) e mudar para `true`.
   static const revenueCatEnabled = false;
 
+  /// Indica se a UI de compra (paywall, planos, CTAs de upgrade) pode aparecer.
+  ///
+  /// No iOS fica sempre `false`: a App Review rejeitou a 1.51.0 pela guideline
+  /// 3.1.1 (Payments - In-App Purchase) por expor assinatura sem compra via
+  /// StoreKit. Enquanto o IAP nao estiver implementado, o app nao mostra preco,
+  /// plano nem botao de assinar no iOS. Para reativar: implementar o IAP e
+  /// remover a condicao de plataforma.
+  static bool get purchaseUiEnabled => !Platform.isIOS;
+
   /// Indica se o SDK deve ser configurado com a API key.
   ///
   /// Nunca configura com o RevenueCat desativado ([revenueCatEnabled]). Keys da
