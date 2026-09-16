@@ -6,7 +6,21 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest, UserAggr, CompanyAggr } from '../models/types';
 import { db } from '../services/firestore.service';
-import { getRolePermissions, normalizeRole } from './auth.middleware';
+import { resolveUserContext, UserContextFailure } from '../services/user-context.service';
+import { getRolePermissions } from './auth.middleware';
+
+const BEARER_FAILURES: Record<
+  UserContextFailure,
+  { status: number; code: string; message: string }
+> = {
+  user_not_found: { status: 404, code: 'NOT_FOUND', message: 'User not found' },
+  company_not_found: { status: 404, code: 'NOT_FOUND', message: 'Company not found' },
+  no_access: {
+    status: 403,
+    code: 'FORBIDDEN',
+    message: 'User does not have access to this company',
+  },
+};
 
 /**
  * Middleware to resolve full company context
@@ -71,65 +85,18 @@ export async function resolveCompanyContext(
 
     // For bearer auth, resolve user and company
     if (type === 'bearer' && userId) {
-      // Get user info
-      const userDoc = await db.collection('users').doc(userId).get();
+      const result = await resolveUserContext(userId, companyId);
 
-      if (!userDoc.exists) {
-        res.status(404).json({
+      if (!result.ok) {
+        const { status, code, message } = BEARER_FAILURES[result.reason];
+        res.status(status).json({
           success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'User not found',
-          },
+          error: { code, message },
         });
         return;
       }
 
-      const userData = userDoc.data();
-
-      // Get company info
-      const companyDoc = await db.collection('companies').doc(companyId).get();
-
-      if (!companyDoc.exists) {
-        res.status(404).json({
-          success: false,
-          error: {
-            code: 'NOT_FOUND',
-            message: 'Company not found',
-          },
-        });
-        return;
-      }
-
-      const companyData = companyDoc.data();
-
-      // Find user's role in this company
-      const companies = userData?.companies || [];
-      const companyRole = companies.find(
-        (c: { company: CompanyAggr }) => c.company.id === companyId
-      );
-
-      if (!companyRole) {
-        res.status(403).json({
-          success: false,
-          error: {
-            code: 'FORBIDDEN',
-            message: 'User does not have access to this company',
-          },
-        });
-        return;
-      }
-
-      const normalizedRole = normalizeRole(companyRole.role);
-
-      req.userContext = {
-        userId: userId,
-        userName: userData?.name || '',
-        companyId: companyId,
-        companyName: companyData?.name || '',
-        role: normalizedRole,
-        permissions: getRolePermissions(normalizedRole),
-      };
+      req.userContext = result.context;
 
       next();
       return;

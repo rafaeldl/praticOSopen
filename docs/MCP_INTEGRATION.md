@@ -19,9 +19,9 @@ Pontos centrais:
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `router.ts` | Monta `POST /t/:token` em `/mcp` (`app.use('/mcp', mcpLimiter, mcpRouter)` em `src/index.ts`). Aplica cabeçalhos `Cache-Control: no-store, no-transform` antes de `mcpAuth`, inclusive na resposta 401, para que o token nunca fique em cache de CDN. Cria o `StreamableHTTPServerTransport` por requisição (stateless) e conecta o `McpServer`. |
+| `router.ts` | Monta `POST /t/:token` em `/mcp` (`app.use('/mcp', mcpLimiter, mcpRouter)` em `src/index.ts`). Aplica cabeçalhos `Cache-Control: no-store, no-transform` antes de `mcpAuth`, inclusive na resposta 401, para que o token nunca fique em cache de CDN. Cria o `StreamableHTTPServerTransport` por requisição (stateless) e conecta o `McpServer`. Qualquer outro método em `/t/:token` (`GET`, `DELETE`, ...) recebe `405` com `Allow: POST` e erro JSON-RPC, sem passar pelo `token-guard` nem por `mcpAuth`: em modo stateless não há stream SSE para abrir nem sessão para encerrar, e os clientes MCP sondam `GET` esperando `405`. |
 | `token-guard.ts` (`createUnknownTokenGuard`) | Teto global por instância (300/min) para requisições com token que não autenticou recentemente nessa instância, aplicado antes de `mcpAuth`. Tokens que autenticaram na última hora passam direto. |
-| `auth.ts` (`mcpAuth`) | Resolve o token do path (`req.params.token`) em `apiKeys` (`where('key', '==', token)`), valida `active`, `type === 'mcp'` e expiração, e popula `req.auth` e `req.userContext` - o mesmo formato que os handlers `/bot` já esperam. Responde 401 (`Invalid or expired connection token`) sem revelar qual dessas condições falhou. |
+| `auth.ts` (`mcpAuth`) | Resolve o token do path (`req.params.token`) em `apiKeys` (`where('key', '==', token)`), valida `active`, `type === 'mcp'` e expiração, e popula `req.auth` e `req.userContext` - o mesmo formato que os handlers `/bot` já esperam. Usuário, empresa e papel vêm de `resolveUserContext` (`services/user-context.service.ts`), o mesmo helper do ramo `bearer` de `resolveCompanyContext`. Responde 401 (`Invalid or expired connection token`) sem revelar qual dessas condições falhou. Grava `lastUsedAt` no documento do token (ver abaixo). |
 | `bridge.ts` (`callRoute`) | Despacha uma chamada para um router Express **em processo** (sem HTTP real), simulando `req`/`res`. Tem um timeout de segurança de 25s (`RESPONSE_TIMEOUT_MS`) para o caso de um handler nunca responder. |
 | `server.ts` (`buildMcpServer`) | Monta o `McpServer` por requisição: registra o recurso do card (`registerOrderCardResource`) e as tools de leitura e escrita. |
 | `tools/read.ts` | As 7 tools somente-leitura. |
@@ -151,11 +151,91 @@ Tela `lib/screens/integrations/integration_list_screen.dart`:
 - "+" no topo abre um diálogo pedindo um nome (ex.: "Meu ChatGPT").
 - Ao salvar, a URL completa aparece uma única vez, com botão "Copiar URL" - a partir daí ela não é mais recuperável pela UI, nem logada, nem incluída em mensagens de erro.
 - A lista mostra nome, "Nunca usada" ou "Último uso em {data}", e um botão "Revogar" com confirmação ("Revogar esta conexão? Quem estiver usando esta URL perde o acesso.").
+- Datas ausentes no documento do token chegam como `null` (nunca string vazia): o `fromJson` gerado no Flutter só trata `null`.
+
+### Último uso (`lastUsedAt`)
+
+`mcpAuth` grava `lastUsedAt` no documento de `apiKeys` depois de uma autenticação bem-sucedida, para o dono saber qual conexão está ativa antes de revogar.
+
+- **Fire-and-forget**: a escrita não é aguardada; a resposta não espera o Firestore.
+- **Throttle de uma escrita por hora por token** (`LAST_USED_WRITE_INTERVAL_MS`): não grava se o `lastUsedAt` já salvo tem menos de uma hora (vale entre instâncias) nem se a própria instância já gravou naquela hora (segura rajadas antes da primeira escrita chegar ao Firestore). A data exibida tem, portanto, precisão de uma hora.
+- **Falha não derruba a autenticação**: erro na escrita (síncrono ou assíncrono) só é logado, sem o token.
 - Erros do backend chegam por `code` (`FORBIDDEN`, `NOT_FOUND`), nunca pela mensagem de diagnóstico em inglês do backend.
 
 ## Segurança - limites conhecidos da fase 1
 
 O token viaja na própria URL, porque nem o ChatGPT nem o claude.ai permitem cabeçalho customizado num connector (comentário de `mcpAuth`). A aplicação redige o token dos próprios logs, mas os logs de plataforma do Cloud Run e do Firebase Hosting registram a URL completa, e nenhum código de aplicação consegue mudar isso. A Fase 2 substitui o token na URL por OAuth ("Conectar com PraticOS"), eliminando esse ponto.
+
+### Token nos logs de plataforma
+
+**Situação verificada em 2026-09-15 (projeto `praticos`):**
+
+- A function `api` é gen2, então roda como serviço Cloud Run `api`. O log `run.googleapis.com/requests` grava `httpRequest.requestUrl` com o caminho completo, token incluso. O filtro `httpRequest.requestUrl:"/mcp/t/"` já encontra entradas reais.
+- A integração do Firebase Hosting com o Cloud Logging **não** está ligada (não existe log `firebasehosting.googleapis.com/webrequests`). Se for ligada, o filtro abaixo cobre esse log também, porque ele usa o mesmo campo `httpRequest.requestUrl`.
+- O sink `_Default` não tem exclusões, e o bucket `_Default` retém logs por 30 dias.
+- Os logs da própria aplicação (stdout) já saem com o token redigido (`redactSensitivePath` em `utils/log-redaction.utils.ts`) e, em produção, sem query, corpo da requisição nem da resposta (`isPayloadLoggingEnabled`). Ainda assim registram rota, headers mascarados, status e duração, então a observabilidade das chamadas MCP não depende do log de requisição da plataforma.
+
+**Opções avaliadas:**
+
+| Opção | Efeito | Decisão |
+|---|---|---|
+| Exclusão no sink `_Default` | Entradas com `/mcp/t/` deixam de ser armazenadas. Não custa nada e não depende de quem tem acesso ao projeto. | **Recomendada** |
+| Restringir acesso ao Logs Viewer | O token continua armazenado; qualquer papel `roles/logging.viewer`, `roles/viewer`, `roles/editor` ou `roles/owner` ainda lê o log de requisição. `roles/logging.privateLogViewer` não protege esse log, porque ele não é um log de acesso a dados. | Só como complemento |
+| Bucket dedicado com acesso restrito | Mantém as entradas para diagnóstico, mas exige sink e bucket novos, além de IAM por view. Mais infraestrutura para um problema que some na fase 2. | Não adotada |
+
+**Status:** exclusão `mcp-token-urls` aplicada e verificada no sink `_Default` do projeto `praticos` em 2026-09-16. A métrica opcional do passo 1 não foi criada.
+
+**O filtro precisa ser regex.** A primeira tentativa usou o operador de substring, `httpRequest.requestUrl:"/mcp/t/"`. Esse filtro encontra as entradas numa leitura, mas como exclusão não surtiu efeito: requisições de teste feitas 42 s, 3,5 min e 8,7 min depois continuaram sendo gravadas. Com `httpRequest.requestUrl=~"/mcp/t/"`, restrito a `LOG_ID("run.googleapis.com/requests")`, a exclusão passou a valer. Não dá para separar com certeza o efeito do regex do de uma propagação mais demorada, mas o comando abaixo é o que está em produção e verificado.
+
+**Passo a passo (aplicar manualmente, fora do repositório):**
+
+1. (Opcional) Se quiser contar as requisições MCP pela plataforma depois da exclusão, crie uma métrica baseada em logs **antes** do passo 2. Exclusões não afetam métricas definidas pelo usuário, que continuam contando as entradas excluídas ([Google Cloud: Control Dataflow log ingestion](https://docs.cloud.google.com/dataflow/docs/guides/filter-logs)):
+
+   ```bash
+   gcloud logging metrics create mcp_platform_requests \
+     --project=praticos \
+     --description="Requisicoes em /mcp/t/ (entradas excluidas do _Default)" \
+     --log-filter='LOG_ID("run.googleapis.com/requests") AND httpRequest.requestUrl=~"/mcp/t/"'
+   ```
+
+2. Adicione a exclusão ao sink `_Default`:
+
+   ```bash
+   gcloud logging sinks update _Default \
+     --project=praticos \
+     --add-exclusion='name=mcp-token-urls,filter=LOG_ID("run.googleapis.com/requests") AND httpRequest.requestUrl=~"/mcp/t/"'
+   ```
+
+   Pelo console: **Logging → Log Router → `_Default` → Editar sink → Escolher registros para filtrar do sink → Adicionar exclusão**, com nome `mcp-token-urls` e o filtro `LOG_ID("run.googleapis.com/requests") AND httpRequest.requestUrl=~"/mcp/t/"`.
+
+3. Confira que a exclusão foi gravada:
+
+   ```bash
+   gcloud logging sinks describe _Default --project=praticos --format='yaml(exclusions)'
+   ```
+
+4. Confira com dois pedidos na URL direta do serviço Cloud Run, um em `/mcp/t/` e outro fora dele. O segundo é o controle: sem ele, uma leitura vazia também poderia ser falha de leitura. Use um token falso, e o formato imprime só a hora:
+
+   ```bash
+   B=https://api-m4d2l34a3a-rj.a.run.app
+   curl -s -o /dev/null "$B/mcp/t/token_falso_de_teste"
+   curl -s -o /dev/null "$B/controle-sem-mcp"
+   sleep 180
+   # Esperado: vazio
+   gcloud logging read 'httpRequest.requestUrl:"token_falso_de_teste"' \
+     --project=praticos --freshness=15m --limit=5 --format='value(timestamp)'
+   # Esperado: uma entrada
+   gcloud logging read 'httpRequest.requestUrl:"controle-sem-mcp"' \
+     --project=praticos --freshness=15m --limit=5 --format='value(timestamp)'
+   ```
+
+   Não use um caminho qualquer em `praticos.web.app` como controle: o Hosting responde estático sem chegar ao Cloud Run, e aí o controle não aparece no log de jeito nenhum. Dê margem de propagação: mudanças no sink levam alguns minutos para valer.
+
+5. **Entradas já gravadas não são apagadas pela exclusão.** Elas somem quando vencem os 30 dias de retenção do bucket `_Default`. Para fechar essa janela antes, revogue e recrie as conexões em Ajustes → Integrações. Não use `gcloud logging logs delete run.googleapis.com/requests`: esse comando apaga o log de requisição de **todos** os serviços Cloud Run do projeto, incluindo `praticos-web`.
+
+6. Qualquer sink novo que exporte logs de requisição (BigQuery, Cloud Storage, Pub/Sub) precisa da mesma exclusão.
+
+7. Quando o OAuth da fase 2 substituir o token na URL, remova a exclusão: `gcloud logging sinks update _Default --project=praticos --remove-exclusions=mcp-token-urls`.
 
 ## Firestore
 
