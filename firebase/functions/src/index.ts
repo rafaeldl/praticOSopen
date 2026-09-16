@@ -280,7 +280,7 @@ import botUserRoutes from './routes/bot/user.routes';
 
 // Routes - MCP Connector
 import mcpRouter from './mcp/router';
-import { buildLoggableHeaders, redactSensitivePath, shouldLogPayload } from './utils/log-redaction.utils';
+import { buildLoggableHeaders, isPayloadLoggingEnabled, redactSensitivePath } from './utils/log-redaction.utils';
 
 // Initialize Express app
 const app = express();
@@ -306,13 +306,13 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   const timestamp = new Date().toISOString();
-  // Tokens that travel in the URL path (MCP connector, share links) must never
-  // reach the logs verbatim — see redactSensitivePath().
+  // Tokens that travel in the URL path (MCP connector, share links, invites)
+  // must never reach the logs verbatim — see redactSensitivePath().
   const safePath = redactSensitivePath(req.path);
-  // MCP, public magic-link and share-management payloads carry end-customer
-  // personal data or the share token itself — see shouldLogPayload()'s doc
-  // comment. Query, request body and response body are all skipped there.
-  const logPayload = shouldLogPayload(req.path);
+  // Payloads carry tokens and end-customer personal data, so query, request
+  // body and response body are only logged in the local emulator — see
+  // isPayloadLoggingEnabled().
+  const logPayload = isPayloadLoggingEnabled(req.path);
 
   // Log request
   console.log(`\n--- [${timestamp}] INCOMING REQUEST ---`);

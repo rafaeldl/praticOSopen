@@ -27,7 +27,10 @@ export function redactMcpTokenFromPath(path: string): string {
  * - `/public/orders/{token}` — share link token (`ST_<uuid>`), which alone
  *   grants access to the order, its customer and approve/reject actions;
  * - `.../share/{token}` — the same share token on the revoke routes
- *   (`/v1/orders`, `/v1/app/orders`, `/bot/orders`).
+ *   (`/v1/orders`, `/v1/app/orders`, `/bot/orders`);
+ * - `/v1/app/invites/{token}` and `/bot/invite/{code}` — invite code
+ *   (`INV_...`), which lets whoever holds it join the company. The literal
+ *   sibling routes (`pending`, `create`, `accept`, `list`) stay readable.
  *
  * Same rules as redactMcpTokenFromPath(): match by position, never by token
  * shape, and case-insensitively.
@@ -35,7 +38,9 @@ export function redactMcpTokenFromPath(path: string): string {
 export function redactSensitivePath(path: string): string {
   return redactMcpTokenFromPath(path)
     .replace(/(\/public\/orders\/)[^/]+/i, '$1***')
-    .replace(/(\/share\/)[^/]+/i, '$1***');
+    .replace(/(\/share\/)[^/]+/i, '$1***')
+    .replace(/(\/v1\/app\/invites\/)(?!pending(\/|$))[^/]+/i, '$1***')
+    .replace(/(\/bot\/invite\/)(?!(create|accept|list)(\/|$))[^/]+/i, '$1***');
 }
 
 type LoggableHeaders = {
@@ -99,4 +104,20 @@ export function buildLoggableHeaders(headers: IncomingHttpHeaders): LoggableHead
  */
 export function shouldLogPayload(path: string): boolean {
   return !/^\/(mcp|public)(\/|$)|\/share(\/|$)/i.test(path);
+}
+
+/**
+ * Whether the request logger may print query, body and response for this
+ * request. Only ever in the local Functions emulator: in production nearly
+ * every route carries a credential or end-customer personal data in its
+ * payload — link/invite tokens in `/bot/link` and `/bot/invite/accept`
+ * bodies, invite tokens in invite responses, phone/email in `/v1/customers`
+ * queries, customer and order data in most bot/API responses. Even in the
+ * emulator, shouldLogPayload()'s always-sensitive routes stay skipped.
+ */
+export function isPayloadLoggingEnabled(
+  path: string,
+  env: NodeJS.ProcessEnv = process.env
+): boolean {
+  return env.FUNCTIONS_EMULATOR === 'true' && shouldLogPayload(path);
 }

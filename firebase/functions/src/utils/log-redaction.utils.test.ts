@@ -1,5 +1,6 @@
 import {
   buildLoggableHeaders,
+  isPayloadLoggingEnabled,
   redactMcpTokenFromPath,
   redactSensitivePath,
   shouldLogPayload,
@@ -76,6 +77,26 @@ describe('redactSensitivePath', () => {
     expect(redactSensitivePath('/v1/orders/order123/share')).toBe('/v1/orders/order123/share');
     expect(redactSensitivePath('/bot/orders/42/share')).toBe('/bot/orders/42/share');
     expect(redactSensitivePath('/public/orders')).toBe('/public/orders');
+  });
+
+  it('redacts the invite token on the app invite routes', () => {
+    expect(redactSensitivePath('/v1/app/invites/INV_AB12CD34')).toBe('/v1/app/invites/***');
+    expect(redactSensitivePath('/v1/app/invites/INV_AB12CD34/accept')).toBe('/v1/app/invites/***/accept');
+    expect(redactSensitivePath('/V1/APP/Invites/INV_AB12CD34')).toBe('/V1/APP/Invites/***');
+  });
+
+  it('keeps the literal /pending invite route readable', () => {
+    expect(redactSensitivePath('/v1/app/invites/pending')).toBe('/v1/app/invites/pending');
+    expect(redactSensitivePath('/v1/app/invites')).toBe('/v1/app/invites');
+    // Only the exact literal is spared — a token that merely starts with it is not.
+    expect(redactSensitivePath('/v1/app/invites/pendingXYZ')).toBe('/v1/app/invites/***');
+  });
+
+  it('redacts the invite code on the bot invite delete route, keeping literal routes readable', () => {
+    expect(redactSensitivePath('/bot/invite/INV_AB12CD34')).toBe('/bot/invite/***');
+    for (const literal of ['create', 'accept', 'list']) {
+      expect(redactSensitivePath(`/bot/invite/${literal}`)).toBe(`/bot/invite/${literal}`);
+    }
   });
 
   it('leaves unrelated paths untouched', () => {
@@ -177,5 +198,29 @@ describe('shouldLogPayload', () => {
     expect(shouldLogPayload('/mcpxyz/whatever')).toBe(true);
     expect(shouldLogPayload('/publicity')).toBe(true);
     expect(shouldLogPayload('/v1/orders/order123/shared-notes')).toBe(true);
+  });
+});
+
+describe('isPayloadLoggingEnabled', () => {
+  const emulator = { FUNCTIONS_EMULATOR: 'true' };
+
+  it('never logs payloads in production, on any route', () => {
+    // Bot bodies carry LT_/INV_ tokens and phones, /v1/customers queries carry
+    // phone/email, and most responses carry customer data.
+    for (const path of ['/bot/link', '/bot/invite/accept', '/v1/customers', '/v1/app/invites/pending', '/bot/orders/42']) {
+      expect(isPayloadLoggingEnabled(path, {})).toBe(false);
+      expect(isPayloadLoggingEnabled(path, { FUNCTIONS_EMULATOR: 'false' })).toBe(false);
+    }
+  });
+
+  it('logs payloads in the local emulator for ordinary routes', () => {
+    expect(isPayloadLoggingEnabled('/bot/summary/today', emulator)).toBe(true);
+    expect(isPayloadLoggingEnabled('/v1/orders', emulator)).toBe(true);
+  });
+
+  it('still skips the always-sensitive routes in the emulator', () => {
+    expect(isPayloadLoggingEnabled('/mcp/t/mcp_aabbccdd112233', emulator)).toBe(false);
+    expect(isPayloadLoggingEnabled('/public/orders/ST_abc', emulator)).toBe(false);
+    expect(isPayloadLoggingEnabled('/bot/orders/42/share', emulator)).toBe(false);
   });
 });
