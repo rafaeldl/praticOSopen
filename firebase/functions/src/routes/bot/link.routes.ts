@@ -11,6 +11,7 @@ import * as registrationService from '../../services/registration.service';
 import * as inviteService from '../../services/invite.service';
 import { db } from '../../services/firestore.service';
 import { getFormatContext } from '../../utils/format.utils';
+import { maskPhoneForLog, maskTokenForLog } from '../../utils/log-redaction.utils';
 
 const router: Router = Router();
 
@@ -44,7 +45,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
     // Accept whatsappNumber from body or header
     const whatsappNumber = req.body.whatsappNumber || req.headers['x-whatsapp-number'] as string;
 
-    console.log(`[LINK] POST /bot/link - token=${token ? token.substring(0, 10) + '...' : 'missing'}, whatsappNumber=${whatsappNumber || 'missing'}`);
+    console.log(`[LINK] POST /bot/link - token=${maskTokenForLog(token)}, whatsappNumber=${maskPhoneForLog(whatsappNumber)}`);
 
     // Validate token
     if (!token) {
@@ -75,7 +76,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
     // Validate E.164 format
     const e164Regex = /^\+[1-9]\d{6,14}$/;
     if (!e164Regex.test(whatsappNumber)) {
-      console.log(`[LINK] Validation failed: invalid E.164 format: ${whatsappNumber}`);
+      console.log(`[LINK] Validation failed: invalid E.164 format: ${maskPhoneForLog(whatsappNumber)}`);
       res.status(400).json({
         success: false,
         error: {
@@ -122,7 +123,7 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
       tokenData.companyName
     );
 
-    console.log(`[LINK] WhatsApp linked successfully: ${whatsappNumber} -> user=${tokenData.userId}, company=${tokenData.companyId}`);
+    console.log(`[LINK] WhatsApp linked successfully: ${maskPhoneForLog(whatsappNumber)} -> user=${tokenData.userId}, company=${tokenData.companyId}`);
 
     res.json({
       success: true,

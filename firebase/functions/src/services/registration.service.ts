@@ -24,6 +24,7 @@ import {
 import * as channelLinkService from './channel-link.service';
 import { addCompanyToUserDoc } from './invite.service';
 import { executeServerBootstrap } from './bootstrap-server.service';
+import { maskPhoneForLog, maskTokenForLog } from '../utils/log-redaction.utils';
 
 // Token expiration time (24 hours)
 const REGISTRATION_TOKEN_EXPIRATION = 24 * 60 * 60 * 1000;
@@ -262,7 +263,7 @@ export async function startRegistration(
   // Fetch segments
   const segments = await getActiveSegments();
 
-  console.log(`[REGISTRATION] Started for ${normalizedPhone}: ${token}`);
+  console.log(`[REGISTRATION] Started for ${maskPhoneForLog(normalizedPhone)}: ${maskTokenForLog(token)}`);
 
   return {
     success: true,
@@ -374,7 +375,7 @@ export async function updateRegistration(
 
   await getRegistrationsCollection().doc(token).update(updateData);
 
-  console.log(`[REGISTRATION] Updated ${token}: state=${updates.state || registration.state}`);
+  console.log(`[REGISTRATION] Updated ${maskTokenForLog(token)}: state=${updates.state || registration.state}`);
 
   // Return updated registration
   return (await getByToken(token)) as RegistrationToken;
@@ -419,7 +420,7 @@ export async function completeRegistration(
   const authPhone = normalizeBrazilianPhone(registration.whatsappNumber);
   const whatsappPhone = registration.whatsappNumber;
 
-  console.log(`[REGISTRATION] Completing registration for ${whatsappPhone} (auth: ${authPhone})`);
+  console.log(`[REGISTRATION] Completing registration for ${maskPhoneForLog(whatsappPhone)} (auth: ${maskPhoneForLog(authPhone)})`);
 
   try {
     // Check if user already exists in Firebase Auth
@@ -470,7 +471,7 @@ export async function completeRegistration(
         phoneNumber: authPhone, // Use normalized phone for Auth
         displayName: companyName,
       });
-      console.log(`[REGISTRATION] Created new Auth user: ${userRecord.uid} with phone ${authPhone}`);
+      console.log(`[REGISTRATION] Created new Auth user: ${userRecord.uid} with phone ${maskPhoneForLog(authPhone)}`);
     }
 
     const userId = userRecord.uid;
@@ -635,7 +636,7 @@ export async function cancelRegistration(
     state: 'cancelled',
   });
 
-  console.log(`[REGISTRATION] Cancelled: ${token}`);
+  console.log(`[REGISTRATION] Cancelled: ${maskTokenForLog(token)}`);
   return true;
 }
 
