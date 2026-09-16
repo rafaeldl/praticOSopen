@@ -183,6 +183,10 @@ O token viaja na própria URL, porque nem o ChatGPT nem o claude.ai permitem cab
 | Restringir acesso ao Logs Viewer | O token continua armazenado; qualquer papel `roles/logging.viewer`, `roles/viewer`, `roles/editor` ou `roles/owner` ainda lê o log de requisição. `roles/logging.privateLogViewer` não protege esse log, porque ele não é um log de acesso a dados. | Só como complemento |
 | Bucket dedicado com acesso restrito | Mantém as entradas para diagnóstico, mas exige sink e bucket novos, além de IAM por view. Mais infraestrutura para um problema que some na fase 2. | Não adotada |
 
+**Status:** exclusão `mcp-token-urls` aplicada e verificada no sink `_Default` do projeto `praticos` em 2026-09-16. A métrica opcional do passo 1 não foi criada.
+
+**O filtro precisa ser regex.** A primeira tentativa usou o operador de substring, `httpRequest.requestUrl:"/mcp/t/"`. Esse filtro encontra as entradas numa leitura, mas como exclusão não surtiu efeito: requisições de teste feitas 42 s, 3,5 min e 8,7 min depois continuaram sendo gravadas. Com `httpRequest.requestUrl=~"/mcp/t/"`, restrito a `LOG_ID("run.googleapis.com/requests")`, a exclusão passou a valer. Não dá para separar com certeza o efeito do regex do de uma propagação mais demorada, mas o comando abaixo é o que está em produção e verificado.
+
 **Passo a passo (aplicar manualmente, fora do repositório):**
 
 1. (Opcional) Se quiser contar as requisições MCP pela plataforma depois da exclusão, crie uma métrica baseada em logs **antes** do passo 2. Exclusões não afetam métricas definidas pelo usuário, que continuam contando as entradas excluídas ([Google Cloud: Control Dataflow log ingestion](https://docs.cloud.google.com/dataflow/docs/guides/filter-logs)):
@@ -191,7 +195,7 @@ O token viaja na própria URL, porque nem o ChatGPT nem o claude.ai permitem cab
    gcloud logging metrics create mcp_platform_requests \
      --project=praticos \
      --description="Requisicoes em /mcp/t/ (entradas excluidas do _Default)" \
-     --log-filter='httpRequest.requestUrl:"/mcp/t/"'
+     --log-filter='LOG_ID("run.googleapis.com/requests") AND httpRequest.requestUrl=~"/mcp/t/"'
    ```
 
 2. Adicione a exclusão ao sink `_Default`:
@@ -199,10 +203,10 @@ O token viaja na própria URL, porque nem o ChatGPT nem o claude.ai permitem cab
    ```bash
    gcloud logging sinks update _Default \
      --project=praticos \
-     --add-exclusion='name=mcp-token-urls,filter=httpRequest.requestUrl:"/mcp/t/"'
+     --add-exclusion='name=mcp-token-urls,filter=LOG_ID("run.googleapis.com/requests") AND httpRequest.requestUrl=~"/mcp/t/"'
    ```
 
-   Pelo console: **Logging → Log Router → `_Default` → Editar sink → Escolher registros para filtrar do sink → Adicionar exclusão**, com nome `mcp-token-urls` e o filtro `httpRequest.requestUrl:"/mcp/t/"`.
+   Pelo console: **Logging → Log Router → `_Default` → Editar sink → Escolher registros para filtrar do sink → Adicionar exclusão**, com nome `mcp-token-urls` e o filtro `LOG_ID("run.googleapis.com/requests") AND httpRequest.requestUrl=~"/mcp/t/"`.
 
 3. Confira que a exclusão foi gravada:
 
@@ -210,12 +214,22 @@ O token viaja na própria URL, porque nem o ChatGPT nem o claude.ai permitem cab
    gcloud logging sinks describe _Default --project=praticos --format='yaml(exclusions)'
    ```
 
-4. Depois de algumas chamadas MCP, confira que não entram novas entradas. O formato imprime só o nome do log, nunca a URL:
+4. Confira com dois pedidos na URL direta do serviço Cloud Run, um em `/mcp/t/` e outro fora dele. O segundo é o controle: sem ele, uma leitura vazia também poderia ser falha de leitura. Use um token falso, e o formato imprime só a hora:
 
    ```bash
-   gcloud logging read 'httpRequest.requestUrl:"/mcp/t/"' \
-     --project=praticos --freshness=10m --limit=5 --format='value(logName,timestamp)'
+   B=https://api-m4d2l34a3a-rj.a.run.app
+   curl -s -o /dev/null "$B/mcp/t/token_falso_de_teste"
+   curl -s -o /dev/null "$B/controle-sem-mcp"
+   sleep 180
+   # Esperado: vazio
+   gcloud logging read 'httpRequest.requestUrl:"token_falso_de_teste"' \
+     --project=praticos --freshness=15m --limit=5 --format='value(timestamp)'
+   # Esperado: uma entrada
+   gcloud logging read 'httpRequest.requestUrl:"controle-sem-mcp"' \
+     --project=praticos --freshness=15m --limit=5 --format='value(timestamp)'
    ```
+
+   Não use um caminho qualquer em `praticos.web.app` como controle: o Hosting responde estático sem chegar ao Cloud Run, e aí o controle não aparece no log de jeito nenhum. Dê margem de propagação: mudanças no sink levam alguns minutos para valer.
 
 5. **Entradas já gravadas não são apagadas pela exclusão.** Elas somem quando vencem os 30 dias de retenção do bucket `_Default`. Para fechar essa janela antes, revogue e recrie as conexões em Ajustes → Integrações. Não use `gcloud logging logs delete run.googleapis.com/requests`: esse comando apaga o log de requisição de **todos** os serviços Cloud Run do projeto, incluindo `praticos-web`.
 
