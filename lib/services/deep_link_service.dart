@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:praticos/services/subscription_service.dart';
 
 /// Service para lidar com deep links do app
 ///
@@ -59,11 +60,13 @@ class DeepLinkService {
     switch (path) {
       case 'upgrade':
       case 'plans':
-        return '/plans';
       case 'restore':
-        return '/manage_subscription';
       case 'subscription':
-        return '/manage_subscription';
+        // Sem UI de compra no iOS enquanto nao houver IAP (guideline 3.1.1).
+        if (!SubscriptionService.purchaseUiEnabled) return null;
+        return path == 'upgrade' || path == 'plans'
+            ? '/plans'
+            : '/manage_subscription';
       default:
         return null;
     }

@@ -44,6 +44,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
 import 'package:praticos/services/location_service.dart';
 import 'package:praticos/widgets/dynamic_field_builder.dart';
+import 'package:praticos/services/subscription_service.dart';
 
 class OrderForm extends StatefulWidget {
   @override
@@ -2736,14 +2737,15 @@ class _OrderFormState extends State<OrderForm> {
             child: const Text('Agora nao'),
             onPressed: () => Navigator.pop(dialogContext),
           ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            child: const Text('Ver planos'),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              Navigator.pushNamed(ctx, '/subscription/plans');
-            },
-          ),
+          if (SubscriptionService.purchaseUiEnabled)
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: const Text('Ver planos'),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pushNamed(ctx, '/subscription/plans');
+              },
+            ),
         ],
       ),
     );

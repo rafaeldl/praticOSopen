@@ -21,6 +21,7 @@ import 'package:praticos/screens/onboarding/company_info_screen.dart';
 import 'package:praticos/screens/onboarding/accept_invite_screen.dart';
 import 'package:praticos/repositories/company_repository.dart';
 import 'package:praticos/screens/menu_navigation/widgets/link_whatsapp_sheet.dart';
+import 'package:praticos/services/subscription_service.dart';
 
 class Settings extends StatefulWidget {
   @override
@@ -411,6 +412,8 @@ class _SettingsState extends State<Settings> {
               ),
 
               // Subscription Section
+              // Oculta no iOS enquanto nao houver In-App Purchase (guideline 3.1.1).
+              if (SubscriptionService.purchaseUiEnabled)
               CupertinoListSection.insetGrouped(
                 header: Text(context.l10n.subscription.toUpperCase()),
                 children: [

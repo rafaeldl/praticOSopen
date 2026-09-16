@@ -9,6 +9,7 @@ import { requireLinked } from '../../middleware/auth.middleware';
 import * as inviteService from '../../services/invite.service';
 import * as channelLinkService from '../../services/channel-link.service';
 import { validateInput, createInviteSchema, acceptInviteSchema } from '../../utils/validation.utils';
+import { maskTokenForLog } from '../../utils/log-redaction.utils';
 
 const router: Router = Router();
 
@@ -101,7 +102,7 @@ router.post('/accept', async (req: AuthenticatedRequest, res: Response) => {
 
     // Detect Link Token (LT_) and redirect to link logic
     if (inviteCode && inviteCode.startsWith('LT_')) {
-      console.log(`[INVITE] Detected Link Token, redirecting to link logic: ${inviteCode}`);
+      console.log(`[INVITE] Detected Link Token, redirecting to link logic: ${maskTokenForLog(inviteCode)}`);
 
       if (!whatsapp) {
         res.status(400).json({

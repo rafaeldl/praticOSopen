@@ -280,7 +280,7 @@ import botUserRoutes from './routes/bot/user.routes';
 
 // Routes - MCP Connector
 import mcpRouter from './mcp/router';
-import { redactMcpTokenFromPath, shouldLogPayload } from './utils/log-redaction.utils';
+import { buildLoggableHeaders, isPayloadLoggingEnabled, redactSensitivePath } from './utils/log-redaction.utils';
 
 // Initialize Express app
 const app = express();
@@ -306,25 +306,19 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();
   const timestamp = new Date().toISOString();
-  // The MCP connector token travels in the URL path (/mcp/t/{token}), so it
-  // must never reach the logs verbatim.
-  const safePath = redactMcpTokenFromPath(req.path);
-  // Every MCP tools/call body (and many tool responses) carries end-customer
-  // personal data — see shouldLogPayload()'s doc comment. Neither the
-  // request body nor the response body may be logged for /mcp/**.
-  const logPayload = shouldLogPayload(req.path);
+  // Tokens that travel in the URL path (MCP connector, share links, invites)
+  // must never reach the logs verbatim — see redactSensitivePath().
+  const safePath = redactSensitivePath(req.path);
+  // Payloads carry tokens and end-customer personal data, so query, request
+  // body and response body are only logged in the local emulator — see
+  // isPayloadLoggingEnabled().
+  const logPayload = isPayloadLoggingEnabled(req.path);
 
   // Log request
   console.log(`\n--- [${timestamp}] INCOMING REQUEST ---`);
   console.log(`${req.method} ${safePath}`);
-  console.log(`HEADERS:`, JSON.stringify({
-    'x-api-key': req.headers['x-api-key'],
-    'x-api-secret': req.headers['x-api-secret'],
-    'x-whatsapp-number': req.headers['x-whatsapp-number'],
-    'authorization': req.headers['authorization'] ? 'Bearer [HIDDEN]' : undefined,
-    'content-type': req.headers['content-type']
-  }, null, 2));
-  if (Object.keys(req.query).length) console.log(`QUERY:`, JSON.stringify(req.query, null, 2));
+  console.log(`HEADERS:`, JSON.stringify(buildLoggableHeaders(req.headers), null, 2));
+  if (logPayload && Object.keys(req.query).length) console.log(`QUERY:`, JSON.stringify(req.query, null, 2));
   if (logPayload && req.body && Object.keys(req.body).length) console.log(`BODY:`, JSON.stringify(req.body, null, 2));
 
   // Capture the original send to log response

@@ -11,6 +11,7 @@ import { getMessaging } from 'firebase-admin/messaging';
 import { FieldValue } from 'firebase-admin/firestore';
 import { db } from './firestore.service';
 import { Order, OrderComment, Company, UserAggr, RoleType } from '../models/types';
+import { maskTokenForLog } from '../utils/log-redaction.utils';
 
 // Types for notification recipients
 interface NotificationRecipient {
@@ -186,7 +187,7 @@ async function sendNotification(
           const errorCode = resp.error?.code;
           if (errorCode === 'messaging/invalid-registration-token' ||
               errorCode === 'messaging/registration-token-not-registered') {
-            console.log(`[NOTIFICATION] Invalid token at index ${idx}: ${allTokens[idx]}`);
+            console.log(`[NOTIFICATION] Invalid token at index ${idx}: ${maskTokenForLog(allTokens[idx])}`);
             // TODO: Remove invalid token from user document
           }
         }
