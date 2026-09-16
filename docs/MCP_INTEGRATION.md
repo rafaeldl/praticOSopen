@@ -173,7 +173,7 @@ O token viaja na própria URL, porque nem o ChatGPT nem o claude.ai permitem cab
 - A function `api` é gen2, então roda como serviço Cloud Run `api`. O log `run.googleapis.com/requests` grava `httpRequest.requestUrl` com o caminho completo, token incluso. O filtro `httpRequest.requestUrl:"/mcp/t/"` já encontra entradas reais.
 - A integração do Firebase Hosting com o Cloud Logging **não** está ligada (não existe log `firebasehosting.googleapis.com/webrequests`). Se for ligada, o filtro abaixo cobre esse log também, porque ele usa o mesmo campo `httpRequest.requestUrl`.
 - O sink `_Default` não tem exclusões, e o bucket `_Default` retém logs por 30 dias.
-- Os logs da própria aplicação (stdout) já saem com o token redigido e registram método, status e duração, então a observabilidade das chamadas MCP não depende do log de requisição da plataforma.
+- Os logs da própria aplicação (stdout) já saem com o token redigido (`redactSensitivePath` em `utils/log-redaction.utils.ts`) e, em produção, sem query, corpo da requisição nem da resposta (`isPayloadLoggingEnabled`). Ainda assim registram rota, headers mascarados, status e duração, então a observabilidade das chamadas MCP não depende do log de requisição da plataforma.
 
 **Opções avaliadas:**
 
