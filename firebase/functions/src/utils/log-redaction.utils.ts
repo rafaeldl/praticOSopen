@@ -54,12 +54,28 @@ type LoggableHeaders = {
 const REDACTED = '[REDACTED]';
 
 /**
- * The WhatsApp number identifies a person (personal data under LGPD). Keeping
- * only the last 4 digits is enough to correlate bot requests while debugging.
+ * A phone / WhatsApp number identifies a person (personal data under LGPD).
+ * Keeping only the last 4 digits is enough to correlate log lines while
+ * debugging. Takes the first value of a repeated header.
  */
-function maskWhatsappNumber(value: string | string[]): string {
-  const digits = (Array.isArray(value) ? value[0] : value).replace(/\D/g, '');
+export function maskPhoneForLog(value: string | string[] | null | undefined): string {
+  const first = Array.isArray(value) ? value[0] : value;
+  if (!first) return 'missing';
+  const digits = first.replace(/\D/g, '');
   return digits.length > 4 ? `***${digits.slice(-4)}` : '***';
+}
+
+/**
+ * Link (`LT_`), registration (`RG_`), invite (`INV_`) and share (`ST_`) tokens
+ * are bearer credentials: whoever reads one from the logs can use it. Only the
+ * type prefix is kept, which is what debugging needs; anything without a
+ * recognizable prefix (e.g. an FCM registration token) is fully masked.
+ */
+export function maskTokenForLog(value: unknown): string {
+  if (value === null || value === undefined || value === '') return 'missing';
+  if (typeof value !== 'string') return '***';
+  const prefix = /^[A-Z]{2,4}_/.exec(value);
+  return prefix ? `${prefix[0]}***` : '***';
 }
 
 /**
@@ -73,7 +89,7 @@ export function buildLoggableHeaders(headers: IncomingHttpHeaders): LoggableHead
   return {
     'x-api-key': headers['x-api-key'] ? REDACTED : undefined,
     'x-api-secret': headers['x-api-secret'] ? REDACTED : undefined,
-    'x-whatsapp-number': whatsappNumber ? maskWhatsappNumber(whatsappNumber) : undefined,
+    'x-whatsapp-number': whatsappNumber ? maskPhoneForLog(whatsappNumber) : undefined,
     'authorization': headers['authorization'] ? 'Bearer [HIDDEN]' : undefined,
     'content-type': headers['content-type'],
   };

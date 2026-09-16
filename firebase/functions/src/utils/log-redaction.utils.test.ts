@@ -1,6 +1,8 @@
 import {
   buildLoggableHeaders,
   isPayloadLoggingEnabled,
+  maskPhoneForLog,
+  maskTokenForLog,
   redactMcpTokenFromPath,
   redactSensitivePath,
   shouldLogPayload,
@@ -103,6 +105,47 @@ describe('redactSensitivePath', () => {
     expect(redactSensitivePath('/bot/summary/today')).toBe('/bot/summary/today');
     expect(redactSensitivePath('/v1/orders/order123')).toBe('/v1/orders/order123');
     expect(redactSensitivePath('/health')).toBe('/health');
+  });
+});
+
+describe('maskTokenForLog', () => {
+  it('keeps only the type prefix of known token formats', () => {
+    expect(maskTokenForLog('LT_0123456789abcdef0123456789abcdef')).toBe('LT_***');
+    expect(maskTokenForLog('RG_0123456789abcdef0123456789abcdef')).toBe('RG_***');
+    expect(maskTokenForLog('INV_AB12CD34')).toBe('INV_***');
+  });
+
+  it('fully masks a token without a recognizable prefix (e.g. an FCM token)', () => {
+    expect(maskTokenForLog('dGhpcyBpcyBhbiBGQ00gdG9rZW4:APA91bH')).toBe('***');
+  });
+
+  it('never echoes the secret part, even for a long or odd prefix', () => {
+    expect(maskTokenForLog('SECRETVALUEWITHOUTSEPARATOR_x')).toBe('***');
+    expect(maskTokenForLog('LT_')).toBe('LT_***');
+  });
+
+  it('reports missing or non-string values without throwing', () => {
+    expect(maskTokenForLog(undefined)).toBe('missing');
+    expect(maskTokenForLog(null)).toBe('missing');
+    expect(maskTokenForLog('')).toBe('missing');
+    expect(maskTokenForLog({ token: 'LT_abc' })).toBe('***');
+  });
+});
+
+describe('maskPhoneForLog', () => {
+  it('keeps only the last 4 digits', () => {
+    expect(maskPhoneForLog('+5511987654321')).toBe('***4321');
+    expect(maskPhoneForLog('+55 (11) 98765-4321')).toBe('***4321');
+  });
+
+  it('fully masks short values and reports missing ones', () => {
+    expect(maskPhoneForLog('1234')).toBe('***');
+    expect(maskPhoneForLog(undefined)).toBe('missing');
+    expect(maskPhoneForLog('')).toBe('missing');
+  });
+
+  it('uses the first value of a repeated header', () => {
+    expect(maskPhoneForLog(['+5511987654321', '+5511911112222'])).toBe('***4321');
   });
 });
 

@@ -14,6 +14,7 @@ import {
   RoleType,
   toDate,
 } from '../models/types';
+import { maskPhoneForLog, maskTokenForLog } from '../utils/log-redaction.utils';
 
 // Use Date directly - Firestore SDK will convert it to Timestamp
 const nowTimestamp = () => new Date();
@@ -59,7 +60,7 @@ export async function generateLinkToken(
  * Uses a transaction to prevent race conditions
  */
 export async function consumeLinkToken(token: string): Promise<LinkToken | null> {
-  console.log(`[LINK] Consuming token: ${token}`);
+  console.log(`[LINK] Consuming token: ${maskTokenForLog(token)}`);
 
   const tokenRef = db.collection('links').doc('tokens').collection('pending').doc(token);
 
@@ -68,7 +69,7 @@ export async function consumeLinkToken(token: string): Promise<LinkToken | null>
       const tokenDoc = await transaction.get(tokenRef);
 
       if (!tokenDoc.exists) {
-        console.log(`[LINK] Token NOT FOUND: ${token}`);
+        console.log(`[LINK] Token NOT FOUND: ${maskTokenForLog(token)}`);
         return null;
       }
 
@@ -76,14 +77,14 @@ export async function consumeLinkToken(token: string): Promise<LinkToken | null>
 
       // Check if already used
       if (tokenData.used) {
-        console.log(`[LINK] Token already used: ${token}`);
+        console.log(`[LINK] Token already used: ${maskTokenForLog(token)}`);
         return null;
       }
 
       // Check if expired
       const expiresAt = toDate(tokenData.expiresAt);
       if (expiresAt && expiresAt < new Date()) {
-        console.log(`[LINK] Token expired: ${token}, expiresAt: ${expiresAt?.toISOString()}`);
+        console.log(`[LINK] Token expired: ${maskTokenForLog(token)}, expiresAt: ${expiresAt?.toISOString()}`);
         return null;
       }
 
@@ -93,7 +94,7 @@ export async function consumeLinkToken(token: string): Promise<LinkToken | null>
       return tokenData;
     });
   } catch (error) {
-    console.error(`[LINK] Error consuming token ${token}:`, error);
+    console.error(`[LINK] Error consuming token ${maskTokenForLog(token)}:`, error);
     return null;
   }
 }
@@ -174,7 +175,7 @@ export async function linkWhatsApp(
       await auth.updateUser(userId, {
         phoneNumber: authPhone,
       });
-      console.log(`[LINK] Added phone ${authPhone} to Auth user ${userId}`);
+      console.log(`[LINK] Added phone ${maskPhoneForLog(authPhone)} to Auth user ${userId}`);
     }
   } catch (error) {
     // Non-fatal: user can still use WhatsApp, just won't have SMS login
