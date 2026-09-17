@@ -1553,5 +1553,8 @@
   },
   "withUpgrade": "With upgrade",
   "upgradeNow": "Upgrade now",
-  "maybeLater": "Maybe later"
+  "maybeLater": "Maybe later",
+  "photoLimitReachedMessage": "You have reached this month's photo limit.",
+  "photoLimitUpgradeHint": "Upgrade to add more photos.",
+  "viewPlans": "View plans"
 }

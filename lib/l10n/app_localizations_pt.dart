@@ -3628,4 +3628,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get teamSizeGt10 => 'Com mais de 10 funcionários';
+
+  @override
+  String get photoLimitReachedMessage =>
+      'Você atingiu o limite de fotos deste mês.';
+
+  @override
+  String get photoLimitUpgradeHint => 'Faça upgrade para adicionar mais fotos.';
+
+  @override
+  String get viewPlans => 'Ver planos';
 }

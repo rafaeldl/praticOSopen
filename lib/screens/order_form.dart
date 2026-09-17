@@ -27,7 +27,6 @@ import 'package:praticos/services/segment_config_service.dart';
 import 'package:praticos/constants/label_keys.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:praticos/services/authorization_service.dart';
-import 'package:praticos/services/feature_gate_service.dart';
 import 'package:praticos/mobx/reminder_store.dart';
 
 // Formulários Dinâmicos
@@ -44,7 +43,7 @@ import 'package:praticos/global.dart';
 import 'package:praticos/screens/widgets/order_comments_widget.dart';
 import 'package:praticos/services/location_service.dart';
 import 'package:praticos/widgets/dynamic_field_builder.dart';
-import 'package:praticos/services/subscription_service.dart';
+import 'package:praticos/widgets/photo_limit_dialog.dart';
 
 class OrderForm extends StatefulWidget {
   @override
@@ -2627,7 +2626,7 @@ class _OrderFormState extends State<OrderForm> {
                 // Verificar se foi limite atingido
                 final limitResult = _store.photoLimitResult;
                 if (limitResult != null && !limitResult.isAllowed) {
-                  _showPhotoLimitDialog(widgetContext, limitResult);
+                  showPhotoLimitDialog(widgetContext, limitResult);
                 } else {
                   _showMediaError(widgetContext);
                 }
@@ -2650,7 +2649,7 @@ class _OrderFormState extends State<OrderForm> {
                 // Verificar se foi limite atingido
                 final limitResult = _store.photoLimitResult;
                 if (limitResult != null && !limitResult.isAllowed) {
-                  _showPhotoLimitDialog(widgetContext, limitResult);
+                  showPhotoLimitDialog(widgetContext, limitResult);
                 } else {
                   _showMediaError(widgetContext);
                 }
@@ -2706,46 +2705,6 @@ class _OrderFormState extends State<OrderForm> {
             child: Text(ctx.l10n.ok),
             onPressed: () => Navigator.pop(dialogContext),
           ),
-        ],
-      ),
-    );
-  }
-
-  /// Mostra dialog de upgrade quando limite de fotos e atingido.
-  void _showPhotoLimitDialog(BuildContext ctx, FeatureGateResult result) {
-    showCupertinoDialog(
-      context: ctx,
-      builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Limite atingido'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(result.message ?? 'Voce atingiu o limite de fotos do seu plano.'),
-            const SizedBox(height: 12),
-            Text(
-              'Faca upgrade para adicionar mais fotos.',
-              style: TextStyle(
-                fontSize: 13,
-                color: CupertinoColors.secondaryLabel.resolveFrom(ctx),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: false,
-            child: const Text('Agora nao'),
-            onPressed: () => Navigator.pop(dialogContext),
-          ),
-          if (SubscriptionService.purchaseUiEnabled)
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              child: const Text('Ver planos'),
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                Navigator.pushNamed(ctx, '/subscription/plans');
-              },
-            ),
         ],
       ),
     );

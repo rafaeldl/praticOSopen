@@ -1619,5 +1619,8 @@
   "teamSizeSolo": "Sozinho",
   "teamSize1To3": "Com 1-3 funcionários",
   "teamSize4To10": "Com 4-10 funcionários",
-  "teamSizeGt10": "Com mais de 10 funcionários"
+  "teamSizeGt10": "Com mais de 10 funcionários",
+  "photoLimitReachedMessage": "Você atingiu o limite de fotos deste mês.",
+  "photoLimitUpgradeHint": "Faça upgrade para adicionar mais fotos.",
+  "viewPlans": "Ver planos"
 }
