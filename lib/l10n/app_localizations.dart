@@ -6825,6 +6825,24 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'Com mais de 10 funcionários'**
   String get teamSizeGt10;
+
+  /// No description provided for @photoLimitReachedMessage.
+  ///
+  /// In pt, this message translates to:
+  /// **'Você atingiu o limite de fotos deste mês.'**
+  String get photoLimitReachedMessage;
+
+  /// No description provided for @photoLimitUpgradeHint.
+  ///
+  /// In pt, this message translates to:
+  /// **'Faça upgrade para adicionar mais fotos.'**
+  String get photoLimitUpgradeHint;
+
+  /// No description provided for @viewPlans.
+  ///
+  /// In pt, this message translates to:
+  /// **'Ver planos'**
+  String get viewPlans;
 }
 
 class _AppLocalizationsDelegate
