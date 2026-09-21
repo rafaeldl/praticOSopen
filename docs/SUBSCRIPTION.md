@@ -179,6 +179,30 @@ final showWatermark = FeatureGateService.shouldShowPdfWatermark(company);
 
 ---
 
+## iOS: No Paid Features (App Review 3.1.1)
+
+The iOS app has **no paid features and no purchase UI**. Apple rejected versions
+1.51.0, 1.52.0 and 1.52.2 under guideline 3.1.1 (Payments - In-App Purchase):
+first for selling subscriptions outside IAP, then for accessing paid content that
+is not sold through IAP. Since the app has no IAP, iOS must not gate anything.
+
+Two platform switches implement this:
+
+| Switch | File | Effect on iOS |
+|--------|------|---------------|
+| `SubscriptionService.purchaseUiEnabled` | `lib/services/subscription_service.dart` | Hides the Subscription section in Settings, the plans and manage screens, upgrade CTAs and the `upgrade` / `plans` / `restore` / `subscription` deep links |
+| `FeatureGateService.planLimitsEnforced` | `lib/services/feature_gate_service.dart` | Every limit becomes `-1` (unlimited): photos, form templates, collaborators. No PDF watermark |
+
+Rules:
+
+- Android and web keep plans, limits and purchase UI unchanged.
+- Usage counters (`subscription.usage.*`) are still incremented on iOS, so limits
+  keep working for the same company on other platforms.
+- The App Review notes sent by fastlane (`ios/fastlane/Deliverfile`) state this
+  behaviour. Keep them true: if limits return to iOS, update the notes.
+- To restore limits on iOS: ship In-App Purchase first (see
+  `docs/IAP_IMPLEMENTATION_PLAN.md`), then remove both platform checks.
+
 ## Navigation Routes
 
 | Route | Screen |

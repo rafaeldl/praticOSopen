@@ -97,4 +97,45 @@ void main() {
       expect(FeatureGateService.shouldShowPdfWatermark(Subscription(plan: SubscriptionPlan.starter)), isFalse);
     });
   });
+
+  group('FeatureGateService on iOS (no paid features, guideline 3.1.1)', () {
+    setUp(() => FeatureGateService.debugPlanLimitsEnforcedOverride = false);
+    tearDown(() => FeatureGateService.debugPlanLimitsEnforcedOverride = null);
+
+    final exhausted = Subscription(
+      plan: SubscriptionPlan.free,
+      usage: SubscriptionUsage(
+        photosThisMonth: 9999,
+        formTemplates: 9999,
+        collaborators: 9999,
+      ),
+    );
+
+    test('photos are unlimited', () {
+      final single = FeatureGateService.canAddPhoto(exhausted);
+      final many = FeatureGateService.canAddPhotos(exhausted, 500);
+
+      expect(single.isAllowed, isTrue);
+      expect(single.isUnlimited, isTrue);
+      expect(single.message, isNull);
+      expect(many.isAllowed, isTrue);
+    });
+
+    test('form templates and collaborators are unlimited', () {
+      expect(FeatureGateService.canCreateFormTemplate(exhausted).isAllowed, isTrue);
+      expect(FeatureGateService.canAddCollaborator(exhausted).isAllowed, isTrue);
+    });
+
+    test('never suggests an upgrade nor flags near limit', () {
+      final result = FeatureGateService.canAddPhoto(exhausted);
+
+      expect(result.isNearLimit, isFalse);
+      expect(result.isAtLimit, isFalse);
+      expect(result.suggestedUpgrade, isNull);
+    });
+
+    test('PDF has no watermark even on the Free plan', () {
+      expect(FeatureGateService.shouldShowPdfWatermark(null), isFalse);
+    });
+  });
 }

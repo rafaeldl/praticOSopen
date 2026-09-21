@@ -1,3 +1,16 @@
+REGARDING GUIDELINE 3.1.1 - PLEASE READ
+
+The iOS app has no paid features. Every feature in the iOS app is free and unlimited for all users, and the app does not unlock, restore or access any paid content or subscription.
+
+- There is no purchasing of any kind inside the app.
+- There are no plan, pricing or subscription screens on iOS.
+- There are no calls to action for purchase outside the app, and no links to external payment methods.
+- Usage limits tied to paid plans were removed from iOS in this build.
+
+PraticOS is a business management tool for service companies (work orders, customers, scheduling, teams). Paid plans exist on our website, but they do not unlock anything in the iOS app.
+
+----------
+
 Para fazer login com a conta demo:
 
 1. Na tela de login, toque no link "Entrar com email" abaixo dos botões de login social
