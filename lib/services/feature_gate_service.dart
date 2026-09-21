@@ -1,4 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:praticos/models/subscription.dart';
 
 /// Tipos de features limitadas por plano.
@@ -134,6 +137,24 @@ class FeatureGateLimitException implements Exception {
 ///
 /// Verifica limites de uso baseado no plano de assinatura do usuário.
 class FeatureGateService {
+  /// Overrides [planLimitsEnforced] in tests. Always reset to null afterwards.
+  @visibleForTesting
+  static bool? debugPlanLimitsEnforcedOverride;
+
+  /// Whether subscription plan limits apply on this platform.
+  ///
+  /// Always `false` on iOS: App Review rejected the app under guideline 3.1.1
+  /// because it accessed paid content that is not sold through In-App Purchase.
+  /// With no IAP, the iOS app must not contain any paid feature, so every limit
+  /// is lifted there (unlimited photos, forms and collaborators, no PDF
+  /// watermark). To restore limits on iOS: ship IAP first, then drop this check.
+  static bool get planLimitsEnforced =>
+      debugPlanLimitsEnforcedOverride ?? !Platform.isIOS;
+
+  /// Plan limit for the platform: the real one, or -1 (unlimited) on iOS.
+  static int _effectiveLimit(int planLimit) =>
+      planLimitsEnforced ? planLimit : -1;
+
   /// Verifica se pode adicionar uma foto.
   ///
   /// Se [subscription] for null, usa limites do plano Free.
@@ -145,7 +166,7 @@ class FeatureGateService {
     final sub = subscription ?? Subscription();
     final limits = sub.limits;
     final currentUsage = sub.usage.photosThisMonth;
-    final limit = limits.photosPerMonth;
+    final limit = _effectiveLimit(limits.photosPerMonth);
 
     return FeatureGateResult(
       isAllowed: limit == -1 || currentUsage < limit,
@@ -161,7 +182,7 @@ class FeatureGateService {
     final sub = subscription ?? Subscription();
     final limits = sub.limits;
     final currentUsage = sub.usage.photosThisMonth;
-    final limit = limits.photosPerMonth;
+    final limit = _effectiveLimit(limits.photosPerMonth);
 
     return FeatureGateResult(
       isAllowed: limit == -1 || (currentUsage + count) <= limit,
@@ -177,7 +198,7 @@ class FeatureGateService {
     final sub = subscription ?? Subscription();
     final limits = sub.limits;
     final currentUsage = sub.usage.formTemplates;
-    final limit = limits.formTemplates;
+    final limit = _effectiveLimit(limits.formTemplates);
 
     return FeatureGateResult(
       isAllowed: limit == -1 || currentUsage < limit,
@@ -193,7 +214,7 @@ class FeatureGateService {
     final sub = subscription ?? Subscription();
     final limits = sub.limits;
     final currentUsage = sub.usage.collaborators;
-    final limit = limits.collaborators;
+    final limit = _effectiveLimit(limits.collaborators);
 
     return FeatureGateResult(
       isAllowed: limit == -1 || currentUsage < limit,
@@ -206,6 +227,7 @@ class FeatureGateService {
 
   /// Verifica se deve exibir marca d'água no PDF.
   static bool shouldShowPdfWatermark(Subscription? subscription) {
+    if (!planLimitsEnforced) return false;
     final sub = subscription ?? Subscription();
     return sub.limits.pdfWatermark;
   }

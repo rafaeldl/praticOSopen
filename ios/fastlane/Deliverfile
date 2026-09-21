@@ -6,7 +6,7 @@
 app_review_information(
   demo_user: "demo@praticos.com.br",
   demo_password: "Demo@2024!",
-  notes: "Para fazer login com a conta demo:\n\n1. Na tela de login, toque no link 'Entrar com email' abaixo dos botões de login social\n2. Digite o email e senha fornecidos\n3. Toque no botão 'Entrar'\n\nA conta demo possui dados de exemplo incluindo clientes e ordens de serviço."
+  notes: "REGARDING GUIDELINE 3.1.1 - PLEASE READ\n\nThe iOS app has no paid features. Every feature in the iOS app is free and unlimited for all users, and the app does not unlock, restore or access any paid content or subscription.\n\n- There is no purchasing of any kind inside the app.\n- There are no plan, pricing or subscription screens on iOS.\n- There are no calls to action for purchase outside the app, and no links to external payment methods.\n- Usage limits tied to paid plans were removed from iOS in this build.\n\nPraticOS is a business management tool for service companies (work orders, customers, scheduling, teams). Paid plans exist on our website, but they do not unlock anything in the iOS app.\n\n----------\n\nPara fazer login com a conta demo:\n\n1. Na tela de login, toque no link 'Entrar com email' abaixo dos botões de login social\n2. Digite o email e senha fornecidos\n3. Toque no botão 'Entrar'\n\nA conta demo possui dados de exemplo incluindo clientes e ordens de serviço."
 )
 
 # Automatically submit for review after upload
