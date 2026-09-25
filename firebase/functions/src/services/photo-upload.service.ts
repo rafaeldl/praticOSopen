@@ -49,13 +49,13 @@ export async function uploadPhotoFromBase64(
 ): Promise<OrderPhoto> {
   // Parse base64 data
   let base64Data = input.base64;
-  let mimeType = 'image/jpeg';
+  let declaredMimeType = 'image/jpeg';
 
   // Check if it's a data URI
   if (base64Data.startsWith('data:')) {
     const matches = base64Data.match(/^data:([^;]+);base64,(.+)$/);
     if (matches) {
-      mimeType = matches[1];
+      declaredMimeType = matches[1];
       base64Data = matches[2];
     }
   }
@@ -63,51 +63,17 @@ export async function uploadPhotoFromBase64(
   // Decode base64
   const buffer = Buffer.from(base64Data, 'base64');
 
-  // Validate content type
-  if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
-    throw new Error(`Invalid image type: ${mimeType}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`);
-  }
-
-  // Validate file size
-  if (buffer.length > MAX_FILE_SIZE) {
-    throw new Error(`Image too large. Maximum size: ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
-  }
-
-  // Generate unique filename using timestamp-based ID like Flutter app
-  const extension = getExtensionFromMimeType(mimeType) || getExtensionFromFilename(input.filename);
-  const photoId = generatePhotoId();
-  const filename = `${photoId}.${extension}`;
-
-  // Upload to Storage
-  const storagePath = `tenants/${companyId}/orders/${orderId}/photos/${filename}`;
-  const bucket = storage.bucket();
-  const file = bucket.file(storagePath);
-
-  await file.save(buffer, {
-    metadata: {
-      contentType: mimeType,
-      metadata: {
-        orderId,
-        uploadedBy: createdBy.id,
-        description: input.description || '',
-      },
+  return uploadPhotoFromBuffer(
+    companyId,
+    orderId,
+    {
+      buffer,
+      filename: input.filename,
+      mimeType: declaredMimeType,
+      description: input.description,
     },
-  });
-
-  // Make the file publicly accessible
-  await file.makePublic();
-
-  // Get public URL
-  const publicUrl = `https://storage.googleapis.com/${bucket.name}/${storagePath}`;
-
-  return {
-    id: photoId,
-    url: publicUrl,
-    storagePath,
-    description: input.description,
-    createdAt: new Date().toISOString(),
-    createdBy,
-  };
+    createdBy
+  );
 }
 
 /**
@@ -119,18 +85,23 @@ export async function uploadPhotoFromBuffer(
   input: UploadFromBufferInput,
   createdBy: UserAggr
 ): Promise<OrderPhoto> {
-  // Validate content type
-  if (!ALLOWED_MIME_TYPES.includes(input.mimeType)) {
-    throw new Error(`Invalid image type: ${input.mimeType}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`);
-  }
-
   // Validate file size
   if (input.buffer.length > MAX_FILE_SIZE) {
     throw new Error(`Image too large. Maximum size: ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
   }
 
+  // The declared MIME is not trusted: the bytes must be a real image, and the
+  // detected type is what gets stored (the file is made public below).
+  const mimeType = detectMimeTypeFromBuffer(input.buffer);
+  if (!mimeType || !ALLOWED_MIME_TYPES.includes(mimeType)) {
+    const declared = input.mimeType?.split(';')[0]?.trim() || 'unknown';
+    throw new Error(
+      `Invalid or unsupported image type: ${declared}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`
+    );
+  }
+
   // Generate unique filename
-  const extension = getExtensionFromMimeType(input.mimeType) || getExtensionFromFilename(input.filename);
+  const extension = getExtensionFromMimeType(mimeType) || getExtensionFromFilename(input.filename);
   const photoId = generatePhotoId();
   const filename = `${photoId}.${extension}`;
 
@@ -141,7 +112,7 @@ export async function uploadPhotoFromBuffer(
 
   await file.save(input.buffer, {
     metadata: {
-      contentType: input.mimeType,
+      contentType: mimeType,
       metadata: {
         orderId,
         uploadedBy: createdBy.id,
