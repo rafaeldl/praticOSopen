@@ -6,6 +6,7 @@
 // No uuid needed - using timestamp-based IDs like the Flutter app
 import { storage } from './firestore.service';
 import { UserAggr, OrderPhoto } from '../models/types';
+import { assertPublicHttpUrl } from './url-guard';
 
 // ============================================================================
 // Configuration
@@ -13,6 +14,8 @@ import { UserAggr, OrderPhoto } from '../models/types';
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_REDIRECTS = 3;
+const FETCH_TIMEOUT_MS = 15000;
 
 // ============================================================================
 // Photo Upload Functions
@@ -146,20 +149,7 @@ export async function uploadPhotoFromUrl(
   input: UploadFromUrlInput,
   createdBy: UserAggr
 ): Promise<OrderPhoto> {
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(input.url);
-  } catch {
-    throw new Error(`Invalid URL: ${input.url}`);
-  }
-
-  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
-    throw new Error(`Invalid protocol: ${parsedUrl.protocol}. Only http: and https: are supported.`);
-  }
-
-  const response = await fetch(input.url, {
-    signal: AbortSignal.timeout(15000),
-  });
+  const { response, finalUrl } = await fetchWithSafeRedirects(input.url);
 
   if (!response.ok) {
     throw new Error(`Failed to download image from URL: ${response.status} ${response.statusText}`);
@@ -173,40 +163,29 @@ export async function uploadPhotoFromUrl(
     }
   }
 
-  const arrayBuffer = await response.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  const buffer = await readBodyWithLimit(response, MAX_FILE_SIZE);
 
-  if (buffer.length > MAX_FILE_SIZE) {
-    throw new Error(`Image too large. Maximum size: ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
-  }
   if (buffer.length === 0) {
     throw new Error('Downloaded image is empty');
   }
 
-  // Resolve MIME type
-  let mimeType = input.mimeType?.split(';')[0]?.trim();
+  // The declared MIME (input or Content-Type header) is not trusted: the bytes
+  // must be a real image, and the detected type is what gets stored.
+  const mimeType = detectMimeTypeFromBuffer(buffer);
   if (!mimeType || !ALLOWED_MIME_TYPES.includes(mimeType)) {
-    const headerContentType = response.headers.get('content-type')?.split(';')[0]?.trim();
-    if (headerContentType && ALLOWED_MIME_TYPES.includes(headerContentType)) {
-      mimeType = headerContentType;
-    } else {
-      const detected = detectMimeTypeFromBuffer(buffer);
-      if (detected) {
-        mimeType = detected;
-      }
-    }
-  }
-
-  if (!mimeType || !ALLOWED_MIME_TYPES.includes(mimeType)) {
+    const declared =
+      input.mimeType?.split(';')[0]?.trim() ||
+      response.headers.get('content-type')?.split(';')[0]?.trim() ||
+      'unknown';
     throw new Error(
-      `Invalid or unsupported image type: ${mimeType || 'unknown'}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`
+      `Invalid or unsupported image type: ${declared}. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`
     );
   }
 
   // Resolve filename
   let filename = input.filename;
   if (!filename) {
-    const pathname = parsedUrl.pathname;
+    const pathname = finalUrl.pathname;
     const urlFilename = pathname.split('/').pop();
     if (urlFilename && urlFilename.includes('.')) {
       filename = urlFilename;
@@ -271,6 +250,71 @@ export async function getPhotoStream(storagePath: string): Promise<PhotoStreamRe
 // ============================================================================
 // Helper Functions
 // ============================================================================
+
+/**
+ * Fetches a URL without following redirects automatically. Every hop
+ * (initial URL and each Location) is validated against the SSRF guard.
+ */
+async function fetchWithSafeRedirects(rawUrl: string): Promise<{ response: Response; finalUrl: URL }> {
+  let currentUrl = await assertPublicHttpUrl(rawUrl);
+  const signal = AbortSignal.timeout(FETCH_TIMEOUT_MS);
+
+  for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    const response = await fetch(currentUrl.toString(), { redirect: 'manual', signal });
+
+    const isRedirect = response.status >= 300 && response.status < 400;
+    if (!isRedirect) {
+      return { response, finalUrl: currentUrl };
+    }
+
+    const location = response.headers.get('location');
+    if (!location) {
+      throw new Error(`Redirect without Location header: ${response.status}`);
+    }
+    if (hop === MAX_REDIRECTS) {
+      break;
+    }
+
+    let nextUrl: URL;
+    try {
+      nextUrl = new URL(location, currentUrl);
+    } catch {
+      throw new Error(`Invalid redirect URL: ${location}`);
+    }
+    currentUrl = await assertPublicHttpUrl(nextUrl);
+  }
+
+  throw new Error(`Too many redirects (max ${MAX_REDIRECTS})`);
+}
+
+/**
+ * Reads the response body, aborting as soon as it exceeds maxBytes
+ * (Content-Length may be absent or wrong).
+ */
+async function readBodyWithLimit(response: Response, maxBytes: number): Promise<Buffer> {
+  const tooLarge = () => new Error(`Image too large. Maximum size: ${maxBytes / (1024 * 1024)}MB`);
+  const reader = response.body?.getReader?.();
+
+  if (!reader) {
+    const buffer = Buffer.from(await response.arrayBuffer());
+    if (buffer.length > maxBytes) throw tooLarge();
+    return buffer;
+  }
+
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel().catch(() => undefined);
+      throw tooLarge();
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks);
+}
 
 /**
  * Generate photo ID using timestamp-based format like Flutter app
