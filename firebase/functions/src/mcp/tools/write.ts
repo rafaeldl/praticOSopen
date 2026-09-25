@@ -1,8 +1,6 @@
 // Import from 'zod/v3', not 'zod'. The installed zod@3.25 exports v4 at the
 // top level, while @modelcontextprotocol/sdk@1.30 expects zod/v3 types; the
 // mismatch fails the build with TS2589 as soon as a tool has an inputSchema.
-import fs from 'fs';
-import path from 'path';
 import { z } from 'zod/v3';
 import { McpToolContext } from '../types';
 import { callRoute } from '../bridge';
@@ -94,16 +92,16 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
     {
       title: 'Criar ordem de serviço',
       description:
-        'Creates a service order. customerId, deviceId/deviceIds, serviceId and productId MUST come from a previous search call — never invent them. status defaults to quote if omitted (accepts quote, approved or progress only — use update_order_status to move it further). Returns the created order with its customer share link.',
+        'Creates a service order. customerId, deviceId/deviceIds, serviceId and productId must be IDs returned by search. status defaults to quote if omitted (accepts quote, approved or progress only — use update_order_status to move it further). Returns the created order with its customer share link.',
       inputSchema: {
         customerId: z.string(),
         deviceId: z.string().optional(),
-        deviceIds: z.array(z.string()).optional(),
+        deviceIds: z.array(z.string()).optional().describe('For orders with several devices; when present, deviceId is ignored'),
         services: z
           .array(
             z.object({
               serviceId: z.string(),
-              value: z.number().min(0).optional(),
+              value: z.number().min(0).optional().describe('Price for this order; omit to use the catalog price, 0 for no charge'),
               description: z.string().max(500).optional(),
             }),
           )
@@ -118,8 +116,8 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
             }),
           )
           .optional(),
-        scheduledDate: z.string().optional(),
-        dueDate: z.string().optional(),
+        scheduledDate: z.string().optional().describe('ISO 8601 date-time'),
+        dueDate: z.string().optional().describe('ISO 8601 date-time'),
         status: z.enum(['quote', 'approved', 'progress']).optional(),
       },
       annotations: { readOnlyHint: false, destructiveHint: false },
@@ -155,7 +153,7 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
     {
       title: 'Mudar status da OS',
       description:
-        'Changes the status of a service order (approved, progress, done or canceled). Only valid state transitions are accepted. When moving to done, offer the customer share link to the user.',
+        'Changes the status of a service order (approved, progress, done or canceled). Only valid state transitions are accepted.',
       inputSchema: {
         orderNumber: z.number(),
         status: z.enum(['approved', 'progress', 'done', 'canceled']),
@@ -217,7 +215,7 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
     {
       title: 'Adicionar item à OS',
       description:
-        'Adds a service or a product to an existing order. itemId MUST come from a previous search call. quantity applies to products only (minimum 1, default 1 if omitted).',
+        'Adds a service or a product to an existing order. itemId must be an ID returned by search. quantity applies to products only (minimum 1, default 1 if omitted).',
       inputSchema: {
         orderNumber: z.number(),
         type: z.enum(['service', 'product']),
@@ -347,7 +345,7 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
     {
       title: 'Anexar foto à OS',
       description:
-        'Uploads a photo to a service order using a file (ChatGPT fileParams), URL (http/https), local file path (if accessible to server), or base64 encoded image data. Optional filename and description.',
+        'Uploads one photo to a service order. Provide exactly one source: file (an attachment the client passes in), fileUrl (a public http/https URL the server downloads) or photoBase64 (base64 data or a data URI). Accepts JPEG, PNG, WebP or GIF up to 10 MB; anything else returns an error. Returns the new photo count for the order.',
       inputSchema: {
         orderNumber: z.number().describe('Service order number (e.g. 1042)'),
         file: z
@@ -360,8 +358,6 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
           .optional()
           .describe('File object automatically provided by ChatGPT when the user attaches a file'),
         fileUrl: z.string().optional().describe('Public or accessible HTTP/HTTPS URL of the image file'),
-        photoUrl: z.string().optional().describe('Alias for fileUrl'),
-        filePath: z.string().optional().describe('Local filesystem path to the image file (if accessible to server)'),
         photoBase64: z.string().optional().describe('Base64-encoded image data or data URI'),
         filename: z.string().optional().describe('Optional filename with extension (e.g. "vistoria.jpg")'),
         description: z.string().max(500).optional().describe('Optional description or caption for the photo'),
@@ -380,8 +376,6 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
         file_name?: string;
       };
       fileUrl?: string;
-      photoUrl?: string;
-      filePath?: string;
       photoBase64?: string;
       filename?: string;
       description?: string;
@@ -389,38 +383,18 @@ export function registerWriteTools(server: any, ctx: McpToolContext): void {
       const body: Record<string, unknown> = {};
       if (args.description) body.description = args.description;
 
-      const targetUrl = args.file?.download_url || args.fileUrl || args.photoUrl;
+      const targetUrl = args.file?.download_url || args.fileUrl;
 
       if (targetUrl) {
         body.url = targetUrl;
         body.filename = args.filename || args.file?.file_name || 'photo.jpg';
         if (args.file?.mime_type) body.mimeType = args.file.mime_type;
-      } else if (args.filePath) {
-        const rawPath = args.filePath.trim();
-        if (rawPath.startsWith('http://') || rawPath.startsWith('https://')) {
-          body.url = rawPath;
-          body.filename = args.filename || 'photo.jpg';
-        } else {
-          const cleanPath = rawPath.startsWith('file://') ? rawPath.replace(/^file:\/\//, '') : rawPath;
-          if (!fs.existsSync(cleanPath)) {
-            return fail(
-              `Arquivo não encontrado em "${args.filePath}". Se o servidor MCP estiver rodando na nuvem, ele não tem acesso ao sistema de arquivos local da sua máquina. Utilize envio via arquivo (ChatGPT), URL acessível (fileUrl) ou Base64 (photoBase64).`
-            );
-          }
-          try {
-            const fileBuffer = await fs.promises.readFile(cleanPath);
-            body.base64 = fileBuffer.toString('base64');
-            body.filename = args.filename || path.basename(cleanPath) || 'photo.jpg';
-          } catch (err: any) {
-            return fail(`Falha ao ler arquivo local: ${err?.message || err}`);
-          }
-        }
       } else if (args.photoBase64) {
         body.base64 = args.photoBase64;
         body.filename = args.filename || 'photo.jpg';
       } else {
         return fail(
-          'Nenhum anexo de foto fornecido. Envie um arquivo (ChatGPT fileParams), URL acessível (fileUrl), caminho local (filePath) ou Base64 (photoBase64).'
+          'Nenhum anexo de foto fornecido. Envie um arquivo (file), URL acessível (fileUrl) ou Base64 (photoBase64).'
         );
       }
 

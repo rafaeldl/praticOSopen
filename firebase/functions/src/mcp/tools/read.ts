@@ -62,7 +62,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     {
       title: 'Buscar cliente, dispositivo, serviço ou produto',
       description:
-        'Resolves customers, devices, services and products into IDs. ALWAYS call this before create_order or add_order_item — the IDs returned here are the only valid ones. Accepts several terms at once; prefer one call with arrays over several calls.',
+        'Resolves customers, devices, services and products into IDs. create_order and add_order_item only accept IDs returned here, so call this first. Each field takes a string or an array of strings; put every term in one call rather than several. customer/device results come back as an exact match, name suggestions and, when nothing matched, a short list of available records; service/product results come back as matches plus available records. deviceSerial is an exact match and never returns available records.',
       inputSchema: {
         customer: z.union([z.string(), z.array(z.string())]).optional(),
         customerPhone: z.union([z.string(), z.array(z.string())]).optional(),
@@ -98,7 +98,7 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
         status: z
           .enum(['quote', 'approved', 'progress', 'done', 'canceled'])
           .optional(),
-        limit: z.number().optional(),
+        limit: z.number().optional().describe('Maximum orders to return (default 20, max 50)'),
       },
       annotations: { readOnlyHint: true },
     },
@@ -178,7 +178,8 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
     'get_pending_orders',
     {
       title: 'OS pendentes',
-      description: 'Returns the service orders still open, grouped by status.',
+      description:
+        'Returns what needs attention now, as four lists: quotes waiting for approval, orders due today, completed orders not yet paid, and overdue orders. Use list_orders to browse by status instead.',
       inputSchema: {},
       annotations: { readOnlyHint: true },
     },
@@ -206,8 +207,8 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
       description:
         'Returns revenue for a period: total, received and outstanding. Dates in YYYY-MM-DD. Without dates, returns the current month.',
       inputSchema: {
-        startDate: z.string().optional(),
-        endDate: z.string().optional(),
+        startDate: z.string().optional().describe('YYYY-MM-DD'),
+        endDate: z.string().optional().describe('YYYY-MM-DD'),
       },
       annotations: { readOnlyHint: true },
     },
@@ -238,8 +239,8 @@ export function registerReadTools(server: McpServer, ctx: McpToolContext): void 
         'Lists registered customers, devices, services or products. For resolving a specific name into an ID, prefer search.',
       inputSchema: {
         type: z.enum(ENTITY_TYPES),
-        q: z.string().optional(),
-        limit: z.number().optional(),
+        q: z.string().optional().describe('Optional name filter'),
+        limit: z.number().optional().describe('Maximum records to return (default 20, max 50)'),
       },
       annotations: { readOnlyHint: true },
     },

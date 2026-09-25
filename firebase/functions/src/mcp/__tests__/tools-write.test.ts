@@ -362,21 +362,6 @@ describe('write tools', () => {
     expect(result.content[0].text).toContain('Total de fotos: 3');
   });
 
-  it('upload_order_photo retorna erro explicativo se filePath não existir no servidor', async () => {
-    const server = fakeServer();
-    registerWriteTools(server as any, { req });
-
-    const result = await server.tools.get('upload_order_photo')!.handler({
-      orderNumber: 42,
-      filePath: '/tmp/nao-existe-12345.jpg',
-    });
-
-    expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain('Arquivo não encontrado');
-    expect(result.content[0].text).toContain('servidor MCP estiver rodando na nuvem');
-    expect(mockCallRoute).not.toHaveBeenCalled();
-  });
-
   it('upload_order_photo falha se nenhum anexo for fornecido', async () => {
     const server = fakeServer();
     registerWriteTools(server as any, { req });
