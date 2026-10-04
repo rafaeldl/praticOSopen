@@ -414,6 +414,9 @@ class AuthorizationService {
   /// Verifica se o usuário pode acessar o dashboard.
   bool get canViewDashboard => hasPermission(PermissionType.viewDashboard);
 
+  /// Verifica se o usuário pode gerar/cancelar cobranças da OS (Asaas).
+  bool get canChargeOrder => hasPermission(PermissionType.chargeOrder);
+
   // ═══════════════════════════════════════════════════════════════════
   // MANAGEMENT PERMISSIONS
   // ═══════════════════════════════════════════════════════════════════
