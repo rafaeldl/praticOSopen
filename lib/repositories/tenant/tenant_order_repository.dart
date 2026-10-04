@@ -1,6 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
+import 'package:praticos/global.dart';
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/repository.dart';
+import 'package:praticos/utils/order_payment_math.dart';
 
 /// Repository para Orders usando subcollections por tenant.
 ///
@@ -15,6 +19,113 @@ class TenantOrderRepository extends TenantRepository<Order?> {
 
   @override
   Map<String, dynamic> toJson(Order? order) => order!.toJson();
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Payments-safe writes
+  // ═══════════════════════════════════════════════════════════════════
+  //
+  // Payments (transactions, paidAmount, paid, payment) are written only by
+  // updatePayments / applyPaymentFieldUpdate (app) or by the server (Asaas
+  // webhook). Full-order saves must not send them, or they would overwrite
+  // payments made elsewhere.
+
+  /// Creates a new order with all fields. When the order already exists,
+  /// saves it without the payment fields.
+  @override
+  Future<void> createItem(String companyId, Order? item, {String? id}) async {
+    final docId = item?.id ?? id;
+    if (item != null && docId != null) {
+      final ref = collectionFor(companyId).doc(docId);
+      if (await _exists(ref)) {
+        final json = OrderPaymentMath.stripPaymentFields(toJson(item));
+        json.remove('number');
+        await ref.set(json, SetOptions(merge: true));
+        item.id = docId;
+        return;
+      }
+    }
+    await super.createItem(companyId, item, id: id);
+  }
+
+  /// Saves an existing order without the payment fields.
+  @override
+  Future<void> updateItem(String companyId, Order? item) {
+    final json = OrderPaymentMath.stripPaymentFields(toJson(item));
+    return collectionFor(companyId)
+        .doc(item?.id)
+        .set(json, SetOptions(merge: true));
+  }
+
+  /// Offline without cache, `get()` throws: treat as a new order (full write).
+  Future<bool> _exists(DocumentReference<Map<String, dynamic>> ref) async {
+    try {
+      return (await ref.get()).exists;
+    } on FirebaseException {
+      return false;
+    }
+  }
+
+  /// Converts the marker classes of [OrderPaymentMath] into Firestore field
+  /// transforms and stamps the audit fields with the acting user (never the
+  /// order's previous `updatedBy`). Without an actor, `updatedBy` is omitted.
+  static Map<String, dynamic> toFirestoreUpdate(
+    Map<String, dynamic> update, {
+    UserAggr? actor,
+  }) {
+    final result = <String, dynamic>{};
+    update.forEach((key, value) {
+      if (value is ArrayUnionOp) {
+        result[key] = FieldValue.arrayUnion(value.values);
+      } else if (value is IncrementOp) {
+        result[key] = FieldValue.increment(value.by);
+      } else {
+        result[key] = value;
+      }
+    });
+    result.remove('updatedBy');
+    if (actor != null) result['updatedBy'] = actor.toJson();
+    return result;
+  }
+
+  /// Applies a payment update map (from OrderPaymentMath.addPaymentUpdate /
+  /// addDiscountUpdate) with field transforms. No transaction: works offline.
+  Future<void> applyPaymentFieldUpdate(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> update, {
+    UserAggr? actor,
+  }) {
+    return collectionFor(companyId).doc(orderId).update(
+          toFirestoreUpdate(update, actor: actor ?? Global.userAggr),
+        );
+  }
+
+  /// Reads the order inside a Firestore transaction, applies [mutate] to the
+  /// fresh copy and writes only payment fields, discount, total and audit
+  /// (`updatedBy` is the acting user, not the previous one).
+  /// Returns the updated order, or null when it does not exist.
+  /// Errors thrown by [mutate] (e.g. AsaasTransactionLockedException) propagate.
+  Future<Order?> updatePayments(
+    String companyId,
+    String orderId,
+    Order Function(Order fresh) mutate, {
+    UserAggr? actor,
+  }) {
+    final ref = collectionFor(companyId).doc(orderId);
+    final user = actor ?? Global.userAggr;
+    return firestore.runTransaction<Order?>((tx) async {
+      final snap = await tx.get(ref);
+      if (!snap.exists) return null;
+      final fresh = fromJson({...snap.data()!, 'id': snap.id});
+      final updated = mutate(fresh);
+      updated.updatedAt = DateTime.now();
+      updated.updatedBy = user;
+      final data = OrderPaymentMath.paymentUpdateOf(updated);
+      if (user == null) data.remove('updatedBy');
+      tx.update(ref, data);
+      return updated;
+    });
+  }
 
   // ═══════════════════════════════════════════════════════════════════
   // Order-specific methods

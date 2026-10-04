@@ -65,6 +65,24 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
     );
   }
 
+  /// Atualiza só os pagamentos da OS dentro de uma transação do Firestore.
+  /// Ver [TenantOrderRepository.updatePayments].
+  Future<Order?> updatePayments(
+    String companyId,
+    String orderId,
+    Order Function(Order fresh) mutate,
+  ) =>
+      _tenant.updatePayments(companyId, orderId, mutate);
+
+  /// Aplica o mapa de update de pagamento com field transforms (offline-safe).
+  /// Ver [TenantOrderRepository.applyPaymentFieldUpdate].
+  Future<void> applyPaymentFieldUpdate(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> update,
+  ) =>
+      _tenant.applyPaymentFieldUpdate(companyId, orderId, update);
+
   // ═══════════════════════════════════════════════════════════════════
   // Ratings Support
   // ═══════════════════════════════════════════════════════════════════

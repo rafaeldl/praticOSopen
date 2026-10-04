@@ -38,6 +38,14 @@ abstract class TenantRepository<T extends BaseAuditCompany?> {
     return _db.collection('companies').doc(companyId).collection(collection);
   }
 
+  /// Collection reference for subclasses that need custom writes
+  /// (e.g. TenantOrderRepository.updatePayments).
+  CollectionReference<Map<String, dynamic>> collectionFor(String companyId) =>
+      _getCollection(companyId);
+
+  /// Firestore instance used by this repository.
+  FirebaseFirestore get firestore => _db;
+
   // ═══════════════════════════════════════════════════════════════════
   // Single Document Operations
   // ═══════════════════════════════════════════════════════════════════
