@@ -1,0 +1,35 @@
+name: Functions Check
+
+on:
+  push:
+    branches-ignore: [ master ]
+    paths:
+      - 'firebase/functions/**'
+      - '.github/workflows/functions_check.yml'
+
+jobs:
+  check:
+    name: Lint + Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firebase/functions
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: firebase/functions/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
