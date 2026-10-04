@@ -551,7 +551,7 @@ bundle exec fastlane beta               # TestFlight (manual)
 
 Bot WhatsApp rodando em GCE VM `praticos-bot` (zona `southamerica-east1-b`). Todos os comandos em `backend/bot/`.
 
-> **Status:** a VM `praticos-bot` está parada e o sync automático (`.github/workflows/bot-sync.yml`) está desligado; só roda via `workflow_dispatch`. Para religar, restaurar o bloco `push` comentado no workflow.
+> **Status (2026-10-04):** bot desligado. A VM `praticos-bot` e o disco foram **apagados**; as conversas estão arquivadas em `gs://praticos-bot-archive`. Os comandos abaixo só valem se o bot for recriado.
 
 ### Comandos Essenciais
 
@@ -662,6 +662,35 @@ account = AdAccount('act_521666357871300')
 ### Progresso das campanhas
 
 Ver `docs/ADS_CAMPAIGNS.md` para status completo de todas as campanhas, pendencias e historico.
+
+## Modo Autônomo (agentes)
+
+Prioridade vem do [`ROADMAP.md`](ROADMAP.md). Trabalho vem de issues.
+
+### Ciclo
+1. Pegar a issue aberta com label `agent-ready` mais alta no "Agora" do roadmap (se empatar, a mais antiga).
+2. Branch `tipo/descricao-curta` a partir da `master`.
+3. Implementar com **teste novo** para o que mudou. Rodar `fvm flutter analyze`, `fvm flutter test` e, se mexer em Functions, `npm test` em `firebase/functions`.
+4. Abrir PR com o template, `Closes #N` e o label de risco da issue.
+5. Se o CI falhar, corrigir no mesmo PR antes de pegar outra issue.
+
+### Limites
+- **WIP: no máximo 2 PRs de agente abertos.** Acima disso, não abrir novos: revisar/consertar os existentes.
+- Não mergear PR `risk:high`. Não fazer deploy nem promover release fora do fluxo de CI.
+- Bloqueio em passo manual (lojas, consoles, contas, credenciais): label `needs-human`, comentário curto dizendo exatamente o que falta, e seguir para a próxima issue.
+- Dados de clientes (nomes, telefones, conversas) **nunca** entram no repositório — ele é público. Só números agregados.
+- Medir sucesso por PR mergeado e release publicada, não por documento gerado. Não criar docs de planejamento sem pedido.
+
+### Risco
+| `risk:low` (pode auto-mergear com CI verde) | `risk:high` (revisão humana) |
+|---|---|
+| Bug fix com teste, testes, refatoração local | `firestore.rules`, `storage.rules`, índices |
+| Docs técnicas, site/SEO, i18n | Auth, billing, assinatura, IAP, pagamentos |
+| UI isolada, dependências patch | Workflows de CI/release, fastlane, assinatura iOS |
+| | Migrações de dados, modelos compartilhados, Functions de produção com escrita |
+
+### Propor trabalho
+Agentes podem abrir issues com label `agent-proposed` (template "Tarefa"). Só viram `agent-ready` com aprovação do Rafael.
 
 ## Regras Importantes
 
