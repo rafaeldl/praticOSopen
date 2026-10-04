@@ -35,8 +35,10 @@ describeEmulator('firestore.rules', () => {
 
   let env: RulesTestEnvironment;
 
-  const asUser = (uid: string, roles: Record<string, string> = {}, email?: string) =>
-    env.authenticatedContext(uid, { roles, ...(email ? { email } : {}) }).firestore();
+  const asUser = (uid: string, roles: Record<string, string> = {}, email?: string, emailVerified = true) =>
+    env
+      .authenticatedContext(uid, { roles, ...(email ? { email, email_verified: emailVerified } : {}) })
+      .firestore();
 
   beforeAll(async () => {
     const [host, port] = emulatorHost!.split(':');
@@ -324,6 +326,51 @@ describeEmulator('firestore.rules', () => {
           company: { id: 'c2', name: 'Company c2' },
         }),
       );
+    });
+
+    it('allows a company admin to read an invite', async () => {
+      await rut.assertSucceeds(fs.getDoc(fs.doc(asUser('admin1', { c1: 'admin' }), 'links/invites/tokens/INV_1')));
+    });
+
+    it('does not allow other company members to read an invite', async () => {
+      await rut.assertFails(fs.getDoc(fs.doc(asUser('tech1', { c1: 'technician' }), 'links/invites/tokens/INV_1')));
+    });
+
+    it('allows the invitee with a verified email to read the invite', async () => {
+      await rut.assertSucceeds(
+        fs.getDoc(fs.doc(asUser('invitee', {}, 'invitee@example.com'), 'links/invites/tokens/INV_1')),
+      );
+    });
+
+    it('requires a verified email for the invitee to read the invite', async () => {
+      await rut.assertFails(
+        fs.getDoc(fs.doc(asUser('invitee', {}, 'invitee@example.com', false), 'links/invites/tokens/INV_1')),
+      );
+    });
+
+    it('requires a verified email for the invitee to accept', async () => {
+      await rut.assertFails(
+        fs.updateDoc(fs.doc(asUser('invitee', {}, 'invitee@example.com', false), 'links/invites/tokens/INV_1'), {
+          status: 'accepted',
+        }),
+      );
+    });
+
+    it('allows the invitee to reject a pending invite', async () => {
+      await rut.assertSucceeds(
+        fs.updateDoc(fs.doc(asUser('invitee', {}, 'invitee@example.com'), 'links/invites/tokens/INV_1'), {
+          status: 'rejected',
+        }),
+      );
+    });
+
+    it('only allows the invitee to move a pending invite to accepted or rejected', async () => {
+      const db = asUser('invitee', {}, 'invitee@example.com');
+      await rut.assertFails(fs.updateDoc(fs.doc(db, 'links/invites/tokens/INV_1'), { status: 'cancelled' }));
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await fs.updateDoc(fs.doc(ctx.firestore(), 'links/invites/tokens/INV_1'), { status: 'cancelled' });
+      });
+      await rut.assertFails(fs.updateDoc(fs.doc(db, 'links/invites/tokens/INV_1'), { status: 'accepted' }));
     });
 
     it('allows a company admin to cancel an invite', async () => {

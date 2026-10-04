@@ -179,28 +179,35 @@ service cloud.firestore {
     // Path: /links/invites/tokens/{token}
     // Suporta convites via app e WhatsApp
     match /links/invites/tokens/{token} {
+      // Destinatário: e-mail do token verificado e igual ao do convite
+      function isInviteRecipient() {
+        return request.auth.token.email != null
+          && request.auth.token.email_verified == true
+          && request.auth.token.email == resource.data.email;
+      }
+
       // Criação: apenas admin da empresa do convite
       allow create: if request.auth != null
         && request.resource.data.company != null
         && request.resource.data.company.id != null
         && isCompanyAdmin(request.resource.data.company.id);
 
-      // Leitura: membro da empresa OU destinatário (por email/phone)
+      // Leitura: admin da empresa OU destinatário (e-mail verificado)
       allow read: if request.auth != null
         && (
-          // Membro da empresa pode ver convites da empresa
           (resource.data.company != null
             && resource.data.company.id != null
-            && belongsToCompany(resource.data.company.id))
-          // Destinatário pode ver convites pelo seu email
-          || request.auth.token.email == resource.data.email
+            && isCompanyAdmin(resource.data.company.id))
+          || isInviteRecipient()
         );
 
-      // Atualização: destinatário pode aceitar/rejeitar, admin da empresa pode gerenciar
+      // Atualização: destinatário pode aceitar/rejeitar convite pendente,
+      // admin da empresa pode gerenciar
       allow update: if request.auth != null
         && (
-          // Destinatário pode mudar status para accepted/rejected
-          (request.auth.token.email == resource.data.email
+          (isInviteRecipient()
+            && resource.data.status == 'pending'
+            && request.resource.data.status in ['accepted', 'rejected']
             && request.resource.data.diff(resource.data).affectedKeys()
                 .hasOnly(['status', 'acceptedAt', 'acceptedByUserId', 'acceptedByUserName']))
           // Admin da empresa pode gerenciar (sem mover o convite de empresa)
