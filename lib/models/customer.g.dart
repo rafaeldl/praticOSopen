@@ -26,6 +26,7 @@ Customer _$CustomerFromJson(Map<String, dynamic> json) => Customer()
   ..name = json['name'] as String?
   ..phone = json['phone'] as String?
   ..email = json['email'] as String?
+  ..taxId = json['taxId'] as String?
   ..address = json['address'] as String?
   ..latitude = (json['latitude'] as num?)?.toDouble()
   ..longitude = (json['longitude'] as num?)?.toDouble()
@@ -44,6 +45,7 @@ Map<String, dynamic> _$CustomerToJson(Customer instance) => <String, dynamic>{
   'name': instance.name,
   'phone': instance.phone,
   'email': instance.email,
+  'taxId': instance.taxId,
   'address': instance.address,
   'latitude': instance.latitude,
   'longitude': instance.longitude,
@@ -55,7 +57,8 @@ CustomerAggr _$CustomerAggrFromJson(Map<String, dynamic> json) => CustomerAggr()
   ..id = json['id'] as String?
   ..name = json['name'] as String?
   ..phone = json['phone'] as String?
-  ..email = json['email'] as String?;
+  ..email = json['email'] as String?
+  ..taxId = json['taxId'] as String?;
 
 Map<String, dynamic> _$CustomerAggrToJson(CustomerAggr instance) =>
     <String, dynamic>{
@@ -63,4 +66,5 @@ Map<String, dynamic> _$CustomerAggrToJson(CustomerAggr instance) =>
       'name': instance.name,
       'phone': instance.phone,
       'email': instance.email,
+      'taxId': instance.taxId,
     };

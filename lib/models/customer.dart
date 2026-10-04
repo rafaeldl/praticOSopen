@@ -10,6 +10,10 @@ class Customer extends BaseAuditCompany {
   String? name;
   String? phone;
   String? email;
+
+  /// CPF or CNPJ, normalized (digits; uppercase letters for alphanumeric CNPJ).
+  /// See normalizeTaxId in lib/utils/tax_id.dart.
+  String? taxId;
   String? address;
   double? latitude;
   double? longitude;
@@ -29,6 +33,9 @@ class CustomerAggr extends BaseAuditCompanyAggr {
   String? name;
   String? phone;
   String? email;
+
+  /// CPF or CNPJ, normalized (see lib/utils/tax_id.dart).
+  String? taxId;
 
   CustomerAggr();
   factory CustomerAggr.fromJson(Map<String, dynamic> json) =>

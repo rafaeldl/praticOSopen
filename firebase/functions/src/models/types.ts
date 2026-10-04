@@ -118,6 +118,8 @@ export interface CustomerAggr {
   name: string;
   phone?: string | null;
   email?: string | null;
+  /** CPF or CNPJ, normalized (digits; uppercase letters for alphanumeric CNPJ) */
+  taxId?: string | null;
 }
 
 export interface Customer extends CustomerAggr {
