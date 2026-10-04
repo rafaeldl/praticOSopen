@@ -8,7 +8,9 @@ import {
   buildAsaasTransaction,
   computePaymentFields,
   describeAsaasPayment,
+  repairAsaasTransactions,
   revertAsaasPayment,
+  transactionsChanged,
 } from '../order-payment.service';
 import type { AsaasPaymentEvent, OrderCharge } from '../../../models/asaas.types';
 
@@ -599,5 +601,251 @@ describe('order-payment.service - revertAsaasPayment', () => {
     seedOrder();
     await expect(revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1')).resolves.toEqual({ reverted: false });
     expect(list(COMMENTS_PATH)).toHaveLength(0);
+  });
+});
+
+describe('order-payment.service - repairAsaasTransactions', () => {
+  beforeEach(() => {
+    resetFakeDb();
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    jest.spyOn(console, 'log').mockImplementation(() => undefined);
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  /** Old app version saves a stale copy of the order without the Asaas payment. */
+  function overwriteLikeOldApp(overrides: Record<string, unknown> = {}) {
+    seed(ORDER_PATH, {
+      ...read(ORDER_PATH)!,
+      paidAmount: 0, paid: false, payment: 'unpaid', transactions: [],
+      updatedBy: { id: 'u1', name: 'Ana' },
+      ...overrides,
+    });
+  }
+
+  it('reinsere a transação Asaas apagada por versão antiga do app', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    const booked = read(ORDER_PATH)!.transactions;
+    overwriteLikeOldApp();
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 1 });
+
+    const order = read(ORDER_PATH)!;
+    expect(order.transactions).toEqual(booked);
+    expect(order.paidAmount).toBe(1000);
+    expect(order.paid).toBe(true);
+    expect(order.payment).toBe('paid');
+    expect(order.updatedAt).toEqual(expect.stringMatching(ISO));
+    expect(order.updatedBy).toEqual(ASAAS_ACTOR);
+  });
+
+  it('mantém pagamento manual adicionado depois e soma o Asaas reinserido', async () => {
+    seedOrder({ total: 1000 });
+    seedCharge({ value: 600 });
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ value: 600 }));
+    const manual = {
+      id: 'manual1', type: 'payment', amount: 400, description: 'Dinheiro',
+      createdAt: '2026-10-05T10:00:00.000Z', createdBy: { id: 'u1', name: 'Ana' },
+    };
+    overwriteLikeOldApp({ paidAmount: 400, transactions: [manual] });
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 1 });
+
+    const order = read(ORDER_PATH)!;
+    expect((order.transactions as any[]).map((t) => t.id)).toEqual(['manual1', 'asaas_pay_1']);
+    expect(order.paidAmount).toBe(1000);
+    expect(order.payment).toBe('paid');
+  });
+
+  it('não escreve quando nada falta e o status está coerente (sem loop no trigger)', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    const before = read(ORDER_PATH);
+    const writeSpy = jest.spyOn(jest.requireMock('../../firestore.service').db, 'write');
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+
+    expect(writeSpy).not.toHaveBeenCalled();
+    expect(read(ORDER_PATH)).toEqual(before);
+  });
+
+  it('segunda execução depois do reparo não escreve de novo', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    overwriteLikeOldApp();
+    await repairAsaasTransactions('c1', 'o1');
+    const writeSpy = jest.spyOn(jest.requireMock('../../firestore.service').db, 'write');
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+    expect(writeSpy).not.toHaveBeenCalled();
+  });
+
+  it('não reinsere pagamento estornado', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+    expect(read(ORDER_PATH)!.transactions).toEqual([]);
+  });
+
+  it('não reinsere id que está em refundedAsaasPaymentIds mesmo se ainda listado como pago', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    seed(CHARGE_PATH, { ...read(CHARGE_PATH)!, refundedAsaasPaymentIds: ['pay_1'] });
+    overwriteLikeOldApp();
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+    expect(read(ORDER_PATH)!.transactions).toEqual([]);
+    expect(read(ORDER_PATH)!.paidAmount).toBe(0);
+  });
+
+  it('pago sem cópia em appliedTransactions: avisa e não inventa transação', async () => {
+    seedOrder();
+    seedCharge({ paidAsaasPaymentIds: ['pay_1'], appliedTransactions: [] });
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+    expect(read(ORDER_PATH)!.transactions).toEqual([]);
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('[AsaasPayment]'),
+      { companyId: 'c1', orderId: 'o1', chargeId: 'ch1', asaasPaymentId: 'pay_1' },
+    );
+  });
+
+  it('parcelado: reinsere só as parcelas pagas que faltam, em várias cobranças', async () => {
+    seedOrder({ total: 900 });
+    seedCharge({ mode: 'cardInstallments', installmentCount: 2, value: 600, asaasInstallmentId: 'ins_1' });
+    seed(`${ORDER_PATH}/charges/ch2`, { ...read(CHARGE_PATH)!, id: 'ch2', mode: 'single', installmentCount: undefined, value: 300, asaasPaymentId: 'pay_9' });
+    for (const n of [1, 2]) {
+      await applyAsaasPayment('c1', 'o1', 'ch1', payment({ id: `pay_${n}`, value: 300, billingType: 'CREDIT_CARD', installmentNumber: n }));
+    }
+    await applyAsaasPayment('c1', 'o1', 'ch2', payment({ id: 'pay_9', value: 300 }));
+    const all = read(ORDER_PATH)!.transactions as any[];
+    overwriteLikeOldApp({ paidAmount: 300, transactions: [all[0]] });
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 2 });
+
+    const order = read(ORDER_PATH)!;
+    expect((order.transactions as any[]).map((t) => t.id).sort()).toEqual(['asaas_pay_1', 'asaas_pay_2', 'asaas_pay_9']);
+    expect(order.paidAmount).toBe(900);
+    expect(order.payment).toBe('paid');
+  });
+
+  it('corrige status inconsistente (incremento do app + status absoluto) sem mexer no resto', async () => {
+    // App incremented paidAmount offline while computing payment from a stale local state.
+    seedOrder({ total: 1000 });
+    seedCharge({ value: 600 });
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ value: 600 }));
+    const order0 = read(ORDER_PATH)!;
+    const manual = {
+      id: 'manual1', type: 'payment', amount: 400,
+      createdAt: '2026-10-05T10:00:00.000Z', createdBy: { id: 'u1', name: 'Ana' },
+    };
+    seed(ORDER_PATH, {
+      ...order0,
+      transactions: [...(order0.transactions as any[]), manual],
+      paidAmount: 1000,
+      paid: false,
+      payment: 'unpaid',
+      updatedBy: { id: 'u1', name: 'Ana' },
+      updatedAt: '2026-10-05T10:00:00.000Z',
+    });
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+
+    const order = read(ORDER_PATH)!;
+    expect(order.paid).toBe(true);
+    expect(order.payment).toBe('paid');
+    expect(order.paidAmount).toBe(1000);
+    expect((order.transactions as any[]).map((t) => t.id)).toEqual(['asaas_pay_1', 'manual1']);
+    expect(order.updatedBy).toEqual({ id: 'u1', name: 'Ana' });
+    expect(order.updatedAt).toBe('2026-10-05T10:00:00.000Z');
+  });
+
+  it('corrige "paid" que ficou acima do pago (status absoluto antigo) e arredonda centavos', async () => {
+    seedOrder({ total: 0.3, paidAmount: 0.1 + 0.2 - 0.0000001, paid: false, payment: 'unpaid' });
+
+    await repairAsaasTransactions('c1', 'o1');
+    expect(read(ORDER_PATH)!.payment).toBe('paid');
+
+    seed(ORDER_PATH, { ...read(ORDER_PATH)!, total: 500, paidAmount: 200, paid: true, payment: 'paid' });
+    await repairAsaasTransactions('c1', 'o1');
+    expect(read(ORDER_PATH)!.paid).toBe(false);
+    expect(read(ORDER_PATH)!.payment).toBe('unpaid');
+  });
+
+  it('nada falta mas paidAmount/status abaixo das transações: recalcula com computePaymentFields', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    // Old app kept the transaction list but overwrote the totals with its stale copy.
+    overwriteLikeOldApp({ transactions: read(ORDER_PATH)!.transactions, updatedAt: '2026-10-05T10:00:00.000Z' });
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+
+    const order = read(ORDER_PATH)!;
+    expect(order.paidAmount).toBe(1000);
+    expect(order.paid).toBe(true);
+    expect(order.payment).toBe('paid');
+    expect(order.updatedBy).toEqual({ id: 'u1', name: 'Ana' });
+    expect(order.updatedAt).toBe('2026-10-05T10:00:00.000Z');
+  });
+
+  it('OS com total zero nunca fica paga', async () => {
+    seedOrder({ total: 0, paidAmount: 0, paid: true, payment: 'paid' });
+    await repairAsaasTransactions('c1', 'o1');
+    expect(read(ORDER_PATH)!.payment).toBe('unpaid');
+    expect(read(ORDER_PATH)!.paid).toBe(false);
+  });
+
+  it('não grava undefined', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ description: undefined }));
+    overwriteLikeOldApp();
+    const writes: unknown[] = [];
+    const fake = jest.requireMock('../../firestore.service').db;
+    const original = fake.write.bind(fake);
+    jest.spyOn(fake, 'write').mockImplementation((...args: unknown[]) => {
+      writes.push(args[1]);
+      return original(...(args as [string, Record<string, unknown>, 'set' | 'merge' | 'update']));
+    });
+
+    await repairAsaasTransactions('c1', 'o1');
+
+    expect(writes).toHaveLength(1);
+    expect(writes.some(hasUndefined)).toBe(false);
+  });
+
+  it('OS inexistente: não faz nada', async () => {
+    seedCharge();
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+    expect(read(ORDER_PATH)).toBeUndefined();
+  });
+});
+
+describe('order-payment.service - transactionsChanged', () => {
+  const t = (id: string, amount = 10) => ({
+    id, type: 'payment' as const, amount, createdAt: '2026-10-04T00:00:00.000Z', createdBy: ASAAS_ACTOR,
+  });
+
+  it('compara profundamente before/after', () => {
+    expect(transactionsChanged({ transactions: [t('a')] }, { transactions: [t('a')] })).toBe(false);
+    expect(transactionsChanged({}, { transactions: [] })).toBe(false);
+    expect(transactionsChanged(undefined, undefined)).toBe(false);
+    expect(transactionsChanged({ transactions: [t('a')] }, { transactions: [] })).toBe(true);
+    expect(transactionsChanged({ transactions: [t('a', 10)] }, { transactions: [t('a', 20)] })).toBe(true);
+    expect(transactionsChanged({ transactions: [] }, { transactions: [t('b')] })).toBe(true);
+  });
+
+  it('ignora a ordem das chaves dentro da transação', () => {
+    const a = t('a');
+    const reordered = { createdBy: a.createdBy, createdAt: a.createdAt, amount: a.amount, type: a.type, id: a.id };
+    expect(transactionsChanged({ transactions: [a] }, { transactions: [reordered] })).toBe(false);
   });
 });

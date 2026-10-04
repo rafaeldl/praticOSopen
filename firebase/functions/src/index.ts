@@ -104,7 +104,7 @@ export const updateUserClaims = functionsV1
     }
   });
 
-import { handleOrderStatusChange } from './services/asaas/charge.service';
+import { handleOrderUpdatedAsaas } from './services/asaas/order-trigger.service';
 
 /**
  * Asaas master key (AES-256-GCM, base64 of 32 bytes) — see services/asaas/crypto.ts.
@@ -115,23 +115,24 @@ import { handleOrderStatusChange } from './services/asaas/charge.service';
 const asaasCredentialsKey = defineSecret('ASAAS_CREDENTIALS_KEY');
 
 /**
- * [Asaas] Cancels open charges on Asaas when an order is canceled.
- * The app changes the order status directly in Firestore, so this runs as a
- * trigger instead of inside an API route. No-op unless the company has Asaas connected.
+ * [Asaas] Single trigger for order updates (never add a second
+ * onDocumentUpdated on this path). The app writes orders directly to
+ * Firestore, so this runs as a trigger instead of inside an API route:
+ * - status changed to `canceled` → cancels open charges on Asaas;
+ * - `transactions` changed and Asaas connected → restores Asaas payments
+ *   overwritten by old app versions and fixes inconsistent payment fields.
+ * No-op unless the company has Asaas connected. Logic lives in
+ * services/asaas/order-trigger.service.ts.
  */
-export const onOrderCanceledCancelAsaasCharges = onDocumentUpdated(
+export const onOrderUpdatedAsaas = onDocumentUpdated(
   {
     document: 'companies/{companyId}/orders/{orderId}',
     region: 'southamerica-east1',
     secrets: [asaasCredentialsKey],
   },
   async (event) => {
-    const before = event.data?.before.data();
-    const after = event.data?.after.data();
-    if (!after || after.status !== 'canceled' || before?.status === 'canceled') return;
-
     const { companyId, orderId } = event.params;
-    await handleOrderStatusChange(companyId, orderId, before?.status, after.status);
+    await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data());
   }
 );
 
