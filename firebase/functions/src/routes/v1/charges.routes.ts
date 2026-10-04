@@ -31,10 +31,29 @@ function param(value: string | string[]): string {
   return Array.isArray(value) ? value[0] : value;
 }
 
+/** Firestore document ids used by the app: rejects anything else before touching Firestore. */
+const ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/;
+
+function isValidId(value: string | undefined): value is string {
+  return typeof value === 'string' && ID_PATTERN.test(value);
+}
+
+function notFound(res: Response, code: 'ORDER_NOT_FOUND' | 'CHARGE_NOT_FOUND'): void {
+  res.status(404).json({
+    success: false,
+    error: { code, message: code === 'ORDER_NOT_FOUND' ? 'Order not found' : 'Charge not found' },
+  });
+}
+
 router.post(
   '/:orderId/charges',
   requirePermission('manage:payments'),
   async (req: AuthenticatedRequest, res: Response) => {
+    const orderId = param(req.params.orderId);
+    if (!isValidId(orderId)) {
+      notFound(res, 'ORDER_NOT_FOUND');
+      return;
+    }
     try {
       const validation = validateInput(createChargeSchema, req.body);
       if (!validation.success) {
@@ -47,7 +66,7 @@ router.post(
 
       const charge = await createOrderCharge(
         req.userContext!.companyId,
-        param(req.params.orderId),
+        orderId,
         validation.data,
         getUserAggr(req),
       );
@@ -64,12 +83,18 @@ router.delete(
   '/:orderId/charges/:chargeId',
   requirePermission('manage:payments'),
   async (req: AuthenticatedRequest, res: Response) => {
+    const orderId = param(req.params.orderId);
+    const chargeId = param(req.params.chargeId);
+    if (!isValidId(orderId)) {
+      notFound(res, 'ORDER_NOT_FOUND');
+      return;
+    }
+    if (!isValidId(chargeId)) {
+      notFound(res, 'CHARGE_NOT_FOUND');
+      return;
+    }
     try {
-      const charge = await cancelOrderCharge(
-        req.userContext!.companyId,
-        param(req.params.orderId),
-        param(req.params.chargeId),
-      );
+      const charge = await cancelOrderCharge(req.userContext!.companyId, orderId, chargeId);
       res.json({ success: true, data: charge });
     } catch (error) {
       console.error('Cancel charge error:', (error as Error).name);

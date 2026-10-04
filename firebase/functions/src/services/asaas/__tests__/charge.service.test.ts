@@ -473,20 +473,79 @@ describe('charge.service', () => {
       expect(client.deleteInstallment).toHaveBeenCalledWith('ins_1');
     });
 
-    it('cancela a cobrança aberta anterior antes de criar outra', async () => {
+    it('cancela as cobranças abertas anteriores depois de gravar a nova', async () => {
       seedBase({ taxId: CPF });
       seedCharge('old', { status: 'pending' });
       seedCharge('oldInst', { status: 'overdue', mode: 'cardInstallments', asaasInstallmentId: 'ins_old' });
       seedCharge('paid', { status: 'paid' });
+      const pendingAtCancel: string[][] = [];
+      const snapshotPending = async () => {
+        pendingAtCancel.push(
+          list(`${ORDER_PATH}/charges`).filter((c) => c.data.status === 'pending').map((c) => c.id),
+        );
+      };
+      client.deletePayment.mockImplementation(snapshotPending);
+      client.deleteInstallment.mockImplementation(snapshotPending);
 
-      await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER);
+      const charge = await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER);
 
       expect(client.deletePayment).toHaveBeenCalledWith('pay_old');
       expect(client.deleteInstallment).toHaveBeenCalledWith('ins_old');
+      // The new charge doc already existed when each previous one was canceled on Asaas.
+      for (const pending of pendingAtCancel) expect(pending).toContain(charge.id);
+      expect(client.createPayment.mock.invocationCallOrder[0])
+        .toBeLessThan(client.deletePayment.mock.invocationCallOrder[0]);
       expect(read(`${ORDER_PATH}/charges/old`)!.status).toBe('canceled');
       expect(read(`${ORDER_PATH}/charges/oldInst`)!.status).toBe('canceled');
       expect(read(`${ORDER_PATH}/charges/paid`)!.status).toBe('paid');
-      expect(list(`${ORDER_PATH}/charges`).filter((c) => c.data.status === 'pending')).toHaveLength(1);
+      const pending = list(`${ORDER_PATH}/charges`).filter((c) => c.data.status === 'pending');
+      expect(pending.map((c) => c.id)).toEqual([charge.id]);
+    });
+
+    it('Asaas recusa a nova cobrança → anterior continua pendente e não é apagada', async () => {
+      seedBase({ taxId: CPF });
+      seedCharge('old', { status: 'pending' });
+      client.createPayment.mockRejectedValue(
+        new AsaasApiError(400, [{ code: 'invalid_value', description: 'Parcela mínima' }], '/payments'),
+      );
+
+      const error = await createOrderCharge(
+        'c1', 'o1', { value: 100, mode: 'cardInstallments', installmentCount: 12 }, USER,
+      ).catch((e) => e);
+
+      expect(error).toBeInstanceOf(AsaasApiError);
+      expect(client.deletePayment).not.toHaveBeenCalled();
+      expect(client.deleteInstallment).not.toHaveBeenCalled();
+      expect(read(`${ORDER_PATH}/charges/old`)!.status).toBe('pending');
+      expect(list(`${ORDER_PATH}/charges`)).toHaveLength(1);
+    });
+
+    it('falha ao cancelar a anterior → cancela a nova e propaga o erro', async () => {
+      seedBase({ taxId: CPF });
+      seedCharge('old', { status: 'pending' });
+      client.createPayment.mockResolvedValue({ id: 'pay_new', invoiceUrl: 'https://sandbox.asaas.com/i/pay_new' });
+      client.deletePayment.mockImplementation(async (id: string) => {
+        if (id === 'pay_old') throw new AsaasApiError(500, [], '/payments/pay_old');
+      });
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+      const error = await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER).catch((e) => e);
+      errorSpy.mockRestore();
+
+      expect(error).toBeInstanceOf(AsaasApiError);
+      expect(error.status).toBe(500);
+      expect(client.deletePayment).toHaveBeenCalledWith('pay_new');
+      expect(read(`${ORDER_PATH}/charges/old`)!.status).toBe('pending');
+      const others = list(`${ORDER_PATH}/charges`).filter((c) => c.id !== 'old');
+      expect(others).toHaveLength(1);
+      expect(others[0].data.asaasPaymentId).toBe('pay_new');
+      expect(others[0].data.status).toBe('canceled');
+    });
+
+    it('OS sem número → descrição "OS - empresa"', async () => {
+      seedBase({ taxId: CPF, order: { number: null } });
+      await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER);
+      expect(client.createPayment.mock.calls[0][0].description).toBe('OS - Oficina da Ana');
     });
   });
 

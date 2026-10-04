@@ -162,7 +162,7 @@ export async function connectAsaas(
   try {
     const batch = db.batch();
     batch.set(connectionRef, connection);
-    batch.set(paymentSettingsRef(companyId), newSettings);
+    batch.set(paymentSettingsRef(companyId), newSettings, { merge: true });
     await batch.commit();
   } catch (error) {
     await client.deleteWebhook(webhook.id).catch(() => undefined);

@@ -313,25 +313,21 @@ export async function createOrderCharge(
     );
   }
 
-  // 4. Asaas customer, before touching the open charge: a customer/tax id
-  // rejection by Asaas must not leave the order without its open charge.
+  // 4. Asaas customer.
   const asaasCustomerId = await findOrCreateAsaasCustomer(client, companyId, customer, taxId);
 
-  // 5. One open charge per order: cancel the previous ones.
-  for (const charge of openCharges) {
-    await cancelCharge(client, companyId, orderId, charge);
-  }
-
-  // 6. Asaas payment
+  // 5. New Asaas payment. Previous open charges are only canceled after the
+  // new one exists, so an Asaas rejection never kills a link already shared.
   const companySnap = await companyRef(companyId).get();
   const companyName = (companySnap.data()?.name as string | undefined) || '';
   const chargeDoc = chargesRef(companyId, orderId).doc();
+  const hasNumber = order.number !== undefined && order.number !== null && `${order.number}` !== '';
 
   const paymentInput: AsaasCreatePaymentInput = {
     customer: asaasCustomerId,
     billingType: input.mode === 'cardInstallments' ? 'CREDIT_CARD' : 'UNDEFINED',
     dueDate,
-    description: `OS #${order.number ?? ''} - ${companyName}`,
+    description: hasNumber ? `OS #${order.number} - ${companyName}` : `OS - ${companyName}`,
     externalReference: `${companyId}:${orderId}:${chargeDoc.id}`,
   };
   if (input.mode === 'cardInstallments') {
@@ -343,7 +339,7 @@ export async function createOrderCharge(
 
   const payment = await client.createPayment(paymentInput);
 
-  // 7. Charge document
+  // 6. Charge document
   const charge: OrderCharge = {
     id: chargeDoc.id,
     asaasPaymentId: payment.id,
@@ -369,6 +365,22 @@ export async function createOrderCharge(
       console.error(`[Asaas] Could not cancel orphan charge ${charge.id} of order ${orderId}`);
     });
     throw error;
+  }
+
+  // 7. One open charge per order: cancel the previous ones. If one cannot be
+  // canceled, roll back the new charge so there is never more than one open.
+  for (const previous of openCharges) {
+    try {
+      await cancelCharge(client, companyId, orderId, previous);
+    } catch (error) {
+      console.error(
+        `[Asaas] Could not cancel previous charge ${previous.id} of order ${orderId}; rolling back ${charge.id}`,
+      );
+      await cancelCharge(client, companyId, orderId, charge).catch(() => {
+        console.error(`[Asaas] Could not roll back charge ${charge.id} of order ${orderId}`);
+      });
+      throw error;
+    }
   }
 
   console.log(`[Asaas] Charge ${charge.id} created for order ${orderId} of company ${companyId}`);

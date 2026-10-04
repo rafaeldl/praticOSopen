@@ -111,4 +111,36 @@ describe('charges.routes', () => {
     const res = await request(buildApp(['read:all'])).delete('/o1/charges/ch1');
     expect(res.status).toBe(403);
   });
+
+  it('orderId inválido → 404 ORDER_NOT_FOUND sem chamar o serviço', async () => {
+    const app = buildApp(['manage:payments']);
+    for (const id of ['bad.id', 'bad%20id', 'a'.repeat(129)]) {
+      const created = await request(app).post(`/${id}/charges`).send({ value: 100, mode: 'single' });
+      expect(created.status).toBe(404);
+      expect(created.body.error.code).toBe('ORDER_NOT_FOUND');
+
+      const canceled = await request(app).delete(`/${id}/charges/ch1`);
+      expect(canceled.status).toBe(404);
+      expect(canceled.body.error.code).toBe('ORDER_NOT_FOUND');
+    }
+    expect(mockService.createOrderCharge).not.toHaveBeenCalled();
+    expect(mockService.cancelOrderCharge).not.toHaveBeenCalled();
+  });
+
+  it('chargeId inválido → 404 CHARGE_NOT_FOUND sem chamar o serviço', async () => {
+    const app = buildApp(['manage:payments']);
+    for (const id of ['bad.id', 'bad%20id', 'a'.repeat(129)]) {
+      const res = await request(app).delete(`/o1/charges/${id}`);
+      expect(res.status).toBe(404);
+      expect(res.body.error.code).toBe('CHARGE_NOT_FOUND');
+    }
+    expect(mockService.cancelOrderCharge).not.toHaveBeenCalled();
+  });
+
+  it('ids válidos com _ e - passam', async () => {
+    mockService.cancelOrderCharge.mockResolvedValue({ ...CHARGE, status: 'canceled' });
+    const res = await request(buildApp(['manage:payments'])).delete('/o_1-A/charges/ch_1-B');
+    expect(res.status).toBe(200);
+    expect(mockService.cancelOrderCharge).toHaveBeenCalledWith('comp1', 'o_1-A', 'ch_1-B');
+  });
 });

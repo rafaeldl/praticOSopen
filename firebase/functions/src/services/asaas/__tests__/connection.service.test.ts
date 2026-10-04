@@ -115,6 +115,16 @@ describe('connection.service', () => {
       expect(read('companies/c1/settings/payments')).toEqual(settings);
     });
 
+    it('preserva campos extras de settings/payments ao conectar (merge)', async () => {
+      seed('companies/c1/settings/payments', { asaasEnabled: true, asaasConnected: false, futureField: 'keep' });
+      await connectAsaas('c1', '$aact_hmlg_k', USER);
+      expect(read('companies/c1/settings/payments')).toMatchObject({
+        asaasEnabled: true,
+        asaasConnected: true,
+        futureField: 'keep',
+      });
+    });
+
     it('infere produção pelo prefixo', async () => {
       seed('companies/c1/settings/payments', { asaasEnabled: true });
       const settings = await connectAsaas('c1', '$aact_prod_k', USER);
