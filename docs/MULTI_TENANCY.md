@@ -87,30 +87,52 @@ Gerencia as operações relacionadas à entidade empresa e colaboradores.
 
 ## 5. Verificação de Vínculo e Custom Claims
 
-O vínculo de um usuário com uma empresa é **sempre confirmado no servidor**, a partir dos dados da própria empresa. A lista `users/{uid}.companies` serve apenas para ordenação e exibição no app; ela não concede acesso por si só.
+O vínculo de um usuário com uma empresa é **sempre confirmado no servidor**, a partir de dados que apenas o servidor (Admin SDK) grava. A lista `users/{uid}.companies` serve só para ordenação e exibição no app; ela não concede acesso.
 
 ### 5.1. Fontes de verdade
 
 `firebase/functions/src/services/membership.service.ts` (`verifyMembership`, `verifyUserMemberships`, `buildRolesClaim`) considera um vínculo válido quando:
 
 1. O usuário é o dono da empresa (`companies/{cid}.owner.id`, ou o formato legado `owner` como string). Papel: `owner` ou `admin` conforme a entrada do usuário; caso contrário, `admin`.
-2. O usuário está em `companies/{cid}.users[]` (`{user: {id, ...}, role}`). Papel: o dessa lista.
+2. O usuário está no mapa privado `companies/{cid}/private/membership` = `{ members: { [uid]: role }, updatedAt }`. Papel: o do mapa (em minúsculas; `owner` vira `admin` para quem não é o dono).
 
-Qualquer outra entrada é ignorada (log apenas com identificadores). O documento `companies/{cid}/memberships/{uid}` é um índice para a interface (lista de colaboradores) e **não** é fonte de verificação. O servidor mantém esse índice em sincronia ao incluir, alterar o papel ou remover membros (`company.service.ts`).
+Qualquer outra entrada é ignorada (log apenas com identificadores).
+
+| Dado | Papel | Quem grava |
+|------|-------|------------|
+| `companies/{cid}.owner` | Fonte de verdade (dono) | Cadastro |
+| `companies/{cid}/private/membership` | Fonte de verdade (membros) | Somente servidor |
+| `companies/{cid}.users[]` | Exibição | Servidor e app |
+| `companies/{cid}/memberships/{uid}` | Índice para a lista de colaboradores | Servidor e app (admin) |
+| `users/{uid}.companies` | Ordenação/exibição no app | Usuário e servidor |
+
+Todo fluxo do servidor que altera membros mantém os quatro primeiros em sincronia, em transação: `addMemberToCompany`, `updateMemberRole`, `removeMember` (`company.service.ts`), aceite de convite (app e WhatsApp) e cadastro via WhatsApp (`registration.service.ts`, dono registrado como `owner`).
 
 ### 5.2. Onde é usado
 
 - **Custom claims** (`updateUserClaims`, trigger em `users/{uid}`): `roles = { [companyId]: role }` contém apenas vínculos verificados. As regras do Firestore em `companies/{cid}/**` usam `request.auth.token.roles[cid]`.
-- **API do app** (`bearerAuth`, `resolveUserContext`, MCP): empresa e papel vêm da verificação; empresa não verificada → 403.
-- **Convites** (`POST /v1/app/invites/:token/accept`): o servidor inclui o usuário em `companies/{cid}.users`, cria o documento de memberships e atualiza `users.companies`. Quando o e-mail do login difere do e-mail do convite, o aceite segue e é registrado um aviso (identificadores apenas).
+- **API do app** (`bearerAuth`, `resolveUserContext`, MCP) e **bot** (`botAuth`): empresa e papel vêm da verificação; sem vínculo verificado → 403.
+- **Convites**: ver 5.3.
 
-### 5.3. Regras do Firestore relacionadas
+### 5.3. Convites
 
-- `companies/{cid}/memberships/{memberId}`: criação por admin da empresa, ou o próprio vínculo apenas no mesmo batch que cria a empresa (cadastro, `AuthService.signup`).
-- `links/invites/tokens/{token}`: criação e gestão apenas por admin da empresa do convite, sem trocar a empresa; o convidado pode apenas alterar os campos de status (aceitar/recusar).
+- Aceite (`POST /v1/app/invites/:token/accept` e WhatsApp) é atômico: em uma transação, exige convite `pending` e não expirado, registra o membro (5.1) e marca o convite como aceito.
+- Quem já é dono ou membro da empresa recebe `ALREADY_MEMBER` (409); o papel existente nunca é alterado por um convite.
+- Quando o e-mail do login difere do e-mail do convite, o aceite segue e é registrado um aviso (identificadores mascarados).
+- Tokens novos: `INV_` + 16 caracteres `A-Z0-9` gerados com `crypto.randomBytes`; tokens antigos continuam aceitos.
+- Pelo bot, apenas dono/admin criam convites de `manager`; os demais só convidam papéis abaixo do próprio (supervisor → apenas técnico).
+
+### 5.4. Regras do Firestore relacionadas
+
+- `companies/{cid}/private/**`: nenhum acesso pelo cliente.
+- `companies/{cid}/memberships/{memberId}`: criação por admin da empresa, ou o próprio vínculo apenas no mesmo batch que cria a empresa (cadastro, `AuthService.signup`). É índice de exibição.
+- `links/invites/tokens/{token}`:
+  - leitura: admin da empresa do convite, ou o convidado (e-mail do token igual ao do convite e `email_verified == true`);
+  - criação e gestão: apenas admin da empresa, sem trocar a empresa;
+  - convidado: apenas de `pending` para `accepted`/`rejected`, com os campos de status, e `email_verified == true`.
 - Apps anteriores à v1.24.0 aceitavam convites gravando direto no Firestore; esse caminho não é mais permitido (o app atual usa a API).
 
-### 5.4. Testes e scripts
+### 5.5. Testes e scripts
 
 Testes de regras (emulador do Firestore, projeto `demo-praticos`; requer **Java 21+**):
 
@@ -123,18 +145,23 @@ npm run test:rules
 
 Sem `FIRESTORE_EMULATOR_HOST`, a suíte de regras é ignorada em `npm test`. `RULES_FILE=<caminho>` permite testar outro arquivo de regras.
 
-Scripts de manutenção (Application Default Credentials; projeto `praticos` ou `GCLOUD_PROJECT`; **dry-run por padrão**, `--apply` grava; saída só com prefixos de uid/cid):
+Scripts de manutenção (Application Default Credentials; projeto `praticos` ou `GCLOUD_PROJECT`; **dry-run por padrão**, `--apply` grava; idempotentes; saída só com prefixos de uid/cid):
 
 ```bash
 cd firebase/functions
-# 1. Inclui em companies/{cid}.users quem só tinha o documento de memberships
-npm run memberships:migrate            # dry-run
-npm run memberships:migrate -- --apply
+# 1. Monta companies/{cid}/private/membership a partir de companies/{cid}.users[]
+#    e de entradas respaldadas por documento de memberships; reporta entradas sem respaldo
+npm run memberships:seed               # dry-run
+npm run memberships:seed -- --apply
 # 2. Recalcula as claims a partir dos vínculos verificados e mostra as diferenças
 npm run claims:recompute               # dry-run
 npm run claims:recompute -- --apply
 ```
 
-Ordem recomendada no deploy: rodar `memberships:migrate` antes de publicar as functions, e `claims:recompute` depois.
+Ordem no deploy:
+
+1. `npm run memberships:seed -- --apply`
+2. Deploy das regras e das functions
+3. `npm run claims:recompute -- --apply`
 
 Para rodar contra o emulador: `FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 GCLOUD_PROJECT=demo-praticos npm run claims:recompute`.
