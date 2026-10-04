@@ -31,7 +31,14 @@ jest.mock('../../services/firestore.service', () => ({
   },
 }));
 
+jest.mock('../../services/membership.service', () => ({
+  verifyMembership: jest.fn(),
+}));
+
 import { LAST_USED_WRITE_INTERVAL_MS, mcpAuth, resetLastUsedThrottle } from '../auth';
+import { verifyMembership } from '../../services/membership.service';
+
+const mockVerifyMembership = verifyMembership as jest.MockedFunction<typeof verifyMembership>;
 
 function buildRes() {
   const res: Partial<Response> = {};
@@ -85,6 +92,23 @@ describe('mcpAuth', () => {
     jest.clearAllMocks();
     resetLastUsedThrottle();
     mockApiKeyUpdate.mockResolvedValue(undefined);
+    mockVerifyMembership.mockResolvedValue({ companyId: 'comp1', role: 'admin' });
+  });
+
+  it('responde 401 quando o vínculo com a empresa não é confirmado no servidor', async () => {
+    mockApiKeyGet.mockResolvedValue(snapshot(validToken));
+    mockUserGet.mockResolvedValue(docSnapshot(validUser));
+    mockCompanyGet.mockResolvedValue(docSnapshot(validCompany));
+    mockVerifyMembership.mockResolvedValue(null);
+
+    const req = { params: { token: 'mcp_abc' } } as unknown as AuthenticatedRequest;
+    const res = buildRes();
+    const next = jest.fn();
+
+    await mcpAuth(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 
   it('preenche req.auth quando o token é válido', async () => {

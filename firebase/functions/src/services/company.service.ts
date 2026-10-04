@@ -5,10 +5,12 @@
 
 import {
   db,
+  FieldValue,
   getRootCollection,
   getDocument,
   updateDocument,
 } from './firestore.service';
+import { memberRole, ownerId, privateMembershipRef } from './membership.service';
 import {
   Company,
   CompanyAggr,
@@ -108,6 +110,45 @@ export async function listCompanyMembers(companyId: string): Promise<CompanyMemb
   return members;
 }
 
+type MemberEntry = { user: UserAggr; role: RoleType };
+
+/**
+ * Queues, inside a transaction, the writes that register `user` as a member of
+ * `companyId` with `role`: server-only member map (source of truth), display
+ * `users` array and display `memberships` document. `companyData` must have been
+ * read in the same transaction.
+ */
+export function writeMemberAdd(
+  tx: FirebaseFirestore.Transaction,
+  companyId: string,
+  companyData: { users?: MemberEntry[] } | undefined,
+  user: UserAggr,
+  role: RoleType
+): void {
+  const users: MemberEntry[] = Array.isArray(companyData?.users) ? [...companyData!.users] : [];
+  const existingIndex = users.findIndex((u) => u?.user?.id === user.id);
+  if (existingIndex !== -1) {
+    users[existingIndex] = { ...users[existingIndex], role };
+  } else {
+    users.push({ user, role });
+  }
+
+  tx.set(
+    privateMembershipRef(companyId),
+    { members: { [user.id]: role }, updatedAt: FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+  tx.update(db.collection('companies').doc(companyId), {
+    users,
+    updatedAt: new Date().toISOString(),
+  });
+  tx.set(
+    getMembershipRef(companyId, user.id),
+    { user, role, joinedAt: FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+}
+
 /**
  * Update member role
  */
@@ -117,28 +158,45 @@ export async function updateMemberRole(
   newRole: RoleType,
   updatedBy: UserAggr
 ): Promise<boolean> {
-  const company = await getCompany(companyId);
-  if (!company) return false;
+  const companyRef = db.collection('companies').doc(companyId);
+  const privateRef = privateMembershipRef(companyId);
+  const membershipRef = getMembershipRef(companyId, targetUserId);
 
-  // Cannot change owner's role
-  if (company.owner?.id === targetUserId) {
-    throw new Error('Cannot change owner role');
-  }
+  const updated = await db.runTransaction(async (tx) => {
+    const companySnap = await tx.get(companyRef);
+    if (!companySnap.exists) return false;
+    const company = companySnap.data() as Company;
 
-  // Find and update user in users array
-  const users = company.users || [];
-  const userIndex = users.findIndex((u) => u.user.id === targetUserId);
+    // Cannot change owner's role
+    if (ownerId(company.owner) === targetUserId) {
+      throw new Error('Cannot change owner role');
+    }
 
-  if (userIndex === -1) return false;
+    const privateSnap = await tx.get(privateRef);
+    const membershipSnap = await tx.get(membershipRef);
 
-  users[userIndex].role = newRole;
+    const users = Array.isArray(company.users) ? [...company.users] : [];
+    const userIndex = users.findIndex((u) => u?.user?.id === targetUserId);
+    const inPrivate = memberRole(privateSnap.data(), targetUserId) !== null;
 
-  const collection = getRootCollection('companies');
-  await updateDocument(collection, companyId, {
-    users,
-    updatedBy,
-    updatedAt: new Date().toISOString(),
+    if (userIndex === -1 && !inPrivate) return false;
+
+    tx.set(
+      privateRef,
+      { members: { [targetUserId]: newRole }, updatedAt: FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    if (userIndex !== -1) {
+      users[userIndex] = { ...users[userIndex], role: newRole };
+    }
+    tx.update(companyRef, { users, updatedBy, updatedAt: new Date().toISOString() });
+    if (membershipSnap.exists) {
+      tx.update(membershipRef, { role: newRole });
+    }
+    return true;
   });
+
+  if (!updated) return false;
 
   // Also update in user's companies array
   await updateUserCompanyRole(targetUserId, companyId, newRole);
@@ -157,23 +215,31 @@ export async function removeMember(
   targetUserId: string,
   removedBy: UserAggr
 ): Promise<boolean> {
-  const company = await getCompany(companyId);
-  if (!company) return false;
+  const companyRef = db.collection('companies').doc(companyId);
 
-  // Cannot remove owner
-  if (company.owner?.id === targetUserId) {
-    throw new Error('Cannot remove owner');
-  }
+  const removed = await db.runTransaction(async (tx) => {
+    const companySnap = await tx.get(companyRef);
+    if (!companySnap.exists) return false;
+    const company = companySnap.data() as Company;
 
-  // Remove from users array
-  const users = (company.users || []).filter((u) => u.user.id !== targetUserId);
+    // Cannot remove owner
+    if (ownerId(company.owner) === targetUserId) {
+      throw new Error('Cannot remove owner');
+    }
 
-  const collection = getRootCollection('companies');
-  await updateDocument(collection, companyId, {
-    users,
-    updatedBy: removedBy,
-    updatedAt: new Date().toISOString(),
+    const users = (company.users || []).filter((u) => u?.user?.id !== targetUserId);
+
+    tx.set(
+      privateMembershipRef(companyId),
+      { members: { [targetUserId]: FieldValue.delete() }, updatedAt: FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+    tx.update(companyRef, { users, updatedBy: removedBy, updatedAt: new Date().toISOString() });
+    tx.delete(getMembershipRef(companyId, targetUserId));
+    return true;
   });
+
+  if (!removed) return false;
 
   // Remove from user's companies array
   await removeUserFromCompany(targetUserId, companyId);
@@ -185,38 +251,32 @@ export async function removeMember(
 }
 
 /**
- * Add member to company (used by invite accept)
+ * Add member to company (server-side flows). Writes the server-only member
+ * map, the display `users` array and the display membership document.
  */
 export async function addMemberToCompany(
   companyId: string,
   user: UserAggr,
   role: RoleType
 ): Promise<void> {
-  const company = await getCompany(companyId);
-  if (!company) throw new Error('Company not found');
-
-  const users = company.users || [];
-
-  // Check if user already exists
-  const existingIndex = users.findIndex((u) => u.user.id === user.id);
-  if (existingIndex !== -1) {
-    // Update role if already exists
-    users[existingIndex].role = role;
-  } else {
-    // Add new user
-    users.push({ user, role });
-  }
-
-  const collection = getRootCollection('companies');
-  await updateDocument(collection, companyId, {
-    users,
-    updatedAt: new Date().toISOString(),
+  const companyRef = db.collection('companies').doc(companyId);
+  await db.runTransaction(async (tx) => {
+    const companySnap = await tx.get(companyRef);
+    if (!companySnap.exists) throw new Error('Company not found');
+    writeMemberAdd(tx, companyId, companySnap.data() as Company, user, role);
   });
 }
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
+
+/**
+ * Reference to companies/{companyId}/memberships/{userId} (display index)
+ */
+export function getMembershipRef(companyId: string, userId: string) {
+  return db.collection('companies').doc(companyId).collection('memberships').doc(userId);
+}
 
 /**
  * Get linked channels for a user
