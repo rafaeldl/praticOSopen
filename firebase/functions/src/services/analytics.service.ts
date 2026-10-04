@@ -4,6 +4,7 @@
  */
 
 import { getTenantCollection } from './firestore.service';
+import { calculateRemainingBalance, roundMoney } from './order.service';
 import {
   Order,
   AnalyticsSummary,
@@ -134,9 +135,10 @@ function calculateOrdersByStatus(orders: Order[]): OrdersByStatus {
  * Calculate revenue metrics
  * Only counts confirmed orders (excludes quote and canceled)
  */
-function calculateRevenue(orders: Order[]): RevenueMetrics {
+export function calculateRevenue(orders: Order[]): RevenueMetrics {
   let total = 0;
   let paid = 0;
+  let unpaid = 0;
   let discount = 0;
 
   for (const order of orders) {
@@ -145,14 +147,16 @@ function calculateRevenue(orders: Order[]): RevenueMetrics {
       total += order.total || 0;
       paid += order.paidAmount || 0;
       discount += order.discount || 0;
+      // order.total is already net of discount
+      unpaid += calculateRemainingBalance(order);
     }
   }
 
   return {
-    total,
-    paid,
-    unpaid: total - discount - paid,
-    discount,
+    total: roundMoney(total),
+    paid: roundMoney(paid),
+    unpaid: roundMoney(unpaid),
+    discount: roundMoney(discount),
   };
 }
 
@@ -275,7 +279,7 @@ export async function getPendingItems(companyId: string): Promise<PendingItems> 
 
     // Unpaid (status = done, not fully paid)
     if (order.status === 'done' && !order.paid) {
-      const remaining = (order.total || 0) - (order.discount || 0) - (order.paidAmount || 0);
+      const remaining = calculateRemainingBalance(order);
       if (remaining > 0) {
         unpaid.push({
           ...pendingOrder,
