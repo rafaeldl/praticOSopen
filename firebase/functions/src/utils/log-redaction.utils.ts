@@ -114,12 +114,16 @@ export function buildLoggableHeaders(headers: IncomingHttpHeaders): LoggableHead
  * - `.../share` and `.../share/{token}`: share link management. Responses
  *   return the share token and its URL, which would leak through `RESULT`
  *   even with the path redacted.
+ * - `/v1/app/payments/asaas/**`: the connect body carries the company's
+ *   Asaas API key.
+ * - `/webhooks/asaas/**`: Asaas webhook payloads carry end-customer data
+ *   (name, CPF/CNPJ, amounts).
  *
  * Every other path keeps logging its payload as before. Matched
  * case-insensitively because Express routes that way.
  */
 export function shouldLogPayload(path: string): boolean {
-  return !/^\/(mcp|public)(\/|$)|\/share(\/|$)/i.test(path);
+  return !/^\/(mcp|public|webhooks\/asaas)(\/|$)|\/share(\/|$)|\/payments\/asaas(\/|$)/i.test(path);
 }
 
 /**

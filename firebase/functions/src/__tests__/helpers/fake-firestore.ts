@@ -103,7 +103,11 @@ class FakeQuery {
   async get() {
     const docs = this.store
       .listCollection(this.path)
-      .filter((d) => this.filters.every(([f, op, v]) => op === '==' && getField(d.value, f) === v))
+      .filter((d) =>
+        this.filters.every(([f, op, v]) =>
+          op === '==' ? getField(d.value, f) === v : op === 'in' && Array.isArray(v) && v.includes(getField(d.value, f)),
+        ),
+      )
       .map((d) => new FakeSnapshot(new FakeDoc(this.store, d.path), d.value));
     return { empty: docs.length === 0, size: docs.length, docs };
   }
@@ -198,6 +202,23 @@ export class FakeFirestore {
     }
   }
 
+  /** Deletes a document and everything below it (mirrors Firestore's recursiveDelete). */
+  async recursiveDelete(ref: FakeDoc) {
+    for (const path of [...this.docs.keys()]) {
+      if (path === ref.path || path.startsWith(`${ref.path}/`)) this.docs.delete(path);
+    }
+  }
+
+  /** Test helper: list documents directly under a collection path. */
+  list(collectionPath: string): Array<{ id: string; data: Data }> {
+    return this.listCollection(collectionPath).map((d) => ({ id: d.path.split('/').pop() as string, data: clone(d.value) as Data }));
+  }
+  /** Test helper: drop every document. */
+  reset() {
+    this.docs.clear();
+    this.autoId = 0;
+  }
+
   /** Test helper: read a document's data synchronously. */
   read(path: string): Data | undefined {
     return clone(this.docs.get(path));
@@ -212,8 +233,7 @@ export class FakeFirestore {
  * Builds a replacement for `services/firestore.service` backed by `fake`.
  * Usage: jest.mock('../firestore.service', () => require('<path>/fake-firestore').fakeFirestoreModule())
  */
-export function fakeFirestoreModule() {
-  const fake = new FakeFirestore();
+export function fakeFirestoreModule(fake: FakeFirestore = new FakeFirestore()) {
   return {
     __fake: fake,
     db: fake,
@@ -230,3 +250,28 @@ export function fakeFirestoreModule() {
     },
   };
 }
+
+/** Shared instance used by the module-level helpers below (Asaas service tests). */
+export const fakeDb = new FakeFirestore();
+
+/** Seeds a document by full path, e.g. seed('companies/c1/private/asaas', {...}). */
+export function seed(path: string, data: Data) {
+  fakeDb.seed(path, data);
+}
+/** Reads a document by full path (undefined when missing). */
+export function read(path: string): Data | undefined {
+  return fakeDb.read(path);
+}
+/** Lists the documents directly under a collection path. */
+export function list(collectionPath: string) {
+  return fakeDb.list(collectionPath);
+}
+export function resetFakeDb() {
+  fakeDb.reset();
+}
+
+/**
+ * Drop-in module for `services/firestore.service` backed by the shared `fakeDb`:
+ * jest.mock('../../firestore.service', () => jest.requireActual('<path>/helpers/fake-firestore').firestoreServiceMock);
+ */
+export const firestoreServiceMock = fakeFirestoreModule(fakeDb);
