@@ -263,3 +263,93 @@ export async function revertAsaasPayment(
     return { reverted: true };
   });
 }
+
+/** Payment status rule shared with the app: paid only when total > 0 and paidAmount >= total (in cents). */
+export function paymentStatusFor(total: unknown, paidAmount: unknown): { paid: boolean; payment: 'paid' | 'unpaid' } {
+  const t = roundMoney(Number(total) || 0);
+  const p = roundMoney(Number(paidAmount) || 0);
+  const paid = t > 0 && p >= t;
+  return { paid, payment: paid ? 'paid' : 'unpaid' };
+}
+
+/**
+ * Self-heals an order's payment fields after any change to `transactions`:
+ *
+ * 1. Puts back every booked Asaas transaction that is missing from the order
+ *    (an old app version saved a stale copy of the whole order). Charges are
+ *    the source of truth: `paidAsaasPaymentIds` + the copy in
+ *    `appliedTransactions`. Ids in `refundedAsaasPaymentIds` are never re-added.
+ * 2. Recomputes `paid`/`payment` from `paidAmount`/`total` when they disagree
+ *    (the app increments `paidAmount` atomically but writes the status computed
+ *    from its local state, which can miss a concurrent Asaas payment).
+ *
+ * Writes only when something actually changes, so the trigger that calls it
+ * does not loop. A status-only fix keeps the app's updatedAt/updatedBy.
+ */
+export async function repairAsaasTransactions(
+  companyId: string,
+  orderId: string,
+): Promise<{ repaired: number }> {
+  const oRef = orderRef(companyId, orderId);
+  const chargesRef = oRef.collection('charges');
+
+  return db.runTransaction(async (tx) => {
+    const orderSnap = await tx.get(oRef);
+    if (!orderSnap.exists) return { repaired: 0 };
+    const chargesSnap = await tx.get(chargesRef);
+
+    const order = orderSnap.data() as OrderPaymentState & { paid?: unknown; payment?: unknown };
+    const current = order.transactions ?? [];
+    const present = new Set(current.map((t) => t.id));
+    const missing: PaymentTransaction[] = [];
+
+    for (const doc of chargesSnap.docs) {
+      const charge = doc.data() as OrderCharge;
+      const refunded = new Set(charge.refundedAsaasPaymentIds ?? []);
+      const applied = charge.appliedTransactions ?? [];
+      for (const paymentId of charge.paidAsaasPaymentIds ?? []) {
+        const transactionId = asaasTransactionId(paymentId);
+        if (refunded.has(paymentId) || present.has(transactionId)) continue;
+        const copy = applied.find((t) => t.id === transactionId);
+        if (!copy) {
+          console.warn('[AsaasPayment] booked payment without applied copy; cannot repair', {
+            companyId, orderId, chargeId: doc.id, asaasPaymentId: paymentId,
+          });
+          continue;
+        }
+        missing.push(copy);
+        present.add(transactionId);
+      }
+    }
+
+    if (missing.length > 0) {
+      const fields = computePaymentFields(order, [...current, ...missing]);
+      tx.update(oRef, { ...fields, updatedAt: new Date().toISOString(), updatedBy: { ...ASAAS_ACTOR } });
+      console.log('[AsaasPayment] repaired order transactions', { companyId, orderId, repaired: missing.length });
+      return { repaired: missing.length };
+    }
+
+    const status = paymentStatusFor(order.total, order.paidAmount);
+    if (order.paid !== status.paid || order.payment !== status.payment) {
+      tx.update(oRef, { paid: status.paid, payment: status.payment });
+      console.log('[AsaasPayment] fixed order payment status', { companyId, orderId });
+    }
+    return { repaired: 0 };
+  });
+}
+
+/** Deep comparison of `transactions` (key order inside each transaction is ignored). */
+export function transactionsChanged(
+  before: OrderPaymentState | undefined,
+  after: OrderPaymentState | undefined,
+): boolean {
+  return stableJson(before?.transactions ?? []) !== stableJson(after?.transactions ?? []);
+}
+
+function stableJson(value: unknown): string {
+  return JSON.stringify(value, (_key, v) =>
+    v && typeof v === 'object' && !Array.isArray(v)
+      ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, (v as Record<string, unknown>)[k]]))
+      : v,
+  );
+}
