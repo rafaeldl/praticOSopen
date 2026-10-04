@@ -1,5 +1,7 @@
 # Especificação de Melhorias e Evolução - PraticOS
 
+> **Obsoleto (2026-10-04).** Prioridades atuais em [`ROADMAP.md`](/ROADMAP.md).
+
 **Versão:** 3.0
 **Status:** Em Planejamento
 **Objetivo:** Definir tecnicamente as funcionalidades listadas para o backlog, garantindo estrita aderência ao **Design System (Cupertino/HIG)** definido em `docs/UX_GUIDELINES.md` e à **Arquitetura (Multi-tenant/MobX)** definida em `AGENTS.md`.

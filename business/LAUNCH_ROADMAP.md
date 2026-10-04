@@ -1,5 +1,7 @@
 # 🚀 Roadmap de Lançamento - PraticOS
 
+> **Obsoleto (2026-10-04).** Prioridades atuais em [`ROADMAP.md`](/ROADMAP.md).
+
 **Data:** 2026-01-25  
 **Status:** Planejamento
 
