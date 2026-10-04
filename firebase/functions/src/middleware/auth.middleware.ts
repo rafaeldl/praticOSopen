@@ -150,6 +150,22 @@ export async function botAuth(
       const link = await getWhatsAppLink(normalizedNumber);
 
       if (link) {
+        // The link only points to a user/company; membership and role are
+        // confirmed against server-side data.
+        const membership = await verifyMembership(link.userId, link.companyId, link.role);
+        if (!membership) {
+          console.warn(`[BotAuth] Linked number without verified membership: uid=${link.userId.slice(0, 6)}`);
+          res.status(403).json({
+            success: false,
+            error: {
+              code: 'FORBIDDEN',
+              message: 'No company access',
+            },
+          });
+          return;
+        }
+        const verifiedRole = normalizeRole(membership.role);
+
         req.auth.companyId = link.companyId;
         req.auth.userId = link.userId;
 
@@ -162,8 +178,8 @@ export async function botAuth(
           userName: link.userName || '',
           companyId: link.companyId,
           companyName: link.companyName || '',
-          role: link.role,
-          permissions: getRolePermissions(link.role),
+          role: verifiedRole,
+          permissions: getRolePermissions(verifiedRole),
         };
       }
     }

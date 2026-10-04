@@ -3,12 +3,18 @@ import { AuthenticatedRequest } from '../../models/types';
 
 const mockVerifyIdToken = jest.fn();
 const mockUserGet = jest.fn();
+const mockLinkGet = jest.fn();
+const mockCompanyGet = jest.fn();
 
 jest.mock('../../services/firestore.service', () => ({
   auth: { verifyIdToken: (token: string) => mockVerifyIdToken(token) },
   db: {
     collection: (name: string) => {
       if (name === 'users') return { doc: () => ({ get: mockUserGet }) };
+      if (name === 'links') {
+        return { doc: () => ({ collection: () => ({ doc: () => ({ get: mockLinkGet }) }) }) };
+      }
+      if (name === 'companies') return { doc: () => ({ get: mockCompanyGet }) };
       throw new Error(`unexpected collection ${name}`);
     },
   },
@@ -19,7 +25,7 @@ jest.mock('../../services/membership.service', () => ({
   verifyUserMemberships: jest.fn(),
 }));
 
-import { bearerAuth, getRolePermissions } from '../auth.middleware';
+import { bearerAuth, botAuth, getRolePermissions } from '../auth.middleware';
 import { verifyMembership, verifyUserMemberships } from '../../services/membership.service';
 
 const mockVerify = verifyUserMemberships as jest.MockedFunction<typeof verifyUserMemberships>;
@@ -164,5 +170,79 @@ describe('bearerAuth', () => {
       success: false,
       error: { code: 'TOKEN_EXPIRED', message: 'Token has expired' },
     });
+  });
+});
+
+describe('botAuth', () => {
+  const botReq = () =>
+    ({
+      headers: { 'x-api-key': 'bot_praticos_dev_key', 'x-whatsapp-number': '+55 48 99999-0000' },
+    }) as unknown as AuthenticatedRequest;
+
+  const link = {
+    userId: 'u1',
+    companyId: 'c1',
+    role: 'admin',
+    userName: 'User',
+    companyName: 'Company 1',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    mockLinkGet.mockResolvedValue({ exists: true, data: () => link });
+    mockCompanyGet.mockResolvedValue({ exists: true, data: () => ({ country: 'BR' }) });
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('uses the server-verified role instead of the role stored in the link', async () => {
+    mockVerifyOne.mockResolvedValue({ companyId: 'c1', role: 'technician' });
+    const req = botReq();
+    const next = jest.fn();
+
+    await botAuth(req, buildRes(), next);
+
+    expect(mockVerifyOne).toHaveBeenCalledWith('u1', 'c1', 'admin');
+    expect(next).toHaveBeenCalled();
+    expect(req.userContext).toMatchObject({
+      userId: 'u1',
+      companyId: 'c1',
+      role: 'technician',
+      permissions: getRolePermissions('technician'),
+    });
+  });
+
+  it('responds 403 when the linked membership is not verified', async () => {
+    mockVerifyOne.mockResolvedValue(null);
+    const req = botReq();
+    const res = buildRes();
+    const next = jest.fn();
+
+    await botAuth(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(req.userContext).toBeUndefined();
+  });
+
+  it('continues without user context when the number is not linked', async () => {
+    mockLinkGet.mockResolvedValue({ exists: false, data: () => undefined });
+    const req = botReq();
+    const next = jest.fn();
+
+    await botAuth(req, buildRes(), next);
+
+    expect(next).toHaveBeenCalled();
+    expect(mockVerifyOne).not.toHaveBeenCalled();
+    expect(req.userContext).toBeUndefined();
+  });
+
+  it('rejects an invalid bot key', async () => {
+    const res = buildRes();
+
+    await botAuth({ headers: { 'x-api-key': 'nope' } } as unknown as AuthenticatedRequest, res, jest.fn());
+
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 });
