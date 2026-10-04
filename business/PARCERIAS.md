@@ -1,7 +1,7 @@
-# Parceria com o Asaas
+# Parcerias: Asaas, ERPs e meios de pagamento
 
 **Data:** 2026-10-04
-**Contexto:** aposta A do [`DISCOVERY_AUTONOMIA.md`](DISCOVERY_AUTONOMIA.md): receber o pagamento da OS pelo link (Pix, boleto e cartão) e emitir NFS-e, com receita para o PraticOS.
+**Contexto:** canais e parceiros para monetização. Aposta A do [`DISCOVERY_AUTONOMIA.md`](DISCOVERY_AUTONOMIA.md): receber o pagamento da OS pelo link (Pix, boleto e cartão) e emitir NFS-e, com receita para o PraticOS.
 
 ---
 
@@ -103,3 +103,39 @@ Suposição: 40% do valor das OS passa a ser cobrado pelo link.
 - [ ] CNPJ do PraticOS para a conta-pai (existe um? qual?)
 - [ ] Conta PJ no Asaas (produção) e acesso ao sandbox
 - [ ] Inscrição no programa de parceiros e a conversa comercial
+
+---
+
+## 7. Outros parceiros possíveis
+
+Pesquisa de 2026-10-04. O ponto principal não é integração técnica, é **canal de distribuição**: estar na loja de apps de quem já atende a PME prestadora de serviço.
+
+### 7.1 ERPs com loja de aplicativos
+
+| Parceiro | O que oferecem | Como o parceiro ganha | Status | Encaixe com o PraticOS |
+|----------|----------------|-----------------------|--------|------------------------|
+| **Omie** ([Omie.Store](https://www.omie.com.br/funcionalidades/loja-de-aplicativos/)) | Loja com 90+ apps dentro do painel do cliente; parceiro certificado. API com endpoints de OS e NFS-e. | **A Omie cobra a mensalidade do app junto com a dela e repassa ao parceiro, retendo um percentual** ([termos](https://5257088.fs1.hubspotusercontent-na1.net/hubfs/5257088/arquivos-omie-store/Termos_e_Condicoes/Termos_de_uso_e_condicoes_gerais_OmieStore_Jan26.pdf)). | Aberto | **Alto.** Base forte de prestadores de serviço. Resolve a cobrança: o cliente paga pela fatura da Omie, sem IAP e sem nós montarmos billing. |
+| **Bling** ([Central de Extensões](https://www.bling.com.br/api-e-aplicativos)) | App store exposta à base inteira do Bling; API REST v3 com OAuth. | Só apps **homologados** aparecem na loja, não têm limite de usuários e **podem ser monetizados e gerar comissão** ([homologação](https://ajuda.bling.com.br/hc/pt-br/articles/35518268781719-Como-realizar-a-homologa%C3%A7%C3%A3o-de-aplicativos-p%C3%BAblicos-no-Bling)). | Aberto | **Médio.** Base mais de comércio/e-commerce, mas grande. Homologação exige a integração pronta. |
+| **Conta Azul** | Marketplace e canal "Conecta" para parceiros. | — | **Fechado por ora:** informam que não estão desenvolvendo parcerias com novas plataformas para aparecer no ERP ([fonte](https://contaazul.com/desenvolvedores/)). Contato: integracoes@contaazul.com. | Baixo agora. |
+| Tiny (Olist), vhsys | APIs públicas. | — | — | Baixo: foco em e-commerce / API limitada. |
+
+### 7.2 Meios de pagamento (alternativas ou complementos ao Asaas)
+
+| Parceiro | Observação |
+|----------|------------|
+| **InfinitePay** (CloudWalk) | Checkout e link de pagamento via API com webhook ([docs](https://docs.infinitepay.io)). Muito usado por autônomos. **Atenção: lançou um gerador de Ordem de Serviço gratuito** ([fonte](https://www.infinitepay.io/blog/ordem-de-servico)) e agendamentos. É mais concorrente do que parceiro. |
+| Mercado Pago, PagBank, Efí | Têm API de cobrança e split de marketplace. Úteis como alternativa se as condições do Asaas não forem boas. Não investigado a fundo. |
+
+### 7.3 Canal de contadores
+Contadores atendem MEIs e oficinas e indicam ferramentas. O próprio Asaas tem um modelo "Distribuição" para contadores. Possível canal depois que a cobrança + NFS-e existir (o contador ganha com a nota emitida certa).
+
+### 7.4 Recomendação de ordem
+
+1. **Asaas** — cobrança, split e NFS-e (seções 1–6). É a base de receita e o que dá valor fiscal/financeiro à OS.
+2. **Omie.Store** — canal de distribuição **com billing pronto**. Integração mínima: sincronizar clientes e mandar a OS concluída para o financeiro/NFS-e da Omie. Primeiro passo: conversa com o time de parceiros para saber percentual retido e requisitos de certificação.
+3. **Bling** — depois da Omie, reaproveitando a mesma camada de integração.
+4. Contadores — quando houver cobrança + NFS-e funcionando.
+
+**Cuidado:** cada integração com ERP é manutenção contínua (APIs mudam, homologação, suporte). Com a base atual, fazer **uma de cada vez** e medir quantos clientes cada canal traz antes da próxima.
+
+Retomada da issue #198 (ERPs como canal de aquisição), fechada na triagem de 2026-10-04.
