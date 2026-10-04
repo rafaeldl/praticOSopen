@@ -731,12 +731,19 @@ abstract class _OrderStore with Store {
     this.status = status;
     updatePayment();
     createItem();
-    // createItem no longer writes `payment`: persist the status-driven change
-    // (quote/canceled → null, back to active → recomputed) through updatePayments.
+    // createItem no longer writes `payment`: persist the status-driven change.
     if (order!.id != null && order!.payment != previousPayment) {
-      _runPaymentUpdate(
-        (fresh) => OrderPaymentMath.applyOrderStatus(fresh, status),
-      );
+      final clear = OrderPaymentMath.orderStatusPaymentUpdate(status);
+      if (clear != null) {
+        // quote/canceled → payment null: offline-safe, no fresh state needed
+        order!.paid = false;
+        _queuePaymentFieldUpdate(order!.id!, clear, Global.userAggr);
+      } else {
+        // Back to an active status: recompute from the fresh order (online)
+        _runPaymentUpdate(
+          (fresh) => OrderPaymentMath.applyOrderStatus(fresh, status),
+        );
+      }
     }
   }
 
@@ -1337,7 +1344,9 @@ abstract class _OrderStore with Store {
   /// so they read a server state that already contains it.
   Future<void>? _pendingPaymentFieldWrite;
 
-  static const Duration _pendingWriteWait = Duration(seconds: 10);
+  /// Transactions added offline whose write the server hasn't acknowledged
+  /// yet (by id). Kept when the local state is refreshed from a transaction.
+  final Map<String, PaymentTransaction> _pendingTransactions = {};
 
   String _newTransactionId() =>
       DateTime.now().millisecondsSinceEpoch.toString();
@@ -1365,17 +1374,23 @@ abstract class _OrderStore with Store {
   bool _queuePaymentFieldUpdate(
     String orderId,
     Map<String, dynamic> update,
-    UserAggr? actor,
-  ) {
+    UserAggr? actor, {
+    PaymentTransaction? transaction,
+  }) {
+    final pendingId = transaction?.id;
     try {
+      if (pendingId != null) _pendingTransactions[pendingId] = transaction!;
       final write = repository
           .applyPaymentFieldUpdate(companyId!, orderId, update, actor: actor)
           .catchError((Object e, StackTrace stack) {
         _logPaymentError(e, stack, 'applyPaymentFieldUpdate');
+      }).whenComplete(() {
+        if (pendingId != null) _pendingTransactions.remove(pendingId);
       });
       _pendingPaymentFieldWrite = write;
       return true;
     } catch (e, stack) {
+      if (pendingId != null) _pendingTransactions.remove(pendingId);
       lastPaymentFailure = classifyPaymentUpdateFailure(e);
       _logPaymentError(e, stack, 'applyPaymentFieldUpdate');
       return false;
@@ -1397,14 +1412,13 @@ abstract class _OrderStore with Store {
         await repository.createItem(companyId!, order);
       }
 
-      final pending = _pendingPaymentFieldWrite;
-      if (pending != null) {
-        try {
-          await pending.timeout(_pendingWriteWait);
-        } on TimeoutException {
-          // Still not acknowledged (offline or slow): let the transaction
-          // decide; offline it fails with requiresConnection.
-        }
+      // An offline write not acknowledged in time means no connection:
+      // stop here instead of reading a server state without it.
+      final notAcked =
+          await waitForPendingPaymentWrite(_pendingPaymentFieldWrite);
+      if (notAcked != null) {
+        lastPaymentFailure = notAcked;
+        return false;
       }
 
       final fresh = await repository.updatePayments(
@@ -1427,8 +1441,12 @@ abstract class _OrderStore with Store {
   }
 
   /// Copies the payment fields of [fresh] into the local order and observables.
+  /// Transactions added offline and not yet acknowledged are kept (see
+  /// [OrderPaymentMath.mergePendingTransactions]).
   void _applyPaymentState(Order fresh) {
     if (order == null) return;
+    OrderPaymentMath.mergePendingTransactions(
+        fresh, _pendingTransactions.values.toList());
     order!.transactions = fresh.transactions ?? [];
     order!.paidAmount = fresh.paidAmount ?? 0.0;
     order!.paid = fresh.paid;
@@ -1473,7 +1491,10 @@ abstract class _OrderStore with Store {
         current: order!,
         tx: transaction,
       );
-      if (!_queuePaymentFieldUpdate(orderId, update, actor)) return null;
+      if (!_queuePaymentFieldUpdate(orderId, update, actor,
+          transaction: transaction)) {
+        return null;
+      }
     }
 
     OrderPaymentMath.addPayment(order!, transaction);
@@ -1507,7 +1528,10 @@ abstract class _OrderStore with Store {
         current: order!,
         tx: transaction,
       );
-      if (!_queuePaymentFieldUpdate(orderId, update, actor)) return false;
+      if (!_queuePaymentFieldUpdate(orderId, update, actor,
+          transaction: transaction)) {
+        return false;
+      }
     }
 
     OrderPaymentMath.addDiscount(order!, transaction);

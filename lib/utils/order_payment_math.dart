@@ -254,6 +254,43 @@ class OrderPaymentMath {
     return fresh;
   }
 
+  /// Re-applies on [fresh] the locally added transactions whose offline
+  /// write the server hasn't acknowledged yet ([pending]), so refreshing the
+  /// local state from a transaction result doesn't drop them. A pending
+  /// transaction already present in [fresh] (same id) is not counted twice.
+  static Order mergePendingTransactions(
+    Order fresh,
+    Iterable<PaymentTransaction> pending,
+  ) {
+    for (final transaction in pending) {
+      final present = (fresh.transactions ?? const <PaymentTransaction>[])
+          .any((t) => sameTransaction(t, transaction));
+      if (present) continue;
+      if (transaction.type == PaymentTransactionType.payment) {
+        addPayment(fresh, transaction);
+      } else {
+        addDiscount(fresh, transaction);
+      }
+    }
+    return fresh;
+  }
+
+  /// Offline-safe update for an order status change that clears the payment
+  /// status (quote/canceled): `{payment: null, paid: false}`. Returns null
+  /// for any other status: the payment status must then be recomputed from
+  /// the fresh order (updatePayments + [applyOrderStatus]).
+  static Map<String, dynamic>? orderStatusPaymentUpdate(
+    String? orderStatus, {
+    DateTime? updatedAt,
+  }) {
+    if (orderStatus != 'quote' && orderStatus != 'canceled') return null;
+    return {
+      'payment': null,
+      'paid': false,
+      'updatedAt': (updatedAt ?? DateTime.now()).toIso8601String(),
+    };
+  }
+
   /// Payment status driven by the order status: quotes and canceled orders
   /// have no payment status; otherwise keep it (or compute when missing).
   static Order applyOrderStatus(Order fresh, String? orderStatus) {

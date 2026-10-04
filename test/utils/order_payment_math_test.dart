@@ -326,4 +326,86 @@ void main() {
   test('remainingBalance nunca é negativo', () {
     expect(OrderPaymentMath.remainingBalance(_order(paid: 150)), 0);
   });
+
+  group('mergePendingTransactions', () {
+    test('mantém pagamento pendente que ainda não está no fresh', () {
+      // Server state (fresh) already has p1; p2 was added offline and not acked.
+      final fresh = _order(paid: 30, transactions: [_payment('p1', 30)]);
+
+      final merged = OrderPaymentMath.mergePendingTransactions(
+        fresh,
+        [_payment('p2', 20)],
+      );
+
+      expect(merged.transactions!.map((t) => t.id), ['p1', 'p2']);
+      expect(merged.paidAmount, 50);
+      expect(merged.payment, 'unpaid');
+    });
+
+    test('pagamento pendente que já chegou ao servidor não conta duas vezes', () {
+      final fresh = _order(
+          paid: 50, transactions: [_payment('p1', 30), _payment('p2', 20)]);
+
+      final merged = OrderPaymentMath.mergePendingTransactions(
+        fresh,
+        [_payment('p2', 20)],
+      );
+
+      expect(merged.transactions!.map((t) => t.id), ['p1', 'p2']);
+      expect(merged.paidAmount, 50);
+    });
+
+    test('desconto pendente reduz o total e pode quitar a OS', () {
+      final fresh = _order(paid: 90, transactions: [_payment('p1', 90)]);
+
+      final merged = OrderPaymentMath.mergePendingTransactions(
+        fresh,
+        [_discount('d1', 10)],
+      );
+
+      expect(merged.discount, 10);
+      expect(merged.total, 90);
+      expect(merged.paidAmount, 90);
+      expect(merged.payment, 'paid');
+      expect(merged.paid, isTrue);
+    });
+
+    test('sem pendentes devolve o fresh como está', () {
+      final fresh = _order(paid: 30, transactions: [_payment('p1', 30)]);
+
+      final merged = OrderPaymentMath.mergePendingTransactions(fresh, const []);
+
+      expect(merged.transactions!.map((t) => t.id), ['p1']);
+      expect(merged.paidAmount, 30);
+    });
+  });
+
+  group('orderStatusPaymentUpdate', () {
+    test('cancelada grava payment null e paid false (offline-safe)', () {
+      final update = OrderPaymentMath.orderStatusPaymentUpdate(
+        'canceled',
+        updatedAt: DateTime(2026, 10, 4, 12),
+      );
+
+      expect(update, isNotNull);
+      expect(update!.containsKey('payment'), isTrue);
+      expect(update['payment'], isNull);
+      expect(update['paid'], false);
+      expect(update['updatedAt'], DateTime(2026, 10, 4, 12).toIso8601String());
+      expect(update.containsKey('transactions'), isFalse);
+      expect(update.containsKey('paidAmount'), isFalse);
+    });
+
+    test('orçamento também grava payment null', () {
+      final update = OrderPaymentMath.orderStatusPaymentUpdate('quote');
+      expect(update!['payment'], isNull);
+      expect(update['paid'], false);
+    });
+
+    test('status ativo precisa recalcular (transação): devolve null', () {
+      expect(OrderPaymentMath.orderStatusPaymentUpdate('approved'), isNull);
+      expect(OrderPaymentMath.orderStatusPaymentUpdate('progress'), isNull);
+      expect(OrderPaymentMath.orderStatusPaymentUpdate(null), isNull);
+    });
+  });
 }

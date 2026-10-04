@@ -310,11 +310,13 @@ PaymentUpdateFailure? lastPaymentFailure // requiresConnection | asaasLocked | f
 - Salvar a OS (`createItem`/`updateItem` do `TenantOrderRepository`) **não envia** `transactions`, `paidAmount`, `paid` nem `payment` quando a OS já existe. Isso evita que o app sobrescreva pagamentos lançados pelo servidor (webhook do Asaas, API, bot).
 - **Registrar pagamento e desconto funcionam offline.** `addPayment`/`addDiscountTransaction` montam o mapa com `OrderPaymentMath.addPaymentUpdate`/`addDiscountUpdate` e gravam com `applyPaymentFieldUpdate` (`transactions: arrayUnion`, `paidAmount: increment` ou `discount: increment` + `total: increment(-valor)`, mais `payment`/`paid` calculados do estado local). A tela atualiza na hora (otimista); o app não espera a confirmação do servidor, e uma falha posterior vai para o log (Crashlytics).
 - **Remover, zerar, marcar como pago, comprovantes e mudança de status** usam `updatePayments(companyId, orderId, mutate, actor:)`, que lê a OS dentro de `runTransaction`, aplica as regras de `lib/utils/order_payment_math.dart` e grava só os campos de pagamento, `discount`, `total` e auditoria. Exigem conexão: offline o app mostra "Sem conexão. Tente de novo quando estiver online." (`paymentRequiresConnection`); outras falhas mostram `paymentUpdateFailed`. A classificação do erro fica em `lib/utils/payment_update_failure.dart`.
-- Antes de uma transação, o store espera (até 10 s) a última gravação offline-safe ser confirmada, para a transação ler um estado que já a contém.
+- Antes de uma transação, o store espera (até 10 s) a última gravação offline-safe ser confirmada. Se não for confirmada no prazo, a operação **não segue** e mostra `paymentRequiresConnection` (`waitForPendingPaymentWrite`).
+- Ao atualizar o estado local com o resultado de uma transação, pagamentos/descontos lançados offline e ainda não confirmados são mantidos (`OrderPaymentMath.mergePendingTransactions`), para não sumirem da tela nem serem lançados de novo.
+- A tela de pagamentos bloqueia Registrar/Zerar/Remover enquanto uma operação está em andamento (indicador no botão).
 - `updatedBy` é sempre o usuário que fez a ação (`actor: Global.userAggr`), nunca o anterior.
 - Saldo restante = `total - paidAmount` (o `total` já é líquido de desconto), no app e no servidor.
 - Transações com id `asaas_*` são lançadas pelo servidor e não podem ser removidas no app (estornar no Asaas; mensagem `asaasTransactionCannotBeRemoved`). "Zerar" mantém essas transações.
-- Mudança de status para orçamento/cancelada grava `payment = null` via `updatePayments`.
+- Mudança de status para orçamento/cancelada grava `{payment: null, paid: false}` com `applyPaymentFieldUpdate` (funciona offline; `OrderPaymentMath.orderStatusPaymentUpdate`). Voltar para um status ativo recalcula o `payment` via `updatePayments` (precisa de conexão).
 
 ---
 

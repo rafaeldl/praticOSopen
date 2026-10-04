@@ -56,4 +56,25 @@ void main() {
       );
     });
   });
+
+  group('waitForPendingPaymentWrite', () {
+    test('sem escrita pendente não falha', () async {
+      expect(await waitForPendingPaymentWrite(null), isNull);
+    });
+
+    test('escrita confirmada a tempo não falha', () async {
+      expect(await waitForPendingPaymentWrite(Future<void>.value()), isNull);
+    });
+
+    test('escrita não confirmada no prazo exige conexão (não segue)', () async {
+      final neverAcked = Completer<void>().future;
+      expect(
+        await waitForPendingPaymentWrite(
+          neverAcked,
+          timeout: const Duration(milliseconds: 10),
+        ),
+        PaymentUpdateFailure.requiresConnection,
+      );
+    });
+  });
 }

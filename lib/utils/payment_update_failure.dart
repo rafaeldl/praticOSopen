@@ -34,3 +34,21 @@ PaymentUpdateFailure classifyPaymentUpdateFailure(Object error) {
   }
   return PaymentUpdateFailure.failed;
 }
+
+/// Waits (bounded by [timeout]) for the latest offline-safe payment write to
+/// be acknowledged before a Firestore transaction reads the order. Returns
+/// [PaymentUpdateFailure.requiresConnection] when it isn't acknowledged in
+/// time: the caller must not run the transaction, or it would read (and the
+/// local state would be refreshed from) a server state without that write.
+Future<PaymentUpdateFailure?> waitForPendingPaymentWrite(
+  Future<void>? pending, {
+  Duration timeout = const Duration(seconds: 10),
+}) async {
+  if (pending == null) return null;
+  try {
+    await pending.timeout(timeout);
+    return null;
+  } on TimeoutException {
+    return PaymentUpdateFailure.requiresConnection;
+  }
+}

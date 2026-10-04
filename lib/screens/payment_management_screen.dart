@@ -32,6 +32,21 @@ class PaymentManagementScreen extends StatefulWidget {
 
 class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   bool _initialized = false;
+
+  /// True while a payment operation is running: Register/Reset/Remove are
+  /// disabled so the same payment can't be sent twice.
+  bool _busy = false;
+
+  /// Runs [operation] with the busy flag on (ignored if one is running).
+  Future<void> _runBusy(Future<void> Function() operation) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await operation();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
   OrderStore? _store;
 
   // Form state
@@ -309,7 +324,7 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               const SizedBox(height: 16),
               CupertinoButton(
                 padding: EdgeInsets.zero,
-                onPressed: _confirmResetPayment,
+                onPressed: _busy ? null : _confirmResetPayment,
                 child: Text(
                   context.l10n.toReceive,
                   style: TextStyle(
@@ -534,8 +549,14 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
           child: SizedBox(
             width: double.infinity,
             child: CupertinoButton.filled(
-              onPressed: _registerTransaction,
-              child: Text(isPayment ? context.l10n.registerPayment : context.l10n.applyDiscount),
+              onPressed: _busy ? null : _registerTransaction,
+              child: _busy
+                  ? const CupertinoActivityIndicator(
+                      color: CupertinoColors.white,
+                    )
+                  : Text(isPayment
+                      ? context.l10n.registerPayment
+                      : context.l10n.applyDiscount),
             ),
           ),
         ),
@@ -635,7 +656,8 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     return Dismissible(
       key: ValueKey(
           'transaction_${transaction.createdAt.millisecondsSinceEpoch}'),
-      direction: DismissDirection.endToStart,
+      direction:
+          _busy ? DismissDirection.none : DismissDirection.endToStart,
       confirmDismiss: (direction) async {
         _confirmDeleteTransaction(index, transaction);
         return false;
@@ -844,7 +866,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     return null;
   }
 
-  void _registerTransaction() async {
+  void _registerTransaction() => _runBusy(_doRegisterTransaction);
+
+  Future<void> _doRegisterTransaction() async {
     final error = _validateValue(_valueController.text);
     if (error != null) {
       _showError(error);
@@ -957,7 +981,9 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     );
   }
 
-  void _resetPayment() async {
+  void _resetPayment() => _runBusy(_doResetPayment);
+
+  Future<void> _doResetPayment() async {
     final store = _store;
     if (store == null) return;
     final ok = await store.resetAllPayments();
@@ -996,13 +1022,15 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
               Navigator.pop(dialogContext);
               final store = _store;
               if (store == null) return;
-              final ok = await store.removeTransaction(index);
-              if (!mounted) return;
-              if (!ok) {
-                _showError(_paymentFailureMessage(store));
-                return;
-              }
-              _prefillValue();
+              await _runBusy(() async {
+                final ok = await store.removeTransaction(index);
+                if (!mounted) return;
+                if (!ok) {
+                  _showError(_paymentFailureMessage(store));
+                  return;
+                }
+                _prefillValue();
+              });
             },
             child: Text(context.l10n.remove),
           ),
