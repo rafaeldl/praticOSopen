@@ -49,6 +49,8 @@ export interface OrderCharge {
   paidAt?: string;
   /** Server-only copy of every transaction booked on the order (used by the repair trigger). */
   appliedTransactions?: PaymentTransaction[];
+  /** Server-only: Asaas payments refunded on this charge; never booked again. */
+  refundedAsaasPaymentIds?: string[];
 }
 
 /** companies/{companyId}/settings/payments */

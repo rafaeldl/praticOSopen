@@ -107,14 +107,23 @@ export function computePaymentFields(
   return { transactions: nextTransactions, paidAmount, paid, payment: paid ? 'paid' : 'unpaid' };
 }
 
-function expectedPaymentCount(charge: OrderCharge): number {
+function expectedPaymentCount(charge: OrderCharge, ids: { companyId: string; orderId: string; chargeId: string }): number {
+  if (charge.mode === 'cardInstallments' && !charge.installmentCount) {
+    console.warn('[AsaasPayment] cardInstallments charge without installmentCount', ids);
+  }
   return Math.max(1, charge.installmentCount ?? 1);
 }
 
 /**
- * Books an Asaas payment on the order inside a transaction. Idempotent per
- * payment id: returns { applied: false } if it was already booked or if the
- * order/charge no longer exists.
+ * Books an Asaas payment on the order inside a transaction.
+ *
+ * `applied` means "money was booked on the order in this call" (the webhook
+ * uses it to send the push). Returns { applied: false } without writing when
+ * the order/charge no longer exists, the payment was already booked, or it was
+ * refunded on this charge (refunded money is never booked again).
+ *
+ * Charge status: a `refunded` charge keeps its status. A `canceled` charge that
+ * still receives a payment is booked and marked paid: real money arrived.
  */
 export async function applyAsaasPayment(
   companyId: string,
@@ -137,12 +146,17 @@ export async function applyAsaasPayment(
     const charge = chargeSnap.data() as OrderCharge;
     const paidIds = charge.paidAsaasPaymentIds ?? [];
     if (paidIds.includes(payment.id)) return { applied: false };
+    if ((charge.refundedAsaasPaymentIds ?? []).includes(payment.id)) return { applied: false };
 
     const now = new Date();
     const transaction = buildAsaasTransaction(payment, charge, now, paidIds.length + 1);
     const alreadyOnOrder = (order.transactions ?? []).some((t) => t.id === transaction.id);
 
-    if (!alreadyOnOrder) {
+    if (alreadyOnOrder) {
+      console.warn('[AsaasPayment] transaction already on order; reconciling charge only', {
+        companyId, orderId, chargeId, asaasPaymentId: payment.id,
+      });
+    } else {
       const result = applyPaymentTransaction(order, transaction);
       tx.update(oRef, {
         transactions: result.transactions,
@@ -162,12 +176,12 @@ export async function applyAsaasPayment(
         transaction,
       ],
     };
-    if (nextPaidIds.length >= expectedPaymentCount(charge)) {
+    if (charge.status !== 'refunded' && nextPaidIds.length >= expectedPaymentCount(charge, { companyId, orderId, chargeId })) {
       chargeUpdate.status = 'paid';
       chargeUpdate.paidAt = now.toISOString();
     }
     tx.update(cRef, chargeUpdate);
 
-    return { applied: true };
+    return { applied: !alreadyOnOrder };
   });
 }

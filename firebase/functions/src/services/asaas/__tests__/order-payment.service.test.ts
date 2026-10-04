@@ -232,6 +232,80 @@ describe('order-payment.service - applyAsaasPayment', () => {
     expect(read(ORDER_PATH)!.paidAmount).toBe(1000);
   });
 
+  it('estornado: reentrega do mesmo pagamento não grava nada', async () => {
+    seedOrder();
+    seedCharge({ status: 'refunded', refundedAsaasPaymentIds: ['pay_1'] });
+    const orderBefore = read(ORDER_PATH);
+    const chargeBefore = read(CHARGE_PATH);
+
+    const result = await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+
+    expect(result).toEqual({ applied: false });
+    expect(read(ORDER_PATH)).toEqual(orderBefore);
+    expect(read(CHARGE_PATH)).toEqual(chargeBefore);
+  });
+
+  it('cobrança refunded recebendo outro pagamento: lança o dinheiro mas mantém status refunded', async () => {
+    seedOrder({ total: 900 });
+    seedCharge({
+      mode: 'cardInstallments', installmentCount: 1, value: 300, status: 'refunded',
+      refundedAsaasPaymentIds: ['pay_1'],
+    });
+
+    const result = await applyAsaasPayment('c1', 'o1', 'ch1', payment({ id: 'pay_2', value: 300 }));
+
+    expect(result).toEqual({ applied: true });
+    expect(read(ORDER_PATH)!.paidAmount).toBe(300);
+    const charge = read(CHARGE_PATH)!;
+    expect(charge.status).toBe('refunded');
+    expect(charge.paidAt).toBeUndefined();
+    expect(charge.paidAsaasPaymentIds).toEqual(['pay_2']);
+  });
+
+  it('cobrança cancelada recebendo pagamento: dinheiro real entrou, lança na OS e marca paga', async () => {
+    seedOrder();
+    seedCharge({ status: 'canceled' });
+
+    const result = await applyAsaasPayment('c1', 'o1', 'ch1', payment({ billingType: 'BOLETO' }));
+
+    expect(result).toEqual({ applied: true });
+    expect(read(ORDER_PATH)!.paidAmount).toBe(1000);
+    expect(read(ORDER_PATH)!.payment).toBe('paid');
+    expect(read(CHARGE_PATH)!.status).toBe('paid');
+  });
+
+  it('transação já na OS mas fora de paidAsaasPaymentIds: reconcilia a cobrança sem lançar de novo', async () => {
+    const existing = {
+      id: 'asaas_pay_1', type: 'payment', amount: 1000, description: 'Asaas • Pix',
+      createdAt: '2026-10-04T10:00:00.000Z', createdBy: { id: 'asaas', name: 'Asaas' },
+    };
+    seedOrder({ paidAmount: 1000, paid: true, payment: 'paid', transactions: [existing] });
+    seedCharge();
+
+    const result = await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+
+    expect(result).toEqual({ applied: false });
+    const order = read(ORDER_PATH)!;
+    expect(order.paidAmount).toBe(1000);
+    expect(order.transactions).toEqual([existing]);
+    expect(read(CHARGE_PATH)!.paidAsaasPaymentIds).toEqual(['pay_1']);
+    expect(read(CHARGE_PATH)!.status).toBe('paid');
+    expect(console.warn).toHaveBeenCalled();
+  });
+
+  it('parcelado sem installmentCount: avisa e trata como pagamento único', async () => {
+    seedOrder();
+    seedCharge({ mode: 'cardInstallments' });
+
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ billingType: 'CREDIT_CARD' }));
+
+    expect(read(CHARGE_PATH)!.status).toBe('paid');
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringContaining('installmentCount'),
+      { companyId: 'c1', orderId: 'o1', chargeId: 'ch1' },
+    );
+  });
+
   it('retorna applied=false quando a OS não existe', async () => {
     seedCharge();
     await expect(applyAsaasPayment('c1', 'o1', 'ch1', payment())).resolves.toEqual({ applied: false });
