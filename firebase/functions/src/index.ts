@@ -9,6 +9,7 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
+import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
 import express, { Request, Response, NextFunction } from 'express';
 import { buildRolesClaim } from './services/membership.service';
@@ -102,6 +103,37 @@ export const updateUserClaims = functionsV1
       console.error(`Error updating claims for ${userId}:`, error);
     }
   });
+
+import { handleOrderStatusChange } from './services/asaas/charge.service';
+
+/**
+ * Asaas master key (AES-256-GCM, base64 of 32 bytes) — see services/asaas/crypto.ts.
+ * Bound to every function that reads or writes companies/{cid}/private/asaas.
+ * Firebase exposes a bound secret as `process.env.ASAAS_CREDENTIALS_KEY`, which
+ * is what `readMasterKeyFromEnv()` reads.
+ */
+const asaasCredentialsKey = defineSecret('ASAAS_CREDENTIALS_KEY');
+
+/**
+ * [Asaas] Cancels open charges on Asaas when an order is canceled.
+ * The app changes the order status directly in Firestore, so this runs as a
+ * trigger instead of inside an API route. No-op unless the company has Asaas connected.
+ */
+export const onOrderCanceledCancelAsaasCharges = onDocumentUpdated(
+  {
+    document: 'companies/{companyId}/orders/{orderId}',
+    region: 'southamerica-east1',
+    secrets: [asaasCredentialsKey],
+  },
+  async (event) => {
+    const before = event.data?.before.data();
+    const after = event.data?.after.data();
+    if (!after || after.status !== 'canceled' || before?.status === 'canceled') return;
+
+    const { companyId, orderId } = event.params;
+    await handleOrderStatusChange(companyId, orderId, before?.status, after.status);
+  }
+);
 
 // ============================================================================
 // SCHEDULED FUNCTIONS
@@ -238,6 +270,8 @@ import analyticsRoutes from './routes/v1/analytics.routes';
 import shareRoutes from './routes/v1/share.routes';
 import appInviteRoutes from './routes/v1/invite.routes';
 import integrationsRoutes from './routes/v1/integrations.routes';
+import asaasConnectionRoutes from './routes/v1/asaas-connection.routes';
+import chargesRoutes from './routes/v1/charges.routes';
 
 // Routes - Public (no authentication required)
 import publicOrdersRoutes from './routes/public/orders.routes';
@@ -424,12 +458,13 @@ app.use('/v1/company', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, compan
 app.use('/v1/analytics', apiCoreLimiter, apiKeyAuth, resolveCompanyContext, analyticsRoutes);
 
 // Bearer token routes (for Flutter app)
-app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes);
-app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, shareRoutes);
+// Single mount so the rate limit and token check run once per request.
+app.use('/v1/app/orders', apiCoreLimiter, bearerAuth, resolveCompanyContext, ordersRoutes, shareRoutes, chargesRoutes);
 app.use('/v1/app/customers', apiCoreLimiter, bearerAuth, resolveCompanyContext, customersRoutes);
 app.use('/v1/app/devices', apiCoreLimiter, bearerAuth, resolveCompanyContext, devicesRoutes);
 app.use('/v1/app/invites', apiCoreLimiter, bearerAuth, resolveCompanyContext, appInviteRoutes);
 app.use('/v1/app/integrations', apiCoreLimiter, bearerAuth, resolveCompanyContext, integrationsRoutes);
+app.use('/v1/app/payments/asaas', apiCoreLimiter, bearerAuth, resolveCompanyContext, asaasConnectionRoutes);
 
 // User routes (Flutter app authenticated - WhatsApp linking, etc.)
 app.use('/user/link', apiCoreLimiter, bearerAuth, resolveCompanyContext, userLinkRoutes);
@@ -511,7 +546,7 @@ export const api = onRequest(
     timeoutSeconds: 60,
     minInstances: 0,
     maxInstances: 100,
-    secrets: [ssrApiSecret],
+    secrets: [ssrApiSecret, asaasCredentialsKey],
   },
   app
 );

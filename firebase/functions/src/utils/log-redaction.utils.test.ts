@@ -231,6 +231,20 @@ describe('shouldLogPayload', () => {
     expect(shouldLogPayload('/bot/orders/42/share/ST_abc')).toBe(false);
   });
 
+  it('disallows logging for Asaas connection and webhook routes', () => {
+    expect(shouldLogPayload('/v1/app/payments/asaas')).toBe(false);
+    expect(shouldLogPayload('/v1/app/payments/asaas/connect')).toBe(false);
+    expect(shouldLogPayload('/V1/APP/PAYMENTS/ASAAS/connect')).toBe(false);
+    expect(shouldLogPayload('/webhooks/asaas')).toBe(false);
+    expect(shouldLogPayload('/webhooks/asaas/comp1')).toBe(false);
+    expect(shouldLogPayload('/WEBHOOKS/Asaas/comp1')).toBe(false);
+  });
+
+  it('does not over-match Asaas-like prefixes', () => {
+    expect(shouldLogPayload('/v1/app/payments/asaasx')).toBe(true);
+    expect(shouldLogPayload('/webhooks/revenuecat')).toBe(true);
+  });
+
   it('keeps logging enabled for normal API paths', () => {
     expect(shouldLogPayload('/bot/summary/today')).toBe(true);
     expect(shouldLogPayload('/v1/orders')).toBe(true);
@@ -265,5 +279,12 @@ describe('isPayloadLoggingEnabled', () => {
     expect(isPayloadLoggingEnabled('/mcp/t/mcp_aabbccdd112233', emulator)).toBe(false);
     expect(isPayloadLoggingEnabled('/public/orders/ST_abc', emulator)).toBe(false);
     expect(isPayloadLoggingEnabled('/bot/orders/42/share', emulator)).toBe(false);
+  });
+
+  it('never logs Asaas connect bodies (API key) nor Asaas webhook payloads', () => {
+    expect(isPayloadLoggingEnabled('/v1/app/payments/asaas/connect', emulator)).toBe(false);
+    expect(isPayloadLoggingEnabled('/v1/app/payments/asaas/settings', emulator)).toBe(false);
+    expect(isPayloadLoggingEnabled('/webhooks/asaas/comp1', emulator)).toBe(false);
+    expect(isPayloadLoggingEnabled('/v1/app/orders/o1/charges', emulator)).toBe(true);
   });
 });
