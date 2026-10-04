@@ -55,6 +55,23 @@ describe('asaas crypto', () => {
     expect(safeEqualHex('', '')).toBe(false);
   });
 
+  it('safeEqualHex rejeita entradas que não são 64 caracteres hex', () => {
+    const hash = hashToken('token-1');
+    // Buffer.from(hex) stops at the first invalid char: never treat a prefix as a match
+    expect(safeEqualHex(hash, hash.slice(0, 62) + 'zz')).toBe(false);
+    expect(safeEqualHex(hash.slice(0, 62) + 'zz', hash.slice(0, 62) + 'zz')).toBe(false);
+    expect(safeEqualHex('zz' + hash.slice(2), 'zz' + hash.slice(2))).toBe(false);
+    expect(safeEqualHex(hash + '00', hash + '00')).toBe(false);
+    expect(safeEqualHex(hash.slice(0, 62), hash.slice(0, 62))).toBe(false);
+    expect(safeEqualHex(hash + 'g', hash)).toBe(false);
+    expect(safeEqualHex(undefined as unknown as string, hash)).toBe(false);
+  });
+
+  it('safeEqualHex ignora maiúsculas/minúsculas (hex)', () => {
+    const hash = hashToken('token-1');
+    expect(safeEqualHex(hash.toUpperCase(), hash)).toBe(true);
+  });
+
   it('readMasterKeyFromEnv exige a variável', () => {
     const previous = process.env.ASAAS_CREDENTIALS_KEY;
     delete process.env.ASAAS_CREDENTIALS_KEY;

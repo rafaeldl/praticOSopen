@@ -282,6 +282,7 @@ import userLinkRoutes from './routes/user/link.routes';
 
 // Routes - Webhooks (no authentication - signature-based)
 import revenuecatWebhookRoutes from './routes/webhooks/revenuecat.routes';
+import asaasWebhookRoutes from './routes/webhooks/asaas.routes';
 
 // Routes - API Bot
 import linkRoutes from './routes/bot/link.routes';
@@ -446,6 +447,7 @@ app.use('/public/orders', ...publicOrdersLimiters, publicOrdersRoutes);
 
 // Webhook Routes (signature-based authentication)
 app.use('/webhooks/revenuecat', revenuecatWebhookRoutes);
+app.use('/webhooks/asaas', asaasWebhookRoutes);
 
 // API Core v1 Routes
 app.use('/v1/auth', authRoutes);

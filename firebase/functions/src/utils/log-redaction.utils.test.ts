@@ -242,7 +242,14 @@ describe('shouldLogPayload', () => {
 
   it('does not over-match Asaas-like prefixes', () => {
     expect(shouldLogPayload('/v1/app/payments/asaasx')).toBe(true);
-    expect(shouldLogPayload('/webhooks/revenuecat')).toBe(true);
+    expect(shouldLogPayload('/webhooksx/asaas')).toBe(true);
+  });
+
+  it('disallows logging for webhook routes (payment payloads, customer data)', () => {
+    expect(shouldLogPayload('/webhooks/asaas/comp1')).toBe(false);
+    expect(shouldLogPayload('/webhooks/revenuecat')).toBe(false);
+    expect(shouldLogPayload('/WEBHOOKS/revenuecat')).toBe(false);
+    expect(shouldLogPayload('/webhooks')).toBe(false);
   });
 
   it('keeps logging enabled for normal API paths', () => {
