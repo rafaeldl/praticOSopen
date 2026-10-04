@@ -151,6 +151,44 @@ describe('connection.service', () => {
       expect(read('companies/c1/private/asaas')!.webhookId).toBe('wh_1');
     });
 
+    it('reconectar: se criar o novo webhook falhar, a conexão antiga fica intacta', async () => {
+      seed('companies/c1/settings/payments', { asaasEnabled: true, asaasConnected: true, asaasAccountName: 'Velha' });
+      seed('companies/c1/private/asaas', {
+        mode: 'apiKey',
+        environment: 'sandbox',
+        encryptedApiKey: encryptSecret('$aact_hmlg_old', MASTER_KEY),
+        webhookId: 'wh_old',
+        status: 'active',
+      });
+      mockClient.createWebhook.mockRejectedValue(new AsaasApiError(500, [], '/webhooks'));
+
+      await expect(connectAsaas('c1', '$aact_hmlg_new', USER)).rejects.toBeInstanceOf(AsaasApiError);
+
+      expect(mockClient.deleteWebhook).not.toHaveBeenCalled();
+      expect(read('companies/c1/private/asaas')!.webhookId).toBe('wh_old');
+      expect(read('companies/c1/settings/payments')!.asaasAccountName).toBe('Velha');
+    });
+
+    it('reconectar: só remove o webhook antigo depois de gravar a nova conexão', async () => {
+      seed('companies/c1/settings/payments', { asaasEnabled: true, asaasConnected: true });
+      seed('companies/c1/private/asaas', {
+        mode: 'apiKey',
+        environment: 'sandbox',
+        encryptedApiKey: encryptSecret('$aact_hmlg_old', MASTER_KEY),
+        webhookId: 'wh_old',
+        status: 'active',
+      });
+      let webhookIdWhenDeleted: unknown;
+      mockClient.deleteWebhook.mockImplementation(async () => {
+        webhookIdWhenDeleted = read('companies/c1/private/asaas')!.webhookId;
+      });
+
+      await connectAsaas('c1', '$aact_hmlg_new', USER);
+
+      expect(mockClient.deleteWebhook).toHaveBeenCalledWith('wh_old');
+      expect(webhookIdWhenDeleted).toBe('wh_1');
+    });
+
     it('falha de rede (fetch lança) → ASAAS_UNAVAILABLE e nada gravado', async () => {
       seed('companies/c1/settings/payments', { asaasEnabled: true, asaasConnected: false });
       mockClient.getMyAccount.mockRejectedValue(new TypeError('fetch failed'));
@@ -212,6 +250,24 @@ describe('connection.service', () => {
       expect(read('companies/c1/private/asaas')).toBeUndefined();
       expect(read('companies/c1/private/asaas/customers/cust1')).toBeUndefined();
       expect(read('companies/c1/settings/payments')).toEqual({ asaasEnabled: true, asaasConnected: false });
+    });
+
+    it('marca desconectado antes de apagar a credencial', async () => {
+      seed('companies/c1/settings/payments', { asaasEnabled: true, asaasConnected: true });
+      seed('companies/c1/private/asaas', {
+        mode: 'apiKey',
+        environment: 'sandbox',
+        encryptedApiKey: encryptSecret('$aact_hmlg_k', MASTER_KEY),
+        webhookId: 'wh_1',
+        status: 'active',
+      });
+      const { fakeDb } = jest.requireActual('../../../__tests__/helpers/fake-firestore');
+      const spy = jest.spyOn(fakeDb, 'recursiveDelete').mockRejectedValue(new Error('crash'));
+
+      await expect(disconnectAsaas('c1')).rejects.toThrow('crash');
+
+      expect(read('companies/c1/settings/payments')!.asaasConnected).toBe(false);
+      spy.mockRestore();
     });
 
     it('desconecta mesmo se o Asaas recusar a remoção do webhook', async () => {

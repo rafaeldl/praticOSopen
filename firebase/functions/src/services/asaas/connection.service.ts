@@ -70,6 +70,8 @@ async function callAsaas<T>(fn: () => Promise<T>): Promise<T> {
     return await fn();
   } catch (error) {
     if (error instanceof AsaasApiError || error instanceof AsaasServiceError) throw error;
+    const name = error instanceof Error ? error.name : typeof error;
+    console.warn(`[Asaas] Non-API error mapped to ASAAS_UNAVAILABLE (${name})`);
     throw new AsaasServiceError('ASAAS_UNAVAILABLE', 'Asaas is unavailable');
   }
 }
@@ -120,10 +122,9 @@ export async function connectAsaas(
   const masterKey = readMasterKeyFromEnv();
 
   const connectionRef = asaasConnectionRef(companyId);
+  // Read the previous connection now; its webhook is removed only after the new one is stored.
   const existing = await connectionRef.get();
-  if (existing.exists) {
-    await deleteStoredWebhook(companyId, existing.data() as AsaasConnectionDoc);
-  }
+  const previous = existing.exists ? (existing.data() as AsaasConnectionDoc) : undefined;
 
   const authToken = randomBytes(48).toString('base64url');
   const webhook = await callAsaas(() => client.createWebhook({
@@ -168,6 +169,8 @@ export async function connectAsaas(
     throw error;
   }
 
+  if (previous) await deleteStoredWebhook(companyId, previous);
+
   console.log(`[Asaas] Company ${companyId} connected (${environment})`);
   return newSettings;
 }
@@ -179,14 +182,14 @@ export async function disconnectAsaas(companyId: string): Promise<void> {
     await deleteStoredWebhook(companyId, snapshot.data() as AsaasConnectionDoc);
   }
 
-  // Removes the credential and the server-only subcollections (customers map, events).
-  await db.recursiveDelete(connectionRef);
-
   const settings = await getPaymentSettings(companyId);
   await paymentSettingsRef(companyId).set({
     asaasEnabled: settings.asaasEnabled,
     asaasConnected: false,
   });
+
+  // Removes the credential and the server-only subcollections (customers map, events).
+  await db.recursiveDelete(connectionRef);
 
   console.log(`[Asaas] Company ${companyId} disconnected`);
 }
