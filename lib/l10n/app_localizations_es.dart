@@ -310,6 +310,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get discountApplied => 'Descuento aplicado';
 
   @override
+  String get asaasTransactionCannotBeRemoved =>
+      'Los pagos recibidos por Asaas no se pueden eliminar aquí. Para deshacerlo, reembolsa el cobro en Asaas.';
+
+  @override
+  String get paymentUpdateFailed =>
+      'No se pudo guardar el pago. Verifica tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get paymentRequiresConnection =>
+      'Sin conexión. Inténtalo de nuevo cuando estés en línea.';
+
+  @override
   String get register => 'Registrar';
 
   @override

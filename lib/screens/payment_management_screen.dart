@@ -11,6 +11,8 @@ import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/format_service.dart';
 import 'package:praticos/services/photo_service.dart';
+import 'package:praticos/utils/order_payment_math.dart';
+import 'package:praticos/utils/payment_update_failure.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 import 'package:provider/provider.dart';
@@ -849,19 +851,30 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
       return;
     }
 
+    final store = _store;
+    if (store == null) return;
+
     final value = _parseValue(_valueController.text);
     final description = _descriptionController.text.isNotEmpty
         ? _descriptionController.text
         : null;
+    final isPayment = _selectedType == 0;
 
-    if (_selectedType == 0) {
-      _store?.addPayment(value, description: description);
+    // Payments and discounts are saved offline-safe and update the screen
+    // right away (no wait for the server).
+    bool ok;
+    var receiptOk = true;
+    if (isPayment) {
+      final transaction =
+          await store.addPayment(value, description: description);
+      ok = transaction != null;
 
-      // Upload receipt if one was attached
-      if (_receiptFile != null && _store != null) {
-        final txnIndex = _store!.transactions.length - 1;
+      // Upload receipt if one was attached (needs connection)
+      if (transaction != null && _receiptFile != null) {
+        final txnIndex =
+            store.transactions.indexWhere((t) => t.id == transaction.id);
         if (txnIndex >= 0) {
-          await _store!.attachReceiptToTransaction(
+          receiptOk = await store.attachReceiptToTransaction(
             txnIndex,
             _receiptFile!,
             _receiptContentType ?? 'application/octet-stream',
@@ -870,7 +883,13 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         }
       }
     } else {
-      _store?.addDiscountTransaction(value, description: description);
+      ok = await store.addDiscountTransaction(value, description: description);
+    }
+
+    if (!mounted) return;
+    if (!ok) {
+      _showError(_paymentFailureMessage(store));
+      return;
     }
 
     // Clear form and refill with new remaining balance
@@ -882,10 +901,29 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
     });
     _prefillValue();
 
+    if (!receiptOk) {
+      // Payment saved, receipt not
+      _showError(_paymentFailureMessage(store));
+      return;
+    }
+
     // Show feedback
-    _showSuccess(_selectedType == 0
+    _showSuccess(isPayment
         ? context.l10n.paymentRegistered
         : context.l10n.discountApplied);
+  }
+
+  /// Localized message for the last failed payment operation of [store].
+  String _paymentFailureMessage(OrderStore store) {
+    switch (store.lastPaymentFailure) {
+      case PaymentUpdateFailure.requiresConnection:
+        return context.l10n.paymentRequiresConnection;
+      case PaymentUpdateFailure.asaasLocked:
+        return context.l10n.asaasTransactionCannotBeRemoved;
+      case PaymentUpdateFailure.failed:
+      case null:
+        return context.l10n.paymentUpdateFailed;
+    }
   }
 
   void _fillRemainingBalance() {
@@ -920,16 +958,26 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
   }
 
   void _resetPayment() async {
-    if (_store != null) {
-      await _store!.resetAllPayments();
+    final store = _store;
+    if (store == null) return;
+    final ok = await store.resetAllPayments();
+    if (!mounted) return;
+    if (!ok) {
+      _showError(_paymentFailureMessage(store));
+      return;
     }
     _prefillValue();
   }
 
   void _confirmDeleteTransaction(int index, PaymentTransaction transaction) {
+    if (OrderPaymentMath.isAsaasTransaction(transaction)) {
+      _showError(context.l10n.asaasTransactionCannotBeRemoved);
+      return;
+    }
+
     showCupertinoDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (dialogContext) => CupertinoAlertDialog(
         title: Text('${context.l10n.remove} ${transaction.typeLabel(context.l10n)}'),
         content: Text(
           context.l10n.confirmRemoveTransaction(
@@ -940,13 +988,20 @@ class _PaymentManagementScreenState extends State<PaymentManagementScreen> {
         actions: [
           CupertinoDialogAction(
             child: Text(context.l10n.cancel),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(context);
-              _store?.removeTransaction(index);
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              final store = _store;
+              if (store == null) return;
+              final ok = await store.removeTransaction(index);
+              if (!mounted) return;
+              if (!ok) {
+                _showError(_paymentFailureMessage(store));
+                return;
+              }
               _prefillValue();
             },
             child: Text(context.l10n.remove),

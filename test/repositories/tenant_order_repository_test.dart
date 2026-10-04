@@ -20,10 +20,60 @@ void main() {
         'payment': 'unpaid',
       }, actor: actor);
 
-      expect(out['transactions'], isA<FieldValue>());
-      expect(out['paidAmount'], isA<FieldValue>());
+      expect(
+        out['transactions'],
+        FieldValue.arrayUnion([
+          {'id': 't1'}
+        ]),
+      );
+      expect(out['paidAmount'], FieldValue.increment(10.5));
       expect(out['paid'], false);
       expect(out['payment'], 'unpaid');
+    });
+
+    test('FieldValue equality really checks operation and value', () {
+      // Guards the assertions above: a wrong op or value must not match.
+      expect(FieldValue.increment(10.5), isNot(FieldValue.increment(10)));
+      expect(
+        FieldValue.arrayUnion([
+          {'id': 't1'}
+        ]),
+        isNot(FieldValue.arrayRemove([
+          {'id': 't1'}
+        ])),
+      );
+      expect(
+        FieldValue.arrayUnion([
+          {'id': 't1'}
+        ]),
+        isNot(FieldValue.arrayUnion([
+          {'id': 't2'}
+        ])),
+      );
+    });
+
+    test('discount update converts to discount +x and total -x', () {
+      final out = TenantOrderRepository.toFirestoreUpdate({
+        'transactions': ArrayUnionOp([
+          {'id': 'd1', 'type': 'discount', 'amount': 15.0}
+        ]),
+        'discount': const IncrementOp(15.0),
+        'total': const IncrementOp(-15.0),
+        'paid': true,
+        'payment': 'paid',
+      }, actor: actor);
+
+      expect(
+        out['transactions'],
+        FieldValue.arrayUnion([
+          {'id': 'd1', 'type': 'discount', 'amount': 15.0}
+        ]),
+      );
+      expect(out['discount'], FieldValue.increment(15.0));
+      expect(out['total'], FieldValue.increment(-15.0));
+      expect(out['paid'], true);
+      expect(out['payment'], 'paid');
+      expect(out['updatedBy'], actor.toJson());
     });
 
     test('updatedBy is the acting user, not the one in the map', () {

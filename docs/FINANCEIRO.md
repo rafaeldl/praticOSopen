@@ -284,21 +284,37 @@ Isso garante que:
 ### Métodos do OrderStore
 
 ```dart
-// Registrar pagamento
-void addPayment(double amount, {String? description})
+// Registrar pagamento (offline; retorna a transação ou null se não registrou)
+Future<PaymentTransaction?> addPayment(double amount, {String? description})
 
-// Registrar desconto
-void addDiscountTransaction(double amount, {String? description})
+// Registrar desconto (offline; reduz o total da OS)
+Future<bool> addDiscountTransaction(double amount, {String? description})
 
-// Marcar como totalmente pago
-void markAsFullyPaid({String? description})
+// Marcar como totalmente pago (precisa de conexão)
+Future<bool> markAsFullyPaid({String? description})
 
-// Remover transação
-void removeTransaction(int index)
+// Remover transação (precisa de conexão; transações asaas_* são bloqueadas)
+Future<bool> removeTransaction(int index)
 
-// Atualizar status baseado nos valores
-void _updatePaymentStatus()
+// Zerar pagamentos manuais (precisa de conexão; mantém os do Asaas)
+Future<bool> resetAllPayments()
+
+// Motivo da última falha (a UI escolhe a mensagem)
+PaymentUpdateFailure? lastPaymentFailure // requiresConnection | asaasLocked | failed
 ```
+
+---
+
+### Persistência dos pagamentos (Outubro 2026)
+
+- Salvar a OS (`createItem`/`updateItem` do `TenantOrderRepository`) **não envia** `transactions`, `paidAmount`, `paid` nem `payment` quando a OS já existe. Isso evita que o app sobrescreva pagamentos lançados pelo servidor (webhook do Asaas, API, bot).
+- **Registrar pagamento e desconto funcionam offline.** `addPayment`/`addDiscountTransaction` montam o mapa com `OrderPaymentMath.addPaymentUpdate`/`addDiscountUpdate` e gravam com `applyPaymentFieldUpdate` (`transactions: arrayUnion`, `paidAmount: increment` ou `discount: increment` + `total: increment(-valor)`, mais `payment`/`paid` calculados do estado local). A tela atualiza na hora (otimista); o app não espera a confirmação do servidor, e uma falha posterior vai para o log (Crashlytics).
+- **Remover, zerar, marcar como pago, comprovantes e mudança de status** usam `updatePayments(companyId, orderId, mutate, actor:)`, que lê a OS dentro de `runTransaction`, aplica as regras de `lib/utils/order_payment_math.dart` e grava só os campos de pagamento, `discount`, `total` e auditoria. Exigem conexão: offline o app mostra "Sem conexão. Tente de novo quando estiver online." (`paymentRequiresConnection`); outras falhas mostram `paymentUpdateFailed`. A classificação do erro fica em `lib/utils/payment_update_failure.dart`.
+- Antes de uma transação, o store espera (até 10 s) a última gravação offline-safe ser confirmada, para a transação ler um estado que já a contém.
+- `updatedBy` é sempre o usuário que fez a ação (`actor: Global.userAggr`), nunca o anterior.
+- Saldo restante = `total - paidAmount` (o `total` já é líquido de desconto), no app e no servidor.
+- Transações com id `asaas_*` são lançadas pelo servidor e não podem ser removidas no app (estornar no Asaas; mensagem `asaasTransactionCannotBeRemoved`). "Zerar" mantém essas transações.
+- Mudança de status para orçamento/cancelada grava `payment = null` via `updatePayments`.
 
 ---
 
