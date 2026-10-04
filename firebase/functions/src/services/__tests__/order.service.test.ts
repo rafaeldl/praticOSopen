@@ -13,6 +13,7 @@ jest.mock('../firestore.service', () => ({
 
 import {
   addPayment,
+  PaymentValidationError,
   applyPaymentTransaction,
   calculateRemainingBalance,
 } from '../order.service';
@@ -140,6 +141,23 @@ describe('addPayment', () => {
         ],
       })
     );
+  });
+
+  it('rejeita desconto maior que o saldo restante', async () => {
+    mockTxGet.mockResolvedValue(snapshot({ total: 100, discount: 0, paidAmount: 80, transactions: [] }));
+
+    await expect(
+      addPayment('comp1', 'order1', 25, 'discount', undefined, user)
+    ).rejects.toBeInstanceOf(PaymentValidationError);
+    expect(mockTxUpdate).not.toHaveBeenCalled();
+  });
+
+  it('aceita desconto igual ao saldo restante', async () => {
+    mockTxGet.mockResolvedValue(snapshot({ total: 100, discount: 0, paidAmount: 80, transactions: [] }));
+
+    await expect(
+      addPayment('comp1', 'order1', 20, 'discount', undefined, user)
+    ).resolves.not.toBeNull();
   });
 
   it('omite description undefined (Firestore rejeita undefined)', async () => {

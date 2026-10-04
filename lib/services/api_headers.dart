@@ -28,7 +28,8 @@ Future<Map<String, String>> appApiHeaders({
   if (token == null || token.isEmpty) {
     throw const AppApiUnauthenticatedException();
   }
-  final resolvedCompanyId = companyId ?? Global.companyAggr?.id;
+  final resolvedCompanyId =
+      (companyId?.isNotEmpty ?? false) ? companyId : Global.companyAggr?.id;
   return {
     'Authorization': 'Bearer $token',
     'Content-Type': 'application/json',

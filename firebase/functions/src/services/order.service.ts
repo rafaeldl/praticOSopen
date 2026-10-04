@@ -604,6 +604,14 @@ export function applyPaymentTransaction(
   };
 }
 
+/** Thrown by addPayment when the request is invalid for the order's state. */
+export class PaymentValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PaymentValidationError';
+  }
+}
+
 /**
  * Add a payment or discount to an order (inside a Firestore transaction,
  * so it never races with the Asaas webhook).
@@ -628,6 +636,15 @@ export async function addPayment(
     if (!snap.exists) return null;
 
     const order = snap.data() as Order;
+
+    if (type === 'discount') {
+      const remaining = calculateRemainingBalance(order);
+      if (roundMoney(amount - remaining) > 0.005) {
+        throw new PaymentValidationError(
+          'Discount cannot exceed the remaining balance'
+        );
+      }
+    }
 
     const transaction: PaymentTransaction = {
       id: uuidv4(),

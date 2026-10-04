@@ -739,10 +739,14 @@ abstract class _OrderStore with Store {
         order!.paid = false;
         _queuePaymentFieldUpdate(order!.id!, clear, Global.userAggr);
       } else {
-        // Back to an active status: recompute from the fresh order (online)
-        _runPaymentUpdate(
-          (fresh) => OrderPaymentMath.applyOrderStatus(fresh, status),
+        // Back to an active status: recompute locally, offline-safe
+        final update = OrderPaymentMath.activeStatusPaymentUpdate(
+          total: order!.total ?? 0.0,
+          paidAmount: order!.paidAmount ?? 0.0,
         );
+        order!.payment = update['payment'] as String?;
+        order!.paid = update['paid'] as bool?;
+        _queuePaymentFieldUpdate(order!.id!, update, Global.userAggr);
       }
     }
   }

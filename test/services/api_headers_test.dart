@@ -28,6 +28,17 @@ void main() {
       expect(headers['X-Company-Id'], 'other');
     });
 
+    test('companyId vazio cai para Global.companyAggr', () async {
+      Global.companyAggr = CompanyAggr()..id = 'comp-42';
+
+      final headers = await appApiHeaders(
+        companyId: '',
+        tokenProvider: () async => 'tok',
+      );
+
+      expect(headers['X-Company-Id'], 'comp-42');
+    });
+
     test('sem empresa selecionada não envia X-Company-Id', () async {
       final headers = await appApiHeaders(tokenProvider: () async => 'tok');
 

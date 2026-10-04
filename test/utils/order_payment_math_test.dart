@@ -408,4 +408,29 @@ void main() {
       expect(OrderPaymentMath.orderStatusPaymentUpdate(null), isNull);
     });
   });
+
+  group('activeStatusPaymentUpdate', () {
+    test('sem pagamento: unpaid e paid false', () {
+      final update = OrderPaymentMath.activeStatusPaymentUpdate(
+        total: 100,
+        paidAmount: 0,
+        updatedAt: DateTime(2026, 10, 4, 12),
+      );
+
+      expect(update['payment'], 'unpaid');
+      expect(update['paid'], false);
+      expect(update['updatedAt'], DateTime(2026, 10, 4, 12).toIso8601String());
+      expect(update.containsKey('transactions'), isFalse);
+    });
+
+    test('totalmente pago: paid e paid true', () {
+      final update = OrderPaymentMath.activeStatusPaymentUpdate(
+        total: 100,
+        paidAmount: 100,
+      );
+
+      expect(update['payment'], 'paid');
+      expect(update['paid'], true);
+    });
+  });
 }

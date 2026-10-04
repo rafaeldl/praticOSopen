@@ -291,6 +291,22 @@ class OrderPaymentMath {
     };
   }
 
+  /// Offline-safe update for a change to an active order status: recomputes
+  /// `{payment, paid}` locally from [total] and [paidAmount] (no transaction,
+  /// so it is queued and synced when back online).
+  static Map<String, dynamic> activeStatusPaymentUpdate({
+    required double total,
+    required double paidAmount,
+    DateTime? updatedAt,
+  }) {
+    final status = paymentStatusFor(total: total, paidAmount: paidAmount);
+    return {
+      'payment': status,
+      'paid': status == 'paid',
+      'updatedAt': (updatedAt ?? DateTime.now()).toIso8601String(),
+    };
+  }
+
   /// Payment status driven by the order status: quotes and canceled orders
   /// have no payment status; otherwise keep it (or compute when missing).
   static Order applyOrderStatus(Order fresh, String? orderStatus) {
