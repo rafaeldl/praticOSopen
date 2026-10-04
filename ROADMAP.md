@@ -17,7 +17,7 @@
 
 ## Próximo
 
-- **Cobrança na OS (Pix/cartão) via Asaas com split** — receita por transação, fora do IAP da Apple.
+- **PraticOS na Flapp Store do Asaas** — loja dentro da conta Asaas (~270 mil empresas); o Asaas cobra nosso plano do saldo do cliente. Junto: cobrança da OS e baixa automática (#303). Ver `business/PARCERIAS.md` §0.
 - **NFS-e integrada** (Asaas).
 - **Plano Pro com IA** — OS por áudio/foto, orçamento sugerido, mensagem pronta para o cliente; MCP (ChatGPT/Claude) como recurso Pro.
 - **IAP no iOS configurado de verdade** (produtos na App Store + RevenueCat) para reabrir planos no iOS.
