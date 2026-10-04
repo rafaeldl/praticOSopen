@@ -15,13 +15,15 @@ jest.mock('../../services/firestore.service', () => ({
 }));
 
 jest.mock('../../services/membership.service', () => ({
+  verifyMembership: jest.fn(),
   verifyUserMemberships: jest.fn(),
 }));
 
 import { bearerAuth, getRolePermissions } from '../auth.middleware';
-import { verifyUserMemberships } from '../../services/membership.service';
+import { verifyMembership, verifyUserMemberships } from '../../services/membership.service';
 
 const mockVerify = verifyUserMemberships as jest.MockedFunction<typeof verifyUserMemberships>;
+const mockVerifyOne = verifyMembership as jest.MockedFunction<typeof verifyMembership>;
 
 function buildRes() {
   const res: Partial<Response> = {};
@@ -94,20 +96,20 @@ describe('bearerAuth', () => {
   });
 
   it('selects the company from the X-Company-Id header when verified', async () => {
-    mockVerify.mockResolvedValue([
-      { companyId: 'c1', role: 'admin' },
-      { companyId: 'c2', role: 'manager' },
-    ]);
+    mockVerifyOne.mockResolvedValue({ companyId: 'c2', role: 'manager' });
     const req = buildReq({ 'x-company-id': 'c2' });
 
     await bearerAuth(req, buildRes(), jest.fn());
 
+    expect(mockVerifyOne).toHaveBeenCalledWith('u1', 'c2', 'admin');
+    expect(mockVerify).not.toHaveBeenCalled();
     expect(req.userContext?.companyId).toBe('c2');
+    expect(req.userContext?.companyName).toBe('Company 2');
     expect(req.userContext?.role).toBe('manager');
   });
 
   it('responds 403 when the requested company is not verified', async () => {
-    mockVerify.mockResolvedValue([{ companyId: 'c1', role: 'admin' }]);
+    mockVerifyOne.mockResolvedValue(null);
     const res = buildRes();
     const next = jest.fn();
 
@@ -119,6 +121,15 @@ describe('bearerAuth', () => {
       success: false,
       error: { code: 'FORBIDDEN', message: 'No company access' },
     });
+  });
+
+  it('responds 403 when the requested company is not in the user list', async () => {
+    const res = buildRes();
+
+    await bearerAuth(buildReq({ 'x-company-id': 'c3' }), res, jest.fn());
+
+    expect(mockVerifyOne).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(403);
   });
 
   it('responds 403 when no company entry is verified', async () => {

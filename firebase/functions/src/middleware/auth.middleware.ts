@@ -6,7 +6,11 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest, ApiKeyData, ChannelLink, RoleType, toDate } from '../models/types';
 import { db, auth } from '../services/firestore.service';
-import { verifyUserMemberships } from '../services/membership.service';
+import {
+  VerifiedMembership,
+  verifyMembership,
+  verifyUserMemberships,
+} from '../services/membership.service';
 
 // Environment variables
 const BOT_API_KEY = process.env.BOT_API_KEY || 'bot_praticos_dev_key';
@@ -251,13 +255,21 @@ export async function bearerAuth(
 
     // Company + role are confirmed against server-side company data; the
     // user's own companies array only defines the order.
-    const verified = await verifyUserMemberships(userId, companies);
-
-    // Use first verified company or the one requested in the header
     const requestedCompanyId = req.headers['x-company-id'] as string;
-    const activeMembership = requestedCompanyId
-      ? verified.find((m) => m.companyId === requestedCompanyId)
-      : verified[0];
+    let activeMembership: VerifiedMembership | null | undefined;
+
+    if (requestedCompanyId) {
+      // Requested company must be listed by the user and verified
+      const requestedEntry = companies.find(
+        (c) => (c as { company?: { id?: unknown } } | null)?.company?.id === requestedCompanyId
+      ) as { role?: unknown } | undefined;
+      activeMembership = requestedEntry
+        ? await verifyMembership(userId, requestedCompanyId, requestedEntry.role)
+        : null;
+    } else {
+      // First verified company
+      activeMembership = (await verifyUserMemberships(userId, companies))[0];
+    }
 
     if (!activeMembership) {
       console.log(`[BearerAuth] REJECTED - No verified company access for user ${userId}`);
