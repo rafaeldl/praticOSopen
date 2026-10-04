@@ -67,6 +67,46 @@ App (OS) ──► Functions /api ──► Asaas API (conta do técnico)
 ## Regras de Negócio
 
 - Uma OS pode ter várias cobranças (pagamentos parciais); cada pagamento confirmado vira uma transação na OS.
-- Cancelar a OS não cancela cobranças automaticamente nesta fase (decisão a revisar na implementação).
+- Cancelar a OS cancela as cobranças abertas no Asaas (trigger `onOrderUpdatedAsaas`).
 - Estorno no Asaas deve estornar a transação na OS.
 - Recursos de cobrança de serviço físico ficam fora do IAP da Apple; não amarrar recursos pagos do app iOS a planos vendidos fora da loja sem revisar a guideline 3.1.1.
+
+## Webhook e baixa na OS
+
+- Endpoint: `POST /webhooks/asaas/{companyId}` (função `api`), autenticado por um token próprio de cada empresa, gerado na conexão da conta. Requisição sem token válido → 401. Rate limit por empresa e IP. Erro interno → 500 (o Asaas reenvia). Eventos sem cobrança correspondente são registrados e respondidos com 200 para não travar a fila `SEQUENTIALLY`.
+- Idempotência: `companies/{cid}/private/asaas/events/{eventId}` = `{ processedAt, expiresAt }` (TTL de 30 dias em `expiresAt`).
+- `PAYMENT_RECEIVED`/`PAYMENT_CONFIRMED`: transação `asaas_{paymentId}` (`type: payment`) na OS, `paidAmount`/`paid`/`payment` recalculados, push "Pagamento recebido" para dono/admin/gerente. `PAYMENT_OVERDUE`: cobrança `overdue` (se `pending`). `PAYMENT_REFUNDED`: remove a transação, cobrança `refunded`, comentário interno no histórico da OS. `PAYMENT_DELETED`: cobrança `canceled` (se não paga).
+- A cobrança é a fonte da verdade (`paidAsaasPaymentIds` + `appliedTransactions`). O trigger `onOrderUpdatedAsaas` (orders onUpdate) cancela cobranças abertas quando a OS é cancelada e reinsere transações Asaas apagadas por versões antigas do app, só para empresas com `asaasConnected`.
+- O payload e o token do webhook nunca são logados.
+
+## Regras Firestore
+
+- `companies/{cid}/private/**`: negado para o cliente (credencial, mapa de clientes e eventos do webhook).
+- `companies/{cid}/settings/payments`: leitura para membros da empresa, escrita só pelo servidor.
+- `companies/{cid}/orders/{oid}/charges/{chargeId}`: leitura para dono/admin/gerente, escrita só pelo servidor.
+- Testes automatizados em `firebase/functions/src/__tests__/firestore.rules.test.ts` (`cd firebase/functions && npm run test:rules`, precisa de Java 21+).
+
+## Rollout do webhook (Bloco C)
+
+O CI publica só as functions; regras, índices e TTL são manuais. Fazer nesta ordem:
+
+1. **Regras e índices** (antes do app que lê `charges`). Antes, comparar as regras publicadas no console do Firebase com `firebase/firestore.rules`: as publicadas já divergiram da `master`, e o deploy sobrescreve tudo.
+   ```bash
+   cd firebase && firebase deploy --only firestore:rules,firestore:indexes --project praticos
+   ```
+2. **TTL dos eventos do webhook** (também declarado em `firestore.indexes.json`; o comando garante e confere):
+   ```bash
+   gcloud firestore fields ttls update expiresAt \
+     --collection-group=events --enable-ttl --project=praticos
+   gcloud firestore fields ttls list --project=praticos
+   ```
+   A política leva alguns minutos para ficar `ACTIVE`; a exclusão acontece em até ~24 h depois de `expiresAt`.
+3. **Remover o trigger antigo**, logo antes do deploy das functions. `onOrderCanceledCancelAsaasCharges` foi substituído por `onOrderUpdatedAsaas`, e o deploy do CI não usa `--force`, então não apaga funções sozinho:
+   ```bash
+   firebase functions:delete onOrderCanceledCancelAsaasCharges --project praticos --force
+   ```
+4. **Deploy das functions** (merge na `master` dispara o CI, ou manual):
+   ```bash
+   cd firebase && firebase deploy --only functions --project praticos
+   ```
+   O CLI pode pedir para habilitar Eventarc/Pub/Sub para o trigger v2; aceitar.

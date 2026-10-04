@@ -57,6 +57,19 @@ service cloud.firestore {
         && request.auth.token.roles[companyId] in ['admin', 'manager'];
     }
 
+    // Verifica se o usuário é o dono da empresa (role 'owner' nas claims ou owner.id no doc)
+    function isCompanyOwner(companyId) {
+      return request.auth != null && (
+        hasRole(companyId, 'owner')
+        || get(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid
+      );
+    }
+
+    // Cobranças Asaas: dono, admin e gerente (mesmo público da permissão chargeOrder)
+    function canViewCharges(companyId) {
+      return canViewFinancial(companyId) || isCompanyOwner(companyId);
+    }
+
     // Verifica se o usuário pode gerenciar usuários (apenas admin)
     function canManageUsers(companyId) {
       return isCompanyAdmin(companyId);
@@ -381,6 +394,12 @@ service cloud.firestore {
           allow delete: if isCompanyAdmin(companyId)
             || resource.data.author.userId == request.auth.uid;
         }
+
+        // Cobranças Asaas da OS — escrita só via Cloud Functions (Admin SDK)
+        match /charges/{chargeId} {
+          allow read: if canViewCharges(companyId);
+          allow write: if false;
+        }
       }
 
       // ──────────────────────────────────────────────────────────────────────
@@ -518,6 +537,17 @@ service cloud.firestore {
 
         // Criação e deleção: apenas via Cloud Functions (Admin SDK)
         allow create, delete: if false;
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // PAGAMENTOS (ASAAS)
+      // settings/payments: membros leem (flag do piloto e conta conectada);
+      // escrita só via Cloud Functions. Credenciais, mapa de clientes e
+      // eventos do webhook ficam em private/** (negado acima).
+      // ──────────────────────────────────────────────────────────────────────
+      match /settings/payments {
+        allow read: if belongsToCompany(companyId);
+        allow write: if false;
       }
     }
   }
