@@ -21,7 +21,7 @@
 - **NFS-e integrada** (Asaas).
 - **Plano Pro com IA** — OS por áudio/foto, orçamento sugerido, mensagem pronta para o cliente; MCP (ChatGPT/Claude) como recurso Pro.
 - **IAP no iOS configurado de verdade** (produtos na App Store + RevenueCat) para reabrir planos no iOS.
-- Triagem do backlog de issues de jan–mar/2026.
+- **Canal Omie.Store** (loja de apps da Omie cobra o app junto com a mensalidade dela) — #198. Depois, Bling.
 
 ## Depois
 
