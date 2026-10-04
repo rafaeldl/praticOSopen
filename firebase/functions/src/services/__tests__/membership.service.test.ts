@@ -93,7 +93,7 @@ describe('membership.service', () => {
       expect(result).toEqual([{ companyId: 'c1', role: 'supervisor' }]);
     });
 
-    it('takes the role from the membership document when not in the users array', async () => {
+    it('does not accept a membership document as the only backing', async () => {
       serverData(
         { c1: { owner: { id: 'someone-else' }, users: [] } },
         { 'c1/u1': { role: 'manager' } },
@@ -101,10 +101,11 @@ describe('membership.service', () => {
 
       const result = await verifyUserMemberships('u1', [entry('c1', 'admin')]);
 
-      expect(result).toEqual([{ companyId: 'c1', role: 'manager' }]);
+      expect(result).toEqual([]);
+      expect(mockMembershipGet).not.toHaveBeenCalled();
     });
 
-    it('prefers the users array over the membership document', async () => {
+    it('uses the users array role even when a membership document disagrees', async () => {
       serverData(
         { c1: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'technician' }] } },
         { 'c1/u1': { role: 'admin' } },
@@ -137,8 +138,8 @@ describe('membership.service', () => {
       expect(mockMembershipGet).not.toHaveBeenCalled();
     });
 
-    it('drops a membership document without a role', async () => {
-      serverData({ c1: { owner: { id: 'x' } } }, { 'c1/u1': { user: { id: 'u1' } } });
+    it('drops a users array entry without a role', async () => {
+      serverData({ c1: { owner: { id: 'x' }, users: [{ user: { id: 'u1' } }] } });
 
       expect(await verifyUserMemberships('u1', [entry('c1', 'admin')])).toEqual([]);
     });
@@ -204,9 +205,15 @@ describe('membership.service', () => {
     });
 
     it('ignores the entry role for non-owners', async () => {
-      serverData({ c1: { owner: { id: 'x' } } }, { 'c1/u1': { role: 'technician' } });
+      serverData({ c1: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'technician' }] } });
 
       expect(await verifyMembership('u1', 'c1', 'admin')).toEqual({ companyId: 'c1', role: 'technician' });
+    });
+
+    it('returns null when only a membership document exists', async () => {
+      serverData({ c1: { owner: { id: 'x' } } }, { 'c1/u1': { role: 'admin' } });
+
+      expect(await verifyMembership('u1', 'c1', 'admin')).toBeNull();
     });
 
     it('returns null when not a member', async () => {
@@ -225,8 +232,8 @@ describe('membership.service', () => {
   describe('buildRolesClaim', () => {
     it('maps only verified memberships to the roles claim', async () => {
       serverData(
-        { c1: { owner: { id: 'u1' } }, c2: { owner: { id: 'x' } } },
-        { 'c2/u1': { role: 'Technician' } },
+        { c1: { owner: { id: 'u1' } }, c2: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'Technician' }] } },
+        { 'c3/u1': { role: 'admin' } },
       );
 
       const roles = await buildRolesClaim('u1', [

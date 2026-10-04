@@ -2,8 +2,9 @@
  * Membership Service
  * Single source of truth for "is this user a member of this company, and with
  * which role". Membership is always confirmed against server-side company data
- * (owner, company `users` array, `memberships` subcollection); the user's own
- * `companies` array is only used for ordering and as a hint for the owner role.
+ * (company owner and the company `users` array); the user's own `companies`
+ * array is only used for ordering and as a hint for the owner role.
+ * The `memberships` subcollection is a UI index and is not a verification source.
  */
 
 import { db } from './firestore.service';
@@ -35,7 +36,6 @@ function ownerId(owner: unknown): string | null {
  * Resolution order:
  * 1. Company owner → `entryRole` when it is 'owner' or 'admin', otherwise 'admin'.
  * 2. Company `users` array → that role.
- * 3. `companies/{companyId}/memberships/{uid}` → that role.
  * Otherwise returns null.
  *
  * `entryRole` (the role in the user's own `companies` entry) is only used in case 1.
@@ -45,8 +45,7 @@ export async function verifyMembership(
   companyId: string,
   entryRole?: unknown,
 ): Promise<VerifiedMembership | null> {
-  const companyRef = db.collection('companies').doc(companyId);
-  const companySnap = await companyRef.get();
+  const companySnap = await db.collection('companies').doc(companyId).get();
   if (!companySnap.exists) return null;
 
   const company = companySnap.data() || {};
@@ -66,13 +65,6 @@ export async function verifyMembership(
       const role = lower(member.role);
       if (role) return { companyId, role };
     }
-  }
-
-  // 3. Membership document
-  const membershipSnap = await companyRef.collection('memberships').doc(uid).get();
-  if (membershipSnap.exists) {
-    const role = lower(membershipSnap.data()?.role);
-    if (role) return { companyId, role };
   }
 
   return null;
