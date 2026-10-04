@@ -180,6 +180,8 @@ Rodar na nuvem, não no Mac, para não depender da máquina ligada.
 - **iOS sem nenhum recurso pago** desde a 1.52.3: a Apple rejeitou 3 versões pela guideline 3.1.1 (recurso pago sem IAP).
 - **Custos:** bot do WhatsApp **apagado em 2026-10-04** (VM + disco; conversas salvas em `gs://praticos-bot-archive`). Restam Cloud Run (`api`, `praticos-web`), Functions, Firestore/Storage. Google Ads pausado. Meta Ads: token da API expirou em abr/2026, status a confirmar.
 
+- **Aprendizados do bot do WhatsApp (mar–ago/2026, agregados):** ~95 contatos, só ~5 com uso recorrente. O uso que pegou foi **orçamento rápido por texto/foto em funilaria e estética automotiva** (placa + peças + preço → orçamento → "aprovado"). Custo de LLM ~US$ 178, ~US$ 0,09 por mensagem — causado pela arquitetura (agente genérico executando shell, ~160 mil tokens/mensagem), não pelo canal. Análise completa fica fora do repositório (contém dados de clientes).
+
 **Leitura honesta:** o modelo atual cobra por *limite* (fotos, formulários, usuários, marca d'água). Limite incomoda, mas não cria vontade de pagar. Mesmo no Android, onde a cobrança está ligada, não há receita. O problema não é só técnico (IAP), é de **proposta de valor**.
 
 ### 6.2 Opções
@@ -187,7 +189,7 @@ Rodar na nuvem, não no Mac, para não depender da máquina ligada.
 | # | Aposta | Como ganha | Por que pode funcionar | Risco / custo | Apple |
 |---|--------|-----------|------------------------|---------------|-------|
 | A | **Cobrar a OS pelo link (Pix/cartão)** via Asaas com split | % por transação (ex.: 0,99% + taxa do Asaas) | Dor real: o técnico já manda o link da OS; receber ali mesmo é óbvio. Não depende de convencer a assinar. | KYC de subcontas, suporte a estorno. Receita proporcional ao volume. | **Fora do IAP**: pagamento de serviço físico (3.1.3(e)/3.1.5) |
-| B | **IA que economiza tempo** (OS por áudio/foto, orçamento sugerido, mensagem pronta para o cliente, resumo do dia) | Plano Pro com créditos de IA | Diferencial que o concorrente de planilha não tem. Valor visível em 1 uso. | Custo por chamada (Haiku/Jev barato, mas tem que medir). | Recurso digital → **IAP no iOS** |
+| B | **IA que economiza tempo** — maior evidência de uso no bot (OS/orçamento por áudio/foto, orçamento sugerido, mensagem pronta para o cliente, resumo do dia) | Plano Pro com créditos de IA | Diferencial que o concorrente de planilha não tem. Valor visível em 1 uso. | Custo por chamada (Haiku/Jev barato, mas tem que medir). | Recurso digital → **IAP no iOS** |
 | C | **Conectar ao ChatGPT/Claude (MCP)** como recurso Pro | Assinatura | Já está pronto. Custo de LLM é do usuário. Canal de aquisição nos diretórios. | Público que usa ChatGPT/Claude ainda é pequeno entre técnicos. | IAP no iOS |
 | D | **Assistente no WhatsApp pago** (o bot, mas como add-on) | Add-on ~R$49/mês | O bot já existia e funcionava; o problema foi dar de graça. 3–4 clientes pagam a VM + LLM. | Operação (VM, sessões). | Serviço externo; vendido fora do app |
 | E | **NFS-e integrada** (via Asaas) | Por nota ou no plano | Obrigação fiscal; dor recorrente em MEI/oficina. | Variação por município. | Fora do IAP se cobrado no Asaas |
