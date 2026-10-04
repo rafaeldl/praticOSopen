@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:praticos/global.dart';
+import 'package:praticos/models/company.dart';
 import 'package:praticos/services/integration_api_service.dart';
 
 void main() {
@@ -225,6 +227,36 @@ void main() {
     test('tokenProvider null lança com code UNAUTHENTICATED', () async {
       final service = IntegrationApiService.withClient(
         MockClient((_) async => throw 'Should not make HTTP request'),
+        tokenProvider: () async => null,
+      );
+
+      expect(
+        () => service.list(),
+        throwsA(
+          isA<IntegrationApiException>()
+              .having((e) => e.code, 'code', 'UNAUTHENTICATED'),
+        ),
+      );
+    });
+
+    test('envia X-Company-Id da empresa atual', () async {
+      Global.companyAggr = CompanyAggr()..id = 'comp-42';
+      addTearDown(() => Global.companyAggr = null);
+
+      final service = IntegrationApiService.withClient(
+        MockClient((request) async {
+          expect(request.headers['X-Company-Id'], 'comp-42');
+          return http.Response(jsonEncode({'success': true, 'data': []}), 200);
+        }),
+        tokenProvider: () async => 'fake-id-token',
+      );
+
+      await service.list();
+    });
+
+    test('sem token lança exceção com code UNAUTHENTICATED', () async {
+      final service = IntegrationApiService.withClient(
+        MockClient((_) async => http.Response('{}', 200)),
         tokenProvider: () async => null,
       );
 

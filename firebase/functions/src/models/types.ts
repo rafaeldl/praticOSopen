@@ -118,6 +118,8 @@ export interface CustomerAggr {
   name: string;
   phone?: string | null;
   email?: string | null;
+  /** CPF or CNPJ, normalized (digits; uppercase letters for alphanumeric CNPJ) */
+  taxId?: string | null;
 }
 
 export interface Customer extends CustomerAggr {
@@ -191,7 +193,8 @@ export interface Product extends ProductAggr {
 // ============================================================================
 
 export type OrderStatus = 'quote' | 'approved' | 'progress' | 'done' | 'canceled';
-export type PaymentStatus = 'unpaid' | 'partial' | 'paid';
+// Stored values only. 'partial' is computed in memory (app convention).
+export type PaymentStatus = 'unpaid' | 'paid';
 export type TransactionType = 'payment' | 'discount';
 
 export interface OrderService {

@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'dart:io';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 import 'package:praticos/services/analytics_service.dart';
 import 'package:praticos/services/format_service.dart';
@@ -10,6 +13,9 @@ import 'package:praticos/models/order_document.dart';
 import 'package:praticos/models/order_photo.dart';
 import 'package:praticos/models/order_form.dart' as of_model;
 import 'package:praticos/models/payment_transaction.dart';
+import 'package:praticos/models/user.dart';
+import 'package:praticos/utils/order_payment_math.dart';
+import 'package:praticos/utils/payment_update_failure.dart';
 import 'package:praticos/models/permission.dart';
 import 'package:praticos/services/authorization_service.dart';
 import 'package:praticos/services/forms_service.dart';
@@ -720,10 +726,29 @@ abstract class _OrderStore with Store {
   @action
   setStatus(String? status) {
     if (status == null) return;
+    final previousPayment = order!.payment;
     order!.status = status;
     this.status = status;
     updatePayment();
     createItem();
+    // createItem no longer writes `payment`: persist the status-driven change.
+    if (order!.id != null && order!.payment != previousPayment) {
+      final clear = OrderPaymentMath.orderStatusPaymentUpdate(status);
+      if (clear != null) {
+        // quote/canceled → payment null: offline-safe, no fresh state needed
+        order!.paid = false;
+        _queuePaymentFieldUpdate(order!.id!, clear, Global.userAggr);
+      } else {
+        // Back to an active status: recompute locally, offline-safe
+        final update = OrderPaymentMath.activeStatusPaymentUpdate(
+          total: order!.total ?? 0.0,
+          paidAmount: order!.paidAmount ?? 0.0,
+        );
+        order!.payment = update['payment'] as String?;
+        order!.paid = update['paid'] as bool?;
+        _queuePaymentFieldUpdate(order!.id!, update, Global.userAggr);
+      }
+    }
   }
 
   String dateToString(DateTime? date) {
@@ -753,6 +778,8 @@ abstract class _OrderStore with Store {
     return repository.removeItem(companyId!, order!.id);
   }
 
+  /// Computes the payment label shown in the UI (display only).
+  /// Persistence of payment fields happens only through updatePayments.
   void updatePayment() {
     if (order == null) return;
 
@@ -1182,24 +1209,22 @@ abstract class _OrderStore with Store {
       if (!deleted) return false;
     }
 
-    // If this document is a receipt linked to a transaction, clear the reference
-    if (doc.linkedTransactionId != null) {
-      final txn = order!.transactions?.firstWhere(
-        (t) => t.id == doc.linkedTransactionId,
-        orElse: () => PaymentTransaction(type: PaymentTransactionType.payment, amount: 0),
-      );
-      if (txn != null && txn.amount > 0) {
-        txn.receiptDocumentId = null;
-        final txnIndex = transactions.indexWhere((t) => t.id == doc.linkedTransactionId);
-        if (txnIndex >= 0) {
-          transactions[txnIndex] = txn;
-        }
-      }
-    }
-
     order!.documents!.removeAt(index);
     documents.removeAt(index);
     createItem();
+
+    // If this document is a receipt linked to a transaction, clear the reference
+    final linkedId = doc.linkedTransactionId;
+    if (linkedId != null) {
+      final linked = (order!.transactions ?? const <PaymentTransaction>[])
+          .where((t) => t.id == linkedId)
+          .toList();
+      if (linked.isNotEmpty) {
+        await _runPaymentUpdate(
+          (fresh) => OrderPaymentMath.setReceipt(fresh, linked.first, null),
+        );
+      }
+    }
     return true;
   }
 
@@ -1211,19 +1236,16 @@ abstract class _OrderStore with Store {
   @action
   Future<bool> attachReceiptToTransaction(int index, File file,
       String contentType, String fileName) async {
+    lastPaymentFailure = null;
     if (order == null ||
         companyId == null ||
         order!.id == null ||
+        order!.company?.id == null ||
         order!.transactions == null ||
         index >= order!.transactions!.length) {
+      lastPaymentFailure = PaymentUpdateFailure.failed;
       return false;
     }
-
-    // Ensure order is saved first
-    if (order!.id == null) {
-      await repository.createItem(companyId!, order);
-    }
-    if (order!.id == null || order!.company?.id == null) return false;
 
     final transaction = order!.transactions![index];
 
@@ -1239,29 +1261,28 @@ abstract class _OrderStore with Store {
       );
 
       isUploadingDocument = false;
-
-      if (doc != null) {
-        doc.type = OrderDocumentType.receipt;
-        doc.linkedTransactionId = transaction.id;
-
-        // Add to order documents
-        order!.documents ??= [];
-        order!.documents!.add(doc);
-        documents.add(doc);
-
-        // Link receipt to transaction
-        transaction.receiptDocumentId = doc.id;
-
-        // Update observable list to trigger UI refresh
-        transactions[index] = transaction;
-        order!.transactions![index] = transaction;
-        createItem();
-        return true;
+      if (doc == null) {
+        lastPaymentFailure = PaymentUpdateFailure.failed;
+        return false;
       }
-      return false;
-    } catch (e) {
+
+      doc.type = OrderDocumentType.receipt;
+      doc.linkedTransactionId = transaction.id;
+
+      // Documents are persisted by the regular order save
+      order!.documents ??= [];
+      order!.documents!.add(doc);
+      documents.add(doc);
+      createItem();
+
+      // Transactions are persisted only through updatePayments
+      return _runPaymentUpdate(
+        (fresh) => OrderPaymentMath.setReceipt(fresh, transaction, doc.id),
+      );
+    } catch (e, stack) {
       isUploadingDocument = false;
-      print('Erro no upload do comprovante: $e');
+      lastPaymentFailure = classifyPaymentUpdateFailure(e);
+      _logPaymentError(e, stack, 'attachReceiptToTransaction');
       return false;
     }
   }
@@ -1279,25 +1300,27 @@ abstract class _OrderStore with Store {
     final docId = transaction.receiptDocumentId;
     if (docId == null) return false;
 
-    // Find and remove the linked OrderDocument
-    final docIndex = order!.documents?.indexWhere((d) => d.id == docId) ?? -1;
-    if (docIndex >= 0) {
-      final doc = order!.documents![docIndex];
-      if (doc.storagePath != null) {
-        await photoService.deletePhoto(doc.storagePath!);
-      }
-      order!.documents!.removeAt(docIndex);
-      documents.removeAt(docIndex);
-    }
+    final ok = await _runPaymentUpdate(
+      (fresh) => OrderPaymentMath.setReceipt(fresh, transaction, null),
+    );
+    if (!ok) return false;
 
-    // Clear reference on transaction
-    transaction.receiptDocumentId = null;
-
-    // Update observable list to trigger UI refresh
-    transactions[index] = transaction;
-    order!.transactions![index] = transaction;
+    await _deleteOrderDocumentById(docId);
     createItem();
     return true;
+  }
+
+  /// Deletes an OrderDocument from storage and from the local lists.
+  /// The caller persists the documents list with createItem().
+  Future<void> _deleteOrderDocumentById(String docId) async {
+    final docIndex = order!.documents?.indexWhere((d) => d.id == docId) ?? -1;
+    if (docIndex < 0) return;
+    final doc = order!.documents![docIndex];
+    if (doc.storagePath != null) {
+      await photoService.deletePhoto(doc.storagePath!);
+    }
+    order!.documents!.removeAt(docIndex);
+    documents.removeWhere((d) => d.id == docId);
   }
 
   @action
@@ -1308,190 +1331,295 @@ abstract class _OrderStore with Store {
     createItem();
   }
 
-  /// Adiciona um pagamento parcial
-  @action
-  void addPayment(double amount, {String? description}) {
-    if (order == null || amount <= 0) return;
+  // ============================================================
+  // PAYMENTS
+  // Adding a payment/discount: field transforms (arrayUnion/increment),
+  // offline-safe, applied optimistically to the local state.
+  // Remove / reset / mark as paid / receipts / status: updatePayments
+  // (runTransaction, needs connection).
+  // A full order save (createItem) never writes payment fields.
+  // ============================================================
 
-    final txnId = DateTime.now().millisecondsSinceEpoch.toString();
+  /// Why the last payment operation failed (null when it succeeded).
+  /// Read by the UI to pick the error message.
+  PaymentUpdateFailure? lastPaymentFailure;
+
+  /// Latest offline-safe payment write. Transactions wait for it (bounded)
+  /// so they read a server state that already contains it.
+  Future<void>? _pendingPaymentFieldWrite;
+
+  /// Transactions added offline whose write the server hasn't acknowledged
+  /// yet (by id). Kept when the local state is refreshed from a transaction.
+  final Map<String, PaymentTransaction> _pendingTransactions = {};
+
+  String _newTransactionId() =>
+      DateTime.now().millisecondsSinceEpoch.toString();
+
+  void _logPaymentError(Object error, StackTrace stack, String operation) {
+    print('[OrderStore] $operation failed: $error');
+    if (classifyPaymentUpdateFailure(error) != PaymentUpdateFailure.failed) {
+      return; // offline / Asaas lock are expected, not bugs
+    }
+    try {
+      FirebaseCrashlytics.instance.recordError(
+        error,
+        stack,
+        reason: 'OrderStore.$operation',
+        fatal: false,
+      );
+    } catch (_) {
+      // Crashlytics unavailable (e.g. not initialized): print is enough
+    }
+  }
+
+  /// Sends an offline-safe payment update without awaiting the server ack
+  /// (the Future only resolves when the server confirms, so awaiting it
+  /// would hang offline). Returns false only if the write couldn't be queued.
+  bool _queuePaymentFieldUpdate(
+    String orderId,
+    Map<String, dynamic> update,
+    UserAggr? actor, {
+    PaymentTransaction? transaction,
+  }) {
+    final pendingId = transaction?.id;
+    try {
+      if (pendingId != null) _pendingTransactions[pendingId] = transaction!;
+      final write = repository
+          .applyPaymentFieldUpdate(companyId!, orderId, update, actor: actor)
+          .catchError((Object e, StackTrace stack) {
+        _logPaymentError(e, stack, 'applyPaymentFieldUpdate');
+      }).whenComplete(() {
+        if (pendingId != null) _pendingTransactions.remove(pendingId);
+      });
+      _pendingPaymentFieldWrite = write;
+      return true;
+    } catch (e, stack) {
+      if (pendingId != null) _pendingTransactions.remove(pendingId);
+      lastPaymentFailure = classifyPaymentUpdateFailure(e);
+      _logPaymentError(e, stack, 'applyPaymentFieldUpdate');
+      return false;
+    }
+  }
+
+  /// Runs [mutate] on the fresh order inside a Firestore transaction and
+  /// refreshes the local state from the result. Returns false when it can't
+  /// be saved; [lastPaymentFailure] says why (offline → requiresConnection).
+  Future<bool> _runPaymentUpdate(Order Function(Order fresh) mutate) async {
+    lastPaymentFailure = null;
+    if (order == null || companyId == null) {
+      lastPaymentFailure = PaymentUpdateFailure.failed;
+      return false;
+    }
+    try {
+      if (order!.id == null) {
+        // New order not saved yet: save it before touching payments
+        await repository.createItem(companyId!, order);
+      }
+
+      // An offline write not acknowledged in time means no connection:
+      // stop here instead of reading a server state without it.
+      final notAcked =
+          await waitForPendingPaymentWrite(_pendingPaymentFieldWrite);
+      if (notAcked != null) {
+        lastPaymentFailure = notAcked;
+        return false;
+      }
+
+      final fresh = await repository.updatePayments(
+        companyId!,
+        order!.id!,
+        mutate,
+        actor: Global.userAggr,
+      );
+      if (fresh == null) {
+        lastPaymentFailure = PaymentUpdateFailure.failed;
+        return false;
+      }
+      _applyPaymentState(fresh);
+      return true;
+    } catch (e, stack) {
+      lastPaymentFailure = classifyPaymentUpdateFailure(e);
+      _logPaymentError(e, stack, 'updatePayments');
+      return false;
+    }
+  }
+
+  /// Copies the payment fields of [fresh] into the local order and observables.
+  /// Transactions added offline and not yet acknowledged are kept (see
+  /// [OrderPaymentMath.mergePendingTransactions]).
+  void _applyPaymentState(Order fresh) {
+    if (order == null) return;
+    OrderPaymentMath.mergePendingTransactions(
+        fresh, _pendingTransactions.values.toList());
+    order!.transactions = fresh.transactions ?? [];
+    order!.paidAmount = fresh.paidAmount ?? 0.0;
+    order!.paid = fresh.paid;
+    order!.payment = fresh.payment;
+    order!.discount = fresh.discount ?? 0.0;
+    _syncPaymentObservables();
+  }
+
+  /// Refreshes the payment observables from the local order.
+  void _syncPaymentObservables() {
+    runInAction(() {
+      if (order == null) return;
+      transactions = ObservableList<PaymentTransaction>.of(
+          order!.transactions ?? const <PaymentTransaction>[]);
+      paidAmount = order!.paidAmount ?? 0.0;
+      updateTotal();
+      updatePayment();
+    });
+  }
+
+  /// Adiciona um pagamento parcial. Funciona offline: grava com
+  /// arrayUnion/increment e atualiza o estado local na hora. Retorna a
+  /// transação criada, ou null se não foi possível registrar.
+  @action
+  Future<PaymentTransaction?> addPayment(double amount,
+      {String? description}) async {
+    lastPaymentFailure = null;
+    if (order == null || companyId == null || amount <= 0) return null;
+
+    final actor = Global.userAggr;
     final transaction = PaymentTransaction.payment(
       amount: amount,
       description: description,
-      createdBy: Global.userAggr,
+      createdBy: actor,
     );
-    transaction.id = txnId;
+    transaction.id = _newTransactionId();
 
-    // Inicializa listas se necessário
-    order!.transactions ??= [];
-    order!.paidAmount ??= 0.0;
+    final orderId = order!.id;
+    if (orderId != null) {
+      // Update map is computed from the state before the local change
+      final update = OrderPaymentMath.addPaymentUpdate(
+        current: order!,
+        tx: transaction,
+      );
+      if (!_queuePaymentFieldUpdate(orderId, update, actor,
+          transaction: transaction)) {
+        return null;
+      }
+    }
 
-    // Adiciona transação
-    order!.transactions!.add(transaction);
-    transactions.add(transaction);
+    OrderPaymentMath.addPayment(order!, transaction);
+    _syncPaymentObservables();
+    // New order (not saved yet): the first full save includes the payment
+    if (orderId == null) createItem();
 
-    // Atualiza valor pago
-    order!.paidAmount = (order!.paidAmount ?? 0) + amount;
-    paidAmount = order!.paidAmount;
-
-    // Atualiza status de pagamento
-    _updatePaymentStatus();
-
-    createItem();
     AnalyticsService.instance.logPaymentAdded(amount: amount);
+    return transaction;
   }
 
-  /// Adiciona um desconto como transação
+  /// Adiciona um desconto como transação (reduz o total da OS).
+  /// Funciona offline, como [addPayment].
   @action
-  void addDiscountTransaction(double amount, {String? description}) {
-    if (order == null || amount <= 0) return;
+  Future<bool> addDiscountTransaction(double amount,
+      {String? description}) async {
+    lastPaymentFailure = null;
+    if (order == null || companyId == null || amount <= 0) return false;
 
+    final actor = Global.userAggr;
     final transaction = PaymentTransaction.discount(
       amount: amount,
       description: description,
-      createdBy: Global.userAggr,
+      createdBy: actor,
     );
+    transaction.id = _newTransactionId();
 
-    // Inicializa listas se necessário
-    order!.transactions ??= [];
-    order!.discount ??= 0.0;
-
-    // Adiciona transação
-    order!.transactions!.add(transaction);
-    transactions.add(transaction);
-
-    // Atualiza desconto total
-    order!.discount = (order!.discount ?? 0) + amount;
-    discount = order!.discount;
-
-    // Recalcula total
-    updateTotal();
-
-    // Atualiza status de pagamento
-    _updatePaymentStatus();
-
-    createItem();
-  }
-
-  /// Marca como totalmente pago
-  @action
-  void markAsFullyPaid({String? description}) {
-    if (order == null) return;
-
-    final remaining = remainingBalance;
-    if (remaining > 0) {
-      addPayment(remaining, description: description ?? 'Pagamento total');
+    final orderId = order!.id;
+    if (orderId != null) {
+      final update = OrderPaymentMath.addDiscountUpdate(
+        current: order!,
+        tx: transaction,
+      );
+      if (!_queuePaymentFieldUpdate(orderId, update, actor,
+          transaction: transaction)) {
+        return false;
+      }
     }
 
-    order!.payment = 'paid';
-    payment = 'Pago';
-    createItem();
+    OrderPaymentMath.addDiscount(order!, transaction);
+    _syncPaymentObservables();
+    if (orderId == null) createItem();
+    return true;
   }
 
-  /// Atualiza o status de pagamento baseado nos valores
-  void _updatePaymentStatus() {
-    if (order == null) return;
-
-    final totalValue = order!.total ?? 0.0;
-    final paid = order!.paidAmount ?? 0.0;
-
-    // No banco: apenas 'unpaid' ou 'paid'
-    // 'partial' é calculado em memória baseado em paidAmount
-    if (paid >= totalValue && totalValue > 0) {
-      order!.payment = 'paid';
-      payment = 'Pago';
-    } else {
-      order!.payment = 'unpaid';
-      // Se tem pagamento parcial, mostrar "Parcial" na UI
-      payment = paid > 0 ? 'Parcial' : 'A receber';
-    }
-  }
-
-  /// Remove uma transação pelo índice
+  /// Marca como totalmente pago (lança o saldo restante como pagamento).
+  /// Precisa de conexão.
   @action
-  Future<void> removeTransaction(int index) async {
+  Future<bool> markAsFullyPaid({String? description}) async {
+    if (order == null) return false;
+
+    final transactionId = _newTransactionId();
+    final createdBy = Global.userAggr;
+
+    return _runPaymentUpdate(
+      (fresh) => OrderPaymentMath.markAsFullyPaid(fresh, (remaining) {
+        final transaction = PaymentTransaction.payment(
+          amount: remaining,
+          description: description ?? 'Pagamento total',
+          createdBy: createdBy,
+        );
+        transaction.id = transactionId;
+        return transaction;
+      }),
+    );
+  }
+
+  /// Remove uma transação pelo índice. Transações do Asaas (`asaas_*`) não
+  /// podem ser removidas aqui: o estorno é feito no Asaas. Precisa de conexão.
+  @action
+  Future<bool> removeTransaction(int index) async {
+    lastPaymentFailure = null;
     if (order == null ||
         order!.transactions == null ||
         index >= order!.transactions!.length) {
-      return;
+      return false;
     }
 
     final transaction = order!.transactions![index];
-
-    // Delete associated receipt document if exists
-    if (transaction.receiptDocumentId != null) {
-      final docIndex = order!.documents?.indexWhere(
-        (d) => d.id == transaction.receiptDocumentId,
-      ) ?? -1;
-      if (docIndex >= 0) {
-        final doc = order!.documents![docIndex];
-        if (doc.storagePath != null) {
-          await photoService.deletePhoto(doc.storagePath!);
-        }
-        order!.documents!.removeAt(docIndex);
-        documents.removeAt(docIndex);
-      }
+    if (OrderPaymentMath.isAsaasTransaction(transaction)) {
+      lastPaymentFailure = PaymentUpdateFailure.asaasLocked;
+      return false;
     }
 
-    // Remove da lista
-    order!.transactions!.removeAt(index);
-    transactions.removeAt(index);
+    final ok = await _runPaymentUpdate(
+      (fresh) => OrderPaymentMath.removeTransaction(fresh, transaction),
+    );
+    if (!ok) return false;
 
-    // Recalcula valores baseado no tipo
-    if (transaction.type == PaymentTransactionType.payment) {
-      order!.paidAmount = (order!.paidAmount ?? 0) - transaction.amount;
-      if (order!.paidAmount! < 0) order!.paidAmount = 0;
-      paidAmount = order!.paidAmount;
-    } else if (transaction.type == PaymentTransactionType.discount) {
-      order!.discount = (order!.discount ?? 0) - transaction.amount;
-      if (order!.discount! < 0) order!.discount = 0;
-      discount = order!.discount;
-      updateTotal();
+    // Delete the receipt only after the transaction is gone
+    final receiptId = transaction.receiptDocumentId;
+    if (receiptId != null) {
+      await _deleteOrderDocumentById(receiptId);
+      createItem();
     }
-
-    _updatePaymentStatus();
-    createItem();
+    return true;
   }
 
-  /// Resets all payments: removes all transactions and their receipt documents
+  /// Resets all manual payments and discounts (and their receipts).
+  /// Payments received through Asaas are kept. Precisa de conexão.
   @action
-  Future<void> resetAllPayments() async {
-    if (order == null) return;
+  Future<bool> resetAllPayments() async {
+    if (order == null) return false;
 
-    // Delete receipt documents from storage and order.documents
-    final txns = order!.transactions ?? [];
-    for (final txn in txns) {
-      if (txn.receiptDocumentId != null) {
-        final docIndex = order!.documents?.indexWhere(
-          (d) => d.id == txn.receiptDocumentId,
-        ) ?? -1;
-        if (docIndex >= 0) {
-          final doc = order!.documents![docIndex];
-          if (doc.storagePath != null) {
-            await photoService.deletePhoto(doc.storagePath!);
-          }
-          order!.documents!.removeAt(docIndex);
-        }
+    final removable = (order!.transactions ?? const <PaymentTransaction>[])
+        .where((t) => !OrderPaymentMath.isAsaasTransaction(t))
+        .toList();
+
+    final ok = await _runPaymentUpdate(OrderPaymentMath.resetPayments);
+    if (!ok) return false;
+
+    var removedDocument = false;
+    for (final transaction in removable) {
+      final receiptId = transaction.receiptDocumentId;
+      if (receiptId != null) {
+        await _deleteOrderDocumentById(receiptId);
+        removedDocument = true;
       }
     }
-
-    // Sync observable documents list
-    documents.clear();
-    documents.addAll(order!.documents ?? []);
-
-    // Clear transactions
-    order!.transactions?.clear();
-    transactions.clear();
-
-    // Reset payment values
-    order!.payment = 'unpaid';
-    order!.paidAmount = 0;
-    order!.discount = 0;
-    paidAmount = 0;
-    discount = 0;
-    updateTotal();
-
-    _updatePaymentStatus();
-    createItem();
+    if (removedDocument) createItem();
+    return true;
   }
 
   updateTotal() {

@@ -25,7 +25,7 @@ jest.mock('../../services/membership.service', () => ({
   verifyUserMemberships: jest.fn(),
 }));
 
-import { bearerAuth, botAuth, getRolePermissions } from '../auth.middleware';
+import { bearerAuth, botAuth, getRolePermissions, hasPermission } from '../auth.middleware';
 import { verifyMembership, verifyUserMemberships } from '../../services/membership.service';
 
 const mockVerify = verifyUserMemberships as jest.MockedFunction<typeof verifyUserMemberships>;
@@ -244,5 +244,17 @@ describe('botAuth', () => {
     await botAuth({ headers: { 'x-api-key': 'nope' } } as unknown as AuthenticatedRequest, res, jest.fn());
 
     expect(res.status).toHaveBeenCalledWith(401);
+  });
+});
+
+describe('getRolePermissions — manage:payments', () => {
+  it.each(['owner', 'admin', 'manager'])('%s pode gerenciar pagamentos', (role) => {
+    const permissions = getRolePermissions(role);
+    expect(permissions).toContain('manage:payments');
+    expect(hasPermission({ permissions }, 'manage:payments')).toBe(true);
+  });
+
+  it.each(['supervisor', 'consultant', 'technician'])('%s não pode', (role) => {
+    expect(hasPermission({ permissions: getRolePermissions(role) }, 'manage:payments')).toBe(false);
   });
 });

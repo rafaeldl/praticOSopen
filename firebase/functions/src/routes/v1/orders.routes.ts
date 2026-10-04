@@ -476,6 +476,13 @@ router.post('/:id/payments', async (req: AuthenticatedRequest, res: Response) =>
       data: result,
     });
   } catch (error) {
+    if (error instanceof orderService.PaymentValidationError) {
+      res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: error.message },
+      });
+      return;
+    }
     console.error('Add payment error:', error);
     res.status(500).json({
       success: false,

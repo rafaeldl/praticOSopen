@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import 'package:praticos/models/order.dart';
+import 'package:praticos/models/user.dart';
 import 'package:praticos/repositories/tenant/tenant_order_repository.dart';
 import 'package:praticos/repositories/tenant_repository.dart';
 import 'package:praticos/repositories/v2/repository_v2.dart';
@@ -64,6 +65,27 @@ class OrderRepositoryV2 extends RepositoryV2<Order?> {
       customerId: customerId,
     );
   }
+
+  /// Atualiza só os pagamentos da OS dentro de uma transação do Firestore.
+  /// Ver [TenantOrderRepository.updatePayments].
+  Future<Order?> updatePayments(
+    String companyId,
+    String orderId,
+    Order Function(Order fresh) mutate, {
+    UserAggr? actor,
+  }) =>
+      _tenant.updatePayments(companyId, orderId, mutate, actor: actor);
+
+  /// Aplica o mapa de update de pagamento com field transforms (offline-safe).
+  /// Ver [TenantOrderRepository.applyPaymentFieldUpdate].
+  Future<void> applyPaymentFieldUpdate(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> update, {
+    UserAggr? actor,
+  }) =>
+      _tenant.applyPaymentFieldUpdate(companyId, orderId, update,
+          actor: actor);
 
   // ═══════════════════════════════════════════════════════════════════
   // Ratings Support

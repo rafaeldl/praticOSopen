@@ -11,6 +11,7 @@ import {
   createDocument,
   updateDocument,
   getNextOrderNumber,
+  runTransaction,
   QueryFilter,
 } from './firestore.service';
 import {
@@ -21,6 +22,7 @@ import {
   OrderProduct as OrderProductItem,
   OrderPhoto,
   PaymentTransaction,
+  PaymentStatus,
   TransactionType,
   UserAggr,
   CompanyAggr,
@@ -553,7 +555,66 @@ export async function addOrderProduct(
 }
 
 /**
- * Add a payment or discount to an order
+ * Round a money value to cents (avoids 0.1 + 0.2 style drift).
+ */
+export function roundMoney(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+/**
+ * Apply a payment or discount transaction to an order (pure).
+ * Same rules as the app (lib/utils/order_payment_math.dart):
+ * - discount increases `discount` AND lowers `total` (total is net of discount);
+ * - remaining balance = total - paidAmount;
+ * - `payment` is stored only as 'paid' | 'unpaid'.
+ */
+export function applyPaymentTransaction(
+  order: Pick<Order, 'total' | 'discount' | 'paidAmount' | 'transactions'>,
+  transaction: PaymentTransaction
+): {
+  transactions: PaymentTransaction[];
+  total: number;
+  discount: number;
+  paidAmount: number;
+  paid: boolean;
+  payment: PaymentStatus;
+  remainingBalance: number;
+} {
+  let total = order.total || 0;
+  let discount = order.discount || 0;
+  let paidAmount = order.paidAmount || 0;
+
+  if (transaction.type === 'payment') {
+    paidAmount = roundMoney(paidAmount + transaction.amount);
+  } else {
+    discount = roundMoney(discount + transaction.amount);
+    total = Math.max(0, roundMoney(total - transaction.amount));
+  }
+
+  const paid = total > 0 && paidAmount >= total;
+
+  return {
+    transactions: [...(order.transactions || []), transaction],
+    total,
+    discount,
+    paidAmount,
+    paid,
+    payment: paid ? 'paid' : 'unpaid',
+    remainingBalance: calculateRemainingBalance({ total, paidAmount }),
+  };
+}
+
+/** Thrown by addPayment when the request is invalid for the order's state. */
+export class PaymentValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PaymentValidationError';
+  }
+}
+
+/**
+ * Add a payment or discount to an order (inside a Firestore transaction,
+ * so it never races with the Asaas webhook).
  */
 export async function addPayment(
   companyId: string,
@@ -568,50 +629,52 @@ export async function addPayment(
   remainingBalance: number;
   isFullyPaid: boolean;
 } | null> {
-  const collection = getTenantCollection(companyId, 'orders');
-  const order = await getDocument<Order>(collection, orderId);
+  const orderRef = getTenantCollection(companyId, 'orders').doc(orderId);
 
-  if (!order) return null;
+  return runTransaction(async (tx) => {
+    const snap = await tx.get(orderRef);
+    if (!snap.exists) return null;
 
-  const transaction: PaymentTransaction = {
-    id: uuidv4(),
-    type,
-    amount,
-    description,
-    createdAt: new Date().toISOString(),
-    createdBy,
-  };
+    const order = snap.data() as Order;
 
-  const transactions = [...(order.transactions || []), transaction];
+    if (type === 'discount') {
+      const remaining = calculateRemainingBalance(order);
+      if (roundMoney(amount - remaining) > 0.005) {
+        throw new PaymentValidationError(
+          'Discount cannot exceed the remaining balance'
+        );
+      }
+    }
 
-  let newPaidAmount = order.paidAmount;
-  let newDiscount = order.discount;
+    const transaction: PaymentTransaction = {
+      id: uuidv4(),
+      type,
+      amount,
+      createdAt: new Date().toISOString(),
+      createdBy,
+      ...(description !== undefined ? { description } : {}),
+    };
 
-  if (type === 'payment') {
-    newPaidAmount += amount;
-  } else if (type === 'discount') {
-    newDiscount += amount;
-  }
+    const result = applyPaymentTransaction(order, transaction);
 
-  const remainingBalance = order.total - newDiscount - newPaidAmount;
-  const isFullyPaid = remainingBalance <= 0;
+    tx.update(orderRef, {
+      transactions: result.transactions,
+      total: result.total,
+      discount: result.discount,
+      paidAmount: result.paidAmount,
+      paid: result.paid,
+      payment: result.payment,
+      updatedBy: createdBy,
+      updatedAt: new Date().toISOString(),
+    });
 
-  await updateDocument(collection, orderId, {
-    transactions,
-    paidAmount: newPaidAmount,
-    discount: newDiscount,
-    paid: isFullyPaid,
-    payment: isFullyPaid ? 'paid' : newPaidAmount > 0 ? 'partial' : 'unpaid',
-    updatedBy: createdBy,
-    updatedAt: new Date().toISOString(),
+    return {
+      transactionId: transaction.id,
+      paidAmount: result.paidAmount,
+      remainingBalance: result.remainingBalance,
+      isFullyPaid: result.paid,
+    };
   });
-
-  return {
-    transactionId: transaction.id,
-    paidAmount: newPaidAmount,
-    remainingBalance: Math.max(0, remainingBalance),
-    isFullyPaid,
-  };
 }
 
 // ============================================================================
@@ -633,10 +696,11 @@ export function toOrderAggr(order: Order): OrderAggr {
 }
 
 /**
- * Calculate remaining balance
+ * Calculate remaining balance. `total` is already net of discount,
+ * so the discount must NOT be subtracted again.
  */
-export function calculateRemainingBalance(order: Order): number {
-  return Math.max(0, order.total - order.discount - order.paidAmount);
+export function calculateRemainingBalance(order: Pick<Order, 'total' | 'paidAmount'>): number {
+  return Math.max(0, roundMoney((order.total || 0) - (order.paidAmount || 0)));
 }
 
 // ============================================================================

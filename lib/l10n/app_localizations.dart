@@ -700,6 +700,24 @@ abstract class AppLocalizations {
   /// **'Desconto aplicado'**
   String get discountApplied;
 
+  /// No description provided for @asaasTransactionCannotBeRemoved.
+  ///
+  /// In pt, this message translates to:
+  /// **'Pagamentos recebidos pelo Asaas não podem ser removidos aqui. Para desfazer, estorne a cobrança no Asaas.'**
+  String get asaasTransactionCannotBeRemoved;
+
+  /// No description provided for @paymentUpdateFailed.
+  ///
+  /// In pt, this message translates to:
+  /// **'Não foi possível salvar o pagamento. Verifique sua conexão e tente novamente.'**
+  String get paymentUpdateFailed;
+
+  /// No description provided for @paymentRequiresConnection.
+  ///
+  /// In pt, this message translates to:
+  /// **'Sem conexão. Tente de novo quando estiver online.'**
+  String get paymentRequiresConnection;
+
   /// No description provided for @register.
   ///
   /// In pt, this message translates to:

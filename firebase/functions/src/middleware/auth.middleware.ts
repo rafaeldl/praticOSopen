@@ -414,6 +414,7 @@ export function getRolePermissions(role: RoleType | string): string[] {
       'delete:all',
       'manage:company',
       'manage:members',
+      'manage:payments',
       'view:financial',
     ],
     admin: [
@@ -421,6 +422,7 @@ export function getRolePermissions(role: RoleType | string): string[] {
       'write:all',
       'delete:all',
       'manage:members',
+      'manage:payments',
       'view:financial',
     ],
     supervisor: [
@@ -434,6 +436,7 @@ export function getRolePermissions(role: RoleType | string): string[] {
       'write:orders',
       'write:customers',
       'write:devices',
+      'manage:payments',
       'view:financial',
     ],
     consultant: [

@@ -47,6 +47,9 @@ enum PermissionType {
   /// Editar valores e preços
   editPrices,
 
+  /// Gerar e cancelar cobranças (Asaas) a partir da OS
+  chargeOrder,
+
   // ═══════════════════════════════════════════════════════════════════
   // RELATÓRIOS
   // ═══════════════════════════════════════════════════════════════════
@@ -226,6 +229,7 @@ class RolePermissions {
     PermissionType.viewBilling,
     PermissionType.viewFinancialReports,
     PermissionType.editPrices,
+    PermissionType.chargeOrder,
     // Relatórios
     PermissionType.viewOperationalReports,
     PermissionType.viewDashboard,
@@ -263,6 +267,7 @@ class RolePermissions {
     PermissionType.viewBilling,
     PermissionType.viewFinancialReports,
     PermissionType.editPrices,
+    PermissionType.chargeOrder,
     // Relatórios
     PermissionType.viewOperationalReports,
     PermissionType.viewDashboard,
