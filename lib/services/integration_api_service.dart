@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:http/http.dart' as http;
 import 'package:praticos/models/integration_token.dart';
+import 'package:praticos/services/api_headers.dart';
 
 class IntegrationApiException implements Exception {
   final String message;
@@ -23,7 +23,7 @@ class IntegrationApiService {
 
   static final IntegrationApiService instance = IntegrationApiService._(
     http.Client(),
-    _defaultTokenProvider,
+    defaultIdTokenProvider,
   );
 
   /// Test seam: lets a test inject a mock client and a fake auth token.
@@ -32,12 +32,6 @@ class IntegrationApiService {
     required Future<String?> Function() tokenProvider,
   }) =>
       IntegrationApiService._(client, tokenProvider);
-
-  static Future<String?> _defaultTokenProvider() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return null;
-    return user.getIdToken();
-  }
 
   static String get _baseUrl {
     if (kDebugMode) {
@@ -68,14 +62,12 @@ class IntegrationApiService {
   }
 
   Future<Map<String, String>> _headers() async {
-    final token = await _tokenProvider();
-    if (token == null) {
-      throw IntegrationApiException('User not authenticated', code: 'UNAUTHENTICATED');
+    try {
+      return await appApiHeaders(tokenProvider: _tokenProvider);
+    } on AppApiUnauthenticatedException {
+      throw IntegrationApiException('User not authenticated',
+          code: 'UNAUTHENTICATED');
     }
-    return {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    };
   }
 
   void _ensureOk(http.Response response) {
