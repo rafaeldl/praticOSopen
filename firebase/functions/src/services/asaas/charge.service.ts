@@ -8,13 +8,14 @@ import { db } from '../firestore.service';
 import { calculateRemainingBalance } from '../order.service';
 import { Customer, Order, UserAggr } from '../../models/types';
 import {
+  AsaasConnectionDoc,
   AsaasCreatePaymentInput,
   ChargeStatus,
   CreateChargeInput,
   OrderCharge,
 } from '../../models/asaas.types';
 import { AsaasApiError, AsaasClient } from './asaas-client';
-import { getAsaasCredentialProvider } from './credential-provider';
+import { asaasConnectionRef, getAsaasCredentialProvider } from './credential-provider';
 import { AsaasServiceError } from './errors';
 import { getPaymentSettings } from './connection.service';
 import { isValidTaxId, normalizeTaxId } from '../../utils/tax-id.utils';
@@ -86,6 +87,16 @@ function isOpen(charge: Pick<OrderCharge, 'status'>): boolean {
   return OPEN_STATUSES.includes(charge.status);
 }
 
+/** An installment plan with any paid installment must not be canceled (mirrors the webhook rule). */
+function hasPaidInstallments(charge: Pick<OrderCharge, 'paidAsaasPaymentIds'>): boolean {
+  return (charge.paidAsaasPaymentIds?.length ?? 0) > 0;
+}
+
+/** Open and with nothing paid yet: safe to cancel on Asaas and mark canceled. */
+function isCancelable(charge: OrderCharge): boolean {
+  return isOpen(charge) && !hasPaidInstallments(charge);
+}
+
 async function cancelInAsaas(client: AsaasClient, charge: OrderCharge): Promise<void> {
   try {
     if (charge.asaasInstallmentId) {
@@ -121,7 +132,7 @@ async function cancelCharge(
     const snapshot = await tx.get(ref);
     if (!snapshot.exists) return { ...charge, status: 'canceled' as ChargeStatus };
     const current = { ...(snapshot.data() as OrderCharge), id: snapshot.id };
-    if (!isOpen(current)) return current;
+    if (!isCancelable(current)) return current;
     tx.update(ref, { status: 'canceled' });
     return { ...current, status: 'canceled' as ChargeStatus };
   });
@@ -157,6 +168,33 @@ async function resolveTaxId(
   return stored;
 }
 
+/** companies/{cid}/private/asaas/customers/{customerId} */
+interface AsaasCustomerMapEntry {
+  asaasCustomerId: string;
+  environment?: AsaasConnectionDoc['environment'];
+  walletId?: string;
+}
+
+type AccountIdentity = Pick<AsaasConnectionDoc, 'environment' | 'walletId'>;
+
+async function currentAccount(companyId: string): Promise<Partial<AccountIdentity>> {
+  const snapshot = await asaasConnectionRef(companyId).get();
+  const connection = snapshot.data() as AsaasConnectionDoc | undefined;
+  return { environment: connection?.environment, walletId: connection?.walletId };
+}
+
+/**
+ * A mapped Asaas customer belongs to the account it was created on. Entries
+ * from another environment/wallet (reconnect to a different account) or
+ * legacy entries without environment are not reused.
+ */
+function mapEntryMatches(entry: Partial<AsaasCustomerMapEntry> | undefined, account: Partial<AccountIdentity>): boolean {
+  if (!entry?.asaasCustomerId || !entry.environment || !account.environment) return false;
+  if (entry.environment !== account.environment) return false;
+  if (entry.walletId && account.walletId && entry.walletId !== account.walletId) return false;
+  return true;
+}
+
 async function findOrCreateAsaasCustomer(
   client: AsaasClient,
   companyId: string,
@@ -164,9 +202,9 @@ async function findOrCreateAsaasCustomer(
   taxId: string,
 ): Promise<string> {
   const mapRef = asaasCustomerMapRef(companyId, customer.id);
-  const mapped = await mapRef.get();
-  const mappedId = mapped.data()?.asaasCustomerId as string | undefined;
-  if (mappedId) return mappedId;
+  const [mapped, account] = await Promise.all([mapRef.get(), currentAccount(companyId)]);
+  const entry = mapped.data() as Partial<AsaasCustomerMapEntry> | undefined;
+  if (mapEntryMatches(entry, account)) return entry!.asaasCustomerId as string;
 
   const existing = await client.findCustomerByExternalReference(customer.id);
   let asaasCustomerId = existing?.id;
@@ -183,7 +221,10 @@ async function findOrCreateAsaasCustomer(
     asaasCustomerId = created.id;
   }
 
-  await mapRef.set({ asaasCustomerId });
+  const newEntry: AsaasCustomerMapEntry = { asaasCustomerId };
+  if (account.environment) newEntry.environment = account.environment;
+  if (account.walletId) newEntry.walletId = account.walletId;
+  await mapRef.set(newEntry);
   return asaasCustomerId;
 }
 
@@ -263,14 +304,23 @@ export async function createOrderCharge(
 
   const client = await getAsaasCredentialProvider().getClient(companyId);
 
-  // 4. One open charge per order: cancel the previous ones first.
   const openCharges = (await listCharges(companyId, orderId)).filter(isOpen);
+  if (openCharges.some(hasPaidInstallments)) {
+    // Remaining installments are still being collected: a new charge could bill twice.
+    throw new AsaasServiceError(
+      'CHARGE_NOT_OPEN',
+      'The order has an installment plan with paid installments; it cannot be replaced',
+    );
+  }
+
+  // 4. Asaas customer, before touching the open charge: a customer/tax id
+  // rejection by Asaas must not leave the order without its open charge.
+  const asaasCustomerId = await findOrCreateAsaasCustomer(client, companyId, customer, taxId);
+
+  // 5. One open charge per order: cancel the previous ones.
   for (const charge of openCharges) {
     await cancelCharge(client, companyId, orderId, charge);
   }
-
-  // 5. Asaas customer
-  const asaasCustomerId = await findOrCreateAsaasCustomer(client, companyId, customer, taxId);
 
   // 6. Asaas payment
   const companySnap = await companyRef(companyId).get();
@@ -338,14 +388,20 @@ export async function cancelOrderCharge(
   if (!isOpen(charge)) {
     throw new AsaasServiceError('CHARGE_NOT_OPEN', 'Only pending or overdue charges can be canceled');
   }
+  if (hasPaidInstallments(charge)) {
+    throw new AsaasServiceError('CHARGE_NOT_OPEN', 'An installment plan with paid installments cannot be canceled');
+  }
 
   const client = await getAsaasCredentialProvider().getClient(companyId);
   return cancelCharge(client, companyId, orderId, charge);
 }
 
-/** Cancels every pending/overdue charge of the order. Logs failures, never throws per charge. */
+/**
+ * Cancels every pending/overdue charge of the order, skipping installment
+ * plans with paid installments. Logs failures, never throws per charge.
+ */
 export async function cancelOpenChargesForOrder(companyId: string, orderId: string): Promise<void> {
-  const openCharges = (await listCharges(companyId, orderId)).filter(isOpen);
+  const openCharges = (await listCharges(companyId, orderId)).filter(isCancelable);
   if (openCharges.length === 0) return;
 
   const client = await getAsaasCredentialProvider().getClient(companyId);

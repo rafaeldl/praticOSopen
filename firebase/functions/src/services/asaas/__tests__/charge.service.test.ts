@@ -17,6 +17,8 @@ import {
 const USER = { id: 'u1', name: 'Ana' };
 const CPF = '52998224725';
 const ORDER_PATH = 'companies/c1/orders/o1';
+const MAP_PATH = 'companies/c1/private/asaas/customers/cust1';
+const MAP_SANDBOX = (asaasCustomerId: string) => ({ asaasCustomerId, environment: 'sandbox', walletId: 'w1' });
 
 const client = {
   findCustomerByExternalReference: jest.fn(),
@@ -29,6 +31,7 @@ const client = {
 function seedBase(options: { taxId?: string; order?: Record<string, unknown>; connected?: boolean } = {}) {
   seed('companies/c1', { name: 'Oficina da Ana' });
   seed('companies/c1/settings/payments', { asaasEnabled: true, asaasConnected: options.connected ?? true });
+  seed('companies/c1/private/asaas', { mode: 'apiKey', environment: 'sandbox', walletId: 'w1', status: 'active' });
   seed('companies/c1/customers/cust1', {
     name: 'João',
     email: 'joao@cliente.com',
@@ -105,7 +108,7 @@ describe('charge.service', () => {
         externalReference: 'cust1',
         notificationDisabled: true,
       });
-      expect(read('companies/c1/private/asaas/customers/cust1')).toEqual({ asaasCustomerId: 'cus_1' });
+      expect(read('companies/c1/private/asaas/customers/cust1')).toEqual(MAP_SANDBOX('cus_1'));
 
       const paymentInput = client.createPayment.mock.calls[0][0];
       expect(paymentInput).toEqual({
@@ -157,13 +160,85 @@ describe('charge.service', () => {
 
     it('reusa o cliente mapeado sem chamar o Asaas', async () => {
       seedBase({ taxId: CPF });
-      seed('companies/c1/private/asaas/customers/cust1', { asaasCustomerId: 'cus_mapped' });
+      seed('companies/c1/private/asaas/customers/cust1', MAP_SANDBOX('cus_mapped'));
 
       await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER);
 
       expect(client.findCustomerByExternalReference).not.toHaveBeenCalled();
       expect(client.createCustomer).not.toHaveBeenCalled();
       expect(client.createPayment.mock.calls[0][0].customer).toBe('cus_mapped');
+    });
+
+    it('mapa de outro ambiente é ignorado: cria cliente na conta atual e sobrescreve o mapa', async () => {
+      seedBase({ taxId: CPF });
+      seed(MAP_PATH, { asaasCustomerId: 'cus_prod', environment: 'production', walletId: 'w1' });
+
+      await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER);
+
+      expect(client.findCustomerByExternalReference).toHaveBeenCalledWith('cust1');
+      expect(client.createCustomer).toHaveBeenCalled();
+      expect(client.createPayment.mock.calls[0][0].customer).toBe('cus_1');
+      expect(read(MAP_PATH)).toEqual(MAP_SANDBOX('cus_1'));
+    });
+
+    it('mapa de outra carteira (walletId) no mesmo ambiente é ignorado', async () => {
+      seedBase({ taxId: CPF });
+      seed(MAP_PATH, { asaasCustomerId: 'cus_other', environment: 'sandbox', walletId: 'w_other' });
+
+      await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER);
+
+      expect(client.createPayment.mock.calls[0][0].customer).toBe('cus_1');
+      expect(read(MAP_PATH)).toEqual(MAP_SANDBOX('cus_1'));
+    });
+
+    it('mapa legado sem environment é tratado como divergente', async () => {
+      seedBase({ taxId: CPF });
+      seed(MAP_PATH, { asaasCustomerId: 'cus_legacy' });
+
+      await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER);
+
+      expect(client.createPayment.mock.calls[0][0].customer).toBe('cus_1');
+      expect(read(MAP_PATH)).toEqual(MAP_SANDBOX('cus_1'));
+    });
+
+    it('mapa sem walletId no mesmo ambiente é reusado', async () => {
+      seedBase({ taxId: CPF });
+      seed(MAP_PATH, { asaasCustomerId: 'cus_nowallet', environment: 'sandbox' });
+
+      await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER);
+
+      expect(client.findCustomerByExternalReference).not.toHaveBeenCalled();
+      expect(client.createPayment.mock.calls[0][0].customer).toBe('cus_nowallet');
+    });
+
+    it('Asaas recusa o cliente → cobrança aberta anterior continua pendente', async () => {
+      seedBase({ taxId: CPF });
+      seedCharge('old', { status: 'pending' });
+      client.createCustomer.mockRejectedValue(
+        new AsaasApiError(400, [{ code: 'invalid_cpfCnpj', description: 'CPF inválido' }], '/customers'),
+      );
+
+      const error = await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER).catch((e) => e);
+
+      expect(error).toBeInstanceOf(AsaasApiError);
+      expect(client.deletePayment).not.toHaveBeenCalled();
+      expect(read(`${ORDER_PATH}/charges/old`)!.status).toBe('pending');
+    });
+
+    it('parcelamento aberto com parcela paga bloqueia nova cobrança (sem cancelar nada)', async () => {
+      seedBase({ taxId: CPF });
+      seedCharge('inst', {
+        mode: 'cardInstallments',
+        asaasInstallmentId: 'ins_1',
+        paidAsaasPaymentIds: ['pay_inst_1'],
+      });
+
+      const error = await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER).catch((e) => e);
+
+      expect(error.code).toBe('CHARGE_NOT_OPEN');
+      expect(client.deleteInstallment).not.toHaveBeenCalled();
+      expect(client.createPayment).not.toHaveBeenCalled();
+      expect(read(`${ORDER_PATH}/charges/inst`)!.status).toBe('pending');
     });
 
     it('acha cliente existente no Asaas pelo externalReference', async () => {
@@ -174,7 +249,7 @@ describe('charge.service', () => {
 
       expect(client.findCustomerByExternalReference).toHaveBeenCalledWith('cust1');
       expect(client.createCustomer).not.toHaveBeenCalled();
-      expect(read('companies/c1/private/asaas/customers/cust1')).toEqual({ asaasCustomerId: 'cus_existing' });
+      expect(read('companies/c1/private/asaas/customers/cust1')).toEqual(MAP_SANDBOX('cus_existing'));
     });
 
     it('valor acima do saldo restante → INVALID_VALUE', async () => {
@@ -478,6 +553,30 @@ describe('charge.service', () => {
       expect(charge.status).toBe('paid');
     });
 
+    it('parcelamento com parcela paga → CHARGE_NOT_OPEN, sem chamar o Asaas', async () => {
+      seedBase({ taxId: CPF });
+      seedCharge('ch1', { mode: 'cardInstallments', asaasInstallmentId: 'ins_1', paidAsaasPaymentIds: ['pay_x'] });
+
+      const error = await cancelOrderCharge('c1', 'o1', 'ch1').catch((e) => e);
+
+      expect(error.code).toBe('CHARGE_NOT_OPEN');
+      expect(client.deleteInstallment).not.toHaveBeenCalled();
+      expect(read(`${ORDER_PATH}/charges/ch1`)!.status).toBe('pending');
+    });
+
+    it('não marca canceled se uma parcela foi paga durante o cancelamento', async () => {
+      seedBase({ taxId: CPF });
+      seedCharge('ch1', { mode: 'cardInstallments', asaasInstallmentId: 'ins_1' });
+      client.deleteInstallment.mockImplementation(async () => {
+        seed(`${ORDER_PATH}/charges/ch1`, { ...read(`${ORDER_PATH}/charges/ch1`), paidAsaasPaymentIds: ['pay_x'] });
+      });
+
+      const charge = await cancelOrderCharge('c1', 'o1', 'ch1');
+
+      expect(read(`${ORDER_PATH}/charges/ch1`)!.status).toBe('pending');
+      expect(charge.status).toBe('pending');
+    });
+
     it('cobrança paga → CHARGE_NOT_OPEN', async () => {
       seedBase({ taxId: CPF });
       seedCharge('ch1', { status: 'paid' });
@@ -502,6 +601,21 @@ describe('charge.service', () => {
       expect(read(`${ORDER_PATH}/charges/a`)!.status).toBe('pending');
       expect(read(`${ORDER_PATH}/charges/b`)!.status).toBe('canceled');
       expect(errorSpy).toHaveBeenCalled();
+      errorSpy.mockRestore();
+    });
+
+    it('pula parcelamento com parcela paga sem falhar', async () => {
+      seedBase({ taxId: CPF });
+      seedCharge('a', {});
+      seedCharge('inst', { mode: 'cardInstallments', asaasInstallmentId: 'ins_1', paidAsaasPaymentIds: ['pay_x'] });
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+
+      await cancelOpenChargesForOrder('c1', 'o1');
+
+      expect(read(`${ORDER_PATH}/charges/a`)!.status).toBe('canceled');
+      expect(read(`${ORDER_PATH}/charges/inst`)!.status).toBe('pending');
+      expect(client.deleteInstallment).not.toHaveBeenCalled();
+      expect(errorSpy).not.toHaveBeenCalled();
       errorSpy.mockRestore();
     });
 
