@@ -58,6 +58,11 @@ describeEmulator('firestore.rules', () => {
         name: 'Company c1',
         owner: { id: 'admin1', name: 'Admin' },
       });
+      await fs.setDoc(fs.doc(db, 'companies/c1/orders/o1'), {
+        number: 1,
+        status: 'quote',
+        createdBy: { id: 'admin1', name: 'Admin' },
+      });
       await fs.setDoc(fs.doc(db, 'companies/c1/memberships/admin1'), {
         user: { id: 'admin1', name: 'Admin' },
         role: 'admin',
@@ -124,24 +129,38 @@ describeEmulator('firestore.rules', () => {
       );
     });
 
-    it('does not allow creating the user document with company entries', async () => {
+    // Claims are issued by the server from verified memberships, so a company
+    // listed only in the user's own document is absent from `roles`.
+    it('a company entry written to the own profile does not give access to its orders', async () => {
+      const db = asUser('outsider');
+      await fs.updateDoc(fs.doc(db, 'users/outsider'), { companies: [entry('c1', 'admin')] });
+
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c1/orders/o1')));
+      await rut.assertFails(fs.getDocs(fs.collection(db, 'companies/c1/orders')));
       await rut.assertFails(
-        fs.setDoc(fs.doc(asUser('newbie'), 'users/newbie'), { id: 'newbie', companies: [entry('c1', 'admin')] }),
+        fs.setDoc(fs.doc(db, 'companies/c1/orders/o2'), { createdBy: { id: 'outsider' } }),
+      );
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c1')));
+    });
+
+    it('a role changed on the own profile does not give admin access', async () => {
+      // Claim keeps the server-verified role (technician)
+      const db = asUser('tech1', { c1: 'technician' });
+      await fs.updateDoc(fs.doc(db, 'users/tech1'), { companies: [entry('c1', 'admin')] });
+
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c1/orders/o1')));
+      await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/products/p1'), { name: 'P' }));
+      await rut.assertFails(
+        fs.setDoc(fs.doc(db, 'companies/c1/memberships/tech9'), { role: 'admin' }),
       );
     });
 
-    it('does not allow adding an existing company to the own profile', async () => {
-      await rut.assertFails(
-        fs.updateDoc(fs.doc(asUser('outsider'), 'users/outsider'), { companies: [entry('c1', 'admin')] }),
-      );
-    });
+    it('a user document created with company entries does not give access to them', async () => {
+      const db = asUser('newbie');
+      await fs.setDoc(fs.doc(db, 'users/newbie'), { id: 'newbie', companies: [entry('c1', 'admin')] });
 
-    it('does not allow changing the own role in a company', async () => {
-      await rut.assertFails(
-        fs.updateDoc(fs.doc(asUser('tech1', { c1: 'technician' }), 'users/tech1'), {
-          companies: [entry('c1', 'admin')],
-        }),
-      );
+      await rut.assertFails(fs.getDoc(fs.doc(db, 'companies/c1/orders/o1')));
+      await rut.assertFails(fs.getDocs(fs.collection(db, 'companies/c1/memberships')));
     });
 
     it('allows a profile update that keeps companies unchanged', async () => {
