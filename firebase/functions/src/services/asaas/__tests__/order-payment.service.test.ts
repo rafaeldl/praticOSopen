@@ -1,6 +1,6 @@
 jest.mock('../../firestore.service', () => jest.requireActual('../../../__tests__/helpers/fake-firestore').firestoreServiceMock);
 
-import { read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
+import { SERVER_TIMESTAMP, list, read, resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import {
   ASAAS_ACTOR,
   applyAsaasPayment,
@@ -8,6 +8,7 @@ import {
   buildAsaasTransaction,
   computePaymentFields,
   describeAsaasPayment,
+  revertAsaasPayment,
 } from '../order-payment.service';
 import type { AsaasPaymentEvent, OrderCharge } from '../../../models/asaas.types';
 
@@ -376,5 +377,207 @@ describe('order-payment.service - computePaymentFields', () => {
   it('OS com total zero nunca fica paga', () => {
     const fields = computePaymentFields({ total: 0, paidAmount: 0, transactions: [] }, []);
     expect(fields).toEqual({ transactions: [], paidAmount: 0, paid: false, payment: 'unpaid' });
+  });
+});
+
+describe('order-payment.service - revertAsaasPayment', () => {
+  const COMMENTS_PATH = `${ORDER_PATH}/comments`;
+
+  beforeEach(() => {
+    resetFakeDb();
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('remove a transação, recalcula, marca refunded e registra no histórico', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+
+    const result = await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    expect(result).toEqual({ reverted: true });
+    const order = read(ORDER_PATH)!;
+    expect(order.transactions).toEqual([]);
+    expect(order.paidAmount).toBe(0);
+    expect(order.paid).toBe(false);
+    expect(order.payment).toBe('unpaid');
+    expect(order.updatedAt).toEqual(expect.stringMatching(ISO));
+    expect(order.updatedBy).toEqual({ id: 'asaas', name: 'Asaas' });
+
+    const charge = read(CHARGE_PATH)!;
+    expect(charge.status).toBe('refunded');
+    expect(charge.paidAsaasPaymentIds).toEqual([]);
+    expect(charge.appliedTransactions).toEqual([]);
+    expect(charge.refundedAsaasPaymentIds).toEqual(['pay_1']);
+
+    const comments = list(COMMENTS_PATH);
+    expect(comments).toHaveLength(1);
+    const comment = comments[0].data;
+    expect(comment).toEqual({
+      text: expect.any(String),
+      authorType: 'internal',
+      author: { name: 'Asaas' },
+      source: 'asaas',
+      isInternal: true,
+      createdAt: SERVER_TIMESTAMP,
+    });
+    expect(comment.text).toContain('estornado');
+    expect(comment.text).toContain('1.000,00');
+    expect(comment.text).toContain('Asaas • Pix');
+  });
+
+  it('não faz nada quando o pagamento nunca foi lançado', async () => {
+    seedOrder();
+    seedCharge();
+    const orderBefore = read(ORDER_PATH);
+    const chargeBefore = read(CHARGE_PATH);
+
+    const result = await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    expect(result).toEqual({ reverted: false });
+    expect(read(ORDER_PATH)).toEqual(orderBefore);
+    expect(read(CHARGE_PATH)).toEqual(chargeBefore);
+    expect(list(COMMENTS_PATH)).toHaveLength(0);
+  });
+
+  it('é idempotente: estornar de novo o mesmo pagamento não grava nada', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+    const orderBefore = read(ORDER_PATH);
+    const chargeBefore = read(CHARGE_PATH);
+
+    const result = await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    expect(result).toEqual({ reverted: false });
+    expect(read(ORDER_PATH)).toEqual(orderBefore);
+    expect(read(CHARGE_PATH)).toEqual(chargeBefore);
+    expect(list(COMMENTS_PATH)).toHaveLength(1);
+  });
+
+  it('reentrega do CONFIRMED depois do estorno não lança de novo', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ status: 'CONFIRMED' }));
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    const result = await applyAsaasPayment('c1', 'o1', 'ch1', payment({ status: 'CONFIRMED' }));
+
+    expect(result).toEqual({ applied: false });
+    const order = read(ORDER_PATH)!;
+    expect(order.transactions).toEqual([]);
+    expect(order.paidAmount).toBe(0);
+    const charge = read(CHARGE_PATH)!;
+    expect(charge.status).toBe('refunded');
+    expect(charge.paidAsaasPaymentIds).toEqual([]);
+  });
+
+  it('parcelado: estorna só a parcela indicada e mantém as outras', async () => {
+    seedOrder({ total: 600 });
+    seedCharge({ mode: 'cardInstallments', installmentCount: 2, value: 600, asaasInstallmentId: 'ins_1' });
+    for (const n of [1, 2]) {
+      await applyAsaasPayment('c1', 'o1', 'ch1', payment({
+        id: `pay_${n}`, value: 300, billingType: 'CREDIT_CARD', installment: 'ins_1', installmentNumber: n,
+      }));
+    }
+
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    const order = read(ORDER_PATH)!;
+    expect((order.transactions as any[]).map((t) => t.id)).toEqual(['asaas_pay_2']);
+    expect(order.paidAmount).toBe(300);
+    expect(order.payment).toBe('unpaid');
+    const charge = read(CHARGE_PATH)!;
+    expect(charge.status).toBe('refunded');
+    expect(charge.paidAsaasPaymentIds).toEqual(['pay_2']);
+    expect((charge.appliedTransactions as any[]).map((t) => t.id)).toEqual(['asaas_pay_2']);
+    expect(charge.refundedAsaasPaymentIds).toEqual(['pay_1']);
+    expect(list(COMMENTS_PATH)[0].data.text).toContain('Asaas • Cartão 1/2');
+  });
+
+  it('acrescenta ao refundedAsaasPaymentIds existente', async () => {
+    seedOrder({ total: 600 });
+    seedCharge({ mode: 'cardInstallments', installmentCount: 2, value: 600 });
+    for (const n of [1, 2]) {
+      await applyAsaasPayment('c1', 'o1', 'ch1', payment({ id: `pay_${n}`, value: 300, billingType: 'CREDIT_CARD' }));
+    }
+
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_2');
+
+    expect(read(CHARGE_PATH)!.refundedAsaasPaymentIds).toEqual(['pay_1', 'pay_2']);
+    expect(read(ORDER_PATH)!.paidAmount).toBe(0);
+    expect(list(COMMENTS_PATH)).toHaveLength(2);
+  });
+
+  it('transação apagada da OS por app antigo: ajusta a cobrança e usa a cópia para o histórico', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    seed(ORDER_PATH, { ...read(ORDER_PATH)!, transactions: [], paidAmount: 0, paid: false, payment: 'unpaid' });
+    const orderBefore = read(ORDER_PATH);
+
+    const result = await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    expect(result).toEqual({ reverted: true });
+    expect(read(ORDER_PATH)).toEqual(orderBefore);
+    const charge = read(CHARGE_PATH)!;
+    expect(charge.status).toBe('refunded');
+    expect(charge.paidAsaasPaymentIds).toEqual([]);
+    expect(charge.refundedAsaasPaymentIds).toEqual(['pay_1']);
+    expect(list(COMMENTS_PATH)[0].data.text).toContain('1.000,00');
+  });
+
+  it('preserva pagamento manual e paidAmount legado ao estornar', async () => {
+    seedOrder({
+      total: 1000,
+      paidAmount: 300,
+      transactions: [{
+        id: 'manual1', type: 'payment', amount: 200, description: 'Dinheiro',
+        createdAt: '2026-10-01T10:00:00.000Z', createdBy: { id: 'u1', name: 'Ana' },
+      }],
+    });
+    seedCharge({ value: 700 });
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ value: 700 }));
+    expect(read(ORDER_PATH)!.payment).toBe('paid');
+
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    const order = read(ORDER_PATH)!;
+    expect((order.transactions as any[]).map((t) => t.id)).toEqual(['manual1']);
+    expect(order.paidAmount).toBe(300);
+    expect(order.payment).toBe('unpaid');
+  });
+
+  it('não grava undefined nos documentos', async () => {
+    seedOrder();
+    seedCharge({ appliedTransactions: undefined });
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment({ description: undefined }));
+    const writes: unknown[] = [];
+    const fake = jest.requireMock('../../firestore.service').db;
+    const original = fake.write.bind(fake);
+    const spy = jest.spyOn(fake, 'write').mockImplementation((...args: unknown[]) => {
+      writes.push(args[1]);
+      return original(...(args as [string, Record<string, unknown>, 'set' | 'merge' | 'update']));
+    });
+
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+    spy.mockRestore();
+
+    expect(writes).toHaveLength(3);
+    expect(writes.some(hasUndefined)).toBe(false);
+  });
+
+  it('retorna reverted=false quando a OS ou a cobrança não existe', async () => {
+    seedCharge({ paidAsaasPaymentIds: ['pay_1'] });
+    await expect(revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1')).resolves.toEqual({ reverted: false });
+    expect(read(CHARGE_PATH)!.status).toBe('pending');
+
+    resetFakeDb();
+    seedOrder();
+    await expect(revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1')).resolves.toEqual({ reverted: false });
+    expect(list(COMMENTS_PATH)).toHaveLength(0);
   });
 });

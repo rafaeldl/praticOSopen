@@ -12,7 +12,7 @@
  * Payment status follows the app convention: `paid` | `unpaid` ("partial" is
  * computed in memory by the app). Remaining balance = total - paidAmount.
  */
-import { db } from '../firestore.service';
+import { db, FieldValue } from '../firestore.service';
 import { applyPaymentTransaction, roundMoney } from '../order.service';
 import type { Order, PaymentTransaction, UserAggr } from '../../models/types';
 import type { AsaasPaymentEvent, OrderCharge } from '../../models/asaas.types';
@@ -183,5 +183,76 @@ export async function applyAsaasPayment(
     tx.update(cRef, chargeUpdate);
 
     return { applied: !alreadyOnOrder };
+  });
+}
+
+const brlFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+/**
+ * Reverts a refunded Asaas payment inside a transaction: removes
+ * `asaas_<id>` from the order, recomputes the payment fields, moves the id
+ * from `paidAsaasPaymentIds` to `refundedAsaasPaymentIds` (so a redelivered
+ * CONFIRMED/RECEIVED is never booked again), marks the charge `refunded` and
+ * adds an internal audit comment to the order history (same pattern as the
+ * magic-link approve/reject/rating comments).
+ *
+ * Returns { reverted: false } without writing when the order/charge no longer
+ * exists, the payment was never booked, or it was already reverted.
+ */
+export async function revertAsaasPayment(
+  companyId: string,
+  orderId: string,
+  chargeId: string,
+  asaasPaymentId: string,
+): Promise<{ reverted: boolean }> {
+  const oRef = orderRef(companyId, orderId);
+  const cRef = chargeRef(companyId, orderId, chargeId);
+  const transactionId = asaasTransactionId(asaasPaymentId);
+
+  return db.runTransaction(async (tx) => {
+    const orderSnap = await tx.get(oRef);
+    const chargeSnap = await tx.get(cRef);
+    if (!orderSnap.exists || !chargeSnap.exists) {
+      console.warn('[AsaasPayment] order or charge not found on refund', { companyId, orderId, chargeId });
+      return { reverted: false };
+    }
+
+    const order = orderSnap.data() as OrderPaymentState;
+    const charge = chargeSnap.data() as OrderCharge;
+    const refundedIds = charge.refundedAsaasPaymentIds ?? [];
+    if (refundedIds.includes(asaasPaymentId)) return { reverted: false };
+
+    const current = order.transactions ?? [];
+    const paidIds = charge.paidAsaasPaymentIds ?? [];
+    const applied = charge.appliedTransactions ?? [];
+    const onOrder = current.find((t) => t.id === transactionId);
+    if (!onOrder && !paidIds.includes(asaasPaymentId)) return { reverted: false };
+
+    const now = new Date();
+    if (onOrder) {
+      const fields = computePaymentFields(order, current.filter((t) => t.id !== transactionId));
+      tx.update(oRef, { ...fields, updatedAt: now.toISOString(), updatedBy: { ...ASAAS_ACTOR } });
+    }
+    tx.update(cRef, {
+      status: 'refunded',
+      paidAsaasPaymentIds: paidIds.filter((id) => id !== asaasPaymentId),
+      appliedTransactions: applied.filter((t) => t.id !== transactionId),
+      refundedAsaasPaymentIds: [...refundedIds, asaasPaymentId],
+    });
+
+    const removed = onOrder ?? applied.find((t) => t.id === transactionId);
+    const detail = removed
+      ? `: ${brlFormatter.format(Number(removed.amount) || 0)} (${removed.description ?? 'Asaas'})`
+      : '';
+    tx.set(oRef.collection('comments').doc(), {
+      text: `Pagamento estornado no Asaas${detail}. O saldo da OS foi recalculado.`,
+      authorType: 'internal',
+      author: { name: 'Asaas' },
+      source: 'asaas',
+      isInternal: true,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    return { reverted: true };
   });
 }
