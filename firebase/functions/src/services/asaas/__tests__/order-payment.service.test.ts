@@ -427,18 +427,38 @@ describe('order-payment.service - revertAsaasPayment', () => {
     expect(comment.text).toContain('Asaas • Pix');
   });
 
-  it('não faz nada quando o pagamento nunca foi lançado', async () => {
+  it('pagamento nunca lançado: só registra o id em refundedAsaasPaymentIds', async () => {
     seedOrder();
     seedCharge();
     const orderBefore = read(ORDER_PATH);
-    const chargeBefore = read(CHARGE_PATH);
+    const chargeBefore = read(CHARGE_PATH)!;
 
     const result = await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
 
     expect(result).toEqual({ reverted: false });
     expect(read(ORDER_PATH)).toEqual(orderBefore);
-    expect(read(CHARGE_PATH)).toEqual(chargeBefore);
+    expect(read(CHARGE_PATH)).toEqual({ ...chargeBefore, refundedAsaasPaymentIds: ['pay_1'] });
     expect(list(COMMENTS_PATH)).toHaveLength(0);
+
+    const again = await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+    expect(again).toEqual({ reverted: false });
+    expect(read(CHARGE_PATH)!.refundedAsaasPaymentIds).toEqual(['pay_1']);
+  });
+
+  it('estorno antes do CONFIRMED: o CONFIRMED atrasado não é lançado', async () => {
+    seedOrder();
+    seedCharge();
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+
+    const result = await applyAsaasPayment('c1', 'o1', 'ch1', payment({ status: 'CONFIRMED' }));
+
+    expect(result).toEqual({ applied: false });
+    const order = read(ORDER_PATH)!;
+    expect(order.transactions).toEqual([]);
+    expect(order.paidAmount).toBe(0);
+    const charge = read(CHARGE_PATH)!;
+    expect(charge.status).toBe('pending');
+    expect(charge.paidAsaasPaymentIds).toEqual([]);
   });
 
   it('é idempotente: estornar de novo o mesmo pagamento não grava nada', async () => {

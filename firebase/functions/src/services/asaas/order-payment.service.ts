@@ -197,7 +197,9 @@ const brlFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currenc
  * magic-link approve/reject/rating comments).
  *
  * Returns { reverted: false } without writing when the order/charge no longer
- * exists, the payment was never booked, or it was already reverted.
+ * exists or the payment was already reverted. A refund for a payment never
+ * booked returns { reverted: false } but still records the id in
+ * `refundedAsaasPaymentIds` (no status change, no order write, no comment).
  */
 export async function revertAsaasPayment(
   companyId: string,
@@ -226,7 +228,12 @@ export async function revertAsaasPayment(
     const paidIds = charge.paidAsaasPaymentIds ?? [];
     const applied = charge.appliedTransactions ?? [];
     const onOrder = current.find((t) => t.id === transactionId);
-    if (!onOrder && !paidIds.includes(asaasPaymentId)) return { reverted: false };
+    if (!onOrder && !paidIds.includes(asaasPaymentId)) {
+      // Refund for a payment never booked here: remember it so a late
+      // CONFIRMED/RECEIVED for the same id is never booked.
+      tx.update(cRef, { refundedAsaasPaymentIds: [...refundedIds, asaasPaymentId] });
+      return { reverted: false };
+    }
 
     const now = new Date();
     if (onOrder) {
