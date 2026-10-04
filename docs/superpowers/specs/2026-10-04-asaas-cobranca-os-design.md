@@ -1,7 +1,7 @@
 # Cobrança da OS via Asaas
 
 **Data:** 2026-10-04
-**Status:** Em revisão (aguardando aprovação do Rafael)
+**Status:** Aprovado para planejamento (2026-10-04)
 **Issue:** #303
 **Contexto:** [`business/PARCERIAS.md`](../../../business/PARCERIAS.md), [`docs/ASAAS_INTEGRATION.md`](../../ASAAS_INTEGRATION.md)
 
