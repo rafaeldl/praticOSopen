@@ -102,8 +102,10 @@ export function computePaymentFields(
 ): OrderPaymentFields {
   const untracked = Math.max(0, roundMoney((previous.paidAmount ?? 0) - sumPayments(previous.transactions ?? [])));
   const paidAmount = roundMoney(sumPayments(nextTransactions) + untracked);
+  // Same rule as the app (OrderPaymentMath.paymentStatusFor): both sides
+  // rounded, so float drift from FieldValue.increment on total is ignored.
   const total = Number(previous.total ?? 0);
-  const paid = total > 0 && paidAmount >= total;
+  const paid = total > 0 && paidAmount >= roundMoney(total);
   return { transactions: nextTransactions, paidAmount, paid, payment: paid ? 'paid' : 'unpaid' };
 }
 
@@ -271,7 +273,9 @@ export async function revertAsaasPayment(
  *    (an old app version saved a stale copy of the whole order). Charges are
  *    the source of truth: `paidAsaasPaymentIds` + the copy in
  *    `appliedTransactions`. Ids in `refundedAsaasPaymentIds` are never re-added.
- * 2. Otherwise recomputes `paidAmount`/`paid`/`payment` from the transactions
+ *    Any `asaas_<id>` on the order whose id is in a charge's
+ *    `refundedAsaasPaymentIds` (brought back by a stale copy) is removed.
+ * 2. Otherwise (and only when the order has `paidAmount`) recomputes `paidAmount`/`paid`/`payment` from the transactions
  *    and the order total (`computePaymentFields`) and fixes them when they
  *    disagree (the app increments `paidAmount` atomically but writes the status
  *    computed from its local state, which can miss a concurrent Asaas payment).
@@ -292,12 +296,19 @@ export async function repairAsaasTransactions(
     const chargesSnap = await tx.get(chargesRef);
 
     const order = orderSnap.data() as OrderPaymentState & { paid?: unknown; payment?: unknown };
-    const current = order.transactions ?? [];
+    const charges = chargesSnap.docs.map((doc) => ({ id: doc.id, charge: doc.data() as OrderCharge }));
+
+    // A stale copy saved by an old app can bring back a refunded payment.
+    const refundedTransactionIds = new Set(
+      charges.flatMap(({ charge }) => (charge.refundedAsaasPaymentIds ?? []).map(asaasTransactionId)),
+    );
+    const original = order.transactions ?? [];
+    const current = original.filter((t) => !refundedTransactionIds.has(t.id));
+    const removed = original.length - current.length;
     const present = new Set(current.map((t) => t.id));
     const missing: PaymentTransaction[] = [];
 
-    for (const doc of chargesSnap.docs) {
-      const charge = doc.data() as OrderCharge;
+    for (const { id: chargeId, charge } of charges) {
       const refunded = new Set(charge.refundedAsaasPaymentIds ?? []);
       const applied = charge.appliedTransactions ?? [];
       for (const paymentId of charge.paidAsaasPaymentIds ?? []) {
@@ -306,7 +317,7 @@ export async function repairAsaasTransactions(
         const copy = applied.find((t) => t.id === transactionId);
         if (!copy) {
           console.warn('[AsaasPayment] booked payment without applied copy; cannot repair', {
-            companyId, orderId, chargeId: doc.id, asaasPaymentId: paymentId,
+            companyId, orderId, chargeId, asaasPaymentId: paymentId,
           });
           continue;
         }
@@ -315,12 +326,19 @@ export async function repairAsaasTransactions(
       }
     }
 
-    if (missing.length > 0) {
+    const repaired = missing.length + removed;
+    if (repaired > 0) {
       const fields = computePaymentFields(order, [...current, ...missing]);
       tx.update(oRef, { ...fields, updatedAt: new Date().toISOString(), updatedBy: { ...ASAAS_ACTOR } });
-      console.log('[AsaasPayment] repaired order transactions', { companyId, orderId, repaired: missing.length });
-      return { repaired: missing.length };
+      console.log('[AsaasPayment] repaired order transactions', {
+        companyId, orderId, restored: missing.length, removedRefunded: removed,
+      });
+      return { repaired };
     }
+
+    // Legacy orders (payment set, no paidAmount; the app falls back to total)
+    // are never downgraded by the status-only fix.
+    if (order.paidAmount === undefined || order.paidAmount === null) return { repaired: 0 };
 
     const fields = computePaymentFields(order, current);
     const storedPaidAmount = roundMoney(Number(order.paidAmount) || 0);

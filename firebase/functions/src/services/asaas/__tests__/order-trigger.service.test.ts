@@ -114,4 +114,18 @@ describe('order-trigger.service - handleOrderUpdatedAsaas', () => {
 
     expect(read(ORDER_PATH)!.transactions).toEqual(applied);
   });
+
+  it('correção só de status não mexe em transactions', async () => {
+    seed(SETTINGS_PATH, { asaasEnabled: true, asaasConnected: true });
+    const applied = await seedPaidOrderThenOverwrite();
+    // App kept the transaction list but saved stale totals.
+    seed(ORDER_PATH, { ...read(ORDER_PATH)!, transactions: applied });
+
+    await handleOrderUpdatedAsaas('c1', 'o1', { transactions: [] }, { transactions: applied });
+
+    const order = read(ORDER_PATH)!;
+    expect(order.transactions).toEqual(applied);
+    expect(order.paidAmount).toBe(1000);
+    expect(order.payment).toBe('paid');
+  });
 });

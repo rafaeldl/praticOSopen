@@ -376,6 +376,16 @@ describe('order-payment.service - computePaymentFields', () => {
     expect(fields.paidAmount).toBe(0);
   });
 
+  it('arredonda total e pago antes de comparar (drift de desconto via increment), como o app', () => {
+    const tx = { id: 'm1', type: 'payment' as const, amount: 10.2, createdAt: '2026-10-04T00:00:00.000Z', createdBy: ASAAS_ACTOR };
+    // total 10.3 - discount 0.1 via FieldValue.increment
+    const total = 10.3 - 0.1;
+    expect(total).not.toBe(10.2);
+    const fields = computePaymentFields({ total, paidAmount: 10.2, transactions: [tx] }, [tx]);
+    expect(fields.paid).toBe(true);
+    expect(fields.payment).toBe('paid');
+  });
+
   it('OS com total zero nunca fica paga', () => {
     const fields = computePaymentFields({ total: 0, paidAmount: 0, transactions: [] }, []);
     expect(fields).toEqual({ transactions: [], paidAmount: 0, paid: false, payment: 'unpaid' });
@@ -820,6 +830,41 @@ describe('order-payment.service - repairAsaasTransactions', () => {
 
     expect(writes).toHaveLength(1);
     expect(writes.some(hasUndefined)).toBe(false);
+  });
+
+  it('OS legada sem paidAmount (payment=paid): não rebaixa o status', async () => {
+    seed(ORDER_PATH, { number: 42, total: 1000, paid: true, payment: 'paid', transactions: [] });
+    const writeSpy = jest.spyOn(jest.requireMock('../../firestore.service').db, 'write');
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+
+    expect(writeSpy).not.toHaveBeenCalled();
+    expect(read(ORDER_PATH)!.payment).toBe('paid');
+    expect(read(ORDER_PATH)!.paid).toBe(true);
+    expect(read(ORDER_PATH)!.paidAmount).toBeUndefined();
+  });
+
+  it('cópia antiga reintroduz transação estornada: remove e recalcula', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    const stale = read(ORDER_PATH)!;
+    await revertAsaasPayment('c1', 'o1', 'ch1', 'pay_1');
+    // Old app saves its stale copy, which still has asaas_pay_1.
+    seed(ORDER_PATH, { ...stale, updatedBy: { id: 'u1', name: 'Ana' } });
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 1 });
+
+    const order = read(ORDER_PATH)!;
+    expect(order.transactions).toEqual([]);
+    expect(order.paidAmount).toBe(0);
+    expect(order.paid).toBe(false);
+    expect(order.payment).toBe('unpaid');
+    expect(order.updatedBy).toEqual(ASAAS_ACTOR);
+
+    const writeSpy = jest.spyOn(jest.requireMock('../../firestore.service').db, 'write');
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+    expect(writeSpy).not.toHaveBeenCalled();
   });
 
   it('OS inexistente: não faz nada', async () => {
