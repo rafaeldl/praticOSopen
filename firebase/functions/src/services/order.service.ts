@@ -591,7 +591,9 @@ export function applyPaymentTransaction(
     total = Math.max(0, roundMoney(total - transaction.amount));
   }
 
-  const paid = total > 0 && paidAmount >= total;
+  // Same rule as the app (OrderPaymentMath.paymentStatusFor): compare rounded
+  // values, so float drift from FieldValue.increment on total is ignored.
+  const paid = total > 0 && paidAmount >= roundMoney(total);
 
   return {
     transactions: [...(order.transactions || []), transaction],

@@ -81,6 +81,14 @@ describe('applyPaymentTransaction', () => {
     });
   });
 
+  it('arredonda o total antes de comparar (drift de desconto via increment), como o app', () => {
+    const total = 10.3 - 0.1; // 10.200000000000001
+    expect(total).not.toBe(10.2);
+    const result = applyPaymentTransaction({ total, discount: 0.1, paidAmount: 0 }, txn('payment', 10.2));
+    expect(result.paid).toBe(true);
+    expect(result.payment).toBe('paid');
+  });
+
   it('marca como pago quando paidAmount alcança o total líquido', () => {
     const result = applyPaymentTransaction(
       { total: 90, discount: 10, paidAmount: 50 },
