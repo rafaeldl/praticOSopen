@@ -23,8 +23,24 @@ describe('toHttpError', () => {
 
   it('mapeia 401 do Asaas para chave recusada', () => {
     const result = toHttpError(new AsaasApiError(401, [], '/payments'), 'x');
-    expect(result.status).toBe(409);
+    expect(result.status).toBe(400);
     expect(result.body.error.code).toBe('ASAAS_INVALID_API_KEY');
+    expect(toHttpError(new AsaasApiError(403, [], '/payments'), 'x').status).toBe(400);
+    expect(toHttpError(new AsaasServiceError('ASAAS_INVALID_API_KEY', 'm'), 'x').status).toBe(400);
+  });
+
+  it.each([
+    ['TimeoutError', new DOMException('timed out', 'TimeoutError')],
+    ['AbortError', new DOMException('aborted', 'AbortError')],
+    ['fetch TypeError', new TypeError('fetch failed')],
+  ])('mapeia falha de rede (%s) para 502 ASAAS_UNAVAILABLE', (_n, error) => {
+    const result = toHttpError(error, 'x');
+    expect(result.status).toBe(502);
+    expect(result.body.error.code).toBe('ASAAS_UNAVAILABLE');
+  });
+
+  it('TypeError sem relação com fetch continua 500', () => {
+    expect(toHttpError(new TypeError('x is not a function'), 'x').status).toBe(500);
   });
 
   it('mapeia 5xx do Asaas para 502', () => {

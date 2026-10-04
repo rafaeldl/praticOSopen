@@ -57,6 +57,14 @@ export interface HttpErrorBody {
   body: { success: false; error: { code: string; message: string } };
 }
 
+/** Raw fetch failures: timeout/abort (AbortSignal.timeout) and network errors ("fetch failed"). */
+function isNetworkFailure(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const { name, message, cause } = error as { name?: string; message?: string; cause?: unknown };
+  if (name === 'TimeoutError' || name === 'AbortError') return true;
+  return error instanceof TypeError && (/fetch failed/i.test(message ?? '') || cause !== undefined);
+}
+
 /**
  * Converts any error thrown by the Asaas services into the API error format.
  * Never includes the API key, tokens or request payloads.
@@ -76,9 +84,9 @@ export function toHttpError(error: unknown, fallbackMessage: string): HttpErrorB
         body: { success: false, error: { code: 'ASAAS_VALIDATION_ERROR', message } },
       };
     }
-    if (error.status === 401) {
+    if (error.status === 401 || error.status === 403) {
       return {
-        status: 409,
+        status: HTTP_STATUS.ASAAS_INVALID_API_KEY,
         body: {
           success: false,
           error: { code: 'ASAAS_INVALID_API_KEY', message: 'Asaas API key was rejected' },
@@ -87,6 +95,12 @@ export function toHttpError(error: unknown, fallbackMessage: string): HttpErrorB
     }
     return {
       status: 502,
+      body: { success: false, error: { code: 'ASAAS_UNAVAILABLE', message: 'Asaas is unavailable' } },
+    };
+  }
+  if (isNetworkFailure(error)) {
+    return {
+      status: HTTP_STATUS.ASAAS_UNAVAILABLE,
       body: { success: false, error: { code: 'ASAAS_UNAVAILABLE', message: 'Asaas is unavailable' } },
     };
   }
