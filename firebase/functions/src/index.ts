@@ -257,6 +257,7 @@ export const blockSuspiciousSignups = beforeUserCreated(
 import { apiKeyAuth, botAuth, bearerAuth } from './middleware/auth.middleware';
 import { resolveCompanyContext } from './middleware/company.middleware';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
+import { globalErrorHandler } from './middleware/error-handler.middleware';
 import { createPublicOrdersLimiters } from './utils/public-rate-limit.utils';
 
 // Routes - API Core v1
@@ -506,40 +507,8 @@ app.use((_req: Request, res: Response) => {
   });
 });
 
-// Global error handler
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('Unhandled error:', err);
-
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: err.message,
-      },
-    });
-  }
-
-  if (err.name === 'UnauthorizedError') {
-    return res.status(401).json({
-      success: false,
-      error: {
-        code: 'UNAUTHORIZED',
-        message: 'Invalid or missing authentication',
-      },
-    });
-  }
-
-  return res.status(500).json({
-    success: false,
-    error: {
-      code: 'INTERNAL_ERROR',
-      message: process.env.NODE_ENV === 'development'
-        ? err.message
-        : 'An unexpected error occurred',
-    },
-  });
-});
+// Global error handler (never logs the raw body of body-parser errors)
+app.use(globalErrorHandler);
 
 // Export HTTP API function
 export const api = onRequest(

@@ -33,6 +33,7 @@ function companyIdParam(req: Request): string {
   return typeof value === 'string' && COMPANY_ID_PATTERN.test(value) ? value : '';
 }
 
+/** 300 req/min per companyId + client IP. */
 export const asaasWebhookLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 300,
@@ -42,7 +43,10 @@ export const asaasWebhookLimiter = rateLimit({
     success: false,
     error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests, please try again later' },
   },
-  keyGenerator: (req: Request) => `asaas-webhook:${companyIdParam(req) || 'invalid'}`,
+  // Per company AND client IP: a flood with wrong tokens from one IP must not
+  // exhaust the budget of Asaas' own deliveries for that company. req.ip is the
+  // real client (trust-proxy.utils.ts); /webhooks/** has no Hosting rewrite.
+  keyGenerator: (req: Request) => `asaas-webhook:${companyIdParam(req) || 'invalid'}:${req.ip || 'unknown'}`,
 });
 
 function unauthorized(res: Response): Response {

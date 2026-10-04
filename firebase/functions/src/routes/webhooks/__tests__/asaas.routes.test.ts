@@ -7,6 +7,7 @@ import express from 'express';
 import { resetFakeDb, seed } from '../../../__tests__/helpers/fake-firestore';
 import { hashToken } from '../../../services/asaas/crypto';
 import { handleAsaasEvent } from '../../../services/asaas/webhook.service';
+import { configureTrustProxy } from '../../../utils/trust-proxy.utils';
 import router from '../asaas.routes';
 
 const mockHandle = handleAsaasEvent as jest.Mock;
@@ -19,6 +20,7 @@ const BODY = {
 
 function buildApp() {
   const app = express();
+  configureTrustProxy(app);
   app.use(express.json());
   app.use('/webhooks/asaas', router);
   return app;
@@ -126,20 +128,23 @@ describe('POST /webhooks/asaas/:companyId', () => {
     expect(res.status).toBe(500);
   });
 
-  it('limita 300 req/min por companyId', async () => {
+  it('limita 300 req/min por companyId + IP', async () => {
     const app = buildApp();
     seed('companies/c5/private/asaas', { webhookTokenHash: hashToken(TOKEN), status: 'active' });
-    const send = (companyId: string) => request(app)
+    const send = (companyId: string, ip: string) => request(app)
       .post(`/webhooks/asaas/${companyId}`)
+      .set('X-Forwarded-For', ip)
       .set('asaas-access-token', TOKEN)
       .send(BODY);
 
     for (let i = 0; i < 300; i++) {
-      const res = await send('c5');
+      const res = await send('c5', '203.0.113.10');
       expect(res.status).toBe(200);
     }
-    expect((await send('c5')).status).toBe(429);
-    // Other companies keep their own budget.
-    expect((await send('c1')).status).toBe(200);
+    expect((await send('c5', '203.0.113.10')).status).toBe(429);
+    // Flooding from one IP does not block Asaas (another IP) for the same company.
+    expect((await send('c5', '198.51.100.20')).status).toBe(200);
+    // Nor the same IP for another company.
+    expect((await send('c1', '203.0.113.10')).status).toBe(200);
   });
 });
