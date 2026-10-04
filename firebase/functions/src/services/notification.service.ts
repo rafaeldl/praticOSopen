@@ -200,6 +200,71 @@ async function sendNotification(
   }
 }
 
+// Roles that receive Asaas payment notifications (financial roles only)
+const PAYMENT_NOTIFICATION_ROLES: RoleType[] = ['owner', 'admin', 'manager'];
+
+const brlFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+/**
+ * Owner + users with a financial role. Unlike getNotificationRecipients, the
+ * assigned technician and the order creator are not included.
+ */
+async function getPaymentNotificationRecipients(companyId: string): Promise<NotificationRecipient[]> {
+  const recipients: NotificationRecipient[] = [];
+  const added = new Set<string>();
+  const companyDoc = await db.collection('companies').doc(companyId).get();
+  if (!companyDoc.exists) return recipients;
+  const company = companyDoc.data() as Company;
+
+  if (company.owner?.id) {
+    recipients.push({ userId: company.owner.id, name: company.owner.name });
+    added.add(company.owner.id);
+  }
+  for (const userRole of company.users ?? []) {
+    if (userRole.user?.id && PAYMENT_NOTIFICATION_ROLES.includes(userRole.role) && !added.has(userRole.user.id)) {
+      recipients.push({ userId: userRole.user.id, name: userRole.user.name });
+      added.add(userRole.user.id);
+    }
+  }
+  return recipients;
+}
+
+/**
+ * Notify owner/admin/manager that an Asaas payment was booked on an order.
+ * Never throws: a failed push must not fail the webhook.
+ */
+export async function notifyAsaasPaymentReceived(
+  companyId: string,
+  orderId: string,
+  amount: number
+): Promise<void> {
+  try {
+    const recipients = await getPaymentNotificationRecipients(companyId);
+    if (recipients.length === 0) {
+      console.log('[NOTIFICATION] No recipients for Asaas payment notification');
+      return;
+    }
+
+    const orderDoc = await db.collection('companies').doc(companyId).collection('orders').doc(orderId).get();
+    const orderNumber = orderDoc.exists ? String(orderDoc.data()?.number ?? '') : '';
+
+    const payload: NotificationPayload = {
+      title: 'Pagamento recebido',
+      body: `OS #${orderNumber} – ${brlFormatter.format(amount)}`,
+      data: {
+        type: 'payment_received',
+        orderId,
+        orderNumber,
+        companyId,
+      },
+    };
+
+    await sendNotification(recipients, payload, companyId);
+  } catch (error) {
+    console.error('Error sending Asaas payment notification:', error);
+  }
+}
+
 /**
  * Notify when a customer approves a quote via magic link
  */
