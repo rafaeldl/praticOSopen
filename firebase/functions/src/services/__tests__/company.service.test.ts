@@ -1,119 +1,90 @@
-const mockGetDocument = jest.fn();
-const mockUpdateDocument = jest.fn();
-const mockMembershipSet = jest.fn();
-const mockMembershipUpdate = jest.fn();
-const mockMembershipDelete = jest.fn();
-const mockMembershipGet = jest.fn();
-const mockUserGet = jest.fn();
-const mockUserUpdate = jest.fn();
-const membershipPaths: string[] = [];
+jest.mock('../firestore.service', () =>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('../../__tests__/helpers/fake-firestore').fakeFirestoreModule(),
+);
 
-jest.mock('../firestore.service', () => ({
-  getRootCollection: (name: string) => ({ name }),
-  getDocument: (...args: unknown[]) => mockGetDocument(...args),
-  updateDocument: (...args: unknown[]) => mockUpdateDocument(...args),
-  FieldValue: { serverTimestamp: () => 'SERVER_TIMESTAMP' },
-  db: {
-    batch: () => ({ update: jest.fn(), delete: jest.fn(), commit: async () => undefined }),
-    collection: (name: string) => {
-      if (name === 'companies') {
-        return {
-          doc: (cid: string) => ({
-            collection: () => ({
-              doc: (uid: string) => {
-                membershipPaths.push(`${cid}/${uid}`);
-                return {
-                  get: mockMembershipGet,
-                  set: mockMembershipSet,
-                  update: mockMembershipUpdate,
-                  delete: mockMembershipDelete,
-                };
-              },
-            }),
-          }),
-        };
-      }
-      if (name === 'users') {
-        return { doc: () => ({ get: mockUserGet, update: mockUserUpdate }) };
-      }
-      if (name === 'links') {
-        const empty = { empty: true, docs: [] };
-        const query = { where: () => query, limit: () => query, get: async () => empty };
-        return { doc: () => ({ collection: () => query }) };
-      }
-      throw new Error(`unexpected collection ${name}`);
-    },
-  },
-}));
-
+import * as firestoreService from '../firestore.service';
+import { FakeFirestore, SERVER_TIMESTAMP } from '../../__tests__/helpers/fake-firestore';
 import { addMemberToCompany, removeMember, updateMemberRole } from '../company.service';
 
+const fake = (firestoreService as unknown as { __fake: FakeFirestore }).__fake;
 const admin = { id: 'admin1', name: 'Admin' };
 
 describe('company.service membership consistency', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    membershipPaths.length = 0;
-    mockUserGet.mockResolvedValue({ exists: true, data: () => ({ companies: [] }) });
+    fake.docs.clear();
+    fake.seed('companies/c1', { id: 'c1', name: 'C1', owner: admin, users: [] });
+    fake.seed('users/u1', { id: 'u1', companies: [{ company: { id: 'c1', name: 'C1' }, role: 'technician' }] });
   });
 
-  it('addMemberToCompany also writes the membership document', async () => {
-    mockGetDocument.mockResolvedValue({ id: 'c1', owner: admin, users: [] });
+  it('addMemberToCompany writes the server-only member map, users array and membership doc', async () => {
+    await addMemberToCompany('c1', { id: 'u1', name: 'User' }, 'technician');
+
+    expect(fake.read('companies/c1/private/membership')).toEqual({
+      members: { u1: 'technician' },
+      updatedAt: SERVER_TIMESTAMP,
+    });
+    expect(fake.read('companies/c1')?.users).toEqual([{ user: { id: 'u1', name: 'User' }, role: 'technician' }]);
+    expect(fake.read('companies/c1/memberships/u1')).toEqual({
+      user: { id: 'u1', name: 'User' },
+      role: 'technician',
+      joinedAt: SERVER_TIMESTAMP,
+    });
+  });
+
+  it('addMemberToCompany keeps other members in the member map', async () => {
+    fake.seed('companies/c1/private/membership', { members: { other: 'admin' } });
 
     await addMemberToCompany('c1', { id: 'u1', name: 'User' }, 'technician');
 
-    expect(mockUpdateDocument).toHaveBeenCalledWith(
-      { name: 'companies' },
-      'c1',
-      expect.objectContaining({ users: [{ user: { id: 'u1', name: 'User' }, role: 'technician' }] }),
-    );
-    expect(membershipPaths).toEqual(['c1/u1']);
-    expect(mockMembershipSet).toHaveBeenCalledWith(
-      { user: { id: 'u1', name: 'User' }, role: 'technician', joinedAt: 'SERVER_TIMESTAMP' },
-      { merge: true },
-    );
+    expect(fake.read('companies/c1/private/membership')?.members).toEqual({ other: 'admin', u1: 'technician' });
   });
 
-  it('updateMemberRole also updates an existing membership document', async () => {
-    mockGetDocument.mockResolvedValue({
+  it('updateMemberRole updates the member map, users array and an existing membership doc', async () => {
+    fake.seed('companies/c1', {
       id: 'c1',
       owner: admin,
       users: [{ user: { id: 'u1', name: 'User' }, role: 'technician' }],
     });
-    mockMembershipGet.mockResolvedValue({ exists: true });
+    fake.seed('companies/c1/private/membership', { members: { u1: 'technician' } });
+    fake.seed('companies/c1/memberships/u1', { role: 'technician' });
 
-    const ok = await updateMemberRole('c1', 'u1', 'manager', admin);
+    expect(await updateMemberRole('c1', 'u1', 'manager', admin)).toBe(true);
 
-    expect(ok).toBe(true);
-    expect(membershipPaths).toContain('c1/u1');
-    expect(mockMembershipUpdate).toHaveBeenCalledWith({ role: 'manager' });
+    expect(fake.read('companies/c1/private/membership')?.members).toEqual({ u1: 'manager' });
+    expect(fake.read('companies/c1')?.users).toEqual([{ user: { id: 'u1', name: 'User' }, role: 'manager' }]);
+    expect(fake.read('companies/c1/memberships/u1')?.role).toBe('manager');
+    expect(fake.read('users/u1')?.companies).toEqual([{ company: { id: 'c1', name: 'C1' }, role: 'manager' }]);
   });
 
-  it('updateMemberRole does not create a missing membership document', async () => {
-    mockGetDocument.mockResolvedValue({
+  it('updateMemberRole recognizes members present only in the member map', async () => {
+    fake.seed('companies/c1/private/membership', { members: { u1: 'technician' } });
+
+    expect(await updateMemberRole('c1', 'u1', 'supervisor', admin)).toBe(true);
+
+    expect(fake.read('companies/c1/private/membership')?.members).toEqual({ u1: 'supervisor' });
+    expect(fake.read('companies/c1/memberships/u1')).toBeUndefined();
+  });
+
+  it('updateMemberRole returns false for non-members', async () => {
+    expect(await updateMemberRole('c1', 'u1', 'manager', admin)).toBe(false);
+    expect(fake.read('companies/c1/private/membership')).toBeUndefined();
+  });
+
+  it('removeMember removes the member from the member map, users array and membership doc', async () => {
+    fake.seed('companies/c1', {
       id: 'c1',
       owner: admin,
       users: [{ user: { id: 'u1', name: 'User' }, role: 'technician' }],
     });
-    mockMembershipGet.mockResolvedValue({ exists: false });
+    fake.seed('companies/c1/private/membership', { members: { u1: 'technician', other: 'admin' } });
+    fake.seed('companies/c1/memberships/u1', { role: 'technician' });
 
-    await updateMemberRole('c1', 'u1', 'manager', admin);
+    expect(await removeMember('c1', 'u1', admin)).toBe(true);
 
-    expect(mockMembershipUpdate).not.toHaveBeenCalled();
-    expect(mockMembershipSet).not.toHaveBeenCalled();
-  });
-
-  it('removeMember also deletes the membership document', async () => {
-    mockGetDocument.mockResolvedValue({
-      id: 'c1',
-      owner: admin,
-      users: [{ user: { id: 'u1', name: 'User' }, role: 'technician' }],
-    });
-
-    const ok = await removeMember('c1', 'u1', admin);
-
-    expect(ok).toBe(true);
-    expect(membershipPaths).toContain('c1/u1');
-    expect(mockMembershipDelete).toHaveBeenCalled();
+    expect(fake.read('companies/c1/private/membership')?.members).toEqual({ other: 'admin' });
+    expect(fake.read('companies/c1')?.users).toEqual([]);
+    expect(fake.read('companies/c1/memberships/u1')).toBeUndefined();
+    expect(fake.read('users/u1')?.companies).toEqual([]);
   });
 });

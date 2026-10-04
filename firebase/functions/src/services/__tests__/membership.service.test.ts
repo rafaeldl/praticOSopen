@@ -1,4 +1,5 @@
 const mockCompanyGet = jest.fn();
+const mockPrivateGet = jest.fn();
 const mockMembershipGet = jest.fn();
 
 jest.mock('../firestore.service', () => ({
@@ -8,14 +9,14 @@ jest.mock('../firestore.service', () => ({
       return {
         doc: (companyId: string) => ({
           get: () => mockCompanyGet(companyId),
-          collection: (sub: string) => {
-            if (sub !== 'memberships') throw new Error(`unexpected subcollection ${sub}`);
-            return {
-              doc: (memberId: string) => ({
-                get: () => mockMembershipGet(companyId, memberId),
-              }),
-            };
-          },
+          collection: (sub: string) => ({
+            doc: (docId: string) => ({
+              get: () =>
+                sub === 'private' && docId === 'membership'
+                  ? mockPrivateGet(companyId)
+                  : mockMembershipGet(companyId, docId),
+            }),
+          }),
         }),
       };
     },
@@ -30,9 +31,19 @@ function snap(data: Data | null) {
   return { exists: !!data, data: () => data ?? undefined };
 }
 
-/** Configures server data: companies by id and memberships by `${cid}/${uid}`. */
-function serverData(companies: Record<string, Data>, memberships: Record<string, Data> = {}) {
+/**
+ * Configures server data: companies by id, server-only member maps by company
+ * id, and display-only membership docs by `${cid}/${uid}`.
+ */
+function serverData(
+  companies: Record<string, Data>,
+  members: Record<string, Record<string, unknown>> = {},
+  memberships: Record<string, Data> = {},
+) {
   mockCompanyGet.mockImplementation(async (cid: string) => snap(companies[cid] ?? null));
+  mockPrivateGet.mockImplementation(async (cid: string) =>
+    snap(members[cid] ? { members: members[cid] } : null),
+  );
   mockMembershipGet.mockImplementation(async (cid: string, uid: string) =>
     snap(memberships[`${cid}/${uid}`] ?? null),
   );
@@ -56,6 +67,7 @@ describe('membership.service', () => {
       const result = await verifyUserMemberships('u1', [entry('c1', 'technician')]);
 
       expect(result).toEqual([{ companyId: 'c1', role: 'admin' }]);
+      expect(mockPrivateGet).not.toHaveBeenCalled();
     });
 
     it('keeps the owner role when the entry says owner or admin', async () => {
@@ -72,53 +84,51 @@ describe('membership.service', () => {
     it('accepts the legacy string owner field', async () => {
       serverData({ c1: { owner: 'u1' } });
 
-      const result = await verifyUserMemberships('u1', [entry('c1')]);
-
-      expect(result).toEqual([{ companyId: 'c1', role: 'admin' }]);
+      expect(await verifyUserMemberships('u1', [entry('c1')])).toEqual([{ companyId: 'c1', role: 'admin' }]);
     });
 
-    it('takes the role from the company users array, not from the entry', async () => {
-      serverData({
-        c1: {
-          owner: { id: 'someone-else' },
-          users: [
-            { user: { id: 'other' }, role: 'admin' },
-            { user: { id: 'u1' }, role: 'Supervisor' },
-          ],
-        },
-      });
+    it('takes the role from the server-only member map, not from the entry', async () => {
+      serverData({ c1: { owner: { id: 'x' } } }, { c1: { other: 'admin', u1: 'Supervisor' } });
 
       const result = await verifyUserMemberships('u1', [entry('c1', 'admin')]);
 
       expect(result).toEqual([{ companyId: 'c1', role: 'supervisor' }]);
     });
 
-    it('does not accept a membership document as the only backing', async () => {
-      serverData(
-        { c1: { owner: { id: 'someone-else' }, users: [] } },
-        { 'c1/u1': { role: 'manager' } },
-      );
+    it('maps an owner role in the member map to admin for non-owners', async () => {
+      serverData({ c1: { owner: { id: 'x' } } }, { c1: { u1: 'owner' } });
 
-      const result = await verifyUserMemberships('u1', [entry('c1', 'admin')]);
+      expect(await verifyUserMemberships('u1', [entry('c1', 'owner')])).toEqual([
+        { companyId: 'c1', role: 'admin' },
+      ]);
+    });
 
-      expect(result).toEqual([]);
+    it('treats the company users array as display data only', async () => {
+      serverData({ c1: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'admin' }] } });
+
+      expect(await verifyUserMemberships('u1', [entry('c1', 'admin')])).toEqual([]);
+    });
+
+    it('treats membership documents as display data only', async () => {
+      serverData({ c1: { owner: { id: 'x' } } }, {}, { 'c1/u1': { role: 'admin' } });
+
+      expect(await verifyUserMemberships('u1', [entry('c1', 'admin')])).toEqual([]);
       expect(mockMembershipGet).not.toHaveBeenCalled();
     });
 
-    it('uses the users array role even when a membership document disagrees', async () => {
+    it('uses the member map role even when the users array disagrees', async () => {
       serverData(
-        { c1: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'technician' }] } },
-        { 'c1/u1': { role: 'admin' } },
+        { c1: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'admin' }] } },
+        { c1: { u1: 'technician' } },
       );
 
-      const result = await verifyUserMemberships('u1', [entry('c1', 'admin')]);
-
-      expect(result).toEqual([{ companyId: 'c1', role: 'technician' }]);
-      expect(mockMembershipGet).not.toHaveBeenCalled();
+      expect(await verifyUserMemberships('u1', [entry('c1', 'admin')])).toEqual([
+        { companyId: 'c1', role: 'technician' },
+      ]);
     });
 
     it('drops entries without server-side backing and logs only identifiers', async () => {
-      serverData({ c1: { owner: { id: 'x' }, users: [] } });
+      serverData({ c1: { owner: { id: 'x' } } }, { c1: { other: 'admin' } });
 
       const result = await verifyUserMemberships('u1', [entry('c1', 'admin')]);
 
@@ -132,23 +142,18 @@ describe('membership.service', () => {
     it('drops entries whose company does not exist', async () => {
       serverData({});
 
-      const result = await verifyUserMemberships('u1', [entry('missing', 'admin')]);
-
-      expect(result).toEqual([]);
-      expect(mockMembershipGet).not.toHaveBeenCalled();
+      expect(await verifyUserMemberships('u1', [entry('missing', 'admin')])).toEqual([]);
+      expect(mockPrivateGet).not.toHaveBeenCalled();
     });
 
-    it('drops a users array entry without a role', async () => {
-      serverData({ c1: { owner: { id: 'x' }, users: [{ user: { id: 'u1' } }] } });
+    it('drops a member map entry without a usable role', async () => {
+      serverData({ c1: { owner: { id: 'x' } } }, { c1: { u1: '' } });
 
       expect(await verifyUserMemberships('u1', [entry('c1', 'admin')])).toEqual([]);
     });
 
     it('keeps the user order and ignores duplicates', async () => {
-      serverData({
-        c1: { owner: { id: 'u1' } },
-        c2: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'consultant' }] },
-      });
+      serverData({ c1: { owner: { id: 'u1' } }, c2: { owner: { id: 'x' } } }, { c2: { u1: 'consultant' } });
 
       const result = await verifyUserMemberships('u1', [
         entry('c2', 'admin'),
@@ -187,7 +192,7 @@ describe('membership.service', () => {
 
   describe('verifyMembership', () => {
     it('returns the verified membership', async () => {
-      serverData({ c1: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'manager' }] } });
+      serverData({ c1: { owner: { id: 'x' } } }, { c1: { u1: 'manager' } });
 
       expect(await verifyMembership('u1', 'c1')).toEqual({ companyId: 'c1', role: 'manager' });
     });
@@ -205,18 +210,12 @@ describe('membership.service', () => {
     });
 
     it('ignores the entry role for non-owners', async () => {
-      serverData({ c1: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'technician' }] } });
+      serverData({ c1: { owner: { id: 'x' } } }, { c1: { u1: 'technician' } });
 
       expect(await verifyMembership('u1', 'c1', 'admin')).toEqual({ companyId: 'c1', role: 'technician' });
     });
 
-    it('returns null when only a membership document exists', async () => {
-      serverData({ c1: { owner: { id: 'x' } } }, { 'c1/u1': { role: 'admin' } });
-
-      expect(await verifyMembership('u1', 'c1', 'admin')).toBeNull();
-    });
-
-    it('returns null when not a member', async () => {
+    it('returns null without a server-only member map', async () => {
       serverData({ c1: { owner: { id: 'x' } } });
 
       expect(await verifyMembership('u1', 'c1')).toBeNull();
@@ -232,7 +231,8 @@ describe('membership.service', () => {
   describe('buildRolesClaim', () => {
     it('maps only verified memberships to the roles claim', async () => {
       serverData(
-        { c1: { owner: { id: 'u1' } }, c2: { owner: { id: 'x' }, users: [{ user: { id: 'u1' }, role: 'Technician' }] } },
+        { c1: { owner: { id: 'u1' } }, c2: { owner: { id: 'x' } }, c3: { owner: { id: 'x' } } },
+        { c2: { u1: 'Technician' } },
         { 'c3/u1': { role: 'admin' } },
       );
 

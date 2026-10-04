@@ -15,7 +15,9 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   db,
   auth,
+  FieldValue,
 } from './firestore.service';
+import { privateMembershipRef } from './membership.service';
 import {
   RoleType,
   UserAggr,
@@ -531,7 +533,14 @@ export async function completeRegistration(
       updatedBy: userAggr,
     };
 
-    await companyRef.set(companyData);
+    // Company + server-only member map (source of truth for membership)
+    const companyBatch = db.batch();
+    companyBatch.set(companyRef, companyData);
+    companyBatch.set(privateMembershipRef(companyId), {
+      members: { [userId]: 'owner' },
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    await companyBatch.commit();
 
     const companyAggr: CompanyAggr = {
       id: companyId,

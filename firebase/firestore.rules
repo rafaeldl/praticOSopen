@@ -430,6 +430,14 @@ service cloud.firestore {
       }
 
       // ──────────────────────────────────────────────────────────────────────
+      // DADOS PRIVADOS DO SERVIDOR (ex.: mapa de membros verificado)
+      // Somente Admin SDK; nenhum acesso pelo cliente
+      // ──────────────────────────────────────────────────────────────────────
+      match /private/{doc=**} {
+        allow read, write: if false;
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
       // MARCAS E CATÁLOGO DE DISPOSITIVOS
       // ──────────────────────────────────────────────────────────────────────
       match /brands/{brandId} {

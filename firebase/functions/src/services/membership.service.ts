@@ -1,10 +1,11 @@
 /**
  * Membership Service
  * Single source of truth for "is this user a member of this company, and with
- * which role". Membership is always confirmed against server-side company data
- * (company owner and the company `users` array); the user's own `companies`
- * array is only used for ordering and as a hint for the owner role.
- * The `memberships` subcollection is a UI index and is not a verification source.
+ * which role". Membership is confirmed against server-only data: the company
+ * owner and `companies/{cid}/private/membership.members` ({ [uid]: role }),
+ * which only the Admin SDK can write. The user's own `companies` array is only
+ * used for ordering and as a hint for the owner role. The company `users` array
+ * and the `memberships` subcollection are display data, not verification sources.
  */
 
 import { db } from './firestore.service';
@@ -17,11 +18,26 @@ export interface VerifiedMembership {
 
 const OWNER_ROLES = ['owner', 'admin'];
 
+/** Server-only member map: companies/{cid}/private/membership */
+export const PRIVATE_COLLECTION = 'private';
+export const MEMBERSHIP_DOC = 'membership';
+
+export function privateMembershipRef(companyId: string) {
+  return db.collection('companies').doc(companyId).collection(PRIVATE_COLLECTION).doc(MEMBERSHIP_DOC);
+}
+
+/** Reads the role of `uid` from a private membership snapshot's data. */
+export function memberRole(data: unknown, uid: string): string | null {
+  const members = (data as { members?: unknown } | undefined)?.members;
+  if (!members || typeof members !== 'object') return null;
+  return lower((members as Record<string, unknown>)[uid]);
+}
+
 function lower(value: unknown): string | null {
   return typeof value === 'string' && value.trim() ? value.trim().toLowerCase() : null;
 }
 
-function ownerId(owner: unknown): string | null {
+export function ownerId(owner: unknown): string | null {
   if (typeof owner === 'string') return owner;
   if (owner && typeof owner === 'object') {
     const id = (owner as { id?: unknown }).id;
@@ -35,7 +51,8 @@ function ownerId(owner: unknown): string | null {
  *
  * Resolution order:
  * 1. Company owner → `entryRole` when it is 'owner' or 'admin', otherwise 'admin'.
- * 2. Company `users` array → that role.
+ * 2. `private/membership.members[uid]` → that role ('owner' becomes 'admin',
+ *    since the uid is not the company owner).
  * Otherwise returns null.
  *
  * `entryRole` (the role in the user's own `companies` entry) is only used in case 1.
@@ -57,17 +74,12 @@ export async function verifyMembership(
     return { companyId, role };
   }
 
-  // 2. Company users array
-  const users: unknown[] = Array.isArray(company.users) ? company.users : [];
-  for (const item of users) {
-    const member = item as { user?: { id?: unknown }; role?: unknown } | null;
-    if (member?.user?.id === uid) {
-      const role = lower(member.role);
-      if (role) return { companyId, role };
-    }
-  }
+  // 2. Server-only member map
+  const privateSnap = await privateMembershipRef(companyId).get();
+  const role = privateSnap.exists ? memberRole(privateSnap.data(), uid) : null;
+  if (!role) return null;
 
-  return null;
+  return { companyId, role: role === 'owner' ? 'admin' : role };
 }
 
 /**

@@ -245,6 +245,32 @@ describeEmulator('firestore.rules', () => {
     });
   });
 
+  describe('companies/{cid}/private', () => {
+    it('is not readable by clients, including the company owner', async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        await fs.setDoc(fs.doc(ctx.firestore(), 'companies/c1/private/membership'), {
+          members: { tech1: 'technician' },
+        });
+      });
+      await rut.assertFails(fs.getDoc(fs.doc(asUser('admin1', { c1: 'admin' }), 'companies/c1/private/membership')));
+    });
+
+    it('is not writable by clients, including the company owner', async () => {
+      const db = asUser('admin1', { c1: 'admin' });
+      await rut.assertFails(
+        fs.setDoc(fs.doc(db, 'companies/c1/private/membership'), { members: { tech1: 'admin' } }),
+      );
+    });
+
+    it('is not writable while creating a company in the signup batch', async () => {
+      const db = asUser('new2');
+      const batch = fs.writeBatch(db);
+      batch.set(fs.doc(db, 'companies/cNew2'), { owner: { id: 'new2' } });
+      batch.set(fs.doc(db, 'companies/cNew2/private/membership'), { members: { new2: 'admin' } });
+      await rut.assertFails(batch.commit());
+    });
+  });
+
   describe('links/invites/tokens/{token}', () => {
     const invite = (token: string) => ({
       token,
