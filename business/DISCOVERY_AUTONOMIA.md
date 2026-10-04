@@ -165,10 +165,20 @@ Rodar na nuvem, não no Mac, para não depender da máquina ligada.
 
 ### 6.1 Onde estamos
 
-- **744 empresas cadastradas** no Firestore. Quantas estão ativas: a confirmar no painel admin.
+- **Uso (Firestore, 2026-10-04):**
+
+  | Janela | Empresas novas | Empresas ativas (≥1 OS) |
+  |--------|----------------|--------------------------|
+  | 7 dias | 11 | **27** |
+  | 30 dias | 84 | 67 |
+  | 90 dias | 225 | 129 |
+  | 365 dias | 510 | 243 |
+
+  744 empresas no total, ~25,5 mil OS criadas.
+- **Aquisição orgânica:** Google Ads está pausado e com gasto zero nos últimos 30 dias, e mesmo assim entram ~84 empresas/mês. Só ~1 em cada 3 cadastradas no ano segue ativa.
 - **Receita: zero.** Planos (Free/Starter/Pro/Business) implementados via RevenueCat, ativos só no Android/web.
 - **iOS sem nenhum recurso pago** desde a 1.52.3: a Apple rejeitou 3 versões pela guideline 3.1.1 (recurso pago sem IAP).
-- **Custos conhecidos:** Google Ads R$10/dia (~R$300/mês), Cloud Run (`api`, `praticos-web`), Functions, Firestore/Storage, disco da VM do bot (20 GB, parada).
+- **Custos:** bot do WhatsApp **apagado em 2026-10-04** (VM + disco; conversas salvas em `gs://praticos-bot-archive`). Restam Cloud Run (`api`, `praticos-web`), Functions, Firestore/Storage. Google Ads pausado. Meta Ads: token da API expirou em abr/2026, status a confirmar.
 
 **Leitura honesta:** o modelo atual cobra por *limite* (fotos, formulários, usuários, marca d'água). Limite incomoda, mas não cria vontade de pagar. Mesmo no Android, onde a cobrança está ligada, não há receita. O problema não é só técnico (IAP), é de **proposta de valor**.
 
@@ -191,10 +201,10 @@ Rodar na nuvem, não no Mac, para não depender da máquina ligada.
 2. **Aposta principal: A (cobrança na OS) + E (NFS-e) no Asaas.** Escapa da Apple, monetiza pelo uso real e vira motivo para o técnico abrir o app todo dia. Receita escala com o volume dos clientes, não com convencer cada um a assinar.
 3. **Aposta secundária: B + C no plano Pro**, com IAP no iOS feito direito (produtos na App Store via RevenueCat). Código de assinatura já existe; falta configurar as lojas e trocar os gatilhos de "limite" por "IA".
 4. **D fica guardada:** só volta como add-on pago, quando houver ao menos 5 interessados.
-5. **Custos agora:** apagar o disco da VM do bot, revisar se R$300/mês em ads faz sentido enquanto não há como monetizar o usuário que chega.
+5. **Custos:** VM do bot apagada e ads pausados (2026-10-04).
 
 ### 6.4 Dados que faltam
 
-- Empresas ativas por semana (painel admin).
 - Assinantes e receita no RevenueCat (Android).
+- Status do Meta Ads.
 - Fatura do GCP/Firebase do último mês.

@@ -4,7 +4,7 @@
 > Contexto e racional: [`business/DISCOVERY_AUTONOMIA.md`](business/DISCOVERY_AUTONOMIA.md).
 > Atualizado: 2026-10-04
 
-**Métrica norte:** empresas ativas por semana (≥1 OS nos últimos 7 dias).
+**Métrica norte:** empresas ativas por semana (≥1 OS nos últimos 7 dias). Base em 2026-10-04: **27**.
 **Direção do trimestre:** gerar a primeira receita recorrente.
 
 ---
@@ -13,7 +13,7 @@
 
 1. **Base para trabalho autônomo** — testes no CI, template de issue, labels `agent-ready` / `risk:*`, regras do modo autônomo no `CLAUDE.md`, rotina diária de engenharia.
 2. **Validar disposição a pagar** — lista das empresas mais ativas, conversa com 10–20, landing de pré-venda para cobrança na OS + NFS-e e para IA.
-3. **Cortar custo sem retorno** — apagar recursos do bot do WhatsApp; revisar gasto de ads enquanto não há monetização.
+3. **Ativação e retenção** — só ~1/3 das empresas cadastradas segue ativa; descobrir onde as novas (~84/mês, orgânicas) abandonam.
 
 ## Próximo
 
@@ -29,6 +29,10 @@
 - Portal web (#192 / PR #194).
 - Oportunidades / marketplace de leads.
 - Assistente no WhatsApp como add-on pago (só com ≥5 interessados).
+
+## Feito
+
+- 2026-10-04: bot do WhatsApp desligado (VM e disco apagados; conversas em `gs://praticos-bot-archive`). Google Ads pausado.
 
 ## Fora (decidido não fazer agora)
 
