@@ -5,6 +5,42 @@
 
 ---
 
+## 0. Flapp Store do Asaas (achado mais importante — 2026-10-04)
+
+Fontes: [materiais.asaas.com/flappstore](https://materiais.asaas.com/flappstore), [docs.asaas.com/docs/flappstore](https://docs.asaas.com/docs/flappstore), [lançamento](https://blog.asaas.com/release/flapp-store/).
+
+**O que é:** loja de aplicativos dentro da conta Asaas. A empresa descobre, contrata e gerencia "Flapps" (apps parceiros homologados) sem sair do Asaas. Base: **~270 mil empresas**.
+
+**Como funciona para o cliente:**
+- Contrata o plano dentro da conta Asaas; **o valor é debitado do saldo da conta Asaas**, com recorrência.
+- Na contratação, autoriza **permissões** para o app usar a conta: consultar clientes, consultar/criar cobranças, consultar pagamentos, consultar dados da conta.
+- Upgrade, downgrade, trial e cancelamento ficam em "Meus Flapps". Suporte de cobrança é do Asaas; suporte de uso é do parceiro.
+
+**Requisitos para ser parceiro:** usar o Asaas no fluxo de pagamento, modelo self-service/PLG, integração via API do Asaas, **cobrança recorrente**, boa reputação pública e **aderência ao mobile**.
+
+**Por que encaixa no PraticOS:**
+
+| Problema nosso | Como a Flapp Store resolve |
+|---|---|
+| Poucos clientes ativos | Vitrine para 270 mil empresas, a maioria PME sem ERP — o mesmo perfil da nossa base |
+| Não temos como cobrar (IAP bloqueado no iOS, nada no Android) | O Asaas cobra o plano do saldo do cliente e repassa |
+| Técnico teria que colar chave de API do Asaas | As permissões da contratação dão acesso à conta do cliente, sem chave manual |
+| Cobrança da OS e baixa automática | A permissão "criar cobranças/consultar pagamentos" é exatamente o que a #303 precisa |
+
+Nos exemplos públicos (contratos, atendimento, vendas) **não aparece app de ordem de serviço** — a categoria parece livre. A confirmar.
+
+**Pontos em aberto (perguntar ao Asaas):**
+- Percentual que o Asaas retém do plano e prazo de repasse.
+- Processo e prazo de homologação; como funciona a autorização técnica (OAuth/escopos) para o app.
+- Se já existe ou está entrando algum app de OS.
+- Regras de trial e de preço.
+
+**Risco Apple:** se o plano comprado na Flapp Store libera recursos no app iOS, a Apple pode aplicar a mesma guideline 3.1.1 que causou as rejeições (recurso pago sem IAP). Avaliar antes de ligar recursos pagos no iOS; os recursos ligados à cobrança de serviço físico (cobrar o cliente da OS) tendem a estar fora do IAP.
+
+**Nova recomendação:** a Flapp Store substitui os modelos 1–3 abaixo como caminho principal. Ela junta distribuição, cobrança do nosso plano e integração com a conta do técnico numa coisa só. A conversa com o Asaas passa a ser sobre entrar na Flapp Store.
+
+---
+
 ## 1. O que o Asaas oferece
 
 ### 1.1 Programa de parceiros (comercial)
