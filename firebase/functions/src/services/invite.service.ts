@@ -63,8 +63,6 @@ export interface AcceptInviteResult {
 export interface AcceptInviteError {
   success: false;
   error: string;
-  /** Machine-readable code for errors that need a specific HTTP status */
-  code?: 'INVITE_EMAIL_MISMATCH';
 }
 
 function normalizeEmail(email: unknown): string {
@@ -158,8 +156,9 @@ export async function createInvite(
 /**
  * Accept an invite
  *
- * @param callerEmail Email from the caller's verified ID token. When the
- * invite was addressed to an email, it must match (case-insensitive).
+ * @param callerEmail Email from the caller's verified ID token. A difference
+ * from the invite email is only logged: private-relay and phone logins are
+ * legitimate ways to accept an invite.
  */
 export async function acceptInvite(
   token: string,
@@ -195,14 +194,12 @@ export async function acceptInvite(
     return { success: false, error: 'Invite has expired' };
   }
 
-  // Invites addressed to an email can only be accepted by that email
+  // Log (identifiers only) when the caller email differs from the invite email
   const inviteEmail = normalizeEmail(invite.email);
   if (inviteEmail && inviteEmail !== normalizeEmail(callerEmail)) {
-    return {
-      success: false,
-      code: 'INVITE_EMAIL_MISMATCH',
-      error: 'This invite was sent to a different email address',
-    };
+    console.warn(
+      `[Invite] Accepted with a different login email: invite=${token} uid=${userId.slice(0, 6)}`
+    );
   }
 
   // Add user to company (company users array + membership document)

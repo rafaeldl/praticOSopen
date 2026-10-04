@@ -44,26 +44,7 @@ describe('invite.routes accept', () => {
     expect(res.body.data.companyId).toBe('c9');
   });
 
-  it('responds 403 INVITE_EMAIL_MISMATCH when the invite belongs to another email', async () => {
-    mockService.acceptInvite.mockResolvedValue({
-      success: false,
-      code: 'INVITE_EMAIL_MISMATCH',
-      error: 'This invite was sent to a different email address',
-    });
-
-    const res = await request(buildApp('user@example.com')).post('/INV_ABC/accept');
-
-    expect(res.status).toBe(403);
-    expect(res.body).toEqual({
-      success: false,
-      error: {
-        code: 'INVITE_EMAIL_MISMATCH',
-        message: 'This invite was sent to a different email address',
-      },
-    });
-  });
-
-  it('keeps 400 INVALID_INVITE for other failures', async () => {
+  it('responds 400 INVALID_INVITE for failures', async () => {
     mockService.acceptInvite.mockResolvedValue({
       success: false,
       error: 'Invite has expired',

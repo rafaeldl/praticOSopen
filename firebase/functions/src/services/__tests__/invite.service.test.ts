@@ -59,33 +59,38 @@ const baseInvite = {
 };
 
 describe('invite.service acceptInvite', () => {
+  afterEach(() => warnSpy.mockRestore());
+
+  let warnSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
     mockUserGet.mockResolvedValue({ exists: true, data: () => ({ companies: [] }) });
   });
 
-  it('rejects when the caller email does not match the invite email', async () => {
+  it('accepts when the caller email differs and logs only identifiers', async () => {
     mockInviteGet.mockResolvedValue(inviteSnap({ ...baseInvite, email: 'invited@example.com' }));
 
-    const result = await acceptInvite('INV_ABC', 'u1', 'User', 'someone.else@example.com');
+    const result = await acceptInvite('INV_ABC', 'user123456789', 'User', 'relay@privaterelay.example');
 
-    expect(result).toEqual({
-      success: false,
-      code: 'INVITE_EMAIL_MISMATCH',
-      error: 'This invite was sent to a different email address',
-    });
-    expect(mockAddMember).not.toHaveBeenCalled();
-    expect(mockUserUpdate).not.toHaveBeenCalled();
-    expect(mockInviteUpdate).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ success: true, companyId: 'c1' });
+    expect(mockAddMember).toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    const message = String(warnSpy.mock.calls[0][0]);
+    expect(message).toContain('INV_ABC');
+    expect(message).toContain('user12');
+    expect(message).not.toContain('user123456789');
+    expect(message).not.toContain('@');
   });
 
-  it('rejects when the invite has an email and the caller has none', async () => {
+  it('accepts when the invite has an email and the caller has none', async () => {
     mockInviteGet.mockResolvedValue(inviteSnap({ ...baseInvite, email: 'invited@example.com' }));
 
     const result = await acceptInvite('INV_ABC', 'u1', 'User', undefined);
 
-    expect(result).toMatchObject({ success: false, code: 'INVITE_EMAIL_MISMATCH' });
-    expect(mockAddMember).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ success: true });
+    expect(warnSpy).toHaveBeenCalledTimes(1);
   });
 
   it('accepts when the email matches ignoring case and surrounding spaces', async () => {
@@ -100,6 +105,7 @@ describe('invite.service acceptInvite', () => {
       role: 'technician',
     });
     expect(mockAddMember).toHaveBeenCalledWith('c1', { id: 'u1', name: 'User' }, 'technician');
+    expect(warnSpy).not.toHaveBeenCalled();
     expect(mockUserUpdate).toHaveBeenCalledWith({
       companies: [{ company: { id: 'c1', name: 'Company 1' }, role: 'technician' }],
     });

@@ -351,14 +351,6 @@ router.post('/:token/accept', async (req: AuthenticatedRequest, res: Response) =
       req.auth?.email
     );
 
-    if (!result.success && result.code === 'INVITE_EMAIL_MISMATCH') {
-      res.status(403).json({
-        success: false,
-        error: { code: 'INVITE_EMAIL_MISMATCH', message: result.error },
-      });
-      return;
-    }
-
     if (!result.success) {
       res.status(400).json({
         success: false,
