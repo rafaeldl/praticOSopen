@@ -11,6 +11,7 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { beforeUserCreated } from 'firebase-functions/v2/identity';
 import * as admin from 'firebase-admin';
 import express, { Request, Response, NextFunction } from 'express';
+import { buildRolesClaim } from './services/membership.service';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 
@@ -84,26 +85,11 @@ export const updateUserClaims = functionsV1
 
     const userData = change.after.data();
 
-    // Build roles map from companies array
-    const roles: Record<string, string> = {};
-    const seenCompanies = new Set<string>();
-
-    if (userData?.companies && Array.isArray(userData.companies)) {
-      userData.companies.forEach((item: { company?: { id?: string }; role?: string }) => {
-        if (item.company?.id && item.role) {
-          const companyId = item.company.id;
-
-          // Detect and ignore duplicates
-          if (seenCompanies.has(companyId)) {
-            console.warn(`[Claims] Duplicate company detected for user ${userId}: ${companyId}. Ignoring duplicate entry.`);
-            return;
-          }
-
-          seenCompanies.add(companyId);
-          roles[companyId] = String(item.role).toLowerCase();
-        }
-      });
-    }
+    // Roles come only from memberships confirmed by server-side company data
+    const roles = await buildRolesClaim(
+      userId,
+      Array.isArray(userData?.companies) ? userData.companies : [],
+    );
 
     const claims = { roles };
 

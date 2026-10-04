@@ -14,8 +14,15 @@ jest.mock('../../services/firestore.service', () => ({
   },
 }));
 
+jest.mock('../../services/membership.service', () => ({
+  verifyMembership: jest.fn(),
+}));
+
 import { resolveCompanyContext } from '../company.middleware';
 import { getRolePermissions } from '../auth.middleware';
+import { verifyMembership } from '../../services/membership.service';
+
+const mockVerifyMembership = verifyMembership as jest.MockedFunction<typeof verifyMembership>;
 
 function buildRes() {
   const res: Partial<Response> = {};
@@ -35,14 +42,15 @@ const bearerReq = () =>
 
 const validUser = {
   name: 'John Doe',
-  // Legacy role, normalized to 'technician'
-  companies: [{ company: { id: 'comp1', name: 'Company 1' }, role: 'user' }],
+  // Role written by the client; the effective role comes from server data
+  companies: [{ company: { id: 'comp1', name: 'Company 1' }, role: 'admin' }],
 };
 
 describe('resolveCompanyContext', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    mockVerifyMembership.mockResolvedValue({ companyId: 'comp1', role: 'user' });
   });
   afterEach(() => jest.restoreAllMocks());
 
@@ -87,7 +95,7 @@ describe('resolveCompanyContext', () => {
   });
 
   describe('bearer', () => {
-    it('monta userContext com o papel normalizado', async () => {
+    it('monta userContext com o papel verificado no servidor (normalizado)', async () => {
       mockUserGet.mockResolvedValue(docSnapshot(validUser));
       mockCompanyGet.mockResolvedValue(docSnapshot({ name: 'Company 1' }));
       const req = bearerReq();
@@ -96,6 +104,7 @@ describe('resolveCompanyContext', () => {
       await resolveCompanyContext(req, buildRes(), next);
 
       expect(next).toHaveBeenCalled();
+      expect(mockVerifyMembership).toHaveBeenCalledWith('user1', 'comp1', 'admin');
       expect(req.userContext).toEqual({
         userId: 'user1',
         userName: 'John Doe',
@@ -156,6 +165,24 @@ describe('resolveCompanyContext', () => {
         docSnapshot({ name: 'John', companies: [{ company: { id: 'other' }, role: 'admin' }] }),
       );
       mockCompanyGet.mockResolvedValue(docSnapshot({ name: 'Company 1' }));
+      const res = buildRes();
+      const next = jest.fn();
+
+      await resolveCompanyContext(bearerReq(), res, next);
+
+      expect(next).not.toHaveBeenCalled();
+      expect(mockVerifyMembership).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'User does not have access to this company' },
+      });
+    });
+
+    it('responde 403 quando o vínculo não é confirmado no servidor', async () => {
+      mockUserGet.mockResolvedValue(docSnapshot(validUser));
+      mockCompanyGet.mockResolvedValue(docSnapshot({ name: 'Company 1' }));
+      mockVerifyMembership.mockResolvedValue(null);
       const res = buildRes();
       const next = jest.fn();
 

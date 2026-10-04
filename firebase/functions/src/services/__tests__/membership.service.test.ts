@@ -22,7 +22,7 @@ jest.mock('../firestore.service', () => ({
   },
 }));
 
-import { verifyMembership, verifyUserMemberships } from '../membership.service';
+import { buildRolesClaim, verifyMembership, verifyUserMemberships } from '../membership.service';
 
 type Data = Record<string, unknown>;
 
@@ -219,6 +219,27 @@ describe('membership.service', () => {
       serverData({});
 
       expect(await verifyMembership('u1', 'c1')).toBeNull();
+    });
+  });
+
+  describe('buildRolesClaim', () => {
+    it('maps only verified memberships to the roles claim', async () => {
+      serverData(
+        { c1: { owner: { id: 'u1' } }, c2: { owner: { id: 'x' } } },
+        { 'c2/u1': { role: 'Technician' } },
+      );
+
+      const roles = await buildRolesClaim('u1', [
+        entry('c1', 'admin'),
+        entry('c2', 'admin'),
+        entry('c3', 'admin'),
+      ]);
+
+      expect(roles).toEqual({ c1: 'admin', c2: 'technician' });
+    });
+
+    it('returns an empty map without entries', async () => {
+      expect(await buildRolesClaim('u1', [])).toEqual({});
     });
   });
 });

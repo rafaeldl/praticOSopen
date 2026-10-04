@@ -5,6 +5,7 @@
 
 import {
   db,
+  FieldValue,
   getRootCollection,
   getDocument,
   updateDocument,
@@ -140,6 +141,13 @@ export async function updateMemberRole(
     updatedAt: new Date().toISOString(),
   });
 
+  // Keep the membership document in sync (only if it exists)
+  const membershipRef = getMembershipRef(companyId, targetUserId);
+  const membershipSnap = await membershipRef.get();
+  if (membershipSnap.exists) {
+    await membershipRef.update({ role: newRole });
+  }
+
   // Also update in user's companies array
   await updateUserCompanyRole(targetUserId, companyId, newRole);
 
@@ -174,6 +182,9 @@ export async function removeMember(
     updatedBy: removedBy,
     updatedAt: new Date().toISOString(),
   });
+
+  // Remove the membership document
+  await getMembershipRef(companyId, targetUserId).delete();
 
   // Remove from user's companies array
   await removeUserFromCompany(targetUserId, companyId);
@@ -212,11 +223,24 @@ export async function addMemberToCompany(
     users,
     updatedAt: new Date().toISOString(),
   });
+
+  // Keep the membership document in sync with the users array
+  await getMembershipRef(companyId, user.id).set(
+    { user, role, joinedAt: FieldValue.serverTimestamp() },
+    { merge: true }
+  );
 }
 
 // ============================================================================
 // Helper Functions
 // ============================================================================
+
+/**
+ * Reference to companies/{companyId}/memberships/{userId}
+ */
+function getMembershipRef(companyId: string, userId: string) {
+  return db.collection('companies').doc(companyId).collection('memberships').doc(userId);
+}
 
 /**
  * Get linked channels for a user

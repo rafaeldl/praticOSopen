@@ -63,6 +63,12 @@ export interface AcceptInviteResult {
 export interface AcceptInviteError {
   success: false;
   error: string;
+  /** Machine-readable code for errors that need a specific HTTP status */
+  code?: 'INVITE_EMAIL_MISMATCH';
+}
+
+function normalizeEmail(email: unknown): string {
+  return typeof email === 'string' ? email.trim().toLowerCase() : '';
 }
 
 // ============================================================================
@@ -151,11 +157,15 @@ export async function createInvite(
 
 /**
  * Accept an invite
+ *
+ * @param callerEmail Email from the caller's verified ID token. When the
+ * invite was addressed to an email, it must match (case-insensitive).
  */
 export async function acceptInvite(
   token: string,
   userId: string,
-  userName: string
+  userName: string,
+  callerEmail?: string | null
 ): Promise<AcceptInviteResult | AcceptInviteError> {
   // Get invite
   const inviteDoc = await getInvitesCollection().doc(token).get();
@@ -185,7 +195,17 @@ export async function acceptInvite(
     return { success: false, error: 'Invite has expired' };
   }
 
-  // Add user to company
+  // Invites addressed to an email can only be accepted by that email
+  const inviteEmail = normalizeEmail(invite.email);
+  if (inviteEmail && inviteEmail !== normalizeEmail(callerEmail)) {
+    return {
+      success: false,
+      code: 'INVITE_EMAIL_MISMATCH',
+      error: 'This invite was sent to a different email address',
+    };
+  }
+
+  // Add user to company (company users array + membership document)
   await companyService.addMemberToCompany(
     invite.company.id,
     { id: userId, name: userName },

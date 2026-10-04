@@ -109,3 +109,18 @@ export async function verifyUserMemberships(
 
   return verified;
 }
+
+/**
+ * Builds the `roles` custom claim ({ [companyId]: role }) from verified
+ * memberships only.
+ */
+export async function buildRolesClaim(
+  uid: string,
+  entries: unknown[],
+): Promise<Record<string, string>> {
+  const roles: Record<string, string> = {};
+  for (const { companyId, role } of await verifyUserMemberships(uid, entries)) {
+    roles[companyId] = role;
+  }
+  return roles;
+}

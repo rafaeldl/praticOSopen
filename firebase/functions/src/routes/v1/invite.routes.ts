@@ -344,7 +344,20 @@ router.post('/:token/accept', async (req: AuthenticatedRequest, res: Response) =
     // Get user info
     const userAggr = getUserAggr(req);
 
-    const result = await inviteService.acceptInvite(token, userId, userAggr.name);
+    const result = await inviteService.acceptInvite(
+      token,
+      userId,
+      userAggr.name,
+      req.auth?.email
+    );
+
+    if (!result.success && result.code === 'INVITE_EMAIL_MISMATCH') {
+      res.status(403).json({
+        success: false,
+        error: { code: 'INVITE_EMAIL_MISMATCH', message: result.error },
+      });
+      return;
+    }
 
     if (!result.success) {
       res.status(400).json({
