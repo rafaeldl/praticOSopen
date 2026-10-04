@@ -351,6 +351,14 @@ router.post('/:token/accept', async (req: AuthenticatedRequest, res: Response) =
       req.auth?.email
     );
 
+    if (!result.success && result.code === 'ALREADY_MEMBER') {
+      res.status(409).json({
+        success: false,
+        error: { code: 'ALREADY_MEMBER', message: result.error },
+      });
+      return;
+    }
+
     if (!result.success) {
       res.status(400).json({
         success: false,

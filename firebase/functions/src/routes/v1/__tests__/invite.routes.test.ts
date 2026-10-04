@@ -44,7 +44,23 @@ describe('invite.routes accept', () => {
     expect(res.body.data.companyId).toBe('c9');
   });
 
-  it('responds 400 INVALID_INVITE for failures', async () => {
+  it('responds 409 ALREADY_MEMBER for existing members', async () => {
+    mockService.acceptInvite.mockResolvedValue({
+      success: false,
+      code: 'ALREADY_MEMBER',
+      error: 'User is already a member of this company',
+    });
+
+    const res = await request(buildApp('user@example.com')).post('/INV_ABC/accept');
+
+    expect(res.status).toBe(409);
+    expect(res.body).toEqual({
+      success: false,
+      error: { code: 'ALREADY_MEMBER', message: 'User is already a member of this company' },
+    });
+  });
+
+  it('responds 400 INVALID_INVITE for other failures', async () => {
     mockService.acceptInvite.mockResolvedValue({
       success: false,
       error: 'Invite has expired',
