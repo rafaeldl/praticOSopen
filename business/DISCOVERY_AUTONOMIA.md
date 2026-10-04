@@ -175,6 +175,18 @@ Rodar na nuvem, não no Mac, para não depender da máquina ligada.
   | 365 dias | 510 | 243 |
 
   744 empresas no total, ~25,5 mil OS criadas.
+- **Quem usa de verdade (OS nos últimos 90 dias, por empresa):**
+
+  | Nível | Critério | Empresas |
+  |-------|----------|----------|
+  | Recorrente | OS em ≥8 das ~13 semanas e ≥4 OS no último mês | 6 |
+  | Regular | OS em ≥4 semanas e ≥1 no último mês | 7 |
+  | Experimentando | ≥3 OS em ≥2 dias | 21 |
+  | Teste | o resto | 95 |
+
+  **Base real: 13 empresas** (12 sem contar a empresa-âncora, que é da família e gera ~42% de todas as OS). Segmentos dessas 13: automotivo 4, celulares 3, ar-condicionado 2, informática 2, outros 2. Nenhuma paga.
+  Valor das OS que passam pelo app em 90 dias: ~R$ 168 mil nas 12 (≈R$ 56 mil/mês) e ~R$ 712 mil na âncora. Uma taxa de 1% sobre cobrança na OS daria ~R$ 2,9 mil/mês só com essa base — sinal a favor da aposta A.
+  Lista nominal fica fora do repositório.
 - **Aquisição orgânica:** Google Ads está pausado e com gasto zero nos últimos 30 dias, e mesmo assim entram ~84 empresas/mês. Só ~1 em cada 3 cadastradas no ano segue ativa.
 - **Receita: zero.** Planos (Free/Starter/Pro/Business) implementados via RevenueCat, ativos só no Android/web.
 - **iOS sem nenhum recurso pago** desde a 1.52.3: a Apple rejeitou 3 versões pela guideline 3.1.1 (recurso pago sem IAP).
