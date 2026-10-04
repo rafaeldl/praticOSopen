@@ -6,6 +6,11 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest, ApiKeyData, ChannelLink, RoleType, toDate } from '../models/types';
 import { db, auth } from '../services/firestore.service';
+import {
+  VerifiedMembership,
+  verifyMembership,
+  verifyUserMemberships,
+} from '../services/membership.service';
 
 // Environment variables
 const BOT_API_KEY = process.env.BOT_API_KEY || 'bot_praticos_dev_key';
@@ -145,6 +150,22 @@ export async function botAuth(
       const link = await getWhatsAppLink(normalizedNumber);
 
       if (link) {
+        // The link only points to a user/company; membership and role are
+        // confirmed against server-side data.
+        const membership = await verifyMembership(link.userId, link.companyId, link.role);
+        if (!membership) {
+          console.warn(`[BotAuth] Linked number without verified membership: uid=${link.userId.slice(0, 6)}`);
+          res.status(403).json({
+            success: false,
+            error: {
+              code: 'FORBIDDEN',
+              message: 'No company access',
+            },
+          });
+          return;
+        }
+        const verifiedRole = normalizeRole(membership.role);
+
         req.auth.companyId = link.companyId;
         req.auth.userId = link.userId;
 
@@ -157,8 +178,8 @@ export async function botAuth(
           userName: link.userName || '',
           companyId: link.companyId,
           companyName: link.companyName || '',
-          role: link.role,
-          permissions: getRolePermissions(link.role),
+          role: verifiedRole,
+          permissions: getRolePermissions(verifiedRole),
         };
       }
     }
@@ -246,27 +267,28 @@ export async function bearerAuth(
     }
 
     const userData = userDoc.data();
-    const companies = userData?.companies || [];
+    const companies: unknown[] = Array.isArray(userData?.companies) ? userData.companies : [];
 
-    console.log(`[BearerAuth] User ${userId} - Companies count: ${companies.length}`);
-    console.log(`[BearerAuth] Companies data:`, JSON.stringify(companies, null, 2));
-
-    // Use first company or get from header
+    // Company + role are confirmed against server-side company data; the
+    // user's own companies array only defines the order.
     const requestedCompanyId = req.headers['x-company-id'] as string;
-    console.log(`[BearerAuth] Requested company ID from header: ${requestedCompanyId || 'not provided'}`);
-
-    let activeCompany = companies[0];
+    let activeMembership: VerifiedMembership | null | undefined;
 
     if (requestedCompanyId) {
-      activeCompany = companies.find(
-        (c: { company: { id: string } }) => c.company.id === requestedCompanyId
-      );
+      // Requested company must be listed by the user and verified
+      const requestedEntry = companies.find(
+        (c) => (c as { company?: { id?: unknown } } | null)?.company?.id === requestedCompanyId
+      ) as { role?: unknown } | undefined;
+      activeMembership = requestedEntry
+        ? await verifyMembership(userId, requestedCompanyId, requestedEntry.role)
+        : null;
+    } else {
+      // First verified company
+      activeMembership = (await verifyUserMemberships(userId, companies))[0];
     }
 
-    console.log(`[BearerAuth] Active company:`, JSON.stringify(activeCompany, null, 2));
-
-    if (!activeCompany) {
-      console.log(`[BearerAuth] REJECTED - No company access for user ${userId}`);
+    if (!activeMembership) {
+      console.log(`[BearerAuth] REJECTED - No verified company access for user ${userId}`);
       res.status(403).json({
         success: false,
         error: {
@@ -277,25 +299,28 @@ export async function bearerAuth(
       return;
     }
 
-    // Normalize role (handles legacy 'user' role)
-    const normalizedRole = normalizeRole(activeCompany.role);
-    const permissions = getRolePermissions(normalizedRole);
+    const activeEntry = companies.find(
+      (c) => (c as { company?: { id?: unknown } } | null)?.company?.id === activeMembership.companyId
+    ) as { company?: { name?: string } } | undefined;
 
-    console.log(`[BearerAuth] User ${userId} - Company: ${activeCompany.company.id}, Role: ${activeCompany.role} -> ${normalizedRole}, Permissions: ${permissions.join(', ')}`);
+    // Normalize role (handles legacy 'user' role)
+    const normalizedRole = normalizeRole(activeMembership.role);
+    const permissions = getRolePermissions(normalizedRole);
 
     // Set auth context
     req.auth = {
       type: 'bearer',
-      companyId: activeCompany.company.id,
+      companyId: activeMembership.companyId,
       userId: userId,
+      email: decodedToken.email,
       permissions: permissions,
     };
 
     req.userContext = {
       userId: userId,
       userName: userData?.name || '',
-      companyId: activeCompany.company.id,
-      companyName: activeCompany.company.name || '',
+      companyId: activeMembership.companyId,
+      companyName: activeEntry?.company?.name || '',
       role: normalizedRole,
       permissions: permissions,
     };

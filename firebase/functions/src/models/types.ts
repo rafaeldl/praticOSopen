@@ -468,6 +468,8 @@ export interface AuthenticatedRequest extends Request {
     type: 'apiKey' | 'bot' | 'bearer' | 'shareToken' | 'mcp';
     companyId: string;
     userId?: string;
+    /** Email from the verified ID token (bearer auth only) */
+    email?: string;
     permissions?: string[];
     companyCountry?: string;
   };

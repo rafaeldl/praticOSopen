@@ -85,6 +85,15 @@ service cloud.firestore {
         && request.auth.token.roles[companyId] in ['admin', 'supervisor'];
     }
 
+    // Empresa criada pelo próprio usuário nesta mesma escrita (batch de cadastro)
+    function createsOwnCompanyInBatch(companyId) {
+      return request.auth != null
+        && companyId is string
+        && !exists(/databases/$(database)/documents/companies/$(companyId))
+        && existsAfter(/databases/$(database)/documents/companies/$(companyId))
+        && getAfter(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid;
+    }
+
     // Verifica se é o owner da empresa (para estrutura legada)
     function isOwner() {
       return request.auth != null
@@ -170,35 +179,42 @@ service cloud.firestore {
     // Path: /links/invites/tokens/{token}
     // Suporta convites via app e WhatsApp
     match /links/invites/tokens/{token} {
-      // Criação: membro da empresa com permissão de gerenciar usuários (admin)
-      // Também permite se o usuário pertence à empresa do convite
+      // Destinatário: e-mail do token verificado e igual ao do convite
+      function isInviteRecipient() {
+        return request.auth.token.email != null
+          && request.auth.token.email_verified == true
+          && request.auth.token.email == resource.data.email;
+      }
+
+      // Criação: apenas admin da empresa do convite
       allow create: if request.auth != null
         && request.resource.data.company != null
         && request.resource.data.company.id != null
-        && belongsToCompany(request.resource.data.company.id);
+        && isCompanyAdmin(request.resource.data.company.id);
 
-      // Leitura: membro da empresa OU destinatário (por email/phone)
+      // Leitura: admin da empresa OU destinatário (e-mail verificado)
       allow read: if request.auth != null
         && (
-          // Membro da empresa pode ver convites da empresa
           (resource.data.company != null
             && resource.data.company.id != null
-            && belongsToCompany(resource.data.company.id))
-          // Destinatário pode ver convites pelo seu email
-          || request.auth.token.email == resource.data.email
+            && isCompanyAdmin(resource.data.company.id))
+          || isInviteRecipient()
         );
 
-      // Atualização: destinatário pode aceitar/rejeitar, membro da empresa pode cancelar
+      // Atualização: destinatário pode aceitar/rejeitar convite pendente,
+      // admin da empresa pode gerenciar
       allow update: if request.auth != null
         && (
-          // Destinatário pode mudar status para accepted/rejected
-          (request.auth.token.email == resource.data.email
+          (isInviteRecipient()
+            && resource.data.status == 'pending'
+            && request.resource.data.status in ['accepted', 'rejected']
             && request.resource.data.diff(resource.data).affectedKeys()
                 .hasOnly(['status', 'acceptedAt', 'acceptedByUserId', 'acceptedByUserName']))
-          // Membro da empresa pode cancelar
+          // Admin da empresa pode gerenciar (sem mover o convite de empresa)
           || (resource.data.company != null
               && resource.data.company.id != null
-              && belongsToCompany(resource.data.company.id))
+              && isCompanyAdmin(resource.data.company.id)
+              && request.resource.data.company.id == resource.data.company.id)
         );
 
       // Deleção: apenas admin da empresa
@@ -401,15 +417,16 @@ service cloud.firestore {
 
       // ──────────────────────────────────────────────────────────────────────
       // MEMBERSHIPS (COLABORADORES)
-      // Todos podem visualizar, admin pode gerenciar, usuário pode criar próprio
+      // Todos podem visualizar, admin pode gerenciar; o próprio vínculo só é
+      // criado junto com a empresa (cadastro)
       // ──────────────────────────────────────────────────────────────────────
       match /memberships/{memberId} {
         allow read: if belongsToCompany(companyId);
-        // Permite criar seu próprio membership (signup) ou owner/admin gerenciar outros
+        // Admin cria vínculos; o próprio vínculo apenas ao criar a empresa no mesmo batch
         allow create: if request.auth != null
           && (
-            request.auth.uid == memberId  // Self-membership (signup)
-            || isCompanyAdmin(companyId)
+            isCompanyAdmin(companyId)
+            || (request.auth.uid == memberId && createsOwnCompanyInBatch(companyId))
           );
         // Update/delete apenas owner ou admin
         allow update, delete: if request.auth != null
@@ -417,6 +434,14 @@ service cloud.firestore {
             get(/databases/$(database)/documents/companies/$(companyId)).data.owner.id == request.auth.uid
             || isCompanyAdmin(companyId)
           );
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // DADOS PRIVADOS DO SERVIDOR (ex.: mapa de membros verificado)
+      // Somente Admin SDK; nenhum acesso pelo cliente
+      // ──────────────────────────────────────────────────────────────────────
+      match /private/{doc=**} {
+        allow read, write: if false;
       }
 
       // ──────────────────────────────────────────────────────────────────────
@@ -449,6 +474,31 @@ service cloud.firestore {
         allow read: if belongsToCompany(companyId);
         allow create, update: if belongsToCompany(companyId);
         allow delete: if canManageCompany(companyId);
+      }
+
+      // ──────────────────────────────────────────────────────────────────────
+      // MÓDULO FINANCEIRO
+      // Acesso restrito a admin e manager (canViewFinancial)
+      // Soft delete apenas (allow delete: if false)
+      // Publicado a partir de feat/financial-module (2026-03-31); mantido aqui
+      // para que o deploy deste arquivo não remova regras em uso.
+      // ──────────────────────────────────────────────────────────────────────
+      match /financialAccounts/{accountId} {
+        allow read: if canViewFinancial(companyId);
+        allow create, update: if canViewFinancial(companyId);
+        allow delete: if false; // Soft delete only
+      }
+
+      match /financialEntries/{entryId} {
+        allow read: if canViewFinancial(companyId);
+        allow create, update: if canViewFinancial(companyId);
+        allow delete: if false; // Soft delete only
+      }
+
+      match /financialPayments/{paymentId} {
+        allow read: if canViewFinancial(companyId);
+        allow create, update: if canViewFinancial(companyId);
+        allow delete: if false; // Soft delete only
       }
 
       // ──────────────────────────────────────────────────────────────────────

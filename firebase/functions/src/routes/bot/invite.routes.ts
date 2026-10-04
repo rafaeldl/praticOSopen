@@ -13,6 +13,29 @@ import { maskTokenForLog } from '../../utils/log-redaction.utils';
 
 const router: Router = Router();
 
+const ROLE_RANK: Record<string, number> = {
+  owner: 6,
+  admin: 5,
+  manager: 4,
+  supervisor: 3,
+  consultant: 2,
+  technician: 1,
+};
+
+/**
+ * Invite role policy: owner/admin may invite any assignable role (including
+ * admin/manager); other inviters only roles below their own, and supervisors
+ * only technicians.
+ */
+export function canInviteRole(inviterRole: string, inviteRole: string): boolean {
+  if (inviterRole === 'owner' || inviterRole === 'admin') return inviteRole !== 'owner';
+  if (inviteRole === 'admin' || inviteRole === 'manager') return false;
+  if (inviterRole === 'supervisor') return inviteRole === 'technician';
+  const inviterRank = ROLE_RANK[inviterRole] ?? 0;
+  const inviteRank = ROLE_RANK[inviteRole] ?? Number.MAX_SAFE_INTEGER;
+  return inviteRank < inviterRank;
+}
+
 /**
  * POST /api/bot/invite/create
  * Create a new invite code (admin/owner only)
@@ -47,13 +70,12 @@ router.post('/create', requireLinked, async (req: AuthenticatedRequest, res: Res
 
     const { collaboratorName, role: inviteRole, email, phone } = validation.data;
 
-    // Supervisors can only invite technicians
-    if (role === 'supervisor' && inviteRole !== 'technician') {
+    if (!canInviteRole(role, inviteRole)) {
       res.status(403).json({
         success: false,
         error: {
           code: 'FORBIDDEN',
-          message: 'Supervisors can only invite technicians',
+          message: 'You cannot invite collaborators with this role',
         },
       });
       return;
@@ -188,6 +210,14 @@ router.post('/accept', async (req: AuthenticatedRequest, res: Response) => {
       validatedData.whatsappNumber,
       validatedData.name
     );
+
+    if (!result.success && result.code === 'ALREADY_MEMBER') {
+      res.status(409).json({
+        success: false,
+        error: { code: 'ALREADY_MEMBER', message: result.error },
+      });
+      return;
+    }
 
     if (!result.success) {
       res.status(400).json({

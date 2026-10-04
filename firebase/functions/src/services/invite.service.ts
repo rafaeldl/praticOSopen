@@ -3,7 +3,7 @@
  * Manages collaborator invitations via app and WhatsApp
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { randomBytes } from 'crypto';
 import {
   db,
 } from './firestore.service';
@@ -14,6 +14,8 @@ import {
 } from '../models/types';
 import * as companyService from './company.service';
 import * as channelLinkService from './channel-link.service';
+import { memberRole, ownerId, privateMembershipRef, verifyMembership } from './membership.service';
+import { maskTokenForLog } from '../utils/log-redaction.utils';
 
 // Bot WhatsApp number (from environment or config)
 const BOT_WHATSAPP_NUMBER = process.env.BOT_WHATSAPP_NUMBER || '+5548988794742';
@@ -60,24 +62,41 @@ export interface AcceptInviteResult {
   role: RoleType;
 }
 
+export type AcceptInviteErrorCode = 'ALREADY_MEMBER';
+
 export interface AcceptInviteError {
   success: false;
   error: string;
+  /** Machine-readable code for errors with a specific HTTP status */
+  code?: AcceptInviteErrorCode;
+}
+
+function normalizeEmail(email: unknown): string {
+  return typeof email === 'string' ? email.trim().toLowerCase() : '';
 }
 
 // ============================================================================
 // Token Generation
 // ============================================================================
 
+const TOKEN_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const TOKEN_LENGTH = 16;
+
 /**
- * Generate a unique invite token
- * Format: INV_ + 8 uppercase alphanumeric characters
+ * Generate an invite token: INV_ + 16 uppercase alphanumeric characters from a
+ * cryptographically secure source (rejection sampling, no modulo bias).
+ * Uppercase only, so codes survive the uppercasing done by the app and the bot.
+ * Existing tokens in older formats remain valid.
  */
 export function generateToken(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let result = 'INV_';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  const limit = 256 - (256 % TOKEN_ALPHABET.length);
+  while (result.length < 4 + TOKEN_LENGTH) {
+    for (const byte of randomBytes(TOKEN_LENGTH * 2)) {
+      if (byte >= limit) continue;
+      result += TOKEN_ALPHABET[byte % TOKEN_ALPHABET.length];
+      if (result.length === 4 + TOKEN_LENGTH) break;
+    }
   }
   return result;
 }
@@ -118,8 +137,7 @@ export async function createInvite(
   }
 
   if (attempts >= maxAttempts) {
-    // Fallback to UUID-based token
-    token = `INV_${uuidv4().substring(0, 8).toUpperCase()}`;
+    throw new Error('Could not generate a unique invite token');
   }
 
   const expiresAt = new Date(Date.now() + INVITE_TOKEN_EXPIRATION);
@@ -151,57 +169,29 @@ export async function createInvite(
 
 /**
  * Accept an invite
+ *
+ * @param callerEmail Email from the caller's verified ID token. A difference
+ * from the invite email is only logged: private-relay and phone logins are
+ * legitimate ways to accept an invite.
  */
 export async function acceptInvite(
   token: string,
   userId: string,
-  userName: string
+  userName: string,
+  callerEmail?: string | null
 ): Promise<AcceptInviteResult | AcceptInviteError> {
-  // Get invite
-  const inviteDoc = await getInvitesCollection().doc(token).get();
+  const result = await acceptInviteTransaction(token, { id: userId, name: userName });
+  if (!result.success) return result;
 
-  if (!inviteDoc.exists) {
-    return { success: false, error: 'Invalid invite code' };
+  const { invite } = result;
+
+  // Log (masked identifiers only) when the caller email differs from the invite email
+  const inviteEmail = normalizeEmail(invite.email);
+  if (inviteEmail && inviteEmail !== normalizeEmail(callerEmail)) {
+    console.warn(
+      `[Invite] Accepted with a different login email: invite=${maskTokenForLog(token)} uid=${userId.slice(0, 6)}`
+    );
   }
-
-  const invite = inviteDoc.data() as Invite;
-
-  // Check status
-  if (invite.status === 'accepted') {
-    return { success: false, error: 'Invite has already been used' };
-  }
-
-  if (invite.status === 'cancelled') {
-    return { success: false, error: 'Invite has been cancelled' };
-  }
-
-  if (invite.status === 'rejected') {
-    return { success: false, error: 'Invite has been rejected' };
-  }
-
-  // Check if expired
-  const expiresAt = toDate(invite.expiresAt);
-  if (expiresAt && expiresAt < new Date()) {
-    return { success: false, error: 'Invite has expired' };
-  }
-
-  // Add user to company
-  await companyService.addMemberToCompany(
-    invite.company.id,
-    { id: userId, name: userName },
-    invite.role
-  );
-
-  // Add company to user's companies array
-  await addCompanyToUser(userId, invite.company, invite.role);
-
-  // Mark invite as accepted
-  await inviteDoc.ref.update({
-    status: 'accepted',
-    acceptedByUserId: userId,
-    acceptedByUserName: userName,
-    acceptedAt: new Date().toISOString(),
-  });
 
   return {
     success: true,
@@ -209,6 +199,82 @@ export async function acceptInvite(
     companyName: invite.company.name,
     role: invite.role,
   };
+}
+
+/** Validates an invite's state; returns an error message or null when usable. */
+function inviteStateError(invite: Invite): string | null {
+  if (invite.status === 'accepted') return 'Invite has already been used';
+  if (invite.status === 'cancelled') return 'Invite has been cancelled';
+  if (invite.status === 'rejected') return 'Invite has been rejected';
+  if (invite.status !== 'pending') return 'Invite is not pending';
+  const expiresAt = toDate(invite.expiresAt);
+  if (expiresAt && expiresAt < new Date()) return 'Invite has expired';
+  return null;
+}
+
+/**
+ * Accepts an invite atomically: in one transaction, requires a pending,
+ * non-expired invite and a user who is not yet the owner or a member, then
+ * registers the membership, adds the company to the user's list and marks the
+ * invite as accepted. An existing role is never changed by an invite.
+ */
+async function acceptInviteTransaction(
+  token: string,
+  user: UserAggr
+): Promise<{ success: true; invite: Invite } | AcceptInviteError> {
+  const inviteRef = getInvitesCollection().doc(token);
+  const userRef = db.collection('users').doc(user.id);
+
+  return db.runTransaction(async (tx) => {
+    const inviteSnap = await tx.get(inviteRef);
+    if (!inviteSnap.exists) {
+      return { success: false as const, error: 'Invalid invite code' };
+    }
+    const invite = inviteSnap.data() as Invite;
+    const stateError = inviteStateError(invite);
+    if (stateError) return { success: false as const, error: stateError };
+
+    const companyRef = db.collection('companies').doc(invite.company.id);
+    const companySnap = await tx.get(companyRef);
+    if (!companySnap.exists) {
+      return { success: false as const, error: 'Company not found' };
+    }
+    const company = companySnap.data();
+    const privateSnap = await tx.get(privateMembershipRef(invite.company.id));
+    const userSnap = await tx.get(userRef);
+
+    if (ownerId(company?.owner) === user.id || memberRole(privateSnap.data(), user.id) !== null) {
+      return {
+        success: false as const,
+        code: 'ALREADY_MEMBER' as const,
+        error: 'User is already a member of this company',
+      };
+    }
+
+    companyService.writeMemberAdd(tx, invite.company.id, company, user, invite.role);
+
+    if (userSnap.exists) {
+      const companies: Array<{ company?: { id?: string }; role?: string }> = Array.isArray(
+        userSnap.get('companies')
+      )
+        ? [...userSnap.get('companies')]
+        : [];
+      const entry = { company: { id: invite.company.id, name: invite.company.name }, role: invite.role };
+      const index = companies.findIndex((c) => c?.company?.id === invite.company.id);
+      if (index === -1) companies.push(entry);
+      else companies[index] = entry;
+      tx.update(userRef, { companies });
+    }
+
+    tx.update(inviteRef, {
+      status: 'accepted',
+      acceptedByUserId: user.id,
+      acceptedByUserName: user.name,
+      acceptedAt: new Date().toISOString(),
+    });
+
+    return { success: true as const, invite };
+  });
 }
 
 /**
@@ -401,9 +467,6 @@ export async function addCompanyToUserDoc(
   await db.collection('users').doc(userId).update({ companies });
 }
 
-// Alias for internal use
-const addCompanyToUser = addCompanyToUserDoc;
-
 /**
  * Mark invite as accepted (for bot service)
  */
@@ -427,15 +490,7 @@ export async function isUserMemberOfCompany(
   userId: string,
   companyId: string
 ): Promise<boolean> {
-  const company = await companyService.getCompany(companyId);
-  if (!company) return false;
-
-  // Check if user is owner
-  if (company.owner?.id === userId) return true;
-
-  // Check if user is in users array
-  const users = company.users || [];
-  return users.some((u) => u.user.id === userId);
+  return (await verifyMembership(userId, companyId)) !== null;
 }
 
 /**
@@ -557,6 +612,7 @@ export interface AcceptInviteViaWhatsAppResult {
 export interface AcceptInviteViaWhatsAppError {
   success: false;
   error: string;
+  code?: AcceptInviteErrorCode;
 }
 
 /**
@@ -571,25 +627,16 @@ export async function acceptInviteViaWhatsApp(
   // Normalize invite code (support both old INVITE_ and new INV_ formats)
   const normalizedCode = normalizeInviteCode(inviteCode);
 
-  // Get invite
+  // Get invite (pre-check before creating any user; re-checked atomically below)
   const invite = await getByToken(normalizedCode);
 
   if (!invite) {
     return { success: false, error: 'Invalid invite code' };
   }
 
-  // Check if already accepted
-  if (invite.status === 'accepted') {
-    return { success: false, error: 'Invite has already been used' };
-  }
-
-  if (invite.status === 'cancelled') {
-    return { success: false, error: 'Invite has been cancelled' };
-  }
-
-  // Check if expired
-  if (invite.expiresAt && new Date(invite.expiresAt) < new Date()) {
-    return { success: false, error: 'Invite has expired' };
+  const stateError = inviteStateError(invite);
+  if (stateError) {
+    return { success: false, error: stateError };
   }
 
   // Check if WhatsApp is already linked
@@ -611,36 +658,27 @@ export async function acceptInviteViaWhatsApp(
     userId = await channelLinkService.createUserFromWhatsApp(whatsappNumber, userName);
   }
 
-  // Add user to company
-  await companyService.addMemberToCompany(
-    invite.company.id,
-    { id: userId, name: userName },
-    invite.role
-  );
+  // Register membership and mark the invite accepted atomically
+  const result = await acceptInviteTransaction(normalizedCode, { id: userId, name: userName });
+  if (!result.success) return result;
 
   // Link WhatsApp
   await channelLinkService.linkWhatsApp(
     whatsappNumber,
     userId,
-    invite.company.id,
-    invite.role,
+    result.invite.company.id,
+    result.invite.role,
     userName,
-    invite.company.name
+    result.invite.company.name
   );
-
-  // Add company to user's companies array (for claims update)
-  await addCompanyToUserDoc(userId, invite.company, invite.role);
-
-  // Mark invite as accepted
-  await markAsAccepted(normalizedCode, userId, userName);
 
   return {
     success: true,
     userId,
     userName,
-    companyId: invite.company.id,
-    companyName: invite.company.name,
-    role: invite.role,
+    companyId: result.invite.company.id,
+    companyName: result.invite.company.name,
+    role: result.invite.role,
   };
 }
 

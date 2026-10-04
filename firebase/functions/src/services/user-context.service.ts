@@ -7,6 +7,7 @@
 import { db } from './firestore.service';
 import { CompanyAggr, UserContext } from '../models/types';
 import { getRolePermissions, normalizeRole } from '../middleware/auth.middleware';
+import { verifyMembership } from './membership.service';
 
 export type UserContextFailure = 'user_not_found' | 'company_not_found' | 'no_access';
 
@@ -40,17 +41,24 @@ export async function resolveUserContext(
 
   const companyData = companyDoc.data();
 
-  // Find user's role in this company
-  const companies = userData?.companies || [];
-  const companyRole = companies.find(
-    (c: { company: CompanyAggr }) => c.company.id === companyId
+  // The company must be listed by the user and confirmed by server-side data;
+  // the role always comes from server-side data.
+  const companies = Array.isArray(userData?.companies) ? userData.companies : [];
+  const entry = companies.find(
+    (c: { company?: CompanyAggr } | null) => c?.company?.id === companyId
   );
 
-  if (!companyRole) {
+  if (!entry) {
     return { ok: false, reason: 'no_access' };
   }
 
-  const normalizedRole = normalizeRole(companyRole.role);
+  const membership = await verifyMembership(userId, companyId, entry.role);
+
+  if (!membership) {
+    return { ok: false, reason: 'no_access' };
+  }
+
+  const normalizedRole = normalizeRole(membership.role);
 
   return {
     ok: true,
