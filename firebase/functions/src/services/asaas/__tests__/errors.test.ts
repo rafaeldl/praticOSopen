@@ -11,6 +11,7 @@ describe('toHttpError', () => {
     expect(toHttpError(new AsaasServiceError('ASAAS_NOT_ENABLED', 'm'), 'x').status).toBe(403);
     expect(toHttpError(new AsaasServiceError('CHARGE_NOT_FOUND', 'm'), 'x').status).toBe(404);
     expect(toHttpError(new AsaasServiceError('ASAAS_NOT_CONNECTED', 'm'), 'x').status).toBe(409);
+    expect(toHttpError(new AsaasServiceError('INSTALLMENTS_IN_PROGRESS', 'm'), 'x').status).toBe(409);
   });
 
   it('mapeia 400 do Asaas com a descrição', () => {

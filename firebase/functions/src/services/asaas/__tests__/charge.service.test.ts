@@ -235,7 +235,7 @@ describe('charge.service', () => {
 
       const error = await createOrderCharge('c1', 'o1', { value: 100, mode: 'single' }, USER).catch((e) => e);
 
-      expect(error.code).toBe('CHARGE_NOT_OPEN');
+      expect(error.code).toBe('INSTALLMENTS_IN_PROGRESS');
       expect(client.deleteInstallment).not.toHaveBeenCalled();
       expect(client.createPayment).not.toHaveBeenCalled();
       expect(read(`${ORDER_PATH}/charges/inst`)!.status).toBe('pending');
@@ -553,13 +553,13 @@ describe('charge.service', () => {
       expect(charge.status).toBe('paid');
     });
 
-    it('parcelamento com parcela paga → CHARGE_NOT_OPEN, sem chamar o Asaas', async () => {
+    it('parcelamento com parcela paga → INSTALLMENTS_IN_PROGRESS, sem chamar o Asaas', async () => {
       seedBase({ taxId: CPF });
       seedCharge('ch1', { mode: 'cardInstallments', asaasInstallmentId: 'ins_1', paidAsaasPaymentIds: ['pay_x'] });
 
       const error = await cancelOrderCharge('c1', 'o1', 'ch1').catch((e) => e);
 
-      expect(error.code).toBe('CHARGE_NOT_OPEN');
+      expect(error.code).toBe('INSTALLMENTS_IN_PROGRESS');
       expect(client.deleteInstallment).not.toHaveBeenCalled();
       expect(read(`${ORDER_PATH}/charges/ch1`)!.status).toBe('pending');
     });

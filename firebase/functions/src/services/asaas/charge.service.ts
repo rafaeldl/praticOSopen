@@ -308,7 +308,7 @@ export async function createOrderCharge(
   if (openCharges.some(hasPaidInstallments)) {
     // Remaining installments are still being collected: a new charge could bill twice.
     throw new AsaasServiceError(
-      'CHARGE_NOT_OPEN',
+      'INSTALLMENTS_IN_PROGRESS',
       'The order has an installment plan with paid installments; it cannot be replaced',
     );
   }
@@ -389,7 +389,10 @@ export async function cancelOrderCharge(
     throw new AsaasServiceError('CHARGE_NOT_OPEN', 'Only pending or overdue charges can be canceled');
   }
   if (hasPaidInstallments(charge)) {
-    throw new AsaasServiceError('CHARGE_NOT_OPEN', 'An installment plan with paid installments cannot be canceled');
+    throw new AsaasServiceError(
+      'INSTALLMENTS_IN_PROGRESS',
+      'An installment plan with paid installments cannot be canceled',
+    );
   }
 
   const client = await getAsaasCredentialProvider().getClient(companyId);

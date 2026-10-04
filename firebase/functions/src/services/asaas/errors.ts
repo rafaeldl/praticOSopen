@@ -20,7 +20,8 @@ export type AsaasErrorCode =
   | 'TAX_ID_REQUIRED'
   | 'INVALID_TAX_ID'
   | 'CHARGE_NOT_FOUND'
-  | 'CHARGE_NOT_OPEN';
+  | 'CHARGE_NOT_OPEN'
+  | 'INSTALLMENTS_IN_PROGRESS';
 
 const HTTP_STATUS: Record<AsaasErrorCode, number> = {
   ASAAS_NOT_ENABLED: 403,
@@ -38,6 +39,7 @@ const HTTP_STATUS: Record<AsaasErrorCode, number> = {
   INVALID_TAX_ID: 400,
   CHARGE_NOT_FOUND: 404,
   CHARGE_NOT_OPEN: 409,
+  INSTALLMENTS_IN_PROGRESS: 409,
 };
 
 export class AsaasServiceError extends Error {
