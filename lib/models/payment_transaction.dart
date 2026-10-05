@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:praticos/utils/order_payment_math.dart';
 import 'package:praticos/l10n/app_localizations.dart';
 import 'package:praticos/models/user.dart';
 import 'package:praticos/services/format_service.dart';
@@ -49,6 +50,9 @@ class PaymentTransaction {
 
   /// Whether this transaction has a receipt attached
   bool get hasReceipt => receiptDocumentId != null;
+
+  /// Payment posted by the Asaas webhook; can only be undone by a refund.
+  bool get isAsaas => OrderPaymentMath.isAsaasTransaction(this);
 
   factory PaymentTransaction.fromJson(Map<String, dynamic> json) =>
       _$PaymentTransactionFromJson(json);
