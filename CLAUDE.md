@@ -842,7 +842,7 @@ Antes de finalizar uma feature, verificar:
 - `docs/IOS_CODE_SIGNING.md` - Assinatura iOS via fastlane match (bootstrap, renovacao, troubleshooting)
 - `docs/PDF_GENERATION.md` - Geracao do PDF da OS (fotos, paginacao, download de imagens)
 - `docs/SHARE_LINK.md` - Sistema de compartilhamento via magic link
-- `docs/ASAAS_INTEGRATION.md` - Integração Asaas (ambientes, configuração, arquitetura da cobrança na OS)
+- `docs/ASAAS_INTEGRATION.md` - Integração Asaas (cobrança na OS: endpoints, dados, webhook, E2E no sandbox e rollout do piloto)
 - `docs/UX_GUIDELINES.md` - Padrões visuais iOS/Cupertino
 - `docs/WEB_UX_GUIDELINES.md` - Padrões para site institucional
 - `docs/WEBSITE_STRUCTURE.md` - Estrutura completa do site Eleventy
