@@ -13,6 +13,7 @@ class NotificationType {
   static const newComment = 'new_comment';
   static const statusChanged = 'status_changed';
   static const orderRated = 'order_rated';
+  static const paymentReceived = 'payment_received';
 }
 
 /// In-app notification stored in Firestore
