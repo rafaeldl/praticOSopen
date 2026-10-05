@@ -5,6 +5,7 @@ import 'package:praticos/models/customer.dart';
 import 'package:praticos/services/location_service.dart';
 import 'package:praticos/widgets/dynamic_text_field.dart';
 import 'package:praticos/widgets/dynamic_field_builder.dart';
+import 'package:praticos/widgets/tax_id_form_field.dart';
 import 'package:praticos/providers/segment_config_provider.dart';
 import 'package:praticos/extensions/context_extensions.dart';
 
@@ -128,6 +129,12 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
                     textAlign: TextAlign.right,
                     onSaved: (val) => _customer?.email = val,
                   ),
+                  // CPF/CNPJ (Brazil only): required by Asaas to charge
+                  if (config.countryCode == null || config.countryCode == 'BR')
+                    TaxIdFormField(
+                      initialValue: _customer?.taxId,
+                      onSaved: (val) => _customer?.taxId = val,
+                    ),
                   CupertinoTextFormFieldRow(
                     prefix: GestureDetector(
                       onTap: (_customer?.address != null && _customer!.address!.isNotEmpty) ||
@@ -182,6 +189,7 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
     'customer.phone',
     'customer.email',
     'customer.address',
+    'customer.taxId',
   };
 
   List<Widget> _buildCustomFieldSections(SegmentConfigProvider config) {
