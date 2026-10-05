@@ -1,398 +1,359 @@
 {
   "pt": {
-    "lang": "pt-BR",
-    "langCode": "pt",
-    "title": "PraticOS - Gestão de Ordens de Serviço Simplificada",
-    "description": "Sistema completo para gestão de ordens de serviço, clientes e finanças. Controle seu negócio de forma prática e eficiente.",
-    "keywords": "ordem de serviço, gestão, clientes, oficina, prestador de serviço, app",
-    "ogTitle": "PraticOS - Gestão de Ordens de Serviço",
-    "ogDescription": "Sistema completo para gestão de ordens de serviço, clientes e finanças.",
     "hero": {
-      "badge": "Novidade! Múltiplas empresas",
-      "title": "Gerencie suas",
-      "titleHighlight": "Ordens de Serviço",
-      "subtitle": "de forma simples e eficiente",
-      "text": "Sistema completo para prestadores de serviço. Controle clientes, ordens de serviço e finanças em um só lugar.",
-      "ctaPrimary": { "text": "Baixar Grátis", "href": "#download" },
-      "ctaWhatsapp": { "text": "Começar pelo WhatsApp" },
-      "stats": [
-        { "value": "500+", "label": "Usuários ativos" },
-        { "value": "10k+", "label": "OS criadas" },
-        { "value": "4.8", "label": "Avaliação" }
-      ],
-      "phones": {
-        "back": { "image": "dashboard.png", "alt": "Dashboard PraticOS" },
-        "front": { "image": "home.png", "alt": "Ordens de Serviço" }
-      },
-      "scroll": "Scroll"
+      "titleBefore": "Do orçamento ao pagamento,",
+      "titleMark": "numa OS só.",
+      "lede": "PraticOS é o app de ordem de serviço para quem trabalha na oficina, na bancada ou na casa do cliente. Abra a OS, tire as fotos, mande o link para o cliente aprovar e registre o pagamento — tudo pelo celular.",
+      "ctaPrimary": "Baixar grátis",
+      "ctaSecondary": "Ver como funciona",
+      "note": "Plano grátis para sempre · iOS e Android · sem cartão de crédito",
+      "ticket": {
+        "caption": "Exemplo de OS",
+        "title": "Ordem de serviço",
+        "number": "Nº 0142",
+        "rows": [
+          { "label": "Cliente", "value": "Marcos Andrade" },
+          { "label": "Equipamento", "value": "Split 12.000 BTUs · sala" },
+          { "label": "Serviço", "value": "Limpeza completa + carga de gás" },
+          { "label": "Técnico", "value": "Ana Paula" },
+          { "label": "Fotos", "value": "4 anexadas" }
+        ],
+        "totalLabel": "Total",
+        "total": "R$ 480,00",
+        "stamp": "Aprovado pelo cliente",
+        "steps": ["Orçamento", "Aprovado", "Em execução", "Concluído", "Pago"],
+        "current": 2
+      }
     },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Tudo que você precisa para",
-      "titleHighlight": "gerenciar seu negócio",
-      "subtitle": "Ferramentas poderosas e intuitivas para aumentar sua produtividade",
-      "items": [
+    "workflow": {
+      "title": "Como uma OS anda no PraticOS",
+      "lede": "Cinco passos, do primeiro contato ao dinheiro na conta. Sem planilha, sem caderno e sem orçamento perdido no meio da conversa.",
+      "stages": [
         {
-          "icon": "document",
-          "title": "Ordens de Serviço",
-          "text": "Crie, edite e acompanhe todas as suas ordens de serviço. Adicione fotos, descrições detalhadas e valores."
+          "number": "01",
+          "title": "Abra a OS em menos de um minuto",
+          "text": "Escolha o cliente, o equipamento e o que vai ser feito. Serviços e peças saem do seu catálogo, com preço.",
+          "facts": [
+            "Cliente fica salvo com todo o histórico de serviços",
+            "O app usa os nomes do seu ramo: veículo, aparelho, equipamento",
+            "Status claros: orçamento, aprovado, em execução, concluído"
+          ],
+          "image": "home.png",
+          "alt": "Lista de ordens de serviço no app PraticOS"
         },
         {
-          "icon": "users",
-          "title": "Gestão de Clientes",
-          "text": "Cadastre e organize seus clientes. Histórico completo de serviços, contatos e valores pendentes.",
-          "color": "yellow"
+          "number": "02",
+          "title": "Registre com foto e checklist",
+          "text": "Fotografe o antes e o depois direto na OS. Use checklists e vistorias para que todo técnico siga o mesmo padrão.",
+          "facts": [
+            "Fotos ficam anexadas à OS, não perdidas na galeria",
+            "Checklists e formulários criados por você",
+            "PDF da OS pronto para enviar ou imprimir"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist preenchido dentro de uma OS"
         },
         {
-          "icon": "chart",
-          "title": "Dashboard Financeiro",
-          "text": "Visualize faturamento, valores recebidos e a receber. Gráficos e relatórios por período.",
-          "color": "orange"
+          "number": "03",
+          "title": "Agende e distribua para a equipe",
+          "text": "Veja o mês inteiro no calendário e filtre por técnico. O app lembra você antes de cada visita.",
+          "facts": [
+            "Lembrete no celular antes do horário, mesmo sem internet",
+            "Cada técnico vê o que é dele",
+            "Perfis de acesso: administrador, gerente, técnico e outros"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda mensal com ordens de serviço marcadas"
         },
         {
-          "icon": "calendar",
-          "title": "Agenda",
-          "text": "Visualize OS agendadas em um calendário mensal. Configure lembretes e filtre por técnico.",
-          "color": "teal"
+          "number": "04",
+          "title": "Mande o link para o cliente",
+          "text": "O cliente abre a OS no navegador, sem instalar nada. Ele vê fotos e valores, aprova o orçamento e deixa comentários.",
+          "facts": [
+            "Aprovação registrada na própria OS",
+            "Cliente acompanha o andamento sem precisar ligar",
+            "Funciona em qualquer celular"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalhe de uma OS com fotos, cliente e status"
         },
         {
-          "icon": "lock",
-          "title": "Múltiplas Empresas",
-          "text": "Gerencie várias empresas ou filiais em uma única conta. Ideal para franquias e grupos.",
-          "color": "green"
-        },
-        {
-          "icon": "settings",
-          "title": "Temas Claro/Escuro",
-          "text": "Interface adaptável ao seu estilo. Suporte nativo a modo claro e escuro com design Material e Cupertino.",
-          "color": "purple"
-        },
-        {
-          "icon": "shield",
-          "title": "Autenticação Segura",
-          "text": "Login com Google, Apple ou Email. Seus dados protegidos com as melhores práticas de segurança.",
-          "color": "cyan"
+          "number": "05",
+          "title": "Receba e saiba quanto entrou",
+          "text": "Registre pagamentos inteiros ou parciais, com desconto. O painel mostra o que você recebeu e o que ainda falta receber.",
+          "facts": [
+            "Pagamento parcial e desconto na mesma OS",
+            "Faturamento por período",
+            "Quem ainda deve, em uma lista só"
+          ],
+          "image": "payments.png",
+          "alt": "Tela de pagamentos de uma OS"
         }
       ]
     },
-    "whatsappAssistant": {
-      "tag": "Assistente WhatsApp",
-      "title": "Gerencie pelo",
-      "titleHighlight": "WhatsApp",
-      "text": "Crie ordens de serviço, envie fotos e áudios, e acompanhe seu negócio direto pelo chat. Seu assistente com IA funciona 24/7.",
-      "cta": { "text": "Saiba mais", "href": "funcionalidades/whatsapp-bot.html" },
-      "ctaWhatsapp": "Testar o Assistente",
-      "features": [
-        "OS por conversa natural",
-        "Fotos e áudios inteligentes",
-        "Links mágicos para clientes",
-        "Resumo financeiro por chat"
-      ],
-      "demoAlt": "Demo do assistente WhatsApp"
+    "segments": {
+      "title": "Feito para quem conserta, instala e faz manutenção",
+      "lede": "O PraticOS se ajusta ao seu ramo. Na oficina o campo se chama veículo, na assistência técnica é aparelho, na refrigeração é equipamento. Veja o seu:"
     },
-    "screenshots": {
-      "tag": "Screenshots",
-      "title": "Conheça a",
-      "titleHighlight": "interface do app",
-      "subtitle": "Design moderno e intuitivo para a melhor experiência",
-      "items": [
-        { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard" },
-        { "image": "agenda.png", "alt": "Agenda", "label": "Agenda" },
-        { "image": "order-detail.png", "alt": "Detalhe da OS", "label": "Detalhe da OS", "featured": true },
-        { "image": "payments.png", "alt": "Pagamentos", "label": "Pagamentos" },
-        { "image": "forms.png", "alt": "Formulários", "label": "Formulários" }
-      ]
+    "whatsappAssistant": {
+      "title": "Sem tempo de abrir o app? Mande uma mensagem.",
+      "text": "O assistente do PraticOS no WhatsApp cria OS, anexa fotos e responde quanto você faturou, a partir de texto ou áudio.",
+      "features": [
+        "Abra uma OS conversando",
+        "Fotos e áudios vão direto para a OS",
+        "Envie o link da OS para o cliente",
+        "Pergunte o resumo financeiro do mês"
+      ],
+      "cta": { "text": "Conhecer o assistente", "href": "funcionalidades/whatsapp-bot.html" },
+      "ctaWhatsapp": "Testar no WhatsApp",
+      "demoAlt": "Conversa com o assistente do PraticOS no WhatsApp"
     },
     "download": {
-      "title": "Baixe agora e comece a",
-      "titleHighlight": "organizar seu negócio",
-      "text": "Disponível para iOS e Android. Comece gratuitamente!",
-      "appStore": { "label": "Disponível na", "name": "App Store" },
-      "playStore": { "label": "Disponível no", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contato",
-      "title": "Precisa de",
-      "titleHighlight": "ajuda?",
-      "subtitle": "Nossa equipe está pronta para te atender",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq.html", "text": "Perguntas frequentes" },
-        "privacy": { "title": "Privacidade", "link": "privacy.html", "text": "Política de privacidade" }
-      },
-      "form": {
-        "name": "Nome",
-        "namePlaceholder": "Seu nome",
-        "email": "E-mail",
-        "emailPlaceholder": "seu@email.com",
-        "message": "Mensagem",
-        "messagePlaceholder": "Como podemos ajudar?",
-        "submit": "Enviar Mensagem"
-      }
+      "title": "Baixe e abra sua primeira OS hoje.",
+      "text": "Grátis no iOS e no Android. Sem cartão de crédito e sem prazo para acabar.",
+      "appStore": { "label": "Baixar na", "name": "App Store" },
+      "playStore": { "label": "Disponível no", "name": "Google Play" },
+      "contactLead": "Ficou com dúvida?",
+      "contactWhatsapp": "Fale com a gente no WhatsApp",
+      "contactFaq": "Perguntas frequentes"
     }
   },
   "en": {
-    "lang": "en",
-    "langCode": "en",
-    "title": "PraticOS - Simplified Service Order Management",
-    "description": "Complete system for service order, customer, and financial management. Control your business efficiently.",
-    "keywords": "service order, management, customers, workshop, service provider, app",
-    "ogTitle": "PraticOS - Service Order Management",
-    "ogDescription": "Complete system for service order, customer, and financial management.",
     "hero": {
-      "badge": "New! Multiple companies",
-      "title": "Manage your",
-      "titleHighlight": "Service Orders",
-      "subtitle": "simply and efficiently",
-      "text": "Complete system for service providers. Control customers, service orders, and finances in one place.",
-      "ctaPrimary": { "text": "Download Free", "href": "#download" },
-      "ctaWhatsapp": { "text": "Start on WhatsApp" },
-      "stats": [
-        { "value": "500+", "label": "Active users" },
-        { "value": "10k+", "label": "Orders created" },
-        { "value": "4.8", "label": "Rating" }
-      ],
-      "phones": {
-        "back": { "image": "dashboard.png", "alt": "PraticOS Dashboard" },
-        "front": { "image": "home.png", "alt": "Service Orders" }
-      },
-      "scroll": "Scroll"
+      "titleBefore": "From quote to payment,",
+      "titleMark": "in one work order.",
+      "lede": "PraticOS is the work order app for people who work in a shop, at a bench or at the customer's door. Open the order, take the photos, send the link for the customer to approve and record the payment — all from your phone.",
+      "ctaPrimary": "Download free",
+      "ctaSecondary": "See how it works",
+      "note": "Free plan forever · iOS and Android · no credit card",
+      "ticket": {
+        "caption": "Sample work order",
+        "title": "Work order",
+        "number": "No. 0142",
+        "rows": [
+          { "label": "Customer", "value": "Mark Anderson" },
+          { "label": "Equipment", "value": "Split AC 12,000 BTU · living room" },
+          { "label": "Service", "value": "Full cleaning + refrigerant recharge" },
+          { "label": "Technician", "value": "Anna Paula" },
+          { "label": "Photos", "value": "4 attached" }
+        ],
+        "totalLabel": "Total",
+        "total": "$480.00",
+        "stamp": "Approved by customer",
+        "steps": ["Quote", "Approved", "In progress", "Done", "Paid"],
+        "current": 2
+      }
     },
-    "features": {
-      "tag": "Features",
-      "title": "Everything you need to",
-      "titleHighlight": "manage your business",
-      "subtitle": "Powerful and intuitive tools to increase your productivity",
-      "items": [
+    "workflow": {
+      "title": "How a work order moves through PraticOS",
+      "lede": "Five steps, from first contact to money in the bank. No spreadsheet, no notebook, no quote lost in a chat thread.",
+      "stages": [
         {
-          "icon": "document",
-          "title": "Service Orders",
-          "text": "Create, edit, and track all your service orders. Add photos, detailed descriptions, and values."
+          "number": "01",
+          "title": "Open an order in under a minute",
+          "text": "Pick the customer, the equipment and the job. Services and parts come from your own catalog, with prices.",
+          "facts": [
+            "Customers are saved with their full service history",
+            "The app uses your trade's words: vehicle, device, equipment",
+            "Clear statuses: quote, approved, in progress, done"
+          ],
+          "image": "home.png",
+          "alt": "Work order list in the PraticOS app"
         },
         {
-          "icon": "users",
-          "title": "Customer Management",
-          "text": "Register and organize your customers. Complete history of services, contacts, and pending values.",
-          "color": "yellow"
+          "number": "02",
+          "title": "Record it with photos and checklists",
+          "text": "Shoot the before and after straight into the order. Use checklists and inspections so every technician follows the same standard.",
+          "facts": [
+            "Photos stay attached to the order, not lost in your gallery",
+            "Checklists and forms you design",
+            "Order PDF ready to send or print"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist filled in inside a work order"
         },
         {
-          "icon": "chart",
-          "title": "Financial Dashboard",
-          "text": "View revenue, received amounts, and receivables. Charts and reports by period.",
-          "color": "orange"
+          "number": "03",
+          "title": "Schedule and assign the team",
+          "text": "See the whole month on a calendar and filter by technician. The app reminds you before every visit.",
+          "facts": [
+            "Phone reminder before each visit, even offline",
+            "Each technician sees their own jobs",
+            "Access profiles: admin, manager, technician and more"
+          ],
+          "image": "agenda.png",
+          "alt": "Monthly calendar with scheduled work orders"
         },
         {
-          "icon": "calendar",
-          "title": "Agenda",
-          "text": "View scheduled orders on a monthly calendar. Configure reminders and filter by technician.",
-          "color": "teal"
+          "number": "04",
+          "title": "Send the customer a link",
+          "text": "The customer opens the order in a browser, nothing to install. They see photos and prices, approve the quote and leave comments.",
+          "facts": [
+            "Approval recorded on the order itself",
+            "Customers follow progress without calling you",
+            "Works on any phone"
+          ],
+          "image": "order-detail.png",
+          "alt": "Work order detail with photos, customer and status"
         },
         {
-          "icon": "lock",
-          "title": "Multiple Companies",
-          "text": "Manage multiple companies or branches in a single account. Ideal for franchises and groups.",
-          "color": "green"
-        },
-        {
-          "icon": "settings",
-          "title": "Light/Dark Themes",
-          "text": "Adaptable interface to your style. Native support for light and dark mode with Material and Cupertino design.",
-          "color": "purple"
-        },
-        {
-          "icon": "shield",
-          "title": "Secure Authentication",
-          "text": "Login with Google, Apple, or Email. Your data protected with the best security practices.",
-          "color": "cyan"
+          "number": "05",
+          "title": "Get paid and know what came in",
+          "text": "Record full or partial payments, with discounts. The dashboard shows what you received and what is still owed.",
+          "facts": [
+            "Partial payment and discount on the same order",
+            "Revenue by period",
+            "Everyone who still owes you, in one list"
+          ],
+          "image": "payments.png",
+          "alt": "Payments screen of a work order"
         }
       ]
     },
-    "whatsappAssistant": {
-      "tag": "WhatsApp Assistant",
-      "title": "Manage via",
-      "titleHighlight": "WhatsApp",
-      "text": "Create work orders, send photos and audio, and track your business directly through chat. Your AI assistant works 24/7.",
-      "cta": { "text": "Learn more", "href": "funcionalidades/whatsapp-bot-en.html" },
-      "ctaWhatsapp": "Try the Assistant",
-      "features": [
-        "WO by natural conversation",
-        "Smart photos and audio",
-        "Magic links for customers",
-        "Financial summary via chat"
-      ],
-      "demoAlt": "WhatsApp assistant demo"
+    "segments": {
+      "title": "Built for people who repair, install and maintain",
+      "lede": "PraticOS adapts to your trade. In an auto shop the field is called vehicle, in a phone repair shop it is device, in HVAC it is equipment. Find yours:"
     },
-    "screenshots": {
-      "tag": "Screenshots",
-      "title": "Discover the",
-      "titleHighlight": "app interface",
-      "subtitle": "Modern and intuitive design for the best experience",
-      "items": [
-        { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard" },
-        { "image": "agenda.png", "alt": "Agenda", "label": "Agenda" },
-        { "image": "order-detail.png", "alt": "Order Detail", "label": "Order Detail", "featured": true },
-        { "image": "payments.png", "alt": "Payments", "label": "Payments" },
-        { "image": "forms.png", "alt": "Forms", "label": "Forms" }
-      ]
+    "whatsappAssistant": {
+      "title": "No time to open the app? Send a message.",
+      "text": "The PraticOS WhatsApp assistant opens work orders, attaches photos and tells you how much you billed, from text or voice notes.",
+      "features": [
+        "Open a work order by chatting",
+        "Photos and voice notes go straight into the order",
+        "Send the order link to the customer",
+        "Ask for this month's financial summary"
+      ],
+      "cta": { "text": "Meet the assistant", "href": "funcionalidades/whatsapp-bot-en.html" },
+      "ctaWhatsapp": "Try it on WhatsApp",
+      "demoAlt": "Chat with the PraticOS assistant on WhatsApp"
     },
     "download": {
-      "title": "Download now and start",
-      "titleHighlight": "organizing your business",
-      "text": "Available for iOS and Android. Start for free!",
-      "appStore": { "label": "Available on", "name": "App Store" },
-      "playStore": { "label": "Available on", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contact",
-      "title": "Need",
-      "titleHighlight": "help?",
-      "subtitle": "Our team is ready to assist you",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-en.html", "text": "Frequently asked questions" },
-        "privacy": { "title": "Privacy", "link": "privacy-en.html", "text": "Privacy policy" }
-      },
-      "form": {
-        "name": "Name",
-        "namePlaceholder": "Your name",
-        "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "message": "Message",
-        "messagePlaceholder": "How can we help?",
-        "submit": "Send Message"
-      }
+      "title": "Download it and open your first order today.",
+      "text": "Free on iOS and Android. No credit card and no trial clock.",
+      "appStore": { "label": "Download on the", "name": "App Store" },
+      "playStore": { "label": "Get it on", "name": "Google Play" },
+      "contactLead": "Questions?",
+      "contactWhatsapp": "Talk to us on WhatsApp",
+      "contactFaq": "FAQ"
     }
   },
   "es": {
-    "lang": "es",
-    "langCode": "es",
-    "title": "PraticOS - Gestión de Órdenes de Servicio Simplificada",
-    "description": "Sistema completo para gestión de órdenes de servicio, clientes y finanzas. Controle su negocio de forma práctica y eficiente.",
-    "keywords": "orden de servicio, gestión, clientes, taller, proveedor de servicios, app",
-    "ogTitle": "PraticOS - Gestión de Órdenes de Servicio",
-    "ogDescription": "Sistema completo para gestión de órdenes de servicio, clientes y finanzas.",
     "hero": {
-      "badge": "¡Novedad! Múltiples empresas",
-      "title": "Gestione sus",
-      "titleHighlight": "Órdenes de Servicio",
-      "subtitle": "de forma simple y eficiente",
-      "text": "Sistema completo para proveedores de servicios. Controle clientes, órdenes de servicio y finanzas en un solo lugar.",
-      "ctaPrimary": { "text": "Descargar Gratis", "href": "#download" },
-      "ctaWhatsapp": { "text": "Empezar por WhatsApp" },
-      "stats": [
-        { "value": "500+", "label": "Usuarios activos" },
-        { "value": "10k+", "label": "OS creadas" },
-        { "value": "4.8", "label": "Calificación" }
-      ],
-      "phones": {
-        "back": { "image": "dashboard.png", "alt": "Dashboard PraticOS" },
-        "front": { "image": "home.png", "alt": "Órdenes de Servicio" }
-      },
-      "scroll": "Scroll"
+      "titleBefore": "Del presupuesto al cobro,",
+      "titleMark": "en una sola orden.",
+      "lede": "PraticOS es la app de órdenes de servicio para quien trabaja en el taller, en el banco de trabajo o en la casa del cliente. Abre la orden, saca las fotos, envía el link para que el cliente apruebe y registra el pago — todo desde el celular.",
+      "ctaPrimary": "Descargar gratis",
+      "ctaSecondary": "Ver cómo funciona",
+      "note": "Plan gratis para siempre · iOS y Android · sin tarjeta de crédito",
+      "ticket": {
+        "caption": "Ejemplo de orden",
+        "title": "Orden de servicio",
+        "number": "N.º 0142",
+        "rows": [
+          { "label": "Cliente", "value": "Marcos Andrade" },
+          { "label": "Equipo", "value": "Split 12.000 BTU · living" },
+          { "label": "Servicio", "value": "Limpieza completa + carga de gas" },
+          { "label": "Técnico", "value": "Ana Paula" },
+          { "label": "Fotos", "value": "4 adjuntas" }
+        ],
+        "totalLabel": "Total",
+        "total": "$ 480,00",
+        "stamp": "Aprobado por el cliente",
+        "steps": ["Presupuesto", "Aprobado", "En curso", "Terminado", "Cobrado"],
+        "current": 2
+      }
     },
-    "features": {
-      "tag": "Funcionalidades",
-      "title": "Todo lo que necesita para",
-      "titleHighlight": "gestionar su negocio",
-      "subtitle": "Herramientas poderosas e intuitivas para aumentar su productividad",
-      "items": [
+    "workflow": {
+      "title": "Cómo avanza una orden en PraticOS",
+      "lede": "Cinco pasos, del primer contacto al dinero en la cuenta. Sin planillas, sin cuaderno y sin presupuestos perdidos en el chat.",
+      "stages": [
         {
-          "icon": "document",
-          "title": "Órdenes de Servicio",
-          "text": "Cree, edite y siga todas sus órdenes de servicio. Agregue fotos, descripciones detalladas y valores."
+          "number": "01",
+          "title": "Abre la orden en menos de un minuto",
+          "text": "Elige el cliente, el equipo y el trabajo a realizar. Servicios y repuestos salen de tu catálogo, con precio.",
+          "facts": [
+            "El cliente queda guardado con todo su historial",
+            "La app usa las palabras de tu rubro: vehículo, aparato, equipo",
+            "Estados claros: presupuesto, aprobado, en curso, terminado"
+          ],
+          "image": "home.png",
+          "alt": "Lista de órdenes de servicio en la app PraticOS"
         },
         {
-          "icon": "users",
-          "title": "Gestión de Clientes",
-          "text": "Registre y organice sus clientes. Historial completo de servicios, contactos y valores pendientes.",
-          "color": "yellow"
+          "number": "02",
+          "title": "Registra con fotos y checklist",
+          "text": "Fotografía el antes y el después dentro de la orden. Usa checklists e inspecciones para que cada técnico siga el mismo estándar.",
+          "facts": [
+            "Las fotos quedan en la orden, no perdidas en la galería",
+            "Checklists y formularios diseñados por ti",
+            "PDF de la orden listo para enviar o imprimir"
+          ],
+          "image": "forms.png",
+          "alt": "Checklist completado dentro de una orden"
         },
         {
-          "icon": "chart",
-          "title": "Dashboard Financiero",
-          "text": "Visualice facturación, valores recibidos y por recibir. Gráficos e informes por período.",
-          "color": "orange"
+          "number": "03",
+          "title": "Agenda y reparte el trabajo",
+          "text": "Mira el mes completo en el calendario y filtra por técnico. La app te avisa antes de cada visita.",
+          "facts": [
+            "Recordatorio en el celular, incluso sin internet",
+            "Cada técnico ve lo suyo",
+            "Perfiles de acceso: administrador, gerente, técnico y más"
+          ],
+          "image": "agenda.png",
+          "alt": "Agenda mensual con órdenes programadas"
         },
         {
-          "icon": "calendar",
-          "title": "Agenda",
-          "text": "Visualice OS programadas en un calendario mensual. Configure recordatorios y filtre por técnico.",
-          "color": "teal"
+          "number": "04",
+          "title": "Envía el link al cliente",
+          "text": "El cliente abre la orden en el navegador, sin instalar nada. Ve fotos y valores, aprueba el presupuesto y deja comentarios.",
+          "facts": [
+            "La aprobación queda registrada en la orden",
+            "El cliente sigue el avance sin llamarte",
+            "Funciona en cualquier celular"
+          ],
+          "image": "order-detail.png",
+          "alt": "Detalle de una orden con fotos, cliente y estado"
         },
         {
-          "icon": "lock",
-          "title": "Múltiples Empresas",
-          "text": "Gestione varias empresas o sucursales en una sola cuenta. Ideal para franquicias y grupos.",
-          "color": "green"
-        },
-        {
-          "icon": "settings",
-          "title": "Temas Claro/Oscuro",
-          "text": "Interfaz adaptable a su estilo. Soporte nativo a modo claro y oscuro con diseño Material y Cupertino.",
-          "color": "purple"
-        },
-        {
-          "icon": "shield",
-          "title": "Autenticación Segura",
-          "text": "Inicio de sesión con Google, Apple o Email. Sus datos protegidos con las mejores prácticas de seguridad.",
-          "color": "cyan"
+          "number": "05",
+          "title": "Cobra y sabe cuánto entró",
+          "text": "Registra pagos completos o parciales, con descuento. El panel muestra lo que cobraste y lo que falta cobrar.",
+          "facts": [
+            "Pago parcial y descuento en la misma orden",
+            "Facturación por período",
+            "Quién te debe, en una sola lista"
+          ],
+          "image": "payments.png",
+          "alt": "Pantalla de pagos de una orden"
         }
       ]
     },
-    "whatsappAssistant": {
-      "tag": "Asistente WhatsApp",
-      "title": "Gestione por",
-      "titleHighlight": "WhatsApp",
-      "text": "Cree órdenes de servicio, envíe fotos y audios, y acompañe su negocio directo por chat. Su asistente con IA funciona 24/7.",
-      "cta": { "text": "Saber más", "href": "funcionalidades/whatsapp-bot-es.html" },
-      "ctaWhatsapp": "Probar el Asistente",
-      "features": [
-        "OS por conversación natural",
-        "Fotos y audios inteligentes",
-        "Links mágicos para clientes",
-        "Resumen financiero por chat"
-      ],
-      "demoAlt": "Demo del asistente WhatsApp"
+    "segments": {
+      "title": "Hecho para quien repara, instala y mantiene",
+      "lede": "PraticOS se adapta a tu rubro. En el taller el campo se llama vehículo, en el servicio técnico es aparato, en refrigeración es equipo. Encuentra el tuyo:"
     },
-    "screenshots": {
-      "tag": "Capturas",
-      "title": "Conozca la",
-      "titleHighlight": "interfaz de la app",
-      "subtitle": "Diseño moderno e intuitivo para la mejor experiencia",
-      "items": [
-        { "image": "dashboard.png", "alt": "Dashboard", "label": "Dashboard" },
-        { "image": "agenda.png", "alt": "Agenda", "label": "Agenda" },
-        { "image": "order-detail.png", "alt": "Detalle de la OS", "label": "Detalle de la OS", "featured": true },
-        { "image": "payments.png", "alt": "Pagos", "label": "Pagos" },
-        { "image": "forms.png", "alt": "Formularios", "label": "Formularios" }
-      ]
+    "whatsappAssistant": {
+      "title": "¿Sin tiempo para abrir la app? Manda un mensaje.",
+      "text": "El asistente de PraticOS en WhatsApp abre órdenes, adjunta fotos y te dice cuánto facturaste, con texto o audio.",
+      "features": [
+        "Abre una orden conversando",
+        "Fotos y audios van directo a la orden",
+        "Envía el link de la orden al cliente",
+        "Pide el resumen financiero del mes"
+      ],
+      "cta": { "text": "Conocer el asistente", "href": "funcionalidades/whatsapp-bot-es.html" },
+      "ctaWhatsapp": "Probar en WhatsApp",
+      "demoAlt": "Conversación con el asistente de PraticOS en WhatsApp"
     },
     "download": {
-      "title": "Descargue ahora y comience a",
-      "titleHighlight": "organizar su negocio",
-      "text": "Disponible para iOS y Android. ¡Comience gratis!",
-      "appStore": { "label": "Disponible en", "name": "App Store" },
-      "playStore": { "label": "Disponible en", "name": "Google Play" }
-    },
-    "contact": {
-      "tag": "Contacto",
-      "title": "¿Necesita",
-      "titleHighlight": "ayuda?",
-      "subtitle": "Nuestro equipo está listo para atenderle",
-      "cards": {
-        "email": { "title": "Email" },
-        "faq": { "title": "FAQ", "link": "faq-es.html", "text": "Preguntas frecuentes" },
-        "privacy": { "title": "Privacidad", "link": "privacy-es.html", "text": "Política de privacidad" }
-      },
-      "form": {
-        "name": "Nombre",
-        "namePlaceholder": "Su nombre",
-        "email": "Correo electrónico",
-        "emailPlaceholder": "su@email.com",
-        "message": "Mensaje",
-        "messagePlaceholder": "¿Cómo podemos ayudarle?",
-        "submit": "Enviar Mensaje"
-      }
+      "title": "Descárgala y abre tu primera orden hoy.",
+      "text": "Gratis en iOS y Android. Sin tarjeta de crédito y sin plazo de prueba.",
+      "appStore": { "label": "Descargar en", "name": "App Store" },
+      "playStore": { "label": "Disponible en", "name": "Google Play" },
+      "contactLead": "¿Dudas?",
+      "contactWhatsapp": "Escríbenos por WhatsApp",
+      "contactFaq": "Preguntas frecuentes"
     }
   }
 }

@@ -1,39 +1,32 @@
-{# Get download data based on segment/language #}
-{% set dl = data.download %}
-
-<!-- Download Section -->
-<section id="download" class="download">
-    <div class="container">
-        <div class="download-content">
-            <h2>{{ dl.title }} <span class="gradient-text">{{ dl.titleHighlight }}</span></h2>
-            <p>{{ dl.text }}</p>
-            <div class="download-buttons">
-                <a href="{{ site.appStore }}" target="_blank" rel="noopener" class="store-button" title="{{ dl.appStore.label }} {{ dl.appStore.name }}" data-ga="select_content" data-ga-detail="app_store">
-                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-                    </svg>
-                    <div class="store-info">
-                        <span class="store-label">{{ dl.appStore.label }}</span>
-                        <span class="store-name">{{ dl.appStore.name }}</span>
-                    </div>
+{# Final CTA band — store links + human contact #}
+{% set dl = (homepage[langCode] | default(homepage.pt)).download %}
+{% set waMsg = site.whatsapp.messages[langCode] | default(site.whatsapp.messages.pt) %}
+{% set faqHref = {pt: 'faq.html', en: 'faq-en.html', es: 'faq-es.html'}[langCode] | default('faq.html') %}
+<section class="cta-final" id="baixar">
+    <div class="wrap">
+        <div class="cta-final__grid">
+            <div>
+                <h2>{{ dl.title }}</h2>
+                <p>{{ dl.text }}</p>
+            </div>
+            <div class="cta-final__stores">
+                <a href="{{ site.appStore }}" target="_blank" rel="noopener" class="store-btn" data-ga="cta_click" data-ga-detail="download_app_store">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                    <span><small>{{ dl.appStore.label }}</small><strong>{{ dl.appStore.name }}</strong></span>
+                    <svg class="arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </a>
-                <a href="{{ site.playStore }}" target="_blank" rel="noopener" class="store-button" data-ga="select_content" data-ga-detail="play_store">
-                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                        <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.92V2.734a1 1 0 0 1 .609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.8 8.99l-2.302 2.302-8.634-8.634z"/>
-                    </svg>
-                    <div class="store-info">
-                        <span class="store-label">{{ dl.playStore.label }}</span>
-                        <span class="store-name">{{ dl.playStore.name }}</span>
-                    </div>
+                <a href="{{ site.playStore }}" target="_blank" rel="noopener" class="store-btn" data-ga="cta_click" data-ga-detail="download_play_store">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.6 1.8c-.3.3-.4.7-.4 1.2v18c0 .5.1.9.4 1.2l.1.1L13.8 12.2v-.3L3.7 1.7l-.1.1zm13.5 13.7-3.3-3.3v-.3l3.3-3.3.1.1 3.9 2.2c1.1.6 1.1 1.7 0 2.3l-3.9 2.2-.1.1zm-.1.1L13.6 12 3.6 22.2c.4.4 1 .4 1.7.1l11.7-6.7M17 8.4 5.3 1.7c-.7-.4-1.3-.3-1.7.1L13.6 12l3.4-3.6z"/></svg>
+                    <span><small>{{ dl.playStore.label }}</small><strong>{{ dl.playStore.name }}</strong></span>
+                    <svg class="arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </a>
             </div>
         </div>
-        <div class="download-phone">
-            <div class="phone-glow"></div>
-            <div class="phone-mockup large">
-                <img class="theme-dark" src="{{ relPath }}assets/screenshots/{{ langCode }}/dark/login.png" alt="PraticOS App" loading="lazy">
-                <img class="theme-light" src="{{ relPath }}assets/screenshots/{{ langCode }}/light/login.png" alt="PraticOS App" loading="lazy">
-            </div>
-        </div>
+        <p class="cta-final__contact">
+            <span>{{ dl.contactLead }}</span>
+            {% if site.flags.whatsappContact %}<a href="https://wa.me/{{ site.whatsapp.number }}?text={{ waMsg | urlencode }}" target="_blank" rel="noopener" data-ga="generate_lead" data-ga-detail="cta_whatsapp_contact">{{ dl.contactWhatsapp }}</a>{% endif %}
+            <a href="mailto:{{ site.email }}" data-ga="generate_lead" data-ga-detail="email_link">{{ site.email }}</a>
+            <a href="{{ relPath }}{{ faqHref }}">{{ dl.contactFaq }}</a>
+        </p>
     </div>
 </section>

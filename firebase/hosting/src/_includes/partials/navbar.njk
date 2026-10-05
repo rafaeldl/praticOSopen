@@ -1,53 +1,62 @@
-{# Get navigation data based on language #}
+{# N1b · wordmark left · centred links + segments dropdown · lang/theme/CTA right #}
 {% set nav = navigation[langCode] | default(navigation.pt) %}
 {% set seg = segments[langCode] | default(segments.pt) %}
+{% set homeHref = relPath ~ (indexPage | default('index.html') | prettyUrl) %}
 
-<!-- Navigation -->
-<nav class="navbar{% if navbarScrolled %} scrolled{% endif %}">
-    <div class="nav-container">
-        <a href="{{ relPath }}{{ indexPage | default('index.html') | prettyUrl }}" class="nav-logo">
-            <img src="{{ relPath }}assets/images/logo.png" alt="PraticOS" class="logo-img">
-            <span class="logo-text">{{ site.logoText | safe }}</span>
+<a class="skip-link" href="#conteudo">{{ nav.skip }}</a>
+<header class="nav" data-nav>
+    <div class="nav__inner">
+        <a href="{{ homeHref }}" class="brand" aria-label="{{ nav.home }}">
+            <img src="{{ relPath }}assets/images/logo-96.png" alt="" width="32" height="32">
+            <span class="brand__word">Pratic<b>OS</b></span>
         </a>
-        <div class="nav-links">
+
+        <nav class="nav__center" aria-label="Principal">
             {% for link in nav.links %}
-            <a href="{% if link.external %}{{ relPath }}{{ link.href | prettyUrl }}{% elif link.href == '#screenshots' and segmentSlug %}#hero{% elif (link.href | first) == '#' and not isHomepage and not segmentSlug %}{{ relPath }}{{ indexPage | default('index.html') | prettyUrl }}{{ link.href }}{% else %}{{ link.href }}{% endif %}">{{ link.label }}</a>
-            {# Segments Dropdown - After Screenshots #}
-            {% if loop.index == 2 and seg.links %}
-            <div class="nav-dropdown">
-                <button class="nav-dropdown-trigger" aria-expanded="false" aria-haspopup="true">
+        {% if not link.flag or site.flags[link.flag] %}
+            {% if link.segments %}
+            <div class="nav__item" data-dropdown>
+                <button class="nav__link" type="button" aria-expanded="false" aria-haspopup="true">
                     {{ seg.title }}
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <svg class="nav__caret" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
-                <div class="nav-dropdown-menu">
-                    <div class="nav-dropdown-grid">
+                <div class="nav__dropdown">
+                    <div class="nav__dropdown-head">
+                        <span class="label">{{ nav.segmentsAll }}</span>
+                    </div>
+                    <div class="nav__dropdown-grid">
                         {% for segment in seg.links %}
-                        <a href="{{ relPath }}{{ segment.href | prettyUrl }}" class="nav-dropdown-item">{{ segment.label }}</a>
+                        <a href="{{ relPath }}{{ segment.href | prettyUrl }}" class="nav__dropitem"{% if segmentSlug and segment.href.indexOf('/' ~ segmentSlug) != -1 %} aria-current="page"{% endif %}>{{ segment.label }}</a>
                         {% endfor %}
                     </div>
                 </div>
             </div>
+            {% elif (link.href | first) == '#' %}
+            <a class="nav__link" href="{% if isHomepage %}{{ link.href }}{% else %}{{ homeHref }}{{ link.href }}{% endif %}">{{ link.label }}</a>
+            {% else %}
+            <a class="nav__link" href="{{ relPath }}{{ link.href | prettyUrl }}">{{ link.label }}</a>
+            {% endif %}
             {% endif %}
             {% endfor %}
-        </div>
-        <div class="nav-actions">
-            <div class="lang-switch">
+        </nav>
+
+        <div class="nav__right">
+            {% if langSwitch %}
+            <div class="lang-switch" role="group" aria-label="{{ nav.language }}">
                 {% for langItem in langSwitch %}
-                <a href="{{ langItem.href | prettyUrl }}"{% if langItem.active %} class="active"{% endif %} data-ga="select_content" data-ga-detail="lang_{{ langItem.code | lower }}">{{ langItem.code }}</a>
+                <a href="{{ langItem.href | prettyUrl }}" hreflang="{{ langItem.code | lower }}"{% if langItem.active %} class="active" aria-current="true"{% endif %} data-ga="select_content" data-ga-detail="lang_{{ langItem.code | lower }}">{{ langItem.code }}</a>
                 {% endfor %}
             </div>
-            <button class="theme-toggle" aria-label="Toggle theme">
-                <svg class="theme-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                <svg class="theme-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            {% endif %}
+            <button class="icon-btn theme-toggle" type="button" aria-label="{{ nav.themeToggle }}">
+                <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+                <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
             </button>
-            <a href="{% if not isHomepage and not segmentSlug %}{{ relPath }}{{ indexPage | default('index.html') | prettyUrl }}{% endif %}#download" class="btn btn-primary" data-ga="select_content" data-ga-detail="navbar_cta">{{ nav.cta }}</a>
+            <a href="{% if isHomepage %}#baixar{% else %}{{ homeHref }}#baixar{% endif %}" class="btn btn--primary btn--sm nav__cta" data-ga="select_content" data-ga-detail="navbar_cta">{{ nav.cta }}</a>
+            <button class="icon-btn nav-toggle" type="button" aria-label="{{ nav.menu }}" aria-expanded="false" aria-controls="mobile-menu">
+                <svg class="i-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+                <svg class="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
         </div>
-        <button class="nav-toggle" aria-label="Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
     </div>
-</nav>
+</header>

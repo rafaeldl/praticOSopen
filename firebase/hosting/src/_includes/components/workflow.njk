@@ -1,0 +1,28 @@
+{# F4 · step sequence — the page's spine: five real stages of a work order #}
+{% set wf = data.workflow %}
+<section class="section workflow" id="como-funciona">
+    <div class="wrap">
+        <div class="section-head">
+            <h2>{{ wf.title }}</h2>
+            <p>{{ wf.lede }}</p>
+        </div>
+        <ol class="stages" role="list">
+            {% for stage in wf.stages %}
+            <li class="stage">
+                <div class="stage__copy">
+                    <span class="stage__num mono" aria-hidden="true">{{ stage.number }}</span>
+                    <h3>{{ stage.title }}</h3>
+                    <p>{{ stage.text }}</p>
+                    <ul class="stage__facts" role="list">
+                        {% for fact in stage.facts %}<li>{{ fact }}</li>{% endfor %}
+                    </ul>
+                </div>
+                <figure class="shot stage__shot">
+                    <img class="theme-light" src="{{ relPath }}assets/screenshots/{{ langCode }}/light/{{ stage.image }}" alt="{{ stage.alt }}" loading="lazy" decoding="async" width="1170" height="2532">
+                    <img class="theme-dark" src="{{ relPath }}assets/screenshots/{{ langCode }}/dark/{{ stage.image }}" alt="{{ stage.alt }}" loading="lazy" decoding="async" width="1170" height="2532">
+                </figure>
+            </li>
+            {% endfor %}
+        </ol>
+    </div>
+</section>
