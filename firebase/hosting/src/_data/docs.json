@@ -39,6 +39,11 @@
               "title": "Financeiro",
               "description": "Pagamentos parciais, descontos, histórico de cada OS e o painel com o que falta receber.",
               "href": "financeiro.html"
+            },
+            {
+              "title": "Cobrança com Asaas",
+              "description": "Cobre o cliente da OS por Pix, boleto ou cartão parcelado pela sua conta Asaas, com pagamento no link da OS e baixa automática.",
+              "href": "cobranca-asaas.html"
             }
           ]
         },
@@ -137,6 +142,11 @@
               "title": "Payments",
               "description": "Partial payments, discounts, each order’s history and a dashboard of what is still owed.",
               "href": "financeiro-en.html"
+            },
+            {
+              "title": "Asaas charges",
+              "description": "Charge the customer of a work order by Pix, boleto or card installments through your Asaas account, with payment on the order link and automatic settlement.",
+              "href": "cobranca-asaas-en.html"
             }
           ]
         },
@@ -235,6 +245,11 @@
               "title": "Finanzas",
               "description": "Pagos parciales, descuentos, historial de cada OS y el panel con lo que falta cobrar.",
               "href": "financeiro-es.html"
+            },
+            {
+              "title": "Cobro con Asaas",
+              "description": "Cobra al cliente de la orden por Pix, boleto o tarjeta en cuotas con tu cuenta Asaas, con pago en el enlace de la orden y registro automático.",
+              "href": "cobranca-asaas-es.html"
             }
           ]
         },
