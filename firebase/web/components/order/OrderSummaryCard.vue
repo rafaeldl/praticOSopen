@@ -27,6 +27,9 @@
       </div>
     </div>
 
+    <!-- Asaas charge: pay button / overdue / paid -->
+    <OrderChargeAction :charge="charge" />
+
     <!-- Services -->
     <template v-if="order?.services?.length">
       <div class="my-4 h-px bg-[#EDF2F7]" />
@@ -69,10 +72,12 @@
 
 <script setup lang="ts">
 import { formatCurrency } from '~/utils/format'
+import type { PublicOrderCharge } from '~/utils/charge'
 
 const props = defineProps<{
   order: any
   country?: string
+  charge?: PublicOrderCharge | null
 }>()
 
 const { t } = useOrderI18n()

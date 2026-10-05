@@ -121,6 +121,12 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     termsReadLess: 'Ler menos',
     termsAcceptCheckbox: 'Li e aceito os Termos e Condições',
     termsRequiredError: 'Você deve aceitar os termos para aprovar o orçamento',
+    chargePay: 'Pagar {amount}',
+    chargeMethods: 'Pix, boleto ou cartão',
+    chargeInstallments: 'Em {count}x no cartão',
+    chargeDue: 'Vence em {date}',
+    chargeOverdue: 'Cobrança vencida. Fale com a empresa',
+    chargePaid: 'Pago ✓',
   },
   en: {
     pageTitle: 'Track your Order - PraticOS',
@@ -218,6 +224,12 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     termsReadLess: 'Read less',
     termsAcceptCheckbox: 'I have read and accept the Terms and Conditions',
     termsRequiredError: 'You must accept the terms to approve the quote',
+    chargePay: 'Pay {amount}',
+    chargeMethods: 'Pix, bank slip or card',
+    chargeInstallments: '{count} card installments',
+    chargeDue: 'Due {date}',
+    chargeOverdue: 'Payment overdue. Please contact the company',
+    chargePaid: 'Paid ✓',
   },
   es: {
     pageTitle: 'Seguí tu OS - PraticOS',
@@ -315,6 +327,12 @@ const uiStrings: Record<Lang, Record<string, string>> = {
     termsReadLess: 'Leer menos',
     termsAcceptCheckbox: 'He leído y acepto los Términos y Condiciones',
     termsRequiredError: 'Debes aceptar los términos para aprobar el presupuesto',
+    chargePay: 'Pagar {amount}',
+    chargeMethods: 'Pix, boleto o tarjeta',
+    chargeInstallments: 'En {count} cuotas con tarjeta',
+    chargeDue: 'Vence el {date}',
+    chargeOverdue: 'Cobro vencido. Contacta a la empresa',
+    chargePaid: 'Pagado ✓',
   },
 }
 

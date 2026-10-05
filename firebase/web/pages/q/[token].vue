@@ -42,7 +42,7 @@
         />
 
         <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
-        <OrderSummaryCard :order="order" :country="company?.country" />
+        <OrderSummaryCard :order="order" :country="company?.country" :charge="charge" />
         <OrderVehiclesCard :order="order" />
         <OrderChecklistCard :forms="order.forms" />
         <OrderActivityCard :comments="comments" />
@@ -69,7 +69,7 @@
           />
           <OrderProgressCard v-else :status="order.status" />
           <OrderPhotosCard :photos="order.photos" @open-lightbox="openLightbox" />
-          <OrderSummaryCard :order="order" :country="company?.country" />
+          <OrderSummaryCard :order="order" :country="company?.country" :charge="charge" />
           <OrderChecklistCard :forms="order.forms" />
         </div>
 
@@ -160,6 +160,7 @@ const order = computed(() => (orderData.value as any)?.data?.order)
 const company = computed(() => (orderData.value as any)?.data?.company)
 const comments = computed(() => (orderData.value as any)?.data?.comments || [])
 const permissions = computed(() => (orderData.value as any)?.data?.permissions || [])
+const charge = computed(() => (orderData.value as any)?.data?.charge ?? null)
 
 // Apply segment custom labels (e.g. "Veículos" for automotive, "Aparelhos" for electronics)
 const segmentLabels = computed(() => (orderData.value as any)?.data?.segmentLabels || null)
