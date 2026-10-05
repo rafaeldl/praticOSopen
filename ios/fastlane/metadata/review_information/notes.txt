@@ -1,13 +1,13 @@
 REGARDING GUIDELINE 3.1.1 - PLEASE READ
 
-The iOS app has no paid features. Every feature in the iOS app is free and unlimited for all users, and the app does not unlock, restore or access any paid content or subscription.
+Account registration in PraticOS is free and does not give access to anything that is sold outside the app. PraticOS does not sell paid plans or subscriptions on any platform (website, Android or iOS) at this time: our website lists planned prices, but no plan can be purchased anywhere. There is no external purchase mechanism of any kind.
 
-- There is no purchasing of any kind inside the app.
-- There are no plan, pricing or subscription screens on iOS.
+- Creating a company account is free and unlocks every feature of the iOS app, with no limits.
+- There is no purchasing of any kind inside the app, and no plan, pricing or subscription screens on iOS.
 - There are no calls to action for purchase outside the app, and no links to external payment methods.
-- Usage limits tied to paid plans were removed from iOS in this build.
+- If paid plans are introduced in the future, they will be offered on iOS exclusively through In-App Purchase.
 
-PraticOS is a business management tool for service companies (work orders, customers, scheduling, teams). Paid plans exist on our website, but they do not unlock anything in the iOS app.
+PraticOS is a work-order management tool for service companies (mechanics, technicians, cleaning, etc.): work orders, customers, scheduling and teams. The payment features in work orders let a business record and charge its own customers for physical, real-world services performed outside the app (guideline 3.1.3(e)); they are not payments to PraticOS.
 
 ----------
 
