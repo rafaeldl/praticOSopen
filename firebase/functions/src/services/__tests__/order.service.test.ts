@@ -81,6 +81,14 @@ describe('applyPaymentTransaction', () => {
     });
   });
 
+  it('arredonda o total antes de comparar (drift de desconto via increment), como o app', () => {
+    const total = 10.3 - 0.1; // 10.200000000000001
+    expect(total).not.toBe(10.2);
+    const result = applyPaymentTransaction({ total, discount: 0.1, paidAmount: 0 }, txn('payment', 10.2));
+    expect(result.paid).toBe(true);
+    expect(result.payment).toBe('paid');
+  });
+
   it('marca como pago quando paidAmount alcança o total líquido', () => {
     const result = applyPaymentTransaction(
       { total: 90, discount: 10, paidAmount: 50 },
@@ -95,6 +103,23 @@ describe('applyPaymentTransaction', () => {
       txn('discount', 10)
     );
     expect(result).toMatchObject({ total: 90, paid: true, payment: 'paid', remainingBalance: 0 });
+  });
+
+  it.each(['canceled', 'quote'] as const)('OS %s: soma o pagamento mas payment fica null e paid false', (status) => {
+    const result = applyPaymentTransaction(
+      { status, total: 100, discount: 0, paidAmount: 60 },
+      txn('payment', 40)
+    );
+    expect(result).toMatchObject({ paidAmount: 100, paid: false, payment: null, remainingBalance: 0 });
+    expect(result.transactions).toHaveLength(1);
+  });
+
+  it.each(['approved', 'progress', 'done', undefined] as const)('OS %s: status de pagamento normal', (status) => {
+    const result = applyPaymentTransaction(
+      { status, total: 100, discount: 0, paidAmount: 60 },
+      txn('payment', 40)
+    );
+    expect(result).toMatchObject({ paid: true, payment: 'paid' });
   });
 
   it('arredonda para centavos', () => {

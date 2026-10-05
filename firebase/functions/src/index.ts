@@ -104,7 +104,7 @@ export const updateUserClaims = functionsV1
     }
   });
 
-import { handleOrderStatusChange } from './services/asaas/charge.service';
+import { handleOrderUpdatedAsaas } from './services/asaas/order-trigger.service';
 
 /**
  * Asaas master key (AES-256-GCM, base64 of 32 bytes) — see services/asaas/crypto.ts.
@@ -115,23 +115,24 @@ import { handleOrderStatusChange } from './services/asaas/charge.service';
 const asaasCredentialsKey = defineSecret('ASAAS_CREDENTIALS_KEY');
 
 /**
- * [Asaas] Cancels open charges on Asaas when an order is canceled.
- * The app changes the order status directly in Firestore, so this runs as a
- * trigger instead of inside an API route. No-op unless the company has Asaas connected.
+ * [Asaas] Single trigger for order updates (never add a second
+ * onDocumentUpdated on this path). The app writes orders directly to
+ * Firestore, so this runs as a trigger instead of inside an API route:
+ * - status changed to `canceled` → cancels open charges on Asaas;
+ * - `transactions` changed and Asaas connected → restores Asaas payments
+ *   overwritten by old app versions and fixes inconsistent payment fields.
+ * No-op unless the company has Asaas connected. Logic lives in
+ * services/asaas/order-trigger.service.ts.
  */
-export const onOrderCanceledCancelAsaasCharges = onDocumentUpdated(
+export const onOrderUpdatedAsaas = onDocumentUpdated(
   {
     document: 'companies/{companyId}/orders/{orderId}',
     region: 'southamerica-east1',
     secrets: [asaasCredentialsKey],
   },
   async (event) => {
-    const before = event.data?.before.data();
-    const after = event.data?.after.data();
-    if (!after || after.status !== 'canceled' || before?.status === 'canceled') return;
-
     const { companyId, orderId } = event.params;
-    await handleOrderStatusChange(companyId, orderId, before?.status, after.status);
+    await handleOrderUpdatedAsaas(companyId, orderId, event.data?.before.data(), event.data?.after.data());
   }
 );
 
@@ -256,6 +257,7 @@ export const blockSuspiciousSignups = beforeUserCreated(
 import { apiKeyAuth, botAuth, bearerAuth } from './middleware/auth.middleware';
 import { resolveCompanyContext } from './middleware/company.middleware';
 import { configureTrustProxy } from './utils/trust-proxy.utils';
+import { globalErrorHandler } from './middleware/error-handler.middleware';
 import { createPublicOrdersLimiters } from './utils/public-rate-limit.utils';
 
 // Routes - API Core v1
@@ -281,6 +283,7 @@ import userLinkRoutes from './routes/user/link.routes';
 
 // Routes - Webhooks (no authentication - signature-based)
 import revenuecatWebhookRoutes from './routes/webhooks/revenuecat.routes';
+import asaasWebhookRoutes from './routes/webhooks/asaas.routes';
 
 // Routes - API Bot
 import linkRoutes from './routes/bot/link.routes';
@@ -445,6 +448,7 @@ app.use('/public/orders', ...publicOrdersLimiters, publicOrdersRoutes);
 
 // Webhook Routes (signature-based authentication)
 app.use('/webhooks/revenuecat', revenuecatWebhookRoutes);
+app.use('/webhooks/asaas', asaasWebhookRoutes);
 
 // API Core v1 Routes
 app.use('/v1/auth', authRoutes);
@@ -503,40 +507,8 @@ app.use((_req: Request, res: Response) => {
   });
 });
 
-// Global error handler
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('Unhandled error:', err);
-
-  if (err.name === 'ValidationError') {
-    return res.status(400).json({
-      success: false,
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: err.message,
-      },
-    });
-  }
-
-  if (err.name === 'UnauthorizedError') {
-    return res.status(401).json({
-      success: false,
-      error: {
-        code: 'UNAUTHORIZED',
-        message: 'Invalid or missing authentication',
-      },
-    });
-  }
-
-  return res.status(500).json({
-    success: false,
-    error: {
-      code: 'INTERNAL_ERROR',
-      message: process.env.NODE_ENV === 'development'
-        ? err.message
-        : 'An unexpected error occurred',
-    },
-  });
-});
+// Global error handler (never logs the raw body of body-parser errors)
+app.use(globalErrorHandler);
 
 // Export HTTP API function
 export const api = onRequest(

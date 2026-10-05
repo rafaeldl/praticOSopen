@@ -273,6 +273,108 @@ describeEmulator('firestore.rules', () => {
     });
   });
 
+  describe('Asaas payments', () => {
+    // admin1 is owner.id of c1 (seeded above); owner2 holds the 'owner' claim.
+    const owner = () => asUser('admin1', { c1: 'admin' });
+    const ownerClaim = () => asUser('owner2', { c1: 'owner' });
+
+    beforeEach(async () => {
+      await env.withSecurityRulesDisabled(async (ctx) => {
+        const db = ctx.firestore();
+        await fs.setDoc(fs.doc(db, 'companies/c1/settings/payments'), {
+          asaasEnabled: true,
+          asaasConnected: true,
+        });
+        await fs.setDoc(fs.doc(db, 'companies/c1/orders/o1/charges/ch1'), { status: 'pending', value: 100 });
+        await fs.setDoc(fs.doc(db, 'companies/c1/private/asaas'), { webhookTokenHash: 'x' });
+        await fs.setDoc(fs.doc(db, 'companies/c1/private/asaas/events/e1'), { processedAt: 'now' });
+        await fs.setDoc(fs.doc(db, 'companies/c1/private/asaas/customers/cu1'), { asaasCustomerId: 'cus_1' });
+      });
+    });
+
+    describe('settings/payments', () => {
+      const path = 'companies/c1/settings/payments';
+
+      it.each(['owner', 'admin', 'manager', 'supervisor', 'consultant', 'technician'])(
+        'is readable by a %s of the company',
+        async (role) => {
+          await rut.assertSucceeds(fs.getDoc(fs.doc(asUser(`u_${role}`, { c1: role }), path)));
+        },
+      );
+
+      it('is not readable by non-members', async () => {
+        await rut.assertFails(fs.getDoc(fs.doc(asUser('outsider'), path)));
+        await rut.assertFails(fs.getDoc(fs.doc(asUser('other', { c2: 'admin' }), path)));
+        await rut.assertFails(fs.getDoc(fs.doc(env.unauthenticatedContext().firestore(), path)));
+      });
+
+      it('is not writable by anyone, including the owner', async () => {
+        for (const db of [owner(), ownerClaim(), asUser('mgr1', { c1: 'manager' })]) {
+          await rut.assertFails(fs.updateDoc(fs.doc(db, path), { asaasEnabled: false }));
+          await rut.assertFails(fs.setDoc(fs.doc(db, path), { asaasConnected: false }));
+          await rut.assertFails(fs.deleteDoc(fs.doc(db, path)));
+        }
+        await rut.assertFails(
+          fs.setDoc(fs.doc(owner(), 'companies/c1/settings/other'), { asaasEnabled: true }),
+        );
+      });
+    });
+
+    describe('orders/{oid}/charges/{chargeId}', () => {
+      const path = 'companies/c1/orders/o1/charges/ch1';
+
+      it('is readable by the owner, admin and manager', async () => {
+        await rut.assertSucceeds(fs.getDoc(fs.doc(owner(), path)));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(ownerClaim(), path)));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(asUser('adm2', { c1: 'admin' }), path)));
+        await rut.assertSucceeds(fs.getDoc(fs.doc(asUser('mgr1', { c1: 'manager' }), path)));
+        await rut.assertSucceeds(fs.getDocs(fs.collection(asUser('mgr1', { c1: 'manager' }), 'companies/c1/orders/o1/charges')));
+      });
+
+      it('is readable by the owner (owner.id) even with another role claim', async () => {
+        await rut.assertSucceeds(fs.getDoc(fs.doc(asUser('admin1', { c1: 'supervisor' }), path)));
+      });
+
+      it.each(['supervisor', 'consultant', 'technician', 'viewer'])('is not readable by a %s', async (role) => {
+        await rut.assertFails(fs.getDoc(fs.doc(asUser(`u_${role}`, { c1: role }), path)));
+      });
+
+      it('is not readable by non-members', async () => {
+        await rut.assertFails(fs.getDoc(fs.doc(asUser('outsider'), path)));
+        await rut.assertFails(fs.getDoc(fs.doc(asUser('other', { c2: 'admin' }), path)));
+        await rut.assertFails(fs.getDoc(fs.doc(env.unauthenticatedContext().firestore(), path)));
+      });
+
+      it('is not writable by anyone, including the owner', async () => {
+        for (const db of [owner(), ownerClaim(), asUser('mgr1', { c1: 'manager' })]) {
+          await rut.assertFails(fs.updateDoc(fs.doc(db, path), { status: 'paid' }));
+          await rut.assertFails(fs.setDoc(fs.doc(db, 'companies/c1/orders/o1/charges/ch2'), { status: 'paid' }));
+          await rut.assertFails(fs.deleteDoc(fs.doc(db, path)));
+        }
+      });
+    });
+
+    describe('private/asaas', () => {
+      const paths = [
+        'companies/c1/private/asaas',
+        'companies/c1/private/asaas/events/e1',
+        'companies/c1/private/asaas/customers/cu1',
+      ];
+
+      it.each(paths)('%s is not readable or writable, even by the owner', async (path) => {
+        for (const db of [owner(), ownerClaim()]) {
+          await rut.assertFails(fs.getDoc(fs.doc(db, path)));
+          await rut.assertFails(fs.setDoc(fs.doc(db, path), { x: 1 }));
+          await rut.assertFails(fs.deleteDoc(fs.doc(db, path)));
+        }
+      });
+
+      it('events are not listable by the owner', async () => {
+        await rut.assertFails(fs.getDocs(fs.collection(owner(), 'companies/c1/private/asaas/events')));
+      });
+    });
+  });
+
   describe('links/invites/tokens/{token}', () => {
     const invite = (token: string) => ({
       token,

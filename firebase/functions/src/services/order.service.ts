@@ -568,8 +568,28 @@ export function roundMoney(value: number): number {
  * - remaining balance = total - paidAmount;
  * - `payment` is stored only as 'paid' | 'unpaid'.
  */
+/**
+ * Payment status of an order (same rule as the app's OrderPaymentMath:
+ * paymentStatusFor + applyOrderStatus/orderStatusPaymentUpdate). Quotes and
+ * canceled orders have no payment status (`payment: null, paid: false`), even
+ * when money was received; their paidAmount/transactions are still kept.
+ * Otherwise compares rounded values, so float drift from FieldValue.increment
+ * on total is ignored.
+ */
+export function paymentStatusFields(
+  orderStatus: string | null | undefined,
+  total: number,
+  paidAmount: number
+): { paid: boolean; payment: PaymentStatus | null } {
+  if (orderStatus === 'quote' || orderStatus === 'canceled') {
+    return { paid: false, payment: null };
+  }
+  const paid = total > 0 && paidAmount >= roundMoney(total);
+  return { paid, payment: paid ? 'paid' : 'unpaid' };
+}
+
 export function applyPaymentTransaction(
-  order: Pick<Order, 'total' | 'discount' | 'paidAmount' | 'transactions'>,
+  order: Pick<Order, 'total' | 'discount' | 'paidAmount' | 'transactions'> & Partial<Pick<Order, 'status'>>,
   transaction: PaymentTransaction
 ): {
   transactions: PaymentTransaction[];
@@ -577,7 +597,7 @@ export function applyPaymentTransaction(
   discount: number;
   paidAmount: number;
   paid: boolean;
-  payment: PaymentStatus;
+  payment: PaymentStatus | null;
   remainingBalance: number;
 } {
   let total = order.total || 0;
@@ -591,7 +611,7 @@ export function applyPaymentTransaction(
     total = Math.max(0, roundMoney(total - transaction.amount));
   }
 
-  const paid = total > 0 && paidAmount >= total;
+  const { paid, payment } = paymentStatusFields(order.status, total, paidAmount);
 
   return {
     transactions: [...(order.transactions || []), transaction],
@@ -599,7 +619,7 @@ export function applyPaymentTransaction(
     discount,
     paidAmount,
     paid,
-    payment: paid ? 'paid' : 'unpaid',
+    payment,
     remainingBalance: calculateRemainingBalance({ total, paidAmount }),
   };
 }

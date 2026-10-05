@@ -3,7 +3,7 @@
  * See docs/superpowers/specs/2026-10-04-asaas-cobranca-os-design.md
  */
 
-import { UserAggr } from './types';
+import { PaymentTransaction, UserAggr } from './types';
 
 export type AsaasEnvironment = 'sandbox' | 'production';
 export type AsaasConnectionMode = 'apiKey' | 'flapp';
@@ -47,6 +47,10 @@ export interface OrderCharge {
   createdBy: UserAggr;
   createdAt: string;
   paidAt?: string;
+  /** Server-only copy of every transaction booked on the order (used by the repair trigger). */
+  appliedTransactions?: PaymentTransaction[];
+  /** Server-only: Asaas payments refunded on this charge; never booked again. */
+  refundedAsaasPaymentIds?: string[];
 }
 
 /** companies/{companyId}/settings/payments */
@@ -159,4 +163,36 @@ export interface AsaasList<T> {
   limit: number;
   offset: number;
   data: T[];
+}
+
+// ============================================================================
+// Webhook (POST /webhooks/asaas/:companyId)
+// ============================================================================
+
+/** Webhook events PraticOS subscribes to (same list as the webhook registration). */
+export type AsaasWebhookEventName = AsaasWebhookEventType;
+
+/** Subset of the Asaas payment object sent in webhook events (extra fields are ignored). */
+export interface AsaasPaymentEvent {
+  id: string;
+  value: number;
+  netValue?: number;
+  /** PIX | BOLETO | CREDIT_CARD | DEBIT_CARD | UNDEFINED | RECEIVED_IN_CASH ... */
+  billingType: string;
+  status: string;
+  /** '<companyId>:<orderId>:<chargeId>' set by createOrderCharge. */
+  externalReference?: string | null;
+  /** Installment id, only for installment payments. */
+  installment?: string | null;
+  installmentNumber?: number | null;
+  description?: string | null;
+}
+
+export interface AsaasWebhookEvent {
+  /** Unique event id (e.g. 'evt_05b7...&368604920'), used for idempotency. */
+  id: string;
+  /** Event name; only AsaasWebhookEventName values are handled. */
+  event: string;
+  dateCreated?: string;
+  payment?: AsaasPaymentEvent;
 }

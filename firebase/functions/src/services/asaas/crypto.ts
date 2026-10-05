@@ -46,12 +46,18 @@ export function hashToken(token: string): string {
   return createHash('sha256').update(token, 'utf8').digest('hex');
 }
 
-/** Timing-safe comparison of two hex strings; false when lengths differ. */
+const SHA256_HEX = /^[0-9a-f]{64}$/i;
+
+/**
+ * Timing-safe comparison of two SHA-256 hex digests (case-insensitive).
+ * False unless both are exactly 64 hex chars: Buffer.from(hex) silently stops
+ * at the first invalid char, so a malformed value could otherwise match a prefix.
+ */
 export function safeEqualHex(a: string, b: string): boolean {
-  const left = Buffer.from(a || '', 'hex');
-  const right = Buffer.from(b || '', 'hex');
-  if (left.length === 0 || left.length !== right.length) return false;
-  return timingSafeEqual(left, right);
+  if (typeof a !== 'string' || typeof b !== 'string' || !SHA256_HEX.test(a) || !SHA256_HEX.test(b)) {
+    return false;
+  }
+  return timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
 }
 
 /** Master key from the bound secret (process.env at runtime). */

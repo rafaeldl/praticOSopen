@@ -514,7 +514,7 @@ export interface ShareTokenAuth {
 // ============================================================================
 
 export type CommentAuthorType = 'customer' | 'internal';
-export type CommentSource = 'app' | 'magicLink' | 'bot';
+export type CommentSource = 'app' | 'magicLink' | 'bot' | 'asaas';
 
 export interface CommentAuthor {
   name: string;

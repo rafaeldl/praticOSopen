@@ -90,9 +90,11 @@ class FakeQuery {
     protected store: FakeFirestore,
     public path: string,
     private filters: Array<[string, string, unknown]> = [],
+    /** Collection-group query: `path` is the collection id, matched at any depth. */
+    private group = false,
   ) {}
   where(field: string, op: string, value: unknown) {
-    return new FakeQuery(this.store, this.path, [...this.filters, [field, op, value]]);
+    return new FakeQuery(this.store, this.path, [...this.filters, [field, op, value]], this.group);
   }
   orderBy() {
     return this;
@@ -101,8 +103,8 @@ class FakeQuery {
     return this;
   }
   async get() {
-    const docs = this.store
-      .listCollection(this.path)
+    const source = this.group ? this.store.listCollectionGroup(this.path) : this.store.listCollection(this.path);
+    const docs = source
       .filter((d) =>
         this.filters.every(([f, op, v]) =>
           op === '==' ? getField(d.value, f) === v : op === 'in' && Array.isArray(v) && v.includes(getField(d.value, f)),
@@ -134,6 +136,9 @@ export class FakeFirestore {
   doc(path: string) {
     return new FakeDoc(this, path);
   }
+  collectionGroup(collectionId: string) {
+    return new FakeQuery(this, collectionId, [], true);
+  }
 
   write(path: string, data: Data, mode: 'set' | 'merge' | 'update') {
     const current = this.docs.get(path);
@@ -163,6 +168,15 @@ export class FakeFirestore {
     const depth = path.split('/').length + 1;
     return [...this.docs.entries()]
       .filter(([p]) => p.startsWith(`${path}/`) && p.split('/').length === depth)
+      .map(([p, value]) => ({ path: p, value }));
+  }
+
+  listCollectionGroup(collectionId: string) {
+    return [...this.docs.entries()]
+      .filter(([p]) => {
+        const parts = p.split('/');
+        return parts.length % 2 === 0 && parts[parts.length - 2] === collectionId;
+      })
       .map(([p, value]) => ({ path: p, value }));
   }
 
@@ -238,7 +252,11 @@ export function fakeFirestoreModule(fake: FakeFirestore = new FakeFirestore()) {
     __fake: fake,
     db: fake,
     FieldValue: FakeFieldValue,
-    Timestamp: { now: () => SERVER_TIMESTAMP },
+    Timestamp: {
+      now: () => SERVER_TIMESTAMP,
+      // Plain object (survives the JSON clone of the fake), same shape as Firestore's.
+      fromDate: (date: Date) => ({ seconds: Math.floor(date.getTime() / 1000), nanoseconds: (date.getTime() % 1000) * 1e6 }),
+    },
     getRootCollection: (name: string) => fake.collection(name),
     getTenantCollection: (companyId: string, name: string) => fake.collection(`companies/${companyId}/${name}`),
     getDocument: async (collection: FakeCollection, id: string) => {
