@@ -1444,6 +1444,33 @@ abstract class _OrderStore with Store {
     }
   }
 
+  /// Reads the order from the server. Test seam for [reloadPayments].
+  late Future<Order?> Function(String companyId, String orderId)
+      fetchOrderFromServer = repository.getFromServer;
+
+  /// Re-reads the order from the server and refreshes the local payment
+  /// state (transactions, paidAmount, paid, payment, discount and total).
+  ///
+  /// [orderStream] doesn't refresh the payment fields, so the screen calls
+  /// this when an Asaas charge is paid or refunded by the webhook.
+  /// Returns false when it couldn't read (offline, missing order) or the
+  /// store moved to another order meanwhile.
+  @action
+  Future<bool> reloadPayments() async {
+    final orderId = order?.id;
+    final company = companyId;
+    if (orderId == null || company == null) return false;
+    try {
+      final fresh = await fetchOrderFromServer(company, orderId);
+      if (fresh == null || order?.id != orderId) return false;
+      _applyPaymentState(fresh);
+      return true;
+    } catch (e, stack) {
+      _logPaymentError(e, stack, 'reloadPayments');
+      return false;
+    }
+  }
+
   /// Copies the payment fields of [fresh] into the local order and observables.
   /// Transactions added offline and not yet acknowledged are kept (see
   /// [OrderPaymentMath.mergePendingTransactions]).

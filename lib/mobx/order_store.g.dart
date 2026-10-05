@@ -1088,6 +1088,16 @@ mixin _$OrderStore on _OrderStore, Store {
     );
   }
 
+  late final _$reloadPaymentsAsyncAction = AsyncAction(
+    '_OrderStore.reloadPayments',
+    context: context,
+  );
+
+  @override
+  Future<bool> reloadPayments() {
+    return _$reloadPaymentsAsyncAction.run(() => super.reloadPayments());
+  }
+
   late final _$addPaymentAsyncAction = AsyncAction(
     '_OrderStore.addPayment',
     context: context,
