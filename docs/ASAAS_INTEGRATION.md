@@ -1,6 +1,6 @@
 # Integração Asaas
 
-> Status: **etapa 1 (núcleo de cobrança) implementada, pronta para o piloto** (issue #303). Blocos A–D na `master`; Bloco E (botão "Pagar" no link da OS) no PR #315, ainda não mergeado.
+> Status: **etapa 1 (núcleo de cobrança) implementada, pronta para o piloto** (issue #303). Blocos A–E na `master` (Bloco E: botão "Pagar" no link da OS, PR #315, mergeado).
 > Spec: [`docs/superpowers/specs/2026-10-04-asaas-cobranca-os-design.md`](superpowers/specs/2026-10-04-asaas-cobranca-os-design.md).
 > Estratégia e parceria: [`business/PARCERIAS.md`](../business/PARCERIAS.md).
 
@@ -46,7 +46,7 @@ Todas as chamadas ao Asaas saem das Cloud Functions (`api`). O app nunca guarda 
 | Peça | Arquivo |
 |------|---------|
 | Tipos | `firebase/functions/src/models/asaas.types.ts` |
-| Criptografia (AES-256-GCM, hash de token) | `firebase/functions/src/services/asaas/crypto.ts` |
+| Criptografia da credencial e hash de token | `firebase/functions/src/services/asaas/crypto.ts` |
 | Cliente HTTP do Asaas | `firebase/functions/src/services/asaas/asaas-client.ts` |
 | Credencial por empresa (`AsaasCredentialProvider`; hoje `ApiKeyCredentialProvider`) | `firebase/functions/src/services/asaas/credential-provider.ts` |
 | Códigos de erro → HTTP | `firebase/functions/src/services/asaas/errors.ts` |
@@ -60,7 +60,7 @@ Todas as chamadas ao Asaas saem das Cloud Functions (`api`). O app nunca guarda 
 
 Segredo e configuração das Functions:
 
-- `ASAAS_CREDENTIALS_KEY`: chave mestra (base64 de 32 bytes) no Secret Manager, via `defineSecret`, ligada às functions que leem ou gravam `private/asaas` (`api` e `onOrderUpdatedAsaas`).
+- `ASAAS_CREDENTIALS_KEY`: chave mestra no Secret Manager, via `defineSecret`, ligada às functions que leem ou gravam `private/asaas` (`api` e `onOrderUpdatedAsaas`).
 - `ASAAS_WEBHOOK_BASE_URL`: base da URL do webhook. Default no código: `https://southamerica-east1-praticos.cloudfunctions.net/api` (o deploy do CI não lê `.env` local). Sobrescrever só em dev.
 - `ASAAS_SANDBOX_API_KEY`: só para o script E2E (`.env.local`).
 
@@ -96,7 +96,7 @@ Rotas `/v1/app/*` usam `bearerAuth` + `resolveCompanyContext`; o app envia `X-Co
 
 | Caminho | Acesso | Conteúdo |
 |---------|--------|----------|
-| `companies/{cid}/private/asaas` | só servidor | `mode` (`apiKey`\|`flapp`), `environment` (`sandbox`\|`production`), `encryptedApiKey { iv, tag, ciphertext }`, `accountName`, `walletId?`, `webhookId?`, `webhookTokenHash?` (SHA-256), `status` (`active`\|`invalid`), `connectedBy`, `connectedAt` |
+| `companies/{cid}/private/asaas` | só servidor | `mode` (`apiKey`\|`flapp`), `environment` (`sandbox`\|`production`), `encryptedApiKey` (criptografada), `accountName`, `walletId?`, `webhookId?`, `webhookTokenHash?` (hash), `status` (`active`\|`invalid`), `connectedBy`, `connectedAt` |
 | `companies/{cid}/private/asaas/customers/{customerId}` | só servidor | `{ asaasCustomerId, environment?, walletId? }` |
 | `companies/{cid}/private/asaas/events/{eventId}` | só servidor | `{ processedAt, expiresAt }`: idempotência do webhook, TTL de 30 dias em `expiresAt` |
 | `companies/{cid}/settings/payments` | leitura membros, escrita servidor | `asaasEnabled` (piloto, só via script), `asaasConnected`, `asaasAccountName?`, `asaasEnvironment?` |
@@ -112,8 +112,8 @@ Na OS, cada pagamento Asaas é uma `PaymentTransaction` com `id = asaas_{payment
 ## Webhook e baixa na OS
 
 - URL por empresa: `{ASAAS_WEBHOOK_BASE_URL}/webhooks/asaas/{companyId}`, cadastrada na conexão com `sendType: SEQUENTIALLY`, `apiVersion: 3`, um `authToken` aleatório próprio da empresa (guardado só como hash) e os eventos `PAYMENT_RECEIVED`, `PAYMENT_CONFIRMED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED`, `PAYMENT_DELETED`.
-- Autenticação pelo header `asaas-access-token`. Token ausente ou inválido → 401 (mesma resposta para empresa inexistente, desconectada ou token errado). Evento sem `id`/`event` → 400.
-- Rate limit de 300 req/min por empresa + IP.
+- Autenticação pelo header `asaas-access-token`. Token ausente ou inválido → 401. Evento sem `id`/`event` → 400.
+- Endpoint com limite de requisições por empresa + IP.
 - Idempotência por `event.id` em `private/asaas/events`, gravado só depois do processamento dar certo. Erro interno → 500, o Asaas reenvia. Eventos que nunca vão dar certo (cobrança inexistente, `externalReference` de outra empresa, evento não tratado) são registrados e respondidos com 200 para não travar a fila `SEQUENTIALLY`.
 - A cobrança é localizada pelo `externalReference`; sem ele, pelo `asaasInstallmentId` da parcela.
 - O payload, a chave e o token nunca são logados (só ids e nome do evento).
@@ -179,7 +179,7 @@ Os códigos da API viram textos traduzidos (`lib/screens/payments/asaas_error_te
 
 O Asaas exige o documento do cliente. O app usa o `taxId` do agregado do cliente na OS; se estiver vazio ou inválido, lê o cadastro do cliente. Se ainda assim não houver documento válido, a tela pede o CPF/CNPJ (aceita CNPJ alfanumérico), valida os dígitos verificadores e envia normalizado em `customerTaxId`.
 
-## Link da OS (Bloco E, PR #315)
+## Link da OS (Bloco E, PR #315, mergeado)
 
 `GET /public/orders/:token` passa a devolver `charge: { status, value, dueDate, mode, installmentCount?, invoiceUrl } | null`: a cobrança aberta (`pending`/`overdue`) mais recente ou, sem nenhuma, a última paga. Ids do Asaas e campos de auditoria nunca saem. Parcelamento com parcela já paga aparece como `paid`. Com o Asaas desconectado, cobrança aberta vira `null` (a paga continua). Erro ao ler a cobrança devolve `null` sem derrubar a página. Detalhes em [`SHARE_LINK.md`](SHARE_LINK.md).
 
@@ -225,7 +225,7 @@ npm run e2e:asaas                 # só Asaas: conta, cliente de teste, cobranç
 npm run e2e:asaas -- --with-api   # também cria a cobrança pela API do PraticOS e espera o webhook dar baixa
 ```
 
-O modo `--with-api` **grava** uma cobrança numa OS real: apontar só para o emulador (ou túnel para ele) ou para uma empresa de teste conectada ao sandbox com a **mesma** chave, nunca para empresa de cliente. A OS precisa de saldo e de link compartilhado. Variáveis (não commitar):
+O modo `--with-api` **grava** uma cobrança no saldo total da OS e substitui qualquer cobrança aberta dessa OS: usar só OS de teste. Ele grava numa OS real: apontar só para o emulador (ou túnel para ele) ou para uma empresa de teste conectada ao sandbox com a **mesma** chave, nunca para empresa de cliente. A OS precisa de saldo e de link compartilhado. Variáveis (não commitar):
 
 ```bash
 export PRATICOS_API_BASE=http://127.0.0.1:5001/<project>/southamerica-east1/api
@@ -239,9 +239,9 @@ A cobrança é localizada no Asaas pelo `externalReference = {companyId}:{orderI
 
 ## Rollout
 
-Situação em 2026-10-04: Blocos A–C publicados (functions pelo CI). O CI publica só as Functions; regras, índices e TTL são manuais.
+Situação em 2026-10-04: Blocos A–C (código de Functions/rules) publicados; D (app) entra no próximo release; E (link) publicado com o deploy do hosting web. O CI publica só as Functions; regras, índices e TTL são manuais.
 
-1. **Secret da chave mestra**: `ASAAS_CREDENTIALS_KEY` já criado no Secret Manager (pré-requisito do Bloco B). **Não trocar** essa chave depois que houver empresas conectadas: as credenciais gravadas deixam de abrir e todas precisam reconectar.
+1. **Secret da chave mestra**: `ASAAS_CREDENTIALS_KEY` já criado no Secret Manager (pré-requisito do Bloco B). Não trocar a chave mestra sem plano de reconexão (ver inventário privado).
 2. **`ASAAS_WEBHOOK_BASE_URL`**: o valor de produção é o default do código (ver "Arquitetura"). Conferir:
 
    ```bash
@@ -266,7 +266,7 @@ Situação em 2026-10-04: Blocos A–C publicados (functions pelo CI). O CI publ
 
 5. **Trigger antigo**: `onOrderCanceledCancelAsaasCharges` (substituído por `onOrderUpdatedAsaas`) nunca foi publicado em produção; não há nada a apagar.
 6. **App com o Bloco D publicado** (TestFlight/Internal → produção) antes de liberar qualquer empresa. Versões antigas não mostram "Cobrar"; o trigger de reparo cobre a sobrescrita de pagamentos por elas.
-7. **Link da OS (Bloco E)**: mergear o PR #315 (o CI publica o web no Cloud Run e as Functions) para o cliente ter o botão "Pagar".
+7. **Link da OS (Bloco E)**: PR #315 mergeado; o botão "Pagar" chega ao cliente com o deploy do hosting web.
 8. **Checklist manual** (seção abaixo) feito no sandbox.
 9. **Liberar empresas piloto** (só empresas com conta Asaas própria em produção). Sem `--yes` o script só mostra o plano:
 
@@ -291,7 +291,7 @@ Itens que o E2E automático não cobre:
 - [ ] **Fatura vencida**: verificar se uma cobrança `overdue` ainda pode ser paga pela fatura do Asaas. Hoje o link da OS mostra "Cobrança vencida" sem botão; se o Asaas aceitar pagamento após o vencimento, decidir se o botão deve continuar aparecendo.
 - [ ] **Retorno à aba (Bloco E)**: com a página `/q/{token}` aberta, pagar em outra aba, voltar e conferir "Pago R$ x ✓" sem recarregar; depois de pago, voltar à aba não faz novo GET.
 - [ ] **Webhook ponta a ponta** com uma empresa sandbox conectada: `npm run e2e:asaas -- --with-api` contra o emulador (via túnel) ou a empresa de teste; conferir no app o card "Cobrança" pago e a transação na OS.
-- [ ] **`req.ip`** nas chamadas diretas a `cloudfunctions.net` (caminho do webhook, sem rewrite do Hosting): conferir nos logs que o rate limit usa o IP real do Asaas e não um IP de proxy compartilhado.
+- [ ] **`req.ip`** (exige as Functions de produção com uma empresa de teste conectada ao sandbox, não o emulador) nas chamadas diretas a `cloudfunctions.net` (caminho do webhook, sem rewrite do Hosting): conferir nos logs que o rate limit usa o IP real do Asaas e não um IP de proxy compartilhado.
 
 ## Regras de Negócio
 
