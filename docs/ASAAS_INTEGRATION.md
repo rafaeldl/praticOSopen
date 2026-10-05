@@ -76,6 +76,7 @@ App (OS) ──► Functions /api ──► Asaas API (conta do técnico)
 - Endpoint: `POST /webhooks/asaas/{companyId}` (função `api`), autenticado por um token próprio de cada empresa, gerado na conexão da conta. Requisição sem token válido → 401. Rate limit por empresa e IP. Erro interno → 500 (o Asaas reenvia). Eventos sem cobrança correspondente são registrados e respondidos com 200 para não travar a fila `SEQUENTIALLY`.
 - Idempotência: `companies/{cid}/private/asaas/events/{eventId}` = `{ processedAt, expiresAt }` (TTL de 30 dias em `expiresAt`).
 - `PAYMENT_RECEIVED`/`PAYMENT_CONFIRMED`: transação `asaas_{paymentId}` (`type: payment`) na OS, `paidAmount`/`paid`/`payment` recalculados, push "Pagamento recebido" para dono/admin/gerente. `PAYMENT_OVERDUE`: cobrança `overdue` (se `pending`). `PAYMENT_REFUNDED`: remove a transação, cobrança `refunded`, comentário interno no histórico da OS. `PAYMENT_DELETED`: cobrança `canceled` (se não paga).
+- OS em orçamento (`quote`) ou cancelada (`canceled`) fica sem status de pagamento (`payment: null`, `paid: false`), como no app; o `paidAmount` e as transações continuam sendo mantidos.
 - A cobrança é a fonte da verdade (`paidAsaasPaymentIds` + `appliedTransactions`). O trigger `onOrderUpdatedAsaas` (orders onUpdate) cancela cobranças abertas quando a OS é cancelada e reinsere transações Asaas apagadas por versões antigas do app, só para empresas com `asaasConnected`.
 - O payload e o token do webhook nunca são logados.
 
@@ -88,7 +89,9 @@ App (OS) ──► Functions /api ──► Asaas API (conta do técnico)
 
 ## Rollout do webhook (Bloco C)
 
-O CI publica só as functions; regras, índices e TTL são manuais. Fazer nesta ordem:
+O CI publica só as functions; regras, índices e TTL são manuais. Fazer nesta ordem.
+
+**Os passos 1 a 3 precisam estar feitos ANTES de mergear o PR.** O merge na `master` dispara `.github/workflows/firebase-functions-deploy.yml`, que publica as functions sem `--force`: se ainda existir `onOrderCanceledCancelAsaasCharges` no projeto, o deploy aborta por causa da exclusão.
 
 1. **Regras e índices** (antes do app que lê `charges`). Antes, comparar as regras publicadas no console do Firebase com `firebase/firestore.rules`: as publicadas já divergiram da `master`, e o deploy sobrescreve tudo.
    ```bash
@@ -101,12 +104,18 @@ O CI publica só as functions; regras, índices e TTL são manuais. Fazer nesta 
    gcloud firestore fields ttls list --project=praticos
    ```
    A política leva alguns minutos para ficar `ACTIVE`; a exclusão acontece em até ~24 h depois de `expiresAt`.
-3. **Remover o trigger antigo**, logo antes do deploy das functions. `onOrderCanceledCancelAsaasCharges` foi substituído por `onOrderUpdatedAsaas`, e o deploy do CI não usa `--force`, então não apaga funções sozinho:
+3. **Remover o trigger antigo**, logo antes do merge. `onOrderCanceledCancelAsaasCharges` foi substituído por `onOrderUpdatedAsaas`, e o deploy do CI não usa `--force`, então não apaga funções sozinho (e aborta se houver função a apagar). Entre este passo e o deploy, cancelar uma OS não cancela as cobranças abertas:
    ```bash
-   firebase functions:delete onOrderCanceledCancelAsaasCharges --project praticos --force
+   cd firebase && firebase functions:delete onOrderCanceledCancelAsaasCharges --project praticos --force
    ```
-4. **Deploy das functions** (merge na `master` dispara o CI, ou manual):
+4. **Deploy das functions** (mergear o PR dispara o CI, ou manual):
    ```bash
    cd firebase && firebase deploy --only functions --project praticos
    ```
    O CLI pode pedir para habilitar Eventarc/Pub/Sub para o trigger v2; aceitar.
+
+## Limitações conhecidas
+
+- **Chargeback e estorno parcial não são tratados.** Os eventos `PAYMENT_CHARGEBACK_REQUESTED`/`PAYMENT_CHARGEBACK_DISPUTE`, `PAYMENT_RECEIVED_IN_CASH_UNDONE` e `PAYMENT_PARTIALLY_REFUNDED` não são assinados: um chargeback de cartão ou um estorno parcial deixa a OS paga. Até serem tratados, corrigir manualmente no app.
+- **Parcelamento:** o estorno de uma única parcela marca a cobrança inteira como `refunded`. Apagar uma parcela de um parcelamento ainda não pago no painel do Asaas cancela a cobrança.
+- **Depois de desconectar o Asaas**, o trigger de reparo para de rodar (só age em empresas com `asaasConnected`). Uma versão antiga do app que sobrescrever a OS pode então apagar transações Asaas já lançadas, e elas não são reinseridas.
