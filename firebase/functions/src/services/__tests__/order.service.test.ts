@@ -105,6 +105,23 @@ describe('applyPaymentTransaction', () => {
     expect(result).toMatchObject({ total: 90, paid: true, payment: 'paid', remainingBalance: 0 });
   });
 
+  it.each(['canceled', 'quote'] as const)('OS %s: soma o pagamento mas payment fica null e paid false', (status) => {
+    const result = applyPaymentTransaction(
+      { status, total: 100, discount: 0, paidAmount: 60 },
+      txn('payment', 40)
+    );
+    expect(result).toMatchObject({ paidAmount: 100, paid: false, payment: null, remainingBalance: 0 });
+    expect(result.transactions).toHaveLength(1);
+  });
+
+  it.each(['approved', 'progress', 'done', undefined] as const)('OS %s: status de pagamento normal', (status) => {
+    const result = applyPaymentTransaction(
+      { status, total: 100, discount: 0, paidAmount: 60 },
+      txn('payment', 40)
+    );
+    expect(result).toMatchObject({ paid: true, payment: 'paid' });
+  });
+
   it('arredonda para centavos', () => {
     const result = applyPaymentTransaction(
       { total: 0.3, discount: 0, paidAmount: 0.1 },

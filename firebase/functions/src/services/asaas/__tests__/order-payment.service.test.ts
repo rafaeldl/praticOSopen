@@ -309,6 +309,19 @@ describe('order-payment.service - applyAsaasPayment', () => {
     );
   });
 
+  it('OS em orçamento (quote): lança o dinheiro mas mantém payment null e paid false', async () => {
+    seedOrder({ status: 'quote', payment: null, paid: false });
+    seedCharge();
+
+    await expect(applyAsaasPayment('c1', 'o1', 'ch1', payment())).resolves.toEqual({ applied: true });
+
+    const order = read(ORDER_PATH)!;
+    expect(order.paidAmount).toBe(1000);
+    expect((order.transactions as any[]).map((t) => t.id)).toEqual(['asaas_pay_1']);
+    expect(order.payment).toBeNull();
+    expect(order.paid).toBe(false);
+  });
+
   it('retorna applied=false quando a OS não existe', async () => {
     seedCharge();
     await expect(applyAsaasPayment('c1', 'o1', 'ch1', payment())).resolves.toEqual({ applied: false });
@@ -804,6 +817,47 @@ describe('order-payment.service - repairAsaasTransactions', () => {
     expect(order.payment).toBe('paid');
     expect(order.updatedBy).toEqual({ id: 'u1', name: 'Ana' });
     expect(order.updatedAt).toBe('2026-10-05T10:00:00.000Z');
+  });
+
+  it('OS cancelada paga via Pix: não volta para paid (app grava payment null)', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    // App cancels the order: keeps paidAmount/transactions, clears the status.
+    seed(ORDER_PATH, { ...read(ORDER_PATH)!, status: 'canceled', payment: null, paid: false });
+    const before = read(ORDER_PATH);
+    const writeSpy = jest.spyOn(jest.requireMock('../../firestore.service').db, 'write');
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 0 });
+
+    expect(writeSpy).not.toHaveBeenCalled();
+    expect(read(ORDER_PATH)).toEqual(before);
+  });
+
+  it('OS cancelada com status de pagamento antigo: corrige para payment null e paid false', async () => {
+    seedOrder({ status: 'canceled', total: 1000, paidAmount: 1000, paid: true, payment: 'paid' });
+
+    await repairAsaasTransactions('c1', 'o1');
+
+    const order = read(ORDER_PATH)!;
+    expect(order.payment).toBeNull();
+    expect(order.paid).toBe(false);
+    expect(order.paidAmount).toBe(1000);
+  });
+
+  it('OS cancelada sem a transação Asaas: reinsere e mantém payment null e paid false', async () => {
+    seedOrder();
+    seedCharge();
+    await applyAsaasPayment('c1', 'o1', 'ch1', payment());
+    overwriteLikeOldApp({ status: 'canceled', payment: null, paid: false });
+
+    await expect(repairAsaasTransactions('c1', 'o1')).resolves.toEqual({ repaired: 1 });
+
+    const order = read(ORDER_PATH)!;
+    expect((order.transactions as any[]).map((t) => t.id)).toEqual(['asaas_pay_1']);
+    expect(order.paidAmount).toBe(1000);
+    expect(order.payment).toBeNull();
+    expect(order.paid).toBe(false);
   });
 
   it('OS com total zero nunca fica paga', async () => {

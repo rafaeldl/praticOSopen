@@ -13,7 +13,7 @@
  * computed in memory by the app). Remaining balance = total - paidAmount.
  */
 import { db, FieldValue } from '../firestore.service';
-import { applyPaymentTransaction, roundMoney } from '../order.service';
+import { applyPaymentTransaction, paymentStatusFields, roundMoney } from '../order.service';
 import type { Order, PaymentTransaction, UserAggr } from '../../models/types';
 import type { AsaasPaymentEvent, OrderCharge } from '../../models/asaas.types';
 
@@ -21,6 +21,8 @@ export const ASAAS_TRANSACTION_PREFIX = 'asaas_';
 export const ASAAS_ACTOR: UserAggr = { id: 'asaas', name: 'Asaas' };
 
 export interface OrderPaymentState {
+  /** Order status: quotes and canceled orders have no payment status. */
+  status?: string | null;
   total?: number;
   paidAmount?: number;
   transactions?: PaymentTransaction[];
@@ -30,7 +32,8 @@ export interface OrderPaymentFields {
   transactions: PaymentTransaction[];
   paidAmount: number;
   paid: boolean;
-  payment: 'paid' | 'unpaid';
+  /** null for quotes and canceled orders (same rule as the app). */
+  payment: 'paid' | 'unpaid' | null;
 }
 
 const BILLING_TYPE_LABELS: Record<string, string> = {
@@ -102,11 +105,8 @@ export function computePaymentFields(
 ): OrderPaymentFields {
   const untracked = Math.max(0, roundMoney((previous.paidAmount ?? 0) - sumPayments(previous.transactions ?? [])));
   const paidAmount = roundMoney(sumPayments(nextTransactions) + untracked);
-  // Same rule as the app (OrderPaymentMath.paymentStatusFor): both sides
-  // rounded, so float drift from FieldValue.increment on total is ignored.
-  const total = Number(previous.total ?? 0);
-  const paid = total > 0 && paidAmount >= roundMoney(total);
-  return { transactions: nextTransactions, paidAmount, paid, payment: paid ? 'paid' : 'unpaid' };
+  const { paid, payment } = paymentStatusFields(previous.status, Number(previous.total ?? 0), paidAmount);
+  return { transactions: nextTransactions, paidAmount, paid, payment };
 }
 
 function expectedPaymentCount(charge: OrderCharge, ids: { companyId: string; orderId: string; chargeId: string }): number {
@@ -279,6 +279,8 @@ export async function revertAsaasPayment(
  *    and the order total (`computePaymentFields`) and fixes them when they
  *    disagree (the app increments `paidAmount` atomically but writes the status
  *    computed from its local state, which can miss a concurrent Asaas payment).
+ *    Quotes and canceled orders keep `payment: null, paid: false` (same rule
+ *    as the app), so a canceled order is never flipped to paid.
  *
  * Writes only when something actually changes, so the trigger that calls it
  * does not loop. A status-only fix keeps the app's updatedAt/updatedBy.
@@ -345,7 +347,7 @@ export async function repairAsaasTransactions(
     if (
       storedPaidAmount !== fields.paidAmount ||
       (order.paid === true) !== fields.paid ||
-      (order.payment ?? 'unpaid') !== fields.payment
+      (order.payment ?? null) !== fields.payment
     ) {
       tx.update(oRef, { paidAmount: fields.paidAmount, paid: fields.paid, payment: fields.payment });
       console.log('[AsaasPayment] fixed order payment fields', { companyId, orderId });
